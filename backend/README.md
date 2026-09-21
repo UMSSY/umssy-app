@@ -1,65 +1,86 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This repository contains the backend for the **UMSSY** application.
 
-## Project setup
+## Project Setup
+
+1. Install dependencies:
 
 ```bash
-$ pnpm install
+pnpm install
 ```
 
-## Compile and run the project
+2. Environment configuration:
+   Create a `.env` file by copying the template file:
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+> **Note:** For local development, using the default values in `.env` is sufficient. Feel free to update the environment variables as needed.
+
+## Compile and Run the Project
+
+1. Start the required services via Docker:
 
 ```bash
-# unit tests
-$ pnpm run test
+docker compose up -d
+```
 
-# e2e tests
-$ pnpm run test:e2e
+2. Run the application in **watch mode** (automatically reloads the server when code changes are saved):
 
-# test coverage
-$ pnpm run test:cov
+```bash
+pnpm run start:dev
+```
+
+you can visit the Swagger documentation in:
+```
+http://localhost:8080/docs
+```
+
+and the server runs in:
+```
+http://localhost:8080/api
+```
+
+## Database Migrations
+
+Ensure your database container is running before executing migration commands.
+
+- **Apply existing migrations:**
+
+```bash
+pnpm migrate:apply
+```
+
+- **Generate a new migration** (if you modified `schema.prisma`):
+
+```bash
+pnpm migrate <migration_name>
+```
+
+- **Generate Prisma Client:**
+
+```bash
+pnpm generate
+```
+
+## Run Tests
+
+```bash
+# Unit tests
+pnpm run test
+
+# End-to-end (E2E) tests
+pnpm run test:e2e
+
+# Test coverage report
+pnpm run test:cov
+
 ```
 
 ## Resources
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
+- [NestJS Documentation](https://docs.nestjs.com?utm_source=gemini) — Learn more about the framework.
+- [NestJS Courses](https://courses.nestjs.com/?utm_source=gemini) — Official video courses for hands-on experience.
+- [Prisma v7 Documentation](https://www.prisma.io/docs/orm/v7?utm_source=gemini) — Official ORM documentation.
