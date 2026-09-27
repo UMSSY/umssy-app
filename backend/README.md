@@ -78,6 +78,13 @@ pnpm run test:e2e
 pnpm run test:cov
 
 ```
+## Testing
+
+Antes de correr los tests, crea un archivo `.env.test` (copiando `.env.test.example`) con tus credenciales reales de la base de datos, agregando la variable `DB_SCHEMA=test` para usar un schema separado y no afectar tus datos locales.
+
+- `pnpm test` — corre los tests unitarios
+- `pnpm test:e2e` — corre los tests e2e usando `.env.test`
+- `pnpm test:all` — corre ambos en paralelo
 
 ## Resources
 
