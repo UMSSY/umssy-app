@@ -1,15 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F6F7F9;
+  --foreground: #0B1F2E;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-tight: var(--font-inter-tight);
+  /*Paleta de colores tomados desde desing.md*/
+  --color-ink :#0B1F2E; /*Texto principal, sidebar, headers*/
+  --color-ink-soft: #33465A; /*Texto de peso medio (valores, subtítulos)*/
+  --color-accent: #E30613; /*Botón principal, ítem activo del menú, barra destacada en gráficos*/
+  --color-danger: #B4050F; /* **Únicamente** para alertas genuinas: desvinculación, tendencia negativa, estado "danger"*/
+  --color-interaction: #FDECED; /* Solo como fondo de selección en formularios (ej. opción marcada en una encuesta) — no es un color de estado*/
+  --color-gold: #C9A227; /*Un solo uso: trazo de 26px sobre títulos de sección. Sin significado, sin etiqueta — puramente ornamental*/
+  --color-surface: #FFFFFF; /* Fondo de tarjetas y paneles*/
+  --color-surface-soft: #F6F7F9; /*Fondo general de la app, cabeceras de tabla */
+  --color-text-secondary: #5B6470; /* Labels, metadatos, texto de apoyo*/
+  --color-border: #E3E7EC; /*Divisores, bordes de tarjeta*/
+  --color-border-strong: #C9CFD8; /*Bordes de botones ghost, chips inactivos */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +34,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), sans-serif;
 }
