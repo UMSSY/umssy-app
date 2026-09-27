@@ -1,0 +1,79 @@
+name: "Tarea de Backend"
+description: "Plantilla oficial para crear issues o reportar errores de Backend"
+title: "Backend: "
+labels: ["backend"]
+
+body:
+  - type: input
+    id: epic-hu
+    attributes:
+      label: "Epic e Historia de Usuario"
+      description: "Indica a que Epic y codigo de Historia de Usuario pertenece esta tarea (Debe iniciar con Epic #N)."
+      placeholder: "Ej: Epic #8 - Historia de Usuario 01 (Inicio de sesion)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: "Tipo de tarea"
+      description: "Selecciona la naturaleza de este cambio."
+      options:
+        - "Feature (Nueva funcionalidad)"
+        - "fix (Correccion de error)"
+        - "refactor (Mejora interna de codigo)"
+        - "test (Creacion o ajuste de pruebas)"
+        - "docs (Documentacion)"
+        - "hotfix (Correccion urgente - uso prioritario de lideres)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Prioridad"
+      description: "Nivel de urgencia para el tablero de prioridades."
+      options:
+        - "Alta"
+        - "Media"
+        - "Baja"
+    validations:
+      required: true
+
+  - type: input
+    id: estimate
+    attributes:
+      label: "Estimacion en horas"
+      description: "Esfuerzo estimado para completar la tarea."
+      placeholder: "Ej: 3 horas"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Descripcion tecnica"
+      description: "Explica que se debe desarrollar (endpoints, logica, base de datos)."
+      placeholder: "Contexto y detalles tecnicos..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: "Criterios de aceptacion"
+      description: "Condiciones verificables para mover la tarea a In review / Done."
+      value: |
+        - [ ] Criterio 1
+        - [ ] Criterio 2
+    validations:
+      required: true
+
+  - type: input
+    id: dependencies
+    attributes:
+      label: "Dependencias (Opcional)"
+      description: "Indica si esta tarea requiere que otra HU este terminada antes."
+      placeholder: "Ej: Depende de #15"
+    validations:
+      required: false
