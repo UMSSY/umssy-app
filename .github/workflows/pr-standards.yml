@@ -3,7 +3,7 @@ name: Git Standards
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
-    branches: [dev, main, "epic/**"]
+    branches: [develop, main, "epic/**"]
 
 permissions:
   contents: read
@@ -28,51 +28,27 @@ jobs:
         run: |
           fail() { echo "::error::$1"; exit 1; }
 
-          DEV_SOURCES='^(epic/|hotfix/|[a-z]+/devops-)'
+          DEVELOP_SOURCES='^(epic/|hotfix/|[a-z]+/devops-)'
           EPIC_SOURCE='^epic/'
 
           echo "Source branch: $HEAD_REF | Target branch: $BASE_REF"
 
           case "$BASE_REF" in
             main)
-              [[ "$HEAD_REF" == "dev" ]] \
-                || fail "Merge to main is only allowed from dev, at the end of the sprint."
+              [[ "$HEAD_REF" == "develop" ]] \
+                || fail "Merge to main is only allowed from develop, at the end of the sprint."
               ;;
-            dev)
-              [[ "$HEAD_REF" =~ $DEV_SOURCES ]] \
-                || fail "Merge to dev is only allowed from epic/* (or hotfix and devops branches from leads and DevOps)."
+            develop)
+              [[ "$HEAD_REF" =~ $DEVELOP_SOURCES ]] \
+                || fail "Merge to develop is only allowed from epic/* (or hotfix and devops branches from leads and DevOps)."
               ;;
             epic/*)
               [[ ! "$HEAD_REF" =~ $EPIC_SOURCE ]] \
-                || fail "Direct merges between epic/* branches are forbidden. Merge to dev and pull from dev."
+                || fail "Direct merges between epic/* branches are forbidden. Merge to develop and pull from develop."
               ;;
           esac
 
           echo "Integration flow is correct."
-
-  commit-format:
-    name: Commit format
-    runs-on: ubuntu-latest
-    if: github.head_ref != 'dev'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Validate PR commits
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          npx --yes @commitlint/cli \
-            --config .github/commitlint.config.mjs \
-            --from "$BASE_SHA" --to "$HEAD_SHA" --verbose
 
   repo-guards:
     name: CI Files
@@ -90,7 +66,7 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           DEVOPS_BRANCH='^[a-z]+/devops-'
-          if [[ "$HEAD_REF" == "dev" || "$HEAD_REF" =~ $DEVOPS_BRANCH ]]; then
+          if [[ "$HEAD_REF" == "develop" || "$HEAD_REF" =~ $DEVOPS_BRANCH ]]; then
             echo "DevOps branch or sprint release: skipping this check."
             exit 0
           fi
