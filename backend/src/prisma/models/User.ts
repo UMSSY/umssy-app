@@ -36,6 +36,7 @@ export type UserMinAggregateOutputType = {
   personalEmail: string | null
   headline: string | null
   aboutMe: string | null
+  interestedOpportunities: string | null
   cvPdfUrl: runtime.Bytes | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -53,6 +54,7 @@ export type UserMaxAggregateOutputType = {
   personalEmail: string | null
   headline: string | null
   aboutMe: string | null
+  interestedOpportunities: string | null
   cvPdfUrl: runtime.Bytes | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -70,6 +72,7 @@ export type UserCountAggregateOutputType = {
   personalEmail: number
   headline: number
   aboutMe: number
+  interestedOpportunities: number
   cvPdfUrl: number
   createdAt: number
   updatedAt: number
@@ -89,6 +92,7 @@ export type UserMinAggregateInputType = {
   personalEmail?: true
   headline?: true
   aboutMe?: true
+  interestedOpportunities?: true
   cvPdfUrl?: true
   createdAt?: true
   updatedAt?: true
@@ -106,6 +110,7 @@ export type UserMaxAggregateInputType = {
   personalEmail?: true
   headline?: true
   aboutMe?: true
+  interestedOpportunities?: true
   cvPdfUrl?: true
   createdAt?: true
   updatedAt?: true
@@ -123,6 +128,7 @@ export type UserCountAggregateInputType = {
   personalEmail?: true
   headline?: true
   aboutMe?: true
+  interestedOpportunities?: true
   cvPdfUrl?: true
   createdAt?: true
   updatedAt?: true
@@ -213,6 +219,7 @@ export type UserGroupByOutputType = {
   personalEmail: string | null
   headline: string | null
   aboutMe: string | null
+  interestedOpportunities: string | null
   cvPdfUrl: runtime.Bytes | null
   createdAt: Date
   updatedAt: Date
@@ -251,6 +258,7 @@ export type UserWhereInput = {
   personalEmail?: Prisma.StringNullableFilter<"User"> | string | null
   headline?: Prisma.StringNullableFilter<"User"> | string | null
   aboutMe?: Prisma.StringNullableFilter<"User"> | string | null
+  interestedOpportunities?: Prisma.StringNullableFilter<"User"> | string | null
   cvPdfUrl?: Prisma.BytesNullableFilter<"User"> | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -286,6 +294,7 @@ export type UserOrderByWithRelationInput = {
   personalEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   headline?: Prisma.SortOrderInput | Prisma.SortOrder
   aboutMe?: Prisma.SortOrderInput | Prisma.SortOrder
+  interestedOpportunities?: Prisma.SortOrderInput | Prisma.SortOrder
   cvPdfUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -324,6 +333,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   personalEmail?: Prisma.StringNullableFilter<"User"> | string | null
   headline?: Prisma.StringNullableFilter<"User"> | string | null
   aboutMe?: Prisma.StringNullableFilter<"User"> | string | null
+  interestedOpportunities?: Prisma.StringNullableFilter<"User"> | string | null
   cvPdfUrl?: Prisma.BytesNullableFilter<"User"> | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -359,6 +369,7 @@ export type UserOrderByWithAggregationInput = {
   personalEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   headline?: Prisma.SortOrderInput | Prisma.SortOrder
   aboutMe?: Prisma.SortOrderInput | Prisma.SortOrder
+  interestedOpportunities?: Prisma.SortOrderInput | Prisma.SortOrder
   cvPdfUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -382,6 +393,7 @@ export type UserScalarWhereWithAggregatesInput = {
   personalEmail?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   headline?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   aboutMe?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  interestedOpportunities?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   cvPdfUrl?: Prisma.BytesNullableWithAggregatesFilter<"User"> | runtime.Bytes | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -398,6 +410,7 @@ export type UserCreateInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -433,6 +446,7 @@ export type UserUncheckedCreateInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -466,6 +480,7 @@ export type UserUpdateInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -501,6 +516,7 @@ export type UserUncheckedUpdateInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -535,6 +551,7 @@ export type UserCreateManyInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -551,6 +568,7 @@ export type UserUpdateManyMutationInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -568,6 +586,7 @@ export type UserUncheckedUpdateManyInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -595,6 +614,7 @@ export type UserCountOrderByAggregateInput = {
   personalEmail?: Prisma.SortOrder
   headline?: Prisma.SortOrder
   aboutMe?: Prisma.SortOrder
+  interestedOpportunities?: Prisma.SortOrder
   cvPdfUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -612,6 +632,7 @@ export type UserMaxOrderByAggregateInput = {
   personalEmail?: Prisma.SortOrder
   headline?: Prisma.SortOrder
   aboutMe?: Prisma.SortOrder
+  interestedOpportunities?: Prisma.SortOrder
   cvPdfUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -629,6 +650,7 @@ export type UserMinOrderByAggregateInput = {
   personalEmail?: Prisma.SortOrder
   headline?: Prisma.SortOrder
   aboutMe?: Prisma.SortOrder
+  interestedOpportunities?: Prisma.SortOrder
   cvPdfUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -951,6 +973,7 @@ export type UserCreateWithoutCityInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -984,6 +1007,7 @@ export type UserUncheckedCreateWithoutCityInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1047,6 +1071,7 @@ export type UserScalarWhereInput = {
   personalEmail?: Prisma.StringNullableFilter<"User"> | string | null
   headline?: Prisma.StringNullableFilter<"User"> | string | null
   aboutMe?: Prisma.StringNullableFilter<"User"> | string | null
+  interestedOpportunities?: Prisma.StringNullableFilter<"User"> | string | null
   cvPdfUrl?: Prisma.BytesNullableFilter<"User"> | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -1063,6 +1088,7 @@ export type UserCreateWithoutRolesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1097,6 +1123,7 @@ export type UserUncheckedCreateWithoutRolesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1145,6 +1172,7 @@ export type UserUpdateWithoutRolesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1179,6 +1207,7 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1211,6 +1240,7 @@ export type UserCreateWithoutEducationsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1245,6 +1275,7 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1293,6 +1324,7 @@ export type UserUpdateWithoutEducationsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1327,6 +1359,7 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1359,6 +1392,7 @@ export type UserCreateWithoutWorkExperiencesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1393,6 +1427,7 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1441,6 +1476,7 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1475,6 +1511,7 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1507,6 +1544,7 @@ export type UserCreateWithoutUserSkillsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1541,6 +1579,7 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1589,6 +1628,7 @@ export type UserUpdateWithoutUserSkillsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1623,6 +1663,7 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1655,6 +1696,7 @@ export type UserCreateWithoutCertificationsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1689,6 +1731,7 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1737,6 +1780,7 @@ export type UserUpdateWithoutCertificationsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1771,6 +1815,7 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1803,6 +1848,7 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1837,6 +1883,7 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1885,6 +1932,7 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1919,6 +1967,7 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1951,6 +2000,7 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1985,6 +2035,7 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2033,6 +2084,7 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2067,6 +2119,7 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2099,6 +2152,7 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2133,6 +2187,7 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2181,6 +2236,7 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2215,6 +2271,7 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2247,6 +2304,7 @@ export type UserCreateWithoutBlockedDatesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2281,6 +2339,7 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2329,6 +2388,7 @@ export type UserUpdateWithoutBlockedDatesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2363,6 +2423,7 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2395,6 +2456,7 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2429,6 +2491,7 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2466,6 +2529,7 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2500,6 +2564,7 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2537,6 +2602,7 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2571,6 +2637,7 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2619,6 +2686,7 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2653,6 +2721,7 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2696,6 +2765,7 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2730,6 +2800,7 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2773,6 +2844,7 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2807,6 +2879,7 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2839,6 +2912,7 @@ export type UserCreateWithoutAppointmentChangesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2873,6 +2947,7 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2921,6 +2996,7 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2955,6 +3031,7 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2987,6 +3064,7 @@ export type UserCreateWithoutCreatedEventsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3021,6 +3099,7 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3058,6 +3137,7 @@ export type UserCreateWithoutModeratedEventsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3092,6 +3172,7 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3140,6 +3221,7 @@ export type UserUpdateWithoutCreatedEventsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3174,6 +3256,7 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3217,6 +3300,7 @@ export type UserUpdateWithoutModeratedEventsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3251,6 +3335,7 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3283,6 +3368,7 @@ export type UserCreateWithoutEventRegistrationsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3317,6 +3403,7 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3365,6 +3452,7 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3399,6 +3487,7 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3431,6 +3520,7 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3465,6 +3555,7 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3513,6 +3604,7 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3547,6 +3639,7 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3579,6 +3672,7 @@ export type UserCreateManyCityInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
+  interestedOpportunities?: string | null
   cvPdfUrl?: runtime.Bytes | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3595,6 +3689,7 @@ export type UserUpdateWithoutCityInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3628,6 +3723,7 @@ export type UserUncheckedUpdateWithoutCityInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3661,6 +3757,7 @@ export type UserUncheckedUpdateManyWithoutCityInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  interestedOpportunities?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3853,6 +3950,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   personalEmail?: boolean
   headline?: boolean
   aboutMe?: boolean
+  interestedOpportunities?: boolean
   cvPdfUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -3889,6 +3987,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   personalEmail?: boolean
   headline?: boolean
   aboutMe?: boolean
+  interestedOpportunities?: boolean
   cvPdfUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -3907,6 +4006,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   personalEmail?: boolean
   headline?: boolean
   aboutMe?: boolean
+  interestedOpportunities?: boolean
   cvPdfUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -3925,12 +4025,13 @@ export type UserSelectScalar = {
   personalEmail?: boolean
   headline?: boolean
   aboutMe?: boolean
+  interestedOpportunities?: boolean
   cvPdfUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "email" | "isActive" | "photoUrl" | "cityId" | "phone" | "personalEmail" | "headline" | "aboutMe" | "cvPdfUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "email" | "isActive" | "photoUrl" | "cityId" | "phone" | "personalEmail" | "headline" | "aboutMe" | "interestedOpportunities" | "cvPdfUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   city?: boolean | Prisma.User$cityArgs<ExtArgs>
   roles?: boolean | Prisma.User$rolesArgs<ExtArgs>
@@ -3993,6 +4094,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     personalEmail: string | null
     headline: string | null
     aboutMe: string | null
+    interestedOpportunities: string | null
     cvPdfUrl: runtime.Bytes | null
     createdAt: Date
     updatedAt: Date
@@ -4448,6 +4550,7 @@ export interface UserFieldRefs {
   readonly personalEmail: Prisma.FieldRef<"User", 'String'>
   readonly headline: Prisma.FieldRef<"User", 'String'>
   readonly aboutMe: Prisma.FieldRef<"User", 'String'>
+  readonly interestedOpportunities: Prisma.FieldRef<"User", 'String'>
   readonly cvPdfUrl: Prisma.FieldRef<"User", 'Bytes'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>

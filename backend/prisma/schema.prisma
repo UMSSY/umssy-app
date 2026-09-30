@@ -106,20 +106,21 @@ model Company {
 }
 
 model User {
-  id            String   @id @default(uuid()) @db.Uuid
-  firstName     String   @map("first_name") @db.VarChar(100)
-  lastName      String   @map("last_name") @db.VarChar(100)
-  email         String   @unique @db.VarChar(150)
-  isActive      Boolean  @default(true) @map("is_active")
-  photoUrl      Bytes?   @map("photo_url")
-  cityId        String?  @map("city_id") @db.Uuid
-  phone         String?
-  personalEmail String?  @map("personal_email")
-  headline      String?
-  aboutMe       String?  @map("about_me")
-  cvPdfUrl      Bytes?   @map("cv_pdf_url")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                      String   @id @default(uuid()) @db.Uuid
+  firstName               String   @map("first_name") @db.VarChar(100)
+  lastName                String   @map("last_name") @db.VarChar(100)
+  email                   String   @unique @db.VarChar(150)
+  isActive                Boolean  @default(true) @map("is_active")
+  photoUrl                Bytes?   @map("photo_url")
+  cityId                  String?  @map("city_id") @db.Uuid
+  phone                   String?
+  personalEmail           String?  @map("personal_email")
+  headline                String?
+  aboutMe                 String?  @map("about_me")
+  interestedOpportunities String?  @map("interested_opportunities")
+  cvPdfUrl                Bytes?   @map("cv_pdf_url")
+  createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   city City? @relation(fields: [cityId], references: [id], onDelete: SetNull)
 

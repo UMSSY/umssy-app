@@ -198,6 +198,7 @@ export const UserScalarFieldEnum = {
   personalEmail: 'personalEmail',
   headline: 'headline',
   aboutMe: 'aboutMe',
+  interestedOpportunities: 'interestedOpportunities',
   cvPdfUrl: 'cvPdfUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
