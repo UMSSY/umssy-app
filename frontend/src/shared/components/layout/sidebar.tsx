@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { GraduationCap, House, TicketCheck } from "lucide-react";
 
 const navigationItems = [
-  { href: "/", label: "Talleres", Icon: House },
+  { href: "/events", label: "Talleres", Icon: House },
   { href: "/mis-pases", label: "Mis pases", Icon: TicketCheck },
 ];
 
