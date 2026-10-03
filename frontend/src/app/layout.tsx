@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Inter_Tight } from "next/font/google";
 import "./globals.css";
+import { RegisterServiceWorker } from "./register-service-worker";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -15,7 +16,7 @@ const interTight = Inter_Tight({
 });
 
 export const metadata: Metadata = {
-  title: "UMSSY | Titulados",
+  title: "UMSSY",
   description: "Plataforma de talleres y pases para Titulados UMSSY",
   manifest: "/manifest.json",
   appleWebApp: {
@@ -41,7 +42,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="es"
       className={`${inter.variable} ${interTight.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+      <RegisterServiceWorker />
+        {children}
+      </body>
     </html>
   );
 }
