@@ -22,7 +22,7 @@ export function MentorCareer({ mentor }: MentorCareerProps) {
             Cargo actual
           </p>
 
-          <p className="mt-1 font-semibold text-ink">{mentor.position}</p>
+          <p className="mt-1 break-words font-semibold text-ink">{mentor.position || "Cargo no registrado"}</p>
         </div>
 
         <div>

@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { MentorDirectoryView } from "./mentor-directory-view";
 
@@ -15,13 +16,13 @@ describe("MentorDirectoryView", () => {
     ).toBeDefined();
   });
 
-  it("renderiza enlaces hacia los perfiles de los mentores", () => {
+  it("renderiza enlaces hacia los perfiles de los mentores", async () => {
     render(<MentorDirectoryView />);
 
     expect(
-      screen.getAllByRole("link", {
+      (await screen.findAllByRole("link", {
         name: /Ver perfil de/i,
-      }).length,
+      })).length,
     ).toBeGreaterThan(0);
   });
 });

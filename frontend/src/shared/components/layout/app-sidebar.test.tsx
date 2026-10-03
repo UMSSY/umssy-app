@@ -37,11 +37,11 @@ describe("AppSidebar", () => {
     expect(screen.getByText("Administrador")).toBeDefined();
   });
 
-  it("renders an empty menu with the default navigation", () => {
+  it("renders the mentorship group with its two routes", () => {
     renderSidebar();
 
     const navigation = screen.getByRole("navigation", { name: "Menú principal" });
-    expect(within(navigation).queryAllByRole("listitem")).toHaveLength(0);
+    expect(within(navigation).getByText("Mentorías")).toBeDefined();
   });
 
   it("renders the items and user received by props", () => {

@@ -24,7 +24,7 @@ export function AppSidebar({
   return (
     <Sidebar
       collapsible="offcanvas"
-      className="border-ink text-surface *:data-[slot=sidebar-inner]:bg-ink"
+      className="border-ink bg-ink text-surface *:data-[slot=sidebar-inner]:bg-ink"
     >
       <SidebarHeader className="p-2">
         <SidebarBrand />

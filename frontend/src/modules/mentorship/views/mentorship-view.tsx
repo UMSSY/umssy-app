@@ -52,6 +52,15 @@ export function MentorshipView() {
     // La integración real con la API se realizará en la tarea correspondiente.
     await new Promise((resolve) => setTimeout(resolve, 500));
 
+    window.localStorage.setItem(
+      "umssy-mentor-participation",
+      JSON.stringify({
+        status: "active",
+        areas: selectedTechnicalAreas.map((area) => area.name),
+        orientations: selectedOrientationTypes.map((orientation) => orientation.label),
+      }),
+    );
+
     setIsActivating(false);
     setIsActivated(true);
   };

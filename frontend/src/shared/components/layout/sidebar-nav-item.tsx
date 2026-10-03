@@ -59,6 +59,7 @@ export function SidebarNavItem({ item, pathname }: SidebarNavItemProps) {
         <SidebarMenuSub id={submenuId} className="mx-0 border-l-0 py-2 pl-6 pr-2">
           {item.children.map((child) => {
             const isChildActive = isRouteActive(pathname, child.href);
+            const ChildIcon = child.icon;
 
             return (
               <SidebarMenuSubItem key={child.href}>
@@ -68,10 +69,14 @@ export function SidebarNavItem({ item, pathname }: SidebarNavItemProps) {
                   aria-current={isChildActive ? "page" : undefined}
                   className={SIDEBAR_SUB_ITEM_CLASS}
                 >
-                  <span
-                    className={`size-1.5 shrink-0 rounded-full ${isChildActive ? "bg-accent" : "bg-surface/40"}`}
-                    aria-hidden="true"
-                  />
+                  {ChildIcon ? (
+                    <ChildIcon size={16} strokeWidth={1.75} aria-hidden="true" />
+                  ) : (
+                    <span
+                      className={`size-1.5 shrink-0 rounded-full ${isChildActive ? "bg-accent" : "bg-surface/40"}`}
+                      aria-hidden="true"
+                    />
+                  )}
                   <span>{child.label}</span>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>

@@ -1,4 +1,4 @@
-import { MentorProfileView } from "@/modules/mentorship/views/mentor-profile-view";
+import { MentorProfileView } from "@/modules/mentorship";
 
 interface MentorProfilePageProps {
   params: Promise<{
