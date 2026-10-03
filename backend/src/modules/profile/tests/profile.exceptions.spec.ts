@@ -9,11 +9,7 @@ import { InvalidFileTypeException } from '../exceptions/invalid-file-type.except
 describe('profile file exceptions', () => {
   it.each([
     [new EmptyFileException(), 400, 'File is required and cannot be empty'],
-    [
-      new FileTooLargeException(),
-      413,
-      'File exceeds the maximum allowed size of 5 MB',
-    ],
+    [new FileTooLargeException(), 413, 'File exceeds the maximum allowed size'],
     [new InvalidFileTypeException(), 415, 'File type is not allowed'],
   ])(
     '%o uses the expected status and English message',
@@ -37,7 +33,7 @@ describe('profile file exceptions', () => {
     expect(json).toHaveBeenCalledWith({
       statusCode: 413,
       data: null,
-      detail: 'File exceeds the maximum allowed size of 5 MB',
+      detail: 'File exceeds the maximum allowed size',
       ok: false,
     });
   });

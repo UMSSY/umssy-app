@@ -1,8 +1,4 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import {
-  CV_ALLOWED_FILE_TYPES,
-  MAX_FILE_SIZE_BYTES,
-} from '../constants/file-upload.constants.js';
 import { EmptyFileException } from '../exceptions/empty-file.exception.js';
 import { FileTooLargeException } from '../exceptions/file-too-large.exception.js';
 import { InvalidFileTypeException } from '../exceptions/invalid-file-type.exception.js';
@@ -14,14 +10,16 @@ const pdfBytes = [0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37];
 const pngBytes = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 const jpgBytes = [0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10];
 
+const maxSizeBytes = 5 * 1024 * 1024;
+
 const cvRules: FileValidationRules = {
-  allowedTypes: CV_ALLOWED_FILE_TYPES,
-  maxSizeBytes: MAX_FILE_SIZE_BYTES,
+  allowedTypes: ['pdf'],
+  maxSizeBytes,
 };
 
 const documentRules: FileValidationRules = {
   allowedTypes: ['pdf', 'png', 'jpg'],
-  maxSizeBytes: MAX_FILE_SIZE_BYTES,
+  maxSizeBytes,
 };
 
 const buildFile = (
@@ -89,7 +87,7 @@ describe('FileValidationService', () => {
   });
 
   it('throws a file too large exception when the size exceeds 5 MB', () => {
-    const file = buildFile(pdfBytes, { size: MAX_FILE_SIZE_BYTES + 1 });
+    const file = buildFile(pdfBytes, { size: maxSizeBytes + 1 });
 
     expect(() => service.validate(file, cvRules)).toThrow(
       FileTooLargeException,

@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { FILE_SIGNATURES } from '../constants/file-signatures.constants.js';
 import { EmptyFileException } from '../exceptions/empty-file.exception.js';
 import { FileTooLargeException } from '../exceptions/file-too-large.exception.js';
 import { InvalidFileTypeException } from '../exceptions/invalid-file-type.exception.js';
@@ -7,6 +6,12 @@ import type { FileSignature } from '../types/file-signature.type.js';
 import type { FileValidationRules } from '../types/file-validation-rules.type.js';
 import type { UploadedFile } from '../types/uploaded-file.type.js';
 import type { ValidatedFile } from '../types/validated-file.type.js';
+
+const fileSignatures: readonly FileSignature[] = [
+  { type: 'pdf', mimeType: 'application/pdf', bytes: [0x25, 0x50, 0x44, 0x46] },
+  { type: 'png', mimeType: 'image/png', bytes: [0x89, 0x50, 0x4e, 0x47] },
+  { type: 'jpg', mimeType: 'image/jpeg', bytes: [0xff, 0xd8, 0xff] },
+];
 
 @Injectable()
 export class FileValidationService {
@@ -36,7 +41,7 @@ export class FileValidationService {
   }
 
   private detectSignature(buffer: Buffer): FileSignature | undefined {
-    return FILE_SIGNATURES.find((signature) =>
+    return fileSignatures.find((signature) =>
       signature.bytes.every((byte, index) => buffer[index] === byte),
     );
   }
