@@ -35,7 +35,11 @@ export function MentorProfileHeader({ mentor }: MentorProfileHeaderProps) {
               </div>
             )}
 
-            <span className="absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white bg-umssy-red" />
+            <span
+              className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white ${
+                mentor.isAvailable ? "bg-umssy-red" : "bg-umssy-secondary"
+              }`}
+            />
           </div>
 
           <div className="min-w-0">
@@ -45,14 +49,40 @@ export function MentorProfileHeader({ mentor }: MentorProfileHeaderProps) {
               </h1>
 
               <span className="inline-flex items-center gap-2 rounded-full border border-umssy-border bg-umssy-background px-3 py-1 text-sm text-umssy-secondary">
-                <span className="h-2 w-2 rounded-full bg-umssy-red" />
-                Disponible para mentoría
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    mentor.isAvailable ? "bg-umssy-red" : "bg-umssy-secondary"
+                  }`}
+                />
+
+                {mentor.isAvailable
+                  ? "Disponible para mentoría"
+                  : "No disponible"}
               </span>
             </div>
 
             <p className="mt-1 break-words text-lg font-semibold text-umssy-secondary">
               {mentor.specialty}
             </p>
+
+            {mentor.professionalInterests.length > 0 && (
+              <div className="mt-3">
+                <p className="text-xs font-semibold uppercase text-umssy-secondary">
+                  Intereses profesionales
+                </p>
+
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {mentor.professionalInterests.map((interest) => (
+                    <span
+                      key={interest}
+                      className="rounded-lg border border-umssy-border bg-umssy-background px-3 py-1 text-sm text-umssy-secondary"
+                    >
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="mt-3 flex items-start gap-2 text-sm text-umssy-secondary">
               <GraduationCap
@@ -69,7 +99,12 @@ export function MentorProfileHeader({ mentor }: MentorProfileHeaderProps) {
 
         <button
           type="button"
-          className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-umssy-red px-6 py-3 font-semibold text-white transition hover:brightness-90 sm:w-auto"
+          disabled={!mentor.isAvailable}
+          className={`inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold transition sm:w-auto ${
+            mentor.isAvailable
+              ? "bg-[#E30613] text-white hover:brightness-90"
+              : "cursor-not-allowed bg-gray-200 text-gray-500"
+          }`}
         >
           <UserPlus size={20} />
           Solicitar mentoría

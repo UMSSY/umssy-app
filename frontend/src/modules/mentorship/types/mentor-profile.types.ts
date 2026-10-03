@@ -8,6 +8,7 @@ export interface MentorProfile {
   id: number;
   name: string;
   specialty: string;
+  professionalInterests: string[];
   position: string;
   company: string;
   yearsExperience: number;
