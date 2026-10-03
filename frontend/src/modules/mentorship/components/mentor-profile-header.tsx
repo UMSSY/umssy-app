@@ -54,6 +54,25 @@ export function MentorProfileHeader({ mentor }: MentorProfileHeaderProps) {
               {mentor.specialty}
             </p>
 
+            {mentor.professionalInterests.length > 0 && (
+              <div className="mt-3">
+                <p className="text-xs font-semibold uppercase text-umssy-secondary">
+                  Intereses profesionales
+                </p>
+
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {mentor.professionalInterests.map((interest) => (
+                    <span
+                      key={interest}
+                      className="rounded-lg border border-umssy-border bg-umssy-background px-3 py-1 text-sm text-umssy-secondary"
+                    >
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="mt-3 flex items-start gap-2 text-sm text-umssy-secondary">
               <GraduationCap
                 size={18}

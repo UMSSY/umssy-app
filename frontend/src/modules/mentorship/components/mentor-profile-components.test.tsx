@@ -58,6 +58,14 @@ describe("Mentor profile components", () => {
     render(<MentorProfileHeader mentor={mentorsMock[0]} />);
 
     expect(screen.getByText("AR")).toBeInTheDocument();
+    expect(screen.getByText("Intereses profesionales")).toBeInTheDocument();
+
+    expect(screen.getByText("Arquitectura de software")).toBeInTheDocument();
+
+    expect(screen.getByText("Cloud Computing")).toBeInTheDocument();
+
+    expect(screen.getByText("Sistemas distribuidos")).toBeInTheDocument();
+    expect(screen.getByText(/Ingeniería de Sistemas/)).toBeInTheDocument();
   });
 
   it("muestra la fotografía cuando el mentor tiene una imagen", () => {
