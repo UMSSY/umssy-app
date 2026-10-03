@@ -422,6 +422,7 @@ export const ModelName = {
   Appointment: 'Appointment',
   TimeProposal: 'TimeProposal',
   AppointmentHistory: 'AppointmentHistory',
+  Vacancy: 'Vacancy',
   EventCategory: 'EventCategory',
   Event: 'Event',
   EventRegistration: 'EventRegistration',
@@ -441,7 +442,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "skill" | "userSkill" | "certification" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "skill" | "userSkill" | "certification" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "vacancy" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2295,6 +2296,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Vacancy: {
+      payload: Prisma.$VacancyPayload<ExtArgs>
+      fields: Prisma.VacancyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VacancyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VacancyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyPayload>
+        }
+        findFirst: {
+          args: Prisma.VacancyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VacancyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyPayload>
+        }
+        findMany: {
+          args: Prisma.VacancyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyPayload>[]
+        }
+        create: {
+          args: Prisma.VacancyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyPayload>
+        }
+        createMany: {
+          args: Prisma.VacancyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VacancyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyPayload>[]
+        }
+        delete: {
+          args: Prisma.VacancyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyPayload>
+        }
+        update: {
+          args: Prisma.VacancyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyPayload>
+        }
+        deleteMany: {
+          args: Prisma.VacancyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VacancyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VacancyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyPayload>[]
+        }
+        upsert: {
+          args: Prisma.VacancyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyPayload>
+        }
+        aggregate: {
+          args: Prisma.VacancyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVacancy>
+        }
+        groupBy: {
+          args: Prisma.VacancyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VacancyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VacancyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VacancyCountAggregateOutputType> | number
+        }
+      }
+    }
     EventCategory: {
       payload: Prisma.$EventCategoryPayload<ExtArgs>
       fields: Prisma.EventCategoryFieldRefs
@@ -2951,6 +3026,25 @@ export const AppointmentHistoryScalarFieldEnum = {
 export type AppointmentHistoryScalarFieldEnum = (typeof AppointmentHistoryScalarFieldEnum)[keyof typeof AppointmentHistoryScalarFieldEnum]
 
 
+export const VacancyScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  companyName: 'companyName',
+  description: 'description',
+  location: 'location',
+  modality: 'modality',
+  requiredSkills: 'requiredSkills',
+  academicRequirements: 'academicRequirements',
+  otherRequirements: 'otherRequirements',
+  isActive: 'isActive',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VacancyScalarFieldEnum = (typeof VacancyScalarFieldEnum)[keyof typeof VacancyScalarFieldEnum]
+
+
 export const EventCategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -3298,6 +3392,7 @@ export type GlobalOmitConfig = {
   appointment?: Prisma.AppointmentOmit
   timeProposal?: Prisma.TimeProposalOmit
   appointmentHistory?: Prisma.AppointmentHistoryOmit
+  vacancy?: Prisma.VacancyOmit
   eventCategory?: Prisma.EventCategoryOmit
   event?: Prisma.EventOmit
   eventRegistration?: Prisma.EventRegistrationOmit

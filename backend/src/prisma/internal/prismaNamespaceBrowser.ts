@@ -76,6 +76,7 @@ export const ModelName = {
   Appointment: 'Appointment',
   TimeProposal: 'TimeProposal',
   AppointmentHistory: 'AppointmentHistory',
+  Vacancy: 'Vacancy',
   EventCategory: 'EventCategory',
   Event: 'Event',
   EventRegistration: 'EventRegistration',
@@ -417,6 +418,25 @@ export const AppointmentHistoryScalarFieldEnum = {
 } as const
 
 export type AppointmentHistoryScalarFieldEnum = (typeof AppointmentHistoryScalarFieldEnum)[keyof typeof AppointmentHistoryScalarFieldEnum]
+
+
+export const VacancyScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  companyName: 'companyName',
+  description: 'description',
+  location: 'location',
+  modality: 'modality',
+  requiredSkills: 'requiredSkills',
+  academicRequirements: 'academicRequirements',
+  otherRequirements: 'otherRequirements',
+  isActive: 'isActive',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VacancyScalarFieldEnum = (typeof VacancyScalarFieldEnum)[keyof typeof VacancyScalarFieldEnum]
 
 
 export const EventCategoryScalarFieldEnum = {
