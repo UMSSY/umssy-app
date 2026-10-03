@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import MentorProfilePage from "./page";
@@ -11,7 +12,7 @@ describe("MentorProfilePage", () => {
 
     render(page);
 
-    expect(screen.getAllByText("Ana Rojas").length).toBeGreaterThan(0);
+    expect((await screen.findAllByText("Ana Rojas")).length).toBeGreaterThan(0);
     expect(screen.getByText("Arquitecta de Software")).toBeInTheDocument();
     expect(screen.getByText("Sobre mí")).toBeInTheDocument();
     expect(screen.getByText("Trayectoria actual")).toBeInTheDocument();

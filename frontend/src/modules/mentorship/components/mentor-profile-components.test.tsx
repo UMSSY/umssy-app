@@ -38,7 +38,7 @@ describe("Mentor profile components", () => {
     });
 
     expect(backLink).toBeInTheDocument();
-    expect(backLink).toHaveAttribute("href", "/mentors");
+    expect(backLink).toHaveAttribute("href", "/mentorship/mentors");
   });
 
   it("muestra todas las áreas técnicas", () => {

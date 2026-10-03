@@ -1,7 +1,12 @@
+"use client";
+
 import { MentorDirectoryGrid } from "../components/mentor-directory-grid";
-import { MENTOR_DIRECTORY_FIXTURES } from "../fixtures/mentor-directory.fixtures";
+import { MentorQueryFeedback } from "../components/mentor-query-feedback";
+import { MentorQuerySkeleton } from "../components/mentor-query-skeleton";
+import { useMentorDirectory } from "../hooks/use-mentor-directory";
 
 export function MentorDirectoryView() {
+  const { data: mentors, isPending, isError, isFetching, refetch } = useMentorDirectory();
   return (
     <main className="min-h-full bg-surface-soft px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
@@ -16,7 +21,11 @@ export function MentorDirectoryView() {
           </p>
         </header>
 
-        <MentorDirectoryGrid mentors={MENTOR_DIRECTORY_FIXTURES} />
+        {isPending || (isError && isFetching) ? <MentorQuerySkeleton /> : isError ? (
+          <MentorQueryFeedback title="No pudimos cargar el directorio" description="Ocurrió un problema al consultar los perfiles. Puedes volver a intentarlo." onRetry={() => { void refetch(); }} />
+        ) : mentors.length === 0 ? (
+          <MentorQueryFeedback title="No hay perfiles disponibles" description="Por el momento no hay perfiles aprobados para mostrar. Vuelve a consultar más adelante." />
+        ) : <MentorDirectoryGrid mentors={mentors} />}
       </div>
     </main>
   );

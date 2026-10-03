@@ -1,9 +1,13 @@
+"use client";
+
 import { MentorProfileHeader } from "../components/mentor-profile-header";
 import { MentorAbout } from "../components/mentor-about";
 import { MentorCareer } from "../components/mentor-career";
 import { MentorGuidanceTypes } from "../components/mentor-guidance-types";
 import { MentorTechnicalAreas } from "../components/mentor-technical-areas";
-import { mentorsMock } from "../services/mentor-profile.mock";
+import { useMentorProfile } from "../hooks/use-mentor-profile";
+import { MentorQueryFeedback } from "../components/mentor-query-feedback";
+import { MentorQuerySkeleton } from "../components/mentor-query-skeleton";
 import { MentorProfileNavigation } from "../components/mentor-profile-navigation";
 
 interface MentorProfileViewProps {
@@ -11,18 +15,20 @@ interface MentorProfileViewProps {
 }
 
 export function MentorProfileView({ mentorId }: MentorProfileViewProps) {
-  const mentor = mentorsMock.find((item) => item.id === Number(mentorId));
+  const { data: mentor, isPending, isError, isFetching, refetch } = useMentorProfile(mentorId);
+
+  if (isPending || (isError && isFetching)) {
+    return <main className="mx-auto w-full max-w-7xl p-4 sm:p-8"><MentorQuerySkeleton isProfile /></main>;
+  }
+
+  if (isError) {
+    return <main className="mx-auto w-full max-w-7xl p-4 sm:p-8"><MentorQueryFeedback title="No pudimos cargar el perfil" description="Ocurrió un problema al consultar este perfil. Puedes reintentar o volver al directorio." onRetry={() => { void refetch(); }} showDirectoryLink /></main>;
+  }
 
   if (!mentor) {
     return (
       <main className="min-h-screen bg-surface-soft p-8">
-        <h1 className="text-2xl font-bold text-ink">
-          Mentor no encontrado
-        </h1>
-
-        <p className="mt-2 text-text-secondary">
-          No se pudo encontrar el perfil solicitado.
-        </p>
+        <MentorQueryFeedback title="Mentor no encontrado" description="No se pudo encontrar el perfil solicitado." showDirectoryLink />
       </main>
     );
   }

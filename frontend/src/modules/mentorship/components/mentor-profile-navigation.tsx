@@ -11,7 +11,7 @@ export function MentorProfileNavigation({
   return (
     <div className="mb-6">
       <Link
-        href="/mentors"
+        href="/mentorship/mentors"
         className="mb-4 inline-flex items-center gap-2 rounded-lg border border-umssy-border bg-white px-4 py-2 text-sm font-semibold text-umssy-ink shadow-sm transition hover:bg-umssy-background hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-umssy-red"
       >
         <ArrowLeft size={16} />
