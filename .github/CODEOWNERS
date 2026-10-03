@@ -1,5 +1,8 @@
-/backend/prisma/ @umssy/DevOps
+/backend/prisma/ @umssy/Database
 README.md @umssy/DevOps
 .github/ @umssy/DevOps
 .husky/ @umssy/DevOps
 scripts/ @umssy/DevOps
+vitest.config*.ts @umssy/DevOps
+eslint.config.mjs @umssy/DevOps
+vitest.setup.ts @umssy/DevOps

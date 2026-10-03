@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+.nyc_output
+.env
+.env.*
+!.env.example
+!.env.test.example
+.database-pg
+*.tsbuildinfo

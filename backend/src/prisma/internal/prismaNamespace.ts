@@ -2723,6 +2723,7 @@ export const UserScalarFieldEnum = {
   firstName: 'firstName',
   lastName: 'lastName',
   email: 'email',
+  password: 'password',
   isActive: 'isActive',
   photoUrl: 'photoUrl',
   cityId: 'cityId',

@@ -1,5 +1,5 @@
+import { BadRequestException } from '@nestjs/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
 import { CertificationsController } from '../controllers/certifications.controller.js';
 import { createCertificationSchema } from '../requests/create-certification.request.js';
@@ -109,7 +109,7 @@ describe('Certification request validation', () => {
     ['future issue date', { ...validBody, issueDate: '2999-01-01' }],
   ])('rejects create body with %s', (_label, body) => {
     expect(() => createPipe.transform(body)).toThrow(
-      RequestValidationException,
+      BadRequestException,
     );
   });
 
@@ -121,10 +121,10 @@ describe('Certification request validation', () => {
 
   it('applies the same constraints to present update fields', () => {
     expect(() => updatePipe.transform({ issueDate: '2999-01-01' })).toThrow(
-      RequestValidationException,
+      BadRequestException,
     );
     expect(() => updatePipe.transform({ name: '' })).toThrow(
-      RequestValidationException,
+      BadRequestException,
     );
   });
 });

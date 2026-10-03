@@ -21,14 +21,20 @@ cp .env.example .env
 
 ## Compile and Run the Project
 
-1. Start the required services via Docker:
-
+1. **Start the required services using Docker:**
+To spin up all services—including the NestJS API and PostgreSQL database (API runs in **development mode** by default) and runs migrations too:
 ```bash
 docker compose up -d
 ```
 
-2. Run the application in **watch mode** (automatically reloads the server when code changes are saved):
 
+If you only need to run the PostgreSQL database (you need to run migrations after), run:
+```bash
+docker compose up postgres -d
+```
+
+2. **Start the application in development mode:**
+Run the server in **watch mode** to enable auto-reloading whenever code changes are saved:
 ```bash
 pnpm run start:dev
 ```
