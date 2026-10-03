@@ -1,0 +1,33 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { FileStorage } from '../types/file-storage.type.js';
+
+@Injectable()
+export class CvFileRepository implements FileStorage {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async save(ownerId: string, content: Buffer): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: ownerId },
+      data: { cvPdfUrl: new Uint8Array(content) },
+      select: { id: true },
+    });
+  }
+
+  async read(ownerId: string): Promise<Buffer | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: ownerId },
+      select: { cvPdfUrl: true },
+    });
+
+    return user?.cvPdfUrl ? Buffer.from(user.cvPdfUrl) : null;
+  }
+
+  async remove(ownerId: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: ownerId },
+      data: { cvPdfUrl: null },
+      select: { id: true },
+    });
+  }
+}
