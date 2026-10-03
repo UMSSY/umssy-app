@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Bolivia no usa horario de verano: siempre UTC-4.
 export const BOLIVIA_UTC_OFFSET_MINUTES = -240;
-// Rango de atención en hora de Bolivia (valor propuesto, a confirmar con el PO).
+// Rango de atención en hora de Bolivia (confirmado por PO).
 export const BLOCK_MIN_HOUR = 7;
 export const BLOCK_MAX_HOUR = 22;
 export const BLOCK_STEP_MINUTES = 30;
