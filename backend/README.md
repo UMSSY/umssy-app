@@ -19,6 +19,40 @@ cp .env.example .env
 
 > **Note:** For local development, using the default values in `.env` is sufficient. Feel free to update the environment variables as needed.
 
+## Authentication Environment Variables
+
+The backend refuses to start if any of the following variables is missing or empty (see `src/common/utils/validate-env.ts`). All of them are listed in `.env.example`.
+
+| Variable         | Description                                                                                         | Example                 |
+| ---------------- | --------------------------------------------------------------------------------------------------- | ----------------------- |
+| `JWT_SECRET`     | Secret used to sign the access tokens. Use a long random value, e.g. `openssl rand -hex 32`.        | _(generated)_           |
+| `JWT_EXPIRES_IN` | Token lifetime, as a duration string (`15m`, `8h`, `7d`) or a number of seconds.                    | `8h`                    |
+| `JWT_ALGORITHM`  | Signing algorithm for the tokens (must be compatible with `JWT_SECRET`, e.g. `HS256`).              | `HS256`                 |
+| `CORS_ORIGIN`    | Single origin allowed by CORS. It must be the URL where the frontend runs.                          | `http://localhost:3000` |
+
+> **Note:** Never reuse the development `JWT_SECRET` in other environments, and never commit your `.env` file.
+
+## Provisional Role-Based Login
+
+Login is provisional and role-based: a user can hold several roles, and picks one when logging in.
+
+- **Endpoint:** `POST /api/auth/login`
+- **Body:** `{ "email": string, "password": string (min. 8 chars), "roleTag": "titulado" | "estudiante" | "mentor" | "empresa" | "administrativo" }`
+- **Flow:**
+  1. The user is looked up by email, along with their active roles.
+  2. The password is checked with `bcrypt`. A wrong email or password returns `401`.
+  3. The requested `roleTag` must be one of the user's assigned roles, otherwise it returns `403`.
+  4. On success it returns `{ "accessToken": "<jwt>", "roleTag": "<role>" }` with status `201`.
+- **Token payload:** `sub` (user id) and `roleTag` (the role chosen at login), signed with `JWT_SECRET`, `JWT_ALGORITHM` and `JWT_EXPIRES_IN`.
+
+A test user is created by the seed (`prisma/seed.ts`): `prueba@umss.edu.bo` / `Prueba123` with the role `titulado`.
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"prueba@umss.edu.bo","password":"Prueba123","roleTag":"titulado"}'
+```
+
 ## Compile and Run the Project
 
 1. Start the required services via Docker:
