@@ -23,11 +23,39 @@ const mentors: MentorDirectoryItem[] = [
 afterEach(cleanup);
 
 describe("MentorDirectoryGrid", () => {
-  it("renderiza varios mentores", () => {
-    render(<MentorDirectoryGrid mentors={mentors} />);
+  it("renderiza el directorio cargado cuando isLoading es false", () => {
+    render(<MentorDirectoryGrid mentors={mentors} isLoading={false} />);
 
     expect(screen.getByText("Mentor Uno")).toBeDefined();
     expect(screen.getByText("Mentor Dos")).toBeDefined();
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("renderiza skeletons y oculta las tarjetas mientras carga", () => {
+    render(<MentorDirectoryGrid mentors={mentors} isLoading />);
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Cargando mentores...",
+    );
+    expect(screen.getAllByTestId("mentor-card-skeleton")).toHaveLength(6);
+    expect(screen.queryByText("Mentor Uno")).toBeNull();
+    expect(screen.queryByRole("link")).toBeNull();
+  });
+
+  it("mantiene el grid responsive durante la carga", () => {
+    render(<MentorDirectoryGrid mentors={mentors} isLoading />);
+
+    const grid = screen.getByRole("region", {
+      name: "Listado de mentores",
+    });
+
+    expect(grid).toHaveAttribute("aria-busy", "true");
+    expect(grid).toHaveClass(
+      "grid",
+      "grid-cols-1",
+      "md:grid-cols-2",
+      "xl:grid-cols-3",
+    );
   });
 
   it("renderiza un solo mentor", () => {

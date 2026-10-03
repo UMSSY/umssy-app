@@ -1,7 +1,13 @@
 import { MentorDirectoryGrid } from "../components/mentor-directory-grid";
 import { MENTOR_DIRECTORY_FIXTURES } from "../fixtures/mentor-directory.fixtures";
 
-export function MentorDirectoryView() {
+interface MentorDirectoryViewProps {
+  isLoading?: boolean;
+}
+
+export function MentorDirectoryView({
+  isLoading = false,
+}: MentorDirectoryViewProps) {
   return (
     <main className="min-h-full bg-surface-soft px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
@@ -16,7 +22,10 @@ export function MentorDirectoryView() {
           </p>
         </header>
 
-        <MentorDirectoryGrid mentors={MENTOR_DIRECTORY_FIXTURES} />
+        <MentorDirectoryGrid
+          mentors={MENTOR_DIRECTORY_FIXTURES}
+          isLoading={isLoading}
+        />
       </div>
     </main>
   );

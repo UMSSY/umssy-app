@@ -24,4 +24,17 @@ describe("MentorDirectoryView", () => {
       }).length,
     ).toBeGreaterThan(0);
   });
+
+  it("permite que el estado de carga controle el directorio", () => {
+    render(<MentorDirectoryView isLoading />);
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Cargando mentores...",
+    );
+    expect(
+      screen.queryByRole("link", {
+        name: /Ver perfil de/i,
+      }),
+    ).toBeNull();
+  });
 });
