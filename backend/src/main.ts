@@ -2,8 +2,11 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
+import { validateJwtEnv } from './common/utils/validate-jwt-env.js';
 
 async function bootstrap() {
+  validateJwtEnv();
+
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();
