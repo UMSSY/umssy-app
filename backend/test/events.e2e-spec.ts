@@ -72,7 +72,7 @@ describe('EventsController (e2e)', () => {
     }
   });
 
-  it('GET /api/events - retorna lista paginada con formato data.items, total, limit y totalPages', async () => {
+  it('GET /api/events - returns paginated list with data.items, total, limit, and totalPages', async () => {
     findManyMock.mockResolvedValueOnce([buildPrismaEventRecord()]);
     countMock.mockResolvedValueOnce(1);
 
@@ -105,7 +105,82 @@ describe('EventsController (e2e)', () => {
     });
   });
 
-  it('GET /api/events?page=2&limit=5 - respeta parametros de paginacion y calcula offset', async () => {
+  it('GET /api/events?search=Node - filters by title search term', async () => {
+    findManyMock.mockResolvedValueOnce([buildPrismaEventRecord()]);
+    countMock.mockResolvedValueOnce(1);
+
+    const res = await request(app.getHttpServer())
+      .get('/api/events?search=Node')
+      .expect(200);
+
+    expect(res.body.statusCode).toBe(200);
+    expect(res.body.data.total).toBe(1);
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          title: { contains: 'Node', mode: 'insensitive' },
+        }),
+      }),
+    );
+  });
+
+  it('GET /api/events?categoryId=123e4567-e89b-12d3-a456-426614174000 - filters by categoryId', async () => {
+    findManyMock.mockResolvedValueOnce([buildPrismaEventRecord()]);
+    countMock.mockResolvedValueOnce(1);
+
+    const res = await request(app.getHttpServer())
+      .get('/api/events?categoryId=123e4567-e89b-12d3-a456-426614174000')
+      .expect(200);
+
+    expect(res.body.statusCode).toBe(200);
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          categoryId: '123e4567-e89b-12d3-a456-426614174000',
+        }),
+      }),
+    );
+  });
+
+  it('GET /api/events?search=Node&categoryId=123e4567-e89b-12d3-a456-426614174000 - combines search and categoryId', async () => {
+    findManyMock.mockResolvedValueOnce([buildPrismaEventRecord()]);
+    countMock.mockResolvedValueOnce(1);
+
+    const res = await request(app.getHttpServer())
+      .get('/api/events?search=Node&categoryId=123e4567-e89b-12d3-a456-426614174000')
+      .expect(200);
+
+    expect(res.body.statusCode).toBe(200);
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          categoryId: '123e4567-e89b-12d3-a456-426614174000',
+          title: { contains: 'Node', mode: 'insensitive' },
+        },
+      }),
+    );
+  });
+
+  it('GET /api/events?search=100%25 - handles special characters like percent sign', async () => {
+    findManyMock.mockResolvedValueOnce([]);
+    countMock.mockResolvedValueOnce(0);
+
+    const res = await request(app.getHttpServer())
+      .get('/api/events?search=100%25')
+      .expect(200);
+
+    expect(res.body.statusCode).toBe(200);
+    expect(res.body.data.total).toBe(0);
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          title: { contains: '100%', mode: 'insensitive' },
+        }),
+      }),
+    );
+  });
+
+  it('GET /api/events?page=2&limit=5 - respects pagination parameters and calculates offset', async () => {
     findManyMock.mockResolvedValueOnce([]);
     countMock.mockResolvedValueOnce(0);
 
@@ -121,7 +196,7 @@ describe('EventsController (e2e)', () => {
     expect(res.body.data.items).toHaveLength(0);
   });
 
-  it('GET /api/events?limit=100 - rechaza limit mayor al maximo (50)', async () => {
+  it('GET /api/events?limit=100 - rejects limit greater than MAX_PAGE_SIZE (50)', async () => {
     const res = await request(app.getHttpServer())
       .get('/api/events?limit=100')
       .expect(400);
@@ -129,7 +204,16 @@ describe('EventsController (e2e)', () => {
     expect(res.body.ok).toBe(false);
   });
 
-  it('GET /api/events?page=0 - rechaza pagina menor a 1', async () => {
+  it('GET /api/events?search=... - rejects search greater than MAX_SEARCH_LENGTH (150)', async () => {
+    const longSearch = 'a'.repeat(151);
+    const res = await request(app.getHttpServer())
+      .get(`/api/events?search=${longSearch}`)
+      .expect(400);
+
+    expect(res.body.ok).toBe(false);
+  });
+
+  it('GET /api/events?page=0 - rejects page less than 1', async () => {
     const res = await request(app.getHttpServer())
       .get('/api/events?page=0')
       .expect(400);
@@ -137,7 +221,7 @@ describe('EventsController (e2e)', () => {
     expect(res.body.ok).toBe(false);
   });
 
-  it('GET /api/events?categoryId=invalid - rechaza UUID invalido', async () => {
+  it('GET /api/events?categoryId=invalid - rejects invalid UUID', async () => {
     const res = await request(app.getHttpServer())
       .get('/api/events?categoryId=not-a-uuid')
       .expect(400);

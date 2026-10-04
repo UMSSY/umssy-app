@@ -37,6 +37,78 @@ async function main() {
 
   console.log('Roles creados:', ROLE_NAMES.join(', '));
   console.log('Usuario de prueba: prueba@umss.edu.bo / Prueba123 (rol: titulado)');
+
+    // --- Eventos & pases (HU-08-03) ---
+  const category = await prisma.eventCategory.upsert({
+    where: { id: '22222222-2222-2222-2222-222222222221' },
+    update: {},
+    create: { id: '22222222-2222-2222-2222-222222222221', name: 'Tecnología' },
+  });
+  const modality = await prisma.eventModality.upsert({
+    where: { id: '22222222-2222-2222-2222-222222222222' },
+    update: {},
+    create: { id: '22222222-2222-2222-2222-222222222222', title: 'Presencial' },
+  });
+  const origin = await prisma.eventOrigin.upsert({
+    where: { id: '22222222-2222-2222-2222-222222222223' },
+    update: {},
+    create: { id: '22222222-2222-2222-2222-222222222223', title: 'Institucional' },
+  });
+  const eventStatus = await prisma.eventStatus.upsert({
+    where: { id: '22222222-2222-2222-2222-222222222224' },
+    update: {},
+    create: { id: '22222222-2222-2222-2222-222222222224', title: 'Publicado' },
+  });
+  const regStatus = await prisma.registrationStatus.upsert({
+    where: { id: '22222222-2222-2222-2222-222222222225' },
+    update: {},
+    create: { id: '22222222-2222-2222-2222-222222222225', title: 'Confirmada' },
+  });
+
+  const events = [
+    { id: '33333333-3333-3333-3333-333333333331', title: 'Taller de NestJS', date: '2026-10-20', location: 'Aula 101', enroll: true },
+    { id: '33333333-3333-3333-3333-333333333332', title: 'Taller de Prisma', date: '2026-10-25', location: 'Laboratorio 2', enroll: true },
+    { id: '33333333-3333-3333-3333-333333333333', title: 'Taller de Vitest', date: '2026-11-02', location: 'Aula 203', enroll: false },
+  ];
+
+  for (const e of events) {
+    await prisma.event.upsert({
+      where: { id: e.id },
+      update: {},
+      create: {
+        id: e.id,
+        title: e.title,
+        description: 'Evento de prueba',
+        instructorName: 'Instructor Demo',
+        eventDate: new Date(e.date),
+        startTime: new Date('1970-01-01T09:00:00.000Z'),
+        endTime: new Date('1970-01-01T12:00:00.000Z'),
+        location: e.location,
+        capacity: 30,
+        supportThreshold: 0,
+        categoryId: category.id,
+        modalityId: modality.id,
+        originId: origin.id,
+        statusId: eventStatus.id,
+        createdById: testUser.id,
+      },
+    });
+
+    if (e.enroll) {
+      await prisma.eventRegistration.upsert({
+        where: { eventId_userId: { eventId: e.id, userId: testUser.id } },
+        update: {},
+        create: {
+          eventId: e.id,
+          userId: testUser.id,
+          statusId: regStatus.id,
+          qrToken: `qr-seed-${e.id.slice(-4)}`,
+        },
+      });
+    }
+  }
+
+    console.log('Eventos de prueba creados; usuario inscrito en 2 de 3');
 }
 
 main()

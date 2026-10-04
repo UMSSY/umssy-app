@@ -27,7 +27,7 @@ describe('EventsService', () => {
     service = new EventsService(repositoryMock as never);
   });
 
-  it('retorna la lista formateada con offset, totalPages e items', async () => {
+  it('returns formatted list with offset, totalPages and items', async () => {
     repositoryMock.findAndCount.mockResolvedValue({
       items: [buildRecord()],
       total: 1,
@@ -44,7 +44,7 @@ describe('EventsService', () => {
     expect(result.data.items[0].registeredCount).toBe(3);
   });
 
-  it('calcula totalPages como 0 cuando total es 0', async () => {
+  it('calculates totalPages as 0 when total is 0', async () => {
     repositoryMock.findAndCount.mockResolvedValue({
       items: [],
       total: 0,
@@ -57,16 +57,49 @@ describe('EventsService', () => {
     expect(result.data.totalPages).toBe(0);
   });
 
-  it('pasa categoryId, statusId, skip y take al repositorio', async () => {
+  it('passes search, categoryId, statusId, skip and take to repository', async () => {
     repositoryMock.findAndCount.mockResolvedValue({ items: [], total: 0 });
 
-    await service.findAll({ page: 3, limit: 5, categoryId: 'cat-uuid', statusId: 'status-uuid' });
+    await service.findAll({
+      page: 3,
+      limit: 5,
+      categoryId: 'cat-uuid',
+      statusId: 'status-uuid',
+      search: 'workshop',
+    });
 
     expect(repositoryMock.findAndCount).toHaveBeenCalledWith({
       categoryId: 'cat-uuid',
       statusId: 'status-uuid',
+      search: 'workshop',
       skip: 10,
       take: 5,
+    });
+  });
+
+  it('calculates correct offset and totalPages when search and categoryId are provided', async () => {
+    repositoryMock.findAndCount.mockResolvedValue({
+      items: [buildRecord()],
+      total: 25,
+    });
+
+    const result = await service.findAll({
+      page: 2,
+      limit: 10,
+      search: 'Node',
+      categoryId: 'cat-uuid',
+    });
+
+    expect(result.page).toBe(2);
+    expect(result.offset).toBe(10);
+    expect(result.data.total).toBe(25);
+    expect(result.data.totalPages).toBe(3);
+    expect(repositoryMock.findAndCount).toHaveBeenCalledWith({
+      categoryId: 'cat-uuid',
+      statusId: undefined,
+      search: 'Node',
+      skip: 10,
+      take: 10,
     });
   });
 });

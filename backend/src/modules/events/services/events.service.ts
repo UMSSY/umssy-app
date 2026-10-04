@@ -9,12 +9,13 @@ export class EventsService {
   constructor(private readonly eventsRepository: EventsRepository) {}
 
   async findAll(payload: GetEventsPayload): Promise<EventsListResponse> {
-    const { page, limit, categoryId, statusId } = payload;
+    const { page, limit, categoryId, statusId, search } = payload;
     const offset = (page - 1) * limit;
 
     const { items, total } = await this.eventsRepository.findAndCount({
       categoryId,
       statusId,
+      search,
       skip: offset,
       take: limit,
     });

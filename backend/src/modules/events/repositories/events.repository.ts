@@ -12,11 +12,17 @@ export class EventsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAndCount(payload: FindEventsPayload): Promise<FindEventsResponse> {
-    const { categoryId, statusId, skip, take } = payload;
+    const { categoryId, statusId, search, skip, take } = payload;
 
     const where: Prisma.EventWhereInput = {
       ...(categoryId !== undefined && { categoryId }),
       ...(statusId !== undefined && { statusId }),
+      ...(search !== undefined && {
+        title: {
+          contains: search,
+          mode: 'insensitive',
+        },
+      }),
     };
 
     const select = {

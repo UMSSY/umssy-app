@@ -61,6 +61,7 @@ export type EventWithRelations = Prisma.EventGetPayload<{
 export interface FindEventsPayload {
   categoryId?: string;
   statusId?: string;
+  search?: string;
   skip: number;
   take: number;
 }
