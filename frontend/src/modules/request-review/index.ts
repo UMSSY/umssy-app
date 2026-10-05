@@ -1,0 +1,1 @@
+export { BackofficeShell } from "./components/backoffice-shell";

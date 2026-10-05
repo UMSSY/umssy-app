@@ -32,7 +32,7 @@ describe("AppSidebar", () => {
     renderSidebar();
 
     expect(screen.getByText("UMSSY")).toBeDefined();
-    expect(screen.getByText("Universidad para el futuro")).toBeDefined();
+    expect(screen.getByText("Backoffice de verificación")).toBeDefined();
     expect(screen.getByText("Alejandro Vargas")).toBeDefined();
     expect(screen.getByText("Administrador")).toBeDefined();
   });
