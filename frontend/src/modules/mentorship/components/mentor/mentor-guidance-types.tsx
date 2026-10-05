@@ -4,6 +4,10 @@ import { useState } from "react";
 import { Compass } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui/toggle-group";
 
 import type { MentorGuidanceType } from "../../types/mentor-guidance-type.types";
 
@@ -65,27 +69,32 @@ export function MentorGuidanceTypes({
       </CardHeader>
 
       <CardContent className="px-6 pb-6 pt-4">
-        <div className="flex flex-wrap gap-2">
-          {guidanceTypes.map((guidance) => {
-            const isSelected = guidance.id === selectedGuidance.id;
-
-            return (
-              <button
-                key={guidance.id}
-                type="button"
-                onClick={() => setSelectedGuidanceId(guidance.id)}
-                aria-pressed={isSelected}
-                className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-umssy-red ${
-                  isSelected
-                    ? "border-umssy-red bg-umssy-red-soft text-umssy-ink shadow-md"
-                    : "border-umssy-border bg-white text-umssy-secondary hover:-translate-y-0.5 hover:border-umssy-red hover:bg-umssy-background hover:shadow-md"
-                }`}
-              >
-                {guidance.name}
-              </button>
+        <ToggleGroup
+          multiple={false}
+          value={[String(selectedGuidance.id)]}
+          onValueChange={(values) => {
+            const nextGuidance = guidanceTypes.find(
+              (guidance) => String(guidance.id) === values[0],
             );
-          })}
-        </div>
+
+            if (nextGuidance) {
+              setSelectedGuidanceId(nextGuidance.id);
+            }
+          }}
+          variant="outline"
+          aria-label="Tipos de orientación"
+          className="flex w-full flex-wrap justify-start gap-2"
+        >
+          {guidanceTypes.map((guidance) => (
+            <ToggleGroupItem
+              key={guidance.id}
+              value={String(guidance.id)}
+              className="h-auto cursor-pointer rounded-lg border-umssy-border bg-white px-4 py-2 text-sm font-semibold text-umssy-secondary shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-umssy-red hover:bg-umssy-background hover:shadow-md focus-visible:border-umssy-red focus-visible:ring-umssy-red/30 aria-pressed:border-umssy-red aria-pressed:bg-umssy-red-soft aria-pressed:text-umssy-ink aria-pressed:shadow-md"
+            >
+              {guidance.name}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
 
         <div className="mt-5 rounded-lg bg-umssy-background p-4">
           <p className="text-sm leading-6 text-umssy-ink">

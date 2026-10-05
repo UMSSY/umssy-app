@@ -52,11 +52,14 @@ describe("Mentor profile components", () => {
   });
 
   it("muestra mensaje cuando no existen tipos de orientación", () => {
-    render(<MentorGuidanceTypes guidanceTypes={[]} />);
+    const { container } = render(<MentorGuidanceTypes guidanceTypes={[]} />);
 
     expect(
       screen.getByText("Este mentor todavía no registró tipos de orientación."),
     ).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-slot="toggle-group"]'),
+    ).not.toBeInTheDocument();
   });
 
   it("muestra los tipos de orientación registrados", () => {
@@ -69,9 +72,24 @@ describe("Mentor profile components", () => {
   });
 
   it("actualiza la descripción al seleccionar un tipo de orientación", () => {
-    render(
+    const { container } = render(
       <MentorGuidanceTypes guidanceTypes={mentorsMock[0].guidanceTypes} />,
     );
+
+    const reviewCvOption = screen.getByRole("button", {
+      name: "Revisión de CV",
+    });
+    const technicalGuidanceOption = screen.getByRole("button", {
+      name: "Orientación técnica",
+    });
+
+    expect(container.querySelector('[data-slot="toggle-group"]')).toHaveAttribute(
+      "aria-label",
+      "Tipos de orientación",
+    );
+    expect(reviewCvOption).toHaveAttribute("data-slot", "toggle-group-item");
+    expect(reviewCvOption).toHaveAttribute("aria-pressed", "true");
+    expect(technicalGuidanceOption).toHaveAttribute("aria-pressed", "false");
 
     expect(
       screen.getByText(
@@ -79,11 +97,10 @@ describe("Mentor profile components", () => {
       ),
     ).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Orientación técnica",
-      }),
-    );
+    fireEvent.click(technicalGuidanceOption);
+
+    expect(reviewCvOption).toHaveAttribute("aria-pressed", "false");
+    expect(technicalGuidanceOption).toHaveAttribute("aria-pressed", "true");
 
     expect(
       screen.getByText(
