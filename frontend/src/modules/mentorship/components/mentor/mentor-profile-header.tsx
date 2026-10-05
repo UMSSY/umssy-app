@@ -1,5 +1,11 @@
-import Image from "next/image";
 import { GraduationCap, UserPlus } from "lucide-react";
+import {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -19,30 +25,33 @@ function getInitials(name: string) {
 }
 
 export function MentorProfileHeader({ mentor }: MentorProfileHeaderProps) {
+  const availabilityLabel = mentor.isAvailable
+    ? "Disponible para mentoría"
+    : "No disponible";
+
   return (
     <Card className="gap-0 overflow-visible rounded-xl border border-umssy-border bg-white py-0 text-base ring-0">
       <CardContent className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
-          <div className="relative h-24 w-24 shrink-0">
+          <Avatar className="size-24 shrink-0 text-2xl">
             {mentor.profileImage ? (
-              <Image
+              <AvatarImage
                 src={mentor.profileImage}
                 alt={`Foto de ${mentor.name}`}
-                fill
-                className="rounded-full border-2 border-umssy-border object-cover"
+                className="border-2 border-umssy-border object-cover"
               />
-            ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-umssy-border bg-white text-2xl font-bold text-umssy-ink shadow-sm">
-                {getInitials(mentor.name)}
-              </div>
-            )}
+            ) : null}
+            <AvatarFallback className="border-2 border-umssy-border bg-white text-2xl font-bold text-umssy-ink shadow-sm">
+              {getInitials(mentor.name)}
+            </AvatarFallback>
 
-            <span
-              className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-white ${
-                mentor.isAvailable ? "bg-green-500" : "bg-red-500"
+            <AvatarBadge
+              className={`bottom-1 right-1 size-4 ring-2 ring-white ${
+                mentor.isAvailable ? "bg-emerald-600" : "bg-destructive"
               }`}
+              aria-hidden="true"
             />
-          </div>
+          </Avatar>
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-3">
@@ -50,23 +59,23 @@ export function MentorProfileHeader({ mentor }: MentorProfileHeaderProps) {
                 {mentor.name}
               </h1>
 
-              <span
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold ${
+              <Badge
+                variant={mentor.isAvailable ? "outline" : "destructive"}
+                className={`h-auto gap-2 px-3 py-1 text-sm font-semibold ${
                   mentor.isAvailable
-                    ? "border-green-300 bg-green-100 text-green-700"
-                    : "border-red-300 bg-red-100 text-red-700"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-destructive/20 bg-destructive/10 text-destructive"
                 }`}
               >
                 <span
                   className={`h-2 w-2 rounded-full ${
-                    mentor.isAvailable ? "bg-green-500" : "bg-red-500"
+                    mentor.isAvailable ? "bg-emerald-600" : "bg-destructive"
                   }`}
+                  aria-hidden="true"
                 />
 
-                {mentor.isAvailable
-                  ? "Disponible para mentoría"
-                  : "No disponible"}
-              </span>
+                {availabilityLabel}
+              </Badge>
             </div>
 
             <p className="mt-1 break-words text-lg font-semibold text-umssy-secondary">
@@ -110,7 +119,7 @@ export function MentorProfileHeader({ mentor }: MentorProfileHeaderProps) {
           disabled={!mentor.isAvailable}
           className={`h-auto w-full shrink-0 gap-2 rounded-lg border-0 px-6 py-3 text-base font-semibold transition active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-100 sm:w-auto ${
             mentor.isAvailable
-              ? "bg-[#E30613] text-white hover:brightness-90"
+              ? "bg-accent text-white hover:bg-danger"
               : "cursor-not-allowed bg-gray-200 text-gray-500"
           }`}
         >

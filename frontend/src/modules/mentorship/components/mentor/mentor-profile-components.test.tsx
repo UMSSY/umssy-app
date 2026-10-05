@@ -1,4 +1,3 @@
-import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -8,18 +7,9 @@ import { MentorProfileHeader } from "./mentor-profile-header";
 import { MentorTechnicalAreas } from "./mentor-technical-areas";
 import { MentorProfileNavigation } from "./mentor-profile-navigation";
 
-vi.mock("next/image", () => ({
-  default: (
-    props: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean },
-  ) => {
-    const { fill, ...imageProps } = props;
-    void fill;
-
-    return React.createElement("img", imageProps);
-  },
-}));
 afterEach(() => {
   cleanup();
+  vi.restoreAllMocks();
 });
 
 describe("Mentor profile components", () => {
@@ -93,9 +83,14 @@ describe("Mentor profile components", () => {
   });
 
   it("muestra las iniciales cuando el mentor no tiene fotografía", () => {
-    render(<MentorProfileHeader mentor={mentorsMock[0]} />);
+    const { container } = render(
+      <MentorProfileHeader mentor={mentorsMock[0]} />,
+    );
 
-    expect(screen.getByText("AR")).toBeInTheDocument();
+    expect(container.querySelector('[data-slot="avatar"]')).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-slot="avatar-fallback"]'),
+    ).toHaveTextContent("AR");
     expect(screen.getByText("Intereses profesionales")).toBeInTheDocument();
     expect(screen.getByText("Arquitectura de software")).toBeInTheDocument();
     expect(screen.getByText("Cloud Computing")).toBeInTheDocument();
@@ -104,9 +99,16 @@ describe("Mentor profile components", () => {
   });
 
   it("habilita solicitar mentoría cuando el mentor está disponible", () => {
-    render(<MentorProfileHeader mentor={mentorsMock[0]} />);
+    const { container } = render(
+      <MentorProfileHeader mentor={mentorsMock[0]} />,
+    );
 
-    expect(screen.getByText("Disponible para mentoría")).toBeInTheDocument();
+    const availabilityBadge = screen.getByText("Disponible para mentoría");
+    expect(availabilityBadge).toHaveAttribute("data-slot", "badge");
+    expect(availabilityBadge).toHaveClass("text-emerald-700");
+    expect(container.querySelector('[data-slot="avatar-badge"]')).toHaveClass(
+      "bg-emerald-600",
+    );
 
     expect(
       screen.getByRole("button", {
@@ -116,9 +118,16 @@ describe("Mentor profile components", () => {
   });
 
   it("deshabilita solicitar mentoría cuando el mentor no está disponible", () => {
-    render(<MentorProfileHeader mentor={mentorsMock[1]} />);
+    const { container } = render(
+      <MentorProfileHeader mentor={mentorsMock[1]} />,
+    );
 
-    expect(screen.getByText("No disponible")).toBeInTheDocument();
+    const availabilityBadge = screen.getByText("No disponible");
+    expect(availabilityBadge).toHaveAttribute("data-slot", "badge");
+    expect(availabilityBadge).toHaveClass("text-destructive");
+    expect(container.querySelector('[data-slot="avatar-badge"]')).toHaveClass(
+      "bg-destructive",
+    );
 
     expect(
       screen.getByRole("button", {
@@ -127,18 +136,30 @@ describe("Mentor profile components", () => {
     ).toBeDisabled();
   });
 
-  it("muestra la fotografía cuando el mentor tiene una imagen", () => {
+  it("muestra la fotografía cuando el mentor tiene una imagen", async () => {
     const mentorWithImage = {
       ...mentorsMock[0],
       profileImage: "/mentor-test.jpg",
     };
 
-    render(<MentorProfileHeader mentor={mentorWithImage} />);
+    vi.spyOn(window, "Image").mockImplementation(function ImageMock() {
+      return {
+        complete: true,
+        naturalWidth: 100,
+      } as HTMLImageElement;
+    });
 
-    expect(
-      screen.getByRole("img", {
-        name: `Foto de ${mentorWithImage.name}`,
-      }),
-    ).toBeInTheDocument();
+    const { container } = render(
+      <MentorProfileHeader mentor={mentorWithImage} />,
+    );
+
+    const image = await screen.findByRole("img", {
+      name: `Foto de ${mentorWithImage.name}`,
+    });
+    expect(image).toHaveAttribute("src", "/mentor-test.jpg");
+    expect(image).toHaveAttribute("data-slot", "avatar-image");
+    expect(container.querySelector('[data-slot="avatar"]')).toContainElement(
+      image,
+    );
   });
 });
