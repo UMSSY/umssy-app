@@ -45,14 +45,14 @@ function failure(status: number, message: string, fieldErrors: FieldErrors = {})
   return { ok: false, status, fieldErrors, message };
 }
 
-// 400 de Zod: message es un arreglo de issues { path, message, ... }
-function fromZodIssues(issues: unknown[]): ApiResult<never> {
+// 400 de validación: errors es un arreglo por campo { field, message }; field puede ser una ruta con puntos
+function fromFieldErrors(issues: unknown[]): ApiResult<never> {
   const fieldErrors: FieldErrors = {};
   let generalMessage: string | undefined;
   for (const issue of issues) {
     if (!isRecord(issue) || typeof issue.message !== "string") continue;
-    const path = Array.isArray(issue.path) ? issue.path : [];
-    const field = KNOWN_FIELDS.find((name) => name === path[0]);
+    const root = typeof issue.field === "string" ? issue.field.split(".")[0] : undefined;
+    const field = KNOWN_FIELDS.find((name) => name === root);
     if (field) {
       fieldErrors[field] ??= issue.message;
     } else {
@@ -67,7 +67,7 @@ function fromZodIssues(issues: unknown[]): ApiResult<never> {
   );
 }
 
-// Errores de dominio: { statusCode, data: null, detail, ok: false }
+// Errores de dominio y de HTTP: { statusCode, data: null, detail, ok: false }
 function fromDomainError(status: number, detail: string): ApiResult<never> {
   const fieldErrors: FieldErrors = {};
   const text = detail.toLowerCase();
@@ -86,7 +86,7 @@ function parseError(status: number, body: unknown, notFoundMessage = NOT_FOUND_M
   // Se usa el texto del issue y no el del servidor; el 413 puede venir sin cuerpo JSON (por ejemplo de un proxy)
   if (status === 413) return failure(413, FILE_TOO_LARGE_MESSAGE);
   if (!isRecord(body)) return failure(0, NETWORK_ERROR_MESSAGE);
-  if (Array.isArray(body.message)) return fromZodIssues(body.message);
+  if (Array.isArray(body.errors)) return fromFieldErrors(body.errors);
   if (typeof body.detail === "string") return fromDomainError(status, body.detail);
   if (typeof body.message === "string") return failure(status, body.message);
   return failure(status, GENERIC_ERROR_MESSAGE);
@@ -116,8 +116,9 @@ async function send<T>(
       validateStatus: () => true,
     });
     if (response.status >= 200 && response.status < 300) {
-      if (!isRecord(response.data)) return failure(0, NETWORK_ERROR_MESSAGE);
-      return { ok: true, data: response.data as T };
+      // Formato estándar: { statusCode, ok, detail, data }; el dato útil viene en data
+      if (!isRecord(response.data) || !isRecord(response.data.data)) return failure(0, NETWORK_ERROR_MESSAGE);
+      return { ok: true, data: response.data.data as T };
     }
     return parseError(response.status, response.data, options.notFoundMessage);
   } catch {

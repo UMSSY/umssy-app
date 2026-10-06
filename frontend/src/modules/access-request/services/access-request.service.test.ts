@@ -19,8 +19,13 @@ const payload: AccessRequestPayload = {
   career: "Licenciatura en Ingeniería de Sistemas",
 };
 
+// Las respuestas 2xx llegan en el formato estándar { statusCode, ok, detail, data }
 function reply(status: number, data: unknown) {
-  request.mockResolvedValue({ status, data } as never);
+  const body =
+    status >= 200 && status < 300 && typeof data === "object" && data !== null
+      ? { statusCode: status, ok: true, detail: "Operación exitosa", data }
+      : data;
+  request.mockResolvedValue({ status, data: body } as never);
 }
 
 describe("accessRequestService", () => {
@@ -121,13 +126,15 @@ describe("accessRequestService", () => {
 
   it("normaliza el 400 de Zod a fieldErrors por campo", async () => {
     reply(400, {
-      message: [
-        { code: "invalid_value", values: ["a"], path: ["career"], message: "La carrera no es válida" },
-        { code: "custom", path: ["graduationYear"], message: "El año de titulación no puede ser futuro" },
-        { code: "custom", path: ["career"], message: "segundo mensaje ignorado" },
-      ],
-      error: "Bad Request",
       statusCode: 400,
+      data: null,
+      detail: "Los datos de la solicitud no son válidos.",
+      ok: false,
+      errors: [
+        { field: "career", message: "La carrera no es válida" },
+        { field: "graduationYear", message: "El año de titulación no puede ser futuro" },
+        { field: "career", message: "segundo mensaje ignorado" },
+      ],
     });
 
     const result = await accessRequestService.createAccessRequest(payload);
@@ -144,7 +151,7 @@ describe("accessRequestService", () => {
   });
 
   it("usa el mensaje de un issue sin campo como mensaje general", async () => {
-    reply(400, { message: [{ code: "custom", path: [], message: "Debes enviar al menos un campo para actualizar" }], statusCode: 400 });
+    reply(400, { statusCode: 400, data: null, detail: "Los datos de la solicitud no son válidos.", ok: false, errors: [{ field: "valor", message: "Debes enviar al menos un campo para actualizar" }] });
 
     const result = await accessRequestService.updateAccessRequest("id-1", payload);
 
@@ -234,7 +241,7 @@ describe("accessRequestService", () => {
     reply(500, { statusCode: 500 });
     expect(await accessRequestService.createAccessRequest(payload)).toMatchObject({ ok: false, status: 500, message: "No se pudo completar la solicitud. Inténtalo de nuevo." });
 
-    reply(400, { statusCode: 400, message: "Validation failed (uuid is expected)", error: "Bad Request" });
+    reply(400, { statusCode: 400, data: null, detail: "Validation failed (uuid is expected)", ok: false });
     expect(await accessRequestService.updateAccessRequest("x", payload)).toMatchObject({ ok: false, status: 400, message: "Validation failed (uuid is expected)" });
   });
 
@@ -301,9 +308,11 @@ describe("accessRequestService", () => {
 
     it("normaliza el 400 de Zod a fieldErrors.documentType", async () => {
       reply(400, {
-        message: [{ code: "invalid_value", path: ["documentType"], message: "El tipo de documento no es válido" }],
-        error: "Bad Request",
         statusCode: 400,
+        data: null,
+        detail: "Los datos de la solicitud no son válidos.",
+        ok: false,
+        errors: [{ field: "documentType", message: "El tipo de documento no es válido" }],
       });
 
       const result = await accessRequestService.uploadDocument("id-1", file, "national_title");
@@ -519,9 +528,11 @@ describe("accessRequestService", () => {
 
     it("el 400 de Zod se resume en un mensaje general", async () => {
       reply(400, {
-        message: [{ code: "invalid_type", path: ["email"], message: "El correo es obligatorio" }],
-        error: "Bad Request",
         statusCode: 400,
+        data: null,
+        detail: "Los datos de la solicitud no son válidos.",
+        ok: false,
+        errors: [{ field: "email", message: "El correo es obligatorio" }],
       });
 
       expect(await accessRequestService.getRequestStatus("SOL-2026-0001", "")).toEqual({
@@ -533,7 +544,7 @@ describe("accessRequestService", () => {
     });
 
     it("el 400 de Zod sobre el código usa su mensaje", async () => {
-      reply(400, { message: [{ code: "invalid_format", path: ["code"], message: "El código de solicitud no es válido" }], statusCode: 400 });
+      reply(400, { statusCode: 400, data: null, detail: "Los datos de la solicitud no son válidos.", ok: false, errors: [{ field: "code", message: "El código de solicitud no es válido" }] });
 
       expect(await accessRequestService.getRequestStatus("abc", "a@b.co")).toMatchObject({ status: 400, message: "El código de solicitud no es válido" });
     });

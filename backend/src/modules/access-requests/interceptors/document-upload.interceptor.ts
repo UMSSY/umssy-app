@@ -3,7 +3,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 import { FileTooLargeException } from '../../files/exceptions/index.js';
 
 // Multer lanza PayloadTooLargeException al pasar limits.fileSize. Se traduce aquí, local al módulo,
-// porque common/ está pendiente de la versión oficial de Pablo (filtros e interceptores globales).
+// a una excepción de dominio para que salga con el formato estándar y un mensaje en español.
 // Debe declararse antes que FileInterceptor para envolver el error de Multer.
 @Injectable()
 export class DocumentUploadInterceptor implements NestInterceptor {
