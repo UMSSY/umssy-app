@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import type { PaginatedResult } from '../../../common/types/api-response.types.js';
-import { buildCsv } from '../../../common/utils/csv.js';
-import { paginate } from '../../../common/utils/pagination.js';
+import type { PaginatedResult } from '../types/api-response.types.js';
+import { buildCsv } from '../utils/csv.js';
+import { paginate } from '../utils/pagination.js';
 import {
   REGISTERED_USERS_CSV_HEADERS,
   REJECTED_USERS_CSV_HEADERS,

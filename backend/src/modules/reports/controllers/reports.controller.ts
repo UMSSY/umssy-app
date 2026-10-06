@@ -1,21 +1,23 @@
-import { Controller, Get, Query, StreamableFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Header,
+  Query,
+  StreamableFile,
+  UseFilters,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiProduces, ApiTags } from '@nestjs/swagger';
-import { ResponseMessage } from '../../../common/decorators/response-message.decorator.js';
-import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
+import { ResponseMessage } from '../decorators/response-message.decorator.js';
+import { HttpExceptionFilter } from '../filters/http-exception.filter.js';
+import { ResponseInterceptor } from '../interceptors/response.interceptor.js';
 import {
-  registeredUsersFiltersSchema,
-  registeredUsersQuerySchema,
-  rejectedUsersFiltersSchema,
-  rejectedUsersQuerySchema,
-  type RegisteredUsersFilters,
-  type RegisteredUsersQuery,
-  type RejectedUsersFilters,
-  type RejectedUsersQuery,
+  RegisteredUsersFiltersDto,
+  RegisteredUsersQueryDto,
+  RejectedUsersFiltersDto,
+  RejectedUsersQueryDto,
 } from '../requests/report-users.schema.js';
-import {
-  reportHistoryQuerySchema,
-  type ReportHistoryQuery,
-} from '../requests/report-history.schema.js';
+import { ReportHistoryQueryDto } from '../requests/report-history.schema.js';
 import { ReportHistoryService } from '../services/report-history.service.js';
 import { ReportsService } from '../services/reports.service.js';
 import type { ReportCsvFile } from '../types/report-user.types.js';
@@ -29,6 +31,8 @@ function toCsvFile({ fileName, content }: ReportCsvFile): StreamableFile {
 
 @ApiTags('Reportes')
 @Controller('reports')
+@UseInterceptors(ResponseInterceptor)
+@UseFilters(HttpExceptionFilter)
 export class ReportsController {
   constructor(
     private readonly reportsService: ReportsService,
@@ -37,46 +41,37 @@ export class ReportsController {
 
   @Get('registered-users')
   @ResponseMessage('Usuarios registrados obtenidos correctamente')
-  getRegisteredUsers(
-    @Query(new ZodValidationPipe(registeredUsersQuerySchema))
-    query: RegisteredUsersQuery,
-  ) {
+  getRegisteredUsers(@Query() query: RegisteredUsersQueryDto) {
     return this.reportsService.getRegisteredUsers(query);
   }
 
   @Get('registered-users/export')
   @ApiProduces('text/csv')
+  @Header('Access-Control-Expose-Headers', 'Content-Disposition')
   exportRegisteredUsersCsv(
-    @Query(new ZodValidationPipe(registeredUsersFiltersSchema))
-    filters: RegisteredUsersFilters,
+    @Query() filters: RegisteredUsersFiltersDto,
   ): StreamableFile {
     return toCsvFile(this.reportsService.exportRegisteredUsersCsv(filters));
   }
 
   @Get('rejected-users')
   @ResponseMessage('Usuarios rechazados obtenidos correctamente')
-  getRejectedUsers(
-    @Query(new ZodValidationPipe(rejectedUsersQuerySchema))
-    query: RejectedUsersQuery,
-  ) {
+  getRejectedUsers(@Query() query: RejectedUsersQueryDto) {
     return this.reportsService.getRejectedUsers(query);
   }
 
   @Get('rejected-users/export')
   @ApiProduces('text/csv')
+  @Header('Access-Control-Expose-Headers', 'Content-Disposition')
   exportRejectedUsersCsv(
-    @Query(new ZodValidationPipe(rejectedUsersFiltersSchema))
-    filters: RejectedUsersFilters,
+    @Query() filters: RejectedUsersFiltersDto,
   ): StreamableFile {
     return toCsvFile(this.reportsService.exportRejectedUsersCsv(filters));
   }
 
   @Get('history')
   @ResponseMessage('Historial de reportes obtenido correctamente')
-  getReportHistory(
-    @Query(new ZodValidationPipe(reportHistoryQuerySchema))
-    query: ReportHistoryQuery,
-  ) {
+  getReportHistory(@Query() query: ReportHistoryQueryDto) {
     return this.reportHistoryService.getReportHistory(query);
   }
 }

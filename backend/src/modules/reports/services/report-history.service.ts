@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
-import type { PaginatedResult } from '../../../common/types/api-response.types.js';
-import { paginate } from '../../../common/utils/pagination.js';
+import type { PaginatedResult } from '../types/api-response.types.js';
+import { paginate } from '../utils/pagination.js';
 import { GeneratedReportsRepository } from '../repositories/generated-reports.repository.js';
 import type { ReportHistoryQuery } from '../requests/report-history.schema.js';
 import type {

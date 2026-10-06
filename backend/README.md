@@ -97,7 +97,7 @@ Then create a `.env.test` file by copying `.env.test.example`. Use the same cred
 ```bash
    pnpm migrate:test:apply
 ```
-
+<!-- TODO: modificar readme para cumplir con la configuracion y runs de los seeds -->
    ## Resources
 - [NestJS Documentation](https://docs.nestjs.com?utm_source=gemini) — Learn more about the framework.
 - [NestJS Courses](https://courses.nestjs.com/?utm_source=gemini) — Official video courses for hands-on experience.

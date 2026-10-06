@@ -1,5 +1,5 @@
 import { ReportUsersRepository } from '../repositories/report-users.repository.js';
-import { CSV_BOM } from '../../../common/utils/csv.js';
+import { CSV_BOM } from '../utils/csv.js';
 import {
   registeredUsersFiltersSchema,
   registeredUsersQuerySchema,
