@@ -6,3 +6,6 @@ scripts/ @umssy/DevOps
 vitest.config.* @umssy/DevOps
 eslint.config.* @umssy/DevOps
 vitest.setup.* @umssy/DevOps
+/frontend/src/style.css @umssy/DevOps
+/frontend/src/app/globals.css @umssy/DevOps
+

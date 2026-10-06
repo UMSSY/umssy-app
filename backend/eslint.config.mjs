@@ -10,13 +10,19 @@ export default defineConfig([
     'node_modules/**',
     'src/generated/**',
   ]),
-
   {
     files: ['src/**/*.ts', 'test/**/*.ts'],
     plugins: {
       'check-file': checkFile,
     },
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
+      '@typescript-eslint/no-deprecated': 'error',
       'check-file/filename-naming-convention': [
         'error',
         { '**/*.ts': 'KEBAB_CASE' },
@@ -26,7 +32,6 @@ export default defineConfig([
         'error',
         { 'src/**/!(__tests__)': 'KEBAB_CASE' },
       ],
-
       '@typescript-eslint/naming-convention': [
         'error',
         {
@@ -41,7 +46,6 @@ export default defineConfig([
       ],
     },
   },
-
   {
     files: ['src/**/*.{exception,exceptions}.ts'],
     rules: {
@@ -49,23 +53,19 @@ export default defineConfig([
         'error',
         {
           selector: 'ClassDeclaration:not([id.name=/Exception$/])',
-          message:
-            'Estándar 4.4: las clases de excepción deben terminar con el sufijo Exception.',
+          message: 'Standard 4.4: Exception classes must end with the Exception suffix.',
         },
       ],
     },
   },
-
   {
     files: ['src/**/index.ts'],
     rules: {
       'no-restricted-syntax': [
         'error',
         {
-          selector:
-            ':matches(FunctionDeclaration, FunctionExpression, ArrowFunctionExpression, VariableDeclaration, ClassDeclaration)',
-          message:
-            'Estándar 2.4: los archivos index solo pueden re-exportar. Incluir lógica está prohibido.',
+          selector: ':matches(FunctionDeclaration, FunctionExpression, ArrowFunctionExpression, VariableDeclaration, ClassDeclaration)',
+          message: 'Standard 2.4: Index files can only act as re-exporting hubs. Including logic is prohibited.',
         },
       ],
     },
