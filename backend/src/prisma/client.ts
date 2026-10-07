@@ -191,3 +191,33 @@ export type EventRegistration = Prisma.EventRegistrationModel
  * 
  */
 export type EventAttendance = Prisma.EventAttendanceModel
+/**
+ * Model AccessRequestStatus
+ * 
+ */
+export type AccessRequestStatus = Prisma.AccessRequestStatusModel
+/**
+ * Model AccessRequestDocumentType
+ * 
+ */
+export type AccessRequestDocumentType = Prisma.AccessRequestDocumentTypeModel
+/**
+ * Model File
+ * 
+ */
+export type File = Prisma.FileModel
+/**
+ * Model Career
+ * 
+ */
+export type Career = Prisma.CareerModel
+/**
+ * Model AccessRequest
+ * 
+ */
+export type AccessRequest = Prisma.AccessRequestModel
+/**
+ * Model ActivationOtp
+ * 
+ */
+export type ActivationOtp = Prisma.ActivationOtpModel

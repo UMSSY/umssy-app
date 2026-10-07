@@ -16,6 +16,7 @@ export const SEED_USERS: ReadonlyArray<SeedUserDefinition & { key: SeedUserKey }
   { key: 'mentorB', firstName: 'Mentor', lastName: 'Beta', email: 'mentor.b@umssy.test', role: 'mentor' },
   { key: 'graduate', firstName: 'Titulado', lastName: 'Uno', email: 'titulado.1@umssy.test', role: 'titulado' },
   { key: 'student', firstName: 'Estudiante', lastName: 'Uno', email: 'estudiante.1@umssy.test', role: 'estudiante' },
+  { key: 'admin', firstName: 'Admin', lastName: 'Uno', email: 'admin.1@umssy.test', role: 'administrativo' },
 ];
 
 export const LEGACY_ROLES = ['MENTOR', 'TITULADO'];

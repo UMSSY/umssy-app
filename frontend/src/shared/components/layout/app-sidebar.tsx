@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import {
   Sidebar,
@@ -14,10 +15,23 @@ import { SidebarBrand } from "./sidebar-brand";
 import { SidebarNavItem } from "./sidebar-nav-item";
 import { SidebarUserCard } from "./sidebar-user-card";
 
+// Props opcionales para personalizar la barra (marca, pie, estilo de ítems e insignias por etiqueta).
+// Sin ellas el render es idéntico al anterior.
+interface AppSidebarExtras {
+  brand?: ReactNode;
+  footer?: ReactNode;
+  itemClassName?: string;
+  itemBadges?: Record<string, ReactNode>;
+}
+
 export function AppSidebar({
   items = SIDEBAR_NAVIGATION,
   user,
-}: AppSidebarProps) {
+  brand,
+  footer,
+  itemClassName,
+  itemBadges,
+}: AppSidebarProps & AppSidebarExtras) {
   const pathname = usePathname();
 
   return (
@@ -26,23 +40,33 @@ export function AppSidebar({
       className="border-ink bg-ink text-surface *:data-[slot=sidebar-inner]:bg-ink"
     >
       <SidebarHeader className="p-2">
-        <SidebarBrand />
+        {brand ?? <SidebarBrand />}
       </SidebarHeader>
 
       <SidebarContent className="px-3">
         <nav aria-label="Menú principal">
           <SidebarMenu className="gap-1">
             {items.map((item) => (
-              <SidebarNavItem key={item.label} item={item} pathname={pathname} />
+              <SidebarNavItem
+                key={item.label}
+                item={item}
+                pathname={pathname}
+                className={itemClassName}
+                badge={itemBadges?.[item.label]}
+              />
             ))}
           </SidebarMenu>
         </nav>
       </SidebarContent>
 
-      {user && (
-        <SidebarFooter className="px-3 py-4">
-          <SidebarUserCard user={user} />
-        </SidebarFooter>
+      {footer ? (
+        <SidebarFooter className="px-3 py-4">{footer}</SidebarFooter>
+      ) : (
+        user && (
+          <SidebarFooter className="px-3 py-4">
+            <SidebarUserCard user={user} />
+          </SidebarFooter>
+        )
       )}
     </Sidebar>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import { useId, useState } from "react";
+import type { ReactNode } from "react";
+import { cn } from "cn";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import {
@@ -14,7 +16,13 @@ import { SIDEBAR_ITEM_CLASS, SIDEBAR_SUB_ITEM_CLASS } from "@/shared/constants/s
 import type { SidebarNavItemProps } from "@/shared/types/sidebar-nav-item-props.types";
 import { isRouteActive } from "@/shared/utils/is-route-active";
 
-export function SidebarNavItem({ item, pathname }: SidebarNavItemProps) {
+// className y badge son opcionales: sin ellos el render es el de siempre
+export function SidebarNavItem({
+  item,
+  pathname,
+  className,
+  badge,
+}: SidebarNavItemProps & { className?: string; badge?: ReactNode }) {
   const Icon = item.icon;
   const submenuId = useId();
   const hasActiveChild =
@@ -32,10 +40,11 @@ export function SidebarNavItem({ item, pathname }: SidebarNavItemProps) {
           render={<Link href={item.href ?? "#"} />}
           isActive={isActive}
           aria-current={isActive ? "page" : undefined}
-          className={SIDEBAR_ITEM_CLASS}
+          className={cn(SIDEBAR_ITEM_CLASS, className)}
         >
           <Icon strokeWidth={1.5} aria-hidden="true" />
-          <span>{item.label}</span>
+          <span className={badge ? "flex-1" : undefined}>{item.label}</span>
+          {badge}
         </SidebarMenuButton>
       </SidebarMenuItem>
     );
