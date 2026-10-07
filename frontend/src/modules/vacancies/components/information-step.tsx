@@ -19,6 +19,7 @@ const CONTRACT_TYPES = ["Tiempo completo", "Medio tiempo", "Pasantia"];
 export function InformationStep({ conditions, updateField, selectModality }: InformationStepProps) {
   const hasUnsavedChanges = 
     conditions.title !== "" || 
+    conditions.description !== "" ||
     conditions.salary !== "" || 
     conditions.mapsLink !== "" || 
     conditions.languages !== "" || 
@@ -132,6 +133,19 @@ export function InformationStep({ conditions, updateField, selectModality }: Inf
             value={conditions.title} 
             onChange={(event) => updateField("title", event.target.value)}
             onKeyDown={handleTitleKeyDown}
+          />
+        </div>
+
+        <div className="md:col-span-2">
+          <Label htmlFor="description" className="text-[12.5px] font-semibold">
+            Descripción
+          </Label>
+          <textarea
+            id="description"
+            className="mt-1.5 min-h-28 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
+            placeholder="Describe las responsabilidades y requisitos del puesto"
+            value={conditions.description}
+            onChange={(event) => updateField("description", event.target.value)}
           />
         </div>
 

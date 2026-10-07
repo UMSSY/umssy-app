@@ -1,4 +1,7 @@
+"use client";
+
 import type { VacancyConditions } from "../hooks/use-job-offer-form";
+import { useState } from "react";
 
 interface PreviewStepProps {
   conditions: VacancyConditions;
@@ -9,7 +12,23 @@ export function PreviewStep({ conditions, onPrevious }: PreviewStepProps) {
   // Mocks basados en el diseño
   const FIXED_COMPANY = "TechBolivia S.R.L.";
   const MOCK_SKILLS = ["Python", "Docker", "Git"];
-  const MOCK_DESCRIPTION = "Buscamos un desarrollador backend con experiencia en Python y arquitecturas de microservicios. Será responsable del diseño e implementación de APIs RESTful, int...";
+  const MOCK_DESCRIPTION = "Buscamos un desarrollador backend con experiencia en Python y arquitecturas de microservicios. Será responsable del diseño e implementación de APIs RESTful, integración con bases de datos, revisión de código y colaboración con equipos multidisciplinarios.";
+  const DESCRIPTION_LIMIT = 125;
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const description = conditions.description || MOCK_DESCRIPTION;
+  const isDescriptionTruncated = description.length > DESCRIPTION_LIMIT;
+  const displayedDescription = isDescriptionTruncated && !isDescriptionExpanded
+    ? `${description.slice(0, DESCRIPTION_LIMIT).trimEnd()}…`
+    : description;
+  const mapsLink = conditions.mapsLink.trim();
+  const isSafeMapsLink = (() => {
+    try {
+      const protocol = new URL(mapsLink).protocol;
+      return protocol === "http:" || protocol === "https:";
+    } catch {
+      return false;
+    }
+  })();
 
   return (
     <div className="w-full mt-8">
@@ -59,8 +78,24 @@ export function PreviewStep({ conditions, onPrevious }: PreviewStepProps) {
         </div>
 
         {/* Descripción */}
-        <p className="text-[14px] text-gray-600 leading-relaxed mb-6">
-          {MOCK_DESCRIPTION} <span className="text-[#E50000] font-semibold cursor-pointer">Ver más</span>
+        <p
+          data-testid="vacancy-description"
+          className="text-[14px] text-gray-600 leading-relaxed mb-6"
+        >
+          {displayedDescription}
+          {isDescriptionTruncated && (
+            <>
+              {" "}
+              <button
+                type="button"
+                className="text-[#E50000] font-semibold"
+                aria-expanded={isDescriptionExpanded}
+                onClick={() => setIsDescriptionExpanded((expanded) => !expanded)}
+              >
+                {isDescriptionExpanded ? "Ver menos" : "Ver más"}
+              </button>
+            </>
+          )}
         </p>
 
         <hr className="border-gray-100 mb-5" />
@@ -78,9 +113,20 @@ export function PreviewStep({ conditions, onPrevious }: PreviewStepProps) {
         {/* Ubicación */}
         <div className="mb-6">
           <h4 className="text-[14px] font-semibold text-gray-900 mb-1">Ubicación</h4>
-          <a href={conditions.mapsLink || "#"} className="text-[14px] text-[#E50000] hover:underline underline-offset-2">
-            {conditions.mapsLink || "https://maps.google.com/?q=Av.+Ballivian+742+Cochabamba"}
-          </a>
+          {isSafeMapsLink ? (
+            <a
+              href={mapsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[14px] text-[#E50000] hover:underline underline-offset-2"
+            >
+              {mapsLink}
+            </a>
+          ) : (
+            <p className="text-[14px] text-gray-600">
+              {mapsLink || "Ubicación no especificada"}
+            </p>
+          )}
         </div>
 
         {/* Chips de Skills */}

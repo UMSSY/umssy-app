@@ -46,6 +46,7 @@ describe('RegisterVacancyView', () => {
 
   const mockConditions: VacancyConditions = {
     title: "",
+    description: "",
     modality: null,
     mapsLink: "",
     contractType: "",
@@ -53,7 +54,7 @@ describe('RegisterVacancyView', () => {
     vacancyCount: "",
     salary: "",
     languages: "",
-    description: "",
+    requirementsDescription: "",
     skills: [],
   };
 

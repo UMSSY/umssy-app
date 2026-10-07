@@ -21,9 +21,9 @@ describe('InformationStep', () => {
   const mockSelectModality = vi.fn();
 
   const emptyConditions: VacancyConditions = {
-    title: "", modality: null, mapsLink: "", contractType: "",
+    title: "", description: "", modality: null, mapsLink: "", contractType: "",
     category: "", vacancyCount: "", salary: "", languages: "",
-    description: "", skills: [],
+    requirementsDescription: "", skills: [],
   };
 
   it('renderiza todos los campos principales (sin depender del texto exacto)', () => {
@@ -36,6 +36,7 @@ describe('InformationStep', () => {
     );
     
     expect(container.querySelector('#title')).toBeInTheDocument();
+    expect(container.querySelector('#description')).toBeInTheDocument();
     expect(container.querySelector('#mapsLink')).toBeInTheDocument();
     
     const modalityButtons = container.querySelectorAll('button');
@@ -75,12 +76,28 @@ describe('InformationStep', () => {
       expect(mockUpdateField).toHaveBeenCalled(); 
     }
   });
-  
+
+  it('actualiza la descripción al escribir en el campo', () => {
+    const { container } = render(
+      <InformationStep
+        conditions={emptyConditions}
+        updateField={mockUpdateField}
+        selectModality={mockSelectModality}
+      />
+    );
+
+    const descriptionInput = container.querySelector('#description');
+    if (descriptionInput) {
+      fireEvent.change(descriptionInput, { target: { value: 'Descripción del puesto' } });
+      expect(mockUpdateField).toHaveBeenCalledWith('description', 'Descripción del puesto');
+    }
+  });
+
   it('renderiza correctamente con datos pre-cargados', () => {
      const fullConditions: VacancyConditions = {
-        title: "Desarrollador Backend", modality: "Hibrido", mapsLink: "https://maps.google.com/?q=...", contractType: "Tiempo completo",
+       title: "Desarrollador Backend", description: "Experiencia requerida", modality: "Hibrido", mapsLink: "https://maps.google.com/?q=...", contractType: "Tiempo completo",
         category: "Tecnología", vacancyCount: "1", salary: "Bs 6.500 - 8.000", languages: "Español",
-        description: "", skills: [],
+        requirementsDescription: "", skills: [],
       };
       
       const { container } = render(

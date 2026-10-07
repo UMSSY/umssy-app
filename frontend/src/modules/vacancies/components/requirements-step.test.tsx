@@ -13,6 +13,7 @@ const mockConditions: VacancyConditions = {
   salary: "",
   languages: "",
   description: "",
+  requirementsDescription: "",
   skills: [],
 };
 

@@ -7,6 +7,7 @@ describe('useJobOfferForm', () => {
     const { result } = renderHook(() => useJobOfferForm());
     expect(result.current.currentStep).toBe(1);
     expect(result.current.conditions.title).toBe("");
+    expect(result.current.conditions.description).toBe("");
   });
 
   it('actualiza un campo de texto correctamente', () => {
@@ -15,6 +16,14 @@ describe('useJobOfferForm', () => {
       result.current.updateField('title', 'Desarrollador React');
     });
     expect(result.current.conditions.title).toBe('Desarrollador React');
+  });
+
+  it('actualiza la descripción correctamente', () => {
+    const { result } = renderHook(() => useJobOfferForm());
+    act(() => {
+      result.current.updateField('description', 'Descripción del puesto');
+    });
+    expect(result.current.conditions.description).toBe('Descripción del puesto');
   });
 
   it('selecciona la modalidad correctamente', () => {

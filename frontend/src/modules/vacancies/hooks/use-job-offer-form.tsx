@@ -6,6 +6,7 @@ export type Modality = "Presencial" | "Remoto" | "Hibrido";
 
 export interface VacancyConditions {
     title: string;
+    description: string;
     modality: Modality | null;
     mapsLink: string;
     contractType: string;
@@ -13,9 +14,8 @@ export interface VacancyConditions {
     vacancyCount: string;
     salary: string;
     languages: string;
-    // NUEVOS CAMPOS PASO 2
-    description: string;
-    skills: string[]; // Guardamos las habilidades como un array de strings
+    requirementsDescription: string;  
+    skills: string[];
 }
 
 export type UpdateVacancyField = <Field extends keyof VacancyConditions>(
@@ -25,6 +25,7 @@ export type UpdateVacancyField = <Field extends keyof VacancyConditions>(
 
 const initialConditions: VacancyConditions = {
     title: "",
+    description: "",
     modality: null,
     mapsLink: "",
     contractType: "",
@@ -32,8 +33,7 @@ const initialConditions: VacancyConditions = {
     vacancyCount: "",
     salary: "",
     languages: "",
-    // VALORES INICIALES PASO 2
-    description: "",
+    requirementsDescription: "",  
     skills: [],
 };
 
@@ -41,7 +41,6 @@ export function useJobOfferForm() {
     const [currentStep, setCurrentStep] = useState(2);
     const [conditions, setConditions] = useState<VacancyConditions>(initialConditions);
 
-    // Como skills es un array, necesitamos actualizar el tipado de updateField
     const updateField: UpdateVacancyField = (field, value) => {
         setConditions((prev) => ({ ...prev, [field]: value }));
     };
@@ -51,10 +50,9 @@ export function useJobOfferForm() {
     }
 
     function goNext() {
-        setCurrentStep((step) => Math.min(step + 1, 3));
+        setCurrentStep(prev => Math.min(prev + 1, 3));
     }
     
-    // NUEVA FUNCIÓN PARA VOLVER ATRÁS
     function goBack() {
         setCurrentStep((step) => Math.max(step - 1, 1));
     }
