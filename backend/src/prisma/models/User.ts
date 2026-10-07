@@ -281,6 +281,9 @@ export type UserWhereInput = {
   eventRegistrations?: Prisma.EventRegistrationListRelationFilter
   checkedInAttendances?: Prisma.EventAttendanceListRelationFilter
   reviewedAccessRequests?: Prisma.AccessRequestListRelationFilter
+  vacancyApplications?: Prisma.VacancyApplicationListRelationFilter
+  savedVacancies?: Prisma.SavedVacancyListRelationFilter
+  applicationChanges?: Prisma.ApplicationHistoryListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -318,6 +321,9 @@ export type UserOrderByWithRelationInput = {
   eventRegistrations?: Prisma.EventRegistrationOrderByRelationAggregateInput
   checkedInAttendances?: Prisma.EventAttendanceOrderByRelationAggregateInput
   reviewedAccessRequests?: Prisma.AccessRequestOrderByRelationAggregateInput
+  vacancyApplications?: Prisma.VacancyApplicationOrderByRelationAggregateInput
+  savedVacancies?: Prisma.SavedVacancyOrderByRelationAggregateInput
+  applicationChanges?: Prisma.ApplicationHistoryOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -358,6 +364,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   eventRegistrations?: Prisma.EventRegistrationListRelationFilter
   checkedInAttendances?: Prisma.EventAttendanceListRelationFilter
   reviewedAccessRequests?: Prisma.AccessRequestListRelationFilter
+  vacancyApplications?: Prisma.VacancyApplicationListRelationFilter
+  savedVacancies?: Prisma.SavedVacancyListRelationFilter
+  applicationChanges?: Prisma.ApplicationHistoryListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -436,6 +445,9 @@ export type UserCreateInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -472,6 +484,9 @@ export type UserUncheckedCreateInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUpdateInput = {
@@ -508,6 +523,9 @@ export type UserUpdateInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -544,6 +562,9 @@ export type UserUncheckedUpdateInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -981,6 +1002,50 @@ export type UserUpdateOneWithoutReviewedAccessRequestsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewedAccessRequestsInput, Prisma.UserUpdateWithoutReviewedAccessRequestsInput>, Prisma.UserUncheckedUpdateWithoutReviewedAccessRequestsInput>
 }
 
+export type UserCreateNestedOneWithoutVacancyApplicationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutVacancyApplicationsInput, Prisma.UserUncheckedCreateWithoutVacancyApplicationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutVacancyApplicationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutVacancyApplicationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutVacancyApplicationsInput, Prisma.UserUncheckedCreateWithoutVacancyApplicationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutVacancyApplicationsInput
+  upsert?: Prisma.UserUpsertWithoutVacancyApplicationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutVacancyApplicationsInput, Prisma.UserUpdateWithoutVacancyApplicationsInput>, Prisma.UserUncheckedUpdateWithoutVacancyApplicationsInput>
+}
+
+export type UserCreateNestedOneWithoutApplicationChangesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutApplicationChangesInput, Prisma.UserUncheckedCreateWithoutApplicationChangesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutApplicationChangesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutApplicationChangesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutApplicationChangesInput, Prisma.UserUncheckedCreateWithoutApplicationChangesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutApplicationChangesInput
+  upsert?: Prisma.UserUpsertWithoutApplicationChangesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutApplicationChangesInput, Prisma.UserUpdateWithoutApplicationChangesInput>, Prisma.UserUncheckedUpdateWithoutApplicationChangesInput>
+}
+
+export type UserCreateNestedOneWithoutSavedVacanciesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSavedVacanciesInput, Prisma.UserUncheckedCreateWithoutSavedVacanciesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSavedVacanciesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSavedVacanciesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSavedVacanciesInput, Prisma.UserUncheckedCreateWithoutSavedVacanciesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSavedVacanciesInput
+  upsert?: Prisma.UserUpsertWithoutSavedVacanciesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSavedVacanciesInput, Prisma.UserUpdateWithoutSavedVacanciesInput>, Prisma.UserUncheckedUpdateWithoutSavedVacanciesInput>
+}
+
 export type UserCreateWithoutCityInput = {
   id?: string
   firstName: string
@@ -1014,6 +1079,9 @@ export type UserCreateWithoutCityInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutCityInput = {
@@ -1049,6 +1117,9 @@ export type UserUncheckedCreateWithoutCityInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutCityInput = {
@@ -1131,6 +1202,9 @@ export type UserCreateWithoutRolesInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutRolesInput = {
@@ -1166,6 +1240,9 @@ export type UserUncheckedCreateWithoutRolesInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutRolesInput = {
@@ -1217,6 +1294,9 @@ export type UserUpdateWithoutRolesInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRolesInput = {
@@ -1252,6 +1332,9 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutEducationsInput = {
@@ -1287,6 +1370,9 @@ export type UserCreateWithoutEducationsInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutEducationsInput = {
@@ -1322,6 +1408,9 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutEducationsInput = {
@@ -1373,6 +1462,9 @@ export type UserUpdateWithoutEducationsInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEducationsInput = {
@@ -1408,6 +1500,9 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutWorkExperiencesInput = {
@@ -1443,6 +1538,9 @@ export type UserCreateWithoutWorkExperiencesInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutWorkExperiencesInput = {
@@ -1478,6 +1576,9 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutWorkExperiencesInput = {
@@ -1529,6 +1630,9 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
@@ -1564,6 +1668,9 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutUserSkillsInput = {
@@ -1599,6 +1706,9 @@ export type UserCreateWithoutUserSkillsInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutUserSkillsInput = {
@@ -1634,6 +1744,9 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutUserSkillsInput = {
@@ -1685,6 +1798,9 @@ export type UserUpdateWithoutUserSkillsInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserSkillsInput = {
@@ -1720,6 +1836,9 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutCertificationsInput = {
@@ -1755,6 +1874,9 @@ export type UserCreateWithoutCertificationsInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutCertificationsInput = {
@@ -1790,6 +1912,9 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutCertificationsInput = {
@@ -1841,6 +1966,9 @@ export type UserUpdateWithoutCertificationsInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCertificationsInput = {
@@ -1876,6 +2004,9 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutMentorTechnicalAreasInput = {
@@ -1911,6 +2042,9 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
@@ -1946,6 +2080,9 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutMentorTechnicalAreasInput = {
@@ -1997,6 +2134,9 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
@@ -2032,6 +2172,9 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutMentorOrientationTypesInput = {
@@ -2067,6 +2210,9 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
@@ -2102,6 +2248,9 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutMentorOrientationTypesInput = {
@@ -2153,6 +2302,9 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
@@ -2188,6 +2340,9 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutAvailabilityBlocksInput = {
@@ -2223,6 +2378,9 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
@@ -2258,6 +2416,9 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutAvailabilityBlocksInput = {
@@ -2309,6 +2470,9 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
@@ -2344,6 +2508,9 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutBlockedDatesInput = {
@@ -2379,6 +2546,9 @@ export type UserCreateWithoutBlockedDatesInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutBlockedDatesInput = {
@@ -2414,6 +2584,9 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutBlockedDatesInput = {
@@ -2465,6 +2638,9 @@ export type UserUpdateWithoutBlockedDatesInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBlockedDatesInput = {
@@ -2500,6 +2676,9 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutMentorAppointmentsInput = {
@@ -2535,6 +2714,9 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
@@ -2570,6 +2752,9 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutMentorAppointmentsInput = {
@@ -2610,6 +2795,9 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
@@ -2645,6 +2833,9 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutStudentAppointmentsInput = {
@@ -2685,6 +2876,9 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
@@ -2720,6 +2914,9 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutCancelledAppointmentsInput = {
@@ -2771,6 +2968,9 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
@@ -2806,6 +3006,9 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUpsertWithoutStudentAppointmentsInput = {
@@ -2852,6 +3055,9 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
@@ -2887,6 +3093,9 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUpsertWithoutCancelledAppointmentsInput = {
@@ -2933,6 +3142,9 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
@@ -2968,6 +3180,9 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutAppointmentChangesInput = {
@@ -3003,6 +3218,9 @@ export type UserCreateWithoutAppointmentChangesInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutAppointmentChangesInput = {
@@ -3038,6 +3256,9 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutAppointmentChangesInput = {
@@ -3089,6 +3310,9 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
@@ -3124,6 +3348,9 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutCreatedEventsInput = {
@@ -3159,6 +3386,9 @@ export type UserCreateWithoutCreatedEventsInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutCreatedEventsInput = {
@@ -3194,6 +3424,9 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutCreatedEventsInput = {
@@ -3234,6 +3467,9 @@ export type UserCreateWithoutModeratedEventsInput = {
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutModeratedEventsInput = {
@@ -3269,6 +3505,9 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutModeratedEventsInput = {
@@ -3320,6 +3559,9 @@ export type UserUpdateWithoutCreatedEventsInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedEventsInput = {
@@ -3355,6 +3597,9 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUpsertWithoutModeratedEventsInput = {
@@ -3401,6 +3646,9 @@ export type UserUpdateWithoutModeratedEventsInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutModeratedEventsInput = {
@@ -3436,6 +3684,9 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutEventRegistrationsInput = {
@@ -3471,6 +3722,9 @@ export type UserCreateWithoutEventRegistrationsInput = {
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutEventRegistrationsInput = {
@@ -3506,6 +3760,9 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutEventRegistrationsInput = {
@@ -3557,6 +3814,9 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
@@ -3592,6 +3852,9 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutCheckedInAttendancesInput = {
@@ -3627,6 +3890,9 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
@@ -3662,6 +3928,9 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutCheckedInAttendancesInput = {
@@ -3713,6 +3982,9 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
@@ -3748,6 +4020,9 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateWithoutReviewedAccessRequestsInput = {
@@ -3783,6 +4058,9 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
 }
 
 export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
@@ -3818,6 +4096,9 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
 }
 
 export type UserCreateOrConnectWithoutReviewedAccessRequestsInput = {
@@ -3869,6 +4150,9 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
@@ -3904,6 +4188,513 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+}
+
+export type UserCreateWithoutVacancyApplicationsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  cvPdfUrl?: runtime.Bytes | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
+}
+
+export type UserUncheckedCreateWithoutVacancyApplicationsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  cvPdfUrl?: runtime.Bytes | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
+}
+
+export type UserCreateOrConnectWithoutVacancyApplicationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutVacancyApplicationsInput, Prisma.UserUncheckedCreateWithoutVacancyApplicationsInput>
+}
+
+export type UserUpsertWithoutVacancyApplicationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutVacancyApplicationsInput, Prisma.UserUncheckedUpdateWithoutVacancyApplicationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutVacancyApplicationsInput, Prisma.UserUncheckedCreateWithoutVacancyApplicationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutVacancyApplicationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutVacancyApplicationsInput, Prisma.UserUncheckedUpdateWithoutVacancyApplicationsInput>
+}
+
+export type UserUpdateWithoutVacancyApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutVacancyApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+}
+
+export type UserCreateWithoutApplicationChangesInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  cvPdfUrl?: runtime.Bytes | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutApplicationChangesInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  cvPdfUrl?: runtime.Bytes | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutApplicationChangesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutApplicationChangesInput, Prisma.UserUncheckedCreateWithoutApplicationChangesInput>
+}
+
+export type UserUpsertWithoutApplicationChangesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutApplicationChangesInput, Prisma.UserUncheckedUpdateWithoutApplicationChangesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutApplicationChangesInput, Prisma.UserUncheckedCreateWithoutApplicationChangesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutApplicationChangesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutApplicationChangesInput, Prisma.UserUncheckedUpdateWithoutApplicationChangesInput>
+}
+
+export type UserUpdateWithoutApplicationChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutApplicationChangesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSavedVacanciesInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  cvPdfUrl?: runtime.Bytes | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryCreateNestedManyWithoutChangedByInput
+}
+
+export type UserUncheckedCreateWithoutSavedVacanciesInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  cvPdfUrl?: runtime.Bytes | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutUserInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedCreateNestedManyWithoutChangedByInput
+}
+
+export type UserCreateOrConnectWithoutSavedVacanciesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSavedVacanciesInput, Prisma.UserUncheckedCreateWithoutSavedVacanciesInput>
+}
+
+export type UserUpsertWithoutSavedVacanciesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSavedVacanciesInput, Prisma.UserUncheckedUpdateWithoutSavedVacanciesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSavedVacanciesInput, Prisma.UserUncheckedCreateWithoutSavedVacanciesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSavedVacanciesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSavedVacanciesInput, Prisma.UserUncheckedUpdateWithoutSavedVacanciesInput>
+}
+
+export type UserUpdateWithoutSavedVacanciesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSavedVacanciesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserCreateManyCityInput = {
@@ -3956,6 +4747,9 @@ export type UserUpdateWithoutCityInput = {
   eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCityInput = {
@@ -3991,6 +4785,9 @@ export type UserUncheckedUpdateWithoutCityInput = {
   eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  vacancyApplications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutUserNestedInput
+  savedVacancies?: Prisma.SavedVacancyUncheckedUpdateManyWithoutUserNestedInput
+  applicationChanges?: Prisma.ApplicationHistoryUncheckedUpdateManyWithoutChangedByNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCityInput = {
@@ -4034,6 +4831,9 @@ export type UserCountOutputType = {
   eventRegistrations: number
   checkedInAttendances: number
   reviewedAccessRequests: number
+  vacancyApplications: number
+  savedVacancies: number
+  applicationChanges: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4055,6 +4855,9 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   eventRegistrations?: boolean | UserCountOutputTypeCountEventRegistrationsArgs
   checkedInAttendances?: boolean | UserCountOutputTypeCountCheckedInAttendancesArgs
   reviewedAccessRequests?: boolean | UserCountOutputTypeCountReviewedAccessRequestsArgs
+  vacancyApplications?: boolean | UserCountOutputTypeCountVacancyApplicationsArgs
+  savedVacancies?: boolean | UserCountOutputTypeCountSavedVacanciesArgs
+  applicationChanges?: boolean | UserCountOutputTypeCountApplicationChangesArgs
 }
 
 /**
@@ -4193,6 +4996,27 @@ export type UserCountOutputTypeCountReviewedAccessRequestsArgs<ExtArgs extends r
   where?: Prisma.AccessRequestWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountVacancyApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.VacancyApplicationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSavedVacanciesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SavedVacancyWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountApplicationChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ApplicationHistoryWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4229,6 +5053,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   eventRegistrations?: boolean | Prisma.User$eventRegistrationsArgs<ExtArgs>
   checkedInAttendances?: boolean | Prisma.User$checkedInAttendancesArgs<ExtArgs>
   reviewedAccessRequests?: boolean | Prisma.User$reviewedAccessRequestsArgs<ExtArgs>
+  vacancyApplications?: boolean | Prisma.User$vacancyApplicationsArgs<ExtArgs>
+  savedVacancies?: boolean | Prisma.User$savedVacanciesArgs<ExtArgs>
+  applicationChanges?: boolean | Prisma.User$applicationChangesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -4309,6 +5136,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   eventRegistrations?: boolean | Prisma.User$eventRegistrationsArgs<ExtArgs>
   checkedInAttendances?: boolean | Prisma.User$checkedInAttendancesArgs<ExtArgs>
   reviewedAccessRequests?: boolean | Prisma.User$reviewedAccessRequestsArgs<ExtArgs>
+  vacancyApplications?: boolean | Prisma.User$vacancyApplicationsArgs<ExtArgs>
+  savedVacancies?: boolean | Prisma.User$savedVacanciesArgs<ExtArgs>
+  applicationChanges?: boolean | Prisma.User$applicationChangesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4340,6 +5170,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     eventRegistrations: Prisma.$EventRegistrationPayload<ExtArgs>[]
     checkedInAttendances: Prisma.$EventAttendancePayload<ExtArgs>[]
     reviewedAccessRequests: Prisma.$AccessRequestPayload<ExtArgs>[]
+    vacancyApplications: Prisma.$VacancyApplicationPayload<ExtArgs>[]
+    savedVacancies: Prisma.$SavedVacancyPayload<ExtArgs>[]
+    applicationChanges: Prisma.$ApplicationHistoryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4770,6 +5603,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   eventRegistrations<T extends Prisma.User$eventRegistrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$eventRegistrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventRegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   checkedInAttendances<T extends Prisma.User$checkedInAttendancesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$checkedInAttendancesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventAttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviewedAccessRequests<T extends Prisma.User$reviewedAccessRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewedAccessRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  vacancyApplications<T extends Prisma.User$vacancyApplicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$vacancyApplicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VacancyApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  savedVacancies<T extends Prisma.User$savedVacanciesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$savedVacanciesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedVacancyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  applicationChanges<T extends Prisma.User$applicationChangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$applicationChangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ApplicationHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5663,6 +6499,78 @@ export type User$reviewedAccessRequestsArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.AccessRequestScalarFieldEnum | Prisma.AccessRequestScalarFieldEnum[]
+}
+
+/**
+ * User.vacancyApplications
+ */
+export type User$vacancyApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the VacancyApplication
+   */
+  select?: Prisma.VacancyApplicationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the VacancyApplication
+   */
+  omit?: Prisma.VacancyApplicationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyApplicationInclude<ExtArgs> | null
+  where?: Prisma.VacancyApplicationWhereInput
+  orderBy?: Prisma.VacancyApplicationOrderByWithRelationInput | Prisma.VacancyApplicationOrderByWithRelationInput[]
+  cursor?: Prisma.VacancyApplicationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.VacancyApplicationScalarFieldEnum | Prisma.VacancyApplicationScalarFieldEnum[]
+}
+
+/**
+ * User.savedVacancies
+ */
+export type User$savedVacanciesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SavedVacancy
+   */
+  select?: Prisma.SavedVacancySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SavedVacancy
+   */
+  omit?: Prisma.SavedVacancyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SavedVacancyInclude<ExtArgs> | null
+  where?: Prisma.SavedVacancyWhereInput
+  orderBy?: Prisma.SavedVacancyOrderByWithRelationInput | Prisma.SavedVacancyOrderByWithRelationInput[]
+  cursor?: Prisma.SavedVacancyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SavedVacancyScalarFieldEnum | Prisma.SavedVacancyScalarFieldEnum[]
+}
+
+/**
+ * User.applicationChanges
+ */
+export type User$applicationChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ApplicationHistory
+   */
+  select?: Prisma.ApplicationHistorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ApplicationHistory
+   */
+  omit?: Prisma.ApplicationHistoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ApplicationHistoryInclude<ExtArgs> | null
+  where?: Prisma.ApplicationHistoryWhereInput
+  orderBy?: Prisma.ApplicationHistoryOrderByWithRelationInput | Prisma.ApplicationHistoryOrderByWithRelationInput[]
+  cursor?: Prisma.ApplicationHistoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ApplicationHistoryScalarFieldEnum | Prisma.ApplicationHistoryScalarFieldEnum[]
 }
 
 /**

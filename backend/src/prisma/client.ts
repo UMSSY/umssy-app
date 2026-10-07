@@ -221,3 +221,23 @@ export type AccessRequest = Prisma.AccessRequestModel
  * 
  */
 export type ActivationOtp = Prisma.ActivationOtpModel
+/**
+ * Model ApplicationStatus
+ * 
+ */
+export type ApplicationStatus = Prisma.ApplicationStatusModel
+/**
+ * Model VacancyApplication
+ * 
+ */
+export type VacancyApplication = Prisma.VacancyApplicationModel
+/**
+ * Model ApplicationHistory
+ * 
+ */
+export type ApplicationHistory = Prisma.ApplicationHistoryModel
+/**
+ * Model SavedVacancy
+ * 
+ */
+export type SavedVacancy = Prisma.SavedVacancyModel

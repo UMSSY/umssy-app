@@ -19,6 +19,9 @@ model Vacancy {
   createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  applications VacancyApplication[]
+  savedBy      SavedVacancy[]
+
   @@index([isActive, createdAt])
   @@map("vacancies")
 }
@@ -165,7 +168,10 @@ model User {
   eventRegistrations   EventRegistration[]
   checkedInAttendances EventAttendance[]
 
-  reviewedAccessRequests AccessRequest[] @relation("AccessRequestReviewedBy")
+  reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
+  vacancyApplications    VacancyApplication[]
+  savedVacancies         SavedVacancy[]
+  applicationChanges     ApplicationHistory[]
 
   @@index([cityId])
   @@map("users")
@@ -218,17 +224,17 @@ model Education {
 }
 
 model WorkExperience {
-  id          String    @id @default(uuid()) @db.Uuid
-  userId      String    @map("user_id") @db.Uuid
-  companyId   String    @map("company_id") @db.Uuid
-  position    String
-  startDate   DateTime  @map("start_date") @db.Date
-  endDate     DateTime? @map("end_date") @db.Date
-  isCurrent   Boolean   @default(false) @map("is_current")
-  description String?
-  detectedSkills String[] @default([]) @map("detected_skills")
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  companyId      String    @map("company_id") @db.Uuid
+  position       String
+  startDate      DateTime  @map("start_date") @db.Date
+  endDate        DateTime? @map("end_date") @db.Date
+  isCurrent      Boolean   @default(false) @map("is_current")
+  description    String?
+  detectedSkills String[]  @default([]) @map("detected_skills")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
@@ -639,4 +645,65 @@ model ActivationOtp {
 
   @@index([accessRequestId])
   @@map("activation_otps")
+}
+
+model ApplicationStatus {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String               @unique @db.VarChar(50)
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  applications    VacancyApplication[]
+  previousChanges ApplicationHistory[] @relation("PreviousApplicationStatus")
+  newChanges      ApplicationHistory[] @relation("NewApplicationStatus")
+
+  @@map("application_statuses")
+}
+
+model VacancyApplication {
+  id        String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  vacancyId String               @map("vacancy_id") @db.Uuid
+  userId    String               @map("user_id") @db.Uuid
+  statusId  String               @map("status_id") @db.Uuid
+  appliedAt DateTime             @default(now()) @map("applied_at") @db.Timestamptz(6)
+  updatedAt DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  vacancy   Vacancy              @relation(fields: [vacancyId], references: [id], onDelete: Restrict)
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  status    ApplicationStatus    @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  history   ApplicationHistory[]
+
+  @@unique([userId, vacancyId])
+  @@index([vacancyId])
+  @@index([statusId])
+  @@map("vacancy_applications")
+}
+
+model ApplicationHistory {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId    String             @map("application_id") @db.Uuid
+  previousStatusId String?            @map("previous_status_id") @db.Uuid
+  newStatusId      String             @map("new_status_id") @db.Uuid
+  changedById      String?            @map("changed_by_id") @db.Uuid
+  changedAt        DateTime           @default(now()) @map("changed_at") @db.Timestamptz(6)
+  application      VacancyApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  previousStatus   ApplicationStatus? @relation("PreviousApplicationStatus", fields: [previousStatusId], references: [id], onDelete: Restrict)
+  newStatus        ApplicationStatus  @relation("NewApplicationStatus", fields: [newStatusId], references: [id], onDelete: Restrict)
+  changedBy        User?              @relation(fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@index([applicationId, changedAt])
+  @@index([previousStatusId])
+  @@index([newStatusId])
+  @@index([changedById])
+  @@map("application_histories")
+}
+
+model SavedVacancy {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  vacancyId String   @map("vacancy_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vacancy   Vacancy  @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, vacancyId])
+  @@index([vacancyId])
+  @@map("saved_vacancies")
 }

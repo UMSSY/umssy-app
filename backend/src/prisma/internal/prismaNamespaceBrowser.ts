@@ -86,7 +86,11 @@ export const ModelName = {
   File: 'File',
   Career: 'Career',
   AccessRequest: 'AccessRequest',
-  ActivationOtp: 'ActivationOtp'
+  ActivationOtp: 'ActivationOtp',
+  ApplicationStatus: 'ApplicationStatus',
+  VacancyApplication: 'VacancyApplication',
+  ApplicationHistory: 'ApplicationHistory',
+  SavedVacancy: 'SavedVacancy'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -598,6 +602,49 @@ export const ActivationOtpScalarFieldEnum = {
 } as const
 
 export type ActivationOtpScalarFieldEnum = (typeof ActivationOtpScalarFieldEnum)[keyof typeof ActivationOtpScalarFieldEnum]
+
+
+export const ApplicationStatusScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt'
+} as const
+
+export type ApplicationStatusScalarFieldEnum = (typeof ApplicationStatusScalarFieldEnum)[keyof typeof ApplicationStatusScalarFieldEnum]
+
+
+export const VacancyApplicationScalarFieldEnum = {
+  id: 'id',
+  vacancyId: 'vacancyId',
+  userId: 'userId',
+  statusId: 'statusId',
+  appliedAt: 'appliedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VacancyApplicationScalarFieldEnum = (typeof VacancyApplicationScalarFieldEnum)[keyof typeof VacancyApplicationScalarFieldEnum]
+
+
+export const ApplicationHistoryScalarFieldEnum = {
+  id: 'id',
+  applicationId: 'applicationId',
+  previousStatusId: 'previousStatusId',
+  newStatusId: 'newStatusId',
+  changedById: 'changedById',
+  changedAt: 'changedAt'
+} as const
+
+export type ApplicationHistoryScalarFieldEnum = (typeof ApplicationHistoryScalarFieldEnum)[keyof typeof ApplicationHistoryScalarFieldEnum]
+
+
+export const SavedVacancyScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  vacancyId: 'vacancyId',
+  createdAt: 'createdAt'
+} as const
+
+export type SavedVacancyScalarFieldEnum = (typeof SavedVacancyScalarFieldEnum)[keyof typeof SavedVacancyScalarFieldEnum]
 
 
 export const SortOrder = {

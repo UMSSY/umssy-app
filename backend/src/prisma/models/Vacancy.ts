@@ -276,6 +276,8 @@ export type VacancyWhereInput = {
   expiresAt?: Prisma.DateTimeNullableFilter<"Vacancy"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Vacancy"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Vacancy"> | Date | string
+  applications?: Prisma.VacancyApplicationListRelationFilter
+  savedBy?: Prisma.SavedVacancyListRelationFilter
 }
 
 export type VacancyOrderByWithRelationInput = {
@@ -293,6 +295,8 @@ export type VacancyOrderByWithRelationInput = {
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  applications?: Prisma.VacancyApplicationOrderByRelationAggregateInput
+  savedBy?: Prisma.SavedVacancyOrderByRelationAggregateInput
 }
 
 export type VacancyWhereUniqueInput = Prisma.AtLeast<{
@@ -313,6 +317,8 @@ export type VacancyWhereUniqueInput = Prisma.AtLeast<{
   expiresAt?: Prisma.DateTimeNullableFilter<"Vacancy"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Vacancy"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Vacancy"> | Date | string
+  applications?: Prisma.VacancyApplicationListRelationFilter
+  savedBy?: Prisma.SavedVacancyListRelationFilter
 }, "id">
 
 export type VacancyOrderByWithAggregationInput = {
@@ -372,6 +378,8 @@ export type VacancyCreateInput = {
   expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  applications?: Prisma.VacancyApplicationCreateNestedManyWithoutVacancyInput
+  savedBy?: Prisma.SavedVacancyCreateNestedManyWithoutVacancyInput
 }
 
 export type VacancyUncheckedCreateInput = {
@@ -389,6 +397,8 @@ export type VacancyUncheckedCreateInput = {
   expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  applications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutVacancyInput
+  savedBy?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutVacancyInput
 }
 
 export type VacancyUpdateInput = {
@@ -406,6 +416,8 @@ export type VacancyUpdateInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.VacancyApplicationUpdateManyWithoutVacancyNestedInput
+  savedBy?: Prisma.SavedVacancyUpdateManyWithoutVacancyNestedInput
 }
 
 export type VacancyUncheckedUpdateInput = {
@@ -423,6 +435,8 @@ export type VacancyUncheckedUpdateInput = {
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutVacancyNestedInput
+  savedBy?: Prisma.SavedVacancyUncheckedUpdateManyWithoutVacancyNestedInput
 }
 
 export type VacancyCreateManyInput = {
@@ -537,6 +551,11 @@ export type VacancySumOrderByAggregateInput = {
   minExperienceYears?: Prisma.SortOrder
 }
 
+export type VacancyScalarRelationFilter = {
+  is?: Prisma.VacancyWhereInput
+  isNot?: Prisma.VacancyWhereInput
+}
+
 export type VacancyCreaterequiredSkillsInput = {
   set: string[]
 }
@@ -592,6 +611,248 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type VacancyCreateNestedOneWithoutApplicationsInput = {
+  create?: Prisma.XOR<Prisma.VacancyCreateWithoutApplicationsInput, Prisma.VacancyUncheckedCreateWithoutApplicationsInput>
+  connectOrCreate?: Prisma.VacancyCreateOrConnectWithoutApplicationsInput
+  connect?: Prisma.VacancyWhereUniqueInput
+}
+
+export type VacancyUpdateOneRequiredWithoutApplicationsNestedInput = {
+  create?: Prisma.XOR<Prisma.VacancyCreateWithoutApplicationsInput, Prisma.VacancyUncheckedCreateWithoutApplicationsInput>
+  connectOrCreate?: Prisma.VacancyCreateOrConnectWithoutApplicationsInput
+  upsert?: Prisma.VacancyUpsertWithoutApplicationsInput
+  connect?: Prisma.VacancyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VacancyUpdateToOneWithWhereWithoutApplicationsInput, Prisma.VacancyUpdateWithoutApplicationsInput>, Prisma.VacancyUncheckedUpdateWithoutApplicationsInput>
+}
+
+export type VacancyCreateNestedOneWithoutSavedByInput = {
+  create?: Prisma.XOR<Prisma.VacancyCreateWithoutSavedByInput, Prisma.VacancyUncheckedCreateWithoutSavedByInput>
+  connectOrCreate?: Prisma.VacancyCreateOrConnectWithoutSavedByInput
+  connect?: Prisma.VacancyWhereUniqueInput
+}
+
+export type VacancyUpdateOneRequiredWithoutSavedByNestedInput = {
+  create?: Prisma.XOR<Prisma.VacancyCreateWithoutSavedByInput, Prisma.VacancyUncheckedCreateWithoutSavedByInput>
+  connectOrCreate?: Prisma.VacancyCreateOrConnectWithoutSavedByInput
+  upsert?: Prisma.VacancyUpsertWithoutSavedByInput
+  connect?: Prisma.VacancyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VacancyUpdateToOneWithWhereWithoutSavedByInput, Prisma.VacancyUpdateWithoutSavedByInput>, Prisma.VacancyUncheckedUpdateWithoutSavedByInput>
+}
+
+export type VacancyCreateWithoutApplicationsInput = {
+  id?: string
+  title: string
+  companyName: string
+  description: string
+  location?: string | null
+  modality?: string | null
+  requiredSkills?: Prisma.VacancyCreaterequiredSkillsInput | string[]
+  academicRequirements?: Prisma.VacancyCreateacademicRequirementsInput | string[]
+  otherRequirements?: Prisma.VacancyCreateotherRequirementsInput | string[]
+  minExperienceYears?: number
+  isActive?: boolean
+  expiresAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  savedBy?: Prisma.SavedVacancyCreateNestedManyWithoutVacancyInput
+}
+
+export type VacancyUncheckedCreateWithoutApplicationsInput = {
+  id?: string
+  title: string
+  companyName: string
+  description: string
+  location?: string | null
+  modality?: string | null
+  requiredSkills?: Prisma.VacancyCreaterequiredSkillsInput | string[]
+  academicRequirements?: Prisma.VacancyCreateacademicRequirementsInput | string[]
+  otherRequirements?: Prisma.VacancyCreateotherRequirementsInput | string[]
+  minExperienceYears?: number
+  isActive?: boolean
+  expiresAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  savedBy?: Prisma.SavedVacancyUncheckedCreateNestedManyWithoutVacancyInput
+}
+
+export type VacancyCreateOrConnectWithoutApplicationsInput = {
+  where: Prisma.VacancyWhereUniqueInput
+  create: Prisma.XOR<Prisma.VacancyCreateWithoutApplicationsInput, Prisma.VacancyUncheckedCreateWithoutApplicationsInput>
+}
+
+export type VacancyUpsertWithoutApplicationsInput = {
+  update: Prisma.XOR<Prisma.VacancyUpdateWithoutApplicationsInput, Prisma.VacancyUncheckedUpdateWithoutApplicationsInput>
+  create: Prisma.XOR<Prisma.VacancyCreateWithoutApplicationsInput, Prisma.VacancyUncheckedCreateWithoutApplicationsInput>
+  where?: Prisma.VacancyWhereInput
+}
+
+export type VacancyUpdateToOneWithWhereWithoutApplicationsInput = {
+  where?: Prisma.VacancyWhereInput
+  data: Prisma.XOR<Prisma.VacancyUpdateWithoutApplicationsInput, Prisma.VacancyUncheckedUpdateWithoutApplicationsInput>
+}
+
+export type VacancyUpdateWithoutApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requiredSkills?: Prisma.VacancyUpdaterequiredSkillsInput | string[]
+  academicRequirements?: Prisma.VacancyUpdateacademicRequirementsInput | string[]
+  otherRequirements?: Prisma.VacancyUpdateotherRequirementsInput | string[]
+  minExperienceYears?: Prisma.FloatFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  savedBy?: Prisma.SavedVacancyUpdateManyWithoutVacancyNestedInput
+}
+
+export type VacancyUncheckedUpdateWithoutApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requiredSkills?: Prisma.VacancyUpdaterequiredSkillsInput | string[]
+  academicRequirements?: Prisma.VacancyUpdateacademicRequirementsInput | string[]
+  otherRequirements?: Prisma.VacancyUpdateotherRequirementsInput | string[]
+  minExperienceYears?: Prisma.FloatFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  savedBy?: Prisma.SavedVacancyUncheckedUpdateManyWithoutVacancyNestedInput
+}
+
+export type VacancyCreateWithoutSavedByInput = {
+  id?: string
+  title: string
+  companyName: string
+  description: string
+  location?: string | null
+  modality?: string | null
+  requiredSkills?: Prisma.VacancyCreaterequiredSkillsInput | string[]
+  academicRequirements?: Prisma.VacancyCreateacademicRequirementsInput | string[]
+  otherRequirements?: Prisma.VacancyCreateotherRequirementsInput | string[]
+  minExperienceYears?: number
+  isActive?: boolean
+  expiresAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  applications?: Prisma.VacancyApplicationCreateNestedManyWithoutVacancyInput
+}
+
+export type VacancyUncheckedCreateWithoutSavedByInput = {
+  id?: string
+  title: string
+  companyName: string
+  description: string
+  location?: string | null
+  modality?: string | null
+  requiredSkills?: Prisma.VacancyCreaterequiredSkillsInput | string[]
+  academicRequirements?: Prisma.VacancyCreateacademicRequirementsInput | string[]
+  otherRequirements?: Prisma.VacancyCreateotherRequirementsInput | string[]
+  minExperienceYears?: number
+  isActive?: boolean
+  expiresAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  applications?: Prisma.VacancyApplicationUncheckedCreateNestedManyWithoutVacancyInput
+}
+
+export type VacancyCreateOrConnectWithoutSavedByInput = {
+  where: Prisma.VacancyWhereUniqueInput
+  create: Prisma.XOR<Prisma.VacancyCreateWithoutSavedByInput, Prisma.VacancyUncheckedCreateWithoutSavedByInput>
+}
+
+export type VacancyUpsertWithoutSavedByInput = {
+  update: Prisma.XOR<Prisma.VacancyUpdateWithoutSavedByInput, Prisma.VacancyUncheckedUpdateWithoutSavedByInput>
+  create: Prisma.XOR<Prisma.VacancyCreateWithoutSavedByInput, Prisma.VacancyUncheckedCreateWithoutSavedByInput>
+  where?: Prisma.VacancyWhereInput
+}
+
+export type VacancyUpdateToOneWithWhereWithoutSavedByInput = {
+  where?: Prisma.VacancyWhereInput
+  data: Prisma.XOR<Prisma.VacancyUpdateWithoutSavedByInput, Prisma.VacancyUncheckedUpdateWithoutSavedByInput>
+}
+
+export type VacancyUpdateWithoutSavedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requiredSkills?: Prisma.VacancyUpdaterequiredSkillsInput | string[]
+  academicRequirements?: Prisma.VacancyUpdateacademicRequirementsInput | string[]
+  otherRequirements?: Prisma.VacancyUpdateotherRequirementsInput | string[]
+  minExperienceYears?: Prisma.FloatFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.VacancyApplicationUpdateManyWithoutVacancyNestedInput
+}
+
+export type VacancyUncheckedUpdateWithoutSavedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  companyName?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modality?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requiredSkills?: Prisma.VacancyUpdaterequiredSkillsInput | string[]
+  academicRequirements?: Prisma.VacancyUpdateacademicRequirementsInput | string[]
+  otherRequirements?: Prisma.VacancyUpdateotherRequirementsInput | string[]
+  minExperienceYears?: Prisma.FloatFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  applications?: Prisma.VacancyApplicationUncheckedUpdateManyWithoutVacancyNestedInput
+}
+
+
+/**
+ * Count Type VacancyCountOutputType
+ */
+
+export type VacancyCountOutputType = {
+  applications: number
+  savedBy: number
+}
+
+export type VacancyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  applications?: boolean | VacancyCountOutputTypeCountApplicationsArgs
+  savedBy?: boolean | VacancyCountOutputTypeCountSavedByArgs
+}
+
+/**
+ * VacancyCountOutputType without action
+ */
+export type VacancyCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the VacancyCountOutputType
+   */
+  select?: Prisma.VacancyCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * VacancyCountOutputType without action
+ */
+export type VacancyCountOutputTypeCountApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.VacancyApplicationWhereInput
+}
+
+/**
+ * VacancyCountOutputType without action
+ */
+export type VacancyCountOutputTypeCountSavedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SavedVacancyWhereInput
+}
 
 
 export type VacancySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -609,6 +870,9 @@ export type VacancySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   expiresAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  applications?: boolean | Prisma.Vacancy$applicationsArgs<ExtArgs>
+  savedBy?: boolean | Prisma.Vacancy$savedByArgs<ExtArgs>
+  _count?: boolean | Prisma.VacancyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vacancy"]>
 
 export type VacancySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -663,10 +927,20 @@ export type VacancySelectScalar = {
 }
 
 export type VacancyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "companyName" | "description" | "location" | "modality" | "requiredSkills" | "academicRequirements" | "otherRequirements" | "minExperienceYears" | "isActive" | "expiresAt" | "createdAt" | "updatedAt", ExtArgs["result"]["vacancy"]>
+export type VacancyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  applications?: boolean | Prisma.Vacancy$applicationsArgs<ExtArgs>
+  savedBy?: boolean | Prisma.Vacancy$savedByArgs<ExtArgs>
+  _count?: boolean | Prisma.VacancyCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type VacancyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type VacancyIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $VacancyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Vacancy"
-  objects: {}
+  objects: {
+    applications: Prisma.$VacancyApplicationPayload<ExtArgs>[]
+    savedBy: Prisma.$SavedVacancyPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     title: string
@@ -1076,6 +1350,8 @@ readonly fields: VacancyFieldRefs;
  */
 export interface Prisma__VacancyClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  applications<T extends Prisma.Vacancy$applicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vacancy$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VacancyApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  savedBy<T extends Prisma.Vacancy$savedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vacancy$savedByArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavedVacancyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1136,6 +1412,10 @@ export type VacancyFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.VacancyOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyInclude<ExtArgs> | null
+  /**
    * Filter, which Vacancy to fetch.
    */
   where: Prisma.VacancyWhereUniqueInput
@@ -1154,6 +1434,10 @@ export type VacancyFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.VacancyOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyInclude<ExtArgs> | null
+  /**
    * Filter, which Vacancy to fetch.
    */
   where: Prisma.VacancyWhereUniqueInput
@@ -1171,6 +1455,10 @@ export type VacancyFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the Vacancy
    */
   omit?: Prisma.VacancyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyInclude<ExtArgs> | null
   /**
    * Filter, which Vacancy to fetch.
    */
@@ -1220,6 +1508,10 @@ export type VacancyFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.VacancyOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyInclude<ExtArgs> | null
+  /**
    * Filter, which Vacancy to fetch.
    */
   where?: Prisma.VacancyWhereInput
@@ -1267,6 +1559,10 @@ export type VacancyFindManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the Vacancy
    */
   omit?: Prisma.VacancyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyInclude<ExtArgs> | null
   /**
    * Filter, which Vacancies to fetch.
    */
@@ -1316,6 +1612,10 @@ export type VacancyCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    */
   omit?: Prisma.VacancyOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyInclude<ExtArgs> | null
+  /**
    * The data needed to create a Vacancy.
    */
   data: Prisma.XOR<Prisma.VacancyCreateInput, Prisma.VacancyUncheckedCreateInput>
@@ -1363,6 +1663,10 @@ export type VacancyUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Omit specific fields from the Vacancy
    */
   omit?: Prisma.VacancyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyInclude<ExtArgs> | null
   /**
    * The data needed to update a Vacancy.
    */
@@ -1430,6 +1734,10 @@ export type VacancyUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    */
   omit?: Prisma.VacancyOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyInclude<ExtArgs> | null
+  /**
    * The filter to search for the Vacancy to update in case it exists.
    */
   where: Prisma.VacancyWhereUniqueInput
@@ -1456,6 +1764,10 @@ export type VacancyDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    */
   omit?: Prisma.VacancyOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyInclude<ExtArgs> | null
+  /**
    * Filter which Vacancy to delete.
    */
   where: Prisma.VacancyWhereUniqueInput
@@ -1476,6 +1788,54 @@ export type VacancyDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
 }
 
 /**
+ * Vacancy.applications
+ */
+export type Vacancy$applicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the VacancyApplication
+   */
+  select?: Prisma.VacancyApplicationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the VacancyApplication
+   */
+  omit?: Prisma.VacancyApplicationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyApplicationInclude<ExtArgs> | null
+  where?: Prisma.VacancyApplicationWhereInput
+  orderBy?: Prisma.VacancyApplicationOrderByWithRelationInput | Prisma.VacancyApplicationOrderByWithRelationInput[]
+  cursor?: Prisma.VacancyApplicationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.VacancyApplicationScalarFieldEnum | Prisma.VacancyApplicationScalarFieldEnum[]
+}
+
+/**
+ * Vacancy.savedBy
+ */
+export type Vacancy$savedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SavedVacancy
+   */
+  select?: Prisma.SavedVacancySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SavedVacancy
+   */
+  omit?: Prisma.SavedVacancyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SavedVacancyInclude<ExtArgs> | null
+  where?: Prisma.SavedVacancyWhereInput
+  orderBy?: Prisma.SavedVacancyOrderByWithRelationInput | Prisma.SavedVacancyOrderByWithRelationInput[]
+  cursor?: Prisma.SavedVacancyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SavedVacancyScalarFieldEnum | Prisma.SavedVacancyScalarFieldEnum[]
+}
+
+/**
  * Vacancy without action
  */
 export type VacancyDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1487,4 +1847,8 @@ export type VacancyDefaultArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the Vacancy
    */
   omit?: Prisma.VacancyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VacancyInclude<ExtArgs> | null
 }

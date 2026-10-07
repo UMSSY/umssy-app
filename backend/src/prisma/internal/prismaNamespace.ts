@@ -432,7 +432,11 @@ export const ModelName = {
   File: 'File',
   Career: 'Career',
   AccessRequest: 'AccessRequest',
-  ActivationOtp: 'ActivationOtp'
+  ActivationOtp: 'ActivationOtp',
+  ApplicationStatus: 'ApplicationStatus',
+  VacancyApplication: 'VacancyApplication',
+  ApplicationHistory: 'ApplicationHistory',
+  SavedVacancy: 'SavedVacancy'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -448,7 +452,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "vacancy" | "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "skill" | "userSkill" | "certification" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp"
+    modelProps: "vacancy" | "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "skill" | "userSkill" | "certification" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp" | "applicationStatus" | "vacancyApplication" | "applicationHistory" | "savedVacancy"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3116,6 +3120,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ApplicationStatus: {
+      payload: Prisma.$ApplicationStatusPayload<ExtArgs>
+      fields: Prisma.ApplicationStatusFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ApplicationStatusFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationStatusPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ApplicationStatusFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationStatusPayload>
+        }
+        findFirst: {
+          args: Prisma.ApplicationStatusFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationStatusPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ApplicationStatusFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationStatusPayload>
+        }
+        findMany: {
+          args: Prisma.ApplicationStatusFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationStatusPayload>[]
+        }
+        create: {
+          args: Prisma.ApplicationStatusCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationStatusPayload>
+        }
+        createMany: {
+          args: Prisma.ApplicationStatusCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ApplicationStatusCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationStatusPayload>[]
+        }
+        delete: {
+          args: Prisma.ApplicationStatusDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationStatusPayload>
+        }
+        update: {
+          args: Prisma.ApplicationStatusUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationStatusPayload>
+        }
+        deleteMany: {
+          args: Prisma.ApplicationStatusDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ApplicationStatusUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ApplicationStatusUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationStatusPayload>[]
+        }
+        upsert: {
+          args: Prisma.ApplicationStatusUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationStatusPayload>
+        }
+        aggregate: {
+          args: Prisma.ApplicationStatusAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateApplicationStatus>
+        }
+        groupBy: {
+          args: Prisma.ApplicationStatusGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ApplicationStatusGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ApplicationStatusCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ApplicationStatusCountAggregateOutputType> | number
+        }
+      }
+    }
+    VacancyApplication: {
+      payload: Prisma.$VacancyApplicationPayload<ExtArgs>
+      fields: Prisma.VacancyApplicationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VacancyApplicationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyApplicationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VacancyApplicationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyApplicationPayload>
+        }
+        findFirst: {
+          args: Prisma.VacancyApplicationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyApplicationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VacancyApplicationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyApplicationPayload>
+        }
+        findMany: {
+          args: Prisma.VacancyApplicationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyApplicationPayload>[]
+        }
+        create: {
+          args: Prisma.VacancyApplicationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyApplicationPayload>
+        }
+        createMany: {
+          args: Prisma.VacancyApplicationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VacancyApplicationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyApplicationPayload>[]
+        }
+        delete: {
+          args: Prisma.VacancyApplicationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyApplicationPayload>
+        }
+        update: {
+          args: Prisma.VacancyApplicationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyApplicationPayload>
+        }
+        deleteMany: {
+          args: Prisma.VacancyApplicationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VacancyApplicationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VacancyApplicationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyApplicationPayload>[]
+        }
+        upsert: {
+          args: Prisma.VacancyApplicationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VacancyApplicationPayload>
+        }
+        aggregate: {
+          args: Prisma.VacancyApplicationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVacancyApplication>
+        }
+        groupBy: {
+          args: Prisma.VacancyApplicationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VacancyApplicationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VacancyApplicationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VacancyApplicationCountAggregateOutputType> | number
+        }
+      }
+    }
+    ApplicationHistory: {
+      payload: Prisma.$ApplicationHistoryPayload<ExtArgs>
+      fields: Prisma.ApplicationHistoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ApplicationHistoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationHistoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ApplicationHistoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationHistoryPayload>
+        }
+        findFirst: {
+          args: Prisma.ApplicationHistoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationHistoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ApplicationHistoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationHistoryPayload>
+        }
+        findMany: {
+          args: Prisma.ApplicationHistoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationHistoryPayload>[]
+        }
+        create: {
+          args: Prisma.ApplicationHistoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationHistoryPayload>
+        }
+        createMany: {
+          args: Prisma.ApplicationHistoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ApplicationHistoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationHistoryPayload>[]
+        }
+        delete: {
+          args: Prisma.ApplicationHistoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationHistoryPayload>
+        }
+        update: {
+          args: Prisma.ApplicationHistoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationHistoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.ApplicationHistoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ApplicationHistoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ApplicationHistoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationHistoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.ApplicationHistoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApplicationHistoryPayload>
+        }
+        aggregate: {
+          args: Prisma.ApplicationHistoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateApplicationHistory>
+        }
+        groupBy: {
+          args: Prisma.ApplicationHistoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ApplicationHistoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ApplicationHistoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ApplicationHistoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    SavedVacancy: {
+      payload: Prisma.$SavedVacancyPayload<ExtArgs>
+      fields: Prisma.SavedVacancyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SavedVacancyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedVacancyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SavedVacancyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedVacancyPayload>
+        }
+        findFirst: {
+          args: Prisma.SavedVacancyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedVacancyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SavedVacancyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedVacancyPayload>
+        }
+        findMany: {
+          args: Prisma.SavedVacancyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedVacancyPayload>[]
+        }
+        create: {
+          args: Prisma.SavedVacancyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedVacancyPayload>
+        }
+        createMany: {
+          args: Prisma.SavedVacancyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SavedVacancyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedVacancyPayload>[]
+        }
+        delete: {
+          args: Prisma.SavedVacancyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedVacancyPayload>
+        }
+        update: {
+          args: Prisma.SavedVacancyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedVacancyPayload>
+        }
+        deleteMany: {
+          args: Prisma.SavedVacancyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SavedVacancyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SavedVacancyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedVacancyPayload>[]
+        }
+        upsert: {
+          args: Prisma.SavedVacancyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedVacancyPayload>
+        }
+        aggregate: {
+          args: Prisma.SavedVacancyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSavedVacancy>
+        }
+        groupBy: {
+          args: Prisma.SavedVacancyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedVacancyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SavedVacancyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedVacancyCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3650,6 +3950,49 @@ export const ActivationOtpScalarFieldEnum = {
 export type ActivationOtpScalarFieldEnum = (typeof ActivationOtpScalarFieldEnum)[keyof typeof ActivationOtpScalarFieldEnum]
 
 
+export const ApplicationStatusScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt'
+} as const
+
+export type ApplicationStatusScalarFieldEnum = (typeof ApplicationStatusScalarFieldEnum)[keyof typeof ApplicationStatusScalarFieldEnum]
+
+
+export const VacancyApplicationScalarFieldEnum = {
+  id: 'id',
+  vacancyId: 'vacancyId',
+  userId: 'userId',
+  statusId: 'statusId',
+  appliedAt: 'appliedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type VacancyApplicationScalarFieldEnum = (typeof VacancyApplicationScalarFieldEnum)[keyof typeof VacancyApplicationScalarFieldEnum]
+
+
+export const ApplicationHistoryScalarFieldEnum = {
+  id: 'id',
+  applicationId: 'applicationId',
+  previousStatusId: 'previousStatusId',
+  newStatusId: 'newStatusId',
+  changedById: 'changedById',
+  changedAt: 'changedAt'
+} as const
+
+export type ApplicationHistoryScalarFieldEnum = (typeof ApplicationHistoryScalarFieldEnum)[keyof typeof ApplicationHistoryScalarFieldEnum]
+
+
+export const SavedVacancyScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  vacancyId: 'vacancyId',
+  createdAt: 'createdAt'
+} as const
+
+export type SavedVacancyScalarFieldEnum = (typeof SavedVacancyScalarFieldEnum)[keyof typeof SavedVacancyScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -3943,6 +4286,10 @@ export type GlobalOmitConfig = {
   career?: Prisma.CareerOmit
   accessRequest?: Prisma.AccessRequestOmit
   activationOtp?: Prisma.ActivationOtpOmit
+  applicationStatus?: Prisma.ApplicationStatusOmit
+  vacancyApplication?: Prisma.VacancyApplicationOmit
+  applicationHistory?: Prisma.ApplicationHistoryOmit
+  savedVacancy?: Prisma.SavedVacancyOmit
 }
 
 /* Types for Logging */
