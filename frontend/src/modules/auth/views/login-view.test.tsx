@@ -48,7 +48,7 @@ describe("LoginView", () => {
         roleTag: "titulado",
       });
       expect(saveAccessToken).toHaveBeenCalledWith("returned-token");
-      expect(push).toHaveBeenCalledWith("/");
+      expect(push).toHaveBeenCalledWith("/profile");
     });
   });
 });
