@@ -4,6 +4,7 @@ import { VacanciesRepository } from '../repositories/vacancies.repository.js';
 import { VacancyMatchingService } from './vacancy-matching.service.js';
 import { VacancyNotFoundException } from '../exceptions/vacancy-not-found.exception.js';
 import { experienceYears } from '../utils/experience-years.js';
+import { compareVacancyRank } from '../utils/compare-vacancy-rank.js';
 
 @Injectable()
 export class VacanciesService {
@@ -19,13 +20,7 @@ export class VacanciesService {
     ]);
     const ranked = vacancies
       .map((vacancy) => this.matching.match(vacancy, profile))
-      .sort(
-        (left, right) =>
-          Number(right.careerMatch) - Number(left.careerMatch) ||
-          Number(right.experienceMatch) - Number(left.experienceMatch) ||
-          right.matchingSkills - left.matchingSkills ||
-          left.id.localeCompare(right.id),
-      );
+      .sort(compareVacancyRank);
     return {
       items: ranked.slice((page - 1) * limit, page * limit),
       total: ranked.length,
