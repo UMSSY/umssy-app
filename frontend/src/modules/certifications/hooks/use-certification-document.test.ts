@@ -90,6 +90,41 @@ describe("useCertificationDocument", () => {
       expect(result.current.feedback).toBeNull();
     });
 
+    it("returns the corrupted file message when the upload is rejected as invalid", async () => {
+      vi.mocked(certificationsService.uploadDocument).mockRejectedValue({
+        response: { status: 400, data: { data: { code: "CORRUPTED_FILE" } } },
+      });
+      const { result } = renderHook(() => useCertificationDocument());
+
+      let outcome: CertificationDocumentResult = { ok: true };
+      await act(async () => {
+        outcome = await result.current.applyDocumentChange("certification-1", {
+          type: "replace",
+          file: DOCUMENT,
+        });
+      });
+
+      expect(outcome).toEqual({ ok: false, message: "El archivo adjunto está dañado o no es válido" });
+      expect(result.current.feedback).toBeNull();
+    });
+
+    it("keeps the generic upload message for a 400 without the corrupted file code", async () => {
+      vi.mocked(certificationsService.uploadDocument).mockRejectedValue({
+        response: { status: 400, data: { data: { code: "OTHER" } } },
+      });
+      const { result } = renderHook(() => useCertificationDocument());
+
+      let outcome: CertificationDocumentResult = { ok: true };
+      await act(async () => {
+        outcome = await result.current.applyDocumentChange("certification-1", {
+          type: "replace",
+          file: DOCUMENT,
+        });
+      });
+
+      expect(outcome).toEqual({ ok: false, message: CERTIFICATION_DOCUMENT_MESSAGES.uploadError });
+    });
+
     it("removes the document and reports the success", async () => {
       vi.mocked(certificationsService.deleteDocument).mockResolvedValue(undefined);
       const { result } = renderHook(() => useCertificationDocument());

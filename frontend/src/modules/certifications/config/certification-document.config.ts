@@ -5,6 +5,7 @@ export const CERTIFICATE_FILE_ACCEPT = CERTIFICATE_ALLOWED_EXTENSIONS.join(",");
 export const CERTIFICATION_DOCUMENT_MESSAGES = {
   uploadSuccess: "Documento adjuntado correctamente.",
   uploadError: "No se pudo adjuntar el documento. Inténtalo de nuevo.",
+  corruptedFile: "El archivo adjunto está dañado o no es válido",
   removeSuccess: "Documento quitado correctamente.",
   removeError: "No se pudo quitar el documento. Inténtalo de nuevo.",
   openError: "No se pudo abrir el documento. Inténtalo de nuevo.",

@@ -440,6 +440,44 @@ describe("CertificationsView", () => {
   });
 
   describe("certification documents", () => {
+    it("shows the corrupted file message next to the selector, keeps the data and does not duplicate the certification on retry", async () => {
+      const corrupted = {
+        response: { status: 400, data: { data: { code: "CORRUPTED_FILE" } } },
+      };
+      let createdCount = 0;
+      vi.mocked(certificationsService.createCertification).mockImplementation(async () => {
+        createdCount += 1;
+        return createCertification(`ccna-${createdCount}`, "CCNA", "2024-01-15");
+      });
+      vi.mocked(certificationsService.uploadDocument)
+        .mockRejectedValueOnce(corrupted)
+        .mockResolvedValueOnce(undefined);
+      const user = await renderView();
+
+      await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
+      await fillCertificationForm(user);
+      await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
+
+      const form = screen.getByRole("form", { name: "Agregar certificación" });
+      expect(
+        await within(form).findByText("El archivo adjunto está dañado o no es válido"),
+      ).toBeInTheDocument();
+      expect(within(form).getByLabelText(/Nombre de la certificación/)).toHaveValue("CCNA");
+      expect(within(form).getByLabelText(/Entidad emisora/)).toHaveValue("Cisco");
+      expect(certificationsService.deleteCertification).toHaveBeenCalledWith("ccna-1");
+
+      vi.mocked(certificationsService.getCertifications).mockResolvedValue([
+        SCRUM,
+        AWS,
+        createCertification("ccna-2", "CCNA", "2024-01-15"),
+      ]);
+      await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
+
+      await waitFor(() => expect(screen.queryByRole("form")).not.toBeInTheDocument());
+      expect(certificationsService.uploadDocument).toHaveBeenLastCalledWith("ccna-2", CERTIFICATE_PDF);
+      expect(getCertificationNames().filter((name) => name === "CCNA")).toHaveLength(1);
+    });
+
     it("is not possible to attach a document outside the unified form", async () => {
       vi.mocked(certificationsService.getCertifications).mockResolvedValue([
         { ...SCRUM, hasDocument: true },

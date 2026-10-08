@@ -10,11 +10,21 @@ import type { Certification } from "../types/certification.types";
 import type { Feedback } from "@/modules/profile/types/feedback.types";
 import type { UploadedDocumentInfo } from "@/modules/profile/types/uploaded-document-info.types";
 import { getDocumentFileName } from "../utils/get-document-file-name";
+import { isCorruptedFileError } from "../utils/is-corrupted-file-error";
 import { getFileFormat } from "../utils/get-file-format";
 import { formatIssueDate } from "../utils/format-issue-date";
 import { getTodayIsoDate } from "../utils/validate-certification";
 
 const STORAGE_KEY = "certification-documents";
+
+function getFailureMessage(isReplacing: boolean, error: unknown): string {
+  if (!isReplacing) {
+    return CERTIFICATION_DOCUMENT_MESSAGES.removeError;
+  }
+  return isCorruptedFileError(error)
+    ? CERTIFICATION_DOCUMENT_MESSAGES.corruptedFile
+    : CERTIFICATION_DOCUMENT_MESSAGES.uploadError;
+}
 
 export function useCertificationDocument() {
   const [isOpening, setIsOpening] = useState(false);
@@ -82,12 +92,10 @@ export function useCertificationDocument() {
           : CERTIFICATION_DOCUMENT_MESSAGES.removeSuccess,
       });
       return { ok: true };
-    } catch {
+    } catch (error) {
       return {
         ok: false,
-        message: isReplacing
-          ? CERTIFICATION_DOCUMENT_MESSAGES.uploadError
-          : CERTIFICATION_DOCUMENT_MESSAGES.removeError,
+        message: getFailureMessage(isReplacing, error),
       };
     }
   }
