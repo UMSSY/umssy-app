@@ -91,6 +91,23 @@ describe("CertificationsView", () => {
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
   });
 
+  it("shows exactly one document indicator per certification card", async () => {
+    vi.mocked(certificationsService.getCertifications).mockResolvedValue([
+      { ...SCRUM, hasDocument: true },
+      AWS,
+    ]);
+    await renderView();
+
+    const list = screen.getByRole("list", { name: "Certificaciones" });
+    const cards = within(list).getAllByRole("article");
+
+    expect(cards).toHaveLength(2);
+    expect(within(cards[0]).getByText("Sin documento de respaldo")).toBeInTheDocument();
+    expect(within(cards[0]).queryByRole("button", { name: /Previsualizar documento/ })).not.toBeInTheDocument();
+    expect(within(cards[1]).getByRole("button", { name: "Previsualizar documento de Scrum Master" })).toBeInTheDocument();
+    expect(within(cards[1]).queryByText("Sin documento de respaldo")).not.toBeInTheDocument();
+  });
+
   it("renders the certifications from the newest to the oldest", async () => {
     await renderView();
 

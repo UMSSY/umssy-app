@@ -170,6 +170,7 @@ export function CertificationsView() {
               isBusy={deleteMutation.isDeleting || isBusy}
               onEdit={openEditForm}
               onDelete={openDeleteDialog}
+              onViewDocument={handleViewDocument}
             />
           </li>
         ))}

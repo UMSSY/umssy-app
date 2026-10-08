@@ -1,3 +1,5 @@
+import { FileText, TriangleAlert } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { CertificationCardProps } from "../types/certification-card-props.types";
 import { formatIssueDate } from "../utils/format-issue-date";
@@ -7,6 +9,7 @@ export function CertificationCard({
   isBusy = false,
   onEdit,
   onDelete,
+  onViewDocument,
 }: CertificationCardProps) {
   return (
     <article className="flex items-center justify-between gap-4 py-3">
@@ -16,6 +19,30 @@ export function CertificationCard({
           {certification.issuingOrganization} · Obtenida el{" "}
           <time dateTime={certification.issueDate}>{formatIssueDate(certification.issueDate)}</time>
         </p>
+        <div className="mt-2">
+          {certification.hasDocument === true ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-label={`Previsualizar documento de ${certification.name}`}
+              disabled={isBusy}
+              onClick={() => onViewDocument(certification)}
+              className="h-7 border-border-strong bg-surface px-2.5 text-[12px] font-semibold text-ink hover:bg-surface-soft"
+            >
+              <FileText aria-hidden="true" />
+              Ver documento
+            </Button>
+          ) : (
+            <Badge
+              variant="outline"
+              className="h-6 gap-1.5 border-amber-300 bg-amber-50 px-2.5 text-[12px] font-semibold text-amber-800"
+            >
+              <TriangleAlert aria-hidden="true" />
+              Sin documento de respaldo
+            </Badge>
+          )}
+        </div>
       </div>
       <div className="flex shrink-0 items-center gap-1">
         <Button
