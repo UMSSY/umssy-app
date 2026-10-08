@@ -24,14 +24,16 @@ export class ReportHistoryService {
   ) {}
 
   // Historial de reportes generados, del más reciente al más antiguo.
+  // El filtro por tipo se aplica antes de paginar para que cada página tenga sus registros completos.
   async getReportHistory(
     query: ReportHistoryQuery,
   ): Promise<PaginatedResult<GeneratedReport>> {
-    const reports = sortByNewest(
-      await this.generatedReportsRepository.findAll(),
-    );
+    const reports = await this.generatedReportsRepository.findAll();
+    const filteredReports = query.reportType
+      ? reports.filter((report) => report.reportType === query.reportType)
+      : reports;
 
-    return paginate(reports, query.page, query.limit);
+    return paginate(sortByNewest(filteredReports), query.page, query.limit);
   }
 
   // Registra un reporte al completarse su exportación. Cada registro recibe su

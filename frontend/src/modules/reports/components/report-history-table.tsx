@@ -1,24 +1,16 @@
 import { FileText } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateTime } from "@/shared/utils/date.utils";
-import type { GeneratedReport, ReportType } from "../types/generated-report.types";
+import { REPORT_TYPE_LABELS } from "../constants/generated-report.constants";
+import type { GeneratedReport } from "../types/generated-report.types";
 import { TableMessageRow, TableSkeletonRows } from "./table-state-rows";
 
 interface ReportHistoryTableProps {
   reports: GeneratedReport[];
   isLoading: boolean;
   errorMessage?: string;
+  emptyMessage?: string;
 }
-
-const REPORT_TYPE_LABELS: Record<ReportType, string> = {
-  REGISTERED_USERS: "Lista de Usuarios",
-  STUDENTS: "Estudiantes",
-  DEGREE_HOLDERS: "Titulados",
-  MENTORS: "Mentores",
-  COMPANIES: "Empresas",
-  ADMINS: "Administradores",
-  REJECTED_USERS: "Rechazados",
-};
 
 const COLUMN_COUNT = 3;
 const HEAD_CLASSES = "h-auto px-6 py-3 font-semibold text-text-secondary";
@@ -41,7 +33,12 @@ function renderDateTime(isoDate: string) {
   );
 }
 
-export function ReportHistoryTable({ reports, isLoading, errorMessage }: ReportHistoryTableProps) {
+export function ReportHistoryTable({
+  reports,
+  isLoading,
+  errorMessage,
+  emptyMessage = "Aún no se generaron reportes.",
+}: ReportHistoryTableProps) {
   // En celulares las tres columnas caben sin scroll horizontal: menos relleno y el texto puede partirse.
   const headClasses = `${HEAD_CLASSES} px-2 whitespace-normal md:px-6 md:whitespace-nowrap`;
   const cellClasses = `${CELL_CLASSES} px-2 py-3 whitespace-normal md:px-6 md:py-4`;
@@ -56,7 +53,7 @@ export function ReportHistoryTable({ reports, isLoading, errorMessage }: ReportH
     }
 
     if (reports.length === 0) {
-      return <TableMessageRow columnCount={COLUMN_COUNT} message="Aún no se generaron reportes." />;
+      return <TableMessageRow columnCount={COLUMN_COUNT} message={emptyMessage} />;
     }
 
     return reports.map((report) => (

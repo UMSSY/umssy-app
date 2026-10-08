@@ -144,6 +144,57 @@ describe('ReportHistoryService', () => {
 
       expect(result.totalItems).toBe(0);
     });
+
+    describe('filtro por tipo de reporte', () => {
+      it('devuelve solo los reportes del tipo indicado', async () => {
+        const result = await buildService().getReportHistory(
+          historyQuery({ reportType: 'REJECTED_USERS' }),
+        );
+
+        expect(result.items.map((report) => report.id)).toEqual(['b']);
+        expect(result).toMatchObject({ totalItems: 1, totalPages: 1 });
+      });
+
+      it('con "ALL" o sin filtro devuelve todos los tipos', async () => {
+        const withAll = await buildService().getReportHistory(
+          historyQuery({ reportType: 'ALL' }),
+        );
+        const withoutFilter =
+          await buildService().getReportHistory(historyQuery());
+
+        expect(withAll).toEqual(withoutFilter);
+        expect(withAll.totalItems).toBe(3);
+      });
+
+      it('filtra antes de paginar', async () => {
+        const reports = Array.from({ length: 12 }, (_, index) =>
+          buildReport({
+            id: `r-${index}`,
+            reportType: index % 2 === 0 ? 'MENTORS' : 'COMPANIES',
+            generatedAt: new Date(Date.UTC(2026, 9, index + 1)).toISOString(),
+          }),
+        );
+
+        const result = await buildService(reports).getReportHistory(
+          historyQuery({ reportType: 'MENTORS', page: '2', limit: '5' }),
+        );
+
+        expect(result).toMatchObject({ totalItems: 6, totalPages: 2, page: 2 });
+        expect(result.items.map((report) => report.id)).toEqual(['r-0']);
+      });
+
+      it('devuelve una lista vacía si no hay reportes de ese tipo', async () => {
+        const result = await buildService().getReportHistory(
+          historyQuery({ reportType: 'ADMINS' }),
+        );
+
+        expect(result).toMatchObject({ items: [], totalItems: 0 });
+      });
+
+      it('rechaza un tipo de reporte que no existe', () => {
+        expect(() => historyQuery({ reportType: 'GRADUATES' })).toThrow();
+      });
+    });
   });
 
   describe('registerGeneratedReport', () => {

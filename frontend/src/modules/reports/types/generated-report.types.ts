@@ -18,4 +18,5 @@ export interface GeneratedReport {
 export interface ReportHistoryParams {
   page: number;
   limit: number;
+  reportType?: ReportType;
 }
