@@ -20,6 +20,15 @@ import { TechnicalAreasModule } from './modules/technical-areas/technical-areas.
 import { WorkExperienceModule } from './modules/work-experience/work-experience.module.js';
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js';
 
+//import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
+import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
+
+
+
+
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -42,6 +51,10 @@ import { AccessRequestsModule } from './modules/access-requests/access-requests.
   ],
   controllers: [AppController],
   providers: [
+    { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+    { provide: APP_FILTER, useClass: HttpExceptionFilter },   // NUEVO - mapea Zod a 422
+    { provide: APP_FILTER, useClass: DomainExceptionFilter }, // ya lo tenias
+    //{ provide: APP_FILTER, useClass: PrismaExceptionFilter }, // NUEVO - mapea Prisma a 500
     AppService,
     { provide: APP_FILTER, useClass: DomainExceptionFilter },
     { provide: APP_PIPE, useClass: ZodValidationPipe },
