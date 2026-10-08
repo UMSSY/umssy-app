@@ -63,7 +63,7 @@ describe("CertificationForm", () => {
     expect(getIssueDateInput()).toHaveAttribute("type", "date");
     expect(screen.getByText("* Campos obligatorios")).toBeInTheDocument();
     expect(saveButton()).toBeEnabled();
-    expect(screen.queryByRole("button", { name: "Cancelar" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toHaveAttribute("type", "button");
   });
 
   it("fills the inputs with the initial data and shows cancel when editing", () => {
@@ -223,6 +223,49 @@ describe("CertificationForm", () => {
 
     expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
+  });
+
+  it("shows no spinner on cancel while the submit is in progress", async () => {
+    const onSubmit = vi.fn(() => new Promise<void>(() => undefined));
+    const { user } = renderForm({ initialData: SAVED_VALUES, onSubmit });
+
+    await user.click(saveButton());
+
+    const cancel = screen.getByRole("button", { name: "Cancelar" });
+    expect(cancel).toBeDisabled();
+    expect(cancel.querySelector("svg")).toBeNull();
+  });
+
+  it("discards the typed values, the selected file and the errors on cancel without calling the api", async () => {
+    const { onCancel, onSubmit, user } = renderForm();
+
+    await user.type(getNameInput(), "CCNA");
+    await user.upload(
+      screen.getByLabelText(/Archivo de respaldo/),
+      new File(["certificate"], "certificate.pdf", { type: "application/pdf" }),
+    );
+    expect(await screen.findByText(/certificate\.pdf/)).toBeInTheDocument();
+    await user.click(saveButton());
+    expect(screen.getAllByText(CERTIFICATION_VALIDATION_MESSAGES.required).length).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(getNameInput()).toHaveValue("");
+    expect(screen.queryByText(/certificate\.pdf/)).not.toBeInTheDocument();
+    expect(screen.queryByText(CERTIFICATION_VALIDATION_MESSAGES.required)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/Archivo de respaldo/)).toHaveValue("");
+  });
+
+  it("restores the initial data on cancel when editing", async () => {
+    const { user } = renderForm({ initialData: SAVED_VALUES });
+
+    await user.clear(getNameInput());
+    await user.type(getNameInput(), "Changed name");
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(getNameInput()).toHaveValue(SAVED_VALUES.name);
   });
 
   it("notifies when editing is cancelled", async () => {

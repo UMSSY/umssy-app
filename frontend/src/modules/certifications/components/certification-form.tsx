@@ -61,7 +61,7 @@ export function CertificationForm({
   };
 
   const handleCancel = () => {
-    setValues(EMPTY_CERTIFICATION_VALUES);
+    setValues(initialData ?? EMPTY_CERTIFICATION_VALUES);
     setErrors({});
     setSelectedFile(null);
     setFileError(undefined);
@@ -165,17 +165,15 @@ export function CertificationForm({
       <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <p className="text-[13px] text-text-secondary">* Campos obligatorios</p>
         <div className="flex gap-3">
-          {isEditing ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
-              disabled={isBusy}
-              onClick={handleCancel}
-            >
-              Cancelar
-            </Button>
-          ) : null}
+          <Button
+            type="button"
+            variant="outline"
+            className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+            disabled={isBusy}
+            onClick={handleCancel}
+          >
+            Cancelar
+          </Button>
           <Button
             type="submit"
             className="h-12 min-w-44 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger"
