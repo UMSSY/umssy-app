@@ -11,6 +11,8 @@ interface InformationStepProps {
   updateField: (field: keyof VacancyConditions, value: string) => void;
   selectModality: (modality: Modality) => void;
   onContinue: () => void;
+  errors?: Partial<Record<keyof VacancyConditions, string>>;
+  validateMapsLink?: () => void;
 }
 
 const MODALITIES = ["Presencial", "Remoto", "Hibrido"];
