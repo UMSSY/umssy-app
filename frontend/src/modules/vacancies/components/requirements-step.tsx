@@ -18,6 +18,7 @@ const AVAILABLE_SKILLS = [
 ];
 
 const MAX_CHARS = 3000;
+const MAX_SKILLS = 10;
 
 export function RequirementsStep({
   conditions,
@@ -57,7 +58,7 @@ export function RequirementsStep({
   const toggleSkill = (skill: string) => {
     if (conditions.skills.includes(skill)) {
       updateField("skills", conditions.skills.filter(s => s !== skill));
-    } else {
+    } else if (conditions.skills.length < MAX_SKILLS) {
       updateField("skills", [...conditions.skills, skill]);
     }
   };
@@ -124,7 +125,8 @@ export function RequirementsStep({
               
               <button 
                  type="button"
-                 className="px-4 py-1.5 rounded-full text-[13px] font-medium border border-dashed border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+                 disabled={conditions.skills.length >= MAX_SKILLS}
+                 className="px-4 py-1.5 rounded-full text-[13px] font-medium border border-dashed border-amber-400 bg-amber-50 text-amber-700 transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-amber-50"
               >
                  + Añadir habilidad
               </button>

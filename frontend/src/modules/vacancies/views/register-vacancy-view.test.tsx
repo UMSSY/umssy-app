@@ -87,7 +87,7 @@ describe('RegisterVacancyView', () => {
       updateField: vi.fn(),
       selectModality: vi.fn(),
       goNext: vi.fn(),
-      goBack,
+      goBack: goBack,
     });
 
     render(<RegisterVacancyView />);

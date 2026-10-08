@@ -73,6 +73,21 @@ describe("RequirementsStep", () => {
     expect(updateFieldMock).toHaveBeenCalledWith("skills", []);
   });
 
+  it("deshabilita añadir habilidades al alcanzar el máximo de 10", () => {
+    const selectedSkills = [
+      "Python", "Java", "Docker", "Git", "Rust",
+      "Assembly", "JavaScript", "TypeScript", "React", "Node.js",
+    ];
+    const updateFieldMock = vi.fn();
+
+    renderStep({ ...mockConditions, skills: selectedSkills }, updateFieldMock);
+
+    expect(screen.getByRole("button", { name: "+ Añadir habilidad" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "SQL" }));
+    expect(updateFieldMock).not.toHaveBeenCalled();
+  });
+
   it("ejecuta la acción para volver al paso anterior", () => {
     const onPrevious = vi.fn();
     renderStep(mockConditions, vi.fn(), onPrevious);
