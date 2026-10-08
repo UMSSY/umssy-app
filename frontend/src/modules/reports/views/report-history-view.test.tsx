@@ -66,7 +66,7 @@ describe("ReportHistoryView", () => {
     });
     expect(screen.getByText("Lista de Usuarios")).toBeDefined();
     expect(screen.getAllByText("Rechazados").length).toBeGreaterThan(0);
-    expect(screen.getByText("2026-09-28 19:45")).toBeDefined();
+    expect(screen.getByRole("cell", { name: "2026-09-28 19:45" })).toBeDefined();
     expect(screen.queryByText(SECOND_PAGE_REPORT)).toBeNull();
     expect(reportsService.getReportHistory).toHaveBeenCalledWith({ page: 1, limit: 10 });
   });

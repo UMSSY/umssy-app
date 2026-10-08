@@ -30,4 +30,29 @@ describe("ReportHistoryTable", () => {
 
     expect(screen.getByRole("cell", { name: label })).toBeDefined();
   });
+
+  it("separa la fecha y la hora en bloques que no se parten por dentro", () => {
+    const report = { ...buildReport("REGISTERED_USERS"), generatedAt: "2026-10-08T00:28:00" };
+
+    render(<ReportHistoryTable reports={[report]} isLoading={false} />);
+
+    const dateCell = screen.getByRole("cell", { name: "2026-10-08 00:28" });
+    const blocks = [...dateCell.querySelectorAll("span.whitespace-nowrap")].map((block) => block.textContent);
+    expect(blocks).toEqual(["2026-10-08", "00:28"]);
+  });
+
+  it("muestra un guion si la fecha no es válida", () => {
+    const report = { ...buildReport("REJECTED_USERS"), generatedAt: "fecha-invalida" };
+
+    render(<ReportHistoryTable reports={[report]} isLoading={false} />);
+
+    expect(screen.getByRole("cell", { name: "-" })).toBeDefined();
+  });
+
+  it("muestra las tres columnas definidas, en orden", () => {
+    render(<ReportHistoryTable reports={[]} isLoading={false} />);
+
+    const headers = screen.getAllByRole("columnheader").map((header) => header.textContent);
+    expect(headers).toEqual(["Nombre del Archivo/Reporte", "Tipo de Reporte", "Fecha y Hora de Generación"]);
+  });
 });
