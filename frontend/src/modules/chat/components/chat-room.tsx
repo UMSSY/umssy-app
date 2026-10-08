@@ -10,6 +10,7 @@ import {
 
 import { Conversation, Message } from '../types/conversation.types';
 import { MessageInputBar } from './message-input-bar';
+import { ChatErrorState } from './chat-error-state';
 import { getInitials } from '../utils/date-formatter';
 import { isContentValidForSend } from '../utils/unicode-counter';
 
@@ -18,12 +19,15 @@ interface ChatRoomProps {
   messages: Message[];
   currentUserId: string;
   onBack: () => void;
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string) => void | Promise<void>;
   isLoadingMessages?: boolean;
   isSending?: boolean;
   hasMoreMessages?: boolean;
   onLoadMoreMessages?: () => void | Promise<unknown>;
   isLoadingMoreMessages?: boolean;
+  isMessagesError?: boolean;
+  isLoadingOlderError?: boolean;
+  onRetryMessages?: () => void;
 }
 
 export function ChatRoom({
@@ -37,8 +41,14 @@ export function ChatRoom({
   hasMoreMessages = false,
   onLoadMoreMessages,
   isLoadingMoreMessages = false,
+  isMessagesError = false,
+  isLoadingOlderError = false,
+  onRetryMessages,
 }: ChatRoomProps) {
   const [inputText, setInputText] = useState('');
+  const [sendError, setSendError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const sendPendingRef = useRef(false);
 
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -92,7 +102,7 @@ export function ChatRoom({
 
     if (!container) return;
 
-    if (container.scrollTop <= 80) {
+    if (container.scrollTop <= 80 && !isMessagesError) {
       void loadOlderMessages();
     }
   };
@@ -168,6 +178,7 @@ export function ChatRoom({
     if (
       !container ||
       messages.length === 0 ||
+      isMessagesError ||
       !hasMoreMessages ||
       isLoadingMoreMessages ||
       isLoadingPreviousPageRef.current
@@ -180,18 +191,29 @@ export function ChatRoom({
     }
   }, [
     messages.length,
+    isMessagesError,
     hasMoreMessages,
     isLoadingMoreMessages,
     loadOlderMessages,
   ]);
 
-  const handleSend = () => {
-    if (!isContentValidForSend(inputText) || isSending) {
+  const handleSend = async () => {
+    if (!isContentValidForSend(inputText) || isSending || sendPendingRef.current || isLoadingMessages || (isMessagesError && messages.length === 0)) {
       return;
     }
 
-    onSendMessage(inputText.trim());
-    setInputText('');
+    sendPendingRef.current = true;
+    setIsSubmitting(true);
+    setSendError(false);
+    try {
+      await onSendMessage(inputText.trim());
+      setInputText('');
+    } catch {
+      setSendError(true);
+    } finally {
+      sendPendingRef.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   const formatMessageTime = (
@@ -294,10 +316,21 @@ export function ChatRoom({
         onScroll={handleMessagesScroll}
         className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-4 md:p-6 space-y-3 bg-[#F6F7F9]"
       >
+        {isMessagesError && !isLoadingMessages && (
+          <ChatErrorState
+            message={messages.length === 0
+              ? 'No pudimos cargar los mensajes de esta conversación.'
+              : 'No pudimos actualizar el historial. Tus mensajes siguen visibles.'}
+            onRetry={isLoadingOlderError
+              ? () => { void loadOlderMessages(); }
+              : onRetryMessages}
+          />
+        )}
         {/* Indicador mientras se cargan mensajes anteriores */}
         {isLoadingMoreMessages && (
           <div
             data-testid="loading-older-messages"
+            role="status"
             className="flex justify-center py-2"
           >
             <span className="text-xs text-[#5B6470]">
@@ -307,7 +340,7 @@ export function ChatRoom({
         )}
 
         {/* Boton alternativo para cargar mensajes anteriores */}
-        {hasMoreMessages && !isLoadingMoreMessages && (
+        {hasMoreMessages && !isLoadingMoreMessages && !isMessagesError && (
           <div className="flex justify-center py-2">
             <button
               type="button"
@@ -335,7 +368,17 @@ export function ChatRoom({
           )}
 
         {/* Estado sin mensajes */}
-        {messages.length === 0 ? (
+        {isLoadingMessages ? (
+          <div role="status" className="space-y-4 py-6">
+            <p className="text-center text-sm text-[#5B6470]">Sala de chat con {conversation.contact.fullName}</p>
+            <p className="text-center text-sm text-[#5B6470]">Cargando mensajes...</p>
+            <div aria-hidden="true" className="space-y-4 motion-safe:animate-pulse">
+              <div className="h-12 w-2/3 rounded-2xl bg-slate-200" />
+              <div className="ml-auto h-16 w-1/2 rounded-2xl bg-slate-200" />
+              <div className="h-12 w-1/2 rounded-2xl bg-slate-200" />
+            </div>
+          </div>
+        ) : messages.length === 0 && !isMessagesError ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6 text-[#5B6470]">
             <div className="w-12 h-12 rounded-full bg-blue-50 text-[#0B1F2E] flex items-center justify-center mx-auto mb-3">
               <svg
@@ -358,9 +401,7 @@ export function ChatRoom({
             </p>
 
             <p className="text-xs text-slate-400 mt-1">
-              {isLoadingMessages
-                ? 'Cargando mensajes...'
-                : 'Envio e historial de mensajes'}
+              Aún no hay mensajes. Envía el primero para comenzar la conversación.
             </p>
           </div>
         ) : (
@@ -423,11 +464,15 @@ export function ChatRoom({
       </div>
 
       {/* Barra para enviar mensajes */}
+      {sendError && (
+        <ChatErrorState message="No se pudo enviar el mensaje. Conservamos tu texto; vuelve a pulsar Enviar para reintentar." />
+      )}
       <MessageInputBar
         value={inputText}
         onChange={setInputText}
         onSend={handleSend}
-        isSending={isSending}
+        isSending={isSending || isSubmitting}
+        disabled={isLoadingMessages || (isMessagesError && messages.length === 0)}
       />
     </div>
   );

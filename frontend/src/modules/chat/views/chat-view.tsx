@@ -31,6 +31,8 @@ export function ChatView() {
     activeFilter,
     searchQuery,
     isLoading,
+    isError,
+    retryConversations,
     setActiveFilter,
     setSearchQuery,
     handleSelectConversation,
@@ -44,6 +46,9 @@ export function ChatView() {
   hasMoreMessages,
   loadMoreMessages,
   isLoadingMoreMessages,
+  isError: isMessagesError,
+  isFetchNextPageError,
+  refetch: retryMessages,
 } = useMessages(selectedId);
 
   const handleBackToList = () => {
@@ -83,7 +88,6 @@ export function ChatView() {
       await queryClient.invalidateQueries({
         queryKey: messagesQueryKey(selectedId),
       });
-    } catch {
     } finally {
       setIsSending(false);
     }
@@ -100,6 +104,8 @@ export function ChatView() {
           conversations={conversations}
           selectedId={selectedId}
           isLoading={isLoading}
+          isError={isError}
+          onRetry={retryConversations}
           hasMore={hasMore}
           activeFilter={activeFilter}
           searchQuery={searchQuery}
@@ -118,6 +124,7 @@ export function ChatView() {
       >
         {selectedConversation ? (
           <ChatRoom
+            key={selectedConversation.id}
             conversation={selectedConversation}
             messages={messages}
             currentUserId={CURRENT_USER_ID}
@@ -128,6 +135,9 @@ export function ChatView() {
             hasMoreMessages={hasMoreMessages}
             onLoadMoreMessages={loadMoreMessages}
             isLoadingMoreMessages={isLoadingMoreMessages}
+            isMessagesError={isMessagesError}
+            isLoadingOlderError={isFetchNextPageError}
+            onRetryMessages={() => { void retryMessages(); }}
           />
         ) : (
           <EmptyChatState
