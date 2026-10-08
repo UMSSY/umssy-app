@@ -9,6 +9,7 @@ export const CERTIFICATION_DOCUMENT_MESSAGES = {
   removeError: "No se pudo quitar el documento. Inténtalo de nuevo.",
   openError: "No se pudo abrir el documento. Inténtalo de nuevo.",
   notFound: "Esta certificación no tiene un documento adjunto.",
+  readError: "No se pudo leer el archivo seleccionado. Inténtalo de nuevo.",
   downloadError: "No se pudo descargar el documento. Inténtalo de nuevo.",
   previewUnavailable: "No hay vista previa disponible para este tipo de archivo.",
 };

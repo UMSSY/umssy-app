@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import type { CertificationFormProps } from "../types/certification-form-props.t
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
 import { getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
 import { trimFormValues } from "@/modules/profile/utils/trim-form-values";
-import { validateCertificateFile } from "../utils/validate-certificate-file";
+import { readCertificateFile } from "../utils/read-certificate-file";
 import { getTodayIsoDate, validateCertification } from "../utils/validate-certification";
 import { CertificationDocumentField } from "./certification-document-field";
 import { FormField } from "@/modules/profile/components/form-field";
@@ -46,7 +46,9 @@ export function CertificationForm({
   const [fileError, setFileError] = useState<string | undefined>();
   const [submitFileError, setSubmitFileError] = useState<string | undefined>();
   const [isRemovingDocument, setIsRemovingDocument] = useState(false);
+  const [isReadingFile, setIsReadingFile] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const selectionIdRef = useRef(0);
   const isEditing = Boolean(initialData);
   const isBusy = isPending || isSubmitting;
   const title = isEditing ? "Editar certificación" : "Agregar certificación";
@@ -58,26 +60,38 @@ export function CertificationForm({
     setErrors((current) => ({ ...current, [field]: undefined }));
   };
 
-  const handleSelectFile = (file: File) => {
-    const error = validateCertificateFile(file);
+  const handleSelectFile = async (file: File) => {
+    const selectionId = ++selectionIdRef.current;
     setSubmitFileError(undefined);
+    setFileError(undefined);
+    setSelectedFile(null);
+    setIsReadingFile(true);
+    const error = await readCertificateFile(file);
+    if (selectionId !== selectionIdRef.current) {
+      return;
+    }
+
+    setIsReadingFile(false);
     if (error) {
       setFileError(error);
-      setSelectedFile(null);
-    } else {
-      setSelectedFile(file);
-      setFileError(undefined);
-      setIsRemovingDocument(false);
+      return;
     }
+
+    setSelectedFile(file);
+    setIsRemovingDocument(false);
   };
 
   const handleClearFile = () => {
+    selectionIdRef.current += 1;
+    setIsReadingFile(false);
     setSelectedFile(null);
     setFileError(undefined);
     setSubmitFileError(undefined);
   };
 
   const handleRemoveCurrentDocument = () => {
+    selectionIdRef.current += 1;
+    setIsReadingFile(false);
     setSelectedFile(null);
     setFileError(undefined);
     setSubmitFileError(undefined);
@@ -85,6 +99,8 @@ export function CertificationForm({
   };
 
   const handleCancel = () => {
+    selectionIdRef.current += 1;
+    setIsReadingFile(false);
     setValues(initialData ?? EMPTY_CERTIFICATION_VALUES);
     setErrors({});
     setSelectedFile(null);
@@ -96,6 +112,10 @@ export function CertificationForm({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isReadingFile) {
+      return;
+    }
+
     const trimmedValues = trimFormValues(values);
     const validationErrors = validateCertification(trimmedValues);
     
@@ -193,6 +213,7 @@ export function CertificationForm({
         isRequired={!isEditing}
         error={fileError ?? submitFileError}
         disabled={isBusy}
+        isReading={isReadingFile}
         onSelectFile={handleSelectFile}
         onClearFile={handleClearFile}
         onRemoveCurrent={handleRemoveCurrentDocument}
@@ -212,7 +233,7 @@ export function CertificationForm({
           <Button
             type="submit"
             className="h-12 min-w-44 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger"
-            disabled={isBusy}
+            disabled={isBusy || isReadingFile}
           >
             {isBusy ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : null}
             {isBusy ? "Guardando..." : "Guardar certificación"}

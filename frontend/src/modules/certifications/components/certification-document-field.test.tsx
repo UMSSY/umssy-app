@@ -150,4 +150,32 @@ describe("CertificationDocumentField", () => {
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
+
+  it("shows a loading indicator and disables the actions while the file is being read", () => {
+    renderField({ selectedFile: CERTIFICATE_PDF, isReading: true });
+
+    expect(screen.getByRole("status")).toHaveTextContent("Leyendo y validando el archivo...");
+    expect(screen.getByRole("button", { name: "Cambiar archivo" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Quitar archivo seleccionado" })).toBeDisabled();
+  });
+
+  it("clears the value of the file input when the file is removed", async () => {
+    const { onClearFile, user } = renderField({ selectedFile: CERTIFICATE_PDF });
+    const input = getFileInput();
+    Object.defineProperty(input, "value", { value: "C:\\fakepath\\certificate.pdf", writable: true });
+
+    await user.click(screen.getByRole("button", { name: "Quitar archivo seleccionado" }));
+
+    expect(input.value).toBe("");
+    expect(onClearFile).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows choosing the same file again after removing it", async () => {
+    const { onSelectFile, user } = renderField();
+
+    await user.upload(getFileInput(), CERTIFICATE_PDF);
+    await user.upload(getFileInput(), CERTIFICATE_PDF);
+
+    expect(onSelectFile).toHaveBeenCalledTimes(2);
+  });
 });

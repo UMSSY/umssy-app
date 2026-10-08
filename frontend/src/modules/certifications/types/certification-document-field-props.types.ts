@@ -7,6 +7,7 @@ export interface CertificationDocumentFieldProps {
   error?: string;
   disabled?: boolean;
   isUploading?: boolean;
+  isReading?: boolean;
   onSelectFile: (file: File) => void;
   onClearFile: () => void;
   onRemoveCurrent?: () => void;

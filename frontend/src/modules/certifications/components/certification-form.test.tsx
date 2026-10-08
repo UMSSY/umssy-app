@@ -1,6 +1,7 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { CERTIFICATION_DOCUMENT_MESSAGES } from "../config/certification-document.config";
 import { CERTIFICATION_VALIDATION_MESSAGES } from "../config/certification-validation.config";
 import type { CertificationFormProps } from "../types/certification-form-props.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
@@ -397,6 +398,87 @@ describe("CertificationForm", () => {
       expect(onSubmit).toHaveBeenCalledTimes(2);
       expect(onSubmit).toHaveBeenLastCalledWith(SAVED_VALUES, { type: "replace", file: PDF });
       expect(screen.queryByText("No se pudo adjuntar el documento. Inténtalo de nuevo.")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("file reading", () => {
+    const PDF = new File(["certificate"], "nuevo.pdf", { type: "application/pdf" });
+
+    function deferFileRead() {
+      let finish: () => void = () => undefined;
+      vi.spyOn(File.prototype, "arrayBuffer").mockImplementation(
+        () =>
+          new Promise<ArrayBuffer>((resolve) => {
+            finish = () => resolve(new ArrayBuffer(0));
+          }),
+      );
+      return { finish: () => finish() };
+    }
+
+    async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
+      await user.type(getNameInput(), "CCNA");
+      await user.type(getOrganizationInput(), "Cisco");
+      fireEvent.change(getIssueDateInput(), { target: { value: "2024-01-15" } });
+    }
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("shows a loading indicator and blocks saving until the file is ready", async () => {
+      const read = deferFileRead();
+      const { onSubmit, user } = renderForm();
+      await fillRequiredFields(user);
+
+      await user.upload(screen.getByLabelText(/Archivo de respaldo/), PDF);
+
+      expect(screen.getByRole("status")).toHaveTextContent("Leyendo y validando el archivo...");
+      expect(saveButton()).toBeDisabled();
+
+      await user.click(saveButton());
+      expect(onSubmit).not.toHaveBeenCalled();
+
+      await act(async () => {
+        read.finish();
+      });
+
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      expect(screen.getByText(/nuevo\.pdf/)).toBeInTheDocument();
+      expect(saveButton()).toBeEnabled();
+    });
+
+    it("shows the read error when the file cannot be read", async () => {
+      vi.spyOn(File.prototype, "arrayBuffer").mockRejectedValue(new Error("unreadable"));
+      const { user } = renderForm();
+
+      await user.upload(screen.getByLabelText(/Archivo de respaldo/), PDF);
+
+      expect(await screen.findByText(CERTIFICATION_DOCUMENT_MESSAGES.readError)).toBeInTheDocument();
+      expect(saveButton()).toBeEnabled();
+    });
+
+    it("ignores a file that finishes reading after the form was cancelled", async () => {
+      const read = deferFileRead();
+      const { user } = renderForm();
+
+      await user.upload(screen.getByLabelText(/Archivo de respaldo/), PDF);
+      await user.click(screen.getByRole("button", { name: "Cancelar" }));
+      await act(async () => {
+        read.finish();
+      });
+
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      expect(screen.queryByText(/nuevo\.pdf/)).not.toBeInTheDocument();
+    });
+
+    it("removes the selected file before submitting", async () => {
+      const { user } = renderForm();
+
+      await user.upload(screen.getByLabelText(/Archivo de respaldo/), PDF);
+      await user.click(await screen.findByRole("button", { name: "Quitar archivo seleccionado" }));
+
+      expect(screen.queryByText(/nuevo\.pdf/)).not.toBeInTheDocument();
+      expect(screen.getByLabelText(/Archivo de respaldo/)).toHaveValue("");
     });
   });
 });

@@ -22,6 +22,7 @@ export function CertificationDocumentField({
   error,
   disabled = false,
   isUploading = false,
+  isReading = false,
   onSelectFile,
   onClearFile,
   onRemoveCurrent,
@@ -38,7 +39,17 @@ export function CertificationDocumentField({
     }
   };
 
+  const handleClearFile = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    onClearFile();
+  };
+
   const getDescription = () => {
+    if (isReading) {
+      return "Leyendo y validando el archivo...";
+    }
     if (selectedFile) {
       return `${selectedFile.name} · ${formatFileSize(selectedFile.size)}`;
     }
@@ -72,8 +83,17 @@ export function CertificationDocumentField({
       />
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-dashed border-border-strong bg-surface-soft px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
-          <FileText aria-hidden="true" className="size-5 shrink-0 text-ink-soft" />
-          <p className="text-[13px] break-all text-text-secondary">{getDescription()}</p>
+          {isReading ? (
+            <Loader2 aria-hidden="true" className="size-5 shrink-0 animate-spin text-ink-soft" />
+          ) : (
+            <FileText aria-hidden="true" className="size-5 shrink-0 text-ink-soft" />
+          )}
+          <p
+            role={isReading ? "status" : undefined}
+            className="text-[13px] break-all text-text-secondary"
+          >
+            {getDescription()}
+          </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           {selectedFile ? (
@@ -82,8 +102,8 @@ export function CertificationDocumentField({
               variant="outline"
               aria-label="Quitar archivo seleccionado"
               className={OUTLINE_BUTTON_CLASS}
-              disabled={disabled}
-              onClick={onClearFile}
+              disabled={disabled || isReading}
+              onClick={handleClearFile}
             >
               <X aria-hidden="true" className="size-4" />
               Quitar
@@ -93,7 +113,7 @@ export function CertificationDocumentField({
             type="button"
             variant="outline"
             className={OUTLINE_BUTTON_CLASS}
-            disabled={disabled}
+            disabled={disabled || isReading}
             onClick={() => fileInputRef.current?.click()}
           >
             {getPickerLabel()}
@@ -104,7 +124,7 @@ export function CertificationDocumentField({
               variant="outline"
               aria-label="Eliminar documento actual"
               className={`${OUTLINE_BUTTON_CLASS} text-accent hover:text-accent`}
-              disabled={disabled}
+              disabled={disabled || isReading}
               onClick={onRemoveCurrent}
             >
               Eliminar
