@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { CertificationCard } from "../components/certification-card";
 import { CertificationDeleteDialog } from "../components/certification-delete-dialog";
 import { CertificationDocumentsPanel } from "../components/certification-documents-panel";
@@ -33,7 +32,6 @@ export function CertificationsView() {
   const [editing, setEditing] = useState<Certification | null>(null);
   const [formVersion, setFormVersion] = useState(0);
   const [pendingDelete, setPendingDelete] = useState<Certification | null>(null);
-  const [fileFeedback, setFileFeedback] = useState<Feedback | null>(null);
   const [focusRequest, setFocusRequest] = useState(0);
 
   const createMutation = useCreateCertification();
@@ -46,7 +44,6 @@ export function CertificationsView() {
   const isSaving = createMutation.isPending || updateMutation.isPending;
   const isBusy = isSaving || certificationDocument.isSaving || certificationDocument.isOpening;
   const visibleFeedback: Feedback | null =
-    fileFeedback ??
     certificationDocument.feedback ??
     createMutation.feedback ??
     updateMutation.feedback ??
@@ -58,13 +55,13 @@ export function CertificationsView() {
     updateMutation.clearFeedback();
     deleteMutation.clearFeedback();
     certificationDocument.clearFeedback();
-    setFileFeedback(null);
   };
 
   const openEditForm = (certification: Certification) => {
     clearFeedback();
     setIsCreating(false);
     setEditing(certification);
+    setFormVersion((version) => version + 1);
   };
 
   const closeForm = () => {
@@ -81,10 +78,9 @@ export function CertificationsView() {
 
   const openCreateForm = () => {
     clearFeedback();
-    if (editing) {
-      closeForm();
-    }
+    setEditing(null);
     setIsCreating(true);
+    setFormVersion((version) => version + 1);
     setFocusRequest((request) => request + 1);
   };
 
@@ -133,37 +129,9 @@ export function CertificationsView() {
     setPendingDelete(null);
   };
 
-  const handleUploadDocument = async (certification: Certification, file: File) => {
-    clearFeedback();
-    const wasSaved = await certificationDocument.applyDocumentChange(certification.id, {
-      type: "replace",
-      file,
-    });
-    if (wasSaved) {
-      await reload();
-    }
-    return wasSaved;
-  };
-
-  const handleRemoveDocument = async (certification: Certification) => {
-    clearFeedback();
-    const wasRemoved = await certificationDocument.applyDocumentChange(certification.id, {
-      type: "remove",
-    });
-    if (wasRemoved) {
-      await reload();
-    }
-    return wasRemoved;
-  };
-
   const handleViewDocument = (certification: Certification) => {
     clearFeedback();
     void certificationDocument.openDocument(certification);
-  };
-
-  const handleInvalidFile = (message: string) => {
-    clearFeedback();
-    setFileFeedback({ type: "error", message });
   };
 
   const renderAddButton = (className: string) => (
@@ -236,28 +204,24 @@ export function CertificationsView() {
               </div>
               {renderList()}
             </section>
-            {isCreating || editing ? (
-              <>
-                <Separator />
-                <CertificationForm
-                  key={editing ? editing.id : `create-${formVersion}`}
-                  initialData={editing ? toFormValues(editing) : undefined}
-                  isPending={isSaving}
-                  onSubmit={handleSubmit}
-                  onCancel={closeForm}
-                />
-              </>
-            ) : null}
           </div>
         </SectionCard>
         <CertificationDocumentsPanel
           certifications={certifications}
           uploadedInfo={certificationDocument.uploadedInfo}
           isBusy={isBusy}
-          onUpload={handleUploadDocument}
-          onRemove={handleRemoveDocument}
+          form={
+            isCreating || editing ? (
+              <CertificationForm
+                key={`${editing ? editing.id : "create"}-${formVersion}`}
+                initialData={editing ? toFormValues(editing) : undefined}
+                isPending={isSaving}
+                onSubmit={handleSubmit}
+                onCancel={closeForm}
+              />
+            ) : null
+          }
           onView={handleViewDocument}
-          onInvalidFile={handleInvalidFile}
         />
       </div>
       <CertificationDeleteDialog

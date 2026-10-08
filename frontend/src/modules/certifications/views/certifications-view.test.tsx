@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CERTIFICATION_DOCUMENT_MESSAGES } from "../config/certification-document.config";
 import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedback.config";
-import { FILE_VALIDATION_MESSAGES } from "@/modules/profile/config/file-validation-messages.config";
 import { certificationsService } from "../services/certifications.service";
 import type { Certification } from "../types/certification.types";
 import { CertificationsView } from "./certifications-view";
@@ -64,13 +63,6 @@ async function fillCertificationForm(user: ReturnType<typeof userEvent.setup>) {
   await user.upload(within(screen.getByRole("form", { name: /certificación/i })).getByLabelText(/Archivo de respaldo/), CERTIFICATE_PDF);
 }
 
-async function linkDocument(user: ReturnType<typeof userEvent.setup>, certificationName: string) {
-  await user.click(screen.getByRole("combobox", { name: /Certificación asociada/ }));
-  await user.click(await screen.findByRole("option", { name: certificationName }));
-  await user.upload(within(screen.getByRole("form", { name: "Vincular documento" })).getByLabelText(/Archivo de respaldo/), CERTIFICATE_PDF);
-  await user.click(screen.getByRole("button", { name: "Guardar documento" }));
-}
-
 describe("CertificationsView", () => {
   beforeEach(() => {
     vi.mocked(certificationsService.getCertifications).mockResolvedValue([SCRUM, AWS]);
@@ -95,9 +87,8 @@ describe("CertificationsView", () => {
     expect(screen.getByText("Tus certificaciones")).toBeInTheDocument();
     expect(screen.getByText("Documentos de respaldo", { selector: "[data-slot=card-title]" })).toBeInTheDocument();
     expect(screen.getByText("CERTIFICACIONES REGISTRADAS")).toBeInTheDocument();
-    expect(screen.getByText("DOCUMENTOS CARGADOS")).toBeInTheDocument();
-    expect(screen.queryByRole("form", { name: "Agregar certificación" })).not.toBeInTheDocument();
-    expect(screen.getByRole("form", { name: "Vincular documento" })).toBeInTheDocument();
+    expect(screen.queryByRole("form")).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
   });
 
   it("renders the certifications from the newest to the oldest", async () => {
@@ -106,15 +97,14 @@ describe("CertificationsView", () => {
     expect(getCertificationNames()).toEqual(["AWS Cloud Practitioner", "Scrum Master"]);
   });
 
-  it("shows the empty state while keeping both forms available - updated", async () => {
+  it("shows the empty state without any form at rest", async () => {
     vi.mocked(certificationsService.getCertifications).mockResolvedValue([]);
     await renderView();
 
     expect(screen.getByText("Aún no has agregado certificaciones.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "+ Agregar certificación" })).toBeInTheDocument();
     expect(screen.queryByRole("list", { name: "Certificaciones" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("form", { name: "Agregar certificación" })).not.toBeInTheDocument();
-    expect(screen.getByRole("form", { name: "Vincular documento" })).toBeInTheDocument();
+    expect(screen.queryByRole("form")).not.toBeInTheDocument();
   });
 
   it("does not show the empty state when certifications exist", async () => {
@@ -150,14 +140,48 @@ describe("CertificationsView", () => {
     expect(nameInput).toHaveFocus();
   });
 
-  it("keeps typed values when adding from the header without editing", async () => {
+  it("opens the unified form at the top of the documents panel", async () => {
+    vi.mocked(certificationsService.getCertifications).mockResolvedValue([{ ...SCRUM, hasDocument: true }, AWS]);
+    const user = await renderView();
+
+    await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
+
+    const form = screen.getByRole("form", { name: "Agregar certificación" });
+    const panel = screen.getByText("Documentos de respaldo", { selector: "[data-slot=card-title]" }).closest("[data-slot=card]");
+    const documentsList = within(panel as HTMLElement).getByRole("list");
+
+    expect(panel).toContainElement(form);
+    expect(form.compareDocumentPosition(documentsList) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("resets the form when adding again while it is already open", async () => {
     const user = await renderView();
 
     await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
     await user.type(screen.getByLabelText(/Nombre de la certificación/), "CCNA");
     await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
 
-    expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("CCNA");
+    expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("");
+  });
+
+  it("resets the form with the data of another certification when editing a different card", async () => {
+    const user = await renderView();
+
+    await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+    await user.type(screen.getByLabelText(/Nombre de la certificación/), " extra");
+    await user.click(screen.getByRole("button", { name: "Editar AWS Cloud Practitioner" }));
+
+    expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("AWS Cloud Practitioner");
+  });
+
+  it("resets the form when editing the same card again", async () => {
+    const user = await renderView();
+
+    await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+    await user.type(screen.getByLabelText(/Nombre de la certificación/), " extra");
+    await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+
+    expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("Scrum Master");
   });
 
   it("shows the load error instead of the empty state and keeps the form available", async () => {
@@ -324,111 +348,36 @@ describe("CertificationsView", () => {
   });
 
   describe("certification documents", () => {
-    it("lists the certifications in the document select", async () => {
-      const user = await renderView();
-
-      await user.click(screen.getByRole("combobox", { name: /Certificación asociada/ }));
-
-      expect(await screen.findByRole("option", { name: "Scrum Master" })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: "AWS Cloud Practitioner" })).toBeInTheDocument();
-    });
-
-    it("uploads a document for the chosen certification and reloads the list", async () => {
-      vi.mocked(certificationsService.uploadDocument).mockResolvedValue(undefined);
-      const user = await renderView();
-
+    it("is not possible to attach a document outside the unified form", async () => {
       vi.mocked(certificationsService.getCertifications).mockResolvedValue([
         { ...SCRUM, hasDocument: true },
         AWS,
       ]);
-      await linkDocument(user, "Scrum Master");
+      await renderView();
 
-      expect(certificationsService.uploadDocument).toHaveBeenCalledWith("scrum", CERTIFICATE_PDF);
-      expect(await screen.findByRole("status")).toHaveTextContent(
-        CERTIFICATION_DOCUMENT_MESSAGES.uploadSuccess,
-      );
-      expect(
-        await screen.findByRole("button", { name: "Ver documento de Scrum Master" }),
-      ).toHaveTextContent("certificate.pdf");
+      expect(screen.queryByRole("combobox", { name: /Certificación asociada/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Guardar documento" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /Reemplazar documento/ })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /Eliminar documento/ })).not.toBeInTheDocument();
     });
 
-    it("reports when the document cannot be uploaded", async () => {
+    it("uploads the document of a new certification and rolls back when the upload fails", async () => {
+      vi.mocked(certificationsService.createCertification).mockResolvedValue(
+        createCertification("ccna", "CCNA", "2024-01-15"),
+      );
       vi.mocked(certificationsService.uploadDocument).mockRejectedValue(new Error("failed"));
       const user = await renderView();
 
-      await linkDocument(user, "Scrum Master");
+      await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
+      await fillCertificationForm(user);
+      await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
         CERTIFICATION_DOCUMENT_MESSAGES.uploadError,
       );
-    });
-
-    it("removes a document after confirming and reloads the list", async () => {
-      const withDocument = { ...SCRUM, hasDocument: true };
-      vi.mocked(certificationsService.getCertifications).mockResolvedValue([withDocument, AWS]);
-      vi.mocked(certificationsService.deleteDocument).mockResolvedValue(undefined);
-      const user = await renderView();
-
-      vi.mocked(certificationsService.getCertifications).mockResolvedValue([SCRUM, AWS]);
-      await user.click(screen.getByRole("button", { name: "Eliminar documento de Scrum Master" }));
-      const dialog = await screen.findByRole("alertdialog");
-      await user.click(within(dialog).getByRole("button", { name: "Eliminar" }));
-
-      expect(certificationsService.deleteDocument).toHaveBeenCalledWith("scrum");
-      expect(await screen.findByRole("status")).toHaveTextContent(
-        CERTIFICATION_DOCUMENT_MESSAGES.removeSuccess,
-      );
-      await waitFor(() =>
-        expect(
-          screen.queryByRole("button", { name: "Ver documento de Scrum Master" }),
-        ).not.toBeInTheDocument(),
-      );
-    });
-
-    it("reports when the document cannot be removed", async () => {
-      vi.mocked(certificationsService.getCertifications).mockResolvedValue([
-        { ...SCRUM, hasDocument: true },
-      ]);
-      vi.mocked(certificationsService.deleteDocument).mockRejectedValue(new Error("failed"));
-      const user = await renderView();
-
-      await user.click(screen.getByRole("button", { name: "Eliminar documento de Scrum Master" }));
-      const dialog = await screen.findByRole("alertdialog");
-      await user.click(within(dialog).getByRole("button", { name: "Eliminar" }));
-
-      expect(await screen.findByRole("alert")).toHaveTextContent(
-        CERTIFICATION_DOCUMENT_MESSAGES.removeError,
-      );
-    });
-
-    it("replaces a document with a new file", async () => {
-      vi.mocked(certificationsService.getCertifications).mockResolvedValue([
-        { ...SCRUM, hasDocument: true },
-      ]);
-      vi.mocked(certificationsService.uploadDocument).mockResolvedValue(undefined);
-      const user = await renderView();
-
-      await user.click(screen.getByRole("button", { name: "Reemplazar documento de Scrum Master" }));
-      await user.upload(screen.getByLabelText("Archivo de reemplazo"), CERTIFICATE_PDF);
-
-      expect(certificationsService.uploadDocument).toHaveBeenCalledWith("scrum", CERTIFICATE_PDF);
-    });
-
-    it("reports an invalid replacement file in the feedback area", async () => {
-      vi.mocked(certificationsService.getCertifications).mockResolvedValue([
-        { ...SCRUM, hasDocument: true },
-      ]);
-      const user = await renderView();
-
-      await user.click(screen.getByRole("button", { name: "Reemplazar documento de Scrum Master" }));
-      fireEvent.change(screen.getByLabelText("Archivo de reemplazo"), {
-        target: { files: [new File(["text"], "notes.txt", { type: "text/plain" })] },
-      });
-
-      expect(await screen.findByRole("alert")).toHaveTextContent(
-        FILE_VALIDATION_MESSAGES.invalidCertificateType,
-      );
-      expect(certificationsService.uploadDocument).not.toHaveBeenCalled();
+      expect(certificationsService.uploadDocument).toHaveBeenCalledWith("ccna", CERTIFICATE_PDF);
+      expect(certificationsService.deleteCertification).toHaveBeenCalledWith("ccna");
+      expect(screen.getByRole("form", { name: "Agregar certificación" })).toBeInTheDocument();
     });
 
     it("opens the attached document", async () => {
