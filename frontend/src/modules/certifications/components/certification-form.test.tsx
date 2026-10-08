@@ -67,6 +67,35 @@ describe("CertificationForm", () => {
     expect(screen.getByRole("button", { name: "Cancelar" })).toHaveAttribute("type", "button");
   });
 
+  it("limits the name to 150 characters and the date to 1950-01-01 or later", () => {
+    renderForm();
+
+    expect(getNameInput()).toHaveAttribute("maxLength", "150");
+    expect(getIssueDateInput()).toHaveAttribute("min", "1950-01-01");
+  });
+
+  it("shows an inline error for a date written by hand before 1950", async () => {
+    const { onSubmit, user } = renderForm({
+      initialData: { ...SAVED_VALUES, issueDate: "1949-12-31" },
+    });
+
+    await user.click(saveButton());
+
+    expect(screen.getByText(CERTIFICATION_VALIDATION_MESSAGES.minDate)).toBeInTheDocument();
+    expect(getIssueDateInput()).toHaveAttribute("aria-invalid", "true");
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("accepts the boundary date 1950-01-01", async () => {
+    const { onSubmit, user } = renderForm({
+      initialData: { ...SAVED_VALUES, issueDate: "1950-01-01" },
+    });
+
+    await user.click(saveButton());
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
   it("fills the inputs with the initial data and shows cancel when editing", () => {
     renderForm({ initialData: SAVED_VALUES });
 

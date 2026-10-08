@@ -8,4 +8,5 @@ export const CERTIFICATION_VALIDATION_MESSAGES = {
   organizationTooLong: `Usa como máximo ${ISSUING_ORGANIZATION_MAX_LENGTH} caracteres.`,
   invalidDate: "Ingresa una fecha válida.",
   futureDate: "La fecha de emisión no puede ser futura.",
+  minDate: "La fecha de emisión no puede ser anterior al 1 de enero de 1950.",
 };

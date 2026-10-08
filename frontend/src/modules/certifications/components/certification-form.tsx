@@ -10,6 +10,8 @@ import type { CertificationFormProps } from "../types/certification-form-props.t
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
 import { getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
 import { trimFormValues } from "@/modules/profile/utils/trim-form-values";
+import { CERTIFICATION_NAME_MAX_LENGTH } from "../config/certification-validation.config";
+import { CERTIFICATION_MIN_ISSUE_DATE } from "../constants/certification-form.constants";
 import { readCertificateFile } from "../utils/read-certificate-file";
 import { getTodayIsoDate, validateCertification } from "../utils/validate-certification";
 import { CertificationDocumentField } from "./certification-document-field";
@@ -158,6 +160,7 @@ export function CertificationForm({
           id="certification-name"
           name="name"
           type="text"
+          maxLength={CERTIFICATION_NAME_MAX_LENGTH}
           placeholder="Ej. AWS Certified Cloud Practitioner"
           value={values.name}
           disabled={isBusy}
@@ -195,6 +198,7 @@ export function CertificationForm({
             id="certification-issueDate"
             name="issueDate"
             type="date"
+            min={CERTIFICATION_MIN_ISSUE_DATE}
             max={getTodayIsoDate()}
             value={values.issueDate}
             disabled={isBusy}

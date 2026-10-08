@@ -140,6 +140,19 @@ describe("validateCertification", () => {
     expect(validateCertification({ ...VALID_VALUES, issueDate: "2026-06-16" })).toEqual({});
   });
 
+  it("rejects an issue date before 1950-01-01 and accepts the boundary", () => {
+    expect(validateCertification({ ...VALID_VALUES, issueDate: "1949-12-31" })).toEqual({
+      issueDate: CERTIFICATION_VALIDATION_MESSAGES.minDate,
+    });
+    expect(validateCertification({ ...VALID_VALUES, issueDate: "1950-01-01" })).toEqual({});
+  });
+
+  it("reports an impossible date before the minimum date", () => {
+    expect(validateCertification({ ...VALID_VALUES, issueDate: "1949-02-30" })).toEqual({
+      issueDate: CERTIFICATION_VALIDATION_MESSAGES.invalidDate,
+    });
+  });
+
   it("rejects a future issue date", () => {
     expect(validateCertification({ ...VALID_VALUES, issueDate: "2026-06-16" })).toEqual({
       issueDate: CERTIFICATION_VALIDATION_MESSAGES.futureDate,

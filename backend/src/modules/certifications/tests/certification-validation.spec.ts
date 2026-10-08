@@ -196,6 +196,51 @@ describe('Certification issue date', () => {
     });
   });
 
+  it('rejects 1949-12-31 and accepts 1950-01-01', () => {
+    const issues = createCertificationSchema.safeParse({
+      ...validBody,
+      issueDate: '1949-12-31',
+    }).error?.issues;
+
+    expect(issues).toHaveLength(1);
+    expect(issues?.[0]).toMatchObject({
+      path: ['issueDate'],
+      message: CERTIFICATION_VALIDATION_MESSAGES.minDate,
+    });
+
+    const accepted = createCertificationSchema.safeParse({
+      ...validBody,
+      issueDate: '1950-01-01',
+    });
+
+    expect(accepted.success).toBe(true);
+    expect(accepted.data?.issueDate.toISOString()).toBe(
+      '1950-01-01T00:00:00.000Z',
+    );
+  });
+
+  it('applies the minimum date when editing', () => {
+    expect(
+      updateCertificationSchema.safeParse({ issueDate: '1949-12-31' }).error
+        ?.issues[0],
+    ).toMatchObject({
+      path: ['issueDate'],
+      message: CERTIFICATION_VALIDATION_MESSAGES.minDate,
+    });
+    expect(
+      updateCertificationSchema.safeParse({ issueDate: '1950-01-01' }).success,
+    ).toBe(true);
+  });
+
+  it('reports the invalid date message instead of the minimum for impossible dates', () => {
+    expect(
+      createCertificationSchema.safeParse({
+        ...validBody,
+        issueDate: '1949-02-30',
+      }).error?.issues[0]?.message,
+    ).toBe(CERTIFICATION_VALIDATION_MESSAGES.invalidDate);
+  });
+
   it('converts a valid date to a Date at midnight UTC', () => {
     const result = createPipe.transform(validBody);
 
