@@ -71,6 +71,19 @@ describe("ReportHistoryView", () => {
     expect(reportsService.getReportHistory).toHaveBeenCalledWith({ page: 1, limit: 10 });
   });
 
+  it("la ruta de navegación identifica la ubicación del historial (CA 35)", () => {
+    render(<ReportHistoryView />);
+
+    const breadcrumb = screen.getByRole("navigation", { name: "Ruta de navegación" });
+    const steps = within(breadcrumb)
+      .getAllByRole("listitem")
+      .map((item) => item.textContent);
+
+    expect(steps).toEqual(["Inicio", "Reportes Analíticos", "Historial de reportes generados"]);
+    expect(within(breadcrumb).getByRole("link", { name: "Inicio" }).getAttribute("href")).toBe("/dashboard");
+    expect(within(breadcrumb).getByText("Historial de reportes generados").getAttribute("aria-current")).toBe("page");
+  });
+
   it("muestra las columnas en el orden definido y una fila independiente por reporte", async () => {
     render(<ReportHistoryView />);
     await waitFor(() => {
