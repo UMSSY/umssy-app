@@ -31,7 +31,7 @@ const REPORTS: GeneratedReport[] = [
   buildReport({
     id: 'c',
     fileName: 'Egresados_2025',
-    reportType: 'GRADUATES',
+    reportType: 'DEGREE_HOLDERS',
     generatedAt: '2025-02-01T10:00:00.000Z',
   }),
 ];
@@ -88,7 +88,7 @@ describe('ReportHistoryService', () => {
       const result = await buildService().getReportHistory(historyQuery());
 
       expect(new Set(result.items.map((report) => report.reportType))).toEqual(
-        new Set(['REGISTERED_USERS', 'REJECTED_USERS', 'GRADUATES']),
+        new Set(['REGISTERED_USERS', 'REJECTED_USERS', 'DEGREE_HOLDERS']),
       );
     });
 
@@ -184,12 +184,12 @@ describe('ReportHistoryService', () => {
       vi.setSystemTime(new Date('2026-10-03T09:00:00.000Z'));
       const first = service.registerGeneratedReport({
         fileName: 'Egresados_Manana',
-        reportType: 'GRADUATES',
+        reportType: 'DEGREE_HOLDERS',
       });
       vi.setSystemTime(new Date('2026-10-03T18:00:00.000Z'));
       const second = service.registerGeneratedReport({
         fileName: 'Egresados_Tarde',
-        reportType: 'GRADUATES',
+        reportType: 'DEGREE_HOLDERS',
       });
 
       const [newest, previous] = (
@@ -208,7 +208,7 @@ describe('ReportHistoryService', () => {
       const inputs = [
         { fileName: 'Lista_Usuarios_A', reportType: 'REGISTERED_USERS' },
         { fileName: 'Rechazados_B', reportType: 'REJECTED_USERS' },
-        { fileName: 'Egresados_C', reportType: 'GRADUATES' },
+        { fileName: 'Egresados_C', reportType: 'DEGREE_HOLDERS' },
       ] as const;
 
       const registered = await Promise.all(
@@ -229,7 +229,7 @@ describe('ReportHistoryService', () => {
     it('no comparte registros entre instancias', async () => {
       buildServiceWithStorage().registerGeneratedReport({
         fileName: 'Temporal',
-        reportType: 'GRADUATES',
+        reportType: 'DEGREE_HOLDERS',
       });
 
       const result =

@@ -2,6 +2,7 @@ import { Controller, Get, Query, StreamableFile } from '@nestjs/common';
 import { ApiProduces, ApiTags } from '@nestjs/swagger';
 import { ResponseMessage } from '../../../common/decorators/response-message.decorator.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
+import { toRegisteredUsersReportType } from '../mappers/generated-report.mapper.js';
 import {
   registeredUsersFiltersSchema,
   registeredUsersQuerySchema,
@@ -53,7 +54,7 @@ export class ReportsController {
     const file = this.reportsService.exportRegisteredUsersCsv(filters);
     this.reportHistoryService.registerGeneratedReport({
       fileName: file.fileName,
-      reportType: 'REGISTERED_USERS',
+      reportType: toRegisteredUsersReportType(filters.userType),
     });
     return toCsvFile(file);
   }

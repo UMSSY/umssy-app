@@ -12,7 +12,11 @@ interface ReportHistoryTableProps {
 
 const REPORT_TYPE_LABELS: Record<ReportType, string> = {
   REGISTERED_USERS: "Lista de Usuarios",
-  GRADUATES: "Egresados",
+  STUDENTS: "Estudiantes",
+  DEGREE_HOLDERS: "Titulados",
+  MENTORS: "Mentores",
+  COMPANIES: "Empresas",
+  ADMINS: "Administradores",
   REJECTED_USERS: "Rechazados",
 };
 
