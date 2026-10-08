@@ -87,11 +87,11 @@ describe('ReportsController', () => {
     });
   });
 
-  it('delega el historial de reportes al service', () => {
+  it('delega el historial de reportes al service', async () => {
     const query = { page: 1, limit: 10 };
     const spy = vi.spyOn(historyService, 'getReportHistory');
 
-    const result = controller.getReportHistory(query);
+    const result = await controller.getReportHistory(query);
 
     expect(spy).toHaveBeenCalledWith(query);
     expect(result).toEqual({

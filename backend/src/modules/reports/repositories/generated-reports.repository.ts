@@ -1,121 +1,98 @@
-import {
-  Injectable,
-  Logger,
-  type OnModuleInit,
-  Optional,
-} from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type {
   GeneratedReport,
   ReportType,
 } from '../types/generated-report.types.js';
 
+// Un mismo reporte se identifica por su nombre y su fecha de generación,
+// tanto en memoria como en la BD.
+function getReportKey(report: GeneratedReport): string {
+  return `${report.fileName}_${report.generatedAt}`;
+}
+
 @Injectable()
-export class GeneratedReportsRepository implements OnModuleInit {
+export class GeneratedReportsRepository {
   private readonly logger = new Logger(GeneratedReportsRepository.name);
-  private reports: GeneratedReport[] = [];
-  private refreshPromise: Promise<void> | null = null;
+  // Reportes registrados en este proceso que todavía no aparecen en la BD.
+  private pendingReports: GeneratedReport[] = [];
+  // Última lectura correcta de la BD.
+  private storedReports: GeneratedReport[] = [];
 
   constructor(@Optional() private readonly prisma?: PrismaService) {}
 
-  async onModuleInit(): Promise<void> {
-    await this.refresh();
+  async findAll(): Promise<readonly GeneratedReport[]> {
+    await this.loadStoredReports();
+
+    // Un reporte pendiente deja de serlo cuando ya aparece en la BD, así no se muestra dos veces.
+    const storedKeys = new Set(this.storedReports.map(getReportKey));
+    this.pendingReports = this.pendingReports.filter(
+      (report) => !storedKeys.has(getReportKey(report)),
+    );
+
+    return [...this.pendingReports, ...this.storedReports];
   }
 
-  async refresh(): Promise<void> {
-    if (!this.prisma) {
-      return;
-    }
+  create(report: GeneratedReport): GeneratedReport {
+    this.pendingReports.unshift(report);
+    void this.persist(report);
 
-    if (this.refreshPromise) {
-      return this.refreshPromise;
-    }
-
-    this.refreshPromise = this.doRefresh().finally(() => {
-      this.refreshPromise = null;
-    });
-
-    return this.refreshPromise;
+    return report;
   }
 
-  private async doRefresh(): Promise<void> {
+  private async loadStoredReports(): Promise<void> {
     if (!this.prisma) {
       return;
     }
 
     try {
       const records = await this.prisma.adminExportHistory.findMany({
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy: { createdAt: 'desc' },
       });
 
-      const dbReports = records.map((record) => ({
+      this.storedReports = records.map((record) => ({
         id: `${record.userId}_${record.createdAt.getTime()}`,
         fileName: record.reportName,
         reportType: record.reportType as ReportType,
         generatedAt: record.createdAt.toISOString(),
       }));
-
-      // Conserva los reportes recién creados que todavía no aparecen en la BD.
-      const now = Date.now();
-      const recentMemory = this.reports.filter(
-        (r) => now - new Date(r.generatedAt).getTime() < 10000,
-      );
-      const dbKeys = new Set(
-        dbReports.map((r) => `${r.fileName}_${r.generatedAt}`),
-      );
-      const pendingRecent = recentMemory.filter(
-        (r) => !dbKeys.has(`${r.fileName}_${r.generatedAt}`),
-      );
-
-      this.reports = [...pendingRecent, ...dbReports];
     } catch (error) {
-      this.logger.error('Error al sincronizar el historial de reportes', error);
+      // Se conserva la última lectura correcta para no vaciar el historial.
+      this.logger.error('Error al leer el historial de reportes', error);
     }
   }
 
-  findAll(): readonly GeneratedReport[] {
-    void this.refresh();
-    return this.reports;
-  }
-
-  create(report: GeneratedReport): GeneratedReport {
-    this.reports.unshift(report);
-
-    const prisma = this.prisma;
-
-    if (prisma) {
-      void (async () => {
-        try {
-          // TODO: registrar al administrador autenticado en vez del primer usuario de la BD.
-          const user = await prisma.user.findFirst();
-          if (user) {
-            await prisma.adminExportHistory.upsert({
-              where: {
-                userId_createdAt: {
-                  userId: user.id,
-                  createdAt: new Date(report.generatedAt),
-                },
-              },
-              update: {
-                reportName: report.fileName,
-                reportType: report.reportType,
-              },
-              create: {
-                userId: user.id,
-                reportName: report.fileName,
-                reportType: report.reportType,
-                createdAt: new Date(report.generatedAt),
-              },
-            });
-          }
-        } catch (error) {
-          this.logger.error('Error al guardar el reporte generado', error);
-        }
-      })();
+  // Si la escritura falla, el reporte sigue pendiente y se muestra desde memoria.
+  private async persist(report: GeneratedReport): Promise<void> {
+    if (!this.prisma) {
+      return;
     }
 
-    return report;
+    try {
+      // TODO: registrar al administrador autenticado en vez del primer usuario de la BD.
+      const user = await this.prisma.user.findFirst();
+
+      if (!user) {
+        this.logger.warn(
+          'No hay usuarios en la BD: el reporte generado no se guardó',
+        );
+        return;
+      }
+
+      const createdAt = new Date(report.generatedAt);
+
+      await this.prisma.adminExportHistory.upsert({
+        where: { userId_createdAt: { userId: user.id, createdAt } },
+        update: { reportName: report.fileName, reportType: report.reportType },
+        create: {
+          userId: user.id,
+          reportName: report.fileName,
+          reportType: report.reportType,
+          createdAt,
+        },
+      });
+    } catch (error) {
+      this.logger.error('Error al guardar el reporte generado', error);
+    }
   }
 }

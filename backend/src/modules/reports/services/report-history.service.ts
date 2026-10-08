@@ -24,10 +24,12 @@ export class ReportHistoryService {
   ) {}
 
   // Historial de reportes generados, del más reciente al más antiguo.
-  getReportHistory(
+  async getReportHistory(
     query: ReportHistoryQuery,
-  ): PaginatedResult<GeneratedReport> {
-    const reports = sortByNewest(this.generatedReportsRepository.findAll());
+  ): Promise<PaginatedResult<GeneratedReport>> {
+    const reports = sortByNewest(
+      await this.generatedReportsRepository.findAll(),
+    );
 
     return paginate(reports, query.page, query.limit);
   }
