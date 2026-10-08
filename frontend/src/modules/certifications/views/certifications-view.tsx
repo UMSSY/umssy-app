@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CertificationCard } from "../components/certification-card";
 import { CertificationDeleteDialog } from "../components/certification-delete-dialog";
@@ -34,6 +34,7 @@ export function CertificationsView() {
   const [isCreating, setIsCreating] = useState(false);
   const [editing, setEditing] = useState<Certification | null>(null);
   const [formVersion, setFormVersion] = useState(0);
+  const formVersionRef = useRef(0);
   const [pendingDelete, setPendingDelete] = useState<Certification | null>(null);
   const [focusRequest, setFocusRequest] = useState(0);
 
@@ -48,8 +49,7 @@ export function CertificationsView() {
     },
   });
 
-  const isSaving = certificationDocument.isSaving;
-  const isBusy = isSaving || certificationDocument.isOpening;
+  const isOpeningDocument = certificationDocument.isOpening;
   const visibleFeedback: Feedback | null =
     saveCertification.feedback ??
     certificationDocument.feedback ??
@@ -62,19 +62,24 @@ export function CertificationsView() {
     certificationDocument.clearFeedback();
   };
 
+  const startNewFormVersion = () => {
+    formVersionRef.current += 1;
+    setFormVersion(formVersionRef.current);
+  };
+
   const openEditForm = (certification: Certification) => {
     clearFeedback();
     saveCertification.reset();
     setIsCreating(false);
     setEditing(certification);
-    setFormVersion((version) => version + 1);
+    startNewFormVersion();
   };
 
   const closeForm = () => {
     saveCertification.reset();
     setEditing(null);
     setIsCreating(false);
-    setFormVersion((version) => version + 1);
+    startNewFormVersion();
   };
 
   useEffect(() => {
@@ -88,7 +93,7 @@ export function CertificationsView() {
     saveCertification.reset();
     setEditing(null);
     setIsCreating(true);
-    setFormVersion((version) => version + 1);
+    startNewFormVersion();
     setFocusRequest((request) => request + 1);
   };
 
@@ -96,12 +101,15 @@ export function CertificationsView() {
     values: CreateCertificationDto,
     change: CertificationDocumentChange,
   ): Promise<string | null> => {
+    const submittedVersion = formVersionRef.current;
     const result = await saveCertification.save(editing?.id ?? null, values, change);
     if (result.status === "failed") {
       return result.fileError;
     }
 
-    closeForm();
+    if (submittedVersion === formVersionRef.current) {
+      closeForm();
+    }
     return null;
   };
 
@@ -134,7 +142,6 @@ export function CertificationsView() {
     <Button
       type="button"
       className={className}
-      disabled={isBusy}
       onClick={openCreateForm}
     >
       + Agregar certificación
@@ -163,7 +170,7 @@ export function CertificationsView() {
           <li key={certification.id}>
             <CertificationCard
               certification={certification}
-              isBusy={deleteMutation.isDeleting || isBusy}
+              isBusy={deleteMutation.isDeleting || isOpeningDocument}
               onEdit={openEditForm}
               onDelete={openDeleteDialog}
               onViewDocument={handleViewDocument}
@@ -206,7 +213,7 @@ export function CertificationsView() {
         <CertificationDocumentsPanel
           certifications={certifications}
           uploadedInfo={certificationDocument.uploadedInfo}
-          isBusy={isBusy}
+          isBusy={isOpeningDocument}
           form={
             isCreating || editing ? (
               <CertificationForm

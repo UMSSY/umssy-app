@@ -68,7 +68,6 @@ describe("useCertificationDocument", () => {
 
       expect(outcome).toEqual({ ok: true });
       expect(certificationsService.uploadDocument).toHaveBeenCalledWith("certification-1", DOCUMENT);
-      expect(result.current.isSaving).toBe(false);
       expect(result.current.feedback).toEqual({
         type: "success",
         message: CERTIFICATION_DOCUMENT_MESSAGES.uploadSuccess,
@@ -89,7 +88,6 @@ describe("useCertificationDocument", () => {
 
       expect(outcome).toEqual({ ok: false, message: CERTIFICATION_DOCUMENT_MESSAGES.uploadError });
       expect(result.current.feedback).toBeNull();
-      expect(result.current.isSaving).toBe(false);
     });
 
     it("removes the document and reports the success", async () => {

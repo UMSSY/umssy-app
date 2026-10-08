@@ -296,6 +296,81 @@ describe("CertificationsView", () => {
     expect(screen.getByRole("form", { name: "Editar certificación" })).toBeInTheDocument();
   });
 
+  describe("submitting state isolation", () => {
+    it("shows the spinner only on the save button and leaves the rest of the view enabled", async () => {
+      const saving = createDeferred<Certification>();
+      vi.mocked(certificationsService.getCertifications).mockResolvedValue([
+        { ...SCRUM, hasDocument: true },
+        AWS,
+      ]);
+      vi.mocked(certificationsService.updateCertification).mockReturnValue(saving.promise);
+      const user = await renderView();
+
+      await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+      await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
+
+      const form = screen.getByRole("form", { name: "Editar certificación" });
+      expect(within(form).getByRole("button", { name: "Guardando..." })).toBeDisabled();
+      expect(within(form).getByRole("button", { name: "Cancelar" })).toBeDisabled();
+      expect(document.querySelectorAll(".animate-spin")).toHaveLength(1);
+      expect(form.querySelectorAll(".animate-spin")).toHaveLength(1);
+
+      expect(screen.getAllByRole("button", { name: "+ Agregar certificación" })[0]).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Editar Scrum Master" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Editar AWS Cloud Practitioner" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Eliminar Scrum Master" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Previsualizar documento de Scrum Master" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Ver documento de Scrum Master" })).toBeEnabled();
+
+      await act(async () => {
+        saving.resolve({ ...SCRUM, hasDocument: true });
+        await saving.promise;
+      });
+    });
+
+    it("keeps the rest of the view enabled while the document of a new certification is uploading", async () => {
+      const uploading = createDeferred<void>();
+      vi.mocked(certificationsService.createCertification).mockResolvedValue(
+        createCertification("ccna", "CCNA", "2024-01-15"),
+      );
+      vi.mocked(certificationsService.uploadDocument).mockReturnValue(uploading.promise);
+      const user = await renderView();
+
+      await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
+      await fillCertificationForm(user);
+      await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
+
+      expect(await screen.findByRole("button", { name: "Guardando..." })).toBeDisabled();
+      expect(document.querySelectorAll(".animate-spin")).toHaveLength(1);
+      expect(screen.getByRole("button", { name: "+ Agregar certificación" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Editar Scrum Master" })).toBeEnabled();
+
+      await act(async () => {
+        uploading.resolve();
+        await uploading.promise;
+      });
+    });
+
+    it("does not close a different form opened while the previous one was saving", async () => {
+      const saving = createDeferred<Certification>();
+      vi.mocked(certificationsService.updateCertification).mockReturnValue(saving.promise);
+      const user = await renderView();
+
+      await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+      await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
+      await user.click(screen.getByRole("button", { name: "Editar AWS Cloud Practitioner" }));
+
+      await act(async () => {
+        saving.resolve(SCRUM);
+        await saving.promise;
+      });
+
+      expect(screen.getByRole("form", { name: "Editar certificación" })).toBeInTheDocument();
+      expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("AWS Cloud Practitioner");
+      expect(screen.getByRole("button", { name: "Guardar certificación" })).toBeEnabled();
+    });
+  });
+
   it("opens the delete dialog with the certification name and cancels without deleting", async () => {
     const user = await renderView();
 

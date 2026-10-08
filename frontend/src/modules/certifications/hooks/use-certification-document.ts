@@ -17,7 +17,6 @@ import { getTodayIsoDate } from "../utils/validate-certification";
 const STORAGE_KEY = "certification-documents";
 
 export function useCertificationDocument() {
-  const [isSaving, setIsSaving] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [uploadedInfo, setUploadedInfo] = useState<Record<string, UploadedDocumentInfo>>({});
@@ -52,7 +51,6 @@ export function useCertificationDocument() {
     }
 
     const isReplacing = change.type === "replace";
-    setIsSaving(true);
     setFeedback(null);
     try {
       if (isReplacing && change.file) {
@@ -91,8 +89,6 @@ export function useCertificationDocument() {
           ? CERTIFICATION_DOCUMENT_MESSAGES.uploadError
           : CERTIFICATION_DOCUMENT_MESSAGES.removeError,
       };
-    } finally {
-      setIsSaving(false);
     }
   }
 
@@ -143,7 +139,6 @@ export function useCertificationDocument() {
     closeDocument,
     preview,
     uploadedInfo,
-    isSaving,
     isOpening,
     feedback,
     clearFeedback,

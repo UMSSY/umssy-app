@@ -16,12 +16,10 @@ const SAVED_VALUES: CreateCertificationDto = {
 function renderForm({
   initialData,
   currentDocumentName,
-  isPending = false,
   onSubmit = vi.fn().mockResolvedValue(null),
 }: {
   initialData?: CreateCertificationDto;
   currentDocumentName?: string;
-  isPending?: boolean;
   onSubmit?: CertificationFormProps["onSubmit"];
 } = {}) {
   const onCancel = vi.fn();
@@ -29,7 +27,6 @@ function renderForm({
     <CertificationForm
       initialData={initialData}
       currentDocumentName={currentDocumentName}
-      isPending={isPending}
       onSubmit={onSubmit}
       onCancel={onCancel}
     />,
@@ -226,13 +223,6 @@ describe("CertificationForm", () => {
     resolveSubmit();
 
     expect(await screen.findByRole("button", { name: "Guardar certificación" })).toBeEnabled();
-  });
-
-  it("disables the submit button while the mutation is pending", () => {
-    renderForm({ initialData: SAVED_VALUES, isPending: true });
-
-    expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
   });
 
   it("shows no spinner on cancel while the submit is in progress", async () => {

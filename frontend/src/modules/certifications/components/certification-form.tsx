@@ -34,7 +34,6 @@ function getDocumentChange(
 export function CertificationForm({
   initialData,
   currentDocumentName,
-  isPending = false,
   onSubmit,
   onCancel,
 }: CertificationFormProps) {
@@ -50,7 +49,7 @@ export function CertificationForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const selectionIdRef = useRef(0);
   const isEditing = Boolean(initialData);
-  const isBusy = isPending || isSubmitting;
+  const isBusy = isSubmitting;
   const title = isEditing ? "Editar certificación" : "Agregar certificación";
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
