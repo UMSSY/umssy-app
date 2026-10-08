@@ -1,14 +1,19 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import type {
-  GeneratedReport,
-  ReportType,
+import {
+  REPORT_TYPES,
+  type GeneratedReport,
+  type ReportType,
 } from '../types/generated-report.types.js';
 
 // Un mismo reporte se identifica por su nombre y su fecha de generación,
 // tanto en memoria como en la BD.
 function getReportKey(report: GeneratedReport): string {
   return `${report.fileName}_${report.generatedAt}`;
+}
+
+function isReportType(value: string): value is ReportType {
+  return (REPORT_TYPES as readonly string[]).includes(value);
 }
 
 @Injectable()
@@ -50,12 +55,21 @@ export class GeneratedReportsRepository {
         orderBy: { createdAt: 'desc' },
       });
 
-      this.storedReports = records.map((record) => ({
-        id: `${record.userId}_${record.createdAt.getTime()}`,
-        fileName: record.reportName,
-        reportType: record.reportType as ReportType,
-        generatedAt: record.createdAt.toISOString(),
-      }));
+      // Solo se muestran reportes que la plataforma sabe generar (CA 25):
+      // un registro con un tipo desconocido no corresponde a ninguna exportación.
+      this.storedReports = records.flatMap(
+        ({ userId, createdAt, reportName, reportType }) =>
+          isReportType(reportType)
+            ? [
+                {
+                  id: `${userId}_${createdAt.getTime()}`,
+                  fileName: reportName,
+                  reportType,
+                  generatedAt: createdAt.toISOString(),
+                },
+              ]
+            : [],
+      );
     } catch (error) {
       // Se conserva la última lectura correcta para no vaciar el historial.
       this.logger.error('Error al leer el historial de reportes', error);

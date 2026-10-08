@@ -195,4 +195,73 @@ describe('GeneratedReportsRepository', () => {
       expect(await repository.findAll()).toEqual([report]);
     });
   });
+
+  describe('criterios de aceptación', () => {
+    it('muestra únicamente reportes de tipos que la plataforma genera (CA 25)', async () => {
+      const { repository } = buildPrisma([
+        buildRecord(),
+        buildRecord({
+          createdAt: new Date('2026-10-05T12:00:00.000Z'),
+          reportName: 'registro-ajeno.csv',
+          reportType: 'GRADUATES',
+        }),
+      ]);
+
+      const reports = await repository.findAll();
+
+      expect(reports.map((report) => report.fileName)).toEqual([
+        'usuarios-registrados-todos.csv',
+      ]);
+    });
+
+    it('conserva la información al volver a consultar el historial (CA 29)', async () => {
+      const { repository } = buildPrisma([buildRecord()]);
+
+      const first = await repository.findAll();
+      const second = await repository.findAll();
+
+      expect(second).toEqual(first);
+      expect(second).toHaveLength(1);
+    });
+
+    it('mantiene como registros diferenciados los reportes del mismo tipo (CA 41)', async () => {
+      const { repository } = buildPrisma([
+        buildRecord({ createdAt: new Date('2026-10-05T11:50:04.560Z') }),
+        buildRecord({ createdAt: new Date('2026-10-05T11:50:05.120Z') }),
+      ]);
+
+      const reports = await repository.findAll();
+
+      expect(reports).toHaveLength(2);
+      expect(new Set(reports.map((report) => report.id)).size).toBe(2);
+      expect(reports.map((report) => report.reportType)).toEqual([
+        'REGISTERED_USERS',
+        'REGISTERED_USERS',
+      ]);
+    });
+
+    it('no duplica registros al actualizar el historial varias veces (CA 43)', async () => {
+      const report = buildReport();
+      const { prisma, repository } = buildPrisma([buildRecord()]);
+
+      repository.create(report);
+      await repository.findAll();
+      prisma.adminExportHistory.findMany.mockResolvedValue([
+        buildRecord({
+          createdAt: new Date(report.generatedAt),
+          reportName: report.fileName,
+          reportType: report.reportType,
+        }),
+        buildRecord(),
+      ]);
+
+      const reads = [
+        await repository.findAll(),
+        await repository.findAll(),
+        await repository.findAll(),
+      ];
+
+      reads.forEach((reports) => expect(reports).toHaveLength(2));
+    });
+  });
 });
