@@ -6,15 +6,17 @@ import { CertificationCard } from "../components/certification-card";
 import { CertificationDeleteDialog } from "../components/certification-delete-dialog";
 import { CertificationDocumentsPanel } from "../components/certification-documents-panel";
 import { CertificationForm } from "../components/certification-form";
+import { DEFAULT_DOCUMENT_TITLE } from "../constants/certification-form.constants";
 import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
 import { ProfilePageLayout } from "@/modules/profile/components/profile-page-layout";
 import { SectionCard } from "@/modules/profile/components/section-card";
 import { TrajectorySteps } from "@/modules/profile/components/trajectory-steps";
-import { useCreateCertification, useUpdateCertification } from "../hooks/use-certification-mutations";
 import { useCertificationDocument } from "../hooks/use-certification-document";
 import { useCertifications } from "../hooks/use-certifications";
 import { useDeleteCertification } from "../hooks/use-delete-certification";
+import { useSaveCertification } from "../hooks/use-save-certification";
 import type { Certification } from "../types/certification.types";
+import type { CertificationDocumentChange } from "../types/certification-document-change.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
 import type { Feedback } from "@/modules/profile/types/feedback.types";
 
@@ -34,37 +36,41 @@ export function CertificationsView() {
   const [pendingDelete, setPendingDelete] = useState<Certification | null>(null);
   const [focusRequest, setFocusRequest] = useState(0);
 
-  const createMutation = useCreateCertification();
-  const updateMutation = useUpdateCertification();
   const deleteMutation = useDeleteCertification(() => {
     void reload();
   });
   const certificationDocument = useCertificationDocument();
+  const saveCertification = useSaveCertification({
+    applyDocumentChange: certificationDocument.applyDocumentChange,
+    onPersisted: () => {
+      void reload();
+    },
+  });
 
-  const isSaving = createMutation.isPending || updateMutation.isPending;
-  const isBusy = isSaving || certificationDocument.isSaving || certificationDocument.isOpening;
+  const isSaving = certificationDocument.isSaving;
+  const isBusy = isSaving || certificationDocument.isOpening;
   const visibleFeedback: Feedback | null =
+    saveCertification.feedback ??
     certificationDocument.feedback ??
-    createMutation.feedback ??
-    updateMutation.feedback ??
     deleteMutation.feedback ??
     (error ? { type: "error", message: error } : null);
 
   const clearFeedback = () => {
-    createMutation.clearFeedback();
-    updateMutation.clearFeedback();
+    saveCertification.clearFeedback();
     deleteMutation.clearFeedback();
     certificationDocument.clearFeedback();
   };
 
   const openEditForm = (certification: Certification) => {
     clearFeedback();
+    saveCertification.reset();
     setIsCreating(false);
     setEditing(certification);
     setFormVersion((version) => version + 1);
   };
 
   const closeForm = () => {
+    saveCertification.reset();
     setEditing(null);
     setIsCreating(false);
     setFormVersion((version) => version + 1);
@@ -78,42 +84,24 @@ export function CertificationsView() {
 
   const openCreateForm = () => {
     clearFeedback();
+    saveCertification.reset();
     setEditing(null);
     setIsCreating(true);
     setFormVersion((version) => version + 1);
     setFocusRequest((request) => request + 1);
   };
 
-  const handleSubmit = async (values: CreateCertificationDto, file: File | null) => {
-    if (editing) {
-      const savedCertification = await updateMutation.mutate({ id: editing.id, data: values });
-      if (savedCertification) {
-        closeForm();
-        void reload();
-      }
-      return;
-    }
-
-    const savedCertification = await createMutation.mutate(values);
-    if (!savedCertification) {
-      return;
-    }
-
-    if (file) {
-      const wasSaved = await certificationDocument.applyDocumentChange(savedCertification.id, {
-        type: "replace",
-        file,
-      });
-
-      if (!wasSaved) {
-        await deleteMutation.deleteCertification(savedCertification);
-        return;
-      }
-      certificationDocument.clearFeedback();
+  const handleSubmit = async (
+    values: CreateCertificationDto,
+    change: CertificationDocumentChange,
+  ): Promise<string | null> => {
+    const result = await saveCertification.save(editing?.id ?? null, values, change);
+    if (result.status === "failed") {
+      return result.fileError;
     }
 
     closeForm();
-    void reload();
+    return null;
   };
 
   const openDeleteDialog = (certification: Certification) => {
@@ -132,6 +120,13 @@ export function CertificationsView() {
   const handleViewDocument = (certification: Certification) => {
     clearFeedback();
     void certificationDocument.openDocument(certification);
+  };
+
+  const getCurrentDocumentName = (certification: Certification | null) => {
+    if (!certification?.hasDocument) {
+      return undefined;
+    }
+    return certificationDocument.uploadedInfo[certification.id]?.fileName ?? DEFAULT_DOCUMENT_TITLE;
   };
 
   const renderAddButton = (className: string) => (
@@ -216,7 +211,7 @@ export function CertificationsView() {
               <CertificationForm
                 key={`${editing ? editing.id : "create"}-${formVersion}`}
                 initialData={editing ? toFormValues(editing) : undefined}
-                isPending={isSaving}
+                currentDocumentName={getCurrentDocumentName(editing)}
                 onSubmit={handleSubmit}
                 onCancel={closeForm}
               />

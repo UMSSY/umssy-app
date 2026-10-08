@@ -14,10 +14,12 @@ const SAVED_VALUES: CreateCertificationDto = {
 
 function renderForm({
   initialData,
+  currentDocumentName,
   isPending = false,
-  onSubmit = vi.fn(),
+  onSubmit = vi.fn().mockResolvedValue(null),
 }: {
   initialData?: CreateCertificationDto;
+  currentDocumentName?: string;
   isPending?: boolean;
   onSubmit?: CertificationFormProps["onSubmit"];
 } = {}) {
@@ -25,6 +27,7 @@ function renderForm({
   render(
     <CertificationForm
       initialData={initialData}
+      currentDocumentName={currentDocumentName}
       isPending={isPending}
       onSubmit={onSubmit}
       onCancel={onCancel}
@@ -156,7 +159,10 @@ describe("CertificationForm", () => {
     await user.upload(fileInputs[0], new File(["certificate"], "certificate.pdf", { type: "application/pdf" }));
     await user.click(saveButton());
 
-    expect(onSubmit).toHaveBeenCalledWith({ name, issuingOrganization, issueDate: "2025-04-20" }, expect.any(File));
+    expect(onSubmit).toHaveBeenCalledWith(
+      { name, issuingOrganization, issueDate: "2025-04-20" },
+      { type: "replace", file: expect.any(File) },
+    );
   });
 
   it("shows an inline error for a future issue date", async () => {
@@ -190,19 +196,22 @@ describe("CertificationForm", () => {
     await user.upload(fileInputs[0], new File(["certificate"], "certificate.pdf", { type: "application/pdf" }));
     await user.click(saveButton());
 
-    expect(onSubmit).toHaveBeenCalledWith({
-      name: "Scrum Master",
-      issuingOrganization: "Scrum Alliance",
-      issueDate: "2025-04-20",
-    }, expect.any(File));
+    expect(onSubmit).toHaveBeenCalledWith(
+      {
+        name: "Scrum Master",
+        issuingOrganization: "Scrum Alliance",
+        issueDate: "2025-04-20",
+      },
+      { type: "replace", file: expect.any(File) },
+    );
   });
 
   it("disables the inputs and buttons while the submit is in progress", async () => {
     let resolveSubmit: () => void = () => undefined;
     const onSubmit = vi.fn(
       () =>
-        new Promise<void>((resolve) => {
-          resolveSubmit = resolve;
+        new Promise<null>((resolve) => {
+          resolveSubmit = () => resolve(null);
         }),
     );
     const { user } = renderForm({ initialData: SAVED_VALUES, onSubmit });
@@ -226,7 +235,7 @@ describe("CertificationForm", () => {
   });
 
   it("shows no spinner on cancel while the submit is in progress", async () => {
-    const onSubmit = vi.fn(() => new Promise<void>(() => undefined));
+    const onSubmit = vi.fn(() => new Promise<null>(() => undefined));
     const { user } = renderForm({ initialData: SAVED_VALUES, onSubmit });
 
     await user.click(saveButton());
@@ -277,5 +286,117 @@ describe("CertificationForm", () => {
 
     expect(onCancel).toHaveBeenCalledTimes(1);
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  describe("document management when editing", () => {
+    const PDF = new File(["certificate"], "nuevo.pdf", { type: "application/pdf" });
+
+    it("shows the current document with replace and remove actions", () => {
+      renderForm({ initialData: SAVED_VALUES, currentDocumentName: "titulo.pdf" });
+
+      expect(screen.getByText("titulo.pdf")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Reemplazar" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Eliminar documento actual" })).toBeInTheDocument();
+    });
+
+    it("keeps the document when nothing is changed", async () => {
+      const { onSubmit, user } = renderForm({ initialData: SAVED_VALUES, currentDocumentName: "titulo.pdf" });
+
+      await user.click(saveButton());
+
+      expect(onSubmit).toHaveBeenCalledWith(SAVED_VALUES, { type: "keep" });
+    });
+
+    it("does not require a document when editing a certification without one", async () => {
+      const { onSubmit, user } = renderForm({ initialData: SAVED_VALUES });
+
+      await user.click(saveButton());
+
+      expect(onSubmit).toHaveBeenCalledWith(SAVED_VALUES, { type: "keep" });
+    });
+
+    it("marks the document for removal without calling the api until saving", async () => {
+      const { onSubmit, user } = renderForm({ initialData: SAVED_VALUES, currentDocumentName: "titulo.pdf" });
+
+      await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
+
+      expect(onSubmit).not.toHaveBeenCalled();
+      expect(screen.getByText("El documento actual se eliminará al guardar.")).toBeInTheDocument();
+
+      await user.click(saveButton());
+
+      expect(onSubmit).toHaveBeenCalledWith(SAVED_VALUES, { type: "remove" });
+    });
+
+    it("submits the new file as a replacement", async () => {
+      const { onSubmit, user } = renderForm({ initialData: SAVED_VALUES, currentDocumentName: "titulo.pdf" });
+
+      await user.upload(screen.getByLabelText(/Archivo de respaldo/), PDF);
+      await user.click(saveButton());
+
+      expect(onSubmit).toHaveBeenCalledWith(SAVED_VALUES, { type: "replace", file: PDF });
+    });
+
+    it("drops the removal mark when a new file is chosen", async () => {
+      const { onSubmit, user } = renderForm({ initialData: SAVED_VALUES, currentDocumentName: "titulo.pdf" });
+
+      await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
+      await user.upload(screen.getByLabelText(/Archivo de respaldo/), PDF);
+
+      expect(screen.queryByText("El documento actual se eliminará al guardar.")).not.toBeInTheDocument();
+
+      await user.click(saveButton());
+
+      expect(onSubmit).toHaveBeenCalledWith(SAVED_VALUES, { type: "replace", file: PDF });
+    });
+
+    it("drops the selected file when the document is marked for removal", async () => {
+      const { onSubmit, user } = renderForm({ initialData: SAVED_VALUES, currentDocumentName: "titulo.pdf" });
+
+      await user.upload(screen.getByLabelText(/Archivo de respaldo/), PDF);
+      await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
+
+      expect(screen.queryByText(/nuevo\.pdf/)).not.toBeInTheDocument();
+
+      await user.click(saveButton());
+
+      expect(onSubmit).toHaveBeenCalledWith(SAVED_VALUES, { type: "remove" });
+    });
+
+    it("discards the new file and the removal mark on cancel", async () => {
+      const { onSubmit, onCancel, user } = renderForm({
+        initialData: SAVED_VALUES,
+        currentDocumentName: "titulo.pdf",
+      });
+
+      await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
+      await user.click(screen.getByRole("button", { name: "Cancelar" }));
+
+      expect(onCancel).toHaveBeenCalledTimes(1);
+      expect(onSubmit).not.toHaveBeenCalled();
+      expect(screen.queryByText("El documento actual se eliminará al guardar.")).not.toBeInTheDocument();
+      expect(screen.getByText("titulo.pdf")).toBeInTheDocument();
+    });
+
+    it("shows the failure inline, keeps the data and lets the user retry", async () => {
+      const onSubmit = vi
+        .fn()
+        .mockResolvedValueOnce("No se pudo adjuntar el documento. Inténtalo de nuevo.")
+        .mockResolvedValueOnce(null);
+      const { user } = renderForm({ initialData: SAVED_VALUES, currentDocumentName: "titulo.pdf", onSubmit });
+
+      await user.upload(screen.getByLabelText(/Archivo de respaldo/), PDF);
+      await user.click(saveButton());
+
+      expect(await screen.findByText("No se pudo adjuntar el documento. Inténtalo de nuevo.")).toBeInTheDocument();
+      expect(getNameInput()).toHaveValue(SAVED_VALUES.name);
+      expect(screen.getByText(/nuevo\.pdf/)).toBeInTheDocument();
+
+      await user.click(saveButton());
+
+      expect(onSubmit).toHaveBeenCalledTimes(2);
+      expect(onSubmit).toHaveBeenLastCalledWith(SAVED_VALUES, { type: "replace", file: PDF });
+      expect(screen.queryByText("No se pudo adjuntar el documento. Inténtalo de nuevo.")).not.toBeInTheDocument();
+    });
   });
 });

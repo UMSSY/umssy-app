@@ -7,6 +7,7 @@ import {
 } from "../config/certification-document.config";
 import { certificationsService } from "../services/certifications.service";
 import type { CertificationDocumentChange } from "../types/certification-document-change.types";
+import type { CertificationDocumentResult } from "../types/certification-document-result.types";
 import type { Certification } from "../types/certification.types";
 import type { Feedback } from "@/modules/profile/types/feedback.types";
 import type { UploadedDocumentInfo } from "@/modules/profile/types/uploaded-document-info.types";
@@ -35,9 +36,9 @@ export function useCertificationDocument() {
   async function applyDocumentChange(
     certificationId: string,
     change: CertificationDocumentChange,
-  ): Promise<boolean> {
+  ): Promise<CertificationDocumentResult> {
     if (change.type === "keep") {
-      return true;
+      return { ok: true };
     }
 
     const isReplacing = change.type === "replace";
@@ -72,15 +73,14 @@ export function useCertificationDocument() {
           ? CERTIFICATION_DOCUMENT_MESSAGES.uploadSuccess
           : CERTIFICATION_DOCUMENT_MESSAGES.removeSuccess,
       });
-      return true;
+      return { ok: true };
     } catch {
-      setFeedback({
-        type: "error",
+      return {
+        ok: false,
         message: isReplacing
           ? CERTIFICATION_DOCUMENT_MESSAGES.uploadError
           : CERTIFICATION_DOCUMENT_MESSAGES.removeError,
-      });
-      return false;
+      };
     } finally {
       setIsSaving(false);
     }

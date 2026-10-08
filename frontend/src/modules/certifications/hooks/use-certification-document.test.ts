@@ -5,6 +5,7 @@ import {
   DOCUMENT_URL_LIFETIME_MS,
 } from "../config/certification-document.config";
 import { certificationsService } from "../services/certifications.service";
+import type { CertificationDocumentResult } from "../types/certification-document-result.types";
 import type { Certification } from "../types/certification.types";
 import { useCertificationDocument } from "./use-certification-document";
 
@@ -49,12 +50,12 @@ describe("useCertificationDocument", () => {
     it("does nothing when the document is kept", async () => {
       const { result } = renderHook(() => useCertificationDocument());
 
-      let isApplied = false;
+      let outcome: CertificationDocumentResult = { ok: false, message: "" };
       await act(async () => {
-        isApplied = await result.current.applyDocumentChange("certification-1", { type: "keep" });
+        outcome = await result.current.applyDocumentChange("certification-1", { type: "keep" });
       });
 
-      expect(isApplied).toBe(true);
+      expect(outcome).toEqual({ ok: true });
       expect(certificationsService.uploadDocument).not.toHaveBeenCalled();
       expect(certificationsService.deleteDocument).not.toHaveBeenCalled();
       expect(result.current.feedback).toBeNull();
@@ -64,15 +65,15 @@ describe("useCertificationDocument", () => {
       vi.mocked(certificationsService.uploadDocument).mockResolvedValue(undefined);
       const { result } = renderHook(() => useCertificationDocument());
 
-      let isApplied = false;
+      let outcome: CertificationDocumentResult = { ok: false, message: "" };
       await act(async () => {
-        isApplied = await result.current.applyDocumentChange("certification-1", {
+        outcome = await result.current.applyDocumentChange("certification-1", {
           type: "replace",
           file: DOCUMENT,
         });
       });
 
-      expect(isApplied).toBe(true);
+      expect(outcome).toEqual({ ok: true });
       expect(certificationsService.uploadDocument).toHaveBeenCalledWith("certification-1", DOCUMENT);
       expect(result.current.isSaving).toBe(false);
       expect(result.current.feedback).toEqual({
@@ -81,23 +82,21 @@ describe("useCertificationDocument", () => {
       });
     });
 
-    it("reports the error when the upload fails", async () => {
+    it("returns the error message without global feedback when the upload fails", async () => {
       vi.mocked(certificationsService.uploadDocument).mockRejectedValue(new Error("failed"));
       const { result } = renderHook(() => useCertificationDocument());
 
-      let isApplied = true;
+      let outcome: CertificationDocumentResult = { ok: true };
       await act(async () => {
-        isApplied = await result.current.applyDocumentChange("certification-1", {
+        outcome = await result.current.applyDocumentChange("certification-1", {
           type: "replace",
           file: DOCUMENT,
         });
       });
 
-      expect(isApplied).toBe(false);
-      expect(result.current.feedback).toEqual({
-        type: "error",
-        message: CERTIFICATION_DOCUMENT_MESSAGES.uploadError,
-      });
+      expect(outcome).toEqual({ ok: false, message: CERTIFICATION_DOCUMENT_MESSAGES.uploadError });
+      expect(result.current.feedback).toBeNull();
+      expect(result.current.isSaving).toBe(false);
     });
 
     it("removes the document and reports the success", async () => {
@@ -115,18 +114,17 @@ describe("useCertificationDocument", () => {
       });
     });
 
-    it("reports the error when the removal fails", async () => {
+    it("returns the error message without global feedback when the removal fails", async () => {
       vi.mocked(certificationsService.deleteDocument).mockRejectedValue(new Error("failed"));
       const { result } = renderHook(() => useCertificationDocument());
 
+      let outcome: CertificationDocumentResult = { ok: true };
       await act(async () => {
-        await result.current.applyDocumentChange("certification-1", { type: "remove" });
+        outcome = await result.current.applyDocumentChange("certification-1", { type: "remove" });
       });
 
-      expect(result.current.feedback).toEqual({
-        type: "error",
-        message: CERTIFICATION_DOCUMENT_MESSAGES.removeError,
-      });
+      expect(outcome).toEqual({ ok: false, message: CERTIFICATION_DOCUMENT_MESSAGES.removeError });
+      expect(result.current.feedback).toBeNull();
     });
   });
 

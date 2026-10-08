@@ -389,12 +389,102 @@ describe("CertificationsView", () => {
       await fillCertificationForm(user);
       await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
-      expect(await screen.findByRole("alert")).toHaveTextContent(
-        CERTIFICATION_DOCUMENT_MESSAGES.uploadError,
-      );
+      expect(await screen.findByText(CERTIFICATION_DOCUMENT_MESSAGES.uploadError)).toBeInTheDocument();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
       expect(certificationsService.uploadDocument).toHaveBeenCalledWith("ccna", CERTIFICATE_PDF);
       expect(certificationsService.deleteCertification).toHaveBeenCalledWith("ccna");
       expect(screen.getByRole("form", { name: "Agregar certificación" })).toBeInTheDocument();
+    });
+
+    describe("when editing a certification with a document", () => {
+      const WITH_DOCUMENT = { ...SCRUM, hasDocument: true };
+
+      beforeEach(() => {
+        vi.mocked(certificationsService.getCertifications).mockResolvedValue([WITH_DOCUMENT, AWS]);
+        vi.mocked(certificationsService.updateCertification).mockResolvedValue(WITH_DOCUMENT);
+      });
+
+      it("keeps the document untouched when only the fields change", async () => {
+        const user = await renderView();
+
+        await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+        expect(screen.getByRole("button", { name: "Eliminar documento actual" })).toBeInTheDocument();
+        await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
+
+        await waitFor(() => expect(screen.queryByRole("form")).not.toBeInTheDocument());
+        expect(certificationsService.updateCertification).toHaveBeenCalled();
+        expect(certificationsService.uploadDocument).not.toHaveBeenCalled();
+        expect(certificationsService.deleteDocument).not.toHaveBeenCalled();
+      });
+
+      it("replaces the document after updating the fields and refreshes the list", async () => {
+        vi.mocked(certificationsService.uploadDocument).mockResolvedValue(undefined);
+        const user = await renderView();
+
+        await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+        await user.upload(screen.getByLabelText(/Archivo de respaldo/), CERTIFICATE_PDF);
+        vi.mocked(certificationsService.getCertifications).mockClear();
+        await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
+
+        await waitFor(() => expect(screen.queryByRole("form")).not.toBeInTheDocument());
+        expect(certificationsService.uploadDocument).toHaveBeenCalledWith("scrum", CERTIFICATE_PDF);
+        expect(vi.mocked(certificationsService.updateCertification).mock.invocationCallOrder[0]).toBeLessThan(
+          vi.mocked(certificationsService.uploadDocument).mock.invocationCallOrder[0],
+        );
+        expect(certificationsService.getCertifications).toHaveBeenCalled();
+        expect(
+          await screen.findByRole("button", { name: "Ver documento de Scrum Master" }),
+        ).toHaveTextContent("certificate.pdf");
+      });
+
+      it("removes the document only after saving and updates the card without reloading the page", async () => {
+        vi.mocked(certificationsService.deleteDocument).mockResolvedValue(undefined);
+        const user = await renderView();
+
+        await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+        await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
+        expect(certificationsService.deleteDocument).not.toHaveBeenCalled();
+
+        vi.mocked(certificationsService.getCertifications).mockResolvedValue([SCRUM, AWS]);
+        await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
+
+        await waitFor(() => expect(certificationsService.deleteDocument).toHaveBeenCalledWith("scrum"));
+        await waitFor(() =>
+          expect(
+            screen.queryByRole("button", { name: "Ver documento de Scrum Master" }),
+          ).not.toBeInTheDocument(),
+        );
+        expect(screen.getAllByText("Sin documento de respaldo")).toHaveLength(2);
+      });
+
+      it("does not call the document api when cancelling after marking the removal", async () => {
+        const user = await renderView();
+
+        await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+        await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
+        await user.click(screen.getByRole("button", { name: "Cancelar" }));
+
+        expect(certificationsService.updateCertification).not.toHaveBeenCalled();
+        expect(certificationsService.deleteDocument).not.toHaveBeenCalled();
+      });
+
+      it("keeps the form open with an inline error and the data when the document operation fails", async () => {
+        vi.mocked(certificationsService.deleteDocument).mockRejectedValue(new Error("failed"));
+        const user = await renderView();
+
+        await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+        await user.clear(screen.getByLabelText(/Nombre de la certificación/));
+        await user.type(screen.getByLabelText(/Nombre de la certificación/), "Nuevo nombre");
+        await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
+        await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
+
+        expect(
+          await screen.findByText(CERTIFICATION_DOCUMENT_MESSAGES.removeError),
+        ).toBeInTheDocument();
+        expect(screen.getByRole("form", { name: "Editar certificación" })).toBeInTheDocument();
+        expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("Nuevo nombre");
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      });
     });
 
     it("opens the attached document", async () => {

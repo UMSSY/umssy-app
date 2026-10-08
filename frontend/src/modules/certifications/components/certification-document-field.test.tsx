@@ -65,7 +65,49 @@ describe("CertificationDocumentField", () => {
     renderField({ selectedFile: CERTIFICATE_PDF });
 
     expect(screen.getByText("certificate.pdf · 0 KB")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Reemplazar archivo" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cambiar archivo" })).toBeInTheDocument();
+  });
+
+  it("shows the current document with replace and remove actions", async () => {
+    const onRemoveCurrent = vi.fn();
+    const { user } = renderField({ currentDocumentName: "titulo.pdf", onRemoveCurrent });
+
+    expect(screen.getByText("titulo.pdf")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reemplazar" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Seleccionar archivo" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
+
+    expect(onRemoveCurrent).toHaveBeenCalledTimes(1);
+  });
+
+  it("opens the file picker from the replace button", async () => {
+    const { user } = renderField({ currentDocumentName: "titulo.pdf", onRemoveCurrent: vi.fn() });
+    const clickSpy = vi.spyOn(getFileInput(), "click");
+
+    await user.click(screen.getByRole("button", { name: "Reemplazar" }));
+
+    expect(clickSpy).toHaveBeenCalled();
+  });
+
+  it("explains that the document will be removed and hides the remove action", () => {
+    renderField({ currentDocumentName: "titulo.pdf", isRemovalPending: true, onRemoveCurrent: vi.fn() });
+
+    expect(screen.getByText("El documento actual se eliminará al guardar.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Eliminar documento actual" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reemplazar" })).toBeInTheDocument();
+  });
+
+  it("does not offer to remove the current document without a handler", () => {
+    renderField({ currentDocumentName: "titulo.pdf" });
+
+    expect(screen.queryByRole("button", { name: "Eliminar documento actual" })).not.toBeInTheDocument();
+  });
+
+  it("marks the field as optional when it is not required", () => {
+    renderField({ isRequired: false });
+
+    expect(screen.getByText("Archivo de respaldo").textContent).not.toContain("*");
   });
 
   it("shows the error and marks the input as invalid", () => {

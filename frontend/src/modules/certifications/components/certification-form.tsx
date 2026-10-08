@@ -4,6 +4,7 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { CertificationDocumentChange } from "../types/certification-document-change.types";
 import type { CertificationErrors } from "../types/certification-errors.types";
 import type { CertificationFormProps } from "../types/certification-form-props.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
@@ -20,8 +21,19 @@ const EMPTY_CERTIFICATION_VALUES: CreateCertificationDto = {
   issueDate: "",
 };
 
+function getDocumentChange(
+  selectedFile: File | null,
+  isRemovingDocument: boolean,
+): CertificationDocumentChange {
+  if (selectedFile) {
+    return { type: "replace", file: selectedFile };
+  }
+  return isRemovingDocument ? { type: "remove" } : { type: "keep" };
+}
+
 export function CertificationForm({
   initialData,
+  currentDocumentName,
   isPending = false,
   onSubmit,
   onCancel,
@@ -32,6 +44,8 @@ export function CertificationForm({
   const [errors, setErrors] = useState<CertificationErrors>({});
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | undefined>();
+  const [submitFileError, setSubmitFileError] = useState<string | undefined>();
+  const [isRemovingDocument, setIsRemovingDocument] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = Boolean(initialData);
   const isBusy = isPending || isSubmitting;
@@ -46,18 +60,28 @@ export function CertificationForm({
 
   const handleSelectFile = (file: File) => {
     const error = validateCertificateFile(file);
+    setSubmitFileError(undefined);
     if (error) {
       setFileError(error);
       setSelectedFile(null);
     } else {
       setSelectedFile(file);
       setFileError(undefined);
+      setIsRemovingDocument(false);
     }
   };
 
   const handleClearFile = () => {
     setSelectedFile(null);
     setFileError(undefined);
+    setSubmitFileError(undefined);
+  };
+
+  const handleRemoveCurrentDocument = () => {
+    setSelectedFile(null);
+    setFileError(undefined);
+    setSubmitFileError(undefined);
+    setIsRemovingDocument(true);
   };
 
   const handleCancel = () => {
@@ -65,6 +89,8 @@ export function CertificationForm({
     setErrors({});
     setSelectedFile(null);
     setFileError(undefined);
+    setSubmitFileError(undefined);
+    setIsRemovingDocument(false);
     onCancel();
   };
 
@@ -85,9 +111,16 @@ export function CertificationForm({
       return;
     }
 
+    setSubmitFileError(undefined);
     setIsSubmitting(true);
     try {
-      await onSubmit(trimmedValues, selectedFile);
+      const failureMessage = await onSubmit(
+        trimmedValues,
+        getDocumentChange(selectedFile, isRemovingDocument),
+      );
+      if (failureMessage) {
+        setSubmitFileError(failureMessage);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -152,16 +185,18 @@ export function CertificationForm({
           />
         </FormField>
       </div>
-      {!isEditing ? (
-        <CertificationDocumentField
-          id="create-certification-document"
-          selectedFile={selectedFile}
-          error={fileError}
-          disabled={isBusy}
-          onSelectFile={handleSelectFile}
-          onClearFile={handleClearFile}
-        />
-      ) : null}
+      <CertificationDocumentField
+        id={isEditing ? "edit-certification-document" : "create-certification-document"}
+        selectedFile={selectedFile}
+        currentDocumentName={currentDocumentName}
+        isRemovalPending={isRemovingDocument}
+        isRequired={!isEditing}
+        error={fileError ?? submitFileError}
+        disabled={isBusy}
+        onSelectFile={handleSelectFile}
+        onClearFile={handleClearFile}
+        onRemoveCurrent={handleRemoveCurrentDocument}
+      />
       <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <p className="text-[13px] text-text-secondary">* Campos obligatorios</p>
         <div className="flex gap-3">

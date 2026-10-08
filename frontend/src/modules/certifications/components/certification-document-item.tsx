@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { DEFAULT_DOCUMENT_TITLE } from "../constants/certification-form.constants";
 import type { CertificationDocumentItemProps } from "../types/certification-document-item-props.types";
-
-const DEFAULT_DOCUMENT_TITLE = "Documento de respaldo";
 
 export function CertificationDocumentItem({
   certification,
