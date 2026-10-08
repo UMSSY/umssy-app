@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CertificationCard } from "../components/certification-card";
 import { CertificationDeleteDialog } from "../components/certification-delete-dialog";
+import { CertificationDocumentViewer } from "../components/certification-document-viewer";
 import { CertificationDocumentsPanel } from "../components/certification-documents-panel";
 import { CertificationForm } from "../components/certification-form";
 import { DEFAULT_DOCUMENT_TITLE } from "../constants/certification-form.constants";
@@ -220,6 +221,10 @@ export function CertificationsView() {
           onView={handleViewDocument}
         />
       </div>
+      <CertificationDocumentViewer
+        preview={certificationDocument.preview}
+        onClose={certificationDocument.closeDocument}
+      />
       <CertificationDeleteDialog
         certification={pendingDelete}
         isDeleting={deleteMutation.isDeleting}

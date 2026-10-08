@@ -487,22 +487,60 @@ describe("CertificationsView", () => {
       });
     });
 
-    it("opens the attached document", async () => {
+    it("opens the attached document in the viewer from the documents list", async () => {
       vi.mocked(certificationsService.getCertifications).mockResolvedValue([
         { ...SCRUM, hasDocument: true },
         AWS,
       ]);
       vi.mocked(certificationsService.getDocument).mockResolvedValue(CERTIFICATE_PDF);
-      const documentTab = { close: vi.fn(), location: { href: "" } } as unknown as Window;
-      const openSpy = vi.spyOn(window, "open").mockReturnValue(documentTab);
+      const openSpy = vi.spyOn(window, "open");
       vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:certificate");
       const user = await renderView();
 
       await user.click(screen.getByRole("button", { name: "Ver documento de Scrum Master" }));
 
-      await waitFor(() => expect(documentTab.location.href).toBe("blob:certificate"));
+      const dialog = await screen.findByRole("dialog");
       expect(certificationsService.getDocument).toHaveBeenCalledWith("scrum");
-      openSpy.mockRestore();
+      expect(within(dialog).getByText(/Scrum Master · Scrum Master\.pdf/)).toBeInTheDocument();
+      expect(within(dialog).getByRole("button", { name: "Descargar" })).toBeInTheDocument();
+      expect(openSpy).not.toHaveBeenCalled();
+    });
+
+    it("opens the viewer from the preview chip of the card and closes it", async () => {
+      vi.mocked(certificationsService.getCertifications).mockResolvedValue([
+        { ...SCRUM, hasDocument: true },
+      ]);
+      vi.mocked(certificationsService.getDocument).mockResolvedValue(CERTIFICATE_PDF);
+      vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:certificate");
+      vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+      const user = await renderView();
+
+      await user.click(screen.getByRole("button", { name: "Previsualizar documento de Scrum Master" }));
+      const dialog = await screen.findByRole("dialog");
+      await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:certificate");
+    });
+
+    it("downloads the file from the viewer without leaving the view", async () => {
+      vi.mocked(certificationsService.getCertifications).mockResolvedValue([
+        { ...SCRUM, hasDocument: true },
+      ]);
+      vi.mocked(certificationsService.getDocument).mockResolvedValue(CERTIFICATE_PDF);
+      vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:certificate");
+      vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+      const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
+      const user = await renderView();
+
+      await user.click(screen.getByRole("button", { name: "Previsualizar documento de Scrum Master" }));
+      const dialog = await screen.findByRole("dialog");
+      await user.click(within(dialog).getByRole("button", { name: "Descargar" }));
+
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      const link = clickSpy.mock.contexts[0] as HTMLAnchorElement;
+      expect(link.download).toBe("Scrum Master.pdf");
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
 
     it("reports when the attached document cannot be opened", async () => {
@@ -510,7 +548,6 @@ describe("CertificationsView", () => {
         { ...SCRUM, hasDocument: true },
       ]);
       vi.mocked(certificationsService.getDocument).mockRejectedValue(new Error("failed"));
-      const openSpy = vi.spyOn(window, "open").mockReturnValue(null);
       const user = await renderView();
 
       await user.click(screen.getByRole("button", { name: "Ver documento de Scrum Master" }));
@@ -518,7 +555,7 @@ describe("CertificationsView", () => {
       expect(await screen.findByRole("alert")).toHaveTextContent(
         CERTIFICATION_DOCUMENT_MESSAGES.openError,
       );
-      openSpy.mockRestore();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 });

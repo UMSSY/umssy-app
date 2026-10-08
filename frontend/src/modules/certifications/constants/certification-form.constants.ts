@@ -6,3 +6,9 @@ export const DOCUMENT_FORMAT_BY_EXTENSION: Record<string, string> = {
   jpg: "JPG",
   jpeg: "JPG",
 };
+
+export const DOCUMENT_EXTENSION_BY_MIME_TYPE: Record<string, string> = {
+  "application/pdf": "pdf",
+  "image/png": "png",
+  "image/jpeg": "jpg",
+};
