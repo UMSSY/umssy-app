@@ -6,6 +6,7 @@ import { ExportErrorMessage } from "../components/export-error-message";
 import { ExportSuccessToast } from "../components/export-success-toast";
 import { RegisteredUsersTable } from "../components/registered-users-table";
 import { ReportActions } from "../components/report-actions";
+import { ReportAlertToast } from "../components/report-alert-toast";
 import { ReportTableFooter } from "../components/report-table-footer";
 import { UserTypeFilter } from "../components/user-type-filter";
 import { useExportRegisteredUsersCsv } from "../hooks/use-export-registered-users-csv";
@@ -18,15 +19,15 @@ const BREADCRUMB_ITEMS: BreadcrumbEntry[] = [
   { label: "Reporte de usuarios registrados" },
 ];
 
+const SLOW_REQUEST_MESSAGE = "Error 408: La solicitud está tardando demasiado";
+const CONNECTION_ERROR_MESSAGE = "Error 503/504: Sin conexión con el servidor";
+
 export function RegisteredUsersReportView() {
   const [currentPage, setCurrentPage] = useState(1);
   const [userType, setUserType] = useState<UserType | undefined>(undefined);
   const [period, setPeriod] = useState<AcademicPeriod | undefined>(undefined);
-  const { users, totalItems, totalPages, isLoading, errorMessage, refresh } = useRegisteredUsers(
-    currentPage,
-    userType,
-    period,
-  );
+  const { users, totalItems, totalPages, isLoading, errorMessage, isSlow, hasConnectionError, refresh } =
+    useRegisteredUsers(currentPage, userType, period);
   const {
     exportCsv,
     isExporting,
@@ -68,6 +69,8 @@ export function RegisteredUsersReportView() {
 
       <ExportErrorMessage message={exportErrorMessage} />
       <ExportSuccessToast message={exportSuccessMessage} />
+      <ReportAlertToast variant="warning" message={isSlow ? SLOW_REQUEST_MESSAGE : undefined} />
+      <ReportAlertToast variant="error" message={hasConnectionError ? CONNECTION_ERROR_MESSAGE : undefined} />
 
       <ReportTableFooter
         currentPage={currentPage}
