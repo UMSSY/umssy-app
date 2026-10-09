@@ -21,7 +21,7 @@ describe("availabilityApi", () => {
   })
 
   it("getAvailabilityBlocks envía from y to en UTC", async () => {
-    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValue({ data: [mockBlock] })
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValue({ data: { data: [mockBlock] } })
 
     const result = await availabilityApi.getAvailabilityBlocks({
       from: "2024-01-15T00:00:00Z",
@@ -35,7 +35,7 @@ describe("availabilityApi", () => {
   })
 
   it("getAvailabilityBlocks llama a la API sin filtros", async () => {
-    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValue({ data: [mockBlock] })
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValue({ data: { data: [mockBlock] } })
 
     const result = await availabilityApi.getAvailabilityBlocks()
 
@@ -44,7 +44,7 @@ describe("availabilityApi", () => {
   })
 
   it("getMentorFreeBlocks llama a la ruta de bloques libres del mentor", async () => {
-    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValue({ data: [mockBlock] })
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValue({ data: { data: [mockBlock] } })
 
     const result = await availabilityApi.getMentorFreeBlocks("m1", {
       startAt: "2026-10-05T04:00:00.000Z",
@@ -58,7 +58,7 @@ describe("availabilityApi", () => {
   })
 
   it("getAvailabilityBlockById llama a la API con ID correcto", async () => {
-    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValue({ data: mockBlock })
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValue({ data: { data: mockBlock } })
 
     const result = await availabilityApi.getAvailabilityBlockById("1")
 
@@ -67,7 +67,7 @@ describe("availabilityApi", () => {
   })
 
   it("createAvailabilityBlock envía solo startAt y endAt en ISO", async () => {
-    const postSpy = vi.spyOn(apiClient, "post").mockResolvedValue({ data: mockBlock })
+    const postSpy = vi.spyOn(apiClient, "post").mockResolvedValue({ data: { data: mockBlock } })
 
     await availabilityApi.createAvailabilityBlock({ startAt: "2024-01-15T10:00", endAt: "2024-01-15T11:00" })
 
@@ -79,7 +79,7 @@ describe("availabilityApi", () => {
   })
 
   it("updateAvailabilityBlock llama a la API con ID y datos correctos", async () => {
-    const patchSpy = vi.spyOn(apiClient, "patch").mockResolvedValue({ data: mockBlock })
+    const patchSpy = vi.spyOn(apiClient, "patch").mockResolvedValue({ data: { data: mockBlock } })
 
     await availabilityApi.updateAvailabilityBlock("1", { startAt: "2024-01-15T12:00" })
 
@@ -90,7 +90,7 @@ describe("availabilityApi", () => {
   })
 
   it("updateAvailabilityBlock codifica el ID con caracteres especiales", async () => {
-    const patchSpy = vi.spyOn(apiClient, "patch").mockResolvedValue({ data: mockBlock })
+    const patchSpy = vi.spyOn(apiClient, "patch").mockResolvedValue({ data: { data: mockBlock } })
 
     await availabilityApi.updateAvailabilityBlock("a/b&c", { startAt: "2024-01-15T12:00" })
 
