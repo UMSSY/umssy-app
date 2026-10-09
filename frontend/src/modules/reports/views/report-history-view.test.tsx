@@ -59,7 +59,7 @@ describe("ReportHistoryView", () => {
 
     expect(screen.getByRole("heading", { name: "Historial de Reportes Generados" })).toBeDefined();
     expect(screen.getByRole("link", { name: "Inicio" })).toBeDefined();
-    expect(screen.getAllByTestId("skeleton-row")).toHaveLength(5);
+    expect(screen.getAllByTestId("skeleton-row")).toHaveLength(10);
 
     await waitFor(() => {
       expect(screen.getByText(FIRST_PAGE_REPORT)).toBeDefined();

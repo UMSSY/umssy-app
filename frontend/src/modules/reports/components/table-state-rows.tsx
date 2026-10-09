@@ -1,8 +1,10 @@
 import { FileSearchCorner } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { REPORT_PAGE_SIZE } from "../hooks/use-paginated-report";
 
-const SKELETON_ROWS = 5;
+// Una fila de carga por cada registro de la página, para evitar saltos de layout.
+const SKELETON_ROWS = REPORT_PAGE_SIZE;
 
 interface TableSkeletonRowsProps {
   columnCount: number;

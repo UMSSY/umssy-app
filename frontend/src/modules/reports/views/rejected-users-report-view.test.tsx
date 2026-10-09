@@ -60,7 +60,7 @@ describe("RejectedUsersReportView", () => {
     expect(screen.getByPlaceholderText("Buscar por correo electrónico")).toBeDefined();
     expect(screen.getByRole("button", { name: "Actualizar" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
-    expect(screen.getAllByTestId("skeleton-row")).toHaveLength(5);
+    expect(screen.getAllByTestId("skeleton-row")).toHaveLength(10);
 
     await waitFor(() => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();

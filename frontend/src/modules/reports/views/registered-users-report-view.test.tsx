@@ -95,7 +95,7 @@ describe("RegisteredUsersReportView", () => {
     expect(screen.getByRole("button", { name: "Gestión" })).toBeDefined();
     expect(screen.getByRole("button", { name: "actualizar" })).toBeDefined();
     expect(screen.getByText("Cargando usuarios...")).toBeDefined();
-    expect(screen.getAllByTestId("skeleton-row")).toHaveLength(5);
+    expect(screen.getAllByTestId("skeleton-row")).toHaveLength(10);
 
     await waitFor(() => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
