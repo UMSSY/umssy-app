@@ -56,7 +56,7 @@ describe("RejectedUsersReportView", () => {
   it("muestra el título, el buscador, los botones y la primera página", async () => {
     render(<RejectedUsersReportView />);
 
-    expect(screen.getByRole("heading", { name: "REPORTE DE USUARIOS REGISTRADOS RECHAZADOS" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Reporte de usuarios rechazados" })).toBeDefined();
     expect(screen.getByPlaceholderText("Buscar por correo electrónico")).toBeDefined();
     expect(screen.getByRole("button", { name: "Actualizar" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();

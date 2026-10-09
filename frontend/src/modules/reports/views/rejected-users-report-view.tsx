@@ -15,7 +15,7 @@ import { useRejectedUsers } from "../hooks/use-rejected-users";
 const BREADCRUMB_ITEMS: BreadcrumbEntry[] = [
   { label: "Inicio", href: "/dashboard" },
   { label: "Reportes Analíticos" },
-  { label: "Reporte de usuarios registrados rechazados" },
+  { label: "Reporte de usuarios rechazados" },
 ];
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -41,7 +41,7 @@ export function RejectedUsersReportView() {
     <section className="flex flex-1 flex-col gap-6">
       <header className="flex flex-col gap-2">
         <PageBreadcrumb items={BREADCRUMB_ITEMS} />
-        <h1 className="font-tight text-3xl font-extrabold uppercase text-ink">REPORTE DE USUARIOS REGISTRADOS RECHAZADOS</h1>
+        <h1 className="font-tight text-3xl font-extrabold text-ink">Reporte de usuarios rechazados</h1>
       </header>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
