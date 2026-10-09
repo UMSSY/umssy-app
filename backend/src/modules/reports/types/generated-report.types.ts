@@ -1,5 +1,28 @@
+import type { ReportUserType } from './report-user.types.js';
+
 // Mismos códigos que usa el frontend (modules/reports/types).
-export type ReportType = 'REGISTERED_USERS' | 'GRADUATES' | 'REJECTED_USERS';
+// REGISTERED_USERS es la exportación de usuarios registrados sin filtro de tipo.
+export const REPORT_TYPES = [
+  'REGISTERED_USERS',
+  'STUDENTS',
+  'DEGREE_HOLDERS',
+  'MENTORS',
+  'COMPANIES',
+  'ADMINS',
+  'REJECTED_USERS',
+] as const;
+
+export type ReportType = (typeof REPORT_TYPES)[number];
+
+// Tipo de reporte que se registra al exportar usuarios registrados filtrados por tipo de usuario.
+export const REGISTERED_USERS_REPORT_TYPES: Record<ReportUserType, ReportType> =
+  {
+    STUDENT: 'STUDENTS',
+    DEGREE_HOLDER: 'DEGREE_HOLDERS',
+    MENTOR: 'MENTORS',
+    COMPANY: 'COMPANIES',
+    ADMIN: 'ADMINS',
+  };
 
 export interface GeneratedReport {
   readonly id: string;

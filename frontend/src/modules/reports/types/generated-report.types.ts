@@ -1,4 +1,12 @@
-export type ReportType = "REGISTERED_USERS" | "GRADUATES" | "REJECTED_USERS";
+// REGISTERED_USERS es la exportación de usuarios registrados sin filtro de tipo.
+export type ReportType =
+  | "REGISTERED_USERS"
+  | "STUDENTS"
+  | "DEGREE_HOLDERS"
+  | "MENTORS"
+  | "COMPANIES"
+  | "ADMINS"
+  | "REJECTED_USERS";
 
 export interface GeneratedReport {
   id: string;
@@ -10,4 +18,5 @@ export interface GeneratedReport {
 export interface ReportHistoryParams {
   page: number;
   limit: number;
+  reportType?: ReportType;
 }

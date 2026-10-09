@@ -31,7 +31,7 @@ const REPORTS: GeneratedReport[] = [
   buildReport({
     id: 'c',
     fileName: 'Egresados_2025',
-    reportType: 'GRADUATES',
+    reportType: 'DEGREE_HOLDERS',
     generatedAt: '2025-02-01T10:00:00.000Z',
   }),
 ];
@@ -40,7 +40,7 @@ function buildService(
   reports: readonly GeneratedReport[] = REPORTS,
 ): ReportHistoryService {
   const repository = new GeneratedReportsRepository();
-  vi.spyOn(repository, 'findAll').mockReturnValue(reports);
+  vi.spyOn(repository, 'findAll').mockResolvedValue(reports);
   return new ReportHistoryService(repository);
 }
 
@@ -57,15 +57,16 @@ describe('ReportHistoryService', () => {
   });
 
   describe('getReportHistory', () => {
-    it('devuelve los reportes del más reciente al más antiguo', () => {
-      const result = buildService().getReportHistory(historyQuery());
+    it('devuelve los reportes del más reciente al más antiguo', async () => {
+      const result = await buildService().getReportHistory(historyQuery());
 
       expect(result.items.map((report) => report.id)).toEqual(['b', 'a', 'c']);
       expect(result).toMatchObject({ totalItems: 3, page: 1, limit: 10 });
     });
 
-    it('expone el nombre, el tipo y la fecha de generación de cada reporte (CA 2, 3, 4, 30, 31, 32)', () => {
-      const [report] = buildService().getReportHistory(historyQuery()).items;
+    it('expone el nombre, el tipo y la fecha de generación de cada reporte (CA 2, 3, 4, 30, 31, 32)', async () => {
+      const [report] = (await buildService().getReportHistory(historyQuery()))
+        .items;
 
       expect(report).toEqual({
         id: 'b',
@@ -75,29 +76,30 @@ describe('ReportHistoryService', () => {
       });
     });
 
-    it('mantiene juntos el nombre, el tipo y la fecha de cada reporte (CA 6, 7, 8, 16, 25, 33)', () => {
-      const result = buildService().getReportHistory(historyQuery());
+    it('mantiene juntos el nombre, el tipo y la fecha de cada reporte (CA 6, 7, 8, 16, 25, 33)', async () => {
+      const result = await buildService().getReportHistory(historyQuery());
 
       result.items.forEach((report) => {
         expect(report).toEqual(REPORTS.find(({ id }) => id === report.id));
       });
     });
 
-    it('consolida reportes de distintos tipos en el mismo historial (CA 17)', () => {
-      const result = buildService().getReportHistory(historyQuery());
+    it('consolida reportes de distintos tipos en el mismo historial (CA 17)', async () => {
+      const result = await buildService().getReportHistory(historyQuery());
 
       expect(new Set(result.items.map((report) => report.reportType))).toEqual(
-        new Set(['REGISTERED_USERS', 'REJECTED_USERS', 'GRADUATES']),
+        new Set(['REGISTERED_USERS', 'REJECTED_USERS', 'DEGREE_HOLDERS']),
       );
     });
 
-    it('conserva la fecha y hora de generación sin alterarlas (CA 23, 24)', () => {
+    it('conserva la fecha y hora de generación sin alterarlas (CA 23, 24)', async () => {
       const sameDay = [
         buildReport({ id: 'morning', generatedAt: '2026-06-10T12:05:00.000Z' }),
         buildReport({ id: 'night', generatedAt: '2026-06-10T23:59:00.000Z' }),
       ];
 
-      const result = buildService(sameDay).getReportHistory(historyQuery());
+      const result =
+        await buildService(sameDay).getReportHistory(historyQuery());
 
       expect(
         result.items.map(({ id, generatedAt }) => ({ id, generatedAt })),
@@ -107,16 +109,16 @@ describe('ReportHistoryService', () => {
       ]);
     });
 
-    it('no modifica el orden de los datos del repositorio', () => {
+    it('no modifica el orden de los datos del repositorio', async () => {
       const reports = [...REPORTS];
 
-      buildService(reports).getReportHistory(historyQuery());
+      await buildService(reports).getReportHistory(historyQuery());
 
       expect(reports.map((report) => report.id)).toEqual(['a', 'b', 'c']);
     });
 
-    it('pagina los resultados (CA 22)', () => {
-      const result = buildService().getReportHistory(
+    it('pagina los resultados (CA 22)', async () => {
+      const result = await buildService().getReportHistory(
         historyQuery({ page: '2', limit: '2' }),
       );
 
@@ -124,8 +126,8 @@ describe('ReportHistoryService', () => {
       expect(result).toMatchObject({ totalItems: 3, page: 2, limit: 2 });
     });
 
-    it('devuelve una lista vacía cuando no hay reportes', () => {
-      const result = buildService([]).getReportHistory(historyQuery());
+    it('devuelve una lista vacía cuando no hay reportes', async () => {
+      const result = await buildService([]).getReportHistory(historyQuery());
 
       expect(result).toEqual({
         items: [],
@@ -136,10 +138,62 @@ describe('ReportHistoryService', () => {
       });
     });
 
-    it('el repositorio empieza sin reportes', () => {
-      const result = buildServiceWithStorage().getReportHistory(historyQuery());
+    it('el repositorio empieza sin reportes', async () => {
+      const result =
+        await buildServiceWithStorage().getReportHistory(historyQuery());
 
       expect(result.totalItems).toBe(0);
+    });
+
+    describe('filtro por tipo de reporte', () => {
+      it('devuelve solo los reportes del tipo indicado', async () => {
+        const result = await buildService().getReportHistory(
+          historyQuery({ reportType: 'REJECTED_USERS' }),
+        );
+
+        expect(result.items.map((report) => report.id)).toEqual(['b']);
+        expect(result).toMatchObject({ totalItems: 1, totalPages: 1 });
+      });
+
+      it('con "ALL" o sin filtro devuelve todos los tipos', async () => {
+        const withAll = await buildService().getReportHistory(
+          historyQuery({ reportType: 'ALL' }),
+        );
+        const withoutFilter =
+          await buildService().getReportHistory(historyQuery());
+
+        expect(withAll).toEqual(withoutFilter);
+        expect(withAll.totalItems).toBe(3);
+      });
+
+      it('filtra antes de paginar', async () => {
+        const reports = Array.from({ length: 12 }, (_, index) =>
+          buildReport({
+            id: `r-${index}`,
+            reportType: index % 2 === 0 ? 'MENTORS' : 'COMPANIES',
+            generatedAt: new Date(Date.UTC(2026, 9, index + 1)).toISOString(),
+          }),
+        );
+
+        const result = await buildService(reports).getReportHistory(
+          historyQuery({ reportType: 'MENTORS', page: '2', limit: '5' }),
+        );
+
+        expect(result).toMatchObject({ totalItems: 6, totalPages: 2, page: 2 });
+        expect(result.items.map((report) => report.id)).toEqual(['r-0']);
+      });
+
+      it('devuelve una lista vacía si no hay reportes de ese tipo', async () => {
+        const result = await buildService().getReportHistory(
+          historyQuery({ reportType: 'ADMINS' }),
+        );
+
+        expect(result).toMatchObject({ items: [], totalItems: 0 });
+      });
+
+      it('rechaza un tipo de reporte que no existe', () => {
+        expect(() => historyQuery({ reportType: 'GRADUATES' })).toThrow();
+      });
     });
   });
 
@@ -161,35 +215,37 @@ describe('ReportHistoryService', () => {
       });
     });
 
-    it('muestra el reporte registrado al inicio del historial (CA 5, 9)', () => {
+    it('muestra el reporte registrado al inicio del historial (CA 5, 9)', async () => {
       const service = buildServiceWithStorage();
 
       const report = service.registerGeneratedReport({
         fileName: 'Rechazados_Octubre',
         reportType: 'REJECTED_USERS',
       });
-      const result = service.getReportHistory(historyQuery());
+      const result = await service.getReportHistory(historyQuery());
 
       expect(result.totalItems).toBe(1);
       expect(result.items[0]).toEqual(report);
     });
 
-    it('registra como independientes los reportes generados en distintos momentos (CA 18, 34)', () => {
+    it('registra como independientes los reportes generados en distintos momentos (CA 18, 34)', async () => {
       vi.useFakeTimers({ toFake: ['Date'] });
       const service = buildServiceWithStorage();
 
       vi.setSystemTime(new Date('2026-10-03T09:00:00.000Z'));
       const first = service.registerGeneratedReport({
         fileName: 'Egresados_Manana',
-        reportType: 'GRADUATES',
+        reportType: 'DEGREE_HOLDERS',
       });
       vi.setSystemTime(new Date('2026-10-03T18:00:00.000Z'));
       const second = service.registerGeneratedReport({
         fileName: 'Egresados_Tarde',
-        reportType: 'GRADUATES',
+        reportType: 'DEGREE_HOLDERS',
       });
 
-      const [newest, previous] = service.getReportHistory(historyQuery()).items;
+      const [newest, previous] = (
+        await service.getReportHistory(historyQuery())
+      ).items;
 
       expect(first.id).not.toBe(second.id);
       expect(newest).toEqual(second);
@@ -203,13 +259,15 @@ describe('ReportHistoryService', () => {
       const inputs = [
         { fileName: 'Lista_Usuarios_A', reportType: 'REGISTERED_USERS' },
         { fileName: 'Rechazados_B', reportType: 'REJECTED_USERS' },
-        { fileName: 'Egresados_C', reportType: 'GRADUATES' },
+        { fileName: 'Egresados_C', reportType: 'DEGREE_HOLDERS' },
       ] as const;
 
       const registered = await Promise.all(
         inputs.map(async (input) => service.registerGeneratedReport(input)),
       );
-      const history = service.getReportHistory(historyQuery({ limit: '100' }));
+      const history = await service.getReportHistory(
+        historyQuery({ limit: '100' }),
+      );
 
       expect(new Set(registered.map((report) => report.id)).size).toBe(3);
       expect(history.totalItems).toBe(3);
@@ -219,13 +277,14 @@ describe('ReportHistoryService', () => {
       });
     });
 
-    it('no comparte registros entre instancias', () => {
+    it('no comparte registros entre instancias', async () => {
       buildServiceWithStorage().registerGeneratedReport({
         fileName: 'Temporal',
-        reportType: 'GRADUATES',
+        reportType: 'DEGREE_HOLDERS',
       });
 
-      const result = buildServiceWithStorage().getReportHistory(historyQuery());
+      const result =
+        await buildServiceWithStorage().getReportHistory(historyQuery());
 
       expect(result.totalItems).toBe(0);
     });
