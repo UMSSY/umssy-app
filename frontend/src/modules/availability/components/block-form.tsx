@@ -185,7 +185,7 @@ export function BlockForm({
             </Field>
 
             <FieldGroup
-              className="grid grid-cols-2 gap-4"
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
             >
               <Field data-invalid={errors.startAt ? true : undefined}>
                 <FieldLabel htmlFor="startAt" className="font-semibold">
@@ -236,7 +236,7 @@ export function BlockForm({
               </Field>
 
               {mode !== "edit" && (
-                <FieldDescription className="col-span-2 text-xs">
+                <FieldDescription className="col-span-1 text-xs sm:col-span-2">
                   La hora de fin debe ser posterior a la de inicio. Horario en hora de Bolivia (GMT-4).
                 </FieldDescription>
               )}
