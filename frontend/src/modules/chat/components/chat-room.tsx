@@ -1,3 +1,4 @@
+
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
@@ -7,6 +8,8 @@ import {
   useRef,
   useState,
 } from 'react';
+
+import type { KeyboardEvent } from 'react';
 
 import { Conversation, Message } from '../types/conversation.types';
 import { MessageInputBar } from './message-input-bar';
@@ -18,7 +21,7 @@ interface ChatRoomProps {
   messages: Message[];
   currentUserId: string;
   onBack: () => void;
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string) => void | Promise<void>;
   isLoadingMessages?: boolean;
   isSending?: boolean;
   hasMoreMessages?: boolean;
@@ -41,20 +44,11 @@ export function ChatRoom({
   const [inputText, setInputText] = useState('');
 
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
-
   const previousScrollHeightRef = useRef(0);
   const previousScrollTopRef = useRef(0);
   const previousMessagesLengthRef = useRef(0);
-
   const isLoadingPreviousPageRef = useRef(false);
 
-  /**
-   * Carga una pagina de mensajes anteriores.
-   *
-   * Antes de realizar la carga guardamos el alto y la posicion
-   * actuales del scroll. Estos valores permiten mantener al usuario
-   * en el mismo punto cuando los mensajes anteriores se agreguen arriba.
-   */
   const loadOlderMessages = useCallback(async () => {
     const container = messagesContainerRef.current;
 
@@ -83,10 +77,6 @@ export function ChatRoom({
     onLoadMoreMessages,
   ]);
 
-  /**
-   * Cuando el usuario se aproxima a la parte superior del historial,
-   * se solicita automaticamente la pagina anterior.
-   */
   const handleMessagesScroll = () => {
     const container = messagesContainerRef.current;
 
@@ -97,19 +87,6 @@ export function ChatRoom({
     }
   };
 
-  /**
-   * Control del scroll despues de actualizar los mensajes.
-   *
-   * Primera carga:
-   *   muestra los mensajes mas recientes.
-   *
-   * Carga de mensajes anteriores:
-   *   compensa el aumento del scrollHeight para evitar que la
-   *   pantalla salte cuando los mensajes se insertan arriba.
-   *
-   * Mensaje nuevo:
-   *   mueve el historial hacia la parte inferior.
-   */
   useEffect(() => {
     const container = messagesContainerRef.current;
 
@@ -120,10 +97,9 @@ export function ChatRoom({
 
     if (isLoadingPreviousPageRef.current) {
       if (currentLength > previousLength) {
-        const newScrollHeight = container.scrollHeight;
-
         const heightDifference =
-          newScrollHeight - previousScrollHeightRef.current;
+          container.scrollHeight -
+          previousScrollHeightRef.current;
 
         container.scrollTop =
           previousScrollTopRef.current + heightDifference;
@@ -133,24 +109,14 @@ export function ChatRoom({
         isLoadingPreviousPageRef.current = false;
       }
     } else if (previousLength === 0 && currentLength > 0) {
-      /*
-       * Primera pagina cargada.
-       * Se muestran los mensajes mas recientes.
-       */
       container.scrollTop = container.scrollHeight;
     } else if (currentLength > previousLength) {
-      /*
-       * Mensaje nuevo enviado o recibido.
-       */
       container.scrollTop = container.scrollHeight;
     }
 
     previousMessagesLengthRef.current = currentLength;
   }, [messages.length, isLoadingMoreMessages]);
 
-  /**
-   * Reinicia el control del scroll al seleccionar otra conversacion.
-   */
   useEffect(() => {
     previousScrollHeightRef.current = 0;
     previousScrollTopRef.current = 0;
@@ -158,10 +124,6 @@ export function ChatRoom({
     isLoadingPreviousPageRef.current = false;
   }, [conversation.id]);
 
-  /**
-   * Si una pagina contiene pocos mensajes y no alcanza para producir
-   * scroll vertical, se carga otra pagina automaticamente.
-   */
   useEffect(() => {
     const container = messagesContainerRef.current;
 
@@ -185,13 +147,30 @@ export function ChatRoom({
     loadOlderMessages,
   ]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!isContentValidForSend(inputText) || isSending) {
       return;
     }
 
-    onSendMessage(inputText.trim());
-    setInputText('');
+    const content = inputText.trim();
+
+    if (!content) return;
+
+    try {
+      await onSendMessage(content);
+      setInputText('');
+    } catch {
+      // Si falla el envío, se conserva el texto para reintentarlo.
+    }
+  };
+
+  const handleInputKeyDown = (
+    event: KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      void handleSend();
+    }
   };
 
   const formatMessageTime = (
@@ -217,13 +196,11 @@ export function ChatRoom({
       data-testid="chat-room"
       className="flex flex-col h-full w-full min-w-0 min-h-0 bg-[#F6F7F9] overflow-hidden"
     >
-      {/* Cabecera del chat */}
       <header
         data-testid="chat-room-header"
         className="shrink-0 w-full min-w-0 bg-white border-b border-[#E3E7EC] p-3 md:p-4 flex items-center justify-between z-10"
       >
         <div className="flex items-center gap-3">
-          {/* Boton atras para movil */}
           <button
             type="button"
             data-testid="chat-back-button"
@@ -246,7 +223,6 @@ export function ChatRoom({
             </svg>
           </button>
 
-          {/* Avatar */}
           <div className="relative shrink-0">
             {conversation.contact.avatarUrl ? (
               <img
@@ -264,12 +240,11 @@ export function ChatRoom({
               <span
                 data-testid="online-indicator"
                 className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full shadow-xs"
-                title="En linea"
+                title="En línea"
               />
             )}
           </div>
 
-          {/* Informacion del contacto */}
           <div>
             <h3
               data-testid="chat-contact-name"
@@ -280,21 +255,19 @@ export function ChatRoom({
 
             <span className="text-xs font-medium text-emerald-600">
               {conversation.contact.isOnline
-                ? 'En linea'
+                ? 'En línea'
                 : 'Desconectado'}
             </span>
           </div>
         </div>
       </header>
 
-      {/* Historial de mensajes */}
       <div
         ref={messagesContainerRef}
         data-testid="messages-container"
         onScroll={handleMessagesScroll}
         className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-4 md:p-6 space-y-3 bg-[#F6F7F9]"
       >
-        {/* Indicador mientras se cargan mensajes anteriores */}
         {isLoadingMoreMessages && (
           <div
             data-testid="loading-older-messages"
@@ -306,7 +279,6 @@ export function ChatRoom({
           </div>
         )}
 
-        {/* Boton alternativo para cargar mensajes anteriores */}
         {hasMoreMessages && !isLoadingMoreMessages && (
           <div className="flex justify-center py-2">
             <button
@@ -319,7 +291,6 @@ export function ChatRoom({
           </div>
         )}
 
-        {/* Ya se alcanzo el mensaje mas antiguo */}
         {!hasMoreMessages &&
           messages.length > 0 &&
           !isLoadingMessages &&
@@ -329,12 +300,11 @@ export function ChatRoom({
               className="flex justify-center py-2"
             >
               <span className="text-xs text-slate-400">
-                Inicio de la conversacion
+                Inicio de la conversación
               </span>
             </div>
           )}
 
-        {/* Estado sin mensajes */}
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6 text-[#5B6470]">
             <div className="w-12 h-12 rounded-full bg-blue-50 text-[#0B1F2E] flex items-center justify-center mx-auto mb-3">
@@ -360,7 +330,7 @@ export function ChatRoom({
             <p className="text-xs text-slate-400 mt-1">
               {isLoadingMessages
                 ? 'Cargando mensajes...'
-                : 'Envio e historial de mensajes'}
+                : 'Envío e historial de mensajes'}
             </p>
           </div>
         ) : (
@@ -372,9 +342,7 @@ export function ChatRoom({
                 key={message.id}
                 data-testid={`message-item-${message.id}`}
                 className={`flex w-full min-w-0 ${
-                  isOwn
-                    ? 'justify-end'
-                    : 'justify-start'
+                  isOwn ? 'justify-end' : 'justify-start'
                 }`}
               >
                 <div
@@ -397,8 +365,7 @@ export function ChatRoom({
                   >
                     <span>
                       {formatMessageTime(
-                        message.timestamp ||
-                          message.createdAt,
+                        message.timestamp || message.createdAt,
                       )}
                     </span>
 
@@ -418,15 +385,14 @@ export function ChatRoom({
           })
         )}
 
-        {/* Ancla conservada por compatibilidad con los tests existentes */}
         <div data-testid="messages-scroll-anchor" />
       </div>
 
-      {/* Barra para enviar mensajes */}
       <MessageInputBar
         value={inputText}
         onChange={setInputText}
         onSend={handleSend}
+        onKeyDown={handleInputKeyDown}
         isSending={isSending}
       />
     </div>

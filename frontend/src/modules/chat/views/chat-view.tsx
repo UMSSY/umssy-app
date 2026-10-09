@@ -1,7 +1,9 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import { useConversations } from '../hooks/use-conversations';
 import { useMessages, messagesQueryKey } from '../hooks/use-messages';
@@ -39,12 +41,12 @@ export function ChatView() {
   } = useConversations();
 
   const {
-  data: messages = [],
-  isLoading: isLoadingMessages,
-  hasMoreMessages,
-  loadMoreMessages,
-  isLoadingMoreMessages,
-} = useMessages(selectedId);
+    data: messages = [],
+    isLoading: isLoadingMessages,
+    hasMoreMessages,
+    loadMoreMessages,
+    isLoadingMoreMessages,
+  } = useMessages(selectedId);
 
   const handleBackToList = () => {
     clearSelectedConversation();
@@ -58,6 +60,7 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     setIsSearchModalOpen(true);
   };
 
@@ -65,6 +68,7 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     await startConversationWithContact(contactUser);
     setIsSearchModalOpen(false);
   };
@@ -73,6 +77,7 @@ export function ChatView() {
     if (!selectedId || isSending) return;
 
     setIsSending(true);
+
     try {
       await sendMessage({
         conversationId: selectedId,
@@ -83,7 +88,30 @@ export function ChatView() {
       await queryClient.invalidateQueries({
         queryKey: messagesQueryKey(selectedId),
       });
-    } catch {
+    } catch (error: unknown) {
+      const isOffline =
+        typeof navigator !== 'undefined' && !navigator.onLine;
+
+      const errorMessage =
+        error instanceof Error ? error.message : '';
+
+      if (
+        isOffline ||
+        /sin conexión|sin conexion|network|failed to fetch|fetch failed/i.test(
+          errorMessage,
+        )
+      ) {
+        toast.error('Sin conexión a Internet', {
+          description:
+            'No se pudo enviar el mensaje. Comprueba tu conexión e inténtalo de nuevo.',
+        });
+      } else {
+        toast.error('No se pudo enviar el mensaje', {
+          description:
+            errorMessage ||
+            'Ocurrió un error al enviar el mensaje. Inténtalo de nuevo.',
+        });
+      }
     } finally {
       setIsSending(false);
     }

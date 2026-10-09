@@ -31,7 +31,7 @@ export function MessageInputBar({
 }: MessageInputBarProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Auto-ajuste de altura del textarea segun el contenido (maximo 120px)
+  // Auto-ajuste de altura del textarea según el contenido (máximo 120px)
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -42,8 +42,12 @@ export function MessageInputBar({
   }, [value]);
 
   const characterCount = countCharacters(value);
+
   const isSendDisabled =
-    disabled || isSending || isWhitespaceOnly(value) || characterCount > maxLength;
+    disabled ||
+    isSending ||
+    isWhitespaceOnly(value) ||
+    characterCount > maxLength;
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const rawValue = e.target.value;
@@ -63,7 +67,10 @@ export function MessageInputBar({
       data-testid="message-input-bar"
       className="shrink-0 w-full min-w-0 bg-white border-t border-[#E3E7EC] p-3 md:p-4 transition-all"
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full min-w-0">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-2 w-full min-w-0"
+      >
         <div className="flex items-end gap-2.5 w-full min-w-0 bg-[#F6F7F9] border border-[#E3E7EC] rounded-xl p-2 focus-within:border-[#0B1F2E] focus-within:bg-white transition-all">
           <textarea
             ref={textareaRef}
@@ -75,7 +82,7 @@ export function MessageInputBar({
             placeholder={placeholder}
             rows={1}
             className="flex-1 min-w-0 w-full bg-transparent border-0 resize-none text-sm text-[#0B1F2E] placeholder-[#5B6470] focus:outline-none leading-relaxed py-1 px-1 min-h-[40px] max-h-[120px] overflow-y-auto break-words [overflow-wrap:anywhere]"
-            aria-label="Campo de redaccion de mensaje"
+            aria-label="Campo de redacción de mensaje"
           />
 
           <div className="flex items-center gap-2 shrink-0 pb-1">
@@ -109,4 +116,3 @@ export function MessageInputBar({
     </div>
   );
 }
-
