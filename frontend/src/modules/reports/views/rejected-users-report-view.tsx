@@ -33,8 +33,10 @@ export function RejectedUsersReportView() {
   } = useExportRejectedUsersCsv(search);
 
   const handleSearchChange = (value: string) => {
+    if (value.trim() !== searchInput.trim()) {
+      setCurrentPage(1);
+    }
     setSearchInput(value);
-    setCurrentPage(1);
   };
 
   return (
@@ -66,7 +68,7 @@ export function RejectedUsersReportView() {
         isLoading={isLoading}
         onPageChange={setCurrentPage}
         onRefresh={refresh}
-        refreshLabel="Actualizar"
+        emptyResultsMode={search && !errorMessage ? "hide-summary" : "hide-pagination"}
       />
     </section>
   );

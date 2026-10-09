@@ -59,6 +59,14 @@ describe("ReportTableFooter", () => {
     expect(screen.queryByRole("navigation", { name: "Paginación" })).toBeNull();
   });
 
+  it("oculta el contador y deja la página 1 cuando no hay resultados en el modo hide-summary", () => {
+    renderFooter({ totalItems: 0, totalPages: 1, emptyResultsMode: "hide-summary" });
+
+    expect(screen.queryByText(/^Mostrando/)).toBeNull();
+    expect(screen.getByRole("button", { name: "Página 1" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Página siguiente" }).disabled).toBe(true);
+  });
+
   it("mantiene el paginador mientras carga", () => {
     renderFooter({ totalItems: 0, totalPages: 1, isLoading: true });
 
