@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { SKILLS_VALIDATION_MESSAGES } from "../constants/skills.constants";
+import { CUSTOM_SKILL_HINT, SKILL_NAME_MAX_LENGTH, SKILLS_VALIDATION_MESSAGES } from "../constants/skills.constants";
 import type { SkillItem } from "../types/skill-item.types";
 import type { SkillsSelectorProps } from "../types/skills-selector-props.types";
 import { SkillsSelector } from "./skills-selector";
@@ -99,6 +99,43 @@ describe("SkillsSelector", () => {
 
     expect(onCreateCustomSkill).toHaveBeenCalledWith("Docker");
     expect(input).toHaveValue("");
+  });
+
+  it("limits the custom skill name length and shows the allowed length", async () => {
+    const user = userEvent.setup();
+    renderSelector();
+    const input = screen.getByLabelText("Agregar habilidad propia");
+
+    expect(input).not.toHaveAttribute("placeholder");
+    expect(input).toHaveAttribute("maxLength", String(SKILL_NAME_MAX_LENGTH));
+    expect(screen.getByText(CUSTOM_SKILL_HINT)).toBeInTheDocument();
+    expect(input).toHaveAccessibleDescription(CUSTOM_SKILL_HINT);
+
+    await user.type(input, "a".repeat(SKILL_NAME_MAX_LENGTH + 10));
+
+    expect(input).toHaveValue("a".repeat(SKILL_NAME_MAX_LENGTH));
+  });
+
+  it("creates a custom skill without extra spaces", async () => {
+    const user = userEvent.setup();
+    const { onCreateCustomSkill } = renderSelector();
+
+    await user.type(screen.getByLabelText("Agregar habilidad propia"), "  spring    boot ");
+    await user.click(screen.getByRole("button", { name: "Agregar" }));
+
+    expect(onCreateCustomSkill).toHaveBeenCalledWith("spring boot");
+  });
+
+  it("does not create a custom skill with meaningless text", async () => {
+    const user = userEvent.setup();
+    const { onCreateCustomSkill } = renderSelector();
+
+    await user.type(screen.getByLabelText("Agregar habilidad propia"), "9999999");
+    await user.click(screen.getByRole("button", { name: "Agregar" }));
+
+    expect(screen.getByText(SKILLS_VALIDATION_MESSAGES.missingLetter)).toBeInTheDocument();
+    expect(screen.getByLabelText("Agregar habilidad propia")).toHaveAttribute("aria-invalid", "true");
+    expect(onCreateCustomSkill).not.toHaveBeenCalled();
   });
 
   it("does not create a custom skill with an empty name", async () => {

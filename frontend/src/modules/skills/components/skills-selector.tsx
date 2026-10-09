@@ -6,9 +6,10 @@ import { LoaderCircle, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import { SKILLS_UI_TEXTS } from "../constants/skills.constants";
+import { CUSTOM_SKILL_HINT, CUSTOM_SKILL_HINT_ID, SKILL_NAME_MAX_LENGTH, SKILLS_UI_TEXTS } from "../constants/skills.constants";
 import type { SkillsSelectorProps } from "../types/skills-selector-props.types";
-import { getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
+import { getFieldErrorId, getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
+import { formatSkillName } from "../utils/format-skill-name";
 import { validateCustomSkill } from "../utils/validate-custom-skill";
 import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
 import { FormField } from "@/modules/profile/components/form-field";
@@ -49,7 +50,8 @@ export function SkillsSelector({
     event.preventDefault();
     if (isMutateDisabled) return;
 
-    const error = validateCustomSkill(customSkillName, [
+    const formattedName = formatSkillName(customSkillName);
+    const error = validateCustomSkill(formattedName, [
       ...(catalogSkills ?? []),
       ...(selectedSkills ?? []),
     ]);
@@ -58,7 +60,7 @@ export function SkillsSelector({
       return;
     }
 
-    onCreateCustomSkill((customSkillName ?? "").trim());
+    onCreateCustomSkill(formattedName);
     setCustomSkillName("");
     setCustomSkillError("");
   };
@@ -128,8 +130,8 @@ export function SkillsSelector({
               <Input
                 id="custom-skill"
                 type="text"
-                placeholder={SKILLS_UI_TEXTS.customSkillPlaceholder}
                 value={customSkillName}
+                maxLength={SKILL_NAME_MAX_LENGTH}
                 disabled={isMutateDisabled}
                 onChange={(event) => {
                   setCustomSkillName(event.target.value);
@@ -137,6 +139,9 @@ export function SkillsSelector({
                 }}
                 className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
                 {...getFieldErrorProps("custom-skill", customSkillError)}
+                aria-describedby={[CUSTOM_SKILL_HINT_ID, customSkillError ? getFieldErrorId("custom-skill") : null]
+                  .filter(Boolean)
+                  .join(" ")}
               />
               <Button
                 type="submit"
@@ -147,6 +152,9 @@ export function SkillsSelector({
                 {SKILLS_UI_TEXTS.addButton}
               </Button>
             </div>
+            <p id={CUSTOM_SKILL_HINT_ID} className="text-[13px] text-text-secondary">
+              {CUSTOM_SKILL_HINT}
+            </p>
           </FormField>
         </form>
       </section>
