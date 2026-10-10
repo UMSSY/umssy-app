@@ -22,6 +22,5 @@ export function calculateWeightedScore(
   if (totalWeight === 0) return 100;
 
   const percentage = (100 * matchedWeight) / totalWeight;
-  // Compensa errores de punto flotante al redondear valores como 55.5.
   return Math.max(0, Math.min(100, Math.round(percentage + 1e-10)));
 }

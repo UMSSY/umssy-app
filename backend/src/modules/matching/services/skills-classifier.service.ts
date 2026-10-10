@@ -6,10 +6,6 @@ import { NlpService } from './nlp.service.js';
 export class SkillsClassifierService {
   constructor(private readonly nlpService: NlpService) {}
 
-  // Compara los candidatos del texto contra el catalogo de habilidades (T1.6).
-  // Los candidatos ya vienen normalizados por el pipeline (minusculas, sin signos);
-  // las habilidades de varias palabras llegan unidas con guion bajo (ej. machine_learning).
-  // Devuelve cada habilidad una sola vez, en el orden en que aparece en el texto.
   classify(candidates: string[], catalog: DetectedSkillResponse[]): DetectedSkillResponse[] {
     const catalogByKey = this.buildCatalogIndex(catalog);
     const detected = new Map<string, DetectedSkillResponse>();
@@ -24,8 +20,6 @@ export class SkillsClassifierService {
     return [...detected.values()];
   }
 
-  // Normaliza los nombres del catalogo igual que el texto, para comparar sin distinguir
-  // mayusculas (AC-01.10): "Node.js" -> nodejs, "Machine Learning" -> machine_learning.
   private buildCatalogIndex(catalog: DetectedSkillResponse[]): Map<string, DetectedSkillResponse> {
     const skillsByKey = new Map<string, DetectedSkillResponse[]>();
 
@@ -43,9 +37,6 @@ export class SkillsClassifierService {
     return index;
   }
 
-  // La limpieza de caracteres especiales puede volver iguales a varias habilidades
-  // ("C", "C++" y "C#" quedan como "c"). Se conserva solo la que se escribe igual que
-  // la clave; si ninguna lo hace, la clave es ambigua y se descarta para no dar falsos positivos.
   private resolveCollision(
     key: string,
     skills: DetectedSkillResponse[],
