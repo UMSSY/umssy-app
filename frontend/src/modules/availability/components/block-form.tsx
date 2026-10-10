@@ -135,16 +135,10 @@ export function BlockForm({
                       id="date"
                       type="date"
                       value={date}
-                      min={toDateString(today)}
-                      onChange={(event) =>
-                        handleDateSelect(event.target.value ? toCalendarDate(event.target.value) : undefined)
-                      }
+                      readOnly
                       aria-invalid={errors.date ? true : undefined}
                       aria-describedby={errors.date ? "date-error" : undefined}
-                      className={cn(
-                        "absolute inset-0 h-full w-full cursor-pointer opacity-0",
-                        "[&::-webkit-calendar-picker-indicator]:cursor-pointer",
-                      )}
+                      className="absolute inset-0 h-full w-full cursor-default opacity-0"
                     />
                   </>
                 ) : (

@@ -147,7 +147,7 @@ describe("BlockForm", () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
-  it("en modo edición carga initialValues en hora de Bolivia", async () => {
+  it("en modo edición permite cambiar las horas y conserva el día original de solo lectura", async () => {
     const { onSubmit, user } = renderForm({
       mode: "edit",
       initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-14T00:00:00.000Z" },
@@ -155,16 +155,21 @@ describe("BlockForm", () => {
 
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
     expect(screen.getByLabelText(/Día/)).toHaveValue("2026-10-13")
+    expect(screen.getByLabelText(/Día/)).toHaveAttribute("readonly")
     expect(screen.getByText("Martes 13 de octubre")).toBeInTheDocument()
     expect(screen.getByLabelText(/Desde/)).toHaveValue("18:00")
     expect(screen.getByLabelText(/Hasta/)).toHaveValue("20:00")
     expect(screen.queryByText(/Horario en hora de Bolivia/)).not.toBeInTheDocument()
 
+    await user.type(screen.getByLabelText(/Día/), "2026-10-15")
+    expect(screen.getByLabelText(/Día/)).toHaveValue("2026-10-13")
+    await user.selectOptions(screen.getByLabelText(/Desde/), "17:00")
+    await user.selectOptions(screen.getByLabelText(/Hasta/), "19:00")
     await user.click(screen.getByRole("button", { name: "Guardar cambios" }))
 
     expect(onSubmit).toHaveBeenCalledWith({
-      startAt: "2026-10-13T22:00:00.000Z",
-      endAt: "2026-10-14T00:00:00.000Z",
+      startAt: "2026-10-13T21:00:00.000Z",
+      endAt: "2026-10-13T23:00:00.000Z",
     })
   })
 

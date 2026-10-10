@@ -33,7 +33,7 @@ describe("EditBlockPanel", () => {
     renderWithQuery(<EditBlockPanel block={mockBlock} onClose={vi.fn()} />)
 
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
-    expect(screen.getByText("Modifica la fecha o el horario del bloque.")).toBeInTheDocument()
+    expect(screen.getByText("Modifica la hora de inicio o de fin del bloque.")).toBeInTheDocument()
     expect(screen.getByText("Lunes 13 de mayo")).toBeInTheDocument()
     expect(screen.getByLabelText(/Día/)).toHaveValue("2030-05-13")
     expect(screen.getByLabelText(/Desde/)).toHaveValue("10:00")
