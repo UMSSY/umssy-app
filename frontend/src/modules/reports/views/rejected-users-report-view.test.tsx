@@ -286,8 +286,7 @@ describe("RejectedUsersReportView", () => {
     });
     expect(downloadSpy).toHaveBeenCalledWith(file, "usuarios-rechazados-2026-10-03.csv");
     expect(screen.queryByRole("alert")).toBeNull();
-    expect(screen.getByText("Descarga iniciada. Revisa las descargas de tu navegador.")).toBeDefined();
-    expect(screen.queryByText("La exportación de la tabla ha sido un éxito")).toBeNull();
+    expect(screen.getByText("La exportación de la tabla ha sido un éxito")).toBeDefined();
   });
 
   it("muestra un mensaje si falla la exportación", async () => {

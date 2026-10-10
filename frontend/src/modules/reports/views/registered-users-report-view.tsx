@@ -31,7 +31,6 @@ export function RegisteredUsersReportView() {
     isExporting,
     errorMessage: exportErrorMessage,
     successMessage: exportSuccessMessage,
-    downloadMessage: exportDownloadMessage,
   } = useExportRegisteredUsersCsv(userType, period);
 
   const handleUserTypeChange = (selectedUserType?: RoleTag) => {
@@ -81,10 +80,7 @@ export function RegisteredUsersReportView() {
         </div>
       </div>
 
-      <ExportSuccessToast
-        message={exportSuccessMessage ?? exportDownloadMessage}
-        variant={exportSuccessMessage ? "success" : "info"}
-      />
+      <ExportSuccessToast message={exportSuccessMessage} />
       <ReportAlertToast variant="warning" message={isSlow ? SLOW_REQUEST_MESSAGE : undefined} />
       <ReportAlertToast variant="error" message={hasConnectionError ? CONNECTION_ERROR_MESSAGE : undefined} />
     </section>

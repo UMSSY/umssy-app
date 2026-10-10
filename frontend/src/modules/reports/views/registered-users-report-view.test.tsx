@@ -374,8 +374,7 @@ describe("RegisteredUsersReportView", () => {
     });
     expect(downloadSpy).toHaveBeenCalledWith(file, "usuarios-registrados-2026-10-03.csv");
     expect(screen.queryByRole("alert")).toBeNull();
-    expect(screen.getByText("Descarga iniciada. Revisa las descargas de tu navegador.")).toBeDefined();
-    expect(screen.queryByText("La exportación de la tabla ha sido un éxito")).toBeNull();
+    expect(screen.getByText("La exportación de la tabla ha sido un éxito")).toBeDefined();
   });
 
   it("muestra el aviso verde solo cuando termina de guardarse el CSV", async () => {
@@ -406,7 +405,6 @@ describe("RegisteredUsersReportView", () => {
 
     const message = await screen.findByText("La exportación de la tabla ha sido un éxito");
     expect(message.parentElement).toHaveClass("bg-green-50");
-    expect(screen.queryByText("Descarga iniciada. Revisa las descargas de tu navegador.")).toBeNull();
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeEnabled();
   });
 

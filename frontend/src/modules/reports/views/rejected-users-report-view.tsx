@@ -27,7 +27,6 @@ export function RejectedUsersReportView() {
     isExporting,
     errorMessage: exportErrorMessage,
     successMessage: exportSuccessMessage,
-    downloadMessage: exportDownloadMessage,
   } = useExportRejectedUsersCsv(search);
 
   const handleSearchChange = (value: string) => {
@@ -79,10 +78,7 @@ export function RejectedUsersReportView() {
         </div>
       </div>
 
-      <ExportSuccessToast
-        message={exportSuccessMessage ?? exportDownloadMessage}
-        variant={exportSuccessMessage ? "success" : "info"}
-      />
+      <ExportSuccessToast message={exportSuccessMessage} />
     </section>
   );
 }
