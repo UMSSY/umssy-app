@@ -1,4 +1,4 @@
-import { VacanciesView } from "@/modules/vacantes/views/vacancies-view";
+import { VacanciesView } from "@/modules/vacancies/views/vacancies-view";
 
 export default function VacantesPage() {
   return <VacanciesView />;

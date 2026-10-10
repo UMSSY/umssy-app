@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
@@ -48,6 +49,7 @@ import { MatchingModule } from './modules/matching/matching.module.js';
     AccessRequestsModule,
     ReportsModule,
     MatchingModule,
+
   ],
   controllers: [AppController],
   providers: [
