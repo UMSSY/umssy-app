@@ -25,6 +25,6 @@ import { ProfileService } from './services/profile.service.js';
     ProfilePhotoMapper,
     FileValidationService,
   ],
-  exports: [ProfileRepository],
+  exports: [ProfileRepository, ProfilePhotoService],
 })
 export class ProfileModule {}
