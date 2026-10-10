@@ -12,7 +12,6 @@ import { AuthModule } from './modules/auth/auth.module.js';
 import { EventRegistrationsModule } from './modules/event-registrations/event-registrations.module.js';
 import { EventCategoriesModule } from './modules/event-categories/event-categories.module.js';
 import { EventsModule } from './modules/events/events.module.js';
-import { CertificationDocumentsModule } from './modules/certification-documents/certification-documents.module.js';
 import { CertificationsModule } from './modules/certifications/certifications.module.js';
 import { CvModule } from './modules/cv/cv.module.js';
 import { EducationsModule } from './modules/educations/educations.module.js';
@@ -40,7 +39,6 @@ import { AccessRequestsModule } from './modules/access-requests/access-requests.
     EducationsModule,
     WorkExperienceModule,
     CertificationsModule,
-    CertificationDocumentsModule,
     TechnicalAreasModule,
     OrientationTypesModule,
     MentorsModule,

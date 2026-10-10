@@ -40,6 +40,7 @@ import {
 } from '../requests/update-education.request.js';
 import type { EducationResponse } from '../responses/education.response.js';
 import { EducationsService } from '../services/educations.service.js';
+import { EducationCatalogService } from '../services/education-catalog.service.js';
 import type { EducationInstitution } from '../types/education-institution.type.js';
 
 @ApiTags('educations')
@@ -55,12 +56,15 @@ import type { EducationInstitution } from '../types/education-institution.type.j
 )
 @Controller('educations')
 export class EducationsController {
-  constructor(private readonly service: EducationsService) {}
+  constructor(
+    private readonly service: EducationsService,
+    private readonly catalogService: EducationCatalogService,
+  ) {}
 
   @Get('institutions')
   @ApiOkResponse({ description: 'Allowed education institutions and their aliases' })
   getInstitutions(): readonly EducationInstitution[] {
-    return this.service.getInstitutions();
+    return this.catalogService.getInstitutions();
   }
 
   @Get()
