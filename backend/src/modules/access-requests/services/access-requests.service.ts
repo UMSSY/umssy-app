@@ -28,6 +28,15 @@ import type { UpdateAccessRequestDto } from '../requests/update-access-request.s
 import { ACCESS_REQUEST_DOCUMENT_TYPE, ACCESS_REQUEST_STATUS } from '../types/access-request.enum.js';
 import type { AttachDocumentInput } from '../types/uploaded-file.types.js';
 import { DUPLICATE_LABELS } from '../constants/duplicate-labels.constants.js';
+import { INBOX_PERIOD_DAYS } from '../constants/inbox-filters.constants.js';
+import {
+  HOUR_MS,
+  PENDING_ALERT_HOURS,
+  REVIEW_TIME_GOAL_HOURS,
+  REVIEW_TIME_WINDOW_DAYS,
+} from '../constants/inbox-summary.constants.js';
+import { DAY_MS } from '../../../common/constants/date-time.constants.js';
+import { toBoliviaTime, toUtcIso } from '../../../common/utils/date-time.js';
 
 type DuplicateField = keyof typeof DUPLICATE_LABELS;
 
@@ -235,12 +244,51 @@ export class AccessRequestsService {
   }
 
   // Forma { data, page, offset } del contrato paginado; el total viaja dentro de data
-  async list(query: ListAccessRequestsQuery) {
-    const { rows, total } = await this.accessRequestsRepository.findPage(query);
+  async list(query: ListAccessRequestsQuery, now: Date = new Date()) {
+    const { period, ...filters } = query;
+    const days = INBOX_PERIOD_DAYS[period];
+    const submittedFrom = days === undefined ? undefined : new Date(now.getTime() - days * DAY_MS);
+    const { rows, total } = await this.accessRequestsRepository.findPage({ ...filters, submittedFrom });
     return {
       data: { items: rows.map(toAccessRequestListItem), total },
       page: query.page,
       offset: (query.page - 1) * query.limit,
+    };
+  }
+
+  async getSummary(now: Date = new Date()) {
+    const { date: boliviaToday } = toBoliviaTime(now);
+    const todayStart = new Date(toUtcIso(boliviaToday, '00:00'));
+    const monthStart = new Date(toUtcIso(`${boliviaToday.slice(0, 8)}01`, '00:00'));
+    const windowStart = new Date(now.getTime() - REVIEW_TIME_WINDOW_DAYS * DAY_MS);
+    const alertCutoff = new Date(now.getTime() - PENDING_ALERT_HOURS * HOUR_MS);
+    const { PENDING, APPROVED, REJECTED } = ACCESS_REQUEST_STATUS;
+
+    const [pendingCount, pendingOver24hCount, approvedTodayCount, rejectedTodayCount, rejectedThisMonthCount, reviewTimes] =
+      await Promise.all([
+        this.accessRequestsRepository.countByStatus(PENDING),
+        this.accessRequestsRepository.countByStatus(PENDING, { submittedBefore: alertCutoff }),
+        this.accessRequestsRepository.countByStatus(APPROVED, { reviewedFrom: todayStart }),
+        this.accessRequestsRepository.countByStatus(REJECTED, { reviewedFrom: todayStart }),
+        this.accessRequestsRepository.countByStatus(REJECTED, { reviewedFrom: monthStart }),
+        this.accessRequestsRepository.findReviewTimes(windowStart),
+      ]);
+
+    const hours = reviewTimes.flatMap((row) =>
+      row.submittedAt && row.reviewedAt ? [(row.reviewedAt.getTime() - row.submittedAt.getTime()) / HOUR_MS] : [],
+    );
+    const averageReviewHours = hours.length === 0 ? null : Math.round(hours.reduce((sum, value) => sum + value, 0) / hours.length);
+
+    return {
+      pendingCount,
+      pendingOver24hCount,
+      decidedTodayCount: approvedTodayCount + rejectedTodayCount,
+      approvedTodayCount,
+      rejectedTodayCount,
+      averageReviewHours,
+      reviewTimeGoalHours: REVIEW_TIME_GOAL_HOURS,
+      rejectedThisMonthCount,
+      topRejectionReason: null,
     };
   }
 

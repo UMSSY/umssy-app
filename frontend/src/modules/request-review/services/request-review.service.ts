@@ -1,5 +1,7 @@
 import { apiClient } from "@/shared/services/api-client";
 import { REVIEW_PAGE_SIZE } from "../constants/request-review.constants";
+import type { InboxFilters } from "../types/inbox-filters.types";
+import type { InboxSummary } from "../types/inbox-summary.types";
 import type { ApproveResult, RejectResult, ReviewApiResult, ReviewDetail, ReviewListResult, ReviewStatus } from "../types/request-review.types";
 import { getSessionToken } from "../utils/session";
 
@@ -29,10 +31,19 @@ async function listRequests(
   status: ReviewStatus,
   page: number,
   limit: number = REVIEW_PAGE_SIZE,
+  filters: InboxFilters = {},
 ): Promise<ReviewApiResult<ReviewListResult>> {
   try {
+    const { search, career, period } = filters;
     const response = await apiClient.get("/access-requests", {
-      params: { status, page, limit },
+      params: {
+        status,
+        page,
+        limit,
+        ...(search && { search }),
+        ...(career && { career }),
+        ...(period && period !== "all" && { period }),
+      },
       headers: authHeaders(),
       validateStatus: () => true,
     });
@@ -52,6 +63,41 @@ async function listRequests(
         page: typeof body.page === "number" ? body.page : page,
         offset: typeof body.offset === "number" ? body.offset : (page - 1) * limit,
       },
+    };
+  } catch {
+    return { ok: false, status: 0, message: NETWORK_ERROR_MESSAGE };
+  }
+}
+
+const SUMMARY_NUMBER_KEYS = [
+  "pendingCount",
+  "pendingOver24hCount",
+  "decidedTodayCount",
+  "approvedTodayCount",
+  "rejectedTodayCount",
+  "reviewTimeGoalHours",
+  "rejectedThisMonthCount",
+] as const;
+
+async function getSummary(): Promise<ReviewApiResult<InboxSummary>> {
+  try {
+    const response = await apiClient.get("/access-requests/summary", { headers: authHeaders(), validateStatus: () => true });
+    if (response.status < 200 || response.status >= 300) return failureOf(response.status, response.data);
+
+    const body: unknown = response.data;
+    const payload = isRecord(body) && isRecord(body.data) && "pendingCount" in body.data ? body.data : body;
+    const average = isRecord(payload) ? payload.averageReviewHours : undefined;
+    const reason = isRecord(payload) ? payload.topRejectionReason : undefined;
+    if (
+      !isRecord(payload) ||
+      SUMMARY_NUMBER_KEYS.some((key) => typeof payload[key] !== "number") ||
+      (average !== null && typeof average !== "number")
+    ) {
+      return { ok: false, status: 0, message: GENERIC_ERROR_MESSAGE };
+    }
+    return {
+      ok: true,
+      data: { ...(payload as unknown as InboxSummary), averageReviewHours: average, topRejectionReason: typeof reason === "string" ? reason : null },
     };
   } catch {
     return { ok: false, status: 0, message: NETWORK_ERROR_MESSAGE };
@@ -147,4 +193,4 @@ async function getDocumentBlob(id: string): Promise<ReviewApiResult<Blob>> {
   }
 }
 
-export const requestReviewService = { listRequests, getRequestDetail, getDocumentBlob, approveRequest, rejectRequest };
+export const requestReviewService = { listRequests, getSummary, getRequestDetail, getDocumentBlob, approveRequest, rejectRequest };

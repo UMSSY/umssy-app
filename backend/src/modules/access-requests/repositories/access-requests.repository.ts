@@ -15,6 +15,8 @@ import { isSubmittedDuplicate } from '../helpers/unique-violation.js';
 import { ACCESS_REQUEST_STATUS } from '../types/access-request.enum.js';
 import { ACCESS_REQUEST_SELECT, REQUEST_STATUS_SELECT, LIST_SELECT, DETAIL_SELECT } from '../constants/access-request-selects.constants.js';
 import { ACTIVE_STATUSES, LISTED_STATUSES } from '../constants/access-request-status-groups.constants.js';
+import { MAX_SEARCH_TERMS } from '../constants/inbox-filters.constants.js';
+import { DECIDED_STATUSES } from '../constants/inbox-summary.constants.js';
 
 @Injectable()
 export class AccessRequestsRepository {
@@ -42,9 +44,22 @@ export class AccessRequestsRepository {
     }
   }
 
-  async findPage(params: { status?: string; page: number; limit: number }) {
+  async findPage(params: { status?: string; search?: string; career?: string; submittedFrom?: Date; page: number; limit: number }) {
+    const terms = params.search?.split(/\s+/).filter(Boolean).slice(0, MAX_SEARCH_TERMS) ?? [];
     const where: Prisma.AccessRequestWhereInput = {
       status: { title: params.status ?? { in: LISTED_STATUSES } },
+      ...(params.career && { career: { title: params.career } }),
+      ...(params.submittedFrom && { submittedAt: { gte: params.submittedFrom } }),
+      ...(terms.length > 0 && {
+        AND: terms.map((term) => ({
+          OR: [
+            { firstName: { contains: term, mode: 'insensitive' as const } },
+            { lastName: { contains: term, mode: 'insensitive' as const } },
+            { idCardNumber: { contains: term, mode: 'insensitive' as const } },
+            { sisCode: { contains: term, mode: 'insensitive' as const } },
+          ],
+        })),
+      }),
     };
     const [rows, total] = await Promise.all([
       this.prisma.accessRequest.findMany({
@@ -57,6 +72,23 @@ export class AccessRequestsRepository {
       this.prisma.accessRequest.count({ where }),
     ]);
     return { rows, total };
+  }
+
+  countByStatus(status: string, filters: { submittedBefore?: Date; reviewedFrom?: Date } = {}) {
+    return this.prisma.accessRequest.count({
+      where: {
+        status: { title: status },
+        ...(filters.submittedBefore && { submittedAt: { lt: filters.submittedBefore } }),
+        ...(filters.reviewedFrom && { reviewedAt: { gte: filters.reviewedFrom } }),
+      },
+    });
+  }
+
+  findReviewTimes(since: Date) {
+    return this.prisma.accessRequest.findMany({
+      where: { status: { title: { in: DECIDED_STATUSES } }, reviewedAt: { gte: since }, submittedAt: { not: null } },
+      select: { submittedAt: true, reviewedAt: true },
+    });
   }
 
   findDetailById(id: string) {

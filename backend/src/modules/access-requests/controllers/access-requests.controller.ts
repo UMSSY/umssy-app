@@ -43,6 +43,13 @@ export class AccessRequestsController {
     return this.accessRequestsService.list(query);
   }
 
+  @Get('summary')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(BACKOFFICE_ROLE)
+  getSummary() {
+    return this.accessRequestsService.getSummary();
+  }
+
   // Se declara antes que cualquier ruta con :id para que "status" no se tome como identificador
   // TODO: reemplazar el correo en la URL cuando Pablo defina la autenticación (los parámetros de consulta quedan en los logs)
   @Get('status/:code')

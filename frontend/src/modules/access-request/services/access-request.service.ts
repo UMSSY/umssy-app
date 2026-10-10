@@ -42,6 +42,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function unwrapBody(body: unknown): unknown {
+  return isRecord(body) && typeof body.statusCode === "number" && "ok" in body && isRecord(body.data) ? body.data : body;
+}
+
 function failure(status: number, message: string, fieldErrors: FieldErrors = {}): ApiResult<never> {
   return { ok: false, status, fieldErrors, message };
 }
@@ -88,6 +92,9 @@ function parseError(status: number, body: unknown, notFoundMessage = NOT_FOUND_M
   if (status === 413) return failure(413, FILE_TOO_LARGE_MESSAGE);
   if (!isRecord(body)) return failure(0, NETWORK_ERROR_MESSAGE);
   if (Array.isArray(body.message)) return fromZodIssues(body.message);
+  if (Array.isArray(body.errors)) {
+    return fromZodIssues(body.errors.map((error) => (isRecord(error) && typeof error.field === "string" ? { ...error, path: error.field.split(".") } : error)));
+  }
   if (typeof body.detail === "string") return fromDomainError(status, body.detail);
   if (typeof body.message === "string") return failure(status, body.message);
   return failure(status, GENERIC_ERROR_MESSAGE);
@@ -111,8 +118,9 @@ async function send<T>(
       validateStatus: () => true,
     });
     if (response.status >= 200 && response.status < 300) {
-      if (!isRecord(response.data)) return failure(0, NETWORK_ERROR_MESSAGE);
-      return { ok: true, data: response.data as T };
+      const body = unwrapBody(response.data);
+      if (!isRecord(body)) return failure(0, NETWORK_ERROR_MESSAGE);
+      return { ok: true, data: body as T };
     }
     return parseError(response.status, response.data, options.notFoundMessage);
   } catch {
