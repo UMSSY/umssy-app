@@ -1,9 +1,19 @@
+
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
-import { CalendarDays, ChartColumn, House, ListChecks, User, UserRound } from "lucide-react";
+import {
+  CalendarDays,
+  ChartColumn,
+  House,
+  ListChecks,
+  MessageCircle,
+  User,
+  UserRound,
+} from "lucide-react";
 
 export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Inicio", icon: House, href: "/" },
   { label: "Mi perfil", icon: User, href: "/profile" },
+  { label: "Chat", icon: MessageCircle, href: "/chat" },
   {
     label: "Mentorías",
     icon: CalendarDays,

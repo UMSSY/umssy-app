@@ -1,9 +1,11 @@
+﻿
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -24,6 +26,64 @@ interface ChatRoomProps {
   hasMoreMessages?: boolean;
   onLoadMoreMessages?: () => void | Promise<unknown>;
   isLoadingMoreMessages?: boolean;
+}
+
+function getMessageDate(message: Message): string {
+  return message.timestamp || message.createdAt || '';
+}
+
+function formatMessageTime(isoString?: string | null): string {
+  if (!isoString) return '';
+
+  const date = new Date(isoString);
+
+  if (Number.isNaN(date.getTime())) return '';
+
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const hour12 = String(hours % 12 || 12).padStart(2, '0');
+  const period = hours >= 12 ? 'PM' : 'AM';
+
+  return `${hour12}:${minutes} ${period}`;
+}
+
+function formatMessageDate(isoString?: string | null): string {
+  if (!isoString) return '';
+
+  const date = new Date(isoString);
+
+  if (Number.isNaN(date.getTime())) return '';
+
+  return new Intl.DateTimeFormat('es-BO', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+    .format(date)
+    .toUpperCase();
+}
+
+function isSameDay(
+  firstDate?: string | null,
+  secondDate?: string | null,
+): boolean {
+  if (!firstDate || !secondDate) return false;
+
+  const first = new Date(firstDate);
+  const second = new Date(secondDate);
+
+  if (
+    Number.isNaN(first.getTime()) ||
+    Number.isNaN(second.getTime())
+  ) {
+    return false;
+  }
+
+  return (
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate()
+  );
 }
 
 export function ChatRoom({
@@ -48,13 +108,7 @@ export function ChatRoom({
 
   const isLoadingPreviousPageRef = useRef(false);
 
-  /**
-   * Carga una pagina de mensajes anteriores.
-   *
-   * Antes de realizar la carga guardamos el alto y la posicion
-   * actuales del scroll. Estos valores permiten mantener al usuario
-   * en el mismo punto cuando los mensajes anteriores se agreguen arriba.
-   */
+  // Solicitar mensajes anteriores conservando el scroll.
   const loadOlderMessages = useCallback(async () => {
     const container = messagesContainerRef.current;
 
@@ -83,10 +137,7 @@ export function ChatRoom({
     onLoadMoreMessages,
   ]);
 
-  /**
-   * Cuando el usuario se aproxima a la parte superior del historial,
-   * se solicita automaticamente la pagina anterior.
-   */
+  // Cargar automáticamente al llegar arriba.
   const handleMessagesScroll = () => {
     const container = messagesContainerRef.current;
 
@@ -97,20 +148,8 @@ export function ChatRoom({
     }
   };
 
-  /**
-   * Control del scroll despues de actualizar los mensajes.
-   *
-   * Primera carga:
-   *   muestra los mensajes mas recientes.
-   *
-   * Carga de mensajes anteriores:
-   *   compensa el aumento del scrollHeight para evitar que la
-   *   pantalla salte cuando los mensajes se insertan arriba.
-   *
-   * Mensaje nuevo:
-   *   mueve el historial hacia la parte inferior.
-   */
-  useEffect(() => {
+  // Restaurar la posición antes de que el navegador pinte.
+  useLayoutEffect(() => {
     const container = messagesContainerRef.current;
 
     if (!container) return;
@@ -120,10 +159,9 @@ export function ChatRoom({
 
     if (isLoadingPreviousPageRef.current) {
       if (currentLength > previousLength) {
-        const newScrollHeight = container.scrollHeight;
-
         const heightDifference =
-          newScrollHeight - previousScrollHeightRef.current;
+          container.scrollHeight -
+          previousScrollHeightRef.current;
 
         container.scrollTop =
           previousScrollTopRef.current + heightDifference;
@@ -133,24 +171,17 @@ export function ChatRoom({
         isLoadingPreviousPageRef.current = false;
       }
     } else if (previousLength === 0 && currentLength > 0) {
-      /*
-       * Primera pagina cargada.
-       * Se muestran los mensajes mas recientes.
-       */
+      // Primera carga: mostrar los mensajes recientes.
       container.scrollTop = container.scrollHeight;
     } else if (currentLength > previousLength) {
-      /*
-       * Mensaje nuevo enviado o recibido.
-       */
+      // Nuevo mensaje: ir al final del historial.
       container.scrollTop = container.scrollHeight;
     }
 
     previousMessagesLengthRef.current = currentLength;
   }, [messages.length, isLoadingMoreMessages]);
 
-  /**
-   * Reinicia el control del scroll al seleccionar otra conversacion.
-   */
+  // Reiniciar referencias al cambiar de conversación.
   useEffect(() => {
     previousScrollHeightRef.current = 0;
     previousScrollTopRef.current = 0;
@@ -158,10 +189,8 @@ export function ChatRoom({
     isLoadingPreviousPageRef.current = false;
   }, [conversation.id]);
 
-  /**
-   * Si una pagina contiene pocos mensajes y no alcanza para producir
-   * scroll vertical, se carga otra pagina automaticamente.
-   */
+  // Si no hay suficiente contenido para generar scroll,
+  // intentar cargar otra página.
   useEffect(() => {
     const container = messagesContainerRef.current;
 
@@ -194,24 +223,6 @@ export function ChatRoom({
     setInputText('');
   };
 
-  const formatMessageTime = (
-    isoString?: string | null,
-  ): string => {
-    if (!isoString) return '';
-
-    const date = new Date(isoString);
-
-    if (isNaN(date.getTime())) return '';
-
-    return date
-      .toLocaleTimeString('es-ES', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      })
-      .toUpperCase();
-  };
-
   return (
     <div
       data-testid="chat-room"
@@ -223,7 +234,7 @@ export function ChatRoom({
         className="shrink-0 w-full min-w-0 bg-white border-b border-[#E3E7EC] p-3 md:p-4 flex items-center justify-between z-10"
       >
         <div className="flex items-center gap-3">
-          {/* Boton atras para movil */}
+          {/* Botón atrás para móvil */}
           <button
             type="button"
             data-testid="chat-back-button"
@@ -269,7 +280,7 @@ export function ChatRoom({
             )}
           </div>
 
-          {/* Informacion del contacto */}
+          {/* Información del contacto */}
           <div>
             <h3
               data-testid="chat-contact-name"
@@ -294,7 +305,7 @@ export function ChatRoom({
         onScroll={handleMessagesScroll}
         className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-4 md:p-6 space-y-3 bg-[#F6F7F9]"
       >
-        {/* Indicador mientras se cargan mensajes anteriores */}
+        {/* Cargando mensajes anteriores */}
         {isLoadingMoreMessages && (
           <div
             data-testid="loading-older-messages"
@@ -306,7 +317,7 @@ export function ChatRoom({
           </div>
         )}
 
-        {/* Boton alternativo para cargar mensajes anteriores */}
+        {/* Botón para cargar mensajes anteriores */}
         {hasMoreMessages && !isLoadingMoreMessages && (
           <div className="flex justify-center py-2">
             <button
@@ -319,7 +330,7 @@ export function ChatRoom({
           </div>
         )}
 
-        {/* Ya se alcanzo el mensaje mas antiguo */}
+        {/* Inicio de conversación */}
         {!hasMoreMessages &&
           messages.length > 0 &&
           !isLoadingMessages &&
@@ -360,57 +371,100 @@ export function ChatRoom({
             <p className="text-xs text-slate-400 mt-1">
               {isLoadingMessages
                 ? 'Cargando mensajes...'
-                : 'Envio e historial de mensajes'}
+                : 'Envío e historial de mensajes'}
             </p>
           </div>
         ) : (
-          messages.map((message) => {
-            const isOwn = message.senderId === currentUserId;
+          messages.map((message, index) => {
+            const isOwn =
+              message.senderId === currentUserId;
+
+            const senderName = isOwn
+              ? 'Tú'
+              : conversation.contact.fullName;
+
+            const messageDate = getMessageDate(message);
+
+            const previousMessage =
+              index > 0 ? messages[index - 1] : null;
+
+            const showDateSeparator =
+              !previousMessage ||
+              !isSameDay(
+                getMessageDate(previousMessage),
+                messageDate,
+              );
 
             return (
-              <div
-                key={message.id}
-                data-testid={`message-item-${message.id}`}
-                className={`flex w-full min-w-0 ${
-                  isOwn
-                    ? 'justify-end'
-                    : 'justify-start'
-                }`}
-              >
-                <div
-                  className={`max-w-[85%] md:max-w-[70%] min-w-0 rounded-2xl px-4 py-2.5 text-sm shadow-xs [overflow-wrap:anywhere] break-words ${
-                    isOwn
-                      ? 'bg-[#0B1F2E] text-white rounded-tr-xs'
-                      : 'bg-white text-[#0B1F2E] border border-[#E3E7EC] rounded-tl-xs'
-                  }`}
-                >
-                  <p className="leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
-                    {message.content}
-                  </p>
-
+              <div key={message.id}>
+                {/* Separador de fecha */}
+                {showDateSeparator && (
                   <div
-                    className={`flex items-center gap-1.5 justify-end mt-1 text-[10px] ${
-                      isOwn
-                        ? 'text-slate-300'
-                        : 'text-[#5B6470]'
-                    }`}
+                    data-testid={`date-separator-${message.id}`}
+                    className="flex items-center gap-3 my-5"
                   >
-                    <span>
-                      {formatMessageTime(
-                        message.timestamp ||
-                          message.createdAt,
-                      )}
+                    <div className="h-px flex-1 bg-[#E3E7EC]" />
+
+                    <span className="text-[11px] font-semibold text-[#5B6470] text-center whitespace-nowrap">
+                      {formatMessageDate(messageDate)}
                     </span>
 
-                    {isOwn && (
-                      <span className="font-medium">
-                        {message.status === 'sending'
-                          ? 'Enviando...'
-                          : message.status === 'error'
-                            ? 'Error'
-                            : ''}
+                    <div className="h-px flex-1 bg-[#E3E7EC]" />
+                  </div>
+                )}
+
+                {/* Mensaje */}
+                <div
+                  data-testid={`message-item-${message.id}`}
+                  className={`flex w-full min-w-0 ${
+                    isOwn ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  <div
+                    className={`max-w-[85%] md:max-w-[70%] min-w-0 rounded-2xl px-4 py-2.5 text-sm shadow-xs [overflow-wrap:anywhere] break-words ${
+                      isOwn
+                        ? 'bg-[#0B1F2E] text-white rounded-tr-xs'
+                        : 'bg-white text-[#0B1F2E] border border-[#E3E7EC] rounded-tl-xs'
+                    }`}
+                  >
+                    {/* Nombre del remitente */}
+                    <p
+                      className={`mb-1 text-xs font-semibold ${
+                        isOwn
+                          ? 'text-slate-200'
+                          : 'text-[#2563EB]'
+                      }`}
+                    >
+                      {senderName}
+                    </p>
+
+                    {/* Contenido */}
+                    <p className="leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
+                      {message.content}
+                    </p>
+
+                    {/* Hora y estado */}
+                    <div
+                      className={`flex items-center gap-1.5 justify-end mt-1 text-[10px] ${
+                        isOwn
+                          ? 'text-slate-300'
+                          : 'text-[#5B6470]'
+                      }`}
+                    >
+                      <span>
+                        {formatMessageTime(messageDate)}
                       </span>
-                    )}
+
+                      {isOwn && (
+                        <span className="font-medium">
+                          {message.status === 'sending'
+                            ? 'Enviando...'
+                            : message.status === 'error'
+                              ? 'Error'
+                              : ''}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -418,11 +472,11 @@ export function ChatRoom({
           })
         )}
 
-        {/* Ancla conservada por compatibilidad con los tests existentes */}
+        {/* Ancla compatible con las pruebas existentes */}
         <div data-testid="messages-scroll-anchor" />
       </div>
 
-      {/* Barra para enviar mensajes */}
+      {/* Barra de envío */}
       <MessageInputBar
         value={inputText}
         onChange={setInputText}
@@ -432,3 +486,4 @@ export function ChatRoom({
     </div>
   );
 }
+
