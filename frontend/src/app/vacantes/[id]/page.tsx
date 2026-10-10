@@ -1,4 +1,4 @@
-import { vacancies } from "@/modules/vacantes/data/vacancies";
+import { vacancies } from "@/modules/vacancies/data/vacancies";
 import Link from "next/link";
 
 interface VacancyDetailPageProps {
