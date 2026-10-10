@@ -5,6 +5,7 @@ import { InvalidEducationDateRangeException } from '../exceptions/invalid-educat
 import { EducationMapper } from '../mappers/education.mapper.js';
 import type { EducationsRepository } from '../repositories/educations.repository.js';
 import { EducationsService } from '../services/educations.service.js';
+import { EducationCatalogService } from '../services/education-catalog.service.js';
 import type { EducationRecord } from '../types/education-record.type.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
@@ -39,6 +40,7 @@ describe('EducationsService', () => {
     service = new EducationsService(
       repository as unknown as EducationsRepository,
       new EducationMapper(),
+      new EducationCatalogService(),
     );
   });
 
@@ -210,6 +212,6 @@ describe('EducationsService', () => {
     expect(results.find((result) => result.status === 'rejected')).toMatchObject({
       reason: expect.any(EducationUpdateConflictException),
     });
-    expect(stored.endDate >= stored.startDate).toBe(true);
+    expect(stored.endDate! >= stored.startDate).toBe(true);
   });
 });

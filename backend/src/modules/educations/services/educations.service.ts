@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { EDUCATION_INSTITUTIONS } from '../constants/education-institutions.constants.js';
 import type { EducationInstitution } from '../types/education-institution.type.js';
 import { EducationNotFoundException } from '../exceptions/education-not-found.exception.js';
 import { EducationUpdateConflictException } from '../exceptions/education-update-conflict.exception.js';
@@ -9,17 +8,18 @@ import { EducationsRepository } from '../repositories/educations.repository.js';
 import type { CreateEducationRequest } from '../requests/create-education.request.js';
 import type { UpdateEducationRequest } from '../requests/update-education.request.js';
 import type { EducationResponse } from '../responses/education.response.js';
-import { validateEducationDegree } from '../utils/validate-education-degree.js';
+import { EducationCatalogService } from './education-catalog.service.js';
 
 @Injectable()
 export class EducationsService {
   constructor(
     private readonly repository: EducationsRepository,
     private readonly mapper: EducationMapper,
+    private readonly catalogService: EducationCatalogService,
   ) {}
 
   getInstitutions(): readonly EducationInstitution[] {
-    return EDUCATION_INSTITUTIONS;
+    return this.catalogService.getInstitutions();
   }
 
   async findAll(userId: string): Promise<EducationResponse[]> {
@@ -33,7 +33,7 @@ export class EducationsService {
     request: CreateEducationRequest,
   ): Promise<EducationResponse> {
     this.validateDateRange(request.startDate, request.endDate);
-    const degree = validateEducationDegree(request.institution, request.degree);
+    const degree = this.catalogService.validateDegree(request.institution, request.degree);
     return this.mapper.toResponse(
       await this.repository.create(userId, { ...request, degree }),
     );
@@ -53,7 +53,10 @@ export class EducationsService {
       request.startDate ?? record.startDate,
       request.endDate === undefined ? record.endDate : request.endDate,
     );
-    const degree = validateEducationDegree(request.institution ?? record.institution, request.degree ?? record.degree);
+    const degree = this.catalogService.validateDegree(
+      request.institution ?? record.institution,
+      request.degree ?? record.degree,
+    );
     const changes = request.degree !== undefined || request.institution !== undefined
       ? { ...request, degree } : request;
     const updated = await this.repository.update(id, userId, changes, {

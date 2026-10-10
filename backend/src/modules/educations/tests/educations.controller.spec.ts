@@ -75,6 +75,16 @@ describe('EducationsController', () => {
     await app.close();
   });
 
+  it('returns the list of allowed institutions', async () => {
+    const response = await request(app.getHttpServer())
+      .get('/api/educations/institutions')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(response.body.data).toEqual(expect.any(Array));
+    expect(response.body.data.length).toBeGreaterThan(0);
+  });
+
   it('creates, lists, updates and deletes through the authenticated API', async () => {
     const created = await request(app.getHttpServer())
       .post('/api/educations')
