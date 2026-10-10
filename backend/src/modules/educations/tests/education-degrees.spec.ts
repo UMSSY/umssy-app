@@ -15,9 +15,14 @@ describe('Local education degree catalogues', () => {
   });
 
   it('accounts for every allowed institution with sources and unambiguous degree names', () => {
+    expect(EDUCATION_INSTITUTIONS.map((entry) => entry.aliases[0])).toEqual([
+      'UMSS', 'UNIBOL Quechua', 'EMI', 'UCB', 'UPB', 'UNIVALLE', 'UNIFRANZ',
+      'UDABOL', 'UNICEN', 'UCATEC', 'UPDS', 'UAB', 'UNITEPC', 'USIP', 'ULAT', 'UNIVIOR', 'USB',
+    ]);
     expect(EDUCATION_DEGREES.map((entry) => entry.institution)).toEqual(EDUCATION_INSTITUTIONS.map((entry) => entry.name));
     for (const entry of EDUCATION_DEGREES) {
       expect(entry.sources.length).toBeGreaterThan(0);
+      expect(entry.degrees.length).toBeGreaterThan(0);
       const names = entry.degrees.flatMap((degree) => [degree.name, ...degree.aliases].map(normalizeEducationText));
       expect(new Set(names).size).toBe(names.length);
     }
@@ -36,7 +41,7 @@ describe('Local education degree catalogues', () => {
     expect(resolveEducationDegree('Unknown', 'Ingeniería Civil')).toBeUndefined();
   });
 
-  it('does not invent degrees when the reviewed catalogue has no programmes in scope', () => {
+  it('does not resolve degrees for excluded institutions', () => {
     for (const institution of ['UPAL', 'NUR', 'Universidad Pedagógica']) {
       expect(resolveEducationDegree(institution, 'Ingeniería de Sistemas')).toBeUndefined();
     }

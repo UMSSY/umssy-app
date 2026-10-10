@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { educationsService } from "../services/educations.service";
 import type { EducationItem } from "../types/education-item.types";
+import type { EducationFormValues } from "../types/education-form-values.types";
 import { EDUCATION_FEEDBACK_MESSAGES } from "../constants/education-feedback.constants";
 import { EducationView } from "./education-view";
 
@@ -39,6 +40,37 @@ const EDUCATIONS: EducationItem[] = [
   },
 ];
 
+function setupView() {
+  const user = userEvent.setup();
+  render(<EducationView />);
+  return user;
+}
+
+async function openForm(user: ReturnType<typeof userEvent.setup>, action = "Agregar información") {
+  await user.click(await screen.findByRole("button", { name: action }));
+}
+
+async function saveForm(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+}
+
+async function fillForm(user: ReturnType<typeof userEvent.setup>, values: Partial<EducationFormValues>) {
+  const labels: Record<keyof EducationFormValues, RegExp> = {
+    institution: /Institución/, degree: /Título o carrera/, startDate: /Desde/, endDate: /Hasta/, description: /Descripción/,
+  };
+  for (const field of Object.keys(labels) as (keyof EducationFormValues)[]) {
+    const value = values[field];
+    if (value === undefined) continue;
+    const input = screen.getByLabelText(labels[field]);
+    if (field === "startDate" || field === "endDate") {
+      fireEvent.change(input, { target: { value } });
+    } else {
+      await user.clear(input);
+      if (value) await user.type(input, value);
+    }
+  }
+}
+
 describe("EducationView", () => {
   beforeEach(() => {
     vi.mocked(educationsService.getInstitutions).mockResolvedValue([
@@ -53,12 +85,37 @@ describe("EducationView", () => {
     vi.resetAllMocks();
   });
 
-  it.each([false, true])("preserves free-text fields and the list when a duplicate is rejected (editing: %s)", async (editing) => {
+  it.each(['Universidad Privada Abierta Latinoamericana (UPAL)', 'Universidad NUR', 'Universidad Pedagógica'])(
+    'keeps the legacy record from %s visible and requires correction before updating', async (institution) => {
+      const legacy = { ...EDUCATIONS[0], institution, endDate: null };
+      const updated = { ...legacy, institution: EDUCATIONS[0].institution, description: 'Updated description' };
+      vi.mocked(educationsService.getEducations).mockResolvedValueOnce([legacy]).mockResolvedValue([updated]);
+      vi.mocked(educationsService.updateEducation).mockResolvedValue(updated);
+      const user = setupView();
+      const list = await screen.findByRole('list', { name: 'Formación registrada' });
+      expect(list).toHaveTextContent(institution);
+      await openForm(user, 'Editar Ingeniería Informática');
+      expect(screen.getByLabelText(/Institución/)).toHaveValue(institution);
+      await saveForm(user);
+      expect(educationsService.updateEducation).not.toHaveBeenCalled();
+      expect(educationsService.createEducation).not.toHaveBeenCalled();
+      expect(list).toHaveTextContent(institution);
+      expect(screen.getByLabelText(/Institución/)).toHaveAccessibleDescription('Selecciona una universidad de la lista permitida.');
+      await fillForm(user, { institution: updated.institution, description: updated.description });
+      await saveForm(user);
+      await screen.findByText('Formación académica actualizada correctamente.');
+      expect(educationsService.updateEducation).toHaveBeenCalledExactlyOnceWith(legacy.id, {
+        institution: updated.institution, degree: legacy.degree, startDate: legacy.startDate, description: updated.description,
+      });
+      expect(screen.getByRole('list', { name: 'Formación registrada' })).toHaveTextContent('Fecha de fin no registrada');
+    },
+  );
+
+  it.each([false, true])("preserves entered fields and the list when a duplicate is rejected (editing: %s)", async (editing) => {
     const error = { isAxiosError: true, response: { status: 409, data: { data: { code: "EDUCATION_DUPLICATE" } } } };
     vi.mocked(educationsService.createEducation).mockRejectedValue(error);
     vi.mocked(educationsService.updateEducation).mockRejectedValue(error);
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     const list = await screen.findByRole("list", { name: "Formación registrada" });
     await user.click(screen.getByRole("button", {
       name: editing ? "Editar Ingeniería Civil" : "Agregar información",
@@ -74,7 +131,7 @@ describe("EducationView", () => {
       fireEvent.change(screen.getByLabelText(label), { target: { value } });
     }
     expect(screen.getByRole("combobox", { name: /Institución/ })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await saveForm(user);
     expect(await screen.findByRole("alert")).toHaveTextContent(EDUCATION_FEEDBACK_MESSAGES.duplicate);
     expect(screen.getByLabelText(/Institución/)).toHaveValue(original.institution);
     expect(screen.getByLabelText(/Título o carrera/)).toHaveValue(original.degree);
@@ -105,9 +162,8 @@ describe("EducationView", () => {
 
   it('blocks saving until the failed catalogue load is retried successfully', async () => {
     vi.mocked(educationsService.getInstitutions).mockRejectedValueOnce(new Error('Unavailable'));
-    const user = userEvent.setup();
-    render(<EducationView />);
-    await user.click(await screen.findByRole('button', { name: 'Editar Ingeniería Informática' }));
+    const user = setupView();
+    await openForm(user, "Editar Ingeniería Informática");
     expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar la lista de universidades.');
     expect(screen.getByRole('button', { name: 'Guardar formación' })).toBeDisabled();
     fireEvent.submit(screen.getByRole('form'));
@@ -166,12 +222,11 @@ describe("EducationView", () => {
     const updated = { ...legacy, description: "Updated description" };
     vi.mocked(educationsService.getEducations).mockResolvedValueOnce([legacy]).mockResolvedValueOnce([updated]);
     vi.mocked(educationsService.updateEducation).mockResolvedValue(updated);
-    const user = userEvent.setup();
-    render(<EducationView />);
-    await user.click(await screen.findByRole("button", { name: "Editar Ingeniería Informática" }));
+    const user = setupView();
+    await openForm(user, "Editar Ingeniería Informática");
     expect(screen.getByLabelText(/Hasta/)).not.toBeRequired();
     fireEvent.change(screen.getByLabelText(/Descripción/), { target: { value: "Updated description" } });
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await saveForm(user);
     await screen.findByText("Formación académica actualizada correctamente.");
     expect(educationsService.updateEducation).toHaveBeenCalledExactlyOnceWith(legacy.id, {
       institution: legacy.institution,
@@ -188,22 +243,20 @@ describe("EducationView", () => {
     const legacy = { ...EDUCATIONS[0], endDate: null };
     vi.mocked(educationsService.getEducations).mockResolvedValue([legacy]);
     vi.mocked(educationsService.updateEducation).mockResolvedValue(EDUCATIONS[0]);
-    const user = userEvent.setup();
-    render(<EducationView />);
-    await user.click(await screen.findByRole("button", { name: "Editar Ingeniería Informática" }));
+    const user = setupView();
+    await openForm(user, "Editar Ingeniería Informática");
     fireEvent.change(screen.getByLabelText(/Hasta/), { target: { value: "2025-11-30" } });
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await saveForm(user);
     await screen.findByText("Formación académica actualizada correctamente.");
     expect(educationsService.updateEducation).toHaveBeenCalledWith(legacy.id, expect.objectContaining({ endDate: "2025-11-30" }));
   });
 
   it("retains the form after a conflict without reloading, clearing or retrying", async () => {
     vi.mocked(educationsService.updateEducation).mockRejectedValue({ response: { status: 409 } });
-    const user = userEvent.setup();
-    render(<EducationView />);
-    await user.click(await screen.findByRole("button", { name: "Editar Ingeniería Informática" }));
+    const user = setupView();
+    await openForm(user, "Editar Ingeniería Informática");
     fireEvent.change(screen.getByLabelText(/Título o carrera/), { target: { value: "Ingeniería Química" } });
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await saveForm(user);
     expect(await screen.findByRole("alert")).toHaveTextContent(EDUCATION_FEEDBACK_MESSAGES.updateConflict);
     expect(screen.getByLabelText(/Título o carrera/)).toHaveValue("Ingeniería Química");
     expect(screen.getByRole("button", { name: "Guardar formación" })).toBeEnabled();
@@ -238,11 +291,10 @@ describe("EducationView", () => {
   });
 
   it("opens an empty form from the add information button", async () => {
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
     expect(screen.queryByRole("form")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Agregar información" }));
+    await openForm(user);
 
     expect(screen.getByLabelText(/Institución/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Título o carrera/)).toBeInTheDocument();
@@ -258,17 +310,15 @@ describe("EducationView", () => {
     vi.mocked(educationsService.getEducations)
       .mockResolvedValueOnce(EDUCATIONS)
       .mockResolvedValueOnce([...EDUCATIONS, created]);
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
-    await user.click(screen.getByRole("button", { name: "Agregar información" }));
+    await openForm(user);
 
-    await user.type(screen.getByLabelText(/Institución/), "  Universidad Mayor de San Simón (UMSS) ");
-    await user.type(screen.getByLabelText(/Título o carrera/), "Ingeniería de Sistemas");
-    await user.type(screen.getByLabelText(/Desde/), "2021-02-01");
-    await user.type(screen.getByLabelText(/Hasta/), "2025-11-30");
-    await user.type(screen.getByLabelText(/Descripción \(opcional\)/), "   ");
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await fillForm(user, {
+      institution: "  Universidad Mayor de San Simón (UMSS) ", degree: "Ingeniería de Sistemas",
+      startDate: "2021-02-01", endDate: "2025-11-30", description: "   ",
+    });
+    await saveForm(user);
 
     expect(educationsService.createEducation).toHaveBeenCalledWith({
       institution: "Universidad Mayor de San Simón (UMSS)",
@@ -288,16 +338,15 @@ describe("EducationView", () => {
 
   it("shows a Spanish error when creating fails", async () => {
     vi.mocked(educationsService.createEducation).mockRejectedValue(new Error("Bad request"));
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
 
-    await user.click(screen.getByRole("button", { name: "Agregar información" }));
-    await user.type(screen.getByLabelText(/Institución/), "Universidad Mayor de San Simón (UMSS)");
-    await user.type(screen.getByLabelText(/Título o carrera/), "Ingeniería Civil");
-    fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2020-01-01" } });
-    fireEvent.change(screen.getByLabelText(/Hasta/), { target: { value: "2024-01-01" } });
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await openForm(user);
+    await fillForm(user, {
+      institution: "Universidad Mayor de San Simón (UMSS)", degree: "Ingeniería Civil",
+      startDate: "2020-01-01", endDate: "2024-01-01",
+    });
+    await saveForm(user);
 
     expect(
       await screen.findByText("No se pudo agregar la formación académica. Inténtalo de nuevo."),
@@ -306,7 +355,7 @@ describe("EducationView", () => {
     expect(screen.getByLabelText(/Institución/)).toHaveValue("Universidad Mayor de San Simón (UMSS)");
     expect(educationsService.getEducations).toHaveBeenCalledTimes(1);
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
-    await user.click(screen.getByRole("button", { name: "Agregar información" }));
+    await openForm(user);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.getByLabelText(/Institución/)).toHaveValue("");
   });
@@ -317,19 +366,17 @@ describe("EducationView", () => {
     vi.mocked(educationsService.getEducations)
       .mockResolvedValueOnce(EDUCATIONS)
       .mockResolvedValueOnce([updated, EDUCATIONS[1]]);
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
 
-    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
+    await openForm(user, "Editar Ingeniería Informática");
 
     expect(screen.getByRole("form", { name: "Editar formación" })).toBeInTheDocument();
     expect(screen.getByLabelText(/Institución/)).toHaveValue("Universidad Mayor de San Simón (UMSS)");
     expect(screen.getByLabelText(/Hasta/)).toHaveValue("2025-11-30");
 
-    await user.clear(screen.getByLabelText(/Título o carrera/));
-    await user.type(screen.getByLabelText(/Título o carrera/), "Ingeniería de Sistemas");
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await fillForm(user, { degree: "Ingeniería de Sistemas" });
+    await saveForm(user);
 
     expect(educationsService.updateEducation).toHaveBeenCalledWith(EDUCATIONS[0].id, {
       institution: "Universidad Mayor de San Simón (UMSS)",
@@ -346,27 +393,25 @@ describe("EducationView", () => {
     expect(educationsService.createEducation).not.toHaveBeenCalled();
     expect(screen.getByLabelText(/Título o carrera/)).toHaveValue("");
 
-    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Civil" }));
+    await openForm(user, "Editar Ingeniería Civil");
     await user.type(screen.getByLabelText(/Institución/), " unsaved changes");
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
 
     expect(screen.queryByRole("form")).not.toBeInTheDocument();
     expect(educationsService.updateEducation).toHaveBeenCalledTimes(1);
-    await user.click(screen.getByRole("button", { name: "Agregar información" }));
+    await openForm(user);
     expect(screen.getByRole("form", { name: "Agregar formación" })).toBeInTheDocument();
     expect(screen.getByLabelText(/Institución/)).toHaveValue("");
   });
 
   it("shows a Spanish error when updating fails", async () => {
     vi.mocked(educationsService.updateEducation).mockRejectedValue(new Error("Not found"));
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
 
-    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
-    await user.clear(screen.getByLabelText(/Título o carrera/));
-    await user.type(screen.getByLabelText(/Título o carrera/), "Ingeniería de Sistemas");
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await openForm(user, "Editar Ingeniería Informática");
+    await fillForm(user, { degree: "Ingeniería de Sistemas" });
+    await saveForm(user);
 
     expect(
       await screen.findByText("No se pudo actualizar la formación académica. Inténtalo de nuevo."),
@@ -379,21 +424,20 @@ describe("EducationView", () => {
 
   it("switches from editing to a clean create form using add information", async () => {
     vi.mocked(educationsService.createEducation).mockResolvedValue(EDUCATIONS[0]);
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
-    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
-    await user.click(screen.getByRole("button", { name: "Agregar información" }));
+    await openForm(user, "Editar Ingeniería Informática");
+    await openForm(user);
 
     expect(screen.getByRole("form", { name: "Agregar formación" })).toBeInTheDocument();
     for (const label of [/Institución/, /Título o carrera/, /Desde/, /Hasta/, /Descripción/]) {
       expect(screen.getByLabelText(label)).toHaveValue("");
     }
-    await user.type(screen.getByLabelText(/Institución/), "Universidad Privada Boliviana (UPB)");
-    await user.type(screen.getByLabelText(/Título o carrera/), "Ingeniería Electromecánica");
-    await user.type(screen.getByLabelText(/Desde/), "2023-01-01");
-    await user.type(screen.getByLabelText(/Hasta/), "2025-01-01");
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await fillForm(user, {
+      institution: "Universidad Privada Boliviana (UPB)", degree: "Ingeniería Electromecánica",
+      startDate: "2023-01-01", endDate: "2025-01-01",
+    });
+    await saveForm(user);
 
     await screen.findByText("Formación académica agregada correctamente.");
     expect(educationsService.createEducation).toHaveBeenCalledOnce();
@@ -402,10 +446,9 @@ describe("EducationView", () => {
 
   it("allows adding information when the list is empty and cancelling without saving", async () => {
     vi.mocked(educationsService.getEducations).mockResolvedValue([]);
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByText("Todavía no tienes formación académica registrada.");
-    await user.click(screen.getByRole("button", { name: "Agregar información" }));
+    await openForm(user);
     await user.type(screen.getByLabelText(/Institución/), "Unsaved University");
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
 
@@ -419,11 +462,10 @@ describe("EducationView", () => {
     vi.mocked(educationsService.updateEducation).mockReturnValue(new Promise((resolve) => {
       finishSave = resolve;
     }));
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
-    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await openForm(user, "Editar Ingeniería Informática");
+    await saveForm(user);
 
     for (const name of ["Agregar información", "Editar Ingeniería Civil", "Eliminar Ingeniería Informática", "Cancelar", "Guardando..."]) {
       expect(screen.getByRole("button", { name })).toBeDisabled();
@@ -440,11 +482,10 @@ describe("EducationView", () => {
 
   it("deletes a record after confirming and reloads the list", async () => {
     vi.mocked(educationsService.deleteEducation).mockResolvedValue();
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
 
-    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
+    await openForm(user, "Editar Ingeniería Informática");
     await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Informática" }));
     const dialog = await screen.findByRole("alertdialog", { name: "¿Eliminar esta formación?" });
     expect(dialog).toHaveTextContent('Se eliminará "Ingeniería Informática" de tu trayectoria.');
@@ -459,8 +500,7 @@ describe("EducationView", () => {
   });
 
   it("keeps the record when the deletion is cancelled", async () => {
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
 
     await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Civil" }));
@@ -472,8 +512,7 @@ describe("EducationView", () => {
 
   it("shows a Spanish error when deleting fails", async () => {
     vi.mocked(educationsService.deleteEducation).mockRejectedValue(new Error("Server error"));
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
 
     await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Civil" }));
@@ -486,10 +525,9 @@ describe("EducationView", () => {
 
   it("preserves the edit form after a failed deletion and allows retrying inside the dialog", async () => {
     vi.mocked(educationsService.deleteEducation).mockRejectedValueOnce(new Error("Server error")).mockResolvedValueOnce();
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
-    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
+    await openForm(user, "Editar Ingeniería Informática");
     await user.type(screen.getByLabelText(/Institución/), " edited");
     const institution = screen.getByLabelText(/Institución/);
     await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Informática" }));
@@ -507,8 +545,7 @@ describe("EducationView", () => {
   it("disables cancellation, escape and repeated confirmation while deleting", async () => {
     let finishDelete!: () => void;
     vi.mocked(educationsService.deleteEducation).mockReturnValue(new Promise((resolve) => { finishDelete = resolve; }));
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
     await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Informática" }));
     const dialog = await screen.findByRole("alertdialog");
@@ -523,14 +560,13 @@ describe("EducationView", () => {
   });
 
   it.each([false, true])("prevents invalid API writes while creating or editing (editing: %s)", async (editing) => {
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByRole("list", { name: "Formación registrada" });
     await user.click(screen.getByRole("button", { name: editing ? "Editar Ingeniería Informática" : "Agregar información" }));
     for (const label of [/Institución/, /Título o carrera/, /Desde/, /Hasta/]) {
       fireEvent.change(screen.getByLabelText(label), { target: { value: "" } });
     }
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await saveForm(user);
     expect(screen.getByText("La institución es obligatoria.")).toBeInTheDocument();
     expect(screen.getByText("El título o carrera es obligatorio.")).toBeInTheDocument();
     expect(screen.getByText("La fecha de inicio es obligatoria.")).toBeInTheDocument();
@@ -539,7 +575,7 @@ describe("EducationView", () => {
     fireEvent.change(screen.getByLabelText(/Título o carrera/), { target: { value: "Ingeniería Civil" } });
     fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2024-01-02" } });
     fireEvent.change(screen.getByLabelText(/Hasta/), { target: { value: "2024-01-01" } });
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await saveForm(user);
     expect(screen.getByText("La fecha de fin no puede ser anterior a la fecha de inicio.")).toBeInTheDocument();
     expect(educationsService.createEducation).not.toHaveBeenCalled();
     expect(educationsService.updateEducation).not.toHaveBeenCalled();
@@ -560,22 +596,21 @@ describe("EducationView", () => {
     vi.mocked(educationsService.deleteEducation).mockImplementation(async (id) => {
       records = records.filter((record) => record.id !== id);
     });
-    const user = userEvent.setup();
-    render(<EducationView />);
+    const user = setupView();
     await screen.findByText("Todavía no tienes formación académica registrada.");
     for (const [index, degree] of ["Ingeniería Civil", "Ingeniería Electromecánica"].entries()) {
-      await user.click(screen.getByRole("button", { name: "Agregar información" }));
+      await openForm(user);
       for (const [label, value] of [[/Institución/, "Universidad Mayor de San Simón (UMSS)"], [/Título o carrera/, degree], [/Desde/, "2020-01-01"], [/Hasta/, "2024-01-01"]] as const) {
         fireEvent.change(screen.getByLabelText(label), { target: { value } });
       }
-      await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+      await saveForm(user);
       await screen.findByRole("heading", { name: degree });
       expect(within(screen.getByRole("list", { name: "Formación registrada" })).getAllByRole("listitem")).toHaveLength(index + 1);
       expect(screen.getByLabelText(/Institución/)).toHaveValue("");
     }
-    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Civil" }));
+    await openForm(user, "Editar Ingeniería Civil");
     fireEvent.change(screen.getByLabelText(/Título o carrera/), { target: { value: "Ingeniería Química" } });
-    await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+    await saveForm(user);
     await screen.findByRole("heading", { name: "Ingeniería Química" });
     await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Química" }));
     await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Cancelar" }));

@@ -1,10 +1,5 @@
 import type { EducationDegreeCatalogEntry } from '../types/education-degree-catalog-entry.type.js';
 
-// Reviewed on 2026-10-10. Science and technology studies in Cochabamba.
-// Keep both education modules' local catalogues in sync; the catalogue test checks parity.
-// Sources document the selected programmes, not an exhaustive or live admissions offer.
-// Empty lists mean no verified programme in scope, not that the institution is invalid.
-// Historical programme names remain separate options; aliases only cover equivalent spellings.
 export const EDUCATION_DEGREES: readonly EducationDegreeCatalogEntry[] = [
   {
     institution: "Universidad Mayor de San Simón (UMSS)",
@@ -134,13 +129,6 @@ export const EDUCATION_DEGREES: readonly EducationDegreeCatalogEntry[] = [
     ],
   },
   {
-    institution: "Universidad Privada Abierta Latinoamericana (UPAL)",
-    sources: ["https://upal.edu/campus"],
-    degrees: [
-
-    ],
-  },
-  {
     institution: "Universidad Privada Domingo Savio (UPDS)",
     sources: ["https://www.upds.edu.bo/facultad/ingenieria/"],
     degrees: [
@@ -186,13 +174,6 @@ export const EDUCATION_DEGREES: readonly EducationDegreeCatalogEntry[] = [
     ],
   },
   {
-    institution: "Universidad NUR",
-    sources: ["https://www.minedu.gob.bo/files/GUIA-UNIVERSIDADES.pdf#page=83"],
-    degrees: [
-
-    ],
-  },
-  {
     institution: "Universidad Villa de Oropesa (UNIVIOR)",
     sources: ["https://univior.edu.bo/nuestras-carreras/"],
     degrees: [
@@ -205,13 +186,6 @@ export const EDUCATION_DEGREES: readonly EducationDegreeCatalogEntry[] = [
     sources: ["https://www.usalesiana.edu.bo/cochabamba/sitio/ing_de_sistemas_cochabamba/"],
     degrees: [
       { name: "Ingeniería de Sistemas", aliases: [] },
-    ],
-  },
-  {
-    institution: "Universidad Pedagógica",
-    sources: ["https://www.upedagogica.edu.bo/index.php?up=portada"],
-    degrees: [
-
     ],
   },
 ];
