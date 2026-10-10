@@ -175,6 +175,7 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
             <SelectTrigger id="contractType" className="mt-1.5 w-full">
               <SelectValue  placeholder="Selecciona una opcion" />
             </SelectTrigger>
+            
             <SelectContent>
               {CONTRACT_TYPES.map((type) => (
                 <SelectItem key={type} value={type}>
@@ -182,6 +183,7 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
                 </SelectItem>
               ))}
             </SelectContent>
+            
           </Select>
         </div>
 
