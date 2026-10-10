@@ -36,8 +36,8 @@ describe("EditBlockPanel", () => {
     expect(screen.getByText("Modifica la hora de inicio o de fin del bloque.")).toBeInTheDocument()
     expect(screen.getByText("Lunes 13 de mayo")).toBeInTheDocument()
     expect(screen.getByLabelText(/Día/)).toHaveValue("2030-05-13")
-    expect(screen.getByLabelText(/Desde/)).toHaveValue("10:00")
-    expect(screen.getByLabelText(/Hasta/)).toHaveValue("12:00")
+    expect(screen.getByLabelText(/Desde/)).toHaveTextContent("10:00")
+    expect(screen.getByLabelText(/Hasta/)).toHaveTextContent("12:00")
     expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeInTheDocument()
     expect(
       screen.getByRole("button", { name: "Eliminar bloque" }),
