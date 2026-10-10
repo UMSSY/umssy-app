@@ -1,5 +1,10 @@
 import { RegisterVacancyView } from "@/modules/vacancies";
+import { RecruitersBaseView } from "@/modules/recruiters";
 
 export default function RegisterPage() {
-  return <RegisterVacancyView />;
+  return (
+    <RecruitersBaseView>
+      <RegisterVacancyView />
+    </RecruitersBaseView>
+  );
 }

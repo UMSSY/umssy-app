@@ -8,15 +8,17 @@ import { Modality, VacancyConditions } from "../hooks/use-job-offer-form";
 
 interface InformationStepProps {
   conditions: VacancyConditions;
+  errors?: Partial<Record<keyof VacancyConditions, string>>;
   updateField: (field: keyof VacancyConditions, value: string) => void;
   selectModality: (modality: Modality) => void;
+  validateMapsLink?: (link: string) => void;
   onContinue: () => void;
 }
 
 const MODALITIES = ["Presencial", "Remoto", "Hibrido"];
 const CONTRACT_TYPES = ["Tiempo completo", "Medio tiempo", "Pasantia"];
 
-export function InformationStep({ conditions, updateField, selectModality, onContinue }: InformationStepProps) {
+export function InformationStep({ conditions, errors, updateField, selectModality, validateMapsLink, onContinue }: InformationStepProps) {
   const hasUnsavedChanges = 
     conditions.title !== "" || 
     conditions.salary !== "" || 
@@ -175,6 +177,7 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
             <SelectTrigger id="contractType" className="mt-1.5 w-full">
               <SelectValue  placeholder="Selecciona una opcion" />
             </SelectTrigger>
+            
             <SelectContent>
               {CONTRACT_TYPES.map((type) => (
                 <SelectItem key={type} value={type}>
@@ -182,6 +185,7 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
                 </SelectItem>
               ))}
             </SelectContent>
+            
           </Select>
         </div>
 
