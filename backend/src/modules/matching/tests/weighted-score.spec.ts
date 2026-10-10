@@ -60,7 +60,6 @@ describe('Weighted compatibility formula (#275)', () => {
     ).toBe(56);
   });
 
-  //Certifica la estabilidad ante un perfil totalmente vacío
   it('Debe retornar 100% de estabilidad matematica si todas las categorias del perfil estan totalmente vacias', () => {
     const emptyProfileScore = calculateWeightedScore({
       skills: [],
@@ -71,7 +70,6 @@ describe('Weighted compatibility formula (#275)', () => {
     expect(emptyProfileScore).toBe(100);
   });
 
-  //Certifica la estabilidad ante un perfil sobrecalificado (100% exitoso)
   it('Debe retornar 100% exacto ante un perfil que cumple absolutamente todos los requisitos en todas las categorias', () => {
     const perfectProfileScore = calculateWeightedScore({
       skills: [met, met],
