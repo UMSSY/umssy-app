@@ -11,7 +11,7 @@ const userId = '11111111-1111-4111-8111-111111111111';
 const educationId = '33333333-3333-4333-8333-333333333333';
 const data = {
   institution: 'UMSS',
-  degree: 'Computer Science',
+  degree: 'Ingeniería Informática',
   startDate: new Date('2020-01-01'),
   endDate: new Date('2024-01-01'),
 };
@@ -83,21 +83,21 @@ describe('EducationsService', () => {
 
   it('updates a single field while preserving stored dates', async () => {
     repository.findByIdAndUserId.mockResolvedValue(record);
-    repository.update.mockResolvedValue({ ...record, degree: 'Updated' });
+    repository.update.mockResolvedValue({ ...record, degree: 'Ingeniería Industrial' });
     const response = await service.update(userId, educationId, {
-      degree: 'Updated',
+      degree: 'Ingeniería Industrial',
     });
     expect(repository.findByIdAndUserId).toHaveBeenCalledWith(
       educationId,
       userId,
     );
     expect(repository.update).toHaveBeenCalledWith(educationId, userId, {
-      degree: 'Updated',
+      degree: 'Ingeniería Industrial',
     }, {
       startDate: record.startDate,
       endDate: record.endDate,
     });
-    expect(response.degree).toBe('Updated');
+    expect(response.degree).toBe('Ingeniería Industrial');
   });
 
   it.each([
@@ -140,7 +140,7 @@ describe('EducationsService', () => {
   it('rejects edits when no record belongs to the requester', async () => {
     repository.findByIdAndUserId.mockResolvedValue(null);
     await expect(
-      service.update(userId, educationId, { degree: 'Updated' }),
+      service.update(userId, educationId, { degree: 'Ingeniería Industrial' }),
     ).rejects.toBeInstanceOf(EducationNotFoundException);
     expect(repository.update).not.toHaveBeenCalled();
   });
@@ -149,7 +149,7 @@ describe('EducationsService', () => {
     repository.findByIdAndUserId.mockResolvedValueOnce(record).mockResolvedValueOnce(null);
     repository.update.mockResolvedValue(null);
     await expect(
-      service.update(userId, educationId, { degree: 'Updated' }),
+      service.update(userId, educationId, { degree: 'Ingeniería Industrial' }),
     ).rejects.toBeInstanceOf(EducationNotFoundException);
   });
 

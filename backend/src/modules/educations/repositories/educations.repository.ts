@@ -6,6 +6,8 @@ import { DuplicateEducationException } from '../exceptions/duplicate-education.e
 import { EducationWriteConflictException } from '../exceptions/education-write-conflict.exception.js';
 import { normalizeEducationText } from '../utils/normalize-education-text.js';
 import { resolveEducationInstitution } from '../utils/resolve-education-institution.js';
+import { resolveEducationDegree } from '../utils/resolve-education-degree.js';
+import { validateEducationDegree } from '../utils/validate-education-degree.js';
 import { EDUCATION_SELECT } from '../constants/education-select.constants.js';
 import type { CreateEducationRequest } from '../requests/create-education.request.js';
 import type { UpdateEducationRequest } from '../requests/update-education.request.js';
@@ -57,6 +59,8 @@ export class EducationsRepository {
       const where = { id, userId, ...expectedPeriod };
       const current = await tx.education.findFirst({ where, select: EDUCATION_SELECT });
       if (!current) return null;
+      // A concurrent institution edit must not invalidate a degree checked by the service.
+      validateEducationDegree(data.institution ?? current.institution, data.degree ?? current.degree);
       await this.assertNoDuplicate(tx, userId, { ...current, ...data }, id);
       // Preserve the atomic date check used by the service, including after retries.
       const records = await tx.education.updateManyAndReturn({
@@ -81,7 +85,8 @@ export class EducationsRepository {
     });
     const institution = normalizeEducationText(resolveEducationInstitution(candidate.institution) ?? candidate.institution);
     if (records.some((record) => normalizeEducationText(resolveEducationInstitution(record.institution) ?? record.institution) === institution
-      && normalizeEducationText(record.degree) === normalizeEducationText(candidate.degree))) {
+      && normalizeEducationText(resolveEducationDegree(record.institution, record.degree) ?? record.degree)
+        === normalizeEducationText(resolveEducationDegree(candidate.institution, candidate.degree) ?? candidate.degree))) {
       throw new DuplicateEducationException();
     }
   }
