@@ -6,7 +6,7 @@ import {
   AnalyzeExperienceParamsDto,
 } from '../requests/analyze-experience.schema.js';
 import type { AnalyzeExperienceResponse } from '../types/matching.types.js';
-import { ZodValidationPipe } from '@common/pipes/zod-validation.pipe.js';
+import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
 
 @Controller('work-experiences')
 export class MatchingController {
