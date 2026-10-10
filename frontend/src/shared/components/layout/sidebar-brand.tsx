@@ -1,15 +1,20 @@
-import { Shield } from "lucide-react";
+import { APP_NAME, APP_VERSION } from "@/shared/constants/app.constants";
 
-export function SidebarBrand() {
+interface SidebarBrandProps {
+  role?: string;
+}
+
+export function SidebarBrand({ role }: SidebarBrandProps) {
   return (
-    <div className="flex items-center gap-3 px-3 py-4">
-      <div className="relative flex size-12 shrink-0 items-center justify-center">
-        <Shield className="size-12 fill-accent text-surface" strokeWidth={1.5} aria-hidden="true" />
-        <span className="absolute font-tight text-xl font-extrabold text-surface">U</span>
+    <div className="flex items-center gap-2.5 px-3 py-2">
+      <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-accent">
+        <span className="text-sm font-bold leading-none text-surface">{APP_NAME[0]}</span>
       </div>
       <div className="leading-tight">
-        <p className="font-tight text-2xl font-extrabold tracking-wide text-surface">UMSSY</p>
-        <p className="text-sm text-surface/80">Universidad para el futuro</p>
+        <p className="text-sm font-bold text-surface">{APP_NAME}</p>
+        <p className="text-[11px] text-surface/50">
+          {role ? `${role} · ${APP_VERSION}` : APP_VERSION}
+        </p>
       </div>
     </div>
   );

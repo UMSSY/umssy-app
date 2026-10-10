@@ -2,6 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { Inbox } from "lucide-react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
+import { APP_VERSION } from "@/shared/constants/app.constants";
 import { AppShell } from "./app-shell";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -24,7 +25,7 @@ describe("props opcionales del layout compartido", () => {
       </AppShell>,
     );
 
-    expect(screen.getByText("Universidad para el futuro")).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(APP_VERSION))).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /menú/i })).toBeInTheDocument();
     expect(screen.getByText("Ana Pérez")).toBeInTheDocument();
     expect(screen.getByText("Contenido").parentElement).toHaveClass("px-8", "pb-8");
@@ -48,7 +49,7 @@ describe("props opcionales del layout compartido", () => {
     );
 
     expect(screen.getByText("Marca propia")).toBeInTheDocument();
-    expect(screen.queryByText("Universidad para el futuro")).toBeNull();
+    expect(screen.queryByText(APP_VERSION)).toBeNull();
     expect(screen.getByText("Pie propio")).toBeInTheDocument();
     expect(screen.getByText("Cabecera propia")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /menú/i })).toBeNull();

@@ -1,7 +1,19 @@
-import type { NavigationItem } from "@/shared/types/navigation-item.types";
-import { CalendarDays, ChartColumn, House, ListChecks, User, UserRound } from "lucide-react";
+import {
+  CalendarDays,
+  ChartColumn,
+  ClipboardList,
+  House,
+  ListChecks,
+  RadioTower,
+  Search,
+  User,
+  UserRound,
+} from "lucide-react";
+import type { NavigationEntry } from "@/shared/types/app-sidebar-props.types";
 
-export const SIDEBAR_NAVIGATION: NavigationItem[] = [
+// TODO: Agregar Empleos, Guardados, Contactados, Aprobados, Configuración cuando tengan ruta.
+
+export const SIDEBAR_NAVIGATION: NavigationEntry[] = [
   { label: "Inicio", icon: House, href: "/" },
   { label: "Mi perfil", icon: User, href: "/profile" },
   {
@@ -28,6 +40,14 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
       { label: "Reporte de usuarios registrados", href: "/reports/registered-users" },
       { label: "Reporte de usuarios rechazados", href: "/reports/rejected-users" },
       { label: "Historial de reportes generados", href: "/reports/history" },
+    ],
+  },
+  {
+    sectionLabel: "RADAR DE AFINIDAD",
+    items: [
+      { label: "Radar de afinidad", icon: RadioTower, href: "/affinity-radar/profile" },
+      { label: "Cola de revisión", icon: ClipboardList, href: "/affinity-radar/review-queue" },
+      { label: "Búsqueda de candidatos", icon: Search, href: "/matching" },
     ],
   },
 ];

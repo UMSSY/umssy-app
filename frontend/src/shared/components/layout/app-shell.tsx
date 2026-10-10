@@ -5,18 +5,16 @@ import { cn } from "cn";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SIDEBAR_STYLE } from "@/shared/constants/sidebar.constants";
 import type { AppShellProps } from "@/shared/types/app-shell-props.types";
-import type { NavigationItem } from "@/shared/types/navigation-item.types";
+import type { NavigationEntry } from "@/shared/types/app-sidebar-props.types";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarToggleButton } from "./sidebar-toggle-button";
 
-// Props opcionales: sin ellas el render es idéntico al anterior
 interface AppShellExtras {
   brand?: ReactNode;
   sidebarFooter?: ReactNode;
   sidebarItemClassName?: string;
   sidebarItemBadges?: Record<string, ReactNode>;
   sidebarWidth?: string;
-  // Reemplaza la cabecera por defecto (que lleva el botón de menú)
   header?: ReactNode;
   contentClassName?: string;
 }
@@ -37,7 +35,7 @@ export function AppShell({
   return (
     <SidebarProvider style={sidebarWidth ? ({ ...SIDEBAR_STYLE, "--sidebar-width": sidebarWidth } as CSSProperties) : SIDEBAR_STYLE}>
       <AppSidebar
-        items={items as NavigationItem[] | undefined}
+        items={items as NavigationEntry[] | undefined}
         user={user}
         brand={brand}
         footer={sidebarFooter}
@@ -46,7 +44,7 @@ export function AppShell({
       />
       <SidebarInset className="bg-surface-soft">
         {header ?? (
-          <header className={fullBleed ? "absolute left-4 top-3 z-10 flex items-center" : "flex items-center px-4 py-3"}>
+          <header className={cn("md:hidden", fullBleed ? "absolute left-4 top-3 z-10 flex items-center" : "flex items-center px-4 py-3")}>
             <SidebarToggleButton />
           </header>
         )}

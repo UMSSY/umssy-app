@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { House } from "lucide-react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { SIDEBAR_NAVIGATION } from "@/shared/config/navigation.config";
+import { APP_VERSION } from "@/shared/constants/app.constants";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import type { AppSidebarProps } from "@/shared/types/app-sidebar-props.types";
 import { AppSidebar } from "./app-sidebar";
@@ -29,14 +29,20 @@ describe("AppSidebar", () => {
     vi.unstubAllGlobals();
   });
 
-  it("shows the brand without an identity footer when no user is provided", () => {
+  it("shows the brand name and version when no user is provided", () => {
     renderSidebar();
 
     expect(screen.getByText("UMSSY")).toBeDefined();
-    expect(screen.getByText("Universidad para el futuro")).toBeDefined();
+    expect(screen.getByText(APP_VERSION)).toBeDefined();
     expect(screen.queryByText("Alejandro Vargas")).toBeNull();
     expect(screen.queryByText("Administrador")).toBeNull();
     expect(document.querySelector('[data-slot="sidebar-footer"]')).toBeNull();
+  });
+
+  it("shows the role in the brand when a user is provided", () => {
+    renderSidebar({ user: { fullName: "Ana Pérez", role: "Admin" } });
+
+    expect(screen.getByText(`Admin · ${APP_VERSION}`)).toBeDefined();
   });
 
   it("renders the mentorship group with its two routes", () => {
@@ -59,14 +65,18 @@ describe("AppSidebar", () => {
     expect(within(navigation).queryByText("Empleos")).toBeNull();
   });
 
-  it("renders one item per entry of the default navigation", () => {
+  it("renders all navigation entries including the Epic 3 section", () => {
     renderSidebar();
 
     const navigation = screen.getByRole("navigation", { name: "Menú principal" });
-    const topLevelItems = within(navigation)
-      .queryAllByRole("listitem")
-      .filter((item) => item.getAttribute("data-slot") === "sidebar-menu-item");
-    expect(topLevelItems).toHaveLength(SIDEBAR_NAVIGATION.length);
+    expect(within(navigation).getByText("Inicio")).toBeDefined();
+    expect(within(navigation).getByText("Mi perfil")).toBeDefined();
+    expect(within(navigation).getByText("Mentorías")).toBeDefined();
+    expect(within(navigation).getByText("Reportes Analíticos")).toBeDefined();
+    expect(within(navigation).getByText("RADAR DE AFINIDAD")).toBeDefined();
+    expect(within(navigation).getByText("Radar de afinidad")).toBeDefined();
+    expect(within(navigation).getByText("Cola de revisión")).toBeDefined();
+    expect(within(navigation).getByText("Búsqueda de candidatos")).toBeDefined();
   });
 
   it("shows the report history option inside the analytics reports menu", () => {
@@ -87,5 +97,40 @@ describe("AppSidebar", () => {
     expect(screen.getByRole("link", { name: "Inicio" }).getAttribute("aria-current")).toBe("page");
     expect(screen.getByText("María Pérez")).toBeDefined();
     expect(screen.getByText("MP")).toBeDefined();
+  });
+
+  it("marks the active item with an accent dot", () => {
+    renderSidebar({
+      items: [{ label: "Inicio", icon: House, href: "/home" }],
+    });
+
+    const link = screen.getByRole("link", { name: "Inicio" });
+    const dot = link.querySelector(".bg-accent.rounded-full");
+    expect(dot).not.toBeNull();
+  });
+
+  it("does not show the accent dot on inactive items", () => {
+    renderSidebar({
+      items: [{ label: "Inicio", icon: House, href: "/other" }],
+    });
+
+    const link = screen.getByRole("link", { name: "Inicio" });
+    const dot = link.querySelector(".bg-accent.rounded-full");
+    expect(dot).toBeNull();
+  });
+
+  it("renders section labels for NavigationSection entries", () => {
+    renderSidebar({
+      items: [
+        { label: "Inicio", icon: House, href: "/" },
+        {
+          sectionLabel: "MI SECCIÓN",
+          items: [{ label: "Sub", icon: House, href: "/sub" }],
+        },
+      ],
+    });
+
+    expect(screen.getByText("MI SECCIÓN")).toBeDefined();
+    expect(screen.getByRole("link", { name: "Sub" })).toBeDefined();
   });
 });

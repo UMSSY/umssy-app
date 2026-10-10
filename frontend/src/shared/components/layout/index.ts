@@ -3,3 +3,5 @@ export type { BreadcrumbItem } from "./breadcrumbs";
 export { AppShell } from "./app-shell";
 export { AppSidebar } from "./app-sidebar";
 export { PageBreadcrumb } from "./page-breadcrumb";
+export { PageHeader } from "./page-header";
+export type { PageHeaderProps, PageHeaderBreadcrumbItem } from "./page-header";

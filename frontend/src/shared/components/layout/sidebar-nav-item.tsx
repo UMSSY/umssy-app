@@ -16,7 +16,6 @@ import { SIDEBAR_ITEM_CLASS, SIDEBAR_SUB_ITEM_CLASS } from "@/shared/constants/s
 import type { SidebarNavItemProps } from "@/shared/types/sidebar-nav-item-props.types";
 import { isRouteActive } from "@/shared/utils/is-route-active";
 
-// className y badge son opcionales: sin ellos el render es el de siempre
 export function SidebarNavItem({
   item,
   pathname,
@@ -43,7 +42,10 @@ export function SidebarNavItem({
           className={cn(SIDEBAR_ITEM_CLASS, className)}
         >
           <Icon strokeWidth={1.5} aria-hidden="true" />
-          <span className={badge ? "flex-1" : undefined}>{item.label}</span>
+          <span className="flex-1">{item.label}</span>
+          {isActive && (
+            <span className="ml-auto size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+          )}
           {badge}
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -62,7 +64,7 @@ export function SidebarNavItem({
         <Icon strokeWidth={1.5} aria-hidden="true" />
         <span className="flex-1">{item.label}</span>
         <ChevronDown
-          className={`text-accent transition-transform ${isExpanded ? "rotate-180" : ""}`}
+          className={`text-surface/40 transition-transform ${isExpanded ? "rotate-180" : ""}`}
           aria-hidden="true"
         />
       </SidebarMenuButton>
