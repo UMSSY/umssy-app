@@ -1,11 +1,15 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useEducationInstitutions } from "../hooks/use-education-institutions";
 import type { EducationFormValues } from "../types/education-form-values.types";
 import { EducationForm } from "./education-form";
 
+vi.mock("../hooks/use-education-institutions", () => ({ useEducationInstitutions: vi.fn() }));
+const INSTITUTIONS = [{ name: 'Universidad Mayor de San Simón (UMSS)', aliases: ['UMSS', 'Universidad Mayor de San Simón'] }];
+
 const VALUES: EducationFormValues = {
-  institution: "Example University",
+  institution: "Universidad Mayor de San Simón (UMSS)",
   degree: "Computer Science",
   startDate: "2020-02-01",
   endDate: "2025-11-30",
@@ -13,7 +17,83 @@ const VALUES: EducationFormValues = {
 };
 
 describe("EducationForm", () => {
+  beforeEach(() => {
+    vi.mocked(useEducationInstitutions).mockReturnValue({ institutions: INSTITUTIONS, isLoading: false, error: null, reload: vi.fn() });
+  });
   afterEach(cleanup);
+
+  it('filters universities by alias and selects with the keyboard without submitting', async () => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    render(<EducationForm initialValues={{ ...VALUES, institution: '' }} onSubmit={onSubmit} onCancel={vi.fn()} />);
+    const input = screen.getByRole('combobox');
+    await user.type(input, 'umss');
+    expect(screen.getByRole('option', { name: INSTITUTIONS[0].name })).toBeVisible();
+    await user.keyboard('{ArrowDown}');
+    expect(input).toHaveAttribute('aria-activedescendant');
+    await user.keyboard('{Enter}');
+    expect(input).toHaveValue(INSTITUTIONS[0].name);
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+    expect(onSubmit).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Guardar formación' }));
+    expect(onSubmit).toHaveBeenCalledExactlyOnceWith(VALUES);
+  });
+
+  it('selects with the mouse and closes the list with Escape', async () => {
+    const user = userEvent.setup();
+    render(<EducationForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+    await user.type(screen.getByRole('combobox'), 'san simon');
+    await user.click(screen.getByRole('option', { name: INSTITUTIONS[0].name }));
+    expect(screen.getByRole('combobox')).toHaveValue(INSTITUTIONS[0].name);
+    await user.click(screen.getByRole('combobox'));
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it.each([false, true])('rejects unknown typed or legacy institution (editing: %s)', async (editing) => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    render(<EducationForm initialValues={editing ? { ...VALUES, institution: 'gggggg' } : VALUES} onSubmit={onSubmit} onCancel={vi.fn()} />);
+    if (!editing) {
+      await user.clear(screen.getByRole('combobox'));
+      await user.type(screen.getByRole('combobox'), 'gggggg');
+      expect(screen.getByText('No se encontraron universidades.')).toBeVisible();
+    }
+    await user.click(screen.getByRole('button', { name: 'Guardar formación' }));
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByRole('combobox')).toHaveAccessibleDescription('Selecciona una universidad de la lista permitida.');
+    expect(screen.getByRole('combobox')).toHaveValue('gggggg');
+  });
+
+  it('canonicalizes a recognized legacy alias when editing', async () => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    render(<EducationForm initialValues={{ ...VALUES, institution: ' umss ' }} onSubmit={onSubmit} onCancel={vi.fn()} />);
+    await user.click(screen.getByRole('button', { name: 'Guardar formación' }));
+    expect(onSubmit).toHaveBeenCalledExactlyOnceWith(VALUES);
+  });
+
+  it.each(['startDate', 'endDate'] as const)('rejects an early %s and advertises the minimum', async (field) => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    render(<EducationForm initialValues={{ ...VALUES, [field]: '1939-12-31' }} onSubmit={onSubmit} onCancel={vi.fn()} />);
+    expect(screen.getByLabelText(/Desde/)).toHaveAttribute('min', '1940-01-01');
+    expect(screen.getByLabelText(/Hasta/)).toHaveAttribute('min', '1940-01-01');
+    await user.click(screen.getByRole('button', { name: 'Guardar formación' }));
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByText('Fecha inválida.')).toBeVisible();
+  });
+
+  it.each([true, false])('blocks even programmatic submissions while catalogue is unavailable (loading: %s)', (loading) => {
+    const onSubmit = vi.fn();
+    vi.mocked(useEducationInstitutions).mockReturnValue({ institutions: [], isLoading: loading, error: loading ? null : 'No se pudo cargar la lista de universidades.', reload: vi.fn() });
+    render(<EducationForm initialValues={VALUES} onSubmit={onSubmit} onCancel={vi.fn()} />);
+    expect(screen.getByRole('button', { name: 'Guardar formación' })).toBeDisabled();
+    expect(screen.getByRole('combobox')).toBeDisabled();
+    fireEvent.submit(screen.getByRole('form'));
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByRole(loading ? 'status' : 'alert')).toBeVisible();
+  });
 
   it("updates the description counter while typing, deleting and clearing before saving", async () => {
     const onSubmit = vi.fn();

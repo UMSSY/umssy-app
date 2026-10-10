@@ -1,7 +1,10 @@
 export const EDUCATION_DESCRIPTION_MAX_LENGTH = 400;
+export const EDUCATION_MIN_DATE = "1940-01-01";
 
 export const EDUCATION_VALIDATION_MESSAGES = {
   institutionRequired: "La institución es obligatoria.",
+  institutionInvalid: "Selecciona una universidad de la lista permitida.",
+  dateTooEarly: "Fecha inválida.",
   degreeRequired: "El título o carrera es obligatorio.",
   descriptionTooLong: `La descripción no puede superar los ${EDUCATION_DESCRIPTION_MAX_LENGTH} caracteres.`,
   startDateRequired: "La fecha de inicio es obligatoria.",

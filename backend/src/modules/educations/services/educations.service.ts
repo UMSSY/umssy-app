@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { EDUCATION_INSTITUTIONS } from '../constants/education-institutions.constants.js';
+import type { EducationInstitution } from '../types/education-institution.type.js';
 import { EducationNotFoundException } from '../exceptions/education-not-found.exception.js';
 import { EducationUpdateConflictException } from '../exceptions/education-update-conflict.exception.js';
 import { InvalidEducationDateRangeException } from '../exceptions/invalid-education-date-range.exception.js';
@@ -14,6 +16,10 @@ export class EducationsService {
     private readonly repository: EducationsRepository,
     private readonly mapper: EducationMapper,
   ) {}
+
+  getInstitutions(): readonly EducationInstitution[] {
+    return EDUCATION_INSTITUTIONS;
+  }
 
   async findAll(userId: string): Promise<EducationResponse[]> {
     return this.mapper.toResponseList(

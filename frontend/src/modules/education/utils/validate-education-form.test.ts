@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { EducationFormValues } from "../types/education-form-values.types";
-import { validateEducationForm } from "./validate-education-form";
+import { validateEducationForm as validate } from "./validate-education-form";
+
+const INSTITUTIONS = [{ name: 'Universidad Mayor de San Simón (UMSS)', aliases: ['UMSS', 'Universidad Mayor de San Simón'] }];
+const validateEducationForm = (values: EducationFormValues, allowMissingEndDate = false) => validate(values, allowMissingEndDate, INSTITUTIONS);
 
 const VALUES: EducationFormValues = {
-  institution: "University",
+  institution: "Universidad Mayor de San Simón (UMSS)",
   degree: "Engineering",
   startDate: "2020-02-29",
   endDate: "2024-02-29",
@@ -11,6 +14,26 @@ const VALUES: EducationFormValues = {
 };
 
 describe("validateEducationForm", () => {
+  it.each(['gggggg', 'UMSS extra', 'UNIPOL'])('rejects non-catalogue institution %s', (institution) => {
+    expect(validateEducationForm({ ...VALUES, institution }).institution).toBe('Selecciona una universidad de la lista permitida.');
+  });
+
+  it('accepts aliases and names without accents, but fails closed without a catalogue', () => {
+    for (const institution of ['UMSS', ' universidad mayor de san simon ', INSTITUTIONS[0].name]) {
+      expect(validateEducationForm({ ...VALUES, institution })).toEqual({});
+    }
+    expect(validate(VALUES).institution).toBeTruthy();
+  });
+
+  it.each(['0001-01-01', '0201-01-01', '1899-12-31', '1939-12-31'])('rejects %s in either date field', (date) => {
+    for (const field of ['startDate', 'endDate'] as const) {
+      expect(validateEducationForm({ ...VALUES, [field]: date })[field]).toBe('Fecha inválida.');
+    }
+  });
+
+  it('allows equal dates at the lower boundary', () => {
+    expect(validateEducationForm({ ...VALUES, startDate: '1940-01-01', endDate: '1940-01-01' })).toEqual({});
+  });
   it.each([0, 400])("accepts a description of %i characters", (length) => {
     expect(validateEducationForm({ ...VALUES, description: "a".repeat(length) })).toEqual({});
   });

@@ -88,6 +88,16 @@ describe('EducationsRepository', () => {
     expect(education.updateManyAndReturn).not.toHaveBeenCalled();
   });
 
+  it.each(['UMSS', 'universidad mayor de san simon', 'Universidad Mayor de San Simón (UMSS)'])('keeps duplicate protection for legacy alias %s on create and edit', async (institution) => {
+    education.findMany.mockResolvedValue([{ institution, degree: record.degree }]);
+    const data = { institution: 'Universidad Mayor de San Simón (UMSS)', degree: record.degree };
+    await expect(repository.create(userId, { ...data, startDate: record.startDate, endDate: new Date('2024-01-01') }))
+      .rejects.toBeInstanceOf(DuplicateEducationException);
+    await expect(repository.update(educationId, userId, data, expectedPeriod)).rejects.toBeInstanceOf(DuplicateEducationException);
+    expect(education.create).not.toHaveBeenCalled();
+    expect(education.updateManyAndReturn).not.toHaveBeenCalled();
+  });
+
   it('rechecks for duplicates after a serializable conflict instead of repeating just the write', async () => {
     transaction.mockRejectedValueOnce({ code: 'P2034' });
     education.findMany.mockResolvedValue([{ institution: record.institution, degree: record.degree }]);

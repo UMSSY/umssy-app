@@ -5,6 +5,7 @@ import { EDUCATION_SERIALIZATION_ERROR_CODE, EDUCATION_TRANSACTION_ATTEMPTS } fr
 import { DuplicateEducationException } from '../exceptions/duplicate-education.exception.js';
 import { EducationWriteConflictException } from '../exceptions/education-write-conflict.exception.js';
 import { normalizeEducationText } from '../utils/normalize-education-text.js';
+import { resolveEducationInstitution } from '../utils/resolve-education-institution.js';
 import { EDUCATION_SELECT } from '../constants/education-select.constants.js';
 import type { CreateEducationRequest } from '../requests/create-education.request.js';
 import type { UpdateEducationRequest } from '../requests/update-education.request.js';
@@ -78,7 +79,8 @@ export class EducationsRepository {
       },
       select: { institution: true, degree: true },
     });
-    if (records.some((record) => normalizeEducationText(record.institution) === normalizeEducationText(candidate.institution)
+    const institution = normalizeEducationText(resolveEducationInstitution(candidate.institution) ?? candidate.institution);
+    if (records.some((record) => normalizeEducationText(resolveEducationInstitution(record.institution) ?? record.institution) === institution
       && normalizeEducationText(record.degree) === normalizeEducationText(candidate.degree))) {
       throw new DuplicateEducationException();
     }
