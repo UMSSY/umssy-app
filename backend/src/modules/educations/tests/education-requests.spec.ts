@@ -12,9 +12,9 @@ const input = {
 };
 
 describe('Education requests', () => {
-  it('accepts all 20 universities and canonicalizes their aliases', () => {
-    expect(EDUCATION_INSTITUTIONS).toHaveLength(20);
-    expect(new Set(EDUCATION_INSTITUTIONS.map((item) => item.name)).size).toBe(20);
+  it('accepts all 17 universities and canonicalizes their aliases', () => {
+    expect(EDUCATION_INSTITUTIONS).toHaveLength(17);
+    expect(new Set(EDUCATION_INSTITUTIONS.map((item) => item.name)).size).toBe(17);
     for (const institution of EDUCATION_INSTITUTIONS) {
       for (const value of [institution.name, ...institution.aliases]) {
         expect(createEducationSchema.parse({ ...input, institution: value }).institution).toBe(institution.name);
@@ -29,6 +29,15 @@ describe('Education requests', () => {
     expect(createEducationSchema.safeParse({ ...input, institution }).success).toBe(false);
     expect(updateEducationSchema.safeParse({ institution }).success).toBe(false);
   });
+
+  it.each(['UPAL', 'Universidad Privada Abierta Latinoamericana', 'Universidad Privada Abierta Latinoamericana (UPAL)', 'NUR', 'Universidad NUR', 'Universidad Pedagógica'])(
+    'rejects excluded institution %s in creates and updates', (institution) => {
+      for (const result of [createEducationSchema.safeParse({ ...input, institution }), updateEducationSchema.safeParse({ institution })]) {
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error.issues).toContainEqual(expect.objectContaining({ path: ['institution'] }));
+      }
+    },
+  );
 
   it.each(['0001-01-01', '0201-02-01', '1899-12-31', '1939-12-31'])('rejects dates before 1940 in either field: %s', (date) => {
     for (const field of ['startDate', 'endDate']) {
