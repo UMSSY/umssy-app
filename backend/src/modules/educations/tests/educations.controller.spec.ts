@@ -94,7 +94,7 @@ describe('EducationsController', () => {
     });
     expect(created.body.data).not.toHaveProperty('userId');
     expect(repository.create).toHaveBeenCalledWith(userId, {
-      institution: 'UMSS',
+      institution: 'Universidad Mayor de San Simón (UMSS)',
       degree: 'Computer Science',
       startDate: record.startDate,
       endDate: record.endDate,
@@ -176,6 +176,9 @@ describe('EducationsController', () => {
 
   it.each([
     { ...body, institution: ' ' },
+    { ...body, institution: 'gggggg' },
+    { ...body, startDate: '0201-01-01' },
+    { ...body, endDate: '1939-12-31' },
     { ...body, description: 'a'.repeat(401) },
     { ...body, degree: '' },
     { ...body, startDate: undefined },
