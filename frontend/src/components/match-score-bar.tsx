@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MatchScoreProps } from '@/modules/matching/types/match-score.types';
+import { MatchScoreProps } from '@/modules/matching/types/match-score.types.js';
 
 export const MatchScoreBar: React.FC<MatchScoreProps> = ({
   score,
