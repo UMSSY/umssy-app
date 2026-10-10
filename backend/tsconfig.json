@@ -18,6 +18,12 @@
     "skipLibCheck": true,
     "strict": true,
     "strictPropertyInitialization": false,
-    "types": ["vitest/globals", "node"]
+    "types": ["vitest/globals", "node"],
+    "baseUrl":"./",
+    "paths":{
+      "@common/*":["src/common/*"],
+      "@modules/*":["src/modules/*"]
+
+    }
   }
 }
