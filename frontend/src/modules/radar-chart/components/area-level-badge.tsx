@@ -1,32 +1,37 @@
-import { cn } from "@/lib/utils";
 import type { AreaLevelBadgeProps } from "../types/area-detail-components.types";
 import type { AreaLevel } from "../types/area-detail.types";
 
-const BADGE_CLASS: Record<AreaLevel, string> = {
-  Bajo: "border-border-strong bg-surface-soft text-text-secondary",
-  Medio:
-    "border-transparent bg-gold/10 text-[color-mix(in_srgb,var(--color-gold)_50%,var(--color-ink))]",
-  Alto: "border-transparent bg-ink text-surface",
-  Experto: "border-transparent bg-accent text-surface",
-};
-
-const DOT_CLASS: Record<AreaLevel, string> = {
-  Bajo: "bg-border-strong",
-  Medio: "bg-gold",
-  Alto: "bg-surface",
-  Experto: "bg-surface",
+const LEVEL_MARKS: Record<AreaLevel, number> = {
+  Bajo: 1,
+  Medio: 2,
+  Alto: 3,
+  Experto: 4,
 };
 
 export function AreaLevelBadge({ level }: AreaLevelBadgeProps) {
+  const activeMarks = LEVEL_MARKS[level];
+
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold whitespace-nowrap",
-        BADGE_CLASS[level],
-      )}
-    >
-      <span className={cn("size-1.5 rounded-full", DOT_CLASS[level])} aria-hidden="true" />
-      {level}
+    <span className="inline-flex items-center gap-2 whitespace-nowrap">
+      <span className="font-semibold text-ink">{level}</span>
+      <span className="flex items-center gap-0.5" aria-hidden="true">
+        {Array.from({ length: 4 }, (_, index) => {
+          const isActive = index < activeMarks;
+          const isExpert = level === "Experto" && isActive;
+          return (
+            <span
+              key={index}
+              className={
+                isExpert
+                  ? "size-1.5 rounded-full bg-accent"
+                  : isActive
+                    ? "size-1.5 rounded-full bg-ink"
+                    : "size-1.5 rounded-full bg-border-strong"
+              }
+            />
+          );
+        })}
+      </span>
     </span>
   );
 }

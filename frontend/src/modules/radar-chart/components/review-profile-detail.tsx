@@ -26,21 +26,14 @@ interface ReviewProfileDetailProps {
   onAction: (action: ReviewAction) => void;
 }
 
-function getLevelClass(level: ReviewAffinityLevel): string {
-  switch (level) {
-    case "Experto":
-      return "bg-accent";
+const LEVEL_DOT_CLASS: Record<ReviewAffinityLevel, string> = {
+  Experto: "bg-accent",
+  Avanzado: "bg-ink",
+  Intermedio: "bg-ink-soft",
+  Base: "bg-border-strong",
+};
 
-    case "Avanzado":
-      return "bg-gold";
-
-    case "Intermedio":
-      return "bg-ink-soft";
-
-    case "Base":
-      return "bg-border-strong";
-  }
-}
+const LEVEL_BAR_CLASS = "bg-accent";
 
 function ReviewAffinityRadarChart({
   areas,
@@ -99,7 +92,7 @@ function ReviewAffinityRadarChart({
 
             <Radar
               name="Profile Affinity Score"
-              dataKey="puntuacion"
+              dataKey="score"
               stroke="var(--color-accent)"
               strokeWidth={2}
               fill="var(--color-accent)"
@@ -115,7 +108,7 @@ function ReviewAffinityRadarChart({
       </div>
 
       <div className="flex items-center gap-2 text-xs text-text-secondary">
-        <span className="h-2.5 w-5 rounded-sm bg-interaction" />
+        <span className="h-2.5 w-5 rounded-sm bg-accent/20" />
         Profile Affinity Score
       </div>
     </section>
@@ -144,29 +137,25 @@ function ReviewAreaBreakdownPanel({
           <li key={area.area}>
             <div className="flex items-center gap-2 text-xs">
               <span
-                className={`h-1.5 w-1.5 rounded-full ${getLevelClass(
-                  area.nivel,
-                )}`}
+                className={`h-1.5 w-1.5 rounded-full ${LEVEL_DOT_CLASS[area.level]}`}
               />
 
               <span className="text-ink">{area.area}</span>
 
               <span className="ml-auto text-[10px] text-text-secondary">
-                {area.nivel}
+                {area.level}
               </span>
 
               <span className="w-8 text-right font-semibold text-ink">
-                {area.puntuacion.toFixed(1)}
+                {area.score.toFixed(1)}
               </span>
             </div>
 
             <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-soft">
               <div
-                className={`h-full rounded-full ${getLevelClass(
-                  area.nivel,
-                )}`}
+                className={`h-full rounded-full ${LEVEL_BAR_CLASS}`}
                 style={{
-                  width: `${area.puntuacion * 10}%`,
+                  width: `${area.score * 10}%`,
                 }}
               />
             </div>
@@ -214,38 +203,38 @@ export function ReviewProfileDetail({
     );
   }
 
-  const showActions = profile.estado !== "Completado";
+  const showActions = profile.status !== "Completado";
 
   return (
     <section className="bg-surface p-6 lg:p-8">
       <div className="mx-auto w-full max-w-3xl">
         <div className="flex items-start gap-4 border-b border-border pb-5">
           <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-surface-soft text-sm font-semibold text-ink">
-            {getInitials(profile.nombre)}
+            {getInitials(profile.name)}
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-ink">
-                  {profile.nombre}
+                  {profile.name}
                 </h2>
 
                 <p className="mt-1 text-sm text-text-secondary">
-                  {profile.cargoObjetivo}
+                  {profile.targetRole}
                 </p>
               </div>
 
-              <ReviewStatusBadge status={profile.estado} />
+              <ReviewStatusBadge status={profile.status} />
             </div>
 
             <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-xs text-text-secondary">
               <span>
-                Enviado: {profile.fechaEnvio}
+                Enviado: {profile.submittedAt}
               </span>
 
               <span className="font-semibold text-ink">
-                Afinidad global: {profile.afinidadGlobal.toFixed(1)}/10
+                Afinidad global: {profile.globalAffinity.toFixed(1)}/10
               </span>
             </div>
           </div>
@@ -254,12 +243,12 @@ export function ReviewProfileDetail({
         <div className="mt-6 grid gap-5 xl:grid-cols-[1fr_280px]">
           <ReviewAffinityRadarChart
             areas={profile.areas}
-            average={profile.afinidadGlobal}
+            average={profile.globalAffinity}
           />
 
           <ReviewAreaBreakdownPanel
             areas={profile.areas}
-            average={profile.afinidadGlobal}
+            average={profile.globalAffinity}
           />
         </div>
 
@@ -287,11 +276,9 @@ export function ReviewProfileDetail({
             {localAction && (
               <div
                 role="status"
-                className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
-                  localAction === "approved"
-                    ? "border-border bg-surface-soft text-ink"
-                    : "border-destructive/20 bg-destructive/10 text-destructive"
-                }`}
+                className={localAction === "approved"
+                  ? "mt-4 rounded-lg border border-border bg-surface-soft px-4 py-3 text-sm text-ink"
+                  : "mt-4 rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive"}
               >
                 {localAction === "approved"
                   ? "Radar aprobado localmente. No se enviaron datos al backend."

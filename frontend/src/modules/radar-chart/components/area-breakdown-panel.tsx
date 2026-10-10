@@ -1,6 +1,5 @@
 import { useId } from "react";
 import { cn } from "@/lib/utils";
-import type { AreaLevel } from "../types/area-detail.types";
 import type { AreaBreakdownPanelProps } from "../types/radar-profile-components.types";
 import { formatDecimal } from "../utils/format-decimal";
 import { getAreaLevel } from "../utils/get-area-level";
@@ -9,12 +8,7 @@ import { RadarCard } from "./radar-card";
 
 const MAX_SCORE = 10;
 
-const BAR_CLASS: Record<AreaLevel, string> = {
-  Bajo: "bg-border-strong",
-  Medio: "bg-gold",
-  Alto: "bg-ink",
-  Experto: "bg-accent",
-};
+const BAR_FILL_CLASS = "bg-accent";
 
 function toPercent(score: number): string {
   return `${Math.min(Math.max(score / MAX_SCORE, 0), 1) * 100}%`;
@@ -47,7 +41,7 @@ export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownP
               </div>
               <div className="mt-2 h-1.5 rounded-full bg-border" aria-hidden="true">
                 <div
-                  className={cn("h-full rounded-full", BAR_CLASS[level])}
+                  className={cn("h-full rounded-full", BAR_FILL_CLASS)}
                   style={{ width: toPercent(area.score) }}
                 />
               </div>

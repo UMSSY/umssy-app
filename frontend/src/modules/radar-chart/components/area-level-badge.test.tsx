@@ -7,28 +7,49 @@ describe("AreaLevelBadge", () => {
     cleanup();
   });
 
+  it.each(["Bajo", "Medio", "Alto", "Experto"] as const)(
+    "shows the %s level as plain text",
+    (level) => {
+      render(<AreaLevelBadge level={level} />);
+
+      expect(screen.getByText(level)).toBeDefined();
+    },
+  );
+
   it.each([
-    ["Bajo", "bg-surface-soft", "bg-border-strong"],
-    ["Medio", "bg-gold/10", "bg-gold"],
-    ["Alto", "bg-ink", "bg-surface"],
-    ["Experto", "bg-accent", "bg-surface"],
-  ] as const)("styles the %s level with brand colors and a dot", (level, badgeClass, dotClass) => {
-    render(<AreaLevelBadge level={level} />);
+    ["Bajo", 1],
+    ["Medio", 2],
+    ["Alto", 3],
+    ["Experto", 4],
+  ] as const)("shows %i active marks for %s", (level, activeCount) => {
+    const { container } = render(<AreaLevelBadge level={level} />);
 
-    const badge = screen.getByText(level);
-    const dot = badge.querySelector("span");
+    const marks = container.querySelectorAll(".size-1\\.5.rounded-full");
+    const activeMarks = Array.from(marks).filter(
+      (m) => m.classList.contains("bg-ink") || m.classList.contains("bg-accent"),
+    );
 
-    expect(badge.className.split(" ")).toContain(badgeClass);
-    expect(dot?.className.split(" ")).toContain(dotClass);
-    expect(dot?.getAttribute("aria-hidden")).toBe("true");
+    expect(activeMarks).toHaveLength(activeCount);
   });
 
-  it("uses dark text on the gold badge to keep enough contrast", () => {
-    render(<AreaLevelBadge level="Medio" />);
+  it("uses the accent color for all marks when the level is Experto", () => {
+    const { container } = render(<AreaLevelBadge level="Experto" />);
 
-    const badge = screen.getByText("Medio");
+    const marks = container.querySelectorAll(".bg-accent.rounded-full");
+    expect(marks).toHaveLength(4);
+  });
 
-    expect(badge.className).toContain("color-mix");
-    expect(badge.className).not.toContain("text-surface");
+  it("uses the ink color for active marks when not Experto", () => {
+    const { container } = render(<AreaLevelBadge level="Alto" />);
+
+    const inkMarks = container.querySelectorAll(".bg-ink.rounded-full");
+    expect(inkMarks).toHaveLength(3);
+  });
+
+  it("does not use gold or semaphore backgrounds on the badge", () => {
+    const { container } = render(<AreaLevelBadge level="Medio" />);
+
+    expect(container.innerHTML).not.toContain("bg-gold");
+    expect(container.innerHTML).not.toContain("text-danger");
   });
 });

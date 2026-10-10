@@ -21,7 +21,7 @@ import type { AreaId } from "../types/area-detail.types";
 import { formatDecimal } from "../utils/format-decimal";
 
 const CARD_CLASS =
-  "rounded-2xl border border-border bg-surface";
+  "rounded-lg border border-border bg-surface";
 
 const TAB_PANEL_ID = "area-detail-tabpanel";
 
@@ -200,7 +200,7 @@ export function AreaDetailPreviewView() {
               />
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border-strong bg-surface px-6 py-14 text-center">
+            <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border-strong bg-surface px-6 py-14 text-center">
               <MousePointerClick
                 className="size-6 text-border-strong"
                 aria-hidden="true"

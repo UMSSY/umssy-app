@@ -6,7 +6,7 @@ import { RADAR_AREA_SCORES } from "../data/radar-profile.data";
 import { RadarProfileView } from "./radar-profile-view";
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/perfil/radar",
+  usePathname: () => "/affinity-radar/profile",
 }));
 
 vi.mock("recharts", async (importOriginal) => {
@@ -30,10 +30,11 @@ describe("RadarProfileView", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders the header, the KPI cards, the radar and the breakdown", () => {
+  it("renders the page header, the profile card, KPI cards, the radar and the breakdown", () => {
     render(<RadarProfileView />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Carlos Mendoza Ríos" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 1, name: "Radar de afinidad" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 2, name: "Carlos Mendoza Ríos" })).toBeDefined();
     expect(screen.getByRole("list", { name: "Resumen del perfil" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Desglose vectorial de afinidad" })).toBeDefined();
 
@@ -45,14 +46,19 @@ describe("RadarProfileView", () => {
     expect(breakdown.getByText("6,25")).toBeDefined();
   });
 
-  it("lives inside Mi Perfil in the app shell", () => {
+  it("shows the breadcrumb with Mi perfil and Radar de afinidad", () => {
     render(<RadarProfileView />);
 
-    expect(screen.getByRole("link", { name: "Mi Perfil" }).getAttribute("aria-current")).toBe("page");
-    expect(screen.getByRole("navigation", { name: "Ruta de navegación" }).textContent).toContain(
-      "Radar de afinidad",
-    );
-    expect(screen.getByText("Egresado")).toBeDefined();
+    const breadcrumb = screen.getByRole("navigation", { name: "Breadcrumb" });
+    expect(within(breadcrumb).getByText("Mi perfil")).toBeDefined();
+    const current = within(breadcrumb).getByText("Radar de afinidad");
+    expect(current.getAttribute("aria-current")).toBe("page");
+  });
+
+  it("does not render its own sidebar", () => {
+    render(<RadarProfileView />);
+
+    expect(document.querySelector('[data-slot="sidebar"]')).toBeNull();
   });
 
   it("does not make HTTP requests", () => {

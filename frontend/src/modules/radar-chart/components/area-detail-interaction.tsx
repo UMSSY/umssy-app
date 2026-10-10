@@ -22,40 +22,40 @@ export function AreaDetailInteraction({
 
   const selectedAreaId = selectedArea ?? internalAreaId;
 
-  const handleSelectArea = (areaId: AreaId) => {
+  function handleSelectArea(areaId: AreaId) {
     setInternalAreaId(areaId);
     onAreaSelect?.(areaId);
-  };
+  }
 
-  const handleClose = () => {
+  function handleClose() {
     setInternalAreaId(null);
-  };
+  }
 
   return (
-  <div className="space-y-4">
-    <div className="flex flex-wrap gap-2">
-      {Object.values(AREA_DETAILS).map((area) => (
-        <button
-          key={area.id}
-          type="button"
-          onClick={() => handleSelectArea(area.id)}
-          className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted"
-        >
-          {area.name}
-        </button>
-      ))}
-    </div>
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {Object.values(AREA_DETAILS).map((area) => (
+          <button
+            key={area.id}
+            type="button"
+            onClick={() => handleSelectArea(area.id)}
+            className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-soft"
+          >
+            {area.name}
+          </button>
+        ))}
+      </div>
 
-    {selectedAreaId ? (
-      <AreaDetailPanel
-        area={AREA_DETAILS[selectedAreaId]}
-        onClose={handleClose}
-      />
-    ) : (
-      <p className="text-sm text-muted-foreground">
-        Selecciona un área para ver su detalle.
-      </p>
-    )}
-  </div>
-);
+      {selectedAreaId ? (
+        <AreaDetailPanel
+          area={AREA_DETAILS[selectedAreaId]}
+          onClose={handleClose}
+        />
+      ) : (
+        <p className="text-sm text-text-secondary">
+          Selecciona un área para ver su detalle.
+        </p>
+      )}
+    </div>
+  );
 }

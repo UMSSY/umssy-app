@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import { Epic3Shell } from "./epic3-shell";
 
-const navigation = vi.hoisted(() => ({ pathname: "/perfil/radar" }));
+const navigation = vi.hoisted(() => ({ pathname: "/affinity-radar/profile" }));
 
 vi.mock("next/navigation", () => ({
   usePathname: () => navigation.pathname,
@@ -30,14 +30,14 @@ describe("Epic3Shell", () => {
   });
 
   it("renders the content next to the Epic 3 menu and its user", () => {
-    renderShellAt("/perfil/radar");
+    renderShellAt("/affinity-radar/profile");
 
     const menu = within(screen.getByRole("navigation", { name: "Menú principal" }));
 
     expect(screen.getByText("Contenido de la pantalla")).toBeDefined();
     expect(screen.getByText("Carlos Mendoza Ríos")).toBeDefined();
     expect(menu.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
-  "/perfil/radar",
+  "/affinity-radar/profile",
   "/affinity-radar/review-queue",
   "/matching",
   "/area-detail-interaction-preview",
@@ -46,7 +46,7 @@ describe("Epic3Shell", () => {
   });
 
   it.each([
-  ["/perfil/radar", "Mi Perfil"],
+  ["/affinity-radar/profile", "Mi Perfil"],
   ["/affinity-radar/review-queue", "Cola de revisión"],
   ["/matching", "Matching"],
   ["/area-detail-interaction-preview", "Detalle por área"],

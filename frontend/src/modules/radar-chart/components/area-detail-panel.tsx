@@ -21,7 +21,7 @@ export function AreaDetailPanel({ area, onClose, className }: AreaDetailPanelPro
       key={area.id}
       aria-labelledby={titleId}
       className={cn(
-        "flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-surface font-sans text-sm text-ink shadow-[0_1px_2px_rgba(11,31,46,0.04),0_8px_24px_-12px_rgba(11,31,46,0.12)] duration-200 fade-in slide-in-from-bottom-1 motion-safe:animate-in",
+        "flex min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-surface font-sans text-sm text-ink shadow-[0_1px_2px_rgba(11,31,46,0.05)] duration-200 fade-in slide-in-from-bottom-1 motion-safe:animate-in",
         className,
       )}
     >

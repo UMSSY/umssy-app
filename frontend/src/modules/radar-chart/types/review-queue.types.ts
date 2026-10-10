@@ -13,17 +13,17 @@ export type ReviewAffinityLevel =
 
 export interface ReviewAffinityArea {
   area: string;
-  nivel: ReviewAffinityLevel;
-  puntuacion: number;
+  level: ReviewAffinityLevel;
+  score: number;
 }
 
 export interface ReviewProfile {
   id: number;
-  nombre: string;
-  cargoObjetivo: string;
-  fechaEnvio: string;
-  afinidadGlobal: number;
-  estado: ReviewProfileStatus;
+  name: string;
+  targetRole: string;
+  submittedAt: string;
+  globalAffinity: number;
+  status: ReviewProfileStatus;
   areas: ReviewAffinityArea[];
 }
 export type ReviewAction = "approved" | "rejected";

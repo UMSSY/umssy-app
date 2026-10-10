@@ -9,7 +9,7 @@ import type { NavigationItem } from "@/shared/types/navigation-item.types";
 import type { SidebarUser } from "@/shared/types/sidebar-user.types";
 import { RADAR_PROFILE } from "./radar-profile.data";
 
-export const RADAR_PROFILE_PATH = "/perfil/radar";
+export const RADAR_PROFILE_PATH = "/affinity-radar/profile";
 export const REVIEW_QUEUE_PATH = "/affinity-radar/review-queue";
 export const MATCHING_PATH = "/matching";
 export const AREA_DETAIL_INTERACTION_PATH = "/area-detail-interaction-preview";

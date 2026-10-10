@@ -19,7 +19,7 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           <span
             role="img"
             aria-label={profile.name}
-            className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-ink font-heading text-2xl font-semibold text-surface"
+            className="flex size-20 shrink-0 items-center justify-center rounded-full bg-ink font-heading text-2xl font-semibold text-surface"
           >
             {getInitials(profile.name)}
           </span>
@@ -31,16 +31,16 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             height={PHOTO_SIZE}
             priority
             onError={() => setHasPhotoError(true)}
-            className="size-20 shrink-0 rounded-2xl border border-border object-cover"
+            className="size-20 shrink-0 rounded-full border border-border object-cover"
           />
         )}
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-semibold tracking-[0.14em] text-accent uppercase">
             Análisis de perfil profesional con IA
           </p>
-          <h1 className="mt-1 font-heading text-2xl font-semibold tracking-tight break-words text-ink">
+          <h2 className="mt-1 font-heading text-2xl font-semibold tracking-tight break-words text-ink">
             {profile.name}
-          </h1>
+          </h2>
           <p className="mt-1 text-sm text-text-secondary">
             {profile.title} · {profile.yearsOfExperience} años de experiencia
           </p>

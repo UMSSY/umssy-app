@@ -39,24 +39,24 @@ export function ReviewProfileList({
               <div className="flex items-start gap-3">
                 <div
                   className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-soft text-sm font-semibold text-ink"
-                  aria-label={`Avatar de ${profile.nombre}`}
+                  aria-label={`Avatar de ${profile.name}`}
                 >
-                  {getInitials(profile.nombre)}
+                  {getInitials(profile.name)}
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-ink">
-                        {profile.nombre}
+                        {profile.name}
                       </p>
 
                       <p className="mt-1 truncate text-xs text-text-secondary">
-                        {profile.cargoObjetivo}
+                        {profile.targetRole}
                       </p>
                     </div>
 
-                    <ReviewStatusBadge status={profile.estado} />
+                    <ReviewStatusBadge status={profile.status} />
                   </div>
 
                   <div className="mt-3 flex items-end justify-between gap-3">
@@ -66,7 +66,7 @@ export function ReviewProfileList({
                       </p>
 
                       <p className="mt-0.5 text-xs font-medium text-ink-soft">
-                        {profile.fechaEnvio}
+                        {profile.submittedAt}
                       </p>
                     </div>
 
@@ -76,7 +76,7 @@ export function ReviewProfileList({
                       </p>
 
                       <p className="mt-0.5 text-sm font-semibold text-ink">
-                        {profile.afinidadGlobal.toFixed(1)}/10
+                        {profile.globalAffinity.toFixed(1)}/10
                       </p>
                     </div>
                   </div>

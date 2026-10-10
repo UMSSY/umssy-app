@@ -1,32 +1,23 @@
-import { Badge } from "@/components/ui/badge";
 import type { ReviewProfileStatus } from "../types/review-queue.types";
 
 interface ReviewStatusBadgeProps {
   status: ReviewProfileStatus;
 }
 
-function getStatusClasses(status: ReviewProfileStatus): string {
-  switch (status) {
-    case "Completado":
-      return "border-ink/15 bg-ink text-surface";
+const STATUS_DOT_CLASS: Record<ReviewProfileStatus, string> = {
+  Completado: "bg-ink-soft",
+  Procesando: "bg-ink-soft",
+  Pendiente: "bg-accent",
+};
 
-    case "Procesando":
-      return "border-gold/30 bg-gold/15 text-ink";
-
-    case "Pendiente":
-      return "border-accent/20 bg-interaction text-accent";
-  }
-}
-
-export function ReviewStatusBadge({
-  status,
-}: ReviewStatusBadgeProps) {
+export function ReviewStatusBadge({ status }: ReviewStatusBadgeProps) {
   return (
-    <Badge
-      variant="outline"
-      className={getStatusClasses(status)}
-    >
+    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-soft whitespace-nowrap">
+      <span
+        className={`size-1.5 shrink-0 rounded-full ${STATUS_DOT_CLASS[status]}`}
+        aria-hidden="true"
+      />
       {status}
-    </Badge>
+    </span>
   );
 }
