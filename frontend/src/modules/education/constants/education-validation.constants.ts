@@ -6,6 +6,7 @@ export const EDUCATION_VALIDATION_MESSAGES = {
   institutionInvalid: "Selecciona una universidad de la lista permitida.",
   dateTooEarly: "Fecha inválida.",
   degreeRequired: "El título o carrera es obligatorio.",
+  degreeInvalid: "Selecciona una carrera de Ciencias y Tecnología de la universidad elegida.",
   descriptionTooLong: `La descripción no puede superar los ${EDUCATION_DESCRIPTION_MAX_LENGTH} caracteres.`,
   startDateRequired: "La fecha de inicio es obligatoria.",
   endDateRequired: "La fecha de fin es obligatoria.",

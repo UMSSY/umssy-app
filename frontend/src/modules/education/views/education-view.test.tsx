@@ -20,7 +20,7 @@ const EDUCATIONS: EducationItem[] = [
   {
     id: "11111111-1111-4111-8111-111111111111",
     institution: "Universidad Mayor de San Simón (UMSS)",
-    degree: "Computer Science",
+    degree: "Ingeniería Informática",
     startDate: "2021-02-01",
     endDate: "2025-11-30",
     description: "Software development studies.",
@@ -30,7 +30,7 @@ const EDUCATIONS: EducationItem[] = [
   {
     id: "22222222-2222-4222-8222-222222222222",
     institution: "Universidad Privada Boliviana (UPB)",
-    degree: "High School Diploma",
+    degree: "Ingeniería Civil",
     startDate: "2015-02-01",
     endDate: "2020-11-30",
     description: null,
@@ -61,7 +61,7 @@ describe("EducationView", () => {
     render(<EducationView />);
     const list = await screen.findByRole("list", { name: "Formación registrada" });
     await user.click(screen.getByRole("button", {
-      name: editing ? "Editar High School Diploma" : "Agregar información",
+      name: editing ? "Editar Ingeniería Civil" : "Agregar información",
     }));
     const original = EDUCATIONS[0];
     for (const [label, value] of [
@@ -73,7 +73,7 @@ describe("EducationView", () => {
     ] as const) {
       fireEvent.change(screen.getByLabelText(label), { target: { value } });
     }
-    expect(screen.getByRole("combobox")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /Institución/ })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(EDUCATION_FEEDBACK_MESSAGES.duplicate);
     expect(screen.getByLabelText(/Institución/)).toHaveValue(original.institution);
@@ -93,13 +93,12 @@ describe("EducationView", () => {
     const records = within(list).getAllByRole("listitem");
 
     expect(records).toHaveLength(2);
-    expect(within(records[0]).getByRole("heading", { name: "Computer Science" })).toBeInTheDocument();
+    expect(within(records[0]).getByRole("heading", { name: "Ingeniería Informática" })).toBeInTheDocument();
     expect(records[0]).toHaveTextContent("Universidad Mayor de San Simón (UMSS) · Feb 2021 – Nov 2025");
     expect(records[0]).toHaveTextContent("Software development studies.");
-    expect(within(records[1]).getByRole("heading", { name: "High School Diploma" })).toBeInTheDocument();
+    expect(within(records[1]).getByRole("heading", { name: "Ingeniería Civil" })).toBeInTheDocument();
     expect(records[1]).toHaveTextContent("Universidad Privada Boliviana (UPB) · Feb 2015 – Nov 2020");
     expect(records[1].querySelectorAll("p")).toHaveLength(1);
-    expect(screen.queryByText("Ingeniería Informática")).not.toBeInTheDocument();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
@@ -108,14 +107,14 @@ describe("EducationView", () => {
     vi.mocked(educationsService.getInstitutions).mockRejectedValueOnce(new Error('Unavailable'));
     const user = userEvent.setup();
     render(<EducationView />);
-    await user.click(await screen.findByRole('button', { name: 'Editar Computer Science' }));
+    await user.click(await screen.findByRole('button', { name: 'Editar Ingeniería Informática' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar la lista de universidades.');
     expect(screen.getByRole('button', { name: 'Guardar formación' })).toBeDisabled();
     fireEvent.submit(screen.getByRole('form'));
     expect(educationsService.updateEducation).not.toHaveBeenCalled();
     await user.click(screen.getByRole('button', { name: 'Reintentar' }));
-    await waitFor(() => expect(screen.getByRole('combobox')).toBeEnabled());
-    expect(screen.getByRole('combobox')).toHaveValue(EDUCATIONS[0].institution);
+    await waitFor(() => expect(screen.getByRole('combobox', { name: /Institución/ })).toBeEnabled());
+    expect(screen.getByRole('combobox', { name: /Institución/ })).toHaveValue(EDUCATIONS[0].institution);
     expect(screen.getByRole('button', { name: 'Guardar formación' })).toBeEnabled();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
@@ -169,7 +168,7 @@ describe("EducationView", () => {
     vi.mocked(educationsService.updateEducation).mockResolvedValue(updated);
     const user = userEvent.setup();
     render(<EducationView />);
-    await user.click(await screen.findByRole("button", { name: "Editar Computer Science" }));
+    await user.click(await screen.findByRole("button", { name: "Editar Ingeniería Informática" }));
     expect(screen.getByLabelText(/Hasta/)).not.toBeRequired();
     fireEvent.change(screen.getByLabelText(/Descripción/), { target: { value: "Updated description" } });
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
@@ -191,7 +190,7 @@ describe("EducationView", () => {
     vi.mocked(educationsService.updateEducation).mockResolvedValue(EDUCATIONS[0]);
     const user = userEvent.setup();
     render(<EducationView />);
-    await user.click(await screen.findByRole("button", { name: "Editar Computer Science" }));
+    await user.click(await screen.findByRole("button", { name: "Editar Ingeniería Informática" }));
     fireEvent.change(screen.getByLabelText(/Hasta/), { target: { value: "2025-11-30" } });
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
     await screen.findByText("Formación académica actualizada correctamente.");
@@ -202,11 +201,11 @@ describe("EducationView", () => {
     vi.mocked(educationsService.updateEducation).mockRejectedValue({ response: { status: 409 } });
     const user = userEvent.setup();
     render(<EducationView />);
-    await user.click(await screen.findByRole("button", { name: "Editar Computer Science" }));
-    fireEvent.change(screen.getByLabelText(/Título o carrera/), { target: { value: "Unsaved title" } });
+    await user.click(await screen.findByRole("button", { name: "Editar Ingeniería Informática" }));
+    fireEvent.change(screen.getByLabelText(/Título o carrera/), { target: { value: "Ingeniería Química" } });
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(EDUCATION_FEEDBACK_MESSAGES.updateConflict);
-    expect(screen.getByLabelText(/Título o carrera/)).toHaveValue("Unsaved title");
+    expect(screen.getByLabelText(/Título o carrera/)).toHaveValue("Ingeniería Química");
     expect(screen.getByRole("button", { name: "Guardar formación" })).toBeEnabled();
     expect(educationsService.getEducations).toHaveBeenCalledTimes(1);
     expect(educationsService.updateEducation).toHaveBeenCalledTimes(1);
@@ -254,7 +253,7 @@ describe("EducationView", () => {
   });
 
   it("creates an education record and reloads the list", async () => {
-    const created = { ...EDUCATIONS[0], id: "33333333-3333-4333-8333-333333333333", degree: "Systems Engineering" };
+    const created = { ...EDUCATIONS[0], id: "33333333-3333-4333-8333-333333333333", degree: "Ingeniería de Sistemas" };
     vi.mocked(educationsService.createEducation).mockResolvedValue(created);
     vi.mocked(educationsService.getEducations)
       .mockResolvedValueOnce(EDUCATIONS)
@@ -265,7 +264,7 @@ describe("EducationView", () => {
     await user.click(screen.getByRole("button", { name: "Agregar información" }));
 
     await user.type(screen.getByLabelText(/Institución/), "  Universidad Mayor de San Simón (UMSS) ");
-    await user.type(screen.getByLabelText(/Título o carrera/), "Systems Engineering");
+    await user.type(screen.getByLabelText(/Título o carrera/), "Ingeniería de Sistemas");
     await user.type(screen.getByLabelText(/Desde/), "2021-02-01");
     await user.type(screen.getByLabelText(/Hasta/), "2025-11-30");
     await user.type(screen.getByLabelText(/Descripción \(opcional\)/), "   ");
@@ -273,14 +272,14 @@ describe("EducationView", () => {
 
     expect(educationsService.createEducation).toHaveBeenCalledWith({
       institution: "Universidad Mayor de San Simón (UMSS)",
-      degree: "Systems Engineering",
+      degree: "Ingeniería de Sistemas",
       startDate: "2021-02-01",
       endDate: "2025-11-30",
       description: null,
     });
     expect(await screen.findByText("Formación académica agregada correctamente.")).toBeInTheDocument();
     expect(educationsService.getEducations).toHaveBeenCalledTimes(2);
-    expect(await screen.findByRole("heading", { name: "Systems Engineering" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Ingeniería de Sistemas" })).toBeInTheDocument();
     expect(within(screen.getByRole("list", { name: "Formación registrada" })).getAllByRole("listitem")).toHaveLength(3);
     for (const label of [/Institución/, /Título o carrera/, /Desde/, /Hasta/, /Descripción/]) {
       expect(screen.getByLabelText(label)).toHaveValue("");
@@ -295,7 +294,7 @@ describe("EducationView", () => {
 
     await user.click(screen.getByRole("button", { name: "Agregar información" }));
     await user.type(screen.getByLabelText(/Institución/), "Universidad Mayor de San Simón (UMSS)");
-    await user.type(screen.getByLabelText(/Título o carrera/), "Engineering");
+    await user.type(screen.getByLabelText(/Título o carrera/), "Ingeniería Civil");
     fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2020-01-01" } });
     fireEvent.change(screen.getByLabelText(/Hasta/), { target: { value: "2024-01-01" } });
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
@@ -313,7 +312,7 @@ describe("EducationView", () => {
   });
 
   it("edits an existing record and cancels back to the empty form", async () => {
-    const updated = { ...EDUCATIONS[0], degree: "Systems Engineering" };
+    const updated = { ...EDUCATIONS[0], degree: "Ingeniería de Sistemas" };
     vi.mocked(educationsService.updateEducation).mockResolvedValue(updated);
     vi.mocked(educationsService.getEducations)
       .mockResolvedValueOnce(EDUCATIONS)
@@ -322,19 +321,19 @@ describe("EducationView", () => {
     render(<EducationView />);
     await screen.findByRole("list", { name: "Formación registrada" });
 
-    await user.click(screen.getByRole("button", { name: "Editar Computer Science" }));
+    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
 
     expect(screen.getByRole("form", { name: "Editar formación" })).toBeInTheDocument();
     expect(screen.getByLabelText(/Institución/)).toHaveValue("Universidad Mayor de San Simón (UMSS)");
     expect(screen.getByLabelText(/Hasta/)).toHaveValue("2025-11-30");
 
     await user.clear(screen.getByLabelText(/Título o carrera/));
-    await user.type(screen.getByLabelText(/Título o carrera/), "Systems Engineering");
+    await user.type(screen.getByLabelText(/Título o carrera/), "Ingeniería de Sistemas");
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
 
     expect(educationsService.updateEducation).toHaveBeenCalledWith(EDUCATIONS[0].id, {
       institution: "Universidad Mayor de San Simón (UMSS)",
-      degree: "Systems Engineering",
+      degree: "Ingeniería de Sistemas",
       startDate: "2021-02-01",
       endDate: "2025-11-30",
       description: "Software development studies.",
@@ -342,12 +341,12 @@ describe("EducationView", () => {
     expect(
       await screen.findByText("Formación académica actualizada correctamente."),
     ).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: "Systems Engineering" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Computer Science" })).not.toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Ingeniería de Sistemas" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Ingeniería Informática" })).not.toBeInTheDocument();
     expect(educationsService.createEducation).not.toHaveBeenCalled();
     expect(screen.getByLabelText(/Título o carrera/)).toHaveValue("");
 
-    await user.click(screen.getByRole("button", { name: "Editar High School Diploma" }));
+    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Civil" }));
     await user.type(screen.getByLabelText(/Institución/), " unsaved changes");
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
 
@@ -364,16 +363,16 @@ describe("EducationView", () => {
     render(<EducationView />);
     await screen.findByRole("list", { name: "Formación registrada" });
 
-    await user.click(screen.getByRole("button", { name: "Editar Computer Science" }));
+    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
     await user.clear(screen.getByLabelText(/Título o carrera/));
-    await user.type(screen.getByLabelText(/Título o carrera/), "Systems Engineering");
+    await user.type(screen.getByLabelText(/Título o carrera/), "Ingeniería de Sistemas");
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
 
     expect(
       await screen.findByText("No se pudo actualizar la formación académica. Inténtalo de nuevo."),
     ).toBeInTheDocument();
     expect(screen.getByRole("form", { name: "Editar formación" })).toBeInTheDocument();
-    expect(screen.getByLabelText(/Título o carrera/)).toHaveValue("Systems Engineering");
+    expect(screen.getByLabelText(/Título o carrera/)).toHaveValue("Ingeniería de Sistemas");
     expect(educationsService.getEducations).toHaveBeenCalledTimes(1);
     expect(educationsService.createEducation).not.toHaveBeenCalled();
   });
@@ -383,7 +382,7 @@ describe("EducationView", () => {
     const user = userEvent.setup();
     render(<EducationView />);
     await screen.findByRole("list", { name: "Formación registrada" });
-    await user.click(screen.getByRole("button", { name: "Editar Computer Science" }));
+    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
     await user.click(screen.getByRole("button", { name: "Agregar información" }));
 
     expect(screen.getByRole("form", { name: "Agregar formación" })).toBeInTheDocument();
@@ -391,7 +390,7 @@ describe("EducationView", () => {
       expect(screen.getByLabelText(label)).toHaveValue("");
     }
     await user.type(screen.getByLabelText(/Institución/), "Universidad Privada Boliviana (UPB)");
-    await user.type(screen.getByLabelText(/Título o carrera/), "Data Science");
+    await user.type(screen.getByLabelText(/Título o carrera/), "Ingeniería Electromecánica");
     await user.type(screen.getByLabelText(/Desde/), "2023-01-01");
     await user.type(screen.getByLabelText(/Hasta/), "2025-01-01");
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
@@ -423,10 +422,10 @@ describe("EducationView", () => {
     const user = userEvent.setup();
     render(<EducationView />);
     await screen.findByRole("list", { name: "Formación registrada" });
-    await user.click(screen.getByRole("button", { name: "Editar Computer Science" }));
+    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
 
-    for (const name of ["Agregar información", "Editar High School Diploma", "Eliminar Computer Science", "Cancelar", "Guardando..."]) {
+    for (const name of ["Agregar información", "Editar Ingeniería Civil", "Eliminar Ingeniería Informática", "Cancelar", "Guardando..."]) {
       expect(screen.getByRole("button", { name })).toBeDisabled();
     }
     expect(screen.getByLabelText(/Institución/)).toBeDisabled();
@@ -445,10 +444,10 @@ describe("EducationView", () => {
     render(<EducationView />);
     await screen.findByRole("list", { name: "Formación registrada" });
 
-    await user.click(screen.getByRole("button", { name: "Editar Computer Science" }));
-    await user.click(screen.getByRole("button", { name: "Eliminar Computer Science" }));
+    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
+    await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Informática" }));
     const dialog = await screen.findByRole("alertdialog", { name: "¿Eliminar esta formación?" });
-    expect(dialog).toHaveTextContent('Se eliminará "Computer Science" de tu trayectoria.');
+    expect(dialog).toHaveTextContent('Se eliminará "Ingeniería Informática" de tu trayectoria.');
 
     await user.click(within(dialog).getByRole("button", { name: "Eliminar" }));
 
@@ -464,7 +463,7 @@ describe("EducationView", () => {
     render(<EducationView />);
     await screen.findByRole("list", { name: "Formación registrada" });
 
-    await user.click(screen.getByRole("button", { name: "Eliminar High School Diploma" }));
+    await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Civil" }));
     await user.click(await screen.findByRole("button", { name: "Cancelar" }));
 
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
@@ -477,7 +476,7 @@ describe("EducationView", () => {
     render(<EducationView />);
     await screen.findByRole("list", { name: "Formación registrada" });
 
-    await user.click(screen.getByRole("button", { name: "Eliminar High School Diploma" }));
+    await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Civil" }));
     await user.click(await screen.findByRole("button", { name: "Eliminar" }));
 
     expect(
@@ -490,10 +489,10 @@ describe("EducationView", () => {
     const user = userEvent.setup();
     render(<EducationView />);
     await screen.findByRole("list", { name: "Formación registrada" });
-    await user.click(screen.getByRole("button", { name: "Editar Computer Science" }));
+    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Informática" }));
     await user.type(screen.getByLabelText(/Institución/), " edited");
     const institution = screen.getByLabelText(/Institución/);
-    await user.click(screen.getByRole("button", { name: "Eliminar Computer Science" }));
+    await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Informática" }));
     const dialog = await screen.findByRole("alertdialog");
     await user.click(within(dialog).getByRole("button", { name: "Eliminar" }));
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("No se pudo eliminar");
@@ -511,7 +510,7 @@ describe("EducationView", () => {
     const user = userEvent.setup();
     render(<EducationView />);
     await screen.findByRole("list", { name: "Formación registrada" });
-    await user.click(screen.getByRole("button", { name: "Eliminar Computer Science" }));
+    await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Informática" }));
     const dialog = await screen.findByRole("alertdialog");
     await user.click(within(dialog).getByRole("button", { name: "Eliminar" }));
     expect(within(dialog).getByRole("button", { name: "Cancelar" })).toBeDisabled();
@@ -527,7 +526,7 @@ describe("EducationView", () => {
     const user = userEvent.setup();
     render(<EducationView />);
     await screen.findByRole("list", { name: "Formación registrada" });
-    await user.click(screen.getByRole("button", { name: editing ? "Editar Computer Science" : "Agregar información" }));
+    await user.click(screen.getByRole("button", { name: editing ? "Editar Ingeniería Informática" : "Agregar información" }));
     for (const label of [/Institución/, /Título o carrera/, /Desde/, /Hasta/]) {
       fireEvent.change(screen.getByLabelText(label), { target: { value: "" } });
     }
@@ -537,7 +536,7 @@ describe("EducationView", () => {
     expect(screen.getByText("La fecha de inicio es obligatoria.")).toBeInTheDocument();
     expect(screen.getByText("La fecha de fin es obligatoria.")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText(/Institución/), { target: { value: "Universidad Mayor de San Simón (UMSS)" } });
-    fireEvent.change(screen.getByLabelText(/Título o carrera/), { target: { value: "Engineering" } });
+    fireEvent.change(screen.getByLabelText(/Título o carrera/), { target: { value: "Ingeniería Civil" } });
     fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2024-01-02" } });
     fireEvent.change(screen.getByLabelText(/Hasta/), { target: { value: "2024-01-01" } });
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
@@ -564,7 +563,7 @@ describe("EducationView", () => {
     const user = userEvent.setup();
     render(<EducationView />);
     await screen.findByText("Todavía no tienes formación académica registrada.");
-    for (const [index, degree] of ["Engineering", "Data Science"].entries()) {
+    for (const [index, degree] of ["Ingeniería Civil", "Ingeniería Electromecánica"].entries()) {
       await user.click(screen.getByRole("button", { name: "Agregar información" }));
       for (const [label, value] of [[/Institución/, "Universidad Mayor de San Simón (UMSS)"], [/Título o carrera/, degree], [/Desde/, "2020-01-01"], [/Hasta/, "2024-01-01"]] as const) {
         fireEvent.change(screen.getByLabelText(label), { target: { value } });
@@ -574,23 +573,23 @@ describe("EducationView", () => {
       expect(within(screen.getByRole("list", { name: "Formación registrada" })).getAllByRole("listitem")).toHaveLength(index + 1);
       expect(screen.getByLabelText(/Institución/)).toHaveValue("");
     }
-    await user.click(screen.getByRole("button", { name: "Editar Engineering" }));
-    fireEvent.change(screen.getByLabelText(/Título o carrera/), { target: { value: "Updated Engineering" } });
+    await user.click(screen.getByRole("button", { name: "Editar Ingeniería Civil" }));
+    fireEvent.change(screen.getByLabelText(/Título o carrera/), { target: { value: "Ingeniería Química" } });
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
-    await screen.findByRole("heading", { name: "Updated Engineering" });
-    await user.click(screen.getByRole("button", { name: "Eliminar Updated Engineering" }));
+    await screen.findByRole("heading", { name: "Ingeniería Química" });
+    await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Química" }));
     await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Cancelar" }));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(educationsService.deleteEducation).not.toHaveBeenCalled();
-    expect(screen.getByRole("heading", { name: "Updated Engineering" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Eliminar Updated Engineering" }));
+    expect(screen.getByRole("heading", { name: "Ingeniería Química" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Eliminar Ingeniería Química" }));
     await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Eliminar" }));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     const list = screen.getByRole("list", { name: "Formación registrada" });
     expect(within(list).getAllByRole("listitem")).toHaveLength(1);
-    expect(within(list).getByRole("heading", { name: "Data Science" })).toBeInTheDocument();
+    expect(within(list).getByRole("heading", { name: "Ingeniería Electromecánica" })).toBeInTheDocument();
     expect(educationsService.createEducation).toHaveBeenCalledTimes(2);
-    expect(educationsService.updateEducation).toHaveBeenCalledExactlyOnceWith(EDUCATIONS[0].id, expect.objectContaining({ degree: "Updated Engineering" }));
+    expect(educationsService.updateEducation).toHaveBeenCalledExactlyOnceWith(EDUCATIONS[0].id, expect.objectContaining({ degree: "Ingeniería Química" }));
     expect(educationsService.deleteEducation).toHaveBeenCalledExactlyOnceWith(EDUCATIONS[0].id);
   });
 });

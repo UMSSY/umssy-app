@@ -8,6 +8,7 @@ import type { EducationFormErrors } from "../types/education-form-errors.types";
 import type { EducationFormValues } from "../types/education-form-values.types";
 import type { EducationInstitution } from "../types/education-institution.types";
 import { resolveEducationInstitution } from "./resolve-education-institution";
+import { getEducationDegrees, resolveEducationDegree } from "./resolve-education-degree";
 
 function isValidDate(value: string): boolean {
   if (!EDUCATION_DATE_PATTERN.test(value)) return false;
@@ -33,6 +34,9 @@ export function validateEducationForm(
   }
   if (!(values.degree ?? "").trim()) {
     errors.degree = EDUCATION_VALIDATION_MESSAGES.degreeRequired;
+  } else if (!errors.institution && !resolveEducationDegree(values.degree,
+    getEducationDegrees(resolveEducationInstitution(values.institution, institutions) ?? ''))) {
+    errors.degree = EDUCATION_VALIDATION_MESSAGES.degreeInvalid;
   }
   if (!values.startDate) {
     errors.startDate = EDUCATION_VALIDATION_MESSAGES.startDateRequired;

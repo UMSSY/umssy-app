@@ -1,5 +1,4 @@
 import type { INestApplication } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
 import { APP_FILTER } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
@@ -65,7 +64,7 @@ describe.skipIf(!DATABASE)('Education persistence and concurrent HTTP updates', 
 
   async function createFixture(endDate: Date | null) {
     const record = await clients[0].education.create({
-      data: { userId, institution: 'Test University', degree: 'Engineering', startDate: new Date('2020-01-01'), endDate },
+      data: { userId, institution: 'UMSS', degree: 'Ingeniería Civil', startDate: new Date('2020-01-01'), endDate },
       select: { id: true },
     });
     createdIds.push(record.id);
@@ -73,7 +72,7 @@ describe.skipIf(!DATABASE)('Education persistence and concurrent HTTP updates', 
   }
 
   it('persists only one of two equivalent POST requests from separate clients', async () => {
-    const degree = `Concurrent education ${randomUUID()}`;
+    const degree = 'Ingeniería Informática';
     const body = { institution: 'UMSS', degree, startDate: '2020-01-01', endDate: '2024-01-01' };
     const responses = await Promise.all(apps.map((app, index) =>
       request(app.getHttpServer()).post('/api/educations')
@@ -84,17 +83,17 @@ describe.skipIf(!DATABASE)('Education persistence and concurrent HTTP updates', 
     for (const response of responses) {
       if (response.status === 201) createdIds.push(response.body.data.id);
     }
-    expect(responses.map((response) => response.status).sort()).toEqual([201, 409]);
+    expect(responses.map((response) => response.status).sort((left, right) => left - right)).toEqual([201, 409]);
     expect(responses.find((response) => response.status === 409)?.body.data.code).toBe('EDUCATION_DUPLICATE');
     expect(await clients[0].education.count({ where: { userId, degree: { equals: degree, mode: 'insensitive' } } })).toBe(1);
   }, TEST_TIMEOUT);
 
   it('does not let two different records become duplicates through concurrent PATCH requests', async () => {
-    const targetDegree = `Updated education ${randomUUID()}`;
+    const targetDegree = 'Ingeniería Química';
     const ids: string[] = [];
     for (let index = 0; index < apps.length; index += 1) {
       const record = await clients[0].education.create({
-        data: { userId, institution: 'UMSS', degree: `${targetDegree} ${index}`, startDate: new Date('2020-01-01'), endDate: null },
+        data: { userId, institution: 'UMSS', degree: index ? 'Ingeniería Civil' : 'Ingeniería de Sistemas', startDate: new Date('2020-01-01'), endDate: null },
         select: { id: true },
       });
       ids.push(record.id);
@@ -105,7 +104,7 @@ describe.skipIf(!DATABASE)('Education persistence and concurrent HTTP updates', 
         .set('Authorization', `Bearer ${token}`).send({ degree: targetDegree })
         .timeout({ deadline: REQUEST_TIMEOUT }),
     ));
-    expect(responses.map((response) => response.status).sort()).toEqual([200, 409]);
+    expect(responses.map((response) => response.status).sort((left, right) => left - right)).toEqual([200, 409]);
     expect(responses.find((response) => response.status === 409)?.body.data.code).toBe('EDUCATION_DUPLICATE');
     expect(await clients[0].education.count({ where: { userId, degree: targetDegree } })).toBe(1);
   }, TEST_TIMEOUT);

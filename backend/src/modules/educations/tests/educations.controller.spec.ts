@@ -15,7 +15,7 @@ const otherUserId = '22222222-2222-4222-8222-222222222222';
 const educationId = '33333333-3333-4333-8333-333333333333';
 const body = {
   institution: ' UMSS ',
-  degree: ' Computer Science ',
+  degree: ' Ingeniería Informática ',
   startDate: '2020-01-01',
   endDate: '2024-01-01',
   description: ' Research ',
@@ -24,7 +24,7 @@ const record = {
   id: educationId,
   userId,
   institution: 'UMSS',
-  degree: 'Computer Science',
+  degree: 'Ingeniería Informática',
   startDate: new Date('2020-01-01'),
   endDate: new Date('2024-01-01'),
   description: 'Research',
@@ -95,7 +95,7 @@ describe('EducationsController', () => {
     expect(created.body.data).not.toHaveProperty('userId');
     expect(repository.create).toHaveBeenCalledWith(userId, {
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Computer Science',
+      degree: 'Ingeniería Informática',
       startDate: record.startDate,
       endDate: record.endDate,
       description: 'Research',
@@ -110,16 +110,16 @@ describe('EducationsController', () => {
 
     repository.update.mockResolvedValue({
       ...record,
-      degree: 'Updated degree',
+      degree: 'Ingeniería Química',
     });
     const updated = await request(app.getHttpServer())
       .patch(`/api/educations/${educationId}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ degree: ' Updated degree ' })
+      .send({ degree: ' Ingeniería Química ' })
       .expect(200);
-    expect(updated.body.data.degree).toBe('Updated degree');
+    expect(updated.body.data.degree).toBe('Ingeniería Química');
     expect(repository.update).toHaveBeenCalledWith(educationId, userId, {
-      degree: 'Updated degree',
+      degree: 'Ingeniería Química',
     }, {
       startDate: record.startDate,
       endDate: record.endDate,
@@ -243,7 +243,7 @@ describe('EducationsController', () => {
       const response = await request(app.getHttpServer())
         [method]('/api/educations/not-a-uuid')
         .set('Authorization', `Bearer ${token}`)
-        .send({ degree: 'Updated' })
+        .send({ degree: 'Ingeniería Industrial' })
         .expect(400);
       expect(response.body.ok).toBe(false);
       expect(repository.findByIdAndUserId).not.toHaveBeenCalled();
@@ -259,7 +259,7 @@ describe('EducationsController', () => {
     const response = await request(app.getHttpServer())
       .patch(`/api/educations/${educationId}`)
       .set('Authorization', `Bearer ${otherToken}`)
-      .send({ degree: 'Updated' })
+      .send({ degree: 'Ingeniería Industrial' })
       .expect(404);
     expect(response.body).toEqual({
       statusCode: 404,

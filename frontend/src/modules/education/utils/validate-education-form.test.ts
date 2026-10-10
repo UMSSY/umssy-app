@@ -7,7 +7,7 @@ const validateEducationForm = (values: EducationFormValues, allowMissingEndDate 
 
 const VALUES: EducationFormValues = {
   institution: "Universidad Mayor de San Simón (UMSS)",
-  degree: "Engineering",
+  degree: "Ingeniería Civil",
   startDate: "2020-02-29",
   endDate: "2024-02-29",
   description: "",

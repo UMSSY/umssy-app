@@ -12,6 +12,9 @@ import { EDUCATION_INSTITUTION_TEXTS } from "../constants/education-institutions
 import { useEducationInstitutions } from "../hooks/use-education-institutions";
 import { resolveEducationInstitution } from "../utils/resolve-education-institution";
 import { EducationInstitutionCombobox } from "./education-institution-combobox";
+import { EducationDegreeCombobox } from "./education-degree-combobox";
+import { EDUCATION_DEGREE_TEXTS } from "../constants/education-degree-ui.constants";
+import { getEducationDegrees, resolveEducationDegree } from "../utils/resolve-education-degree";
 import type { EducationFormProps } from "../types/education-form-props.types";
 import type { EducationFormValues } from "../types/education-form-values.types";
 import { getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
@@ -35,7 +38,23 @@ export function EducationForm({
   );
   const title = initialValues ? EDUCATION_UI_TEXTS.editTitle : EDUCATION_UI_TEXTS.createTitle;
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const selectedInstitution = resolveEducationInstitution(values.institution, institutions);
+  const degrees = getEducationDegrees(selectedInstitution ?? '');
+  const degreeHint = !selectedInstitution ? EDUCATION_DEGREE_TEXTS.selectInstitution
+    : !degrees.length ? EDUCATION_DEGREE_TEXTS.noDegrees : null;
   const errors = hasSubmitted ? validateEducationForm(values, allowMissingEndDate, institutions) : {};
+
+  const handleInstitutionChange = (institution: string) => {
+    setValues((current) => {
+      const previous = resolveEducationInstitution(current.institution, institutions);
+      const next = resolveEducationInstitution(institution, institutions);
+      // Keep the previous title while the institution search is incomplete.
+      // It stays disabled and cannot be submitted until a valid institution is entered.
+      if (!next || previous === next) return { ...current, institution };
+      const degree = resolveEducationDegree(current.degree, getEducationDegrees(next ?? ''));
+      return { ...current, institution, degree: degree ?? '' };
+    });
+  };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
@@ -49,7 +68,9 @@ export function EducationForm({
     if (Object.keys(validateEducationForm(values, allowMissingEndDate, institutions)).length > 0) return;
     const institution = resolveEducationInstitution(values.institution, institutions);
     if (!institution) return;
-    await onSubmit({ ...values, institution });
+    const degree = resolveEducationDegree(values.degree, getEducationDegrees(institution));
+    if (!degree) return;
+    await onSubmit({ ...values, institution, degree });
   };
 
   return (
@@ -62,7 +83,7 @@ export function EducationForm({
             value={values.institution}
             institutions={institutions}
             disabled={isPending || catalogUnavailable}
-            onChange={(institution) => setValues((current) => ({ ...current, institution }))}
+            onChange={handleInstitutionChange}
           />
           {loadingInstitutions ? <p role="status" className="text-sm text-text-secondary">{EDUCATION_INSTITUTION_TEXTS.loading}</p> : null}
           {institutionsError ? (
@@ -75,18 +96,17 @@ export function EducationForm({
           ) : null}
         </FormField>
         <FormField id="education-degree" label={EDUCATION_UI_TEXTS.degreeLabel} isRequired error={errors.degree}>
-          <Input
+          <EducationDegreeCombobox
+            key={selectedInstitution ?? ''}
             id="education-degree"
-            {...getFieldErrorProps("education-degree", errors.degree)}
-            name="degree"
-            type="text"
-            required
-            placeholder={EDUCATION_UI_TEXTS.degreePlaceholder}
+            error={errors.degree}
+            describedBy={degreeHint ? 'education-degree-hint' : undefined}
             value={values.degree}
-            disabled={isPending}
-            onChange={handleChange}
-            className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+            degrees={degrees}
+            disabled={isPending || catalogUnavailable || !selectedInstitution || !degrees.length}
+            onChange={(degree) => setValues((current) => ({ ...current, degree }))}
           />
+          {degreeHint ? <p id="education-degree-hint" role="status" className="text-sm text-text-secondary">{degreeHint}</p> : null}
         </FormField>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <FormField id="education-startDate" label={EDUCATION_UI_TEXTS.startDateLabel} isRequired error={errors.startDate}>

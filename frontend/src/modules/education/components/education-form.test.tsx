@@ -10,7 +10,7 @@ const INSTITUTIONS = [{ name: 'Universidad Mayor de San Simón (UMSS)', aliases:
 
 const VALUES: EducationFormValues = {
   institution: "Universidad Mayor de San Simón (UMSS)",
-  degree: "Computer Science",
+  degree: "Ingeniería Informática",
   startDate: "2020-02-01",
   endDate: "2025-11-30",
   description: "Software engineering studies.",
@@ -22,11 +22,72 @@ describe("EducationForm", () => {
   });
   afterEach(cleanup);
 
+  it('filters by university, clears incompatible degrees and submits the recognized pair', async () => {
+    const upb = { name: 'Universidad Privada Boliviana (UPB)', aliases: ['UPB'] };
+    vi.mocked(useEducationInstitutions).mockReturnValue({ institutions: [...INSTITUTIONS, upb], isLoading: false, error: null, reload: vi.fn() });
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    render(<EducationForm initialValues={VALUES} onSubmit={onSubmit} onCancel={vi.fn()} />);
+    const degree = screen.getByRole('combobox', { name: /Título o carrera/ });
+    await user.clear(degree);
+    await user.type(degree, 'inteligencia');
+    expect(screen.queryByRole('option', { name: /Inteligencia Artificial/ })).not.toBeInTheDocument();
+    await user.clear(screen.getByLabelText(/Institución/));
+    expect(screen.getByLabelText(/Título o carrera/)).toBeDisabled();
+    await user.type(screen.getByLabelText(/Institución/), 'UPB');
+    const upbDegree = screen.getByRole('combobox', { name: /Título o carrera/ });
+    expect(upbDegree).toHaveValue('');
+    await user.type(upbDegree, 'inteligencia');
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    await user.keyboard('{ArrowDown}{Enter}');
+    expect(onSubmit).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Guardar formación' }));
+    expect(onSubmit).toHaveBeenCalledExactlyOnceWith({ ...VALUES, institution: upb.name, degree: 'Ingeniería en Inteligencia Artificial' });
+  });
+
+  it('preserves a shared degree after typing a different university', async () => {
+    const ucatec = { name: 'Universidad Privada de Ciencias Administrativas y Tecnológicas (UCATEC)', aliases: ['UCATEC'] };
+    vi.mocked(useEducationInstitutions).mockReturnValue({ institutions: [...INSTITUTIONS, ucatec], isLoading: false, error: null, reload: vi.fn() });
+    const user = userEvent.setup();
+    render(<EducationForm initialValues={{ ...VALUES, degree: 'Ingeniería de Sistemas' }} onSubmit={vi.fn()} onCancel={vi.fn()} />);
+    await user.clear(screen.getByLabelText(/Institución/));
+    await user.type(screen.getByLabelText(/Institución/), 'UCATEC');
+    expect(screen.getByLabelText(/Título o carrera/)).toHaveValue('Ingeniería de Sistemas');
+    expect(screen.getByLabelText(/Título o carrera/)).toBeEnabled();
+  });
+
+  it('keeps an unknown legacy title visible and requires correction before saving', async () => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    render(<EducationForm initialValues={{ ...VALUES, degree: 'Legacy unknown title' }} onSubmit={onSubmit} onCancel={vi.fn()} />);
+    await user.click(screen.getByRole('button', { name: 'Guardar formación' }));
+    expect(onSubmit).not.toHaveBeenCalled();
+    const degree = screen.getByLabelText(/Título o carrera/);
+    expect(degree).toHaveValue('Legacy unknown title');
+    expect(degree).toHaveAccessibleDescription('Selecciona una carrera de Ciencias y Tecnología de la universidad elegida.');
+    await user.clear(degree);
+    await user.type(degree, '  ingenieria en informatica  ');
+    await user.click(screen.getByRole('button', { name: 'Guardar formación' }));
+    expect(onSubmit).toHaveBeenCalledExactlyOnceWith(VALUES);
+  });
+
+  it('explains empty catalogues and prevents saving an arbitrary title', async () => {
+    const institution = { name: 'Universidad Pedagógica', aliases: [] };
+    vi.mocked(useEducationInstitutions).mockReturnValue({ institutions: [institution], isLoading: false, error: null, reload: vi.fn() });
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    render(<EducationForm initialValues={{ ...VALUES, institution: institution.name }} onSubmit={onSubmit} onCancel={vi.fn()} />);
+    expect(screen.getByLabelText(/Título o carrera/)).toBeDisabled();
+    expect(screen.getByText(/No hay carreras de Ciencias y Tecnología disponibles/)).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Guardar formación' }));
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it('filters universities by alias and selects with the keyboard without submitting', async () => {
     const onSubmit = vi.fn();
     const user = userEvent.setup();
     render(<EducationForm initialValues={{ ...VALUES, institution: '' }} onSubmit={onSubmit} onCancel={vi.fn()} />);
-    const input = screen.getByRole('combobox');
+    const input = screen.getByRole('combobox', { name: /Institución/ });
     await user.type(input, 'umss');
     expect(screen.getByRole('option', { name: INSTITUTIONS[0].name })).toBeVisible();
     await user.keyboard('{ArrowDown}');
@@ -42,10 +103,10 @@ describe("EducationForm", () => {
   it('selects with the mouse and closes the list with Escape', async () => {
     const user = userEvent.setup();
     render(<EducationForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
-    await user.type(screen.getByRole('combobox'), 'san simon');
+    await user.type(screen.getByRole('combobox', { name: /Institución/ }), 'san simon');
     await user.click(screen.getByRole('option', { name: INSTITUTIONS[0].name }));
-    expect(screen.getByRole('combobox')).toHaveValue(INSTITUTIONS[0].name);
-    await user.click(screen.getByRole('combobox'));
+    expect(screen.getByRole('combobox', { name: /Institución/ })).toHaveValue(INSTITUTIONS[0].name);
+    await user.click(screen.getByRole('combobox', { name: /Institución/ }));
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
@@ -55,14 +116,14 @@ describe("EducationForm", () => {
     const user = userEvent.setup();
     render(<EducationForm initialValues={editing ? { ...VALUES, institution: 'gggggg' } : VALUES} onSubmit={onSubmit} onCancel={vi.fn()} />);
     if (!editing) {
-      await user.clear(screen.getByRole('combobox'));
-      await user.type(screen.getByRole('combobox'), 'gggggg');
+      await user.clear(screen.getByRole('combobox', { name: /Institución/ }));
+      await user.type(screen.getByRole('combobox', { name: /Institución/ }), 'gggggg');
       expect(screen.getByText('No se encontraron universidades.')).toBeVisible();
     }
     await user.click(screen.getByRole('button', { name: 'Guardar formación' }));
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(screen.getByRole('combobox')).toHaveAccessibleDescription('Selecciona una universidad de la lista permitida.');
-    expect(screen.getByRole('combobox')).toHaveValue('gggggg');
+    expect(screen.getByRole('combobox', { name: /Institución/ })).toHaveAccessibleDescription('Selecciona una universidad de la lista permitida.');
+    expect(screen.getByRole('combobox', { name: /Institución/ })).toHaveValue('gggggg');
   });
 
   it('canonicalizes a recognized legacy alias when editing', async () => {
@@ -89,10 +150,10 @@ describe("EducationForm", () => {
     vi.mocked(useEducationInstitutions).mockReturnValue({ institutions: [], isLoading: loading, error: loading ? null : 'No se pudo cargar la lista de universidades.', reload: vi.fn() });
     render(<EducationForm initialValues={VALUES} onSubmit={onSubmit} onCancel={vi.fn()} />);
     expect(screen.getByRole('button', { name: 'Guardar formación' })).toBeDisabled();
-    expect(screen.getByRole('combobox')).toBeDisabled();
+    expect(screen.getByRole('combobox', { name: /Institución/ })).toBeDisabled();
     fireEvent.submit(screen.getByRole('form'));
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(screen.getByRole(loading ? 'status' : 'alert')).toBeVisible();
+    expect(screen.getByText(loading ? 'Cargando universidades...' : 'No se pudo cargar la lista de universidades.')).toBeVisible();
   });
 
   it("updates the description counter while typing, deleting and clearing before saving", async () => {
@@ -201,10 +262,10 @@ describe("EducationForm", () => {
     expect(screen.getByLabelText(/Descripción/)).toHaveValue(VALUES.description);
 
     await user.clear(screen.getByLabelText(/Título o carrera/));
-    await user.type(screen.getByLabelText(/Título o carrera/), "Systems Engineering");
+    await user.type(screen.getByLabelText(/Título o carrera/), "Ingeniería de Sistemas");
     await user.click(screen.getByRole("button", { name: "Guardar formación" }));
 
-    expect(onSubmit).toHaveBeenCalledWith({ ...VALUES, degree: "Systems Engineering" });
+    expect(onSubmit).toHaveBeenCalledWith({ ...VALUES, degree: "Ingeniería de Sistemas" });
   });
 
   it("blocks input, cancellation and submissions while saving", async () => {
