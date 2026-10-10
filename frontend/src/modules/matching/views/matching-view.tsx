@@ -2,13 +2,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMatching } from "../hooks/use-matching";
-import { AFFINITY_AXES } from "../services/matching.mock";
 import { VacancyTabs } from "../components/vacancy-tabs";
 import { CandidateList } from "../components/candidate-list";
 import { CandidateDetailPanel } from "../components/candidate-detail-panel";
 
 export function MatchingView() {
   const {
+    axes,
     vacancies,
     vacancy,
     vacancyId,
@@ -59,7 +59,7 @@ export function MatchingView() {
           <CandidateDetailPanel
             candidate={selectedCandidate}
             vacancy={vacancy}
-            axes={AFFINITY_AXES}
+            axes={axes}
             pendingDiscardId={pendingDiscardId}
             onRequestDiscard={requestDiscard}
             onConfirmDiscard={confirmDiscard}

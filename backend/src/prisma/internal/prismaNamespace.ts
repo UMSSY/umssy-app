@@ -426,6 +426,7 @@ export const ModelName = {
   Event: 'Event',
   EventRegistration: 'EventRegistration',
   EventAttendance: 'EventAttendance',
+  AdminExportHistory: 'AdminExportHistory',
   AccessRequestStatus: 'AccessRequestStatus',
   AccessRequestDocumentType: 'AccessRequestDocumentType',
   File: 'File',
@@ -447,7 +448,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "skill" | "userSkill" | "certification" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "skill" | "userSkill" | "certification" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2597,6 +2598,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AdminExportHistory: {
+      payload: Prisma.$AdminExportHistoryPayload<ExtArgs>
+      fields: Prisma.AdminExportHistoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdminExportHistoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdminExportHistoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        findFirst: {
+          args: Prisma.AdminExportHistoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdminExportHistoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        findMany: {
+          args: Prisma.AdminExportHistoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>[]
+        }
+        create: {
+          args: Prisma.AdminExportHistoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        createMany: {
+          args: Prisma.AdminExportHistoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdminExportHistoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>[]
+        }
+        delete: {
+          args: Prisma.AdminExportHistoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        update: {
+          args: Prisma.AdminExportHistoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.AdminExportHistoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdminExportHistoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdminExportHistoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.AdminExportHistoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        aggregate: {
+          args: Prisma.AdminExportHistoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminExportHistory>
+        }
+        groupBy: {
+          args: Prisma.AdminExportHistoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminExportHistoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdminExportHistoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminExportHistoryCountAggregateOutputType> | number
+        }
+      }
+    }
     AccessRequestStatus: {
       payload: Prisma.$AccessRequestStatusPayload<ExtArgs>
       fields: Prisma.AccessRequestStatusFieldRefs
@@ -3175,6 +3250,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   password: 'password',
   isActive: 'isActive',
+  isAvailableForMentoring: 'isAvailableForMentoring',
   photoUrl: 'photoUrl',
   cityId: 'cityId',
   phone: 'phone',
@@ -3464,6 +3540,16 @@ export const EventAttendanceScalarFieldEnum = {
 } as const
 
 export type EventAttendanceScalarFieldEnum = (typeof EventAttendanceScalarFieldEnum)[keyof typeof EventAttendanceScalarFieldEnum]
+
+
+export const AdminExportHistoryScalarFieldEnum = {
+  userId: 'userId',
+  createdAt: 'createdAt',
+  reportName: 'reportName',
+  reportType: 'reportType'
+} as const
+
+export type AdminExportHistoryScalarFieldEnum = (typeof AdminExportHistoryScalarFieldEnum)[keyof typeof AdminExportHistoryScalarFieldEnum]
 
 
 export const AccessRequestStatusScalarFieldEnum = {
@@ -3840,6 +3926,7 @@ export type GlobalOmitConfig = {
   event?: Prisma.EventOmit
   eventRegistration?: Prisma.EventRegistrationOmit
   eventAttendance?: Prisma.EventAttendanceOmit
+  adminExportHistory?: Prisma.AdminExportHistoryOmit
   accessRequestStatus?: Prisma.AccessRequestStatusOmit
   accessRequestDocumentType?: Prisma.AccessRequestDocumentTypeOmit
   file?: Prisma.FileOmit

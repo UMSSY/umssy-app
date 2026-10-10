@@ -80,6 +80,7 @@ export const ModelName = {
   Event: 'Event',
   EventRegistration: 'EventRegistration',
   EventAttendance: 'EventAttendance',
+  AdminExportHistory: 'AdminExportHistory',
   AccessRequestStatus: 'AccessRequestStatus',
   AccessRequestDocumentType: 'AccessRequestDocumentType',
   File: 'File',
@@ -199,6 +200,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   password: 'password',
   isActive: 'isActive',
+  isAvailableForMentoring: 'isAvailableForMentoring',
   photoUrl: 'photoUrl',
   cityId: 'cityId',
   phone: 'phone',
@@ -488,6 +490,16 @@ export const EventAttendanceScalarFieldEnum = {
 } as const
 
 export type EventAttendanceScalarFieldEnum = (typeof EventAttendanceScalarFieldEnum)[keyof typeof EventAttendanceScalarFieldEnum]
+
+
+export const AdminExportHistoryScalarFieldEnum = {
+  userId: 'userId',
+  createdAt: 'createdAt',
+  reportName: 'reportName',
+  reportType: 'reportType'
+} as const
+
+export type AdminExportHistoryScalarFieldEnum = (typeof AdminExportHistoryScalarFieldEnum)[keyof typeof AdminExportHistoryScalarFieldEnum]
 
 
 export const AccessRequestStatusScalarFieldEnum = {

@@ -5,6 +5,7 @@ export const MENTOR_PROFILE_FIXTURE: MentorProfile = {
   fullName: "Ana Rojas",
   headline: "Arquitecta de Software",
   aboutMe: "Mentora de ingeniería de software.",
+  isAvailable: true,
   photoUrl: null,
   city: {
     id: "e830d438-d63d-4c7c-a6de-2fe9481821fc",

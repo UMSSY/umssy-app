@@ -6,8 +6,8 @@ import {
   BlockNotFoundException,
   BlockNotOwnedException,
   BlockOverlapException,
-  MentorNotFoundException,
 } from '../exceptions/index.js';
+import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { hasOverlapErrorCode } from '../utils/overlap-error.js';
 import type { AvailabilityBlockResponse } from '../types/availability-block-response.types.js';
 import type { CreateBlockDto } from '../requests/create-block.request.js';
@@ -20,6 +20,7 @@ export class AvailabilityService {
   constructor(
     private readonly availabilityRepository: AvailabilityRepository,
     private readonly availabilityMapper: AvailabilityMapper,
+    private readonly mentorsService: MentorsService,
   ) {}
 
   async remove(mentorId: string, blockId: string): Promise<DeletedBlockResponse> {
@@ -98,11 +99,9 @@ export class AvailabilityService {
   }
 
   async findMentorFreeBlocks(mentorId: string, query: WeekQueryDto): Promise<AvailabilityBlockResponse[]> {
+    await this.mentorsService.findOne(mentorId);
+
     const now = new Date();
-    // TODO: validar con el servicio de mentores de Epic 6 (#695)
-    if (!(await this.availabilityRepository.isActiveMentor(mentorId, now))) {
-      throw new MentorNotFoundException();
-    }
 
     const to = new Date(query.to);
     const from = new Date(Math.max(new Date(query.from).getTime(), now.getTime()));

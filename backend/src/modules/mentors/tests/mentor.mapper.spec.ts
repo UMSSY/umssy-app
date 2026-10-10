@@ -11,6 +11,7 @@ function buildProfileRecord(): NonNullable<
     lastName: 'Rojas',
     headline: 'Arquitecta de Software',
     aboutMe: 'Mentora de ingeniería.',
+    isAvailableForMentoring: true,
     photoUrl: new TextEncoder().encode('https://cdn.test/María.jpg'),
     city: { id: 'city-1', title: 'Cochabamba' },
     educations: [
@@ -123,6 +124,7 @@ describe('MentorMapper', () => {
       fullName: 'Ana María Rojas',
       headline: 'Arquitecta de Software',
       aboutMe: 'Mentora de ingeniería.',
+      isAvailable: true,
       photoUrl: 'https://cdn.test/María.jpg',
       city: { id: 'city-1', title: 'Cochabamba' },
       educations: [
@@ -189,6 +191,7 @@ describe('MentorMapper', () => {
       lastName: 'Rojas',
       headline: null,
       aboutMe: null,
+      isAvailableForMentoring: false,
       photoUrl: null,
       city: null,
       educations: [],
@@ -204,6 +207,7 @@ describe('MentorMapper', () => {
       fullName: 'Ana Rojas',
       headline: null,
       aboutMe: null,
+      isAvailable: false,
       photoUrl: null,
       city: null,
       educations: [],

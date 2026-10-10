@@ -140,6 +140,12 @@ export class MentorsService {
     );
   }
 
+  async updateAvailability(userId: string, isAvailable: boolean) {
+    await this.assertActiveMentor(userId);
+
+    return this.mentorsRepository.updateAvailability(userId, isAvailable);
+  }
+
   private async assertActiveMentor(userId: string): Promise<void> {
     const mentor = await this.mentorsRepository.findActiveMentorParticipation(
       userId,

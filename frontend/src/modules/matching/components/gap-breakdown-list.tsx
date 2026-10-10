@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { AffinityAxis, AxisScores } from "../types/matching-types";
-import { AXIS_MAX_SCORE } from "../services/matching.mock";
+import { AXIS_MAX_SCORE } from "../data/matching.data";
 
 interface GapBreakdownListProps {
   axes: AffinityAxis[];

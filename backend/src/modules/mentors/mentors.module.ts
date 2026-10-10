@@ -9,5 +9,6 @@ import { MentorMapper } from './mappers/mentor.mapper.js';
   imports: [AuthModule],
   controllers: [MentorsController],
   providers: [MentorsService, MentorsRepository, MentorMapper],
+  exports: [MentorsService],
 })
 export class MentorsModule {}

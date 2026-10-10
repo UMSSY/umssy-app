@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import {
+  getAffinityAxes,
   getCandidatesForVacancy,
   getVacancies,
   getVacancyById,
@@ -9,6 +10,7 @@ import {
 import type { CandidateWithMatch } from "../types/matching-types";
 
 const vacancies = getVacancies();
+const axes = getAffinityAxes();
 
 export function useMatching() {
   const [vacancyId, setVacancyId] = useState(vacancies[0].id);
@@ -69,16 +71,6 @@ export function useMatching() {
     setPendingDiscardId(null);
   }
 
-  // AC16: "Contactar candidato" muestra la opción de contacto correspondiente.
-  function contactCandidate() {
-    setActionFeedback(null);
-  }
-
-  // AC17: "Agendar entrevista" muestra la opción de agendamiento correspondiente.
-  function scheduleInterview() {
-    setActionFeedback(null);
-  }
-
   function confirmSchedule(name: string, date: string, time: string) {
     setActionFeedback(`Entrevista con ${name} propuesta para el ${date} a las ${time}.`);
   }
@@ -97,11 +89,9 @@ export function useMatching() {
     requestDiscard,
     cancelDiscard,
     confirmDiscard,
-    contactCandidate,
-    scheduleInterview,
     confirmSchedule,
     actionFeedback,
-    setActionFeedback,
+    axes,
   };
 }
 

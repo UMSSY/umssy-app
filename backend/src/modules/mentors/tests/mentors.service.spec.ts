@@ -143,6 +143,7 @@ describe('MentorsService', () => {
       lastName: 'Rojas',
       headline: 'Arquitecta de Software',
       aboutMe: 'Mentora de ingeniería de software.',
+      isAvailableForMentoring: true,
       photoUrl: new TextEncoder().encode('https://cdn.test/ana.jpg'),
       city: { id: 'city-1', title: 'Cochabamba' },
       educations: [
@@ -216,6 +217,7 @@ describe('MentorsService', () => {
       fullName: 'Ana Rojas',
       headline: 'Arquitecta de Software',
       aboutMe: 'Mentora de ingeniería de software.',
+      isAvailable: true,
       photoUrl: 'https://cdn.test/ana.jpg',
       city: { id: 'city-1', title: 'Cochabamba' },
       educations: [
@@ -281,6 +283,47 @@ describe('MentorsService', () => {
       message: 'El mentor no existe o no está activo',
     });
     expect(toProfileResponse).not.toHaveBeenCalled();
+  });
+
+  it('actualiza la disponibilidad de un mentor activo', async () => {
+    const findActiveMentorParticipation = vi
+      .fn()
+      .mockResolvedValue({ id: userId });
+    const updateAvailability = vi.fn().mockResolvedValue({
+      id: userId,
+      isAvailableForMentoring: false,
+    });
+    const repository = {
+      findActiveMentorParticipation,
+      updateAvailability,
+    } as unknown as MentorsRepository;
+    const service = new MentorsService(repository, mapper);
+
+    const result = await service.updateAvailability(userId, false);
+
+    expect(findActiveMentorParticipation).toHaveBeenCalledWith(
+      userId,
+      expect.any(Date),
+    );
+    expect(updateAvailability).toHaveBeenCalledWith(userId, false);
+    expect(result).toEqual({
+      id: userId,
+      isAvailableForMentoring: false,
+    });
+  });
+
+  it('rechaza actualizar disponibilidad si el usuario no es mentor activo', async () => {
+    const updateAvailability = vi.fn();
+    const repository = {
+      findActiveMentorParticipation: vi.fn().mockResolvedValue(null),
+      updateAvailability,
+    } as unknown as MentorsRepository;
+    const service = new MentorsService(repository, mapper);
+
+    await expect(
+      service.updateAvailability(userId, false),
+    ).rejects.toBeInstanceOf(MentorNotFoundException);
+    expect(updateAvailability).not.toHaveBeenCalled();
   });
 
   it('devuelve las areas tecnicas del mentor autenticado activo', async () => {

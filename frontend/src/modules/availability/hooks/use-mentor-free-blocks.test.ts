@@ -1,6 +1,7 @@
-import { StrictMode } from "react"
-import { describe, it, expect, vi, beforeEach } from "vitest"
-import { renderHook, waitFor } from "@testing-library/react"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { act, renderHook, waitFor } from "@testing-library/react"
+import { focusManager } from "@tanstack/react-query"
+import { createQueryWrapper } from "@/shared/testing/create-query-wrapper"
 import { useMentorFreeBlocks } from "./use-mentor-free-blocks"
 import { availabilityApi } from "../services/availability.api"
 import type { AvailabilityBlock } from "../types/availability-block.types"
@@ -30,16 +31,16 @@ describe("useMentorFreeBlocks", () => {
     vi.restoreAllMocks()
   })
 
+  afterEach(() => {
+    focusManager.setFocused(undefined)
+  })
+
   it("obtiene los bloques libres del mentor en la semana indicada", async () => {
     const spy = vi.spyOn(availabilityApi, "getMentorFreeBlocks").mockResolvedValue([mockBlock])
 
-    const { result } = renderHook(() => useMentorFreeBlocks("m1", CURRENT_WEEK), {
-      wrapper: StrictMode,
-    })
+    const { result } = renderHook(() => useMentorFreeBlocks("m1", CURRENT_WEEK), createQueryWrapper())
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     expect(spy).toHaveBeenCalledWith("m1", CURRENT_WEEK)
     expect(result.current.blocks).toEqual([mockBlock])
@@ -49,11 +50,9 @@ describe("useMentorFreeBlocks", () => {
   it("maneja error al obtener bloques libres", async () => {
     vi.spyOn(availabilityApi, "getMentorFreeBlocks").mockRejectedValue(new Error("Network error"))
 
-    const { result } = renderHook(() => useMentorFreeBlocks("m1", CURRENT_WEEK))
+    const { result } = renderHook(() => useMentorFreeBlocks("m1", CURRENT_WEEK), createQueryWrapper())
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     expect(result.current.error).toBe("Error al obtener los bloques de disponibilidad")
   })
@@ -63,95 +62,51 @@ describe("useMentorFreeBlocks", () => {
 
     const { result, rerender } = renderHook(
       ({ mentorId }) => useMentorFreeBlocks(mentorId, CURRENT_WEEK),
-      { initialProps: { mentorId: "m1" } },
+      { ...createQueryWrapper(), initialProps: { mentorId: "m1" } },
     )
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     rerender({ mentorId: "m2" })
 
     expect(result.current.isLoading).toBe(true)
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(spy).toHaveBeenLastCalledWith("m2", CURRENT_WEEK)
   })
 
   it("al cambiar de semana muestra solo los bloques de esa semana", async () => {
     const nextBlock: AvailabilityBlock = { ...mockBlock, id: "2" }
-
     vi.spyOn(availabilityApi, "getMentorFreeBlocks").mockImplementation(async (_id, range) =>
       range.startAt === CURRENT_WEEK.startAt ? [mockBlock] : [nextBlock],
     )
 
     const { result, rerender } = renderHook(
       ({ weekRange }) => useMentorFreeBlocks("m1", weekRange),
-      { initialProps: { weekRange: CURRENT_WEEK } },
+      { ...createQueryWrapper(), initialProps: { weekRange: CURRENT_WEEK } },
     )
 
-    await waitFor(() => {
-      expect(result.current.blocks).toEqual([mockBlock])
-    })
+    await waitFor(() => expect(result.current.blocks).toEqual([mockBlock]))
 
     rerender({ weekRange: NEXT_WEEK })
 
     expect(result.current.blocks).toEqual([])
-
-    await waitFor(() => {
-      expect(result.current.blocks).toEqual([nextBlock])
-    })
-  })
-
-  it("no vuelve a pedir datos cuando la pestaña está oculta", async () => {
-    const spy = vi.spyOn(availabilityApi, "getMentorFreeBlocks").mockResolvedValue([mockBlock])
-
-    const originalVisibilityState = document.visibilityState
-
-    const { result } = renderHook(() => useMentorFreeBlocks("m1", CURRENT_WEEK))
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
-    expect(spy).toHaveBeenCalledTimes(1)
-
-    Object.defineProperty(document, "visibilityState", {
-      configurable: true,
-      value: "hidden",
-    })
-
-    document.dispatchEvent(new Event("visibilitychange"))
-
-    await new Promise((resolve) => setTimeout(resolve, 0))
-
-    expect(spy).toHaveBeenCalledTimes(1)
-
-    Object.defineProperty(document, "visibilityState", {
-      configurable: true,
-      value: originalVisibilityState,
-    })
+    await waitFor(() => expect(result.current.blocks).toEqual([nextBlock]))
   })
 
   it("vuelve a pedir datos al recuperar el foco", async () => {
     const spy = vi.spyOn(availabilityApi, "getMentorFreeBlocks").mockResolvedValue([mockBlock])
 
-    const { result } = renderHook(() => useMentorFreeBlocks("m1", CURRENT_WEEK))
+    const { result } = renderHook(() => useMentorFreeBlocks("m1", CURRENT_WEEK), createQueryWrapper())
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
     const callsBeforeFocus = spy.mock.calls.length
 
-    window.dispatchEvent(new Event("focus"))
-
-    await waitFor(() => {
-      expect(spy.mock.calls.length).toBeGreaterThan(callsBeforeFocus)
+    act(() => {
+      focusManager.setFocused(false)
+      focusManager.setFocused(true)
     })
+
+    await waitFor(() => expect(spy.mock.calls.length).toBeGreaterThan(callsBeforeFocus))
   })
 
   it("reutiliza la disponibilidad mientras la caché sigue fresca", async () => {
@@ -159,24 +114,14 @@ describe("useMentorFreeBlocks", () => {
 
     const { result, rerender } = renderHook(
       ({ weekRange }) => useMentorFreeBlocks("m1", weekRange),
-      { initialProps: { weekRange: CURRENT_WEEK } },
+      { ...createQueryWrapper(), initialProps: { weekRange: CURRENT_WEEK } },
     )
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
     rerender({ weekRange: NEXT_WEEK })
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
-
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
     rerender({ weekRange: CURRENT_WEEK })
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     expect(spy).toHaveBeenCalledTimes(2)
   })

@@ -121,23 +121,33 @@ describe("Mentor profile components", () => {
     ).toBeInTheDocument();
   });
 
-  it("no fabrica un estado de disponibilidad ausente del contrato", () => {
-    const { container } = render(
-      <MentorProfileHeader mentor={MENTOR_PROFILE_FIXTURE} />,
+  it("permite solicitar mentoría cuando el mentor está disponible", () => {
+    render(<MentorProfileHeader mentor={MENTOR_PROFILE_FIXTURE} />);
+
+    const requestLink = screen.getByRole("link", {
+      name: "Solicitar mentoría",
+    });
+
+    expect(requestLink).toHaveAttribute(
+      "href",
+      `/mentors/${MENTOR_PROFILE_FIXTURE.id}/availability`,
+    );
+  });
+
+  it("deshabilita la solicitud cuando el mentor no está disponible", () => {
+    render(
+      <MentorProfileHeader
+        mentor={{
+          ...MENTOR_PROFILE_FIXTURE,
+          isAvailable: false,
+        }}
+      />,
     );
 
     expect(
-      screen.queryByText("Disponible para mentoría"),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
-    expect(
-      container.querySelector('[data-slot="avatar-badge"]'),
-    ).not.toBeInTheDocument();
-    expect(
       screen.getByRole("button", { name: "Solicitar mentoría" }),
-    ).toBeEnabled();
+    ).toBeDisabled();
   });
-
   it("muestra la experiencia y formación entregadas por backend", () => {
     render(<MentorCareer mentor={MENTOR_PROFILE_FIXTURE} />);
 

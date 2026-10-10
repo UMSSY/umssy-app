@@ -1,10 +1,16 @@
 import type {
+  AffinityAxis,
   AffinityAxisId,
   AxisScores,
   CandidateWithMatch,
   Vacancy,
 } from "../types/matching-types";
-import { AFFINITY_AXES, AXIS_MAX_SCORE, CANDIDATES_POOL, VACANCIES } from "./matching.mock";
+import {
+  AFFINITY_AXES,
+  AXIS_MAX_SCORE,
+  CANDIDATES_POOL,
+  VACANCIES,
+} from "../data/matching.data";
 
 /**
  * % de afinidad = 100 menos la desviación promedio entre el perfil del candidato
@@ -30,6 +36,10 @@ export function computeGaps(candidate: AxisScores, target: AxisScores): AxisScor
     gaps[axis.id] = Math.round((candidate[axis.id] - target[axis.id]) * 10) / 10;
   });
   return gaps;
+}
+
+export function getAffinityAxes(): AffinityAxis[] {
+  return AFFINITY_AXES;
 }
 
 export function getVacancies(): Vacancy[] {

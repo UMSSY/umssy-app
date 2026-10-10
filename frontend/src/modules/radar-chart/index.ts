@@ -31,5 +31,13 @@ export { ProfileHeader } from "./components/profile-header";
 export { KpiCards } from "./components/kpi-cards";
 export { AffinityRadarChart } from "./components/affinity-radar-chart";
 export { AreaBreakdownPanel } from "./components/area-breakdown-panel";
-export { RadarProfileView } from "./components/radar-profile-view";
+export { RadarProfileView } from "./views/radar-profile-view";
 export { Epic3Shell } from "./components/epic3-shell";
+export { ReviewQueueView } from "./views/review-queue-view";
+export {
+  AreaDetailPreviewView,
+} from "./views/area-detail-preview-view";
+
+export {
+  AreaDetailInteractionPreviewView,
+} from "./views/area-detail-interaction-preview-view";

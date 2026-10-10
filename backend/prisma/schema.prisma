@@ -112,6 +112,7 @@ model User {
   email         String   @unique @db.VarChar(150)
   password      String?  @db.VarChar(255)
   isActive      Boolean  @default(true) @map("is_active")
+  isAvailableForMentoring  Boolean  @default(false) @map("is_available_for_mentoring")
   photoUrl      Bytes?   @map("photo_url")
   cityId        String?  @map("city_id") @db.Uuid
   phone         String?
@@ -145,7 +146,8 @@ model User {
   eventRegistrations   EventRegistration[]
   checkedInAttendances EventAttendance[]
 
-  reviewedAccessRequests AccessRequest[] @relation("AccessRequestReviewedBy")
+  exportHistories        AdminExportHistory[] @relation("AdminExportHistories")
+  reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
 
   @@index([cityId])
   @@map("users")
@@ -512,6 +514,18 @@ model EventAttendance {
   checkedInBy  User?             @relation(fields: [checkedInById], references: [id], onDelete: SetNull)
 
   @@map("event_attendances")
+}
+
+model AdminExportHistory {
+  userId     String   @map("user_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  reportName String   @map("report_name") @db.VarChar(255)
+  reportType String   @map("report_type") @db.VarChar(100)
+
+  user User @relation("AdminExportHistories", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, createdAt])
+  @@map("admin_export_histories")
 }
 
 model AccessRequestStatus {

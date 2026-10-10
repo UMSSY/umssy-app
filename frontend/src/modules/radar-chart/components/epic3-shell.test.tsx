@@ -37,28 +37,30 @@ describe("Epic3Shell", () => {
     expect(screen.getByText("Contenido de la pantalla")).toBeDefined();
     expect(screen.getByText("Carlos Mendoza Ríos")).toBeDefined();
     expect(menu.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
-      "/perfil/radar",
-      "/affinity-radar/review-queue",
-      "/area-detail-interaction-preview",
-      "/area-detail-preview",
+  "/perfil/radar",
+  "/affinity-radar/review-queue",
+  "/matching",
+  "/area-detail-interaction-preview",
+  "/area-detail-preview",
     ]);
   });
 
   it.each([
-    ["/perfil/radar", "Mi Perfil"],
-    ["/affinity-radar/review-queue", "Cola de revisión"],
-    ["/area-detail-interaction-preview", "Detalle por área"],
-    ["/area-detail-preview", "Panel de detalle"],
+  ["/perfil/radar", "Mi Perfil"],
+  ["/affinity-radar/review-queue", "Cola de revisión"],
+  ["/matching", "Matching"],
+  ["/area-detail-interaction-preview", "Detalle por área"],
+  ["/area-detail-preview", "Panel de detalle"],
   ])("marks only the item of %s as active", (pathname, label) => {
-    renderShellAt(pathname);
+  renderShellAt(pathname);
 
-    const menu = within(screen.getByRole("navigation", { name: "Menú principal" }));
-    const activeLinks = menu
-      .getAllByRole("link")
-      .filter((link) => link.getAttribute("aria-current") === "page");
+  const menu = within(screen.getByRole("navigation", { name: "Menú principal" }));
+  const activeLinks = menu
+    .getAllByRole("link")
+    .filter((link) => link.getAttribute("aria-current") === "page");
 
-    expect(activeLinks).toHaveLength(1);
-    expect(activeLinks[0].textContent).toBe(label);
+  expect(activeLinks).toHaveLength(1);
+  expect(activeLinks[0].textContent).toBe(label);
   });
 
   it("marks no item as active on the QA index", () => {
