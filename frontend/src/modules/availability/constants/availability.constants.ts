@@ -35,7 +35,7 @@ export const FORM_TEXT: Record<
   },
   edit: {
     title: "Editar bloque",
-    description: "Modifica la fecha o el horario del bloque.",
+    description: "Modifica la hora de inicio o de fin del bloque.",
     submit: "Guardar cambios",
     dateLabel: "Día",
     startLabel: "Desde",
