@@ -22,7 +22,6 @@ const body = {
   endDate: '2024-01-01',
 };
 
-// The HTTP stack and repository are real; persistence is isolated to this test.
 describe('Education HTTP flow', () => {
   let app: INestApplication;
   let token: string;
@@ -115,8 +114,12 @@ describe('Education HTTP flow', () => {
     const api = request(app.getHttpServer());
     await api.get('/api/educations/institutions').expect(401);
     const response = await api.get('/api/educations/institutions').set('Authorization', `Bearer ${token}`).expect(200);
-    expect(response.body.data).toHaveLength(20);
-    expect(response.body.data).toContainEqual({ name: 'Universidad Pedagógica', aliases: [] });
+    expect(response.body.data).toHaveLength(17);
+    const names = response.body.data.map((institution: { name: string }) => institution.name);
+    expect(names).toEqual(expect.arrayContaining(['Universidad Central (UNICEN)', 'Universidad Latinoamericana (ULAT)', 'Universidad Villa de Oropesa (UNIVIOR)']));
+    for (const name of ['Universidad Privada Abierta Latinoamericana (UPAL)', 'Universidad NUR', 'Universidad Pedagógica']) {
+      expect(names).not.toContain(name);
+    }
     expect(records.size).toBe(0);
   });
 
@@ -156,7 +159,7 @@ describe('Education HTTP flow', () => {
   it('rejects invalid institutions and early dates on POST and PATCH without changing records', async () => {
     const api = request(app.getHttpServer());
     const created = await api.post('/api/educations').set('Authorization', `Bearer ${token}`).send(body).expect(201);
-    for (const change of [{ institution: 'gggggg' }, { institution: 'UNIPOL' }, { startDate: '0201-01-01' }, { endDate: '1939-12-31' }]) {
+    for (const change of [{ institution: 'gggggg' }, { institution: 'UNIPOL' }, { institution: 'UPAL' }, { institution: 'NUR' }, { institution: 'Universidad Pedagógica' }, { startDate: '0201-01-01' }, { endDate: '1939-12-31' }]) {
       const response = await api.post('/api/educations').set('Authorization', `Bearer ${token}`).send({ ...body, ...change }).expect(400);
       expect(response.body.errors).toEqual(expect.arrayContaining([expect.objectContaining({ field: Object.keys(change)[0] })]));
       await api.patch(`/api/educations/${created.body.data.id}`).set('Authorization', `Bearer ${token}`).send(change).expect(400);
