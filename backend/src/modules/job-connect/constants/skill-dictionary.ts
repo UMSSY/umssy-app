@@ -1,5 +1,3 @@
-// Initial vocabulary from HU-01. Extend with validated terms; institutions are
-// protected tokens, never evidence of a technical skill or an academic degree.
 export const skillDictionary = [
   { name: 'Python', aliases: ['python'] },
   { name: 'JavaScript', aliases: ['javascript', 'js'] },
