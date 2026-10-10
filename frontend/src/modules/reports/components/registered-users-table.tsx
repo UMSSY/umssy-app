@@ -43,7 +43,7 @@ export function RegisteredUsersTable({ users, isLoading, errorMessage }: Registe
   };
 
   return (
-    <div className="rounded-lg border border-border bg-surface">
+    <div className="@container rounded-lg border border-border bg-surface">
       <Table className="min-w-225 text-left text-base">
         <TableHeader className="bg-surface-soft">
           <TableRow className="border-border hover:bg-transparent">

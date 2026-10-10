@@ -2,11 +2,17 @@
 
 import { useState } from "react";
 import { PageBreadcrumb } from "@/shared/components/layout";
-import { REGISTERED_USERS_BREADCRUMB, REGISTERED_USERS_PAGE_SIZE } from "../constants/reports.constants";
+import {
+  CONNECTION_ERROR_MESSAGE,
+  REGISTERED_USERS_BREADCRUMB,
+  REGISTERED_USERS_PAGE_SIZE,
+  SLOW_REQUEST_MESSAGE,
+} from "../constants/reports.constants";
 import { ExportSuccessToast } from "../components/export-success-toast";
 import { RefreshButton } from "../components/refresh-button";
 import { RegisteredUsersTable } from "../components/registered-users-table";
 import { ReportActions } from "../components/report-actions";
+import { ReportAlertToast } from "../components/report-alert-toast";
 import { TablePagination } from "../components/table-pagination";
 import { UserTypeFilter } from "../components/user-type-filter";
 import { useExportRegisteredUsersCsv } from "../hooks/use-export-registered-users-csv";
@@ -18,7 +24,8 @@ export function RegisteredUsersReportView() {
   const [currentPage, setCurrentPage] = useState(1);
   const [userType, setUserType] = useState<RoleTag | undefined>(undefined);
   const [period, setPeriod] = useState<AcademicPeriod | undefined>(undefined);
-  const { users, totalItems, totalPages, isLoading, errorMessage, refresh } = useRegisteredUsers(currentPage, userType, period);
+  const { users, totalItems, totalPages, isLoading, errorMessage, isSlow, hasConnectionError, refresh } =
+    useRegisteredUsers(currentPage, userType, period);
   const {
     exportCsv,
     isExporting,
@@ -78,6 +85,8 @@ export function RegisteredUsersReportView() {
         message={exportSuccessMessage ?? exportDownloadMessage}
         variant={exportSuccessMessage ? "success" : "info"}
       />
+      <ReportAlertToast variant="warning" message={isSlow ? SLOW_REQUEST_MESSAGE : undefined} />
+      <ReportAlertToast variant="error" message={hasConnectionError ? CONNECTION_ERROR_MESSAGE : undefined} />
     </section>
   );
 }

@@ -32,4 +32,5 @@ export interface RegisteredUsersState {
   requestKey: string;
   result?: PaginatedData<RegisteredUser>;
   errorMessage?: string;
+  hasConnectionError?: boolean;
 }

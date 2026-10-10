@@ -55,11 +55,11 @@ describe("RejectedUsersReportView", () => {
   it("muestra el título, el buscador, los botones y la primera página", async () => {
     render(<RejectedUsersReportView />);
 
-    expect(screen.getByRole("heading", { name: "Reporte de usuarios rechazados" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Reporte de usuarios registrados rechazados" })).toBeDefined();
     expect(screen.getByPlaceholderText("Buscar por correo electrónico")).toBeDefined();
     expect(screen.getByRole("button", { name: "Actualizar" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
-    expect(screen.getAllByTestId("skeleton-row")).toHaveLength(5);
+    expect(screen.getAllByTestId("skeleton-row")).toHaveLength(10);
 
     await waitFor(() => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
@@ -139,7 +139,7 @@ describe("RejectedUsersReportView", () => {
       await waitFor(() => {
         expect(screen.getByRole("status").textContent).toBe("No se encontró ningún usuario con el correo");
       });
-      expect(screen.getByText("Mostrando 0-0 de 0 usuarios")).toBeDefined();
+      expect(screen.queryByText(/^Mostrando/)).toBeNull();
     },
   );
 
@@ -182,6 +182,37 @@ describe("RejectedUsersReportView", () => {
     });
     expect(getSearchInput().value).toBe("usuario");
     expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 2, limit: 10, search: "usuario" });
+  });
+
+  it("se mantiene en la página actual si solo se agregan espacios al inicio o al final de la búsqueda", async () => {
+    render(<RejectedUsersReportView />);
+    await searchFor("usuario", "Mostrando 1-10 de 23 usuarios");
+    fireEvent.click(screen.getByRole("button", { name: "Página 3" }));
+    await waitFor(() => {
+      expect(screen.getByText("Mostrando 21-23 de 23 usuarios")).toBeDefined();
+    });
+
+    vi.useFakeTimers();
+    fireEvent.change(getSearchInput(), { target: { value: " usuario " } });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    vi.useRealTimers();
+
+    expect(screen.getByText("Mostrando 21-23 de 23 usuarios")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Página 3" }).getAttribute("aria-current")).toBe("page");
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 3, limit: 10, search: "usuario" });
+  });
+
+  it("muestra la página 1 sin el contador cuando la búsqueda no encuentra usuarios", async () => {
+    render(<RejectedUsersReportView />);
+    await searchFor("fg", "No se encontró ningún usuario con el correo");
+
+    expect(screen.queryByText(/^Mostrando/)).toBeNull();
+    const pageButtons = screen.getAllByRole("button", { name: /^Página \d+$/ });
+    expect(pageButtons.map((button) => button.textContent)).toEqual(["1"]);
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Página anterior" }).disabled).toBe(true);
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Página siguiente" }).disabled).toBe(true);
   });
 
   it("muestra solo la página 1 cuando los resultados caben en una página", async () => {

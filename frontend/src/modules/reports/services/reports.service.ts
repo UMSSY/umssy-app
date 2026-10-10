@@ -34,9 +34,10 @@ export const reportsService = {
   getReportHistory: async ({
     page,
     limit,
+    reportType,
   }: ReportHistoryParams): Promise<ApiResponse<PaginatedData<GeneratedReport>>> => {
     const { data } = await apiClient.get<ApiResponse<PaginatedData<GeneratedReport>>>("/reports/history", {
-      params: { page, limit },
+      params: { page, limit, reportType },
     });
 
     return data;
