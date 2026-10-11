@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
-import { Inter, Inter_Tight } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 
-const inter=Inter({
+const inter = localFont({
+  src: "./fonts/Inter-Variable.ttf",
   variable: "--font-inter",
-  subsets: ["latin"],
-  weight:["400","600"]
+  weight: "100 900",
+  display: "swap",
 });
 
-const interTight=Inter_Tight({
+const interTight = localFont({
+  src: "./fonts/InterTight-Variable.ttf",
   variable: "--font-inter-tight",
-  subsets: ["latin"],
-  weight:["700","800"]
+  weight: "100 900",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
