@@ -8,11 +8,13 @@ describe('date-formatter', () => {
     expect(formatConversationDate('fecha-invalida')).toBe('');
   });
 
-  it('debe formatear la hora si la fecha es de hoy', () => {
-    const today = new Date().toISOString();
-    const result = formatConversationDate(today);
-    expect(result).toMatch(/\d{1,2}:\d{2}/);
-    expect(result.toLowerCase()).toMatch(/m/);
+    it('debe formatear la hora de hoy como hh:mm AM/PM', () => {
+    const today = new Date();
+    today.setHours(8, 40, 0, 0);
+    expect(formatConversationDate(today.toISOString())).toBe('08:40 AM');
+
+    today.setHours(0, 12, 0, 0);
+    expect(formatConversationDate(today.toISOString())).toBe('12:12 AM');
   });
 
   it('debe devolver "Ayer" si la fecha es del dia anterior', () => {
@@ -22,10 +24,24 @@ describe('date-formatter', () => {
   });
 
   it('debe devolver fecha corta si es anterior a ayer', () => {
-    const olderDate = new Date('2026-01-15T10:00:00Z').toISOString();
-    const result = formatConversationDate(olderDate);
-    expect(result).toBeDefined();
-    expect(result.length).toBeGreaterThan(0);
+     const pad = (value: number) => String(value).padStart(2, '0');
+    const daysAgo = (days: number) => {
+      const date = new Date();
+      date.setDate(date.getDate() - days);
+      date.setHours(10, 0, 0, 0);
+      return date;
+    };
+    const expectedFormat = (date: Date) =>
+      `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${pad(date.getFullYear() % 100)}`;
+
+    // anteayer, 10 dias y mas de un año atras
+    [2, 10, 400].forEach((days) => {
+      const date = daysAgo(days);
+      const result = formatConversationDate(date.toISOString());
+
+      expect(result).toMatch(/^\d{2}\/\d{2}\/\d{2}$/);
+      expect(result).toBe(expectedFormat(date));
+    });
   });
 
   it('debe obtener las iniciales correctamente', () => {

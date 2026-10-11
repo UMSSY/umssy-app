@@ -32,7 +32,7 @@ export function ConversationItem({
           : 'Archivo';
       return (
         <span className="text-blue-700 font-medium">
-          [{label}] {lastMessage.content}
+                    [{label}] {lastMessage.content || lastMessage.attachment?.name}
         </span>
       );
     }

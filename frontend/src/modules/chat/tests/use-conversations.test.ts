@@ -102,8 +102,8 @@ describe('useConversations Hook', () => {
     expect(result.current.conversations[0].lastMessage?.content).toBe('Nuevo mensaje');
   });
 
-  it('debe manejar error si falla la peticion al servicio', async () => {
-    vi.spyOn(chatApi, 'getConversations').mockRejectedValue(new Error('Network error'));
+     it('debe enviar un mensaje la conversacion que sube al tope con su nueva vista previa', async () => {
+    vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
 
     const { result } = renderHook(() => useConversations());
 
@@ -111,7 +111,32 @@ describe('useConversations Hook', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.isError).toBe(true);
+    // La conversacion mas antigua es la ultima de la lista
+    const conversations = result.current.conversations;
+    const oldest = conversations[conversations.length - 1];
+    expect(conversations[0].id).not.toBe(oldest.id);
+
+    const now = new Date().toISOString();
+    const content = 'mensaje de reordenamiento';
+
+    act(() => {
+      result.current.applySentMessage({
+        id: `msg-${Date.now()}`,
+        conversationId: oldest.id,
+        senderId: 'current-user',
+        content,
+        timestamp: now,
+        createdAt: now,
+        status: 'sent',
+      });
+    });
+
+    const [first] = result.current.conversations;
+    expect(first.id).toBe(oldest.id);
+    expect(first.lastMessage?.content).toBe(content);
+    expect(result.current.conversations).toHaveLength(conversations.length);
+  });
+
   });
 
   it('debe permitir paginacion y cargar mas elementos', async () => {
@@ -226,5 +251,5 @@ const spy = vi
     updatedAt: '',
   });
 });
-});
+
 

@@ -12,7 +12,8 @@ import {
 
 import { Conversation, Message } from '../types/conversation.types';
 import { MessageInputBar } from './message-input-bar';
-import { getInitials } from '../utils/date-formatter';
+import { formatTime12h, getInitials } from '../utils/date-formatter';
+import { MessageAttachmentCard } from './message-attachment-card';
 import { isContentValidForSend } from '../utils/unicode-counter';
 
 interface ChatRoomProps {
@@ -39,12 +40,7 @@ function formatMessageTime(isoString?: string | null): string {
 
   if (Number.isNaN(date.getTime())) return '';
 
-  const hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const hour12 = String(hours % 12 || 12).padStart(2, '0');
-  const period = hours >= 12 ? 'PM' : 'AM';
-
-  return `${hour12}:${minutes} ${period}`;
+  return formatTime12h(date);
 }
 
 function formatMessageDate(isoString?: string | null): string {
@@ -438,11 +434,21 @@ export function ChatRoom({
                       {senderName}
                     </p>
 
-                    {/* Contenido */}
-                    <p className="leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
-                      {message.content}
-                    </p>
+                    {/* Archivo adjunto (HU-1) */}
+                    {message.attachment && (
+                      <MessageAttachmentCard
+                        messageId={message.id}
+                        attachment={message.attachment}
+                        isOwn={isOwn}
+                      />
+                    )}
 
+                    {/* Contenido */}
+                    {message.content && (
+                      <p className="leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
+                        {message.content}
+                      </p>
+                    )}
                     {/* Hora y estado */}
                     <div
                       className={`flex items-center gap-1.5 justify-end mt-1 text-[10px] ${

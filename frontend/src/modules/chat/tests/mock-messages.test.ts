@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { MOCK_MESSAGES } from '../mocks/mock-messages';
 import { MOCK_CONVERSATIONS } from '../mocks/mock-conversations';
@@ -35,5 +37,17 @@ describe('mock-messages', () => {
     const ids = MOCK_MESSAGES.map((message) => message.id);
 
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+
+describe('mock-messages — archivos adjuntos', () => {
+  it('cada adjunto apunta a un archivo que existe en /public', () => {
+    const withAttachment = MOCK_MESSAGES.filter((message) => message.attachment);
+    expect(withAttachment.length).toBeGreaterThan(0);
+
+    withAttachment.forEach((message) => {
+      expect(existsSync(join(process.cwd(), 'public', message.attachment!.url))).toBe(true);
+    });
   });
 });

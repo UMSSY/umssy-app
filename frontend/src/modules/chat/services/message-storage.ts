@@ -1,7 +1,7 @@
 import { Message, MessageStatus } from '../types/conversation.types';
 import { MOCK_MESSAGES } from '../mocks/mock-messages';
 
-export const CHAT_MESSAGES_STORAGE_KEY = 'umssy_chat_messages_v1';
+export const CHAT_MESSAGES_STORAGE_KEY = 'umssy_chat_messages_v2';
 export const CHAT_READ_STATUS_STORAGE_KEY = 'umssy_chat_read_status_v1';
 
 // Memoria cache en caso de entorno SSR o indisponibilidad de localStorage
@@ -92,6 +92,15 @@ export function getMessagesByConversation(conversationId: string): Message[] {
       const timeB = new Date(b.timestamp || b.createdAt || '').getTime();
       return timeA - timeB;
     });
+}
+
+/**
+ * Devuelve el mensaje mas reciente de una conversacion (o null si no tiene).
+ * refleja lo enviado incluso despues de recargar la pagina.
+ */
+export function getLastMessageByConversation(conversationId: string): Message | null {
+  const messages = getMessagesByConversation(conversationId);
+  return messages.length > 0 ? messages[messages.length - 1] : null;
 }
 
 /**

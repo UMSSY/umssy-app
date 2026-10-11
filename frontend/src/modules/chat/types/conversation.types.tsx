@@ -1,5 +1,11 @@
 export type AttachmentType = 'image' | 'file' | 'audio';
 
+export interface MessageAttachment {
+  name: string;
+  mimeType: string;
+  size: number;
+  url: string;
+}
 export interface UserSummary {
   id: string;
   fullName: string;
@@ -18,6 +24,7 @@ export interface LastMessage {
   status?: MessageStatus;
   isAttachment?: boolean;
   attachmentType?: AttachmentType | null;
+  attachment?: MessageAttachment | null;
 }
 
 export interface Message {
@@ -30,6 +37,7 @@ export interface Message {
   createdAt: string;
   isAttachment?: boolean;
   attachmentType?: AttachmentType | null;
+  attachment?: MessageAttachment | null; 
 }
 
 export interface Conversation {
@@ -66,6 +74,13 @@ export interface SendMessageOptions {
   forceError?: boolean;
   forceOffline?: boolean;
   latencyMs?: number;
+}
+
+export interface MessageAttachment {
+  name: string;
+  mimeType: string;
+  size: number;
+  url: string;
 }
 
 export type SendMessageResponse = StandardApiResponse<Message>;

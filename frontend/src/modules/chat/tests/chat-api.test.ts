@@ -621,3 +621,45 @@ describe('chat-api — persistencia de estado leido y no redisparo de alertas tr
     expect(conv1?.unreadCount).toBe(0);
   });
 });
+
+describe('chat-api — lista de conversaciones derivada del historial ', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    clearStoredMessages();
+  });
+
+  it('al enviar a un chat antiguo sube al tope con la vista previa nueva, tambien tras recargar', async () => {
+    const initialList = await getConversations();
+    expect(initialList[initialList.length - 1].id).toBe('conv-4');
+
+    await sendMessage({
+      conversationId: 'conv-4',
+      content: 'mensaje de reordenamiento',
+    });
+
+    // Simular recarga de pagina (F5)
+    const reloadedList = await getConversations();
+
+    expect(reloadedList[0].id).toBe('conv-4');
+    expect(reloadedList[0].lastMessage?.content).toBe('mensaje de reordenamiento');
+    expect(reloadedList[0].lastMessage?.senderId).toBe(CURRENT_USER_ID);
+  });
+
+  it('la vista previa coincide con el ultimo mensaje del historial de cada conversacion', async () => {
+    const list = await getConversations();
+
+    for (const conversation of list) {
+      const history = await getMessages(conversation.id);
+      const last = history[history.length - 1];
+      expect(conversation.lastMessage?.id).toBe(last.id);
+    }
+  });
+
+  it('la conversacion con archivo expone el adjunto en la vista previa', async () => {
+    const list = await getConversations();
+    const conv3 = list.find((c) => c.id === 'conv-3');
+
+    expect(conv3?.lastMessage?.isAttachment).toBe(true);
+    expect(conv3?.lastMessage?.attachment?.name).toBe('documento-soporte.pdf');
+  });
+});

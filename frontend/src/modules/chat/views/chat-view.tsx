@@ -35,6 +35,7 @@ export function ChatView() {
     setSearchQuery,
     handleSelectConversation,
     clearSelectedConversation,
+    applySentMessage,  
     startConversationWithContact,
   } = useConversations();
 
@@ -74,12 +75,13 @@ export function ChatView() {
 
     setIsSending(true);
     try {
-      await sendMessage({
+      const response = await sendMessage({
         conversationId: selectedId,
         content,
         senderId: CURRENT_USER_ID,
       });
-
+      applySentMessage(response.data);
+      
       await queryClient.invalidateQueries({
         queryKey: messagesQueryKey(selectedId),
       });

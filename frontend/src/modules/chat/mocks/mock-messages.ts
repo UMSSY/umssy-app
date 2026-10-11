@@ -1,4 +1,9 @@
 import { Message } from '../types/conversation.types';
+import { CURRENT_USER_ID } from './mock-users';
+
+const CONV_4_DATE = new Date('2026-04-03T14:15:00Z').toISOString();
+
+const DOCUMENTO_SOPORTE_SIZE = 641;
 
 const now = new Date();
 
@@ -365,17 +370,23 @@ export const MOCK_MESSAGES: Message[] = [
     status: 'sent',
     isAttachment: true,
     attachmentType: 'file',
+    attachment: {                              
+      name: 'documento-soporte.pdf',           
+      mimeType: 'application/pdf',             
+      size: DOCUMENTO_SOPORTE_SIZE,            
+      url: '/files/documento-soporte.pdf',     
+    },    
     createdAt: minutesAgo(1440),
   },
 
   {
     id: 'msg-4-1',
     conversationId: 'conv-4',
-    senderId: 'user-104',
+    senderId: CURRENT_USER_ID,
     content: 'Estimada Claudia, muchas gracias por la informacion compartida en el webinar de ciberseguridad dictado el pasado viernes.',
-    timestamp: minutesAgo(120),
+    timestamp: CONV_4_DATE,
     status: 'sent',
     isAttachment: false,
-    createdAt: minutesAgo(120),
+    createdAt: CONV_4_DATE, 
   }
 ];

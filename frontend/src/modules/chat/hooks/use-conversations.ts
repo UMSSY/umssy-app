@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Conversation, ConversationFilter } from '../types/conversation.types';
+import { Conversation, ConversationFilter, Message } from '../types/conversation.types';
 import { User } from '../types/user.types';
 import {
   getConversations,
   getOrCreateConversation,
   markConversationAsRead,
+  toLastMessage,
 } from '../services/chat-api';
 import { setStoredConversationUnreadCount } from '../services/message-storage';
 
@@ -151,7 +152,16 @@ export function useConversations() {
       });
     });
   };
-
+  const applySentMessage = (message: Message) => {
+    const lastMessage = toLastMessage(message);
+    setConversationsData((prev) =>
+      prev.map((item) =>
+        item.id === message.conversationId
+          ? { ...item, lastMessage, updatedAt: lastMessage.createdAt }
+          : item
+      )
+    );
+  };
   const startConversationWithContact = async (contactUser: User) => {
     if (pendingContactId) return;
 
@@ -194,6 +204,7 @@ export function useConversations() {
     handleSelectConversation,
     clearSelectedConversation,
     simulateIncomingMessage,
+    applySentMessage,
     startConversationWithContact,
   };
 }

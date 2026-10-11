@@ -1,5 +1,6 @@
 import {
   Conversation,
+  LastMessage,
   Message,
   SendMessagePayload,
   SendMessageOptions,
@@ -13,6 +14,7 @@ import {
   MOCK_USER_BY_ID,
 } from '../mocks/mock-users';
 import {
+  getLastMessageByConversation,
   getMessagesByConversation,
   saveStoredMessage,
   getStoredConversationReadState,
@@ -34,19 +36,44 @@ export interface PaginatedMessagesResponse {
   hasMore: boolean;
 }
 
+export function toLastMessage(message: Message): LastMessage {
+  return {
+    id: message.id,
+    senderId: message.senderId,
+    content: message.content,
+    createdAt: message.createdAt || message.timestamp,
+    timestamp: message.timestamp,
+    status: message.status,
+    isAttachment: message.isAttachment ?? false,
+    attachmentType: message.attachmentType ?? null,
+    attachment: message.attachment ?? null,
+  };
+}
+
+
 export async function getConversations(): Promise<Conversation[]> {
   await new Promise((resolve) => setTimeout(resolve, 400));
 
   const readState = getStoredConversationReadState();
 
   const conversations = MOCK_CONVERSATIONS.map((conv) => {
+  
+  const storedLastMessage = getLastMessageByConversation(conv.id);
+    const withLastMessage: Conversation = storedLastMessage
+      ? {
+          ...conv,
+          lastMessage: toLastMessage(storedLastMessage),
+          updatedAt: storedLastMessage.createdAt || storedLastMessage.timestamp,
+        }
+      : { ...conv };
+
     if (conv.id in readState) {
       return {
-        ...conv,
+        ...withLastMessage,
         unreadCount: readState[conv.id],
       };
     }
-    return { ...conv };
+    return withLastMessage;
   });
 
   return conversations.sort((a, b) => {
