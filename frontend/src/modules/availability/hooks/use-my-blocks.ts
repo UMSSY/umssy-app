@@ -1,48 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getWeekRange } from "@/shared/utils/date-time";
+import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
 import { MY_AVAILABILITY_TEXT } from "../constants/my-availability.constants";
 import { availabilityApi } from "../services/availability.api";
-import type { AvailabilityBlock } from "../types/availability-block.types";
 
-// TODO: migrar a useQuery con la semana en la key (#777)
 export function useMyBlocks(weekStart: string) {
-  const [reloadCount, setReloadCount] = useState(0);
-  const [currentWeekStart, setCurrentWeekStart] = useState(weekStart);
-  const [currentReloadCount, setCurrentReloadCount] = useState(reloadCount);
-  const [blocks, setBlocks] = useState<AvailabilityBlock[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useQuery({
+    queryKey: AVAILABILITY_QUERY_KEYS.myBlocks(weekStart),
+    queryFn: () => {
+      const { startAt, endAt } = getWeekRange(weekStart);
+      return availabilityApi.getAvailabilityBlocks({ from: startAt, to: endAt });
+    },
+  });
 
-  if (currentWeekStart !== weekStart || currentReloadCount !== reloadCount) {
-    if (currentWeekStart !== weekStart) setBlocks([]);
-    setCurrentWeekStart(weekStart);
-    setCurrentReloadCount(reloadCount);
-    setIsLoading(true);
-    setError(null);
-  }
-
-  useEffect(() => {
-    let cancelled = false;
-    const { startAt, endAt } = getWeekRange(weekStart);
-    availabilityApi
-      .getAvailabilityBlocks({ from: startAt, to: endAt })
-      .then((data) => {
-        if (!cancelled) setBlocks(data);
-      })
-      .catch(() => {
-        if (!cancelled) setError(MY_AVAILABILITY_TEXT.loadError);
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [weekStart, reloadCount]);
-
-  const refetch = () => setReloadCount((count) => count + 1);
-
-  return { blocks, isLoading, error, refetch };
+  return {
+    blocks: query.data ?? [],
+    isLoading: query.isPending,
+    error: query.isError ? MY_AVAILABILITY_TEXT.loadError : null,
+  };
 }

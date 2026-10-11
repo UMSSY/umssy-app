@@ -1,8 +1,12 @@
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react"
+import { cleanup, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { toast } from "sonner"
+import { renderWithQuery } from "@/shared/testing/render-with-query"
 import { EditBlockPanel } from "./edit-block-panel"
 import { availabilityApi } from "../services/availability.api"
+
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
 const mockBlock = {
   id: "1",
@@ -15,13 +19,18 @@ const mockBlock = {
 }
 
 describe("EditBlockPanel", () => {
+  beforeEach(() => {
+    vi.mocked(toast.success).mockClear()
+    vi.mocked(toast.error).mockClear()
+  })
+
   afterEach(() => {
     cleanup()
     vi.restoreAllMocks()
   })
 
   it("muestra el formulario en modo edición con los datos del bloque", () => {
-    render(<EditBlockPanel block={mockBlock} onClose={vi.fn()} />)
+    renderWithQuery(<EditBlockPanel block={mockBlock} onClose={vi.fn()} />)
 
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
     expect(screen.getByText("Modifica la fecha o el horario del bloque.")).toBeInTheDocument()
@@ -41,7 +50,7 @@ describe("EditBlockPanel", () => {
   it.each(["pending", "confirmed"] as const)(
     "deshabilita Guardar y Eliminar cuando el bloque está %s",
     (state) => {
-      render(<EditBlockPanel block={{ ...mockBlock, state }} onClose={vi.fn()} />)
+      renderWithQuery(<EditBlockPanel block={{ ...mockBlock, state }} onClose={vi.fn()} />)
 
       expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled()
       expect(screen.getByRole("button", { name: "Eliminar bloque" })).toBeDisabled()
@@ -55,7 +64,7 @@ describe("EditBlockPanel", () => {
     const deleteSpy = vi.spyOn(availabilityApi, "deleteAvailabilityBlock")
     const user = userEvent.setup()
 
-    render(<EditBlockPanel block={{ ...mockBlock, state: "pending" }} onClose={vi.fn()} />)
+    renderWithQuery(<EditBlockPanel block={{ ...mockBlock, state: "pending" }} onClose={vi.fn()} />)
 
     await user.click(screen.getByRole("button", { name: "Eliminar bloque" }))
 
@@ -63,14 +72,14 @@ describe("EditBlockPanel", () => {
     expect(deleteSpy).not.toHaveBeenCalled()
   })
 
-  it("guarda los cambios y notifica el cierre", async () => {
+  it("guarda los cambios, avisa con un toast y notifica el cierre", async () => {
     const onClose = vi.fn()
     const updateSpy = vi
       .spyOn(availabilityApi, "updateAvailabilityBlock")
       .mockResolvedValue({ ...mockBlock, endAt: "2030-05-13T18:00:00.000Z" })
     const user = userEvent.setup()
 
-    render(<EditBlockPanel block={mockBlock} onClose={onClose} />)
+    renderWithQuery(<EditBlockPanel block={mockBlock} onClose={onClose} />)
 
     await user.click(screen.getByRole("button", { name: "Guardar cambios" }))
 
@@ -81,24 +90,25 @@ describe("EditBlockPanel", () => {
       })
     })
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    expect(toast.success).toHaveBeenCalledWith("Bloque actualizado correctamente.")
   })
 
-  it("muestra el detalle del backend (409) y no cierra el panel", async () => {
+  it("muestra el detalle del backend (409) en un toast y no cierra el panel", async () => {
     const onClose = vi.fn()
     vi.spyOn(availabilityApi, "updateAvailabilityBlock").mockRejectedValue({
       response: {
-        data: { statusCode: 409, detail: "Los bloques de disponibilidad se solapan", ok: false },
+        data: { statusCode: 409, detail: "Ya tienes un bloque en ese horario", ok: false },
       },
     })
     const user = userEvent.setup()
 
-    render(<EditBlockPanel block={mockBlock} onClose={onClose} />)
+    renderWithQuery(<EditBlockPanel block={mockBlock} onClose={onClose} />)
 
     await user.click(screen.getByRole("button", { name: "Guardar cambios" }))
 
-    expect(
-      await screen.findByText("Los bloques de disponibilidad se solapan"),
-    ).toBeInTheDocument()
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Ya tienes un bloque en ese horario"),
+    )
     expect(onClose).not.toHaveBeenCalled()
   })
 
@@ -109,7 +119,7 @@ describe("EditBlockPanel", () => {
       .mockResolvedValue(undefined)
     const user = userEvent.setup()
 
-    render(<EditBlockPanel block={mockBlock} onClose={onClose} />)
+    renderWithQuery(<EditBlockPanel block={mockBlock} onClose={onClose} />)
 
     await user.click(screen.getByRole("button", { name: "Eliminar bloque" }))
     const dialog = await screen.findByRole("alertdialog")
@@ -128,7 +138,7 @@ describe("EditBlockPanel", () => {
       .mockResolvedValue(undefined)
     const user = userEvent.setup()
 
-    render(<EditBlockPanel block={mockBlock} onClose={onClose} />)
+    renderWithQuery(<EditBlockPanel block={mockBlock} onClose={onClose} />)
 
     await user.click(screen.getByRole("button", { name: "Eliminar bloque" }))
     const dialog = await screen.findByRole("alertdialog")
@@ -145,7 +155,7 @@ describe("EditBlockPanel", () => {
     const updateSpy = vi.spyOn(availabilityApi, "updateAvailabilityBlock")
     const user = userEvent.setup()
 
-    render(<EditBlockPanel block={mockBlock} onClose={onClose} />)
+    renderWithQuery(<EditBlockPanel block={mockBlock} onClose={onClose} />)
 
     await user.click(screen.getByRole("button", { name: "Cancelar" }))
 
@@ -154,7 +164,7 @@ describe("EditBlockPanel", () => {
   })
 
   it("muestra error cuando el bloque no existe", () => {
-    render(<EditBlockPanel block={null} onClose={vi.fn()} />)
+    renderWithQuery(<EditBlockPanel block={null} onClose={vi.fn()} />)
 
     expect(
       screen.getByText("No se pudo cargar el bloque de disponibilidad"),

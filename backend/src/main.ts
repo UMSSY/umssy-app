@@ -3,9 +3,12 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { AppModule } from './app.module.js';
+import { validateEnv } from './common/utils/validate-env.js';
 import { buildSwaggerConfig } from './config/swagger.config.js';
 
 async function bootstrap(): Promise<void> {
+  validateEnv();
+
   const app = await NestFactory.create(AppModule);
 
   const corsOrigins = (process.env.CORS_ORIGIN ?? '')
@@ -13,7 +16,10 @@ async function bootstrap(): Promise<void> {
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
 
-  app.enableCors(corsOrigins.length > 0 ? { origin: corsOrigins } : {});
+  app.enableCors({
+    origin: corsOrigins,
+    exposedHeaders: ['Content-Disposition'],
+  });
   app.setGlobalPrefix('api');
 
   const config = buildSwaggerConfig();

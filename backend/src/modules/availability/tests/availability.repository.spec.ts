@@ -8,10 +8,8 @@ describe('AvailabilityRepository', () => {
   const findUnique = vi.fn();
   const update = vi.fn();
   const deleteBlock = vi.fn();
-  const count = vi.fn();
   const prisma = {
     availabilityBlock: { findMany, findUnique, update, delete: deleteBlock },
-    user: { count },
   };
   let repository: AvailabilityRepository;
 
@@ -122,28 +120,6 @@ describe('AvailabilityRepository', () => {
 
       await expect(repository.delete('block-1')).resolves.toBe(row);
       expect(deleteBlock).toHaveBeenCalledWith({ where: { id: 'block-1' } });
-    });
-  });
-
-  describe('isActiveMentor', () => {
-    it('considera mentor activo solo a un usuario activo con rol mentor vigente', async () => {
-      const now = new Date('2026-10-04T12:00:00.000Z');
-      count.mockResolvedValue(1);
-
-      await expect(repository.isActiveMentor('mentor-1', now)).resolves.toBe(true);
-      expect(count).toHaveBeenCalledWith({
-        where: {
-          id: 'mentor-1',
-          isActive: true,
-          roles: { some: { deletedAt: null, startAt: { lte: now }, role: { name: 'mentor' } } },
-        },
-      });
-    });
-
-    it('devuelve false si no encuentra un mentor activo', async () => {
-      count.mockResolvedValue(0);
-
-      await expect(repository.isActiveMentor('mentor-1', new Date())).resolves.toBe(false);
     });
   });
 });

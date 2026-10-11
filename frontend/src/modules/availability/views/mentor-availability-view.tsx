@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, CircleCheckIcon } from "lucide-react";
-import { Alert, AlertTitle } from "@/components/ui/alert";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import { addWeeks, getWeekRange } from "@/shared/utils/date-time";
@@ -27,10 +26,9 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
     () => initialWeekStart ?? getWeekRange(new Date()).startAt,
   );
   const [editBlockId, setEditBlockId] = useState<string | null>(null);
-  const { blocks, isLoading, error, refetch } = useMyBlocks(weekStart);
-  const { createBlock, isSubmitting, error: createError } = useCreateAvailabilityBlock();
+  const { blocks, isLoading, error } = useMyBlocks(weekStart);
+  const { createBlock, isSubmitting } = useCreateAvailabilityBlock();
   const [formKey, setFormKey] = useState(0);
-  const [isSaved, setIsSaved] = useState(false);
   const weekRange = getWeekRange(weekStart);
   const currentWeekStart = getWeekRange(new Date()).startAt;
 
@@ -40,32 +38,22 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
   };
 
   const handleEditBlock = (block: AvailabilityBlock) => {
-    setIsSaved(false);
     setEditBlockId(block.id);
   };
 
   const handleClosePanel = () => {
     setEditBlockId(null);
-    refetch();
   };
 
   const handleCreate = async (values: CreateAvailabilityBlockInput) => {
-    setIsSaved(false);
     const block = await createBlock(values);
     if (block) {
-      setIsSaved(true);
       setFormKey((key) => key + 1);
-      const blockWeekStart = getWeekRange(block.startAt).startAt;
-      if (blockWeekStart === weekStart) {
-        refetch();
-      } else {
-        setWeekStart(blockWeekStart);
-      }
+      setWeekStart(getWeekRange(block.startAt).startAt);
     }
   };
 
   const handleCancelCreate = () => {
-    setIsSaved(false);
     setFormKey((key) => key + 1);
   };
 
@@ -148,22 +136,13 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
             )}
           </div>
         ) : (
-          <div className="space-y-4">
-            {isSaved && (
-              <Alert role="status" className="rounded-xl px-4 py-3">
-                <CircleCheckIcon aria-hidden="true" />
-                <AlertTitle className="font-semibold">{MY_AVAILABILITY_TEXT.blockSaved}</AlertTitle>
-              </Alert>
-            )}
-            <BlockForm
-              key={formKey}
-              mode="create"
-              isSubmitting={isSubmitting}
-              submitError={createError}
-              onSubmit={handleCreate}
-              onCancel={handleCancelCreate}
-            />
-          </div>
+          <BlockForm
+            key={formKey}
+            mode="create"
+            isSubmitting={isSubmitting}
+            onSubmit={handleCreate}
+            onCancel={handleCancelCreate}
+          />
         )}
       </div>
     </div>

@@ -56,16 +56,4 @@ export class AvailabilityRepository {
   delete(id: string): Promise<AvailabilityBlock> {
     return this.prisma.availabilityBlock.delete({ where: { id } });
   }
-
-  // TODO: provisional, este módulo no debe leer users; borrar al usar el servicio de Epic 6 (#695)
-  async isActiveMentor(mentorId: string, now: Date): Promise<boolean> {
-    const count = await this.prisma.user.count({
-      where: {
-        id: mentorId,
-        isActive: true,
-        roles: { some: { deletedAt: null, startAt: { lte: now }, role: { name: 'mentor' } } },
-      },
-    });
-    return count > 0;
-  }
 }

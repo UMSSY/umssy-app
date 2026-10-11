@@ -214,4 +214,3 @@ describe("WeekGrid", () => {
     expect(onEditBlock).toHaveBeenCalledWith(blocks[0]);
   });
 });
-

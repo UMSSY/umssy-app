@@ -1,10 +1,14 @@
 import { useState } from "react"
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react"
+import { act, cleanup, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { toast } from "sonner"
+import { renderWithQuery } from "@/shared/testing/render-with-query"
 import { DeleteBlockDialog } from "./delete-block-dialog"
 import { availabilityApi } from "../services/availability.api"
 import type { AvailabilityBlock } from "../types/availability-block.types"
+
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
 const mockBlock: AvailabilityBlock = {
   id: "b1",
@@ -26,6 +30,8 @@ function Harness({ onDeleted }: { onDeleted?: () => void }) {
 describe("DeleteBlockDialog", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    vi.mocked(toast.success).mockClear()
+    vi.mocked(toast.error).mockClear()
   })
 
   afterEach(() => {
@@ -34,7 +40,7 @@ describe("DeleteBlockDialog", () => {
   })
 
   it("muestra título, panel del bloque y acciones al abrirse", async () => {
-    render(<Harness />)
+    renderWithQuery(<Harness />)
 
     expect(await screen.findByText("¿Eliminar este bloque?")).toBeInTheDocument()
     expect(screen.getByText("BLOQUE LIBRE")).toBeInTheDocument()
@@ -52,7 +58,7 @@ describe("DeleteBlockDialog", () => {
       .spyOn(availabilityApi, "deleteAvailabilityBlock")
       .mockResolvedValue(undefined)
 
-    render(<Harness />)
+    renderWithQuery(<Harness />)
 
     await user.click(await screen.findByRole("button", { name: "Cancelar" }))
 
@@ -62,54 +68,55 @@ describe("DeleteBlockDialog", () => {
     expect(deleteSpy).not.toHaveBeenCalled()
   })
 
-  it("confirmar elimina el bloque y cierra el modal (CA3)", async () => {
+  it("confirmar elimina el bloque, avisa con un toast y cierra el modal (CA3)", async () => {
     const user = userEvent.setup()
     const deleteSpy = vi
       .spyOn(availabilityApi, "deleteAvailabilityBlock")
       .mockResolvedValue(undefined)
     const onDeleted = vi.fn()
 
-    render(<Harness onDeleted={onDeleted} />)
+    renderWithQuery(<Harness onDeleted={onDeleted} />)
 
     await user.click(await screen.findByRole("button", { name: "Eliminar bloque" }))
 
-    await waitFor(() => {
-      expect(deleteSpy).toHaveBeenCalledWith("b1")
-    })
+    await waitFor(() => expect(deleteSpy).toHaveBeenCalledWith("b1"))
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Bloque eliminado correctamente."))
     await waitFor(() => {
       expect(screen.queryByText("¿Eliminar este bloque?")).not.toBeInTheDocument()
     })
     expect(onDeleted).toHaveBeenCalledTimes(1)
   })
 
-  it("mantiene el modal abierto y muestra el mensaje si la eliminación falla", async () => {
+  it("mantiene el modal abierto y avisa con un toast si la eliminación falla", async () => {
     const user = userEvent.setup()
     vi.spyOn(availabilityApi, "deleteAvailabilityBlock").mockRejectedValue(new Error("Network error"))
     const onDeleted = vi.fn()
 
-    render(<Harness onDeleted={onDeleted} />)
+    renderWithQuery(<Harness onDeleted={onDeleted} />)
 
     await user.click(await screen.findByRole("button", { name: "Eliminar bloque" }))
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Error al eliminar el bloque de disponibilidad"
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Error al eliminar el bloque de disponibilidad"),
     )
     expect(screen.getByText("¿Eliminar este bloque?")).toBeInTheDocument()
     expect(onDeleted).not.toHaveBeenCalled()
   })
 
-  it("muestra el detalle del backend (409) y mantiene el modal abierto", async () => {
+  it("muestra el detalle del backend (409) en un toast y mantiene el modal abierto", async () => {
     const user = userEvent.setup()
     vi.spyOn(availabilityApi, "deleteAvailabilityBlock").mockRejectedValue({
       response: { data: { statusCode: 409, detail: "El bloque tiene una cita asociada", ok: false } },
     })
     const onDeleted = vi.fn()
 
-    render(<Harness onDeleted={onDeleted} />)
+    renderWithQuery(<Harness onDeleted={onDeleted} />)
 
     await user.click(await screen.findByRole("button", { name: "Eliminar bloque" }))
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("El bloque tiene una cita asociada")
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("El bloque tiene una cita asociada"),
+    )
     expect(screen.getByText("¿Eliminar este bloque?")).toBeInTheDocument()
     expect(onDeleted).not.toHaveBeenCalled()
   })
@@ -121,14 +128,14 @@ describe("DeleteBlockDialog", () => {
       () =>
         new Promise<void>((resolve) => {
           resolveDelete = resolve
-        })
+        }),
     )
 
-    render(<Harness />)
+    renderWithQuery(<Harness />)
 
     await user.click(await screen.findByRole("button", { name: "Eliminar bloque" }))
 
-    expect(screen.getByRole("button", { name: "Eliminando..." })).toBeDisabled()
+    expect(await screen.findByRole("button", { name: "Eliminando..." })).toBeDisabled()
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled()
 
     await act(async () => {
@@ -146,7 +153,7 @@ describe("DeleteBlockDialog", () => {
       .spyOn(availabilityApi, "deleteAvailabilityBlock")
       .mockResolvedValue(undefined)
 
-    render(<DeleteBlockDialog block={null} open onOpenChange={vi.fn()} />)
+    renderWithQuery(<DeleteBlockDialog block={null} open onOpenChange={vi.fn()} />)
 
     await user.click(await screen.findByRole("button", { name: "Eliminar bloque" }))
 
