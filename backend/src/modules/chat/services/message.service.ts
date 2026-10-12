@@ -11,6 +11,12 @@ import {
 import { MAX_MESSAGE_LENGTH } from '../constants/chat.constants.js';
 import type { MessageResponse } from '../responses/message.response.js';
 
+const segmenter = new Intl.Segmenter('es', { granularity: 'grapheme' });
+
+function countGraphemes(text: string): number {
+  if (!text) return 0;
+  return Array.from(segmenter.segment(text)).length;
+}
 @Injectable()
 export class MessageService {
   constructor(
@@ -47,11 +53,11 @@ export class MessageService {
         'El contenido del mensaje no puede estar vacío',
       );
     }
-    if (content.length > MAX_MESSAGE_LENGTH) {
-      throw new InvalidMessageContentException(
-        `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
-      );
-    }
+    if (countGraphemes(content) > MAX_MESSAGE_LENGTH) {
+  throw new InvalidMessageContentException(
+    `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
+  );
+}
 
     const sentStatusId = await this.messageStatusService.getSentId();
     const now = new Date();
