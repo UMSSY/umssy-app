@@ -14,18 +14,24 @@ export class UserSearchService {
     rawQuery: string,
     currentUserId: string,
   ): Promise<ChatUserResponse[]> {
+
+    console.log('[chat-search] rawQuery =', JSON.stringify(rawQuery), 'userId =', currentUserId);
+
     const normalized = this.normalize(rawQuery);
 
-    if (normalized.length < MIN_SEARCH_CHARS) {
-      return [];
-    }
+  console.log('[chat-search] normalized =', JSON.stringify(normalized), 'length =', normalized.length);
+
+  if (normalized.length < MIN_SEARCH_CHARS) {
+    console.log('[chat-search] returning [] (too short)');
+    return [];
+  }
 
     const rows = await this.userLookupRepository.searchActiveByName(
       normalized,
       currentUserId,
       MAX_SEARCH_RESULTS,
     );
-
+    console.log('[chat-search] rows from DB:', rows.length);
     return rows.map((row) => ({
       id: row.id,
       fullName: `${row.first_name} ${row.last_name}`.trim(),
