@@ -18,6 +18,5 @@ export const searchUsersSchema = z
         `El término de búsqueda no puede superar los ${MAX_SEARCH_QUERY_LENGTH} caracteres`,
       ),
   })
-  .strict();
 
 export type SearchUsersDto = z.infer<typeof searchUsersSchema>;

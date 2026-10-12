@@ -25,11 +25,10 @@ export class ConversationController {
   constructor(private readonly conversationService: ConversationService) {}
 
   @Post()
-  @UsePipes(new ZodValidationPipe(createConversationSchema))
-  createOrGet(
-    @Body() body: CreateConversationDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ): Promise<ConversationResponse> {
-    return this.conversationService.getOrCreate(user.id, body.contactId);
-  }
+createOrGet(
+  @Body(new ZodValidationPipe(createConversationSchema)) body: CreateConversationDto,
+  @CurrentUser() user: AuthenticatedUser,
+): Promise<ConversationResponse> {
+  return this.conversationService.getOrCreate(user.id, body.contactId);
+}
 }

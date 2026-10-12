@@ -30,11 +30,10 @@ export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
   @Post()
-  @UsePipes(new ZodValidationPipe(sendMessageSchema))
-  send(
-    @Body() body: SendMessageDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+send(
+  @Body(new ZodValidationPipe(sendMessageSchema)) body: SendMessageDto,
+  @CurrentUser() user: AuthenticatedUser,
+) {
     return this.messageService.send({
       conversationId: body.conversationId,
       senderId: user.id,
@@ -43,11 +42,10 @@ export class MessageController {
   }
 
   @Get()
-  @UsePipes(new ZodValidationPipe(getMessagesQuerySchema))
-  getPage(
-    @Query() query: GetMessagesQuery,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+getPage(
+  @Query(new ZodValidationPipe(getMessagesQuerySchema)) query: GetMessagesQuery,
+  @CurrentUser() user: AuthenticatedUser,
+) {
     return this.messageService.getPage({
       conversationId: query.conversationId,
       userId: user.id,

@@ -19,6 +19,5 @@ export const getMessagesQuerySchema = z
       )
       .default(DEFAULT_MESSAGE_PAGE_SIZE),
   })
-  .strict();
 
 export type GetMessagesQuery = z.infer<typeof getMessagesQuerySchema>;
