@@ -8,9 +8,7 @@ import { DomainExceptionFilter } from './common/filters/domain-exception.filter.
 import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
 import { PrismaModule } from './common/prisma/prisma.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
-import { MatchingModule } from './modules/matching/matching.module.js';
 import { AvailabilityModule } from './modules/availability/availability.module.js';
-
 import { EventRegistrationsModule } from './modules/event-registrations/event-registrations.module.js';
 import { EventCategoriesModule } from './modules/event-categories/event-categories.module.js';
 import { EventsModule } from './modules/events/events.module.js';
@@ -26,6 +24,8 @@ import { TechnicalAreasModule } from './modules/technical-areas/technical-areas.
 import { WorkExperienceModule } from './modules/work-experience/work-experience.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js';
+import { ChatModule } from './modules/chat/chat.module.js';
+import { MatchingModule } from './modules/matching/matching.module.js';
 
 @Module({
   imports: [
@@ -33,7 +33,6 @@ import { AccessRequestsModule } from './modules/access-requests/access-requests.
     PrismaModule,
     AvailabilityModule,
     AuthModule,
-    MatchingModule,
     EventsModule,
     EventCategoriesModule,
     EventRegistrationsModule,
@@ -49,6 +48,8 @@ import { AccessRequestsModule } from './modules/access-requests/access-requests.
     MentorsModule,
     AccessRequestsModule,
     ReportsModule,
+    ChatModule,
+    MatchingModule,
   ],
   controllers: [AppController],
   providers: [

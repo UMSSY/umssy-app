@@ -66,6 +66,7 @@ export const ModelName = {
   Education: 'Education',
   WorkExperience: 'WorkExperience',
   Skill: 'Skill',
+  JobOfferSkill: 'JobOfferSkill',
   UserSkill: 'UserSkill',
   Certification: 'Certification',
   TechnicalArea: 'TechnicalArea',
@@ -81,6 +82,10 @@ export const ModelName = {
   Event: 'Event',
   EventRegistration: 'EventRegistration',
   EventAttendance: 'EventAttendance',
+  JobOffer: 'JobOffer',
+  JobOfferModality: 'JobOfferModality',
+  JobOfferContractType: 'JobOfferContractType',
+  JobOfferStatus: 'JobOfferStatus',
   AdminExportHistory: 'AdminExportHistory',
   AccessRequestStatus: 'AccessRequestStatus',
   AccessRequestDocumentType: 'AccessRequestDocumentType',
@@ -91,7 +96,12 @@ export const ModelName = {
   ApplicationStatus: 'ApplicationStatus',
   VacancyApplication: 'VacancyApplication',
   ApplicationHistory: 'ApplicationHistory',
-  SavedVacancy: 'SavedVacancy'
+  SavedVacancy: 'SavedVacancy',
+  MessageStatus: 'MessageStatus',
+  Conversation: 'Conversation',
+  ConversationParticipant: 'ConversationParticipant',
+  Message: 'Message',
+  UserPresence: 'UserPresence'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -306,6 +316,17 @@ export const SkillScalarFieldEnum = {
 export type SkillScalarFieldEnum = (typeof SkillScalarFieldEnum)[keyof typeof SkillScalarFieldEnum]
 
 
+export const JobOfferSkillScalarFieldEnum = {
+  id: 'id',
+  jobOfferId: 'jobOfferId',
+  skillId: 'skillId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferSkillScalarFieldEnum = (typeof JobOfferSkillScalarFieldEnum)[keyof typeof JobOfferSkillScalarFieldEnum]
+
+
 export const UserSkillScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -518,7 +539,59 @@ export const EventAttendanceScalarFieldEnum = {
 export type EventAttendanceScalarFieldEnum = (typeof EventAttendanceScalarFieldEnum)[keyof typeof EventAttendanceScalarFieldEnum]
 
 
+export const JobOfferScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  companyId: 'companyId',
+  modalityId: 'modalityId',
+  contractTypeId: 'contractTypeId',
+  statusId: 'statusId',
+  category: 'category',
+  positionsAvailable: 'positionsAvailable',
+  salaryRange: 'salaryRange',
+  languages: 'languages',
+  locationUrl: 'locationUrl',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferScalarFieldEnum = (typeof JobOfferScalarFieldEnum)[keyof typeof JobOfferScalarFieldEnum]
+
+
+export const JobOfferModalityScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferModalityScalarFieldEnum = (typeof JobOfferModalityScalarFieldEnum)[keyof typeof JobOfferModalityScalarFieldEnum]
+
+
+export const JobOfferContractTypeScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferContractTypeScalarFieldEnum = (typeof JobOfferContractTypeScalarFieldEnum)[keyof typeof JobOfferContractTypeScalarFieldEnum]
+
+
+export const JobOfferStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferStatusScalarFieldEnum = (typeof JobOfferStatusScalarFieldEnum)[keyof typeof JobOfferStatusScalarFieldEnum]
+
+
 export const AdminExportHistoryScalarFieldEnum = {
+  id: 'id',
   userId: 'userId',
   createdAt: 'createdAt',
   reportName: 'reportName',
@@ -657,6 +730,69 @@ export const SavedVacancyScalarFieldEnum = {
 } as const
 
 export type SavedVacancyScalarFieldEnum = (typeof SavedVacancyScalarFieldEnum)[keyof typeof SavedVacancyScalarFieldEnum]
+
+
+export const MessageStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MessageStatusScalarFieldEnum = (typeof MessageStatusScalarFieldEnum)[keyof typeof MessageStatusScalarFieldEnum]
+
+
+export const ConversationScalarFieldEnum = {
+  id: 'id',
+  userAId: 'userAId',
+  userBId: 'userBId',
+  lastMessageId: 'lastMessageId',
+  lastMessageAt: 'lastMessageAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConversationScalarFieldEnum = (typeof ConversationScalarFieldEnum)[keyof typeof ConversationScalarFieldEnum]
+
+
+export const ConversationParticipantScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  userId: 'userId',
+  lastReadAt: 'lastReadAt',
+  isMuted: 'isMuted',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConversationParticipantScalarFieldEnum = (typeof ConversationParticipantScalarFieldEnum)[keyof typeof ConversationParticipantScalarFieldEnum]
+
+
+export const MessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  senderId: 'senderId',
+  content: 'content',
+  statusId: 'statusId',
+  sentAt: 'sentAt',
+  deliveredAt: 'deliveredAt',
+  readAt: 'readAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const UserPresenceScalarFieldEnum = {
+  userId: 'userId',
+  isOnline: 'isOnline',
+  lastSeenAt: 'lastSeenAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
 
 
 export const SortOrder = {

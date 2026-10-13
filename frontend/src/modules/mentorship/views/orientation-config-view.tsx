@@ -3,8 +3,18 @@
 import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -27,6 +37,7 @@ export function OrientationConfigView() {
   const [orientationTypes, setOrientationTypes] = useState<
     OrientationTypeResponse[]
   >([]);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -34,6 +45,7 @@ export function OrientationConfigView() {
   const [isMentorActive, setIsMentorActive] = useState(true);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [showToast, setShowToast] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -67,6 +79,7 @@ export function OrientationConfigView() {
           (orientation) => orientation.id,
         );
         setOrientationTypes(catalogResult.value);
+        setSavedIds(ids);
         setSelectedIds(ids);
         setIsMentorActive(true);
       })
@@ -99,8 +112,10 @@ export function OrientationConfigView() {
 
     setIsSaving(true);
     setShowToast(false);
+    const idsToSave = [...selectedIds];
     try {
-      await updateMentorOrientationTypes(selectedIds);
+      await updateMentorOrientationTypes(idsToSave);
+      setSavedIds(idsToSave);
       setErrorMessage(null);
       setShowToast(true);
     } catch {
@@ -109,7 +124,14 @@ export function OrientationConfigView() {
       );
     } finally {
       setIsSaving(false);
+      setIsConfirmModalOpen(false);
     }
+  };
+
+  const handleOpenConfirmModal = () => {
+    if (selectedIds.length === 0 || isSaving || hasLoadError) return;
+
+    setIsConfirmModalOpen(true);
   };
 
   if (isLoading) {
@@ -214,14 +236,17 @@ export function OrientationConfigView() {
                 <div className="flex flex-col gap-3">
                   {orientationTypes.map((option) => {
                     const isSelected = selectedIds.includes(option.id);
+                    const isSaved = savedIds.includes(option.id);
 
                     return (
                       <label
                         key={option.id}
                         className={`group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors ${
-                          isSelected
-                            ? "border-red-200 bg-red-50/50"
-                            : "border-transparent bg-gray-50/50 hover:bg-gray-50"
+                          !isSelected
+                            ? "border-transparent bg-gray-50/50 hover:bg-gray-50"
+                            : isSaved
+                              ? "border-green-200 bg-green-50/50"
+                              : "border-red-200 bg-red-50/50"
                         }`}
                       >
                         <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -247,7 +272,13 @@ export function OrientationConfigView() {
                               handleCheckboxChange(option.id)
                             }
                             aria-labelledby={`orientation-label-${option.id}`}
-                            className="size-5 border-0 bg-gray-200 text-transparent data-checked:bg-red-600 data-checked:text-white [&_[data-slot=checkbox-indicator]>svg]:size-4"
+                            className={`size-5 border-0 bg-gray-200 text-transparent data-checked:text-white [&_[data-slot=checkbox-indicator]>svg]:size-4 ${
+                              !isSelected
+                                ? ""
+                                : isSaved
+                                  ? "data-checked:bg-green-600"
+                                  : "data-checked:bg-red-600"
+                            }`}
                           />
                         </div>
                       </label>
@@ -268,7 +299,7 @@ export function OrientationConfigView() {
               </Link>
               <Button
                 type="button"
-                onClick={handleSave}
+                onClick={handleOpenConfirmModal}
                 disabled={selectedIds.length === 0 || isSaving || hasLoadError}
                 className="h-10 rounded-lg bg-red-600 px-6 text-sm font-semibold text-white shadow-sm hover:bg-red-700 active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -278,6 +309,44 @@ export function OrientationConfigView() {
           </Card>
         </div>
       </div>
+
+      <AlertDialog
+        open={isConfirmModalOpen}
+        onOpenChange={(open) => {
+          if (!isSaving) setIsConfirmModalOpen(open);
+        }}
+      >
+        <AlertDialogContent className="max-w-md gap-0 rounded-2xl border border-border bg-surface p-8 text-ink shadow-lg ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
+          <AlertDialogHeader className="place-items-start text-left">
+            <AlertDialogTitle className="font-tight text-[22px] font-bold text-ink">
+              ¿Guardar cambios?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-2 text-[15px] text-text-secondary">
+              Se actualizarán los tipos de orientación que seleccionaste.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mx-0 mb-0 mt-8 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
+            <AlertDialogCancel
+              type="button"
+              disabled={isSaving}
+              className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger"
+            >
+              {isSaving ? (
+                <LoaderCircle aria-hidden="true" className="animate-spin" />
+              ) : null}
+              {isSaving ? "Guardando..." : "Sí, guardar cambios"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {showToast && (
         <Alert

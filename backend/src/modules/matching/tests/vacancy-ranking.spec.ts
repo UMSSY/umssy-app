@@ -1,7 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { compareVacancyRank } from '../utils/compare-vacancy-rank.js';
+import { VacancyRankingService } from '../services/vacancy-ranking.service.js';
 
 describe('Hierarchical vacancy ranking (#236)', () => {
+  it('accepts matching results without mutating the input list', () => {
+    const common = {
+      careerMatch: true,
+      experienceMatch: true,
+      allRequiredSkillsMatch: false,
+    };
+    const vacancies = [
+      { ...common, id: 'fewer', matchedSkills: ['Python'] },
+      { ...common, id: 'more', matchedSkills: ['Python', 'SQL'] },
+    ];
+    expect(
+      new VacancyRankingService().rank(vacancies).map(({ id }) => id),
+    ).toEqual(['more', 'fewer']);
+    expect(vacancies.map(({ id }) => id)).toEqual(['fewer', 'more']);
+  });
   it('prioritizes career, then experience, then matching skills regardless of score', () => {
     const vacancies = [
       {

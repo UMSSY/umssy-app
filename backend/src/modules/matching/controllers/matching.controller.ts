@@ -15,8 +15,6 @@ import { ResponseInterceptor } from '../../../common/interceptors/response.inter
 import {
   analyzeExperienceBodySchema,
   analyzeExperienceParamsSchema,
-} from '../requests/analyze-experience.schema.js';
-import type {
   AnalyzeExperienceBodyDto,
   AnalyzeExperienceParamsDto,
 } from '../requests/analyze-experience.schema.js';

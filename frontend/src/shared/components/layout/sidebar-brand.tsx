@@ -1,5 +1,18 @@
 import Image from "next/image";
 
+export function SidebarBrandIcon() {
+  return (
+    <Image
+      src="/umss-logo.svg"
+      alt="Escudo de la Universidad Mayor de San Simón"
+      width={48}
+      height={48}
+      className="size-12 shrink-0 rounded-sm"
+      unoptimized
+    />
+  );
+}
+
 export function SidebarBrand() {
   return (
     <div className="flex items-center gap-3 px-3 py-4">

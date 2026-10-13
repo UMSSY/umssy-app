@@ -1,11 +1,30 @@
 import { describe, expect, it } from 'vitest';
 import { calculateWeightedScore } from '../utils/calculate-weighted-score.js';
 import type { RequirementState } from '../types/requirement-state.types.js';
+import { WeightedScoreService } from '../services/weighted-score.service.js';
 
 const met: RequirementState = { name: 'Met', status: 'Cumple' };
 const pending: RequirementState = { name: 'Pending', status: 'Pendiente' };
 
 describe('Weighted compatibility formula (#275)', () => {
+  it.each([
+    [[], 100],
+    [[pending], 0],
+    [[met], 100],
+    [[met, pending], 50],
+  ] as [RequirementState[], number][])(
+    'calculates boundary cases %j',
+    (skills, expected) => {
+      expect(
+        new WeightedScoreService().calculate({
+          skills,
+          academicRequirements: [],
+          experienceRequirements: [],
+          otherRequirements: [],
+        }),
+      ).toBe(expected);
+    },
+  );
   it('returns 65 for half the skills, all education and experience, and no other requirements met', () => {
     expect(
       calculateWeightedScore({
@@ -40,4 +59,26 @@ describe('Weighted compatibility formula (#275)', () => {
       }),
     ).toBe(56);
   });
+
+  it('Debe retornar 100% de estabilidad matematica si todas las categorias del perfil estan totalmente vacias', () => {
+    const emptyProfileScore = calculateWeightedScore({
+      skills: [],
+      academicRequirements: [],
+      experienceRequirements: [],
+      otherRequirements: [],
+    });
+    expect(emptyProfileScore).toBe(100);
+  });
+
+  it('Debe retornar 100% exacto ante un perfil que cumple absolutamente todos los requisitos en todas las categorias', () => {
+    const perfectProfileScore = calculateWeightedScore({
+      skills: [met, met],
+      academicRequirements: [met],
+      experienceRequirements: [met],
+      otherRequirements: [met],
+    });
+    expect(perfectProfileScore).toBe(100);
+  });
+
+
 });

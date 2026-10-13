@@ -13,3 +13,19 @@ export interface AnalyzeExperienceResponse {
   skills: DetectedSkillResponse[];
   processingTimeMs: number;
 }
+
+export interface MatchingInput {
+  userCareer: string;
+  userExperienceYears: number;
+  userSkills: string[];
+  requiredCareer?: string | null;
+  minimumExperienceYears: number;
+  requiredSkills: string[];
+}
+
+export interface MatchingResult {
+  careerMatch: boolean;
+  experienceMatch: boolean;
+  matchedSkills: string[];
+  allRequiredSkillsMatch: boolean;
+}
