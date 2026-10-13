@@ -156,13 +156,25 @@ export function LoginView() {
           {isLoading ? "Ingresando..." : "Iniciar sesión"}
         </Button>
 
+        <Link
+          href="/guest"
+          className="mt-3 flex h-[42px] w-full items-center justify-center rounded-lg border border-border-strong text-[14.5px] font-semibold text-ink hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          Entrar como invitado
+        </Link>
+
         <p className="mt-5 text-center text-sm text-text-secondary">
           ¿Aún no tienes cuenta?{" "}
           <Link
-            href="/request-access"
+            href="/register"
             className="font-semibold text-ink underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
-            Solicita acceso
+            Crear cuenta
+          </Link>
+        </p>
+        <p className="mt-3 text-center text-sm text-text-secondary">
+          <Link href="/request-access" className="font-semibold text-ink underline underline-offset-4">
+            Solicitar acceso con documentos
           </Link>
         </p>
       </form>

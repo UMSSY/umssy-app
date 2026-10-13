@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
 import { AuthController } from './controllers/auth.controller.js';
 import { AuthService } from './services/auth.service.js';
+import { RegistrationService } from './services/registration.service.js';
 import { AuthRepository } from './repositories/auth.repository.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { JwtAuthGuard as EventsJwtAuthGuard } from './guards/jwt-auth.guard.js';
@@ -17,7 +18,7 @@ import { JwtAuthGuard as EventsJwtAuthGuard } from './guards/jwt-auth.guard.js';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository, JwtAuthGuard, EventsJwtAuthGuard],
+  providers: [AuthService, RegistrationService, AuthRepository, JwtAuthGuard, EventsJwtAuthGuard],
   exports: [AuthService, JwtModule, JwtAuthGuard, EventsJwtAuthGuard],
 })
 export class AuthModule {}

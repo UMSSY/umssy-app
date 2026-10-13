@@ -200,7 +200,9 @@ describe("LoginView", () => {
     vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
     render(<LoginView />);
 
-    expect(screen.getByRole("link", { name: "Solicita acceso" })).toHaveAttribute("href", "/request-access");
+    expect(screen.getByRole("link", { name: "Crear cuenta" })).toHaveAttribute("href", "/register");
+    expect(screen.getByRole("link", { name: "Entrar como invitado" })).toHaveAttribute("href", "/guest");
+    expect(screen.getByRole("link", { name: "Solicitar acceso con documentos" })).toHaveAttribute("href", "/request-access");
   });
 
   it("muestra el error en una alerta accesible", () => {
