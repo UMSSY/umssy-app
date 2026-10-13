@@ -21,6 +21,22 @@ describe("MentorDirectoryView", () => {
     ).toBeDefined();
   });
 
+  it("muestra el buscador visual del directorio", () => {
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue([]);
+    render(<MentorDirectoryView />);
+
+    const searchInput = screen.getByRole("searchbox", {
+      name: "Buscar mentores",
+    });
+
+    expect(searchInput).toBeVisible();
+    expect(searchInput).toHaveAttribute(
+      "placeholder",
+      "Buscar mentores...",
+    );
+    expect(searchInput).toHaveAttribute("readonly");
+  });
+
   it("renderiza enlaces hacia los perfiles de los mentores", async () => {
     vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue([
       {
@@ -34,12 +50,15 @@ describe("MentorDirectoryView", () => {
         orientationTypes: [],
       },
     ]);
+
     render(<MentorDirectoryView />);
 
     expect(
-      (await screen.findAllByRole("link", {
-        name: /Ver perfil de/i,
-      })).length,
+      (
+        await screen.findAllByRole("link", {
+          name: /Ver perfil de/i,
+        })
+      ).length,
     ).toBeGreaterThan(0);
   });
 });

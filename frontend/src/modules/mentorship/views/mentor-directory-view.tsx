@@ -1,5 +1,7 @@
 "use client";
 
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { MentorDirectoryGrid } from "../components/mentor/mentor-directory-grid";
 import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
 import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
@@ -10,7 +12,7 @@ export function MentorDirectoryView() {
     useMentorDirectory();
 
   return (
-    <main className="min-h-full bg-surface-soft px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <main className="min-h-full bg-[#F8F9FF] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <header>
           <h1 className="font-tight text-2xl font-bold text-ink sm:text-3xl">
@@ -22,6 +24,21 @@ export function MentorDirectoryView() {
             experiencia profesional.
           </p>
         </header>
+
+        <div className="relative w-full">
+          <Search
+            aria-hidden="true"
+            className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
+          />
+
+          <Input
+            type="search"
+            placeholder="Buscar mentores..."
+            readOnly
+            aria-label="Buscar mentores"
+            className="h-11 border-blue-100 bg-[#F4F7FF] pl-10"
+          />
+        </div>
 
         {isPending || (isError && isFetching) ? (
           <MentorQuerySkeleton />

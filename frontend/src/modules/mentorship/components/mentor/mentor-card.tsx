@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { getInitials } from "@/shared/utils/get-initials";
@@ -33,8 +34,10 @@ export function MentorCard({ mentor }: MentorCardProps) {
                   className="object-cover"
                 />
               ) : null}
+
               <AvatarFallback>{getInitials(mentor.fullName)}</AvatarFallback>
             </Avatar>
+
             <div className="min-w-0 flex-1">
               <h2
                 id={`mentor-${mentor.id}`}
@@ -48,6 +51,7 @@ export function MentorCard({ mentor }: MentorCardProps) {
                   {mentor.headline}
                 </p>
               ) : null}
+
               {mentor.education ? (
                 <p className="mt-2 [overflow-wrap:anywhere] text-sm text-text-secondary">
                   {mentor.education.degree} · {mentor.education.institution}
@@ -55,14 +59,22 @@ export function MentorCard({ mentor }: MentorCardProps) {
               ) : null}
             </div>
           </div>
+
           <Badge
             variant="outline"
-            className={`ml-auto gap-1.5 px-2.5 ${mentor.isAvailable ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-border bg-surface-soft text-text-secondary"}`}
+            className={`ml-auto gap-1.5 px-2.5 ${
+              mentor.isAvailable
+                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                : "border-border bg-surface-soft text-text-secondary"
+            }`}
           >
             <span
               aria-hidden="true"
-              className={`size-1.5 shrink-0 rounded-full ${mentor.isAvailable ? "bg-emerald-600" : "bg-text-secondary"}`}
+              className={`size-1.5 shrink-0 rounded-full ${
+                mentor.isAvailable ? "bg-emerald-600" : "bg-text-secondary"
+              }`}
             />
+
             {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
           </Badge>
         </div>
@@ -77,7 +89,7 @@ export function MentorCard({ mentor }: MentorCardProps) {
               {mentor.technicalAreas.map((area) => (
                 <li
                   key={area}
-                  className="min-w-0 max-w-full [overflow-wrap:anywhere] rounded-md border border-border bg-surface-soft px-2.5 py-1 text-xs text-ink-soft"
+                  className="min-w-0 max-w-full [overflow-wrap:anywhere] rounded-md border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs text-slate-700"
                 >
                   {area}
                 </li>
@@ -89,16 +101,18 @@ export function MentorCard({ mentor }: MentorCardProps) {
             </p>
           )}
         </div>
+
         <div>
           <p className="mb-2 text-sm font-semibold text-ink">
             Tipos de orientación
           </p>
+
           {mentor.orientationTypes.length > 0 ? (
             <ul className="flex flex-wrap gap-2">
               {mentor.orientationTypes.map((orientationType) => (
                 <li
                   key={orientationType}
-                  className="min-w-0 max-w-full [overflow-wrap:anywhere] rounded-md border border-border bg-surface-soft px-2.5 py-1 text-xs text-ink-soft"
+                  className="min-w-0 max-w-full [overflow-wrap:anywhere] rounded-md border border-amber-100 bg-amber-50 px-2.5 py-1 text-xs text-slate-700"
                 >
                   {orientationType}
                 </li>
@@ -117,11 +131,13 @@ export function MentorCard({ mentor }: MentorCardProps) {
           href={`/mentors/${mentor.id}`}
           className={buttonVariants({
             variant: "outline",
-            className: "max-w-full border-border-strong text-ink",
+            className:
+              "max-w-full gap-2 border-blue-100 bg-blue-50 text-ink hover:bg-blue-100",
           })}
           aria-label={`Ver perfil de ${mentor.fullName}`}
         >
           Ver perfil
+          <ArrowRight aria-hidden="true" className="size-4" />
         </Link>
       </CardFooter>
     </Card>
