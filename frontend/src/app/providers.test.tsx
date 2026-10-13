@@ -1,7 +1,9 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { afterEach, expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { Providers } from "./providers";
+
+vi.mock("@/components/ui/sonner", () => ({ Toaster: () => null }));
 
 afterEach(cleanup);
 

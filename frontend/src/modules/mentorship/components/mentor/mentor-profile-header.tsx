@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { GraduationCap, UserPlus } from "lucide-react";
 import {
   Avatar,
@@ -5,8 +6,9 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 import type { MentorProfile } from "../../types/mentor-profile.types";
 
@@ -89,13 +91,27 @@ export function MentorProfileHeader({ mentor }: MentorProfileHeaderProps) {
           </div>
         </div>
 
-        <Button
-          type="button"
-          className="h-auto w-full shrink-0 gap-2 rounded-lg border-0 bg-accent px-6 py-3 text-base font-semibold text-white transition hover:brightness-90 active:translate-y-0 sm:w-auto"
-        >
-          <UserPlus className="size-5" />
-          Solicitar mentoría
-        </Button>
+        {mentor.isAvailable ? (
+          <Link
+            href={`/mentors/${mentor.id}/availability`}
+            className={cn(
+              buttonVariants(),
+              "h-auto w-full shrink-0 gap-2 rounded-lg border-0 bg-accent px-6 py-3 text-base font-semibold text-white transition hover:brightness-90 active:translate-y-0 sm:w-auto",
+            )}
+          >
+            <UserPlus className="size-5" />
+            Solicitar mentoría
+          </Link>
+        ) : (
+          <Button
+            type="button"
+            disabled
+            className="h-auto w-full shrink-0 gap-2 rounded-lg border-0 bg-accent px-6 py-3 text-base font-semibold text-white transition hover:brightness-90 active:translate-y-0 sm:w-auto"
+          >
+            <UserPlus className="size-5" />
+            Solicitar mentoría
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

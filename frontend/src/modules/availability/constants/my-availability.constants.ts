@@ -5,7 +5,6 @@ export const MY_AVAILABILITY_TEXT = {
   nextWeek: "Semana siguiente",
   today: "Hoy",
   emptyWeek: "Aún no registraste bloques esta semana",
-  blockSaved: "Bloque guardado correctamente.",
   loadError: "Error al obtener los bloques de disponibilidad",
 } as const;
 

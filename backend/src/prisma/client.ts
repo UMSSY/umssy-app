@@ -192,6 +192,11 @@ export type EventRegistration = Prisma.EventRegistrationModel
  */
 export type EventAttendance = Prisma.EventAttendanceModel
 /**
+ * Model AdminExportHistory
+ * 
+ */
+export type AdminExportHistory = Prisma.AdminExportHistoryModel
+/**
  * Model AccessRequestStatus
  * 
  */

@@ -6,9 +6,9 @@ import {
   BlockNotFoundException,
   BlockNotOwnedException,
   BlockOverlapException,
-  MentorNotFoundException,
 } from '../exceptions/index.js';
 import { AvailabilityService } from '../services/availability.service.js';
+import { MentorNotFoundException } from '../../mentors/exceptions/mentor-not-found.exception.js';
 import type { CreateBlockDto } from '../requests/create-block.request.js';
 
 const QUERY = { from: '2026-10-05T04:00:00.000Z', to: '2026-10-12T03:59:59.999Z' };
@@ -36,7 +36,6 @@ describe('AvailabilityService', () => {
     findById: vi.fn(),
     update: vi.fn(),
     findMentorFreeBlocksInRange: vi.fn(),
-    isActiveMentor: vi.fn(),
     create: vi.fn(),
   };
   const mentorId = 'ed9934b9-1a4e-4b8d-bbed-b8772154cba8';
@@ -54,13 +53,18 @@ describe('AvailabilityService', () => {
     createdAt: new Date('2026-11-01T12:00:00.000Z'),
     updatedAt: new Date('2026-11-01T12:00:00.000Z'),
   };
+  const mentorsService = { findOne: vi.fn() };
   let service: AvailabilityService;
 
   beforeEach(() => {
     vi.clearAllMocks();
     availabilityRepository.findMentorBlocksInRange.mockResolvedValue([]);
     availabilityRepository.create.mockResolvedValue(savedBlock);
-    service = new AvailabilityService(availabilityRepository as never, new AvailabilityMapper());
+    service = new AvailabilityService(
+      availabilityRepository as never,
+      new AvailabilityMapper(),
+      mentorsService as never,
+    );
   });
 
   describe('findMyBlocks', () => {
@@ -216,7 +220,11 @@ describe('AvailabilityService', () => {
 
     beforeEach(() => {
       vi.clearAllMocks();
-      removeService = new AvailabilityService(repository as never, new AvailabilityMapper());
+      removeService = new AvailabilityService(
+        repository as never,
+        new AvailabilityMapper(),
+        mentorsService as never,
+      );
     });
 
     it('lanza 404 si el bloque no existe', async () => {
@@ -252,7 +260,7 @@ describe('AvailabilityService', () => {
 
   describe('findMentorFreeBlocks', () => {
     beforeEach(() => {
-      availabilityRepository.isActiveMentor.mockResolvedValue(true);
+      mentorsService.findOne.mockResolvedValue({ id: 'mentor-1' });
     });
 
     afterEach(() => {
@@ -260,14 +268,12 @@ describe('AvailabilityService', () => {
     });
 
     it('responde 404 sin consultar bloques si el mentor no existe o no está activo', async () => {
-      const now = new Date('2026-10-01T12:00:00.000Z');
-      vi.useFakeTimers({ now });
-      availabilityRepository.isActiveMentor.mockResolvedValue(false);
+      mentorsService.findOne.mockRejectedValue(new MentorNotFoundException());
 
       await expect(service.findMentorFreeBlocks('mentor-1', QUERY)).rejects.toBeInstanceOf(
         MentorNotFoundException,
       );
-      expect(availabilityRepository.isActiveMentor).toHaveBeenCalledWith('mentor-1', now);
+      expect(mentorsService.findOne).toHaveBeenCalledWith('mentor-1');
       expect(availabilityRepository.findMentorFreeBlocksInRange).not.toHaveBeenCalled();
     });
 

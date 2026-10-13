@@ -270,6 +270,7 @@ describe('MentorsRepository', () => {
         'firstName',
         'headline',
         'id',
+        'isAvailableForMentoring',
         'lastName',
         'mentorOrientationTypes',
         'mentorTechnicalAreas',
@@ -301,10 +302,15 @@ describe('MentorsRepository', () => {
     const createUserRole = vi.fn().mockResolvedValue({ id: 'user-role-id' });
     const createTechnicalAreas = vi.fn().mockResolvedValue({ count: 2 });
     const createOrientationTypes = vi.fn().mockResolvedValue({ count: 2 });
+    const updateUser = vi.fn().mockResolvedValue({
+      id: 'user-1',
+      isAvailableForMentoring: true,
+    });
     const transaction = {
       userRole: { create: createUserRole },
       mentorTechnicalArea: { createMany: createTechnicalAreas },
       mentorOrientationType: { createMany: createOrientationTypes },
+      user: { update: updateUser },
     };
     const $transaction = vi.fn(async (callback) => callback(transaction));
     const prisma = { $transaction } as unknown as PrismaService;
@@ -337,6 +343,14 @@ describe('MentorsRepository', () => {
         { mentorId: 'user-1', orientationTypeId: 'orientation-2' },
       ],
     });
+    expect(updateUser).toHaveBeenCalledWith({
+      where: {
+        id: 'user-1',
+      },
+      data: {
+        isAvailableForMentoring: true,
+      },
+    });
     expect(result).toEqual({ id: 'user-1' });
   });
 
@@ -361,6 +375,39 @@ describe('MentorsRepository', () => {
     expect(createUserRole).toHaveBeenCalledTimes(1);
     expect(createTechnicalAreas).toHaveBeenCalledTimes(1);
     expect(createOrientationTypes).not.toHaveBeenCalled();
+  });
+
+  it('actualiza la disponibilidad del mentor', async () => {
+    const update = vi.fn().mockResolvedValue({
+      id: 'user-1',
+      isAvailableForMentoring: false,
+    });
+
+    const prisma = {
+      user: { update },
+    } as unknown as PrismaService;
+
+    const repository = new MentorsRepository(prisma);
+
+    const result = await repository.updateAvailability('user-1', false);
+
+    expect(update).toHaveBeenCalledWith({
+      where: {
+        id: 'user-1',
+      },
+      data: {
+        isAvailableForMentoring: false,
+      },
+      select: {
+        id: true,
+        isAvailableForMentoring: true,
+      },
+    });
+
+    expect(result).toEqual({
+      id: 'user-1',
+      isAvailableForMentoring: false,
+    });
   });
 
   it('reemplaza atomicamente las areas tecnicas del mentor', async () => {

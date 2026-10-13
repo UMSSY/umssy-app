@@ -34,15 +34,12 @@ export function WorkExperienceListCard({
     return (
       <ul className="divide-y divide-border">
         {sortedExperiences.map((experience) => (
-          <li
-            key={experience.id}
-            className="flex items-center justify-between gap-4 py-4 first:pt-0"
-          >
-            <div>
-              <h3 className="text-[15px] font-bold text-ink">
+          <li key={experience.id} className="flex items-center justify-between gap-4 py-4 first:pt-0">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[15px] font-bold text-ink [overflow-wrap:anywhere]">
                 {experience.position}
               </h3>
-              <p className="mt-0.5 text-[13px] text-text-secondary">
+              <p className="mt-0.5 text-[13px] text-text-secondary [overflow-wrap:anywhere]">
                 {experience.companyName} ·{" "}
                 {formatWorkPeriod(
                   experience.startDate,

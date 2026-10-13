@@ -192,6 +192,7 @@ export class MentorsRepository {
         lastName: true,
         headline: true,
         aboutMe: true,
+        isAvailableForMentoring: true,
         photoUrl: true,
         city: {
           select: {
@@ -334,7 +335,31 @@ export class MentorsRepository {
         })),
       });
 
+      await transaction.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          isAvailableForMentoring: true,
+        },
+      });
+
       return { id: userId };
+    });
+  }
+
+  updateAvailability(userId: string, isAvailable: boolean) {
+    return this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        isAvailableForMentoring: isAvailable,
+      },
+      select: {
+        id: true,
+        isAvailableForMentoring: true,
+      },
     });
   }
 

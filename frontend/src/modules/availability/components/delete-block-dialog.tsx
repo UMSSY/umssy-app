@@ -22,12 +22,7 @@ export function DeleteBlockDialog({
   onOpenChange,
   onDeleted,
 }: DeleteBlockDialogProps) {
-  const { deleteBlock, isDeleting, error, clearError } = useDeleteBlock();
-
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen) clearError();
-    onOpenChange(nextOpen);
-  };
+  const { deleteBlock, isDeleting } = useDeleteBlock();
 
   const handleConfirm = async () => {
     if (!block) return;
@@ -39,7 +34,7 @@ export function DeleteBlockDialog({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={handleOpenChange}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="p-6 data-[size=default]:sm:max-w-md">
         <AlertDialogHeader className="text-left">
           <AlertDialogTitle className="font-heading text-lg font-bold text-ink">
@@ -63,11 +58,6 @@ export function DeleteBlockDialog({
             {DELETE_BLOCK_TEXT.description}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        {error && (
-          <p role="alert" className="text-sm font-semibold text-danger">
-            {error}
-          </p>
-        )}
         <div className="flex items-center justify-end gap-2">
           <AlertDialogCancel
             className="border-border-strong bg-surface p-5 text-ink hover:bg-surface-soft"

@@ -32,6 +32,7 @@ export class MentorMapper {
       fullName: `${mentor.firstName} ${mentor.lastName}`,
       headline: mentor.headline,
       aboutMe: mentor.aboutMe,
+      isAvailable: mentor.isAvailableForMentoring,
       photoUrl: this.bytesToString(mentor.photoUrl),
       city: mentor.city,
       educations: mentor.educations,

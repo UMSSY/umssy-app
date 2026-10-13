@@ -6,6 +6,7 @@ export interface MentorProfile {
   fullName: string;
   headline: string | null;
   aboutMe: string | null;
+  isAvailable: boolean;
   photoUrl: string | null;
   city: {
     id: string;

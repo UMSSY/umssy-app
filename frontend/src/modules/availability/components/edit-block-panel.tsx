@@ -11,7 +11,7 @@ import type { CreateAvailabilityBlockInput } from "../types/create-availability-
 import type { EditBlockPanelProps } from "../types/edit-block-panel-props.types";
 
 export function EditBlockPanel({ block, onClose }: EditBlockPanelProps) {
-  const { updateBlock, isSubmitting, error: submitError } = useUpdateAvailabilityBlock();
+  const { updateBlock, isSubmitting } = useUpdateAvailabilityBlock();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   if (!block) {
@@ -38,7 +38,6 @@ export function EditBlockPanel({ block, onClose }: EditBlockPanelProps) {
         initialValues={{ startAt: block.startAt, endAt: block.endAt }}
         isSubmitting={isSubmitting}
         disabled={!isEditable}
-        submitError={submitError}
         onSubmit={handleSubmit}
         onCancel={onClose}
       />
