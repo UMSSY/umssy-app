@@ -1,11 +1,11 @@
-
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
 import {
+  CalendarClock,
   CalendarDays,
-  ChartColumn,
   House,
   ListChecks,
   MessageCircle,
+  Ticket,
   User,
   UserRound,
 } from "lucide-react";
@@ -29,15 +29,19 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
         href: "/mentors/participation",
         icon: UserRound,
       },
+      {
+        label: "Mi disponibilidad",
+        href: "/mentor/availability",
+        icon: CalendarClock,
+      },
     ],
   },
   {
-    label: "Reportes Analíticos",
-    icon: ChartColumn,
+    label: "Talleres",
+    icon: CalendarDays,
     children: [
-      { label: "Reporte de usuarios registrados", href: "/reports/registered-users" },
-      { label: "Reporte de usuarios rechazados", href: "/reports/rejected-users" },
-      { label: "Historial de reportes generados", href: "/reports/history" },
+      { label: "Talleres disponibles", href: "/events", icon: ListChecks },
+      { label: "Mis inscripciones", href: "/events/my-passes", icon: Ticket },
     ],
   },
 ];
