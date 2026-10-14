@@ -11,6 +11,7 @@ import { seedAvailability } from '../../modules/availability/seeds/availability.
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
+import { seedMentors } from '../../modules/mentors/seeds/mentors.seed.js';
 
 vi.mock('../../modules/users/seeds/users.seed.js', () => ({
   hashSeedPassword: vi.fn(),
@@ -39,10 +40,14 @@ vi.mock('../../modules/orientation-types/seeds/orientation-types.seed.js', () =>
 vi.mock('../../modules/job-offers/seeds/job-offers.seed.js', () => ({
   seedJobOffers: vi.fn(),
 }));
+vi.mock('../../modules/mentors/seeds/mentors.seed.js', () => ({
+  seedMentors: vi.fn(),
+}));
 
 const users = {
   mentorA: { id: 'mentor' },
   graduate: { id: 'availability-graduate' },
+  student: { id: 'student' },
   eventGraduate: { id: 'event-graduate' },
   emptyGraduate: { id: 'without-passes' },
 };
@@ -102,6 +107,7 @@ describe('combined events and availability seed', () => {
       }),
       expect.any(Date),
     );
+    expect(seedMentors).toHaveBeenCalledWith(tx, { id: 'student' });
     expect(seedAccessRequests).toHaveBeenCalledWith(tx);
     expect(client.$transaction).toHaveBeenCalledTimes(1);
     expect(client.$disconnect).not.toHaveBeenCalled();
