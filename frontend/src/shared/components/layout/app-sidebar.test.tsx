@@ -43,9 +43,9 @@ describe("AppSidebar", () => {
   it("shows the brand without an identity footer when no user is provided", () => {
     renderSidebar();
 
-    expect(screen.getByText("UMSS")).toBeDefined();
-    expect(screen.getByText("Universidad Mayor de San Simón")).toBeDefined();
-    expect(screen.getByRole("img", { name: "Escudo de la Universidad Mayor de San Simón" })).toHaveAttribute("src", "/umss-logo.svg");
+    expect(screen.getByText("UMSSY")).toBeDefined();
+    expect(screen.getByText("Universidad para el futuro")).toBeDefined();
+    expect(screen.getByRole("img", { name: "Logo UMSSY" })).toHaveAttribute("src", "/icons/icon-192x192.png");
     expect(screen.queryByText("Alejandro Vargas")).toBeNull();
     expect(screen.queryByText("Administrador")).toBeNull();
     expect(document.querySelector('[data-slot="sidebar-footer"]')).toBeNull();

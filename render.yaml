@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: umssy-docente-api
+    runtime: node
+    plan: free
+    region: oregon
+    branch: deploy/docente-2026-10-14
+    rootDir: backend
+    buildCommand: npm install --include=dev --ignore-scripts --legacy-peer-deps --package-lock=false && npm run build:hosted
+    startCommand: npm run start:hosted
+    healthCheckPath: /docs
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: umssy-docente-db
+          property: connectionString
+      - key: DB_SCHEMA
+        value: public
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 8h
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: CORS_ORIGIN
+        sync: false
+      - key: SEED_DEMO_ON_EMPTY_DATABASE
+        value: 'true'
+databases:
+  - name: umssy-docente-db
+    plan: free
+    region: oregon
+    databaseName: umssy_docente
+    ipAllowList: []

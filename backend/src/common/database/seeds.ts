@@ -27,7 +27,15 @@ import { SeedOptionsSchema } from './seed-options.schema.js';
 import { runSeedStage } from './run-seed-stage.js';
 
 export function loadSeedEnv(source: NodeJS.ProcessEnv = process.env): SeedEnv {
-  const parsed = SeedEnvSchema.safeParse(source);
+  const connection = source.DATABASE_URL ? new URL(source.DATABASE_URL) : undefined;
+  const parsed = SeedEnvSchema.safeParse(connection ? {
+    ...source,
+    DB_USER: decodeURIComponent(connection.username),
+    DB_PASSWORD: decodeURIComponent(connection.password),
+    DB_HOST: connection.hostname,
+    DB_PORT: connection.port || '5432',
+    DB_NAME: decodeURIComponent(connection.pathname.slice(1)),
+  } : source);
   if (!parsed.success) {
     const detail = parsed.error.issues
       .map((issue) => `${issue.path.join('.') || '(raíz)'}: ${issue.message}`)

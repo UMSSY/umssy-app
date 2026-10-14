@@ -17,6 +17,17 @@ afterEach(() => {
 });
 
 describe('buildDatabaseConnectionString', () => {
+  it('admite la URL de la base asignada por el hosting', () => {
+    vi.stubEnv('DATABASE_URL', 'postgresql://demo:pass@render-db:5432/demo');
+    vi.stubEnv('DB_SCHEMA', 'public');
+    expect(buildDatabaseConnectionString('runtime')).toBe('postgresql://demo:pass@render-db:5432/demo');
+    expect(buildDatabaseConnectionString('migrations')).toContain('schema=public');
+  });
+
+  it('codifica credenciales con caracteres especiales', () => {
+    stubDbEnv({ DB_PASSWORD: 'p@ss:word/123' });
+    expect(buildDatabaseConnectionString()).toContain('p%40ss%3Aword%2F123@');
+  });
   it('usa sslmode=no-verify para el runtime contra un host remoto', () => {
     stubDbEnv();
 
