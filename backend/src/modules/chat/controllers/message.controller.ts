@@ -6,7 +6,6 @@ import {
   Query,
   UseGuards,
   UseInterceptors,
-  UsePipes,
 } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
