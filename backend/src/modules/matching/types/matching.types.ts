@@ -28,6 +28,9 @@ export interface RecommendedJobResponse {
   modality: string;
   score: number;
   matchedSkills: string[];
+  matchedSkillIds: string[];
+  missingSkills: string[];
+  missingSkillIds: string[];
   skills: string[];
 }
 

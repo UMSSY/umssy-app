@@ -73,6 +73,9 @@ describe('JobRecommendationsService', () => {
           modality: 'Remoto',
           score: 33,
           matchedSkills: ['Python'],
+          matchedSkillIds: ['s1'],
+          missingSkills: ['SQL', 'React'],
+          missingSkillIds: ['s3', 's4'],
           skills: ['Python', 'SQL', 'React'],
         },
       ],
@@ -86,6 +89,32 @@ describe('JobRecommendationsService', () => {
 
     expect(result.items[0]?.score).toBe(100);
     expect(result.items[0]?.matchedSkills).toEqual(['Python', 'Docker']);
+    expect(result.items[0]?.missingSkills).toEqual([]);
+    expect(result.items[0]?.missingSkillIds).toEqual([]);
+  });
+
+  it('separa las habilidades que coinciden de las que faltan, con nombres e ids', async () => {
+    jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [DOCKER, SQL, REACT])]);
+
+    const result = await service.getRecommendations(USER_ID);
+    const item = result.items[0];
+
+    expect(item?.matchedSkills).toEqual(['Docker']);
+    expect(item?.matchedSkillIds).toEqual(['s2']);
+    expect(item?.missingSkills).toEqual(['SQL', 'React']);
+    expect(item?.missingSkillIds).toEqual(['s3', 's4']);
+    expect(item?.skills).toEqual(['Docker', 'SQL', 'React']);
+  });
+
+  it('mantiene el orden original de las habilidades requeridas en cada grupo', async () => {
+    jobOffersService.listPublished.mockResolvedValue([
+      buildOffer('o1', [REACT, PYTHON, SQL, DOCKER]),
+    ]);
+
+    const result = await service.getRecommendations(USER_ID);
+
+    expect(result.items[0]?.matchedSkills).toEqual(['Python', 'Docker']);
+    expect(result.items[0]?.missingSkills).toEqual(['React', 'SQL']);
   });
 
   it('ordena de mayor a menor porcentaje', async () => {

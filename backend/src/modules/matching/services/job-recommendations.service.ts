@@ -26,7 +26,7 @@ export class JobRecommendationsService {
 
     const offers = await this.jobOffersService.listPublished();
     const items = offers
-      .map((offer) => this.score(offer, userSkillIds))
+      .map((offer) => this.fit(offer, userSkillIds))
       .filter(({ item }) => item.score > 0)
       .sort((left, right) => right.item.score - left.item.score || right.createdAt - left.createdAt)
       .map(({ item }) => item);
@@ -44,8 +44,9 @@ export class JobRecommendationsService {
     }
   }
 
-  private score(offer: JobOfferResponse, userSkillIds: Set<string>): ScoredOffer {
+  private fit(offer: JobOfferResponse, userSkillIds: Set<string>): ScoredOffer {
     const matched = offer.skills.filter((skill) => userSkillIds.has(skill.id));
+    const missing = offer.skills.filter((skill) => !userSkillIds.has(skill.id));
     const score =
       offer.skills.length === 0 ? 0 : Math.round((matched.length / offer.skills.length) * 100);
 
@@ -58,6 +59,9 @@ export class JobRecommendationsService {
         modality: offer.modality,
         score,
         matchedSkills: matched.map((skill) => skill.name),
+        matchedSkillIds: matched.map((skill) => skill.id),
+        missingSkills: missing.map((skill) => skill.name),
+        missingSkillIds: missing.map((skill) => skill.id),
         skills: offer.skills.map((skill) => skill.name),
       },
     };
