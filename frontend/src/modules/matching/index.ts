@@ -13,6 +13,7 @@ export * from './types/match-score.types';
 
 export { RecommendedJobsView } from "@/modules/matching/views/recommended-jobs-view";
 export { JobMatchDetailView } from "@/modules/matching/views/job-match-detail-view";
+export { RequirementAnalysisView } from "@/modules/matching/views/requirement-analysis-view";
 export type {
   JobMatch,
   JobRequirement,
@@ -20,3 +21,7 @@ export type {
   RecommendedJob,
   RequirementStatus,
 } from "@/modules/matching/types/job-matching.types";
+export type {
+  RequirementAnalysis,
+  RequirementTermsResult,
+} from "@/modules/matching/types/requirement-terms.types";

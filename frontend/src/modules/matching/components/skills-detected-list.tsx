@@ -1,10 +1,11 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { formatAnalysisTime } from "../utils/format-analysis-time";
 
 interface SkillsDetectedListProps {
   skills: string[];
-  processingTimeMs: number;
+  processingTimeMs?: number;
 }
 
 export function SkillsDetectedList({ skills, processingTimeMs }: SkillsDetectedListProps) {
@@ -20,9 +21,11 @@ export function SkillsDetectedList({ skills, processingTimeMs }: SkillsDetectedL
           </li>
         ))}
       </ul>
-      <p className="text-xs font-semibold text-text-secondary">
-        Análisis completado en {(processingTimeMs / 1000).toFixed(1)} s
-      </p>
+      {processingTimeMs !== undefined && (
+        <p className="text-xs font-semibold text-text-secondary">
+          {formatAnalysisTime(processingTimeMs)}
+        </p>
+      )}
     </section>
   );
 }
