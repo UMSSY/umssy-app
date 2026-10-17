@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { Check, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,8 +14,6 @@ interface JobRecommendationCardProps {
 }
 
 export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
-  const pendingSkills = job.skills.filter((skill) => !job.matchedSkills.includes(skill));
-
   return (
     <Card className="h-full gap-3 px-4 py-4">
       <div className="flex items-start justify-between gap-3">
@@ -25,8 +23,8 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
             {job.companyName} · {job.modality}
           </p>
         </div>
-        <p className="shrink-0 text-sm font-semibold text-ink">
-          {job.score}% {JOB_MATCHING_MESSAGES.scoreCaption}
+        <p className="shrink-0 font-tight text-lg font-bold text-ink">
+          {job.score}% {JOB_MATCHING_MESSAGES.affinitySuffix}
         </p>
       </div>
       <div className="flex flex-col gap-2">
@@ -35,16 +33,21 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
         </p>
         <ul className="flex flex-wrap gap-2">
           {job.matchedSkills.map((skill) => (
-            <li key={skill}>
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <Check className="size-3" aria-hidden="true" />
+            <li key={`matched-${skill}`}>
+              <Badge variant="outline" className="border-border-strong text-ink">
+                <Check aria-hidden="true" />
                 {skill}
+                <span className="sr-only"> {JOB_MATCHING_MESSAGES.matchedChip}</span>
               </Badge>
             </li>
           ))}
-          {pendingSkills.map((skill) => (
-            <li key={skill}>
-              <Badge variant="outline">{skill}</Badge>
+          {job.missingSkills.map((skill) => (
+            <li key={`missing-${skill}`}>
+              <Badge variant="outline" className="border-border text-text-secondary">
+                <Minus aria-hidden="true" />
+                {skill}
+                <span className="sr-only"> {JOB_MATCHING_MESSAGES.missingChip}</span>
+              </Badge>
             </li>
           ))}
         </ul>

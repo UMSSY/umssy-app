@@ -1,4 +1,4 @@
-export type RequirementStatus = "Cumple" | "Pendiente";
+export type RequirementStatus = "matched" | "missing";
 
 export interface JobRequirement {
   name: string;
@@ -12,6 +12,9 @@ export interface RecommendedJob {
   modality: string;
   score: number;
   matchedSkills: string[];
+  matchedSkillIds: string[];
+  missingSkills: string[];
+  missingSkillIds: string[];
   skills: string[];
 }
 
@@ -20,13 +23,6 @@ export interface RecommendationsResult {
   items: RecommendedJob[];
 }
 
-export interface JobMatch {
-  jobOfferId: string;
-  title: string;
-  companyName: string;
-  modality: string;
+export interface JobMatch extends RecommendedJob {
   description: string;
-  score: number;
-  requirements: JobRequirement[];
-  hasPendingRequirements: boolean;
 }
