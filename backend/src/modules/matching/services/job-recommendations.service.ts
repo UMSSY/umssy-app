@@ -3,7 +3,9 @@ import { JobOffersService } from '../../job-offers/services/job-offers.service.j
 import type { JobOfferResponse } from '../../job-offers/responses/job-offer.response.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import { UserSkillService } from '../../skills/services/user-skill.service.js';
+import { JobOfferNotFoundException } from '../exceptions/index.js';
 import type {
+  JobFitResponse,
   RecommendationsResponse,
   RecommendedJobResponse,
 } from '../types/matching.types.js';
@@ -32,6 +34,15 @@ export class JobRecommendationsService {
       .map(({ item }) => item);
 
     return { isProfileComplete: true, items };
+  }
+
+  async getJobFit(userId: string, jobOfferId: string): Promise<JobFitResponse> {
+    const userSkillIds = await this.loadUserSkillIds(userId);
+    const offers = await this.jobOffersService.listPublished();
+    const offer = offers.find((candidate) => candidate.id === jobOfferId);
+    if (offer === undefined) throw new JobOfferNotFoundException();
+
+    return { ...this.fit(offer, userSkillIds).item, description: offer.description };
   }
 
   private async loadUserSkillIds(userId: string): Promise<Set<string>> {

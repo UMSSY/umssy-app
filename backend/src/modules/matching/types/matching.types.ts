@@ -34,6 +34,10 @@ export interface RecommendedJobResponse {
   skills: string[];
 }
 
+export interface JobFitResponse extends RecommendedJobResponse {
+  description: string;
+}
+
 export interface RecommendationsResponse {
   isProfileComplete: boolean;
   items: RecommendedJobResponse[];

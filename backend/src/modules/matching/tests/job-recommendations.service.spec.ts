@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { JobOfferResponse } from '../../job-offers/responses/job-offer.response.js';
 import type { JobOffersService } from '../../job-offers/services/job-offers.service.js';
+import { JobOfferNotFoundException } from '../exceptions/index.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 import { JobRecommendationsService } from '../services/job-recommendations.service.js';
@@ -181,5 +182,84 @@ describe('JobRecommendationsService', () => {
     const result = await service.getRecommendations(USER_ID);
 
     expect(result).toEqual({ isProfileComplete: true, items: [] });
+  });
+
+  describe('getJobFit', () => {
+    it('devuelve la vacante con el porcentaje y las habilidades que coinciden o faltan', async () => {
+      jobOffersService.listPublished.mockResolvedValue([
+        buildOffer('o1', [PYTHON, SQL, REACT]),
+        buildOffer('o2', [DOCKER]),
+      ]);
+
+      const result = await service.getJobFit(USER_ID, 'o1');
+
+      expect(result).toEqual({
+        jobOfferId: 'o1',
+        title: 'Vacante o1',
+        companyName: 'Empresa SA',
+        modality: 'Remoto',
+        description: 'Descripcion',
+        score: 33,
+        matchedSkills: ['Python'],
+        matchedSkillIds: ['s1'],
+        missingSkills: ['SQL', 'React'],
+        missingSkillIds: ['s3', 's4'],
+        skills: ['Python', 'SQL', 'React'],
+      });
+      expect(userSkillService.getUserSkills).toHaveBeenCalledWith(USER_ID);
+    });
+
+    it('da el mismo porcentaje que la lista de recomendaciones', async () => {
+      jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [PYTHON, DOCKER, SQL, REACT])]);
+
+      const list = await service.getRecommendations(USER_ID);
+      const detail = await service.getJobFit(USER_ID, 'o1');
+
+      expect(detail.score).toBe(list.items[0]?.score);
+      expect(detail.matchedSkills).toEqual(list.items[0]?.matchedSkills);
+    });
+
+    it('devuelve score 0 y todo faltante cuando el usuario no tiene habilidades', async () => {
+      userSkillService.getUserSkills.mockResolvedValue([]);
+      jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [PYTHON, SQL])]);
+
+      const result = await service.getJobFit(USER_ID, 'o1');
+
+      expect(result.score).toBe(0);
+      expect(result.matchedSkills).toEqual([]);
+      expect(result.missingSkills).toEqual(['Python', 'SQL']);
+    });
+
+    it('trata la falta de perfil como usuario sin habilidades', async () => {
+      userSkillService.getUserSkills.mockRejectedValue(new ProfileNotFoundException());
+      jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [PYTHON])]);
+
+      const result = await service.getJobFit(USER_ID, 'o1');
+
+      expect(result.score).toBe(0);
+    });
+
+    it('devuelve score 0 para una vacante sin habilidades requeridas', async () => {
+      jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [])]);
+
+      const result = await service.getJobFit(USER_ID, 'o1');
+
+      expect(result.score).toBe(0);
+      expect(result.skills).toEqual([]);
+    });
+
+    it('lanza JobOfferNotFoundException cuando la vacante no está entre las publicadas', async () => {
+      jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [PYTHON])]);
+
+      await expect(service.getJobFit(USER_ID, 'inexistente')).rejects.toBeInstanceOf(
+        JobOfferNotFoundException,
+      );
+    });
+
+    it('propaga cualquier otro error al leer las habilidades', async () => {
+      userSkillService.getUserSkills.mockRejectedValue(new Error('fallo'));
+
+      await expect(service.getJobFit(USER_ID, 'o1')).rejects.toThrow('fallo');
+    });
   });
 });

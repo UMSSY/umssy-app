@@ -25,4 +25,29 @@ describe('JobRecommendationsController', () => {
     expect(service.getRecommendations).toHaveBeenCalledWith(USER_ID);
     expect(result).toEqual(response);
   });
+
+  it('delega el detalle al servicio con el usuario autenticado y el id de la vacante', async () => {
+    const response = {
+      jobOfferId: 'o1',
+      title: 'Vacante',
+      companyName: 'Empresa SA',
+      modality: 'Remoto',
+      description: 'Descripcion',
+      score: 50,
+      matchedSkills: ['Python'],
+      matchedSkillIds: ['s1'],
+      missingSkills: ['SQL'],
+      missingSkillIds: ['s3'],
+      skills: ['Python', 'SQL'],
+    };
+    const service = { getJobFit: vi.fn().mockResolvedValue(response) };
+    const controller = new JobRecommendationsController(
+      service as unknown as JobRecommendationsService,
+    );
+
+    const result = await controller.getJobFit(USER_ID, { id: 'o1' });
+
+    expect(service.getJobFit).toHaveBeenCalledWith(USER_ID, 'o1');
+    expect(result).toEqual(response);
+  });
 });
