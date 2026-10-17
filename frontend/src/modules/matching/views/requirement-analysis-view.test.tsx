@@ -99,6 +99,7 @@ describe("RequirementAnalysisView", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       `El texto no puede superar los ${MAX_REQUIREMENT_TEXT_LENGTH} caracteres`,
     );
+    expect(screen.getByRole("alert").className).toMatch(/text-danger.*font-bold|font-bold.*text-danger/);
     expect(textField()).toHaveAttribute("aria-invalid", "true");
     expect(analyzeButton()).toBeDisabled();
     expect(analyze).not.toHaveBeenCalled();

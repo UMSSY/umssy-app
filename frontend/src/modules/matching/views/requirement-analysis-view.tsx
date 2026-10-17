@@ -57,19 +57,19 @@ export function RequirementAnalysisView() {
           onChange={(event) => setText(event.target.value)}
           placeholder={REQUIREMENT_ANALYSIS_MESSAGES.textPlaceholder}
           rows={8}
-          className="max-h-72 overflow-y-auto"
+          className="max-h-72 overflow-y-auto aria-invalid:border-danger aria-invalid:ring-danger/20"
           aria-invalid={isOverLimit || undefined}
           aria-describedby={isOverLimit ? `${COUNTER_ID} ${LIMIT_ERROR_ID}` : COUNTER_ID}
         />
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p
             id={COUNTER_ID}
-            className={isOverLimit ? "text-sm font-semibold text-destructive" : "text-sm text-text-secondary"}
+            className={isOverLimit ? "text-sm font-bold text-danger" : "text-sm text-text-secondary"}
           >
             {length} / {MAX_REQUIREMENT_TEXT_LENGTH}
           </p>
           {isOverLimit && (
-            <p id={LIMIT_ERROR_ID} role="alert" className="text-sm font-semibold text-destructive">
+            <p id={LIMIT_ERROR_ID} role="alert" className="text-sm font-bold text-danger">
               {REQUIREMENT_ANALYSIS_MESSAGES.limitExceeded}
             </p>
           )}
@@ -93,9 +93,9 @@ export function RequirementAnalysisView() {
       )}
 
       {isError && !isPending && (
-        <Alert variant="destructive" className="max-w-3xl">
+        <Alert className="max-w-3xl border-danger text-danger">
           <CircleAlert aria-hidden="true" />
-          <AlertDescription className="flex flex-col items-start gap-3">
+          <AlertDescription className="flex flex-col items-start gap-3 font-bold text-danger">
             <span>{REQUIREMENT_ANALYSIS_MESSAGES.error}</span>
             <Button
               type="button"

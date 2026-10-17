@@ -14,6 +14,7 @@ import {
   JOBS_ROUTE,
 } from "../constants/job-matching.constants";
 import { useJobMatch } from "../hooks/use-job-match";
+import { buildRequirements } from "../utils/build-requirements";
 
 interface JobMatchDetailViewProps {
   jobOfferId: string;
@@ -23,7 +24,7 @@ export function JobMatchDetailView({ jobOfferId }: JobMatchDetailViewProps) {
   const { data, error, isPending, isError, refetch } = useJobMatch(jobOfferId);
 
   const isNotFound = axios.isAxiosError(error) && error.response?.status === 404;
-  const matchedNames = data?.requirements.filter(({ status }) => status === "Cumple").map(({ name }) => name) ?? [];
+  const matchedNames = data?.matchedSkills ?? [];
 
   return (
     <section className="flex max-w-3xl flex-col gap-6">
@@ -42,11 +43,18 @@ export function JobMatchDetailView({ jobOfferId }: JobMatchDetailViewProps) {
       {isPending && <Skeleton aria-busy="true" className="h-72 rounded-xl" />}
 
       {isError && (
-        <div role="alert" className="flex flex-col items-start gap-3 rounded-lg border border-border bg-surface p-4">
-          <p className="text-sm text-ink">
+        <div
+          role="alert"
+          className="flex flex-col items-start gap-3 rounded-lg border border-border bg-surface p-4"
+        >
+          <p className="text-sm font-bold text-danger">
             {isNotFound ? JOB_MATCHING_MESSAGES.notFound : JOB_MATCHING_MESSAGES.loadError}
           </p>
-          {!isNotFound && (
+          {isNotFound ? (
+            <Link href={JOBS_ROUTE} className={buttonVariants({ variant: "outline" })}>
+              {JOB_MATCHING_MESSAGES.backToJobs}
+            </Link>
+          ) : (
             <Button
               variant="outline"
               onClick={() => {
@@ -65,10 +73,10 @@ export function JobMatchDetailView({ jobOfferId }: JobMatchDetailViewProps) {
             <div className="flex items-center gap-4">
               <p className="font-tight text-3xl font-extrabold text-ink">{data.score}%</p>
               <p className="text-sm text-ink-soft">
-                {JOB_MATCHING_MESSAGES.scoreCaption}
+                {JOB_MATCHING_MESSAGES.detailScoreCaption}
                 {matchedNames.length > 0 && (
                   <span className="block text-text-secondary">
-                    según {matchedNames.join(", ")}
+                    {JOB_MATCHING_MESSAGES.detailScoreBasis} {matchedNames.join(", ")}
                   </span>
                 )}
               </p>
@@ -76,10 +84,10 @@ export function JobMatchDetailView({ jobOfferId }: JobMatchDetailViewProps) {
             <MatchScoreBar score={data.score} showLabel={false} size="sm" />
           </div>
 
-          <MissingRequirements requirements={data.requirements} />
+          <MissingRequirements requirements={buildRequirements(data)} />
 
           <section className="flex flex-col gap-2">
-            <h3 className="text-sm font-semibold text-ink">
+            <h3 className="font-tight text-lg font-bold text-ink">
               {JOB_MATCHING_MESSAGES.descriptionTitle}
             </h3>
             <p className="whitespace-pre-line text-sm text-ink-soft">{data.description}</p>
@@ -87,11 +95,13 @@ export function JobMatchDetailView({ jobOfferId }: JobMatchDetailViewProps) {
         </Card>
       )}
 
-      <div>
-        <Link href={JOBS_ROUTE} className={buttonVariants({ variant: "outline", size: "lg" })}>
-          {JOB_MATCHING_MESSAGES.back}
-        </Link>
-      </div>
+      {!isNotFound && (
+        <div>
+          <Link href={JOBS_ROUTE} className={buttonVariants({ variant: "outline", size: "lg" })}>
+            {JOB_MATCHING_MESSAGES.back}
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

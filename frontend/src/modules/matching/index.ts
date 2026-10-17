@@ -25,3 +25,4 @@ export type {
   RequirementAnalysis,
   RequirementTermsResult,
 } from "@/modules/matching/types/requirement-terms.types";
+export type { JobDetailPageProps } from "@/modules/matching/types/job-detail-page-props.types";

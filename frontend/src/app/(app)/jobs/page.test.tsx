@@ -33,6 +33,9 @@ describe("JobsPage", () => {
           modality: "Remoto",
           score: 67,
           matchedSkills: ["Python"],
+          matchedSkillIds: ["s1"],
+          missingSkills: ["Docker"],
+          missingSkillIds: ["s2"],
           skills: ["Python", "Docker"],
         },
       ],
@@ -40,7 +43,7 @@ describe("JobsPage", () => {
 
     expect(screen.getByRole("heading", { name: "Vacantes para ti" })).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "Desarrollador Backend" })).toBeInTheDocument();
-    expect(screen.getByText(/67%/)).toBeInTheDocument();
+    expect(screen.getByText("67% afinidad")).toBeInTheDocument();
     expect(screen.getByText("Docker")).toBeInTheDocument();
   });
 
@@ -48,7 +51,7 @@ describe("JobsPage", () => {
     renderPage({ isProfileComplete: false, items: [] });
 
     expect(
-      await screen.findByRole("heading", { name: "Aún no podemos calcular tu compatibilidad" }),
+      await screen.findByRole("heading", { name: "Aún no podemos calcular tu afinidad" }),
     ).toBeInTheDocument();
   });
 
