@@ -100,6 +100,7 @@ export function RequirementAnalysisView() {
             <Button
               type="button"
               variant="outline"
+              className="text-ink"
               onClick={() => {
                 if (variables !== undefined) mutate(variables);
               }}
