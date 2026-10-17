@@ -59,6 +59,18 @@ function formatMessageDate(isoString?: string | null): string {
 
   if (Number.isNaN(date.getTime())) return '';
 
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (isSameDay(isoString, today.toISOString())) {
+    return 'HOY';
+  }
+
+  if (isSameDay(isoString, yesterday.toISOString())) {
+    return 'AYER';
+  }
+
   return new Intl.DateTimeFormat('es-BO', {
     day: 'numeric',
     month: 'long',
