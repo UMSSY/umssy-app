@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MatchingModule } from '../matching.module.js';
+import { JobRecommendationsController } from '../controllers/job-recommendations.controller.js';
 import { MatchingController } from '../controllers/matching.controller.js';
+import { JobRecommendationsService } from '../services/job-recommendations.service.js';
 import { MatchingService } from '../services/matching.service.js';
 import { NlpService } from '../services/nlp.service.js';
 import { RequirementTermsService } from '../services/requirement-terms.service.js';
@@ -25,6 +27,8 @@ describe('MatchingModule', () => {
   it.each([
     MatchingController,
     RequirementsController,
+    JobRecommendationsController,
+    JobRecommendationsService,
     MatchingService,
     NlpService,
     RequirementTermsService,
