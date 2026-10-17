@@ -14,6 +14,13 @@ export interface AnalyzeExperienceResponse {
   processingTimeMs: number;
 }
 
+export interface RequirementTermsResponse {
+  tokens: string[];
+  terms: string[];
+  skills: string[];
+  institutions: string[];
+}
+
 export interface MatchingInput {
   userCareer: string;
   userExperienceYears: number;
