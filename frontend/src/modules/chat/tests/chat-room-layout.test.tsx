@@ -1,8 +1,11 @@
+
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+
 import { ChatRoom } from '../components/chat-room';
 import { MessageInputBar } from '../components/message-input-bar';
-import { Conversation, Message } from '../types/conversation.types';
+
+import type { Conversation, Message } from '../types/conversation.types';
 
 afterEach(() => {
   cleanup();
@@ -53,18 +56,22 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
         value="Texto de prueba"
         onChange={onChange}
         onSend={onSend}
-      />
+      />,
     );
 
     const inputBar = screen.getByTestId('message-input-bar');
+
     expect(inputBar).toBeDefined();
     expect(inputBar.className).toContain('shrink-0');
     expect(inputBar.className).toContain('border-t');
     expect(inputBar.className).toContain('bg-white');
 
     const textarea = screen.getByTestId('message-textarea');
+
     expect(textarea).toBeDefined();
-    expect(textarea.getAttribute('placeholder')).toBe('Escribe un mensaje...');
+    expect(textarea.getAttribute('placeholder')).toBe(
+      'Escribe un mensaje...',
+    );
 
     const counter = screen.getByTestId('character-counter');
     expect(counter.textContent).toBe('15/500');
@@ -84,10 +91,11 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
         currentUserId="current-user"
         onBack={onBack}
         onSendMessage={onSend}
-      />
+      />,
     );
 
     const messagesContainer = screen.getByTestId('messages-container');
+
     expect(messagesContainer).toBeDefined();
     expect(messagesContainer.className).toContain('overflow-y-auto');
     expect(messagesContainer.className).toContain('flex-1');
@@ -95,7 +103,10 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
 
     expect(screen.getByText('Hola, buenas tardes')).toBeDefined();
     expect(screen.getByText('Hola Maria, como estas?')).toBeDefined();
-    expect(screen.getByTestId('messages-scroll-anchor')).toBeDefined();
+
+    expect(
+      screen.getByTestId('messages-scroll-anchor'),
+    ).toBeDefined();
   });
 
   it('debe responder adecuadamente en resoluciones moviles y permitir volver atras con el boton', () => {
@@ -109,18 +120,22 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
         currentUserId="current-user"
         onBack={onBack}
         onSendMessage={onSend}
-      />
+      />,
     );
 
     const backButton = screen.getByTestId('chat-back-button');
+
     expect(backButton).toBeDefined();
     expect(backButton.className).toContain('md:hidden');
 
     fireEvent.click(backButton);
+
     expect(onBack).toHaveBeenCalledTimes(1);
 
     expect(screen.getByText('Maria Fernandez')).toBeDefined();
-    expect(screen.getByText('En linea')).toBeDefined();
+
+    // El componente muestra "En línea", con tilde.
+    expect(screen.getByText('En línea')).toBeDefined();
   });
 
   it('debe deshabilitar el boton de enviar cuando el input esta vacio', () => {
@@ -132,14 +147,17 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
         value="   "
         onChange={onChange}
         onSend={onSend}
-      />
+      />,
     );
 
-    const sendButton = screen.getByTestId('send-button') as HTMLButtonElement;
+    const sendButton = screen.getByTestId(
+      'send-button',
+    ) as HTMLButtonElement;
+
     expect(sendButton.disabled).toBe(true);
 
     fireEvent.click(sendButton);
+
     expect(onSend).not.toHaveBeenCalled();
   });
 });
-

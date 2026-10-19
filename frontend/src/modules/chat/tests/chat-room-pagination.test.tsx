@@ -238,14 +238,12 @@ describe('ChatRoom - carga de mensajes anteriores (#387)', () => {
     );
 
     expect(
-      screen.getByTestId('start-of-conversation'),
-    ).toBeDefined();
+  screen.getByTestId('start-of-conversation'),
+).toBeDefined();
 
-    expect(
-      screen.getByText(
-        'Inicio de la conversacion',
-      ),
-    ).toBeDefined();
+expect(
+  screen.getByText('Inicio de la conversación'),
+).toBeDefined();
   });
 
   it('debe mantener la posicion del scroll al agregar mensajes anteriores', async () => {

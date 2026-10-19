@@ -1,4 +1,7 @@
+
 'use client';
+
+import { Button } from '@/components/ui/button';
 
 interface EmptyChatStateProps {
   title?: string;
@@ -13,19 +16,19 @@ export function EmptyChatState({
   onAction,
 }: EmptyChatStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center h-full min-h-[350px]">
-      <p className="text-xs md:text-sm text-slate-400 max-w-sm mb-5 leading-relaxed">
+    <div className="flex h-full min-h-[350px] flex-col items-center justify-center p-8 text-center">
+      <p className="mb-5 max-w-sm text-xs leading-relaxed text-slate-400 md:text-sm">
         {description}
       </p>
 
       {onAction && (
-        <button
+        <Button
           type="button"
           onClick={onAction}
-          className="inline-flex items-center justify-center px-5 py-2.5 text-xs md:text-sm font-semibold rounded-lg text-white bg-[#0B2545] hover:bg-[#13294B] active:scale-98 transition-all shadow-sm focus:outline-none"
+          className="inline-flex h-auto items-center justify-center rounded-lg bg-[#0B2545] px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#13294B] focus:outline-none active:scale-98 md:text-sm"
         >
           {actionLabel}
-        </button>
+        </Button>
       )}
     </div>
   );
