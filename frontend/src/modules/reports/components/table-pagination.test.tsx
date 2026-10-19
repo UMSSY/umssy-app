@@ -36,11 +36,20 @@ describe("TablePagination", () => {
     rerender(<TablePagination currentPage={20} totalPages={20} onPageChange={onPageChange} />);
 
     expect(screen.getAllByRole("button", { name: /^Página \d+$/ }).map((button) => button.textContent)).toEqual([
-      "1", "16", "17", "18", "19", "20",
+      "1", "18", "19", "20",
     ]);
     expect(screen.getByRole("button", { name: "Página siguiente" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "Página siguiente" }));
     expect(onPageChange).not.toHaveBeenCalled();
+  });
+
+  it("con 7 páginas muestra 1 2 3 … 7 desde la primera página", () => {
+    const { container } = render(<TablePagination currentPage={1} totalPages={7} onPageChange={vi.fn()} />);
+
+    expect(screen.getAllByRole("button", { name: /^Página \d+$/ }).map((button) => button.textContent)).toEqual([
+      "1", "2", "3", "7",
+    ]);
+    expect(container.querySelectorAll('[data-slot="pagination-ellipsis"]')).toHaveLength(1);
   });
 
   it("muestra todas las páginas cuando la lista es corta", () => {
