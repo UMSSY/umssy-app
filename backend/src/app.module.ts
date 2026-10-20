@@ -27,6 +27,7 @@ import { AccessRequestsModule } from './modules/access-requests/access-requests.
 import { ChatModule } from './modules/chat/chat.module.js';
 import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
+import { AppointmentsModule } from './modules/appointments/appointments.module.js';
 
 
 @Module({
@@ -34,6 +35,7 @@ import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AvailabilityModule,
+    AppointmentsModule,
     AuthModule,
     EventsModule,
     EventCategoriesModule,
