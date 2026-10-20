@@ -101,7 +101,7 @@ export function VacanciesView() {
                     )}
                   </ul>
 			<Link
-			  href={`/vacantes/${vacancy.id}`}
+			  href={`/vacancies/${vacancy.id}`}
 			  className="mt-6 inline-block rounded-md bg-black px-4 py-2 text-white"
 			>
 			  Ver detalles
