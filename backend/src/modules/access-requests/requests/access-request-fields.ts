@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { CAREER } from '../types/career.enum.js';
 import { ID_CARD_ISSUED_IN } from '../types/id-card-issued-in.enum.js';
-import { MIN_AGE, NAME_REGEX, DIGITS_REGEX, ISO_DATE_REGEX } from '../constants/access-request-fields.constants.js';
+import { ID_CARD_MAX_LENGTH, ID_CARD_MIN_LENGTH, MIN_AGE, SIS_CODE_LENGTH } from '../constants/access-request-fields.constants.js';
 
 function isRealIsoDate(value: string): boolean {
   const date = new Date(`${value}T00:00:00.000Z`);
@@ -31,22 +31,30 @@ const nameField = (label: string) =>
     .trim()
     .min(1, `${label} son obligatorios`)
     .max(100, `${label} no pueden superar los 100 caracteres`)
-    .regex(NAME_REGEX, `${label} solo pueden contener letras, espacios, guiones y apóstrofes`);
+    .regex(/^\p{L}[\p{L}\p{M}]*(?:[ '’-]\p{L}[\p{L}\p{M}]*)*$/u, `${label} solo pueden contener letras, espacios, guiones y apóstrofes`);
 
 const digitsField = (label: string) =>
   z
     .string({ error: `${label} es obligatorio` })
     .trim()
     .min(1, `${label} es obligatorio`)
-    .max(20, `${label} no puede superar los 20 dígitos`)
-    .regex(DIGITS_REGEX, `${label} solo puede contener dígitos`);
+    .regex(/^\d+$/, `${label} solo puede contener dígitos`);
+
+const idCardField = digitsField('El carnet de identidad')
+  .min(ID_CARD_MIN_LENGTH, `El carnet de identidad debe tener entre ${ID_CARD_MIN_LENGTH} y ${ID_CARD_MAX_LENGTH} dígitos`)
+  .max(ID_CARD_MAX_LENGTH, `El carnet de identidad debe tener entre ${ID_CARD_MIN_LENGTH} y ${ID_CARD_MAX_LENGTH} dígitos`);
+
+const sisCodeField = digitsField('El código SIS').length(
+  SIS_CODE_LENGTH,
+  `El código SIS debe tener exactamente ${SIS_CODE_LENGTH} dígitos`,
+);
 
 export const accessRequestFields = {
   firstName: nameField('Los nombres'),
   lastName: nameField('Los apellidos'),
-  idCardNumber: digitsField('El carnet de identidad'),
+  idCardNumber: idCardField,
   idCardIssuedIn: z.enum(ID_CARD_ISSUED_IN, { error: 'El departamento de expedición no es válido' }),
-  sisCode: digitsField('El código SIS'),
+  sisCode: sisCodeField,
   email: z
     .string({ error: 'El correo es obligatorio' })
     .trim()
@@ -60,7 +68,7 @@ export const accessRequestFields = {
     .optional(),
   birthDate: z
     .string({ error: 'La fecha de nacimiento es obligatoria' })
-    .regex(ISO_DATE_REGEX, 'La fecha de nacimiento debe tener el formato AAAA-MM-DD')
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha de nacimiento debe tener el formato AAAA-MM-DD')
     .refine(isRealIsoDate, 'La fecha de nacimiento no es válida')
     .transform((value) => new Date(`${value}T00:00:00.000Z`))
     .refine((value) => Number.isNaN(value.getTime()) || isAdult(value), `Debes ser mayor de ${MIN_AGE} años`),

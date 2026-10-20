@@ -5,6 +5,7 @@ import { REPORT_TYPES } from '../types/generated-report.types.js';
 const CREATED_AT = new Date('2026-05-01T10:00:00.000Z');
 
 const RECORD = {
+  id: 'e6caa1ce-1c64-4d6c-9fd1-9ee3d5b90d61',
   userId: 'admin-1',
   createdAt: CREATED_AT,
   reportName: 'usuarios-rechazados-2026-05-01.csv',
@@ -29,9 +30,12 @@ describe('GeneratedReportsRepository', () => {
     it('muestra únicamente reportes de tipos que la plataforma genera (CA 25)', async () => {
       const { repository, adminExportHistory } = buildRepository();
 
-      await repository.findPage(0, 10);
+      await repository.findPage('admin-1', 0, 10);
 
-      const where = { reportType: { in: [...REPORT_TYPES] } };
+      const where = {
+        userId: 'admin-1',
+        reportType: { in: [...REPORT_TYPES] },
+      };
       expect(adminExportHistory.findMany).toHaveBeenCalledWith({
         where,
         orderBy: { createdAt: 'desc' },
@@ -44,15 +48,22 @@ describe('GeneratedReportsRepository', () => {
     it('filtra por el tipo de reporte indicado', async () => {
       const { repository, adminExportHistory } = buildRepository();
 
-      const page = await repository.findPage(10, 10, 'REJECTED_USERS');
+      const page = await repository.findPage(
+        'admin-1',
+        10,
+        10,
+        'REJECTED_USERS',
+      );
 
       expect(adminExportHistory.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { reportType: 'REJECTED_USERS' } }),
+        expect.objectContaining({
+          where: { userId: 'admin-1', reportType: 'REJECTED_USERS' },
+        }),
       );
       expect(page).toEqual({
         reports: [
           {
-            id: `admin-1_${CREATED_AT.getTime()}`,
+            id: RECORD.id,
             fileName: RECORD.reportName,
             reportType: 'REJECTED_USERS',
             generatedAt: CREATED_AT.toISOString(),
@@ -67,10 +78,12 @@ describe('GeneratedReportsRepository', () => {
     it('guarda el reporte en la BD a nombre del usuario autenticado', async () => {
       const { repository, adminExportHistory } = buildRepository();
 
-      await repository.create('admin-1', {
+      const report = await repository.create('admin-1', {
         fileName: RECORD.reportName,
         reportType: 'REJECTED_USERS',
       });
+
+      expect(report.id).toBe(RECORD.id);
 
       expect(adminExportHistory.create).toHaveBeenCalledWith({
         data: {

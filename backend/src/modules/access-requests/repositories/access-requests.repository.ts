@@ -13,7 +13,7 @@ import { nextRequestCode, randomRetryDelayMs, requestCodePrefix, sleep } from '.
 import { MAX_REQUEST_CODE_ATTEMPTS } from '../constants/request-code.constants.js';
 import { isSubmittedDuplicate } from '../helpers/unique-violation.js';
 import { ACCESS_REQUEST_STATUS } from '../types/access-request.enum.js';
-import { ACCESS_REQUEST_SELECT, REQUEST_STATUS_SELECT, LIST_SELECT, DETAIL_SELECT } from '../constants/access-request-selects.constants.js';
+import { ACCESS_REQUEST_SELECT } from '../constants/access-request-selects.constants.js';
 import { ACTIVE_STATUSES, LISTED_STATUSES } from '../constants/access-request-status-groups.constants.js';
 import { MAX_SEARCH_TERMS } from '../constants/inbox-filters.constants.js';
 import { DECIDED_STATUSES } from '../constants/inbox-summary.constants.js';
@@ -76,7 +76,18 @@ export class AccessRequestsRepository {
         orderBy: [{ submittedAt: 'desc' }, { id: 'asc' }],
         skip: (params.page - 1) * params.limit,
         take: params.limit,
-        select: LIST_SELECT,
+        select: {
+          id: true,
+          requestCode: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          sisCode: true,
+          submittedAt: true,
+          status: { select: { title: true } },
+          career: { select: { title: true } },
+          documentType: { select: { title: true } },
+        } satisfies Prisma.AccessRequestSelect,
       }),
       this.prisma.accessRequest.count({ where }),
     ]);
@@ -101,19 +112,52 @@ export class AccessRequestsRepository {
   }
 
   findDetailById(id: string) {
-    return this.prisma.accessRequest.findUnique({ where: { id }, select: DETAIL_SELECT });
+    return this.prisma.accessRequest.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        requestCode: true,
+        firstName: true,
+        lastName: true,
+        idCardNumber: true,
+        idCardIssuedIn: true,
+        sisCode: true,
+        email: true,
+        phone: true,
+        birthDate: true,
+        graduationYear: true,
+        documentFileId: true,
+        submittedAt: true,
+        reviewedAt: true,
+        rejectionReason: true,
+        openedAt: true,
+        status: { select: { title: true } },
+        career: { select: { title: true } },
+        documentType: { select: { title: true } },
+        documentFile: { select: { name: true, extension: true, mimeType: true, size: true } },
+        openedBy: { select: { firstName: true, lastName: true } },
+        reviewedBy: { select: { firstName: true, lastName: true } },
+      } satisfies Prisma.AccessRequestSelect,
+    });
   }
 
   async markInReview(id: string, reviewerId: string): Promise<boolean> {
+    const now = new Date();
     try {
-      await this.prisma.accessRequest.update({
-        where: { id, status: { title: ACCESS_REQUEST_STATUS.PENDING } },
-        data: {
-          status: { connect: { title: ACCESS_REQUEST_STATUS.IN_REVIEW } },
-          reviewedBy: { connect: { id: reviewerId } },
-          reviewedAt: new Date(),
-        },
-        select: { id: true },
+      await this.prisma.$transaction(async (tx) => {
+        await tx.accessRequest.update({
+          where: { id, status: { title: ACCESS_REQUEST_STATUS.PENDING } },
+          data: {
+            status: { connect: { title: ACCESS_REQUEST_STATUS.IN_REVIEW } },
+            reviewedBy: { connect: { id: reviewerId } },
+            reviewedAt: now,
+          },
+          select: { id: true },
+        });
+        await tx.accessRequest.updateMany({
+          where: { id, openedAt: null },
+          data: { openedById: reviewerId, openedAt: now },
+        });
       });
       return true;
     } catch (error) {
@@ -271,7 +315,15 @@ export class AccessRequestsRepository {
   findByRequestCode(requestCode: string, email: string) {
     return this.prisma.accessRequest.findFirst({
       where: { requestCode, email: { equals: email, mode: 'insensitive' } },
-      select: REQUEST_STATUS_SELECT,
+      select: {
+        requestCode: true,
+        submittedAt: true,
+        reviewedAt: true,
+        rejectionReason: true,
+        status: { select: { title: true } },
+        documentType: { select: { title: true } },
+        documentFile: { select: { size: true, mimeType: true } },
+      } satisfies Prisma.AccessRequestSelect,
     });
   }
 
