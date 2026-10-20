@@ -19,7 +19,7 @@ describe('Mis pases', () => {
     expect(screen.getAllByText('Aula 101')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText('2 pases')).toBeInTheDocument();
-    expect(screen.getByText(/09:00 - 12:00/)).toBeInTheDocument();
+    expect(screen.getByText(/09:00 - 12:00 hrs/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Prisma/ }));
     expect(screen.getByText('reg-2')).toBeInTheDocument();
     expect(screen.getAllByText('Lab 2')).toHaveLength(2);
@@ -79,6 +79,20 @@ describe('Mis pases', () => {
     expect(within(card).getByText('Confirmada')).toBeInTheDocument();
     expect(screen.getByText('1 pase')).toBeInTheDocument();
     expect(screen.getByLabelText('Vista ilustrativa de QR')).toBeInTheDocument();
+  });
+
+  it('shows the same place and unambiguous time in the pass and its card', async () => {
+    getMine.mockResolvedValue([{
+      ...pass,
+      location: 'Laboratorio 1, Facultad de Ciencias y Tecnología, UMSS',
+      startTime: '1970-01-01T14:00:00.000Z',
+      endTime: '1970-01-01T17:00:00.000Z',
+    }]);
+    render(<MyPassesView />);
+    await screen.findByText('reg-1');
+    expect(screen.getAllByText('Laboratorio 1, Facultad de Ciencias y Tecnología')).toHaveLength(2);
+    expect(screen.getByText(/14:00 - 17:00 hrs/)).toBeInTheDocument();
+    expect(screen.queryByText(/, UMSS$/)).not.toBeInTheDocument();
   });
 
 });
