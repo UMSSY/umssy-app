@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Conversation, ConversationFilter } from '../types/conversation.types';
@@ -9,6 +10,7 @@ interface ConversationListProps {
   conversations: Conversation[];
   selectedId?: string | null;
   isLoading: boolean;
+  isError?: boolean;
   hasMore: boolean;
   activeFilter: ConversationFilter;
   searchQuery: string;
@@ -23,6 +25,7 @@ export function ConversationList({
   conversations,
   selectedId,
   isLoading,
+  isError = false,
   hasMore,
   activeFilter,
   searchQuery,
@@ -111,8 +114,11 @@ export function ConversationList({
 
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
-          <ConversationSkeleton />
-        ) : conversations.length === 0 ? (
+          <div role="status" aria-label="Cargando conversaciones">
+            <span className="sr-only">Cargando conversaciones...</span>
+            <ConversationSkeleton />
+          </div>
+        ) : isError ? null : conversations.length === 0 ? (
           <EmptyChatState
             description={getEmptyMessage()}
             actionLabel="Iniciar una nueva conversacion"

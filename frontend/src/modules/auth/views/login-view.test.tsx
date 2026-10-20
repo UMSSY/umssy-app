@@ -1,15 +1,15 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { SELECT_ITEM_CONTRAST_CLASS } from "@/shared/constants/select.constants";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { useLogin } from "../hooks/use-login";
 import { LoginView } from "./login-view";
 
 const push = vi.fn();
+const replace = vi.fn();
+let authState: { roles: string[]; isLoading: boolean } = { roles: [], isLoading: false };
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push }),
+  useRouter: () => ({ push, replace }),
 }));
 
 vi.mock("../hooks/use-login", () => ({
@@ -20,8 +20,13 @@ vi.mock("@/shared/services/storage/access-token-storage", () => ({
   saveAccessToken: vi.fn(),
 }));
 
+vi.mock("@/shared/contexts/auth-context", () => ({
+  useAuth: () => authState,
+}));
+
 describe("LoginView", () => {
   afterEach(() => {
+    authState = { roles: [], isLoading: false };
     cleanup();
     vi.clearAllMocks();
     window.history.replaceState({}, '', '/');
@@ -48,11 +53,35 @@ describe("LoginView", () => {
       expect(login).toHaveBeenCalledWith({
         email: "person@example.com",
         password: "secret",
-        roleTag: "titulado",
       });
       expect(saveAccessToken).toHaveBeenCalledWith("returned-token");
       expect(push).toHaveBeenCalledWith("/profile");
     });
+  });
+
+  it("navigates once after signing in even though the session now has roles", async () => {
+    vi.mocked(saveAccessToken).mockImplementation(() => {
+      authState = { roles: ["titulado"], isLoading: false };
+      return true;
+    });
+    const login = vi.fn().mockResolvedValue({ accessToken: "returned-token", roleTag: "titulado" });
+    vi.mocked(useLogin).mockReturnValue({ login, isLoading: false, error: null });
+    render(<LoginView />);
+    fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), { target: { value: "person@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("********"), { target: { value: "secret" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!);
+
+    await waitFor(() => expect(push).toHaveBeenCalledTimes(1));
+    expect(push).toHaveBeenCalledWith("/profile");
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it("redirects away from the form when a validated session already exists", async () => {
+    authState = { roles: ["administrativo"], isLoading: false };
+    vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
+    render(<LoginView />);
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/backoffice/solicitudes"));
   });
 
   async function submitLogin(login: unknown) {
@@ -83,7 +112,7 @@ describe("LoginView", () => {
   });
 
   it.each([
-    ['/login?next=%2Freports%2Fhistory%3Fx%3D1', '/reports/history?x=1'],
+    ['/login?next=%2Freports%2Fhistory%3Fx%3D1', '/profile'],
     ['/login?next=/profile/documents', '/profile/documents'],
     ['/login?next=/backoffice/solicitudes', '/profile'],
     ['/login?next=/%5Cevil.com', '/profile'],
@@ -118,10 +147,10 @@ describe("LoginView", () => {
     await waitFor(() => expect(push).toHaveBeenCalledWith('/backoffice/solicitudes'));
   });
 
-  it.each(["titulado", "estudiante", "mentor", "empresa", "", "desconocido"])("el rol %j va a la ruta actual", async (roleTag) => {
+  it.each(["titulado", "estudiante", "mentor", "empresa", "", "desconocido"])("el rol %j va a su portal", async (roleTag) => {
     await submitLogin(vi.fn().mockResolvedValue({ accessToken: "t", roleTag }));
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/profile"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith(roleTag === "empresa" ? "/recruiters" : "/profile"));
     expect(push).toHaveBeenCalledTimes(1);
   });
 
@@ -191,7 +220,7 @@ describe("LoginView", () => {
 
     expect(screen.getByLabelText("Correo electrónico")).toHaveAttribute("autocomplete", "username");
     expect(screen.getByLabelText("Contraseña")).toHaveAttribute("autocomplete", "current-password");
-    expect(screen.getByRole("combobox", { name: "Rol" })).toHaveTextContent("Titulado");
+    expect(screen.queryByRole("combobox", { name: "Rol" })).toBeNull();
     expect(screen.getByRole("heading", { name: "Iniciar sesión" })).toBeInTheDocument();
     expect(screen.getByText("Universidad para el futuro")).toBeInTheDocument();
   });
@@ -225,13 +254,9 @@ describe("LoginView", () => {
     expect(button).toBeDisabled();
   });
 
-  it("las opciones del rol fijan texto tinta al resaltarse (el tema pone blanco sobre fondo claro)", async () => {
-    vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
-    render(<LoginView />);
-
-    await userEvent.setup().click(screen.getByRole("combobox", { name: "Rol" }));
-    const option = await screen.findByRole("option", { name: "Mentor" });
-
-    for (const token of SELECT_ITEM_CONTRAST_CLASS.split(" ")) expect(option.className).toContain(token);
+  it("uses the combined roles returned by the server when resuming a mentor route", async () => {
+    window.history.replaceState({}, "", "/login?next=/mentor/availability");
+    await submitLogin(vi.fn().mockResolvedValue({ accessToken: "multi", roleTag: "administrativo", roles: ["administrativo", "mentor"] }));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/mentor/availability"));
   });
 });
