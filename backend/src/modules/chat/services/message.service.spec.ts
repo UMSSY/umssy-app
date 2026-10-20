@@ -121,6 +121,171 @@ describe('MessageService', () => {
       ).rejects.toThrow(InvalidMessageContentException);
     });
 
+    it('accepts messages containing 259 emojis without throwing', async () => {
+      const {
+        service,
+        conversationRepository,
+        participantRepository,
+        messageRepository,
+      } = createMockService();
+
+      conversationRepository.findById.mockResolvedValue({ id: 'conv-1' });
+      participantRepository.findByConversationAndUser.mockResolvedValue({
+        id: 'part-1',
+      });
+
+      const now = new Date('2026-10-14T10:00:00.000Z');
+      const emojis = '😀'.repeat(259);
+      messageRepository.create.mockResolvedValue({
+        id: 'msg-emoji-259',
+        conversationId: 'conv-1',
+        senderId: 'user-1',
+        content: emojis,
+        statusId: 'status-sent-id',
+        sentAt: now,
+        createdAt: now,
+      });
+
+      const result = await service.send({
+        conversationId: 'conv-1',
+        senderId: 'user-1',
+        content: emojis,
+      });
+
+      expect(result.content).toBe(emojis);
+      expect(messageRepository.create).toHaveBeenCalled();
+    });
+
+    it('accepts messages containing 250, 251 and 500 flag emojis (🇧🇴)', async () => {
+      const {
+        service,
+        conversationRepository,
+        participantRepository,
+        messageRepository,
+      } = createMockService();
+
+      conversationRepository.findById.mockResolvedValue({ id: 'conv-1' });
+      participantRepository.findByConversationAndUser.mockResolvedValue({
+        id: 'part-1',
+      });
+
+      const now = new Date('2026-10-14T10:00:00.000Z');
+      const flags500 = '🇧🇴'.repeat(500);
+      messageRepository.create.mockResolvedValue({
+        id: 'msg-flag-500',
+        conversationId: 'conv-1',
+        senderId: 'user-1',
+        content: flags500,
+        statusId: 'status-sent-id',
+        sentAt: now,
+        createdAt: now,
+      });
+
+      const result = await service.send({
+        conversationId: 'conv-1',
+        senderId: 'user-1',
+        content: flags500,
+      });
+
+      expect(result.content).toBe(flags500);
+      expect(messageRepository.create).toHaveBeenCalled();
+    });
+
+    it('accepts messages containing 250, 251 and 500 heart emojis (❣️)', async () => {
+      const {
+        service,
+        conversationRepository,
+        participantRepository,
+        messageRepository,
+      } = createMockService();
+
+      conversationRepository.findById.mockResolvedValue({ id: 'conv-1' });
+      participantRepository.findByConversationAndUser.mockResolvedValue({
+        id: 'part-1',
+      });
+
+      const now = new Date('2026-10-14T10:00:00.000Z');
+      const hearts500 = '❣️'.repeat(500);
+      messageRepository.create.mockResolvedValue({
+        id: 'msg-heart-500',
+        conversationId: 'conv-1',
+        senderId: 'user-1',
+        content: hearts500,
+        statusId: 'status-sent-id',
+        sentAt: now,
+        createdAt: now,
+      });
+
+      const result = await service.send({
+        conversationId: 'conv-1',
+        senderId: 'user-1',
+        content: hearts500,
+      });
+
+      expect(result.content).toBe(hearts500);
+      expect(messageRepository.create).toHaveBeenCalled();
+    });
+
+    it('accepts messages containing up to 500 characters with mixed text and emojis', async () => {
+      const {
+        service,
+        conversationRepository,
+        participantRepository,
+        messageRepository,
+      } = createMockService();
+
+      conversationRepository.findById.mockResolvedValue({ id: 'conv-1' });
+      participantRepository.findByConversationAndUser.mockResolvedValue({
+        id: 'part-1',
+      });
+
+      const now = new Date('2026-10-14T10:00:00.000Z');
+      const content = 'a'.repeat(250) + '❣️'.repeat(250);
+      messageRepository.create.mockResolvedValue({
+        id: 'msg-mixed-500',
+        conversationId: 'conv-1',
+        senderId: 'user-1',
+        content,
+        statusId: 'status-sent-id',
+        sentAt: now,
+        createdAt: now,
+      });
+
+      const result = await service.send({
+        conversationId: 'conv-1',
+        senderId: 'user-1',
+        content,
+      });
+
+      expect(result.content).toBe(content);
+      expect(messageRepository.create).toHaveBeenCalled();
+    });
+
+    it('throws InvalidMessageContentException if content with emojis exceeds 500 characters', async () => {
+      const { service, conversationRepository, participantRepository } =
+        createMockService();
+      conversationRepository.findById.mockResolvedValue({ id: 'conv-1' });
+      participantRepository.findByConversationAndUser.mockResolvedValue({
+        id: 'part-1',
+      });
+
+      await expect(
+        service.send({
+          conversationId: 'conv-1',
+          senderId: 'user-1',
+          content: '🇧🇴'.repeat(501),
+        }),
+      ).rejects.toThrow(InvalidMessageContentException);
+
+      await expect(
+        service.send({
+          conversationId: 'conv-1',
+          senderId: 'user-1',
+          content: '❣️'.repeat(501),
+        }),
+      ).rejects.toThrow(InvalidMessageContentException);
+    });
+
     it('creates message, touches lastMessage, marks conversation read and returns response', async () => {
       const {
         service,
@@ -264,4 +429,3 @@ describe('MessageService', () => {
     });
   });
 });
-

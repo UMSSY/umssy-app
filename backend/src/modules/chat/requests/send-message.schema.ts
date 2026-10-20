@@ -4,6 +4,7 @@ import {
   MIN_MESSAGE_LENGTH,
 } from '../constants/chat.constants.js';
 import { conversationIdField } from './chat-fields.schema.js';
+import { countCharacters } from '../utils/unicode-counter.js';
 
 export const sendMessageSchema = z
   .object({
@@ -15,9 +16,11 @@ export const sendMessageSchema = z
         MIN_MESSAGE_LENGTH,
         'El contenido del mensaje no puede estar vacío',
       )
-      .max(
-        MAX_MESSAGE_LENGTH,
-        `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
+      .refine(
+        (val) => countCharacters(val) <= MAX_MESSAGE_LENGTH,
+        {
+          message: `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
+        },
       ),
   })
   .strict();

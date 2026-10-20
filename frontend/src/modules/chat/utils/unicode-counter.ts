@@ -1,7 +1,18 @@
 export const MAX_MESSAGE_LENGTH = 500;
 
 /**
- * Cuenta el numero de caracteres percibidos (clusters de grafemas)
+ * Expresión regular que agrupa secuencias Unicode complejas en un único cluster de grafema:
+ * - Secuencias keycap (ej. #️⃣, 1️⃣)
+ * - Indicadores regionales de banderas (ej. 🇧🇴 = dos símbolos contiguos de indicador regional)
+ * - Emojis base con selectores de variación, modificadores de tono de piel (ej. 👍🏽)
+ *   y secuencias ZWJ compuestas (ej. ❣️, ❤️, 👨‍👩‍👧‍👦, 🏳️‍🌈)
+ * - Cualquier otro punto de código Unicode / carácter individual
+ */
+const GRAPHEME_REGEX =
+  /(?:(?:\d|[#*])\uFE0F?\u20E3|[\uD83C\uDDE6-\uD83C\uDDFF]{2}|(?:\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(?:[\uFE0E\uFE0F]|\p{Emoji_Modifier})*(?:\u200D(?:\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(?:[\uFE0E\uFE0F]|\p{Emoji_Modifier})*)*|[\s\S])/gu;
+
+/**
+ * Cuenta el número de caracteres percibidos (clusters de grafemas)
  * para garantizar que los emojis, modificadores de tono, banderas
  * y secuencias complejas cuenten exactamente como 1 caracter.
  */
@@ -11,16 +22,22 @@ export function countCharacters(text: string): number {
   }
 
   if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
-    const segmenter = new Intl.Segmenter('es', { granularity: 'grapheme' });
-    return Array.from(segmenter.segment(text)).length;
+    const segmenter = new Intl.Segmenter('und', { granularity: 'grapheme' });
+    let count = 0;
+    const iterator = segmenter.segment(text)[Symbol.iterator]();
+    while (!iterator.next().done) {
+      count += 1;
+    }
+    return count;
   }
 
-  // Respaldo basado en puntos de codigo Unicode (evita dividir pares sustitutos)
-  return Array.from(text).length;
+  // Respaldo robusto con regex Unicode para identificar grafemas y emojis compuestos
+  const matches = text.match(GRAPHEME_REGEX);
+  return matches ? matches.length : 0;
 }
 
 /**
- * Trunca una cadena al maximo de caracteres Unicode especificado,
+ * Trunca una cadena al máximo de caracteres Unicode especificado,
  * preservando la integridad de grafemas y emojis sin cortar secuencias.
  */
 export function truncateToMaxCharacters(text: string, maxLength: number): string {
@@ -33,7 +50,7 @@ export function truncateToMaxCharacters(text: string, maxLength: number): string
   }
 
   if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
-    const segmenter = new Intl.Segmenter('es', { granularity: 'grapheme' });
+    const segmenter = new Intl.Segmenter('und', { granularity: 'grapheme' });
     let count = 0;
     let result = '';
 
@@ -48,12 +65,13 @@ export function truncateToMaxCharacters(text: string, maxLength: number): string
     return result;
   }
 
-  const codePoints = Array.from(text);
-  return codePoints.slice(0, maxLength).join('');
+  const matches = text.match(GRAPHEME_REGEX);
+  if (!matches) return '';
+  return matches.slice(0, maxLength).join('');
 }
 
 /**
- * Determina si el texto esta vacio o contiene unicamente espacios en blanco.
+ * Determina si el texto está vacío o contiene únicamente espacios en blanco.
  */
 export function isWhitespaceOnly(text: string): boolean {
   return text.trim().length === 0;
@@ -61,7 +79,7 @@ export function isWhitespaceOnly(text: string): boolean {
 
 /**
  * Valida si un contenido cumple con los criterios para ser enviado:
- * no estar vacio, no ser solo espacios y no superar el limite de caracteres.
+ * no estar vacío, no ser solo espacios y no superar el límite de caracteres.
  */
 export function isContentValidForSend(
   text: string,
@@ -74,4 +92,3 @@ export function isContentValidForSend(
   const count = countCharacters(text);
   return count > 0 && count <= maxLength;
 }
-

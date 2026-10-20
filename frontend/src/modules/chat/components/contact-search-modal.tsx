@@ -1,12 +1,17 @@
-
 'use client';
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
+import { useState, useRef, useEffect, useMemo, type KeyboardEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
 import { useContactSearch } from '../hooks/use-contact-search';
@@ -28,6 +33,16 @@ export function ContactSearchModal({
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 
   const { results, isSearching } = useContactSearch(searchTerm);
+
+  // Deduplicación defensiva para evitar warnings de claves duplicadas en React
+  const uniqueResults = useMemo(() => {
+    const seen = new Set<string>();
+    return results.filter((user) => {
+      if (seen.has(user.id)) return false;
+      seen.add(user.id);
+      return true;
+    });
+  }, [results]);
 
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -59,23 +74,23 @@ export function ContactSearchModal({
       return;
     }
 
-    if (results.length === 0) return;
+    if (uniqueResults.length === 0) return;
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setSelectedIndex((prev) =>
-        prev < results.length - 1 ? prev + 1 : 0
+        prev < uniqueResults.length - 1 ? prev + 1 : 0
       );
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setSelectedIndex((prev) =>
-        prev > 0 ? prev - 1 : results.length - 1
+        prev > 0 ? prev - 1 : uniqueResults.length - 1
       );
     } else if (e.key === 'Enter') {
       e.preventDefault();
 
-      if (selectedIndex >= 0 && selectedIndex < results.length) {
-        handleSelectUser(results[selectedIndex]);
+      if (selectedIndex >= 0 && selectedIndex < uniqueResults.length) {
+        handleSelectUser(uniqueResults[selectedIndex]);
       }
     }
   };
@@ -100,6 +115,9 @@ export function ContactSearchModal({
           >
             Nueva conversación
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Busca y selecciona un contacto para iniciar una conversación
+          </DialogDescription>
         </DialogHeader>
 
         <div className="py-2">
@@ -129,8 +147,8 @@ export function ContactSearchModal({
             >
               Buscando...
             </div>
-          ) : results.length > 0 ? (
-            results.map((user, index) => {
+          ) : uniqueResults.length > 0 ? (
+            uniqueResults.map((user, index) => {
               const isSelected = index === selectedIndex;
 
               return (

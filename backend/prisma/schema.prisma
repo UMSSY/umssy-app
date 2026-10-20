@@ -789,7 +789,7 @@ model Message {
   id             String    @id @default(uuid()) @db.Uuid
   conversationId String    @map("conversation_id") @db.Uuid
   senderId       String    @map("sender_id") @db.Uuid
-  content        String    @db.VarChar(500)
+  content        String    @db.VarChar(4000)
   statusId       String    @map("status_id") @db.Uuid
   sentAt         DateTime  @default(now()) @map("sent_at") @db.Timestamptz(6)
   deliveredAt    DateTime? @map("delivered_at") @db.Timestamptz(6)

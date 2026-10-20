@@ -9,6 +9,7 @@ import {
   NotConversationParticipantException,
 } from '../exceptions/index.js';
 import { MAX_MESSAGE_LENGTH } from '../constants/chat.constants.js';
+import { countCharacters } from '../utils/unicode-counter.js';
 import type { MessageResponse } from '../responses/message.response.js';
 
 @Injectable()
@@ -47,7 +48,7 @@ export class MessageService {
         'El contenido del mensaje no puede estar vacío',
       );
     }
-    if (content.length > MAX_MESSAGE_LENGTH) {
+    if (countCharacters(content) > MAX_MESSAGE_LENGTH) {
       throw new InvalidMessageContentException(
         `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
       );

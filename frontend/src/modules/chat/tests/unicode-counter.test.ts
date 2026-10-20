@@ -14,6 +14,7 @@ const EMOJI_GRIN = fromCodePoints(0x1f603);
 const EMOJI_LAUGH = fromCodePoints(0x1f604);
 const EMOJI_THUMBS_UP = fromCodePoints(0x1f44d);
 const EMOJI_FLAG_BO = fromCodePoints(0x1f1e7, 0x1f1f4);
+const EMOJI_HEART_EXCLAMATION = fromCodePoints(0x2763, 0xfe0f);
 
 describe('unicode-counter utility (HU-03 Tarea 4)', () => {
   describe('countCharacters', () => {
@@ -41,6 +42,17 @@ describe('unicode-counter utility (HU-03 Tarea 4)', () => {
 
     it('debe contar emojis con modificadores o banderas como 1 caracter', () => {
       expect(countCharacters(EMOJI_FLAG_BO)).toBe(1);
+      expect(countCharacters(EMOJI_HEART_EXCLAMATION)).toBe(1);
+    });
+
+    it('debe contar correctamente 250, 251 y 500 emojis complejos como banderas y corazones', () => {
+      expect(countCharacters(EMOJI_FLAG_BO.repeat(250))).toBe(250);
+      expect(countCharacters(EMOJI_FLAG_BO.repeat(251))).toBe(251);
+      expect(countCharacters(EMOJI_FLAG_BO.repeat(500))).toBe(500);
+
+      expect(countCharacters(EMOJI_HEART_EXCLAMATION.repeat(250))).toBe(250);
+      expect(countCharacters(EMOJI_HEART_EXCLAMATION.repeat(251))).toBe(251);
+      expect(countCharacters(EMOJI_HEART_EXCLAMATION.repeat(500))).toBe(500);
     });
   });
 
@@ -77,6 +89,16 @@ describe('unicode-counter utility (HU-03 Tarea 4)', () => {
       const truncated = truncateToMaxCharacters(emojiRepeated, MAX_MESSAGE_LENGTH);
       expect(countCharacters(truncated)).toBe(300);
     });
+
+    it('debe truncar correctamente 501 banderas y corazones a exactamente 500', () => {
+      const flags501 = EMOJI_FLAG_BO.repeat(501);
+      const truncatedFlags = truncateToMaxCharacters(flags501, 500);
+      expect(countCharacters(truncatedFlags)).toBe(500);
+
+      const hearts501 = EMOJI_HEART_EXCLAMATION.repeat(501);
+      const truncatedHearts = truncateToMaxCharacters(hearts501, 500);
+      expect(countCharacters(truncatedHearts)).toBe(500);
+    });
   });
 
   describe('isWhitespaceOnly', () => {
@@ -112,6 +134,13 @@ describe('unicode-counter utility (HU-03 Tarea 4)', () => {
       const exceeds501 = 'x'.repeat(501);
       expect(isContentValidForSend(exceeds501)).toBe(false);
     });
+
+    it('debe validar 500 banderas o corazones pero invalidar 501', () => {
+      expect(isContentValidForSend(EMOJI_FLAG_BO.repeat(500))).toBe(true);
+      expect(isContentValidForSend(EMOJI_FLAG_BO.repeat(501))).toBe(false);
+
+      expect(isContentValidForSend(EMOJI_HEART_EXCLAMATION.repeat(500))).toBe(true);
+      expect(isContentValidForSend(EMOJI_HEART_EXCLAMATION.repeat(501))).toBe(false);
+    });
   });
 });
-
