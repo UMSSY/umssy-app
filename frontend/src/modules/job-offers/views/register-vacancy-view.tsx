@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHeading } from "@/shared/components/layout";
 import { useState } from "react";
 import { ConfirmDialog } from "../components/confirm-dialog";
 import { InformationStep } from "../components/information-step";
@@ -47,10 +48,10 @@ export function RegisterVacancyView() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
-      <h1 className="mb-6 font-tight text-3xl font-extrabold text-ink">Publicar vacante</h1>
+    <div className="mx-auto w-full max-w-7xl">
+      <PageHeading className="mb-8" title="Publicar vacante" />
 
-      <div className="sm:rounded-lg sm:border sm:border-border sm:bg-surface sm:p-6 sm:shadow-sm">
+      <div className="space-y-6">
         <VacancyStepper currentStep={currentStep} />
 
         {currentStep === 1 && (

@@ -48,24 +48,24 @@ export function PreviewStep({
 
   return (
     <div className="mt-8 w-full">
-      <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-500">
+      <h3 className="mb-3 text-xs font-bold tracking-wide text-gray-500 uppercase">
         VISTA PREVIA DE LA PUBLICACIÓN
       </h3>
 
-      <div className="mx-auto max-w-3xl rounded-lg border border-t-[4px] border-gray-100 border-t-[#E50000] bg-white p-5 sm:p-8 shadow-[0_2px_10px_rgb(0,0,0,0.06)]">
+      <div className="mx-auto max-w-3xl rounded-lg border border-border bg-white p-8 shadow-[0_2px_10px_rgb(0,0,0,0.06)]">
         <div className="mb-6 flex items-center gap-4">
-          <div className="flex h-[50px] w-[50px] items-center justify-center rounded-lg bg-[#0f172a] text-lg font-bold tracking-wider text-white">
+          <div className="flex size-[50px] items-center justify-center rounded-lg bg-ink text-lg font-bold tracking-wider text-white">
             {company.initials}
           </div>
           <div>
-            <h4 className="text-[15px] font-extrabold leading-tight text-gray-900">{company.name}</h4>
+            <h4 className="text-[15px] leading-tight font-extrabold text-gray-900">{company.name}</h4>
             <p className="text-[13px] text-gray-500">Empresa verificada</p>
           </div>
         </div>
 
         <div className="mb-6">
           <h2 className="text-[22px] font-extrabold text-gray-900">{conditions.title}</h2>
-          <p className="mt-1 text-[13px] font-bold text-amber-500">{conditions.category}</p>
+          <p className="mt-1 text-[13px] font-bold text-ink-soft">{conditions.category}</p>
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -83,7 +83,7 @@ export function PreviewStep({
           </div>
         </div>
 
-        <p className="mb-6 whitespace-pre-line break-words text-[14px] leading-relaxed text-gray-600">
+        <p className="mb-6 text-[14px] leading-relaxed break-words whitespace-pre-line text-gray-600">
           {formatDescription(conditions.description, isExpanded)}
           {canExpand && (
             <>
@@ -93,7 +93,7 @@ export function PreviewStep({
                 variant="link"
                 aria-expanded={isExpanded}
                 onClick={() => setIsExpanded((current) => !current)}
-                className="h-auto p-0 font-semibold text-[#E50000]"
+                className="h-auto p-0 font-semibold text-accent"
               >
                 {isExpanded ? "Ver menos" : "Ver más"}
               </Button>
@@ -116,7 +116,7 @@ export function PreviewStep({
             href={mapsLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="break-all text-[14px] text-[#E50000] underline-offset-2 hover:underline"
+            className="text-[14px] break-all text-accent underline-offset-2 hover:underline"
           >
             {mapsLink}
           </a>
