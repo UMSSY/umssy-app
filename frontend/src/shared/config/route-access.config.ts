@@ -1,6 +1,7 @@
 import type { RouteAccessRule } from "@/shared/types/route-access-rule.types";
 
 export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
+  { pattern: /^\/dashboard\/?$/, roles: ["titulado", "estudiante", "mentor", "empresa", "administrativo"] },
   { pattern: /^\/backoffice(?:\/|$)/, roles: ["administrativo"] },
   { pattern: /^\/affinity-radar\/review-queue\/?$/, roles: ["administrativo"] },
   { pattern: /^\/recruiters(?:\/|$)/, roles: ["empresa"] },
