@@ -1,4 +1,5 @@
 import type { BreadcrumbEntry } from "@/shared/types/breadcrumb-entry.types";
+import type { JobFeedFilters } from "../types/job-feed-filters.types";
 
 export const RECOMMENDED_JOBS_ENDPOINT = "/job-offers/recommendations";
 export function getJobMatchEndpoint(jobOfferId: string): string {
@@ -6,6 +7,15 @@ export function getJobMatchEndpoint(jobOfferId: string): string {
 }
 
 export const JOBS_ROUTE = "/jobs";
+
+// Umbral propuesto en AC-06.5 para "Solo alta afinidad"; pendiente de confirmar con el PO.
+export const HIGH_AFFINITY_THRESHOLD = 70;
+
+export const EMPTY_JOB_FEED_FILTERS: JobFeedFilters = {
+  search: "",
+  modality: null,
+  onlyHighAffinity: false,
+};
 export const PROFILE_SKILLS_ROUTE = "/profile/trajectory/skills";
 
 export const JOB_MATCHING_QUERY_KEYS = {
