@@ -50,7 +50,7 @@ export function RegisterVacancyView() {
     <div className="mx-auto w-full max-w-5xl">
       <h1 className="mb-6 font-tight text-3xl font-extrabold text-ink">Publicar vacante</h1>
 
-      <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
+      <div className="sm:rounded-lg sm:border sm:border-border sm:bg-surface sm:p-6 sm:shadow-sm">
         <VacancyStepper currentStep={currentStep} />
 
         {currentStep === 1 && (
