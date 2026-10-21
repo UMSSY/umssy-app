@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import type { OrientationTypeResponse } from "../../types/orientation-type-response.types";
 
@@ -61,7 +62,8 @@ export function OrientationStep({
           );
 
           return (
-            <button
+            <Button
+              unstyled
               key={orientation.id}
               type="button"
               onClick={() => toggleOrientation(orientation.id)}
@@ -88,14 +90,14 @@ export function OrientationStep({
                 >
                   {isSelected && (
                     <CheckCircle
-                      className="h-3.5 w-3.5"
+                      className="size-3.5"
                       strokeWidth={3}
                       aria-hidden
                     />
                   )}
                 </div>
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>

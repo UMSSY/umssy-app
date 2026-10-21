@@ -252,7 +252,7 @@ export function OrientationConfigView() {
                         <div className="flex min-w-0 flex-1 flex-col gap-1">
                           <span
                             id={`orientation-label-${option.id}`}
-                            className="min-w-0 break-words text-sm font-semibold text-ink"
+                            className="min-w-0 text-sm font-semibold break-words text-ink"
                           >
                             {option.name}
                           </span>
@@ -287,7 +287,7 @@ export function OrientationConfigView() {
                 </div>
               )}
             </CardContent>
-            <CardFooter className="mx-4 flex items-center justify-between gap-4 border-t border-gray-100 bg-transparent px-0 pb-4 pt-4 sm:mx-8 sm:pb-8">
+            <CardFooter className="mx-4 flex items-center justify-between gap-4 border-t border-gray-100 bg-transparent px-0 py-4 sm:mx-8 sm:pb-8">
               <Link
                 href="/mentors/participation"
                 className={buttonVariants({
@@ -325,7 +325,7 @@ export function OrientationConfigView() {
               Se actualizarán los tipos de orientación que seleccionaste.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mx-0 mb-0 mt-8 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
+          <AlertDialogFooter className="mx-0 mt-8 mb-0 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
             <AlertDialogCancel
               type="button"
               disabled={isSaving}
@@ -350,7 +350,7 @@ export function OrientationConfigView() {
 
       {showToast && (
         <Alert
-          className="fixed right-4 bottom-4 left-4 z-50 flex w-auto items-center gap-3 rounded-xl border-0 bg-gray-900 px-6 py-3 text-white shadow-xl sm:right-8 sm:bottom-8 sm:left-auto"
+          className="fixed inset-x-4 bottom-4 z-50 flex w-auto items-center gap-3 rounded-xl border-0 bg-gray-900 px-6 py-3 text-white shadow-xl sm:right-8 sm:bottom-8 sm:left-auto"
           role="status"
         >
           <CheckCircle2 size={20} className="text-amber-400" />

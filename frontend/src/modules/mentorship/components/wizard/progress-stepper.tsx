@@ -34,7 +34,7 @@ export function ProgressStepper({ currentStep }: ProgressStepperProps) {
                 aria-current={isActive ? "step" : undefined}
               >
                 {isCompleted ? (
-                  <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
+                  <Check className="size-4" strokeWidth={3} aria-hidden />
                 ) : (
                   step.id
                 )}

@@ -67,7 +67,7 @@ function ReviewAffinityRadarChart({
             {average.toFixed(2)}
           </p>
 
-          <p className="text-[9px] uppercase tracking-widest text-text-secondary">
+          <p className="text-[9px] tracking-widest text-text-secondary uppercase">
             Promedio
           </p>
         </div>
@@ -144,7 +144,7 @@ function ReviewAreaBreakdownPanel({
           <li key={area.area}>
             <div className="flex items-center gap-2 text-xs">
               <span
-                className={`h-1.5 w-1.5 rounded-full ${getLevelClass(
+                className={`size-1.5 rounded-full ${getLevelClass(
                   area.nivel,
                 )}`}
               />
@@ -175,7 +175,7 @@ function ReviewAreaBreakdownPanel({
       </ul>
 
       <div className="mt-6 flex items-baseline justify-between border-t border-border pt-4">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-text-secondary">
+        <span className="text-[10px] font-semibold tracking-widest text-text-secondary uppercase">
           Media global
         </span>
 

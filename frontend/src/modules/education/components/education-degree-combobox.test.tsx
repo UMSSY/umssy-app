@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { useState } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -9,7 +10,7 @@ function Field({ disabled = false }: { disabled?: boolean }) {
   const [value, setValue] = useState('');
   return <><label htmlFor="degree">Título o carrera</label><EducationDegreeCombobox id="degree" value={value}
     degrees={getEducationDegrees('Universidad Mayor de San Simón (UMSS)')} disabled={disabled} onChange={setValue} />
-    <button type="button">Outside</button></>;
+    <Button unstyled type="button">Outside</Button></>;
 }
 
 describe('EducationDegreeCombobox', () => {

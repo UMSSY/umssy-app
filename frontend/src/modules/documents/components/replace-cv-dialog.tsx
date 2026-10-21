@@ -47,7 +47,7 @@ export function ReplaceCvDialog({
             {errorMessage}
           </p>
         ) : null}
-        <AlertDialogFooter className="mx-0 mb-0 mt-8 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
+        <AlertDialogFooter className="mx-0 mt-8 mb-0 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
           <AlertDialogCancel
             className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
             disabled={isReplacing}
