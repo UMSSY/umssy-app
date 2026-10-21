@@ -42,7 +42,7 @@ export function AffinityRadarAxisTick({
       aria-label={`Ver detalle de ${area.name}`}
       onClick={() => onAreaClick(area.id)}
       onKeyDown={handleKeyDown}
-      className="cursor-pointer outline-none [&_text]:motion-safe:transition-colors hover:[&_text]:fill-accent focus-visible:[&_text]:fill-accent focus-visible:[&_text]:underline"
+      className="cursor-pointer outline-none hover:[&_text]:fill-accent focus-visible:[&_text]:fill-accent focus-visible:[&_text]:underline [&_text]:motion-safe:transition-colors"
     >
       {label}
     </g>

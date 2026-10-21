@@ -131,14 +131,14 @@ export function BlockForm({
                     >
                       {date ? formatDayAndMonth(date) : ""}
                     </span>
-                    <input
+                    <Input unstyled
                       id="date"
                       type="date"
                       value={date}
                       readOnly
                       aria-invalid={errors.date ? true : undefined}
                       aria-describedby={errors.date ? "date-error" : undefined}
-                      className="absolute inset-0 h-full w-full cursor-default opacity-0"
+                      className="absolute inset-0 size-full cursor-default opacity-0"
                     />
                   </>
                 ) : (

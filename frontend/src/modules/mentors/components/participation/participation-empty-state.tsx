@@ -13,7 +13,7 @@ export function ParticipationEmptyState() {
     <main className="min-h-full bg-surface-soft px-4 py-6 sm:py-8">
       <Card className="mx-auto max-w-4xl gap-0 overflow-visible rounded-lg border border-border bg-surface py-0 text-base shadow-sm ring-0">
         <CardHeader className="gap-0 px-6 pt-6 sm:px-8 sm:pt-8">
-          <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+          <p className="text-xs font-semibold tracking-wide text-text-secondary uppercase">
             UMSSY · Mentorías
           </p>
 
@@ -31,7 +31,7 @@ export function ParticipationEmptyState() {
           </p>
         </CardHeader>
 
-        <CardFooter className="mt-6 border-0 bg-transparent px-6 pb-6 pt-0 sm:px-8 sm:pb-8">
+        <CardFooter className="mt-6 border-0 bg-transparent px-6 pt-0 pb-6 sm:px-8 sm:pb-8">
           <Link
             href="/mentorship"
             className={buttonVariants({

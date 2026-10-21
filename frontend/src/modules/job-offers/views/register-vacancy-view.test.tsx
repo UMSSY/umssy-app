@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_CONDITIONS, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
@@ -46,16 +47,16 @@ vi.mock("../components/vacancy-stepper", () => ({
 vi.mock("../components/information-step", () => ({
   InformationStep: ({ onCancel, onContinue }: { onCancel: () => void; onContinue: () => void }) => (
     <div data-testid="information-step">
-      <button onClick={onCancel}>Cancelar</button>
-      <button onClick={onContinue}>Continuar</button>
+      <Button unstyled onClick={onCancel}>Cancelar</Button>
+      <Button unstyled onClick={onContinue}>Continuar</Button>
     </div>
   ),
 }));
 vi.mock("../components/requirements-step", () => ({
   RequirementsStep: ({ onPrevious, onContinue }: { onPrevious: () => void; onContinue: () => void }) => (
     <div data-testid="requirements-step">
-      <button onClick={onPrevious}>Anterior</button>
-      <button onClick={onContinue}>Continuar</button>
+      <Button unstyled onClick={onPrevious}>Anterior</Button>
+      <Button unstyled onClick={onContinue}>Continuar</Button>
     </div>
   ),
 }));
@@ -72,9 +73,9 @@ vi.mock("../components/preview-step", () => ({
       <span>{props.isSubmitting ? "enviando" : "libre"}</span>
       <span>{props.isPublished ? "publicada" : "pendiente"}</span>
       <span>{props.company.name}</span>
-      <button onClick={props.onPrevious}>Anterior</button>
-      <button onClick={props.onConfirm}>Confirmar</button>
-      <button onClick={props.onFinish}>Aceptar</button>
+      <Button unstyled onClick={props.onPrevious}>Anterior</Button>
+      <Button unstyled onClick={props.onConfirm}>Confirmar</Button>
+      <Button unstyled onClick={props.onFinish}>Aceptar</Button>
     </div>
   ),
 }));

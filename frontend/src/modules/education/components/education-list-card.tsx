@@ -39,7 +39,7 @@ export function EducationListCard({
                   {education.institution} · {formatEducationPeriod(education.startDate, education.endDate)}
                 </p>
                 {education.description ? (
-                  <p className="mt-2 whitespace-pre-line text-[13px] text-text-secondary">
+                  <p className="mt-2 text-[13px] whitespace-pre-line text-text-secondary">
                     {education.description}
                   </p>
                 ) : null}

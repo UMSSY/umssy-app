@@ -63,12 +63,12 @@ export function RequirementsStep({
     <div className="mt-6 rounded-xl border border-border bg-surface">
       <div className="flex items-center gap-3 border-b border-border px-6 py-4">
         <h2 className="text-[16px] font-bold text-ink">Requisitos técnicos</h2>
-        <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-800">
+        <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-800 uppercase">
           Chips Seleccionables
         </span>
       </div>
 
-      <div className="px-6 py-6">
+      <div className="p-6">
         <div className="mb-8">
           <Label htmlFor="description" className="mb-2 text-[12.5px] font-semibold text-ink">
             Descripcion del puesto <span className="text-danger">*</span>
@@ -81,7 +81,7 @@ export function RequirementsStep({
             placeholder="Buscamos un desarrollador backend..."
             aria-invalid={Boolean(errors.description)}
             aria-describedby={errors.description ? "description-error" : undefined}
-            className="min-h-[120px] whitespace-pre-wrap bg-white p-4 text-[14px] text-ink"
+            className="min-h-[120px] bg-white p-4 text-[14px] whitespace-pre-wrap text-ink"
           />
           <div className="mt-1 flex justify-end">
             <span
@@ -95,7 +95,7 @@ export function RequirementsStep({
 
         <div id="skills" tabIndex={-1}>
           <div className="mb-4 flex items-center gap-2">
-            <div className="flex h-4 w-4 items-center justify-center rounded-full border border-amber-500 text-[10px] font-bold text-amber-500">
+            <div className="flex size-4 items-center justify-center rounded-full border border-amber-500 text-[10px] font-bold text-amber-500">
               i
             </div>
             <p className="text-[13px] text-text-secondary">

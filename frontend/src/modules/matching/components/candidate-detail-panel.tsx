@@ -75,7 +75,7 @@ export function CandidateDetailPanel({
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
               {getInitials(candidate.name)}
             </span>
             <div>
@@ -84,7 +84,7 @@ export function CandidateDetailPanel({
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            <p className="text-xs tracking-wide text-muted-foreground uppercase">
               Compatibilidad vs. {vacancy.title}
             </p>
             <p className="text-2xl font-semibold text-foreground">{candidate.matchPercent}%</p>

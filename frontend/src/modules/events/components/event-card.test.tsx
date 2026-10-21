@@ -75,8 +75,17 @@ describe('EventCard y utilidades de formato', () => {
   });
 
   it('formatea correctamente rangos de hora con o sin segundos', () => {
-    expect(formatTimeRange('09:00:00', '13:00:00')).toBe('09:00 - 13:00');
-    expect(formatTimeRange('inicio', 'fin')).toBe('inicio - fin');
+    expect(formatTimeRange('09:00:00', '13:00:00')).toBe('09:00 - 13:00 hrs');
+    expect(formatTimeRange('inicio', 'fin')).toBe('Horario no disponible');
+  });
+
+  it.each([
+    ['00:00', '12:00', '00:00 - 12:00 hrs'],
+    ['13:00:00', '23:59:00', '13:00 - 23:59 hrs'],
+    ['1970-01-01T09:00:00.000Z', '1970-01-01T12:00:00.000Z', '09:00 - 12:00 hrs'],
+    ['24:00', '12:00', 'Horario no disponible'],
+  ])('shows an unambiguous time range for %s to %s', (start, end, expected) => {
+    expect(formatTimeRange(start, end)).toBe(expected);
   });
 
   it('renderiza el titulo, categoria, fecha, horario y relacion de cupos', () => {
@@ -86,7 +95,7 @@ describe('EventCard y utilidades de formato', () => {
       screen.getByRole('heading', { name: 'Desarrollo Web con React' }),
     ).toBeInTheDocument();
     expect(screen.getByText('Tecnologia')).toBeInTheDocument();
-    expect(screen.getByText('09:00 - 13:00')).toBeInTheDocument();
+    expect(screen.getByText('09:00 - 13:00 hrs')).toBeInTheDocument();
     expect(screen.getByText('24/30')).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toHaveAttribute(
       'aria-valuenow',

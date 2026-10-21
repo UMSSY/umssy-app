@@ -41,14 +41,15 @@ const buttonVariants = cva(
 
 function Button({
   className,
+  unstyled = false,
   variant = "default",
   size = "default",
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants> & { unstyled?: boolean }) {
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={unstyled ? className : cn(buttonVariants({ variant, size, className }))}
       {...props}
     />
   )
