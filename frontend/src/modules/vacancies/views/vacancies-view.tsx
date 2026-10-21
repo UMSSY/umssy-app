@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
 import { useVacancies } from "../hooks/use-vacancies";
 
 export function VacanciesView() {
@@ -21,12 +22,11 @@ export function VacanciesView() {
         </p>
 
         <div className="mt-6">
-          <input
+          <Input
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar por cargo, empresa, requisito..."
-            className="w-full rounded-md border border-border bg-surface px-4 py-3 outline-none focus:ring-2"
           />
         </div>
 
@@ -102,7 +102,7 @@ export function VacanciesView() {
                   </ul>
 			<Link
 			  href={`/vacancies/${vacancy.id}`}
-			  className="mt-6 inline-block rounded-md bg-ink px-4 py-2 text-surface"
+			  className="mt-6 inline-block rounded-md bg-black px-4 py-2 text-white"
 			>
 			  Ver detalles
 			</Link>

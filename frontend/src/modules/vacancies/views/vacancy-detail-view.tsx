@@ -17,7 +17,7 @@ export function VacancyDetailView({ id }: VacancyDetailViewProps) {
 
           <Link
             href="/vacancies"
-            className="mt-6 inline-block rounded-md bg-ink px-4 py-2 text-surface"
+            className="mt-6 inline-block rounded-md bg-black px-4 py-2 text-white"
           >
             ← Volver a vacantes
           </Link>

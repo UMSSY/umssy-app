@@ -1,10 +1,47 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { vacancies } from "../data/vacancies";
+import { useEffect, useMemo, useState } from "react";
+import type { Vacancy } from "../data/vacancies";
+import { vacanciesService } from "../services/vacancies.service";
 
 export function useVacancies() {
   const [search, setSearch] = useState("");
+  const [vacancies, setVacancies] = useState<Vacancy[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadVacancies() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const data = await vacanciesService.getPublished();
+
+        if (!cancelled) {
+          setVacancies(data);
+        }
+      } catch {
+        if (!cancelled) {
+          setError(
+            "No se pudieron cargar las vacantes. Verifica que el backend esté funcionando.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadVacancies();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredVacancies = useMemo(() => {
     const searchTerm = search.toLowerCase().trim();
@@ -28,11 +65,13 @@ export function useVacancies() {
 
       return searchableText.includes(searchTerm);
     });
-  }, [search]);
+  }, [search, vacancies]);
 
   return {
     search,
     setSearch,
     filteredVacancies,
+    loading,
+    error,
   };
 }

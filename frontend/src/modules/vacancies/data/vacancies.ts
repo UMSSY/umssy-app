@@ -1,5 +1,5 @@
 export interface Vacancy {
-  id: number;
+  id: string | number;
   cargo: string;
   empresa: string;
   descripcion: string;
