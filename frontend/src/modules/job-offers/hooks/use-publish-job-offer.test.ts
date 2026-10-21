@@ -1,4 +1,5 @@
 import { AxiosError } from "axios";
+import { onlineManager } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
@@ -50,6 +51,22 @@ describe("usePublishJobOffer", () => {
     await waitFor(() => expect(result.current.status).toBe("error"));
     expect(result.current.isSubmitting).toBe(false);
     expect(result.current.error?.kind).toBe("network");
+  });
+
+  it("sin conexión muestra el error de red en lugar de quedar en espera", async () => {
+    onlineManager.setOnline(false);
+    vi.mocked(jobOffersService.publish).mockRejectedValue(new AxiosError("Network Error", "ERR_NETWORK"));
+    const { result } = renderPublishHook();
+
+    try {
+      await act(() => result.current.submit(VALID_CONDITIONS));
+
+      await waitFor(() => expect(result.current.status).toBe("error"));
+      expect(jobOffersService.publish).toHaveBeenCalledTimes(1);
+      expect(result.current.error?.kind).toBe("network");
+    } finally {
+      onlineManager.setOnline(true);
+    }
   });
 
   it("marca el envío en curso y no repite la petición mientras tanto", async () => {

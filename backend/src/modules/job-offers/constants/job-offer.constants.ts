@@ -3,6 +3,8 @@ export const JOB_OFFER_DESCRIPTION_MAX_LENGTH = 3000;
 export const JOB_OFFER_LANGUAGES_MAX_LENGTH = 100;
 export const JOB_OFFER_MAX_POSITIONS = 500;
 export const JOB_OFFER_MAX_SKILLS = 10;
+export const JOB_OFFER_MAX_SALARY = 999_999_999;
+export const JOB_OFFER_SALARY_TO_BE_AGREED = 'A convenir';
 
 export const JOB_OFFER_VALIDATION_MESSAGES = {
   REQUIRED_FIELD: 'Este campo es obligatorio',
@@ -15,6 +17,7 @@ export const JOB_OFFER_VALIDATION_MESSAGES = {
   POSITIONS_TOO_FEW: 'Debe ser al menos 1',
   POSITIONS_TOO_MANY: `El numero maximo de vacantes por publicacion es ${JOB_OFFER_MAX_POSITIONS}`,
   SALARY_NOT_POSITIVE: 'El salario debe ser mayor a 0',
+  SALARY_TOO_HIGH: 'El salario no puede tener mas de 9 digitos',
   SALARY_RANGE_INVALID: 'El salario minimo no puede ser mayor al salario maximo',
   LANGUAGES_TOO_LONG: `Los idiomas no deben exceder los ${JOB_OFFER_LANGUAGES_MAX_LENGTH} caracteres`,
   INVALID_LOCATION_URL: 'Ingresa un enlace valido de Google Maps',
