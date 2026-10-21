@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
 import {
+  FIELD_FOCUS_CLASS,
   MAX_DESCRIPTION_CHARS,
   MAX_SKILLS,
   SKILLS_CATALOG_MESSAGES,
@@ -71,7 +72,7 @@ export function RequirementsStep({
       <div className="px-6 py-6">
         <div className="mb-8">
           <Label htmlFor="description" className="mb-2 text-[12.5px] font-semibold text-ink">
-            Descripcion del puesto <span className="text-danger">*</span>
+            Descripción del puesto <span className="text-danger">*</span>
           </Label>
           <Textarea
             id="description"
@@ -81,7 +82,7 @@ export function RequirementsStep({
             placeholder="Buscamos un desarrollador backend..."
             aria-invalid={Boolean(errors.description)}
             aria-describedby={errors.description ? "description-error" : undefined}
-            className="min-h-[120px] whitespace-pre-wrap bg-white p-4 text-[14px] text-ink"
+            className={`min-h-[120px] whitespace-pre-wrap bg-white p-4 text-[14px] text-ink ${FIELD_FOCUS_CLASS}`}
           />
           <div className="mt-1 flex justify-end">
             <span

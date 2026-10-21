@@ -27,6 +27,7 @@ export function usePublishJobOffer() {
   const [localError, setLocalError] = useState<PublishError | null>(null);
   const mutation = useMutation({
     mutationFn: ({ companyId, payload }: PublishVariables) => jobOffersService.publish(companyId, payload),
+    networkMode: "always",
   });
 
   const submit = async (conditions: VacancyConditions): Promise<void> => {

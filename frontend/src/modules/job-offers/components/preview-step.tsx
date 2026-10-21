@@ -4,7 +4,12 @@ import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { DESCRIPTION_PREVIEW_CHARS, PUBLISHED_DIALOG_TEXT } from "../constants/vacancies.constants";
+import {
+  DESCRIPTION_PREVIEW_CHARS,
+  INTERNSHIP_CONTRACT_TYPE,
+  PUBLISHED_DIALOG_TEXT,
+  SALARY_TO_BE_AGREED,
+} from "../constants/vacancies.constants";
 import type { CurrentCompany, PublishError } from "../types/job-offer.types";
 import type { VacancyConditions } from "../types/vacancy-conditions.types";
 import { ConfirmDialog } from "./confirm-dialog";
@@ -47,7 +52,7 @@ export function PreviewStep({
         VISTA PREVIA DE LA PUBLICACIÓN
       </h3>
 
-      <div className="mx-auto max-w-3xl rounded-lg border border-t-[4px] border-gray-100 border-t-[#E50000] bg-white p-8 shadow-[0_2px_10px_rgb(0,0,0,0.06)]">
+      <div className="mx-auto max-w-3xl rounded-lg border border-t-[4px] border-gray-100 border-t-[#E50000] bg-white p-5 sm:p-8 shadow-[0_2px_10px_rgb(0,0,0,0.06)]">
         <div className="mb-6 flex items-center gap-4">
           <div className="flex h-[50px] w-[50px] items-center justify-center rounded-lg bg-[#0f172a] text-lg font-bold tracking-wider text-white">
             {company.initials}
@@ -74,7 +79,7 @@ export function PreviewStep({
             {conditions.vacancyCount} {conditions.vacancyCount === "1" ? "vacante" : "vacantes"}
           </div>
           <div className="rounded-md bg-gray-50 px-4 py-2.5 text-[13px] font-medium text-gray-700">
-            {conditions.salary}
+            {conditions.contractType === INTERNSHIP_CONTRACT_TYPE ? SALARY_TO_BE_AGREED : conditions.salary}
           </div>
         </div>
 
