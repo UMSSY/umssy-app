@@ -1,4 +1,4 @@
-import { act, cleanup, renderHook } from "@testing-library/react";
+import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DOCKER, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
 import { useJobOfferForm } from "./use-job-offer-form";
@@ -127,6 +127,30 @@ describe("useJobOfferForm", () => {
     expect(result.current.conditions.title).toBe("DevOps Senior");
     act(() => result.current.goBack());
     expect(result.current.currentStep).toBe(1);
+  });
+
+  it("guarda cada paso en el historial y el botón atrás del navegador vuelve al anterior con los datos", async () => {
+    const { result } = renderHook(() => useJobOfferForm());
+    fillInformation(result);
+    act(() => result.current.handleContinue());
+
+    expect(window.location.search).toBe("?paso=2");
+
+    act(() => window.history.back());
+
+    await waitFor(() => expect(result.current.currentStep).toBe(1));
+    expect(window.location.search).toBe("");
+    expect(result.current.conditions.title).toBe("DevOps Senior");
+  });
+
+  it("reset deja la URL sin paso", () => {
+    const { result } = renderHook(() => useJobOfferForm());
+    fillInformation(result);
+    act(() => result.current.handleContinue());
+
+    act(() => result.current.reset());
+
+    expect(window.location.search).toBe("");
   });
 
   it("no pasa del paso 3", () => {

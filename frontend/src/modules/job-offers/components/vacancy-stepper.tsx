@@ -35,7 +35,7 @@ function StepWithLabel({ number, label, state,
       <StepCircle number={number} state={state} />
       <span
         className={
-          "absolute top-full mt-2 whitespace-nowrap text-center text-xs font-semibold " +
+          "absolute top-full mt-2 hidden whitespace-nowrap text-center text-xs font-semibold lg:block " +
           (state === "pending" ? "text-text-secondary" : "text-ink")
         }
       >
@@ -51,10 +51,10 @@ export function VacancyStepper({ currentStep }: VacancyStepperProps) {
   const state3: CircleState = currentStep === 3 ? "active" : "pending";
 
   return (
-    <div className="mt-6 flex items-center px-25 pb-8">
-      <StepWithLabel number={1} label="Informacion y condiciones" state={state1} />
+    <div className="mt-6 flex items-center px-2 lg:px-25 lg:pb-8">
+      <StepWithLabel number={1} label="Información y condiciones" state={state1} />
       <StepLine filled={currentStep > 1} />
-      <StepWithLabel number={2} label="Descripcion y requisitos" state={state2} />
+      <StepWithLabel number={2} label="Descripción y requisitos" state={state2} />
       <StepLine filled={currentStep > 2} />
       <StepWithLabel number={3} label="Vista previa" state={state3} />
     </div>

@@ -7,7 +7,7 @@ export interface CreateJobOfferPayload {
   contractType: ContractType;
   category: string;
   positionsAvailable: number;
-  salaryMin: number;
+  salaryMin?: number;
   salaryMax?: number;
   languages: string;
   locationUrl: string;

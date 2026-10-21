@@ -1,17 +1,21 @@
 export const MODALITIES = ["Presencial", "Remoto", "Híbrido"] as const;
 export const CONTRACT_TYPES = ["Tiempo completo", "Medio tiempo", "Pasantía"] as const;
+export const INTERNSHIP_CONTRACT_TYPE = "Pasantía";
+export const SALARY_TO_BE_AGREED = "A convenir";
+export const FIELD_FOCUS_CLASS = "focus-visible:border-ink focus-visible:ring-ink/20";
 
 export const MAX_TITLE_CHARS = 60;
 export const MAX_LANGUAGES_CHARS = 100;
 export const MAX_DESCRIPTION_CHARS = 3000;
 export const MAX_VACANCIES = 500;
+export const MAX_SALARY_DIGITS = 9;
 export const MAX_SKILLS = 10;
 export const DESCRIPTION_PREVIEW_CHARS = 125;
 
 export const TITLE_ALLOWED_REGEX = /^[a-zA-Z0-9\sÁÉÍÓÚÜÑáéíóúüñ]+$/;
 export const TITLE_DISALLOWED_CHARS_REGEX = /[^a-zA-Z0-9\sÁÉÍÓÚÜÑáéíóúüñ]/g;
 export const GOOGLE_MAPS_LINK_REGEX =
-  /^https:\/\/(maps\.google\.com\/|www\.google\.com\/maps|goo\.gl\/maps\/|maps\.app\.goo\.gl\/)/;
+  /^https:\/\/(?:maps\.app\.goo\.gl\/[\w-]+|goo\.gl\/maps\/[\w-]+|(?:www\.)?google\.com(?:\.[a-z]{2})?\/maps\/place\/[^/\s?#]+\/@-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?,\d+(?:\.\d+)?[zm])(?:[/?#]\S*)?$/;
 
 export const EDITING_KEYS = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Home", "End"];
 
