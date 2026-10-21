@@ -1,5 +1,5 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getMentorOrientationTypes,
@@ -72,7 +72,10 @@ describe("OrientationConfigView", () => {
     vi.mocked(updateMentorOrientationTypes).mockResolvedValue();
   });
 
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
 
   it("muestra loading mientras carga las consultas", () => {
     vi.mocked(getOrientationTypes).mockReturnValue(new Promise(() => {}));
@@ -100,6 +103,21 @@ describe("OrientationConfigView", () => {
     expectOrientationStyle("Orientación profesional", "unselected");
     expect(getOrientationTypes).toHaveBeenCalledTimes(1);
     expect(getMentorOrientationTypes).toHaveBeenCalledTimes(1);
+  });
+
+  it("solo permite guardar cuando la selección cambió", async () => {
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+
+    const saveButton = screen.getByRole("button", { name: "Guardar cambios" });
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.click(checkbox("Orientación profesional"));
+    expect(saveButton).toBeEnabled();
+
+    fireEvent.click(checkbox("Orientación profesional"));
+    expect(saveButton).toBeDisabled();
+    expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
   });
 
   it("permite agregar y quitar multiples orientaciones", async () => {
@@ -171,6 +189,40 @@ describe("OrientationConfigView", () => {
     expectOrientationStyle("Búsqueda de empleo", "saved");
     expectOrientationStyle("Orientación profesional", "saved");
     expectOrientationStyle("Orientación técnica", "unselected");
+  });
+
+  it("oculta el mensaje de éxito después de cinco segundos", async () => {
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+    vi.useFakeTimers();
+
+    fireEvent.click(checkbox("Orientación profesional"));
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sí, guardar cambios" }),
+    );
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(updateMentorOrientationTypes).toHaveBeenCalledOnce();
+    expect(
+      screen.getByText("Tipos de orientación actualizados correctamente"),
+    ).toBeInTheDocument();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(4999);
+    });
+    expect(
+      screen.getByText("Tipos de orientación actualizados correctamente"),
+    ).toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(
+      screen.queryByText("Tipos de orientación actualizados correctamente"),
+    ).not.toBeInTheDocument();
   });
 
   it("mantiene la selección bloqueada mientras el backend confirma el guardado", async () => {
@@ -307,6 +359,7 @@ describe("OrientationConfigView", () => {
 
     render(<OrientationConfigView />);
     await screen.findByRole("checkbox", { name: "Orientación técnica" });
+    fireEvent.click(checkbox("Orientación profesional"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
     fireEvent.click(
       screen.getByRole("button", { name: "Sí, guardar cambios" }),

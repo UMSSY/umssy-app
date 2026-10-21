@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import {
@@ -29,9 +29,19 @@ export function OrientationConfigView() {
   const { orientationTypes, savedIds, isLoading, isSaving, hasLoadError, isMentorActive, retry, save } = useOrientationConfig();
   const [draftIds, setSelectedIds] = useState<string[] | null>(null);
   const selectedIds = draftIds ?? savedIds;
+  const hasChanges =
+    selectedIds.length !== savedIds.length ||
+    selectedIds.some((id) => !savedIds.includes(id));
   const [showToast, setShowToast] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!showToast) return;
+
+    const timeoutId = window.setTimeout(() => setShowToast(false), 5000);
+    return () => window.clearTimeout(timeoutId);
+  }, [showToast]);
 
   const handleCheckboxChange = (id: string) => {
     setErrorMessage(null);
@@ -67,7 +77,9 @@ export function OrientationConfigView() {
   };
 
   const handleOpenConfirmModal = () => {
-    if (selectedIds.length === 0 || isSaving || hasLoadError) return;
+    if (!hasChanges || selectedIds.length === 0 || isSaving || hasLoadError) {
+      return;
+    }
 
     setIsConfirmModalOpen(true);
   };
@@ -188,7 +200,7 @@ export function OrientationConfigView() {
                         <div className="flex min-w-0 flex-1 flex-col gap-1">
                           <span
                             id={`orientation-label-${option.id}`}
-                            className="min-w-0 break-words text-sm font-semibold text-ink"
+                            className="min-w-0 text-sm font-semibold break-words text-ink"
                           >
                             {option.name}
                           </span>
@@ -223,7 +235,7 @@ export function OrientationConfigView() {
                 </div>
               )}
             </CardContent>
-            <CardFooter className="mx-4 flex items-center justify-between gap-4 border-t border-border bg-transparent px-0 pb-4 pt-4 sm:mx-8 sm:pb-8">
+            <CardFooter className="mx-4 flex items-center justify-between gap-4 border-t border-border bg-transparent px-0 py-4 sm:mx-8 sm:pb-8">
               <Link
                 href="/mentors/participation"
                 className={buttonVariants({
@@ -236,7 +248,12 @@ export function OrientationConfigView() {
               <Button
                 type="button"
                 onClick={handleOpenConfirmModal}
-                disabled={selectedIds.length === 0 || isSaving || hasLoadError}
+                disabled={
+                  !hasChanges ||
+                  selectedIds.length === 0 ||
+                  isSaving ||
+                  hasLoadError
+                }
                 className="h-10 rounded-lg bg-accent px-6 text-sm font-semibold text-white shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSaving ? "Guardando..." : "Guardar cambios"}
@@ -261,7 +278,7 @@ export function OrientationConfigView() {
               Se actualizarán los tipos de orientación que seleccionaste.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mx-0 mb-0 mt-8 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
+          <AlertDialogFooter className="mx-0 mt-8 mb-0 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
             <AlertDialogCancel
               type="button"
               disabled={isSaving}
@@ -286,11 +303,11 @@ export function OrientationConfigView() {
 
       {showToast && (
         <Alert
-          className="fixed right-4 bottom-4 left-4 z-50 flex w-auto items-center gap-3 rounded-xl border-0 bg-ink px-6 py-3 text-white shadow-none sm:right-8 sm:bottom-8 sm:left-auto"
+          className="fixed inset-x-4 bottom-4 z-50 flex w-auto items-center gap-4 rounded-2xl border-0 bg-green-700 px-8 py-5 text-white shadow-lg sm:right-8 sm:bottom-8 sm:left-auto"
           role="status"
         >
-          <CheckCircle2 size={20} className="text-ink-soft" />
-          <span className="text-sm font-medium">
+          <CheckCircle2 size={26} className="shrink-0 text-green-100" />
+          <span className="text-base font-semibold sm:text-lg">
             Tipos de orientación actualizados correctamente
           </span>
         </Alert>
