@@ -17,7 +17,7 @@ export function AffinityRadarDot({ area, cx, cy, onAreaClick }: AffinityRadarDot
         cy={cy}
         r={4.5}
         strokeWidth={2}
-        className="fill-accent stroke-surface motion-safe:transition-[r] group-hover:[r:6px]"
+        className="fill-accent stroke-surface group-hover:[r:6px] motion-safe:transition-[r]"
       />
     </g>
   );

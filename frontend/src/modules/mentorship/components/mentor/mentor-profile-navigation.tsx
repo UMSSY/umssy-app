@@ -17,13 +17,13 @@ export function MentorProfileNavigation({
   ];
 
   return (
-    <div className="mb-6 [&>nav]:mb-0 [&>nav]:text-umssy-secondary [&_svg]:size-4 [&_[aria-current=page]]:text-umssy-ink">
+    <div className="mb-6 [&_[aria-current=page]]:text-ink [&_svg]:size-4 [&>nav]:mb-0 [&>nav]:text-text-secondary">
       <Link
         href="/mentorship/mentors"
         className={buttonVariants({
           variant: "outline",
           className:
-            "mb-4 h-auto gap-2 rounded-lg border-umssy-border bg-white px-4 py-2 text-sm font-semibold text-umssy-ink shadow-sm transition hover:bg-umssy-background hover:text-umssy-ink hover:shadow-md active:translate-y-0 focus-visible:ring-2 focus-visible:ring-umssy-red",
+            "mb-4 h-auto gap-2 rounded-lg border-border bg-white px-4 py-2 text-sm font-semibold text-ink shadow-sm transition hover:bg-surface-soft hover:text-ink hover:shadow-md active:translate-y-0 focus-visible:ring-2 focus-visible:ring-accent",
         })}
       >
         <ArrowLeft size={16} />

@@ -66,7 +66,7 @@ export function AppShell({
           <header
             className={
               fullBleed
-                ? "absolute left-4 top-3 z-10 flex items-center"
+                ? "absolute top-3 left-4 z-10 flex items-center"
                 : "flex items-center px-4 py-3"
             }
           >

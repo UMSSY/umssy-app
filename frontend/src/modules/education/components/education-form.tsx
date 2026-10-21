@@ -118,7 +118,7 @@ export function EducationForm({
               value={values.startDate}
               disabled={isPending}
               onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              className="h-12 w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
             />
           </FormField>
           <FormField id="education-endDate" label={EDUCATION_UI_TEXTS.endDateLabel} isRequired={!allowMissingEndDate} error={errors.endDate}>
@@ -132,7 +132,7 @@ export function EducationForm({
               value={values.endDate}
               disabled={isPending}
               onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              className="h-12 w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
             />
           </FormField>
         </div>
@@ -149,7 +149,7 @@ export function EducationForm({
               value={values.description ?? ""}
               disabled={isPending}
               onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 resize-y pt-3 pb-9 field-sizing-fixed min-h-0 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              className="field-sizing-fixed min-h-0 w-full resize-y rounded-lg border border-border bg-surface px-4 pt-3 pb-9 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
             />
             <span id="education-description-count" className="pointer-events-none absolute right-6 bottom-3 text-xs text-text-secondary">
               {(values.description ?? "").length}/{EDUCATION_DESCRIPTION_MAX_LENGTH}

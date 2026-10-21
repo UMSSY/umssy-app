@@ -132,7 +132,7 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
         </div>
 
         {isEditing ? (
-          <div className="min-w-0 animate-in fade-in slide-in-from-right duration-200">
+          <div className="min-w-0 animate-in duration-200 fade-in slide-in-from-right">
             {isLoading ? (
               <AvailabilityLoading />
             ) : (

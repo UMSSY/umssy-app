@@ -26,7 +26,7 @@ export function MyPassesEmptyState() {
         href="/events"
         className={cn(
           buttonVariants(),
-          'mt-7 h-auto min-h-11 max-w-full gap-2 rounded-xl bg-ink px-5 py-3 text-surface whitespace-normal hover:bg-ink/90',
+          'mt-7 h-auto min-h-11 max-w-full gap-2 rounded-xl bg-ink px-5 py-3 whitespace-normal text-surface hover:bg-ink/90',
         )}
       >
         Explorar talleres disponibles

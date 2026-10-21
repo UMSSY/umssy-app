@@ -1,5 +1,7 @@
+"use client";
 
-'use client';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 import { Conversation, ConversationFilter } from '../types/conversation.types';
 import { ConversationItem } from './conversation-item';
@@ -48,31 +50,32 @@ export function ConversationList({
   };
 
   return (
-    <div className="relative flex flex-col h-full bg-white border-r border-slate-200">
-      <div className="p-4 border-b border-slate-100 space-y-3">
+    <div className="relative flex h-full flex-col border-r border-slate-200 bg-white">
+      <div className="space-y-3 border-b border-slate-100 p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Chats</h2>
+          <h2 className="text-xl font-bold tracking-tight text-slate-900">Chats</h2>
           {onStartNewChat && activeFilter !== 'unread' && (
-            <button
+            <Button
+              unstyled
               type="button"
               onClick={onStartNewChat}
-              className="hidden md:inline-flex items-center text-xs font-bold text-red-600 hover:text-red-700"
+              className="hidden items-center text-xs font-bold text-red-600 hover:text-red-700 md:inline-flex"
             >
               + Nuevo
-            </button>
+            </Button>
           )}
         </div>
 
         <div className="relative">
-          <input
+          <Input unstyled
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Buscar personas..."
-            className="w-full pl-9 pr-3 py-2 text-sm bg-slate-100 border border-transparent rounded-lg focus:outline-none focus:bg-white focus:border-[#0B2545] transition-all text-slate-800 placeholder-slate-400"
+            className="w-full rounded-lg border border-transparent bg-slate-100 py-2 pr-3 pl-9 text-sm text-slate-800 placeholder-slate-400 transition-all focus:border-[#0B2545] focus:bg-white focus:outline-none"
           />
           <svg
-            className="w-4 h-4 text-slate-400 absolute left-3 top-3"
+            className="absolute top-3 left-3 size-4 text-slate-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -87,28 +90,30 @@ export function ConversationList({
         </div>
 
         <div className="flex items-center gap-2 pt-1">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={() => onFilterChange('all')}
-            className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all ${
+            className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
               activeFilter === 'all'
                 ? 'bg-[#0B2545] text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             Todos
-          </button>
-          <button
+          </Button>
+          <Button
+            unstyled
             type="button"
             onClick={() => onFilterChange('unread')}
-            className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all ${
+            className={`rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
               activeFilter === 'unread'
                 ? 'bg-[#0B2545] text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             Sin leer
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -137,13 +142,14 @@ export function ConversationList({
 
             {hasMore && (
               <div className="p-3 text-center">
-                <button
+                <Button
+                  unstyled
                   type="button"
                   onClick={onLoadMore}
                   className="text-xs font-semibold text-blue-600 hover:text-blue-800"
                 >
                   Cargar mas conversaciones
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -151,13 +157,14 @@ export function ConversationList({
       </div>
 
       {onStartNewChat && activeFilter !== 'unread' && (
-        <button
+        <Button
+          unstyled
           type="button"
           onClick={onStartNewChat}
-          className="md:hidden absolute bottom-6 right-4 w-12 h-12 bg-red-600 text-white rounded-xl shadow-lg flex items-center justify-center hover:bg-red-700 active:scale-95 transition-all focus:outline-none"
+          className="absolute right-4 bottom-6 flex size-12 items-center justify-center rounded-xl bg-red-600 text-white shadow-lg transition-all hover:bg-red-700 focus:outline-none active:scale-95 md:hidden"
           aria-label="Iniciar nueva conversacion"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -165,7 +172,7 @@ export function ConversationList({
               d="M12 4v16m8-8H4"
             />
           </svg>
-        </button>
+        </Button>
       )}
     </div>
   );

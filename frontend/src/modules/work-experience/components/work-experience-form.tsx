@@ -78,7 +78,7 @@ export function WorkExperienceForm({
             value={values.companyName}
             disabled={isPending}
             onChange={handleChange}
-            className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+            className="h-12 w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
           />
         </FormField>
         <FormField id="work-experience-position" error={errors.position} label="Cargo" isRequired>
@@ -92,7 +92,7 @@ export function WorkExperienceForm({
             value={values.position}
             disabled={isPending}
             onChange={handleChange}
-            className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+            className="h-12 w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
           />
           <p className="mt-1 text-right text-[12px] text-text-secondary">
             {values.position.length}/{WORK_EXPERIENCE_POSITION_MAX_LENGTH}
@@ -110,7 +110,7 @@ export function WorkExperienceForm({
               value={values.startDate}
               disabled={isPending}
               onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              className="h-12 w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
             />
           </FormField>
           <FormField id="work-experience-endDate" error={errors.endDate} label="Hasta">
@@ -124,7 +124,7 @@ export function WorkExperienceForm({
               value={values.endDate}
               disabled={isPending || values.isCurrent}
               onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              className="h-12 w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
             />
           </FormField>
         </div>
@@ -154,7 +154,7 @@ export function WorkExperienceForm({
             value={values.description}
             disabled={isPending}
             onChange={handleChange}
-            className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 resize-y py-3 field-sizing-fixed min-h-0 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+            className="field-sizing-fixed min-h-0 w-full resize-y rounded-lg border border-border bg-surface px-4 py-3 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
           />
           <p className="mt-1 text-right text-[12px] text-text-secondary">
             {values.description.length}/{WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH}

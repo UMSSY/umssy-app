@@ -38,7 +38,7 @@ export function AreaDetailPanel({ area, onClose, className }: AreaDetailPanelPro
         gap={area.gap}
         globalAverage={area.globalAverage}
       />
-      <div className="grid max-h-[60vh] min-w-0 grid-cols-1 divide-y divide-border overflow-y-auto [scrollbar-color:var(--color-border-strong)_transparent] [scrollbar-width:thin] lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+      <div className="grid max-h-[60vh] min-w-0 [scrollbar-width:thin] [scrollbar-color:var(--color-border-strong)_transparent] grid-cols-1 divide-y divide-border overflow-y-auto lg:grid-cols-3 lg:divide-x lg:divide-y-0">
         <AreaSection
           title="Cursos y certificaciones"
           icon={GraduationCap}
