@@ -5,7 +5,7 @@ import type { ProfileTabsProps } from "../types/profile-tabs-props.types";
 
 export function ProfileTabs({ activeTab }: ProfileTabsProps) {
   return (
-    <nav aria-label="Secciones del perfil" className="mt-8 mb-8 border-b border-border">
+    <nav aria-label="Secciones del perfil" className="my-8 border-b border-border">
       <ul className="flex gap-10">
         {PROFILE_TABS.map((tab) => {
           const isActive = tab.id === activeTab;

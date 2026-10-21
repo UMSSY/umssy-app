@@ -1,5 +1,6 @@
+"use client";
 
-'use client';
+import { Button } from "@/components/ui/button";
 
 interface ChatConnectionDialogProps {
   open: boolean;
@@ -40,21 +41,23 @@ export function ChatConnectionDialog({
         </p>
 
         <div className="mt-6 flex justify-end gap-3">
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={onClose}
             className="rounded-lg border border-slate-300 px-4 py-2 text-sm"
           >
             Cerrar
-          </button>
+          </Button>
 
-          <button
+          <Button
+            unstyled
             type="button"
             onClick={onRetry}
             className="rounded-lg bg-[#0B1F2E] px-4 py-2 text-sm text-white"
           >
             Reintentar
-          </button>
+          </Button>
         </div>
       </div>
     </div>

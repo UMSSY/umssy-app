@@ -65,7 +65,7 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
             return (
               <TableRow key={field.key} className="border-border">
                 <TableCell className="px-4 py-3 align-middle whitespace-normal">
-                  <Label htmlFor={`contrast-${field.key}`} className="font-semibold leading-snug break-words text-ink">
+                  <Label htmlFor={`contrast-${field.key}`} className="leading-snug font-semibold break-words text-ink">
                     {field.label}
                   </Label>
                 </TableCell>

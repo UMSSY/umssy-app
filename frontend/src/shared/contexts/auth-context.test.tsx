@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -16,7 +17,7 @@ function SessionConsumer() {
   return (
     <>
       <p data-testid="roles">{roles.join(",")}</p>
-      <button onClick={() => void refreshRoles()}>Actualizar roles</button>
+      <Button unstyled onClick={() => void refreshRoles()}>Actualizar roles</Button>
     </>
   );
 }

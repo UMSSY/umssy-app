@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { getInitials } from "@/shared/utils/get-initials";
 
 import type { ReviewProfile } from "../types/review-queue.types";
@@ -25,7 +26,8 @@ export function ReviewProfileList({
           const isSelected = selectedProfileId === profile.id;
 
           return (
-            <button
+            <Button
+              unstyled
               key={profile.id}
               type="button"
               onClick={() => onProfileSelect(profile)}
@@ -82,7 +84,7 @@ export function ReviewProfileList({
                   </div>
                 </div>
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>

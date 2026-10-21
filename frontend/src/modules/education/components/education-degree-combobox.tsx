@@ -95,7 +95,7 @@ export function EducationDegreeCombobox({ id, value, degrees = [], error, disabl
                 variant="ghost"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => select(degree.name)}
-                className="h-auto min-h-10 w-full justify-start whitespace-normal break-words px-3 py-2 text-left font-normal aria-selected:bg-surface-soft"
+                className="h-auto min-h-10 w-full justify-start px-3 py-2 text-left font-normal break-words whitespace-normal aria-selected:bg-surface-soft"
               >
                 {degree.name}
               </Button>

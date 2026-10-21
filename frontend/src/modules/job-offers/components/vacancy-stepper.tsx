@@ -10,14 +10,14 @@ type CircleState = "done" | "active" | "pending";
 function StepCircle({ number, state }: { number: number; state: CircleState }) {
   if (state === "pending") {
     return (
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border-strong text-xs font-bold text-text-secondary">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-border-strong text-xs font-bold text-text-secondary">
         {number}
       </span>
     );
   }
   return (
-    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-white">
-      {state === "done" ? <Check className="h-3.5 w-3.5" /> : number}
+    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-white">
+      {state === "done" ? <Check className="size-3.5" /> : number}
     </span>
   );
 }

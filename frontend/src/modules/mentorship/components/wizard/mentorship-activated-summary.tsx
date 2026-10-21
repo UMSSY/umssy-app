@@ -82,7 +82,7 @@ export function MentorshipActivatedSummary({
           </Card>
         </CardContent>
 
-        <CardFooter className="border-0 bg-transparent px-4 pb-4 pt-0 sm:px-6 sm:pb-6">
+        <CardFooter className="border-0 bg-transparent px-4 pt-0 pb-4 sm:px-6 sm:pb-6">
           <Link
             href="/mentorship/mentors"
             className={buttonVariants({

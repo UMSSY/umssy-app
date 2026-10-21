@@ -54,8 +54,8 @@ export function MentorshipWizardShell({
           </CardContent>
 
           <CardFooter
-            className={`border-0 bg-transparent px-4 pb-4 pt-0 sm:px-6 sm:pb-6 ${currentStep < 4
-                ? "items-stretch flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between"
+            className={`border-0 bg-transparent px-4 pt-0 pb-4 sm:px-6 sm:pb-6 ${currentStep < 4
+                ? "flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between"
                 : ""
               }`}
           >
@@ -65,7 +65,7 @@ export function MentorshipWizardShell({
                 variant="outline"
                 onClick={onBack}
                 disabled={!canGoBack}
-                className="h-11 sm:h-10 w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-border-strong bg-surface px-4 sm:px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex h-11 w-full items-center justify-center gap-2 border border-border-strong bg-surface px-4 text-[14px] font-semibold text-ink hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-50 sm:h-10 sm:w-auto sm:px-6"
                >
                 ← Volver
               </Button>
@@ -75,7 +75,7 @@ export function MentorshipWizardShell({
                 type="button"
                 onClick={onNext}
                 disabled={!canAdvance}
-                className="h-11 sm:h-10 w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-transparent bg-accent px-4 sm:px-6 text-[14px] font-semibold text-white hover:bg-danger disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex h-11 w-full items-center justify-center gap-2 border border-transparent bg-accent px-4 text-[14px] font-semibold text-white hover:bg-danger disabled:cursor-not-allowed disabled:opacity-50 sm:h-10 sm:w-auto sm:px-6"
               >
                 Continuar →
               </Button>
