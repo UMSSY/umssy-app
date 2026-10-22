@@ -10,11 +10,15 @@ import {
   markConversationAsRead,
 } from '../services/chat-api';
 import { setStoredConversationUnreadCount } from '../services/message-storage';
+import { useMessagingUi } from '../contexts/messaging-ui-context';
 
 const PAGE_SIZE = 10;
 
 export function useConversations() {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const ui = useMessagingUi();
+  const [localSelectedId, setLocalSelectedId] = useState<string | null>(null);
+  const selectedId = ui ? ui.selectedId : localSelectedId;
+  const setSelectedId = ui?.setSelectedId ?? setLocalSelectedId;
   const [filter, setFilter] = useState<ConversationFilter>('all');
   const [keptInUnreadId, setKeptInUnreadId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');

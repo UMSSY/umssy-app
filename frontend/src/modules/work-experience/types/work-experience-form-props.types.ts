@@ -6,5 +6,6 @@ export interface WorkExperienceFormProps {
   isPending?: boolean;
   feedback?: Feedback | null;
   onSubmit: (values: WorkExperienceFormValues) => void | Promise<void>;
+  onValuesChange?: () => void;
   onCancel: () => void;
 }

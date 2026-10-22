@@ -75,7 +75,7 @@ describe("ProfileOverviewView", () => {
     expect(screen.getByText(/Completa tu perfil/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Completar perfil" })).toHaveAttribute(
       "href",
-      "/profile/personal-info",
+      "/profile/settings#personal-info",
     );
     expect(screen.getByText("Aún no agregaste un titular profesional")).toBeInTheDocument();
     expect(screen.getAllByText("Sin registrar")).toHaveLength(3);
@@ -103,10 +103,10 @@ describe("ProfileOverviewView", () => {
 
     expect(
       await screen.findByRole("link", { name: "Editar datos personales" }),
-    ).toHaveAttribute("href", "/profile/personal-info");
+    ).toHaveAttribute("href", "/profile/settings#personal-info");
     expect(screen.getByRole("link", { name: "Editar presentación profesional" })).toHaveAttribute(
       "href",
-      "/profile/presentation",
+      "/profile/settings#presentation",
     );
   });
 
@@ -119,20 +119,29 @@ describe("ProfileOverviewView", () => {
       "Tu sesión no es válida. Inicia sesión nuevamente.",
     );
   });
-  it("links directly to existing trajectory sections without inventing saved data", async () => {
+  it("shows trajectory sections rather than a second navigation directory", async () => {
     render(<ProfileOverviewView />);
     await screen.findByText("Valeria Quispe");
-    expect(screen.getByRole("link", { name: "Formación académica" })).toHaveAttribute("href", "/profile/trajectory/education");
-    expect(screen.getByRole("link", { name: "Experiencia laboral" })).toHaveAttribute("href", "/profile/trajectory/experience");
-    expect(screen.getByRole("link", { name: "Habilidades" })).toHaveAttribute("href", "/profile/trajectory/skills");
-    expect(screen.getByRole("link", { name: "Certificaciones" })).toHaveAttribute("href", "/profile/trajectory/certifications");
-    expect(screen.getByRole("link", { name: "Documentos y CV" })).toHaveAttribute("href", "/profile/documents");
+    expect(await screen.findByRole("region", { name: "Formación académica" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "Experiencia laboral" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "Habilidades" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "Certificaciones" })).toBeInTheDocument();
+    expect(screen.queryByRole("complementary", { name: "Tu trayectoria" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Recorrido del perfil" })).not.toBeInTheDocument();
   });
 
   it("suggests presentation when contact information is already complete", async () => {
     vi.mocked(profileService.getProfile).mockResolvedValue({ ...COMPLETE_PROFILE, aboutMe: null });
     render(<ProfileOverviewView />);
-    expect(await screen.findByRole("link", { name: "Completar perfil" })).toHaveAttribute("href", "/profile/presentation");
+    expect(await screen.findByRole("link", { name: "Completar perfil" })).toHaveAttribute("href", "/profile/settings#presentation");
   });
 
 });
+
+vi.mock("@/modules/education", () => ({ EducationProfileSection: () => <section aria-label="Formación académica"><h2>Formación académica</h2></section> }));
+
+vi.mock("@/modules/work-experience", () => ({ WorkExperienceProfileSection: () => <section aria-label="Experiencia laboral"><h2>Experiencia laboral</h2></section> }));
+
+vi.mock("@/modules/skills", () => ({ SkillsProfileSection: () => <section aria-label="Habilidades"><h2>Habilidades</h2></section> }));
+
+vi.mock("@/modules/certifications", () => ({ CertificationProfileSection: () => <section aria-label="Certificaciones"><h2>Certificaciones</h2></section> }));

@@ -69,7 +69,7 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
             type="button"
             variant="outline"
             disabled={isDisabled}
-            className="h-auto rounded-full border-dashed border-border-strong bg-surface-soft px-4 py-1.5 text-[13px] font-medium text-ink-soft hover:bg-surface-soft"
+            className="h-auto rounded-full border-dashed border-border-strong bg-surface-soft px-4 py-1.5 text-sm font-medium text-ink-soft hover:bg-surface-soft"
           />
         }
       >
@@ -95,7 +95,7 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
           />
 
           {normalizedSearch && !chosen && results.length === 0 && (
-            <p role="status" className="mt-2 text-[12px] text-text-secondary">
+            <p role="status" className="mt-2 text-xs text-text-secondary">
               {SKILL_SEARCH_TEXT.noResults}
             </p>
           )}
@@ -110,7 +110,7 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
                       type="button"
                       disabled={isAlreadySelected}
                       onClick={() => handleChoose(skill)}
-                      className="flex w-full items-center justify-between px-3 py-2 text-left text-[13px] text-ink hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-60"
+                      className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-ink hover:bg-surface-soft disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {skill.name}
                       {isAlreadySelected && <Badge variant="secondary">{SKILL_SEARCH_TEXT.alreadySelected}</Badge>}
@@ -128,7 +128,7 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
             type="button"
             disabled={!chosen}
             onClick={handleAdd}
-            className="bg-accent text-white hover:bg-brand-hover"
+            className="bg-primary text-primary-foreground hover:bg-brand-hover"
           >
             {SKILL_SEARCH_TEXT.confirm}
           </Button>
