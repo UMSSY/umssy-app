@@ -1,6 +1,6 @@
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
 import { getRouteRoles } from "@/shared/utils/get-route-roles";
-import { CalendarDays, ChartNoAxesCombined, House, MessageCircle, Users, BriefcaseBusiness, Building2, Inbox, Radar } from "lucide-react";
+import { CalendarDays, ChartNoAxesCombined, ClipboardList, House, MessageCircle, Users, BriefcaseBusiness, Building2, Inbox, Radar } from "lucide-react";
 
 export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Inicio", icon: House, href: "/dashboard", roles: getRouteRoles("/dashboard") },
@@ -12,4 +12,5 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Solicitudes", icon: Inbox, href: "/backoffice/solicitudes", roles: getRouteRoles("/backoffice") },
   { label: "Revisión de radares", icon: Radar, href: "/affinity-radar/review-queue", roles: getRouteRoles("/affinity-radar/review-queue") },
   { label: "Reportes", icon: ChartNoAxesCombined, href: "/backoffice/reports/registered-users", activePathPatterns: [/^\/backoffice\/reports(?:\/|$)/], roles: getRouteRoles("/backoffice") },
+  { label: "Encuestas", icon: ClipboardList, href: "/backoffice/surveys", roles: getRouteRoles("/backoffice/surveys") },
 ];

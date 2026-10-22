@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, House, Inbox, MessageCircle, Radar, UserRound, Users } from "lucide-react";
+import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, ClipboardList, House, Inbox, MessageCircle, Radar, UserRound, Users } from "lucide-react";
 import type { WorkspaceSectionProps } from "@/shared/types/workspace-section-props.types";
 
 export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
@@ -47,6 +47,15 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Usuarios aceptados", href: "/backoffice/reports/registered-users" },
       { label: "Usuarios rechazados", href: "/backoffice/reports/rejected-users" },
       { label: "Historial de reportes", href: "/backoffice/reports/history" },
+    ],
+  },
+  // Va antes de "requests", que abarca todo /backoffice.
+  {
+    id: "surveys", label: "Encuestas", icon: ClipboardList, patterns: [/^\/backoffice\/surveys(?:\/|$)/],
+    items: [
+      { label: "Encuestas", href: "/backoffice/surveys" },
+      { label: "Crear encuesta", href: "/backoffice/surveys/create" },
+      { label: "Estadísticas de encuestas", href: "/backoffice/surveys/statistics" },
     ],
   },
   { id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [] },

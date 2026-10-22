@@ -61,6 +61,8 @@ describe("AppSidebar", () => {
     ["/mentorship/orientation","Mentorías"],
     ["/area-detail-preview","Empresas"],
     ["/backoffice/reports/history","Reportes"],
+    ["/backoffice/surveys","Encuestas"],
+    ["/backoffice/surveys/statistics","Encuestas"],
   ])("marks the containing area for %s", (pathname,active) => {
     route.pathname=pathname; renderSidebar();
     expect(screen.getByRole("link",{name:active})).toHaveAttribute("aria-current","page");
@@ -87,9 +89,11 @@ describe("AppSidebar", () => {
     const view=renderSidebar();
     expect(screen.queryByRole("link",{name:"Reportes"})).toBeNull();
     expect(screen.getByRole("link",{name:"Mentorías"})).toBeInTheDocument();
+    expect(screen.queryByRole("link",{name:"Encuestas"})).toBeNull();
     sessionRoles.current=["administrativo"];
     view.rerender(<SidebarProvider><AppSidebar /></SidebarProvider>);
     expect(screen.getByRole("link",{name:"Reportes"})).toBeInTheDocument();
     expect(screen.queryByRole("link",{name:"Mentorías"})).toBeNull();
+    expect(screen.getByRole("link",{name:"Encuestas"})).toHaveAttribute("href","/backoffice/surveys");
   });
 });

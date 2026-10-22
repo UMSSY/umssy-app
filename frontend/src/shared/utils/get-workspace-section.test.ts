@@ -19,6 +19,9 @@ describe("Unified navigation", () => {
     expect(getWorkspaceSection("/backoffice/reports/history", ["administrativo"])?.id).toBe("reports");
     expect(getWorkspaceSection("/backoffice/solicitudes/id", ["administrativo"])?.id).toBe("requests");
   });
+  it("resolves surveys before the broader administrative area", () => {
+    expect(getWorkspaceSection("/backoffice/surveys", ["administrativo"])?.id).toBe("surveys");
+  });
   it("does not leak mentor-only settings into the student directory", () => {
     expect(getWorkspaceSection("/mentorship/mentors", ["estudiante"])?.items.map(({ href }) => href)).toEqual(["/mentorship/mentors"]);
     expect(getWorkspaceSection("/mentorship/mentors", ["mentor"])?.items.some(({ href }) => href === "/mentor/availability")).toBe(true);
