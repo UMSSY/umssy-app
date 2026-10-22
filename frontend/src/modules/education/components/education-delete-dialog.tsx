@@ -30,20 +30,20 @@ export function EducationDeleteDialog({
     >
       <AlertDialogContent
         aria-busy={isDeleting}
-        className="max-w-md gap-0 rounded-2xl border border-border bg-surface p-8 text-ink shadow-sm ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md"
+        className="max-w-md gap-0 rounded-lg border border-border bg-surface p-8 text-ink shadow-sm ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md"
       >
         <AlertDialogHeader className="place-items-start text-left">
-          <AlertDialogTitle className="font-tight text-[22px] font-bold text-ink">
+          <AlertDialogTitle className="font-tight text-2xl font-bold text-ink">
             {EDUCATION_UI_TEXTS.deleteTitle}
           </AlertDialogTitle>
-          <AlertDialogDescription className="mt-2 text-[15px] text-text-secondary">
+          <AlertDialogDescription className="mt-2 text-base text-text-secondary">
             {EDUCATION_UI_TEXTS.deleteMessage(degree)}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <FeedbackMessage
           feedback={feedback?.type === "error" ? feedback : null}
         />
-        <AlertDialogFooter className="mx-0 mb-0 mt-8 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
+        <AlertDialogFooter className="mx-0 mt-8 mb-0 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
           <AlertDialogCancel
             disabled={isDeleting}
             className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
@@ -53,7 +53,7 @@ export function EducationDeleteDialog({
           <AlertDialogAction
             disabled={isDeleting}
             onClick={onConfirm}
-            className="h-12 bg-ink px-6 text-[14px] font-semibold text-white hover:bg-ink-soft"
+            className="h-10 bg-critical-action px-6 text-sm font-semibold text-critical-action-foreground hover:bg-critical-action/90"
           >
             {isDeleting ? (
               <LoaderCircle aria-hidden="true" className="animate-spin" />

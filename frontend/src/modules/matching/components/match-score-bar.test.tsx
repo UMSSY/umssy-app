@@ -33,6 +33,6 @@ describe("MatchScoreBar", () => {
   it("uses themed UI track and indicator for compatibility", () => {
     const { container } = render(<MatchScoreBar score={75} />);
     expect(container.querySelector('[data-slot="progress-track"]')).toHaveClass("bg-muted");
-    expect(container.querySelector('[data-slot="progress-indicator"]')).toHaveClass("bg-primary");
+    expect(container.querySelector('[data-slot="progress-indicator"]')).toHaveClass("bg-progress");
   });
 });

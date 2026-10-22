@@ -1,5 +1,5 @@
-import { VacanciesView } from "@/modules/vacancies";
+import { redirect } from "next/navigation";
 
 export default function VacanciesPage() {
-  return <VacanciesView />;
+  return redirect("/vacancies");
 }

@@ -6,6 +6,7 @@ import { AffinityRadarChart } from "../components/affinity-radar-chart";
 import { AreaBreakdownPanel } from "../components/area-breakdown-panel";
 import { KpiCards } from "../components/kpi-cards";
 import { ProfileHeader } from "../components/profile-header";
+import { PageHeading } from "@/shared/components/layout";
 
 export function RadarProfileView() {
   const average = calculateAverage(RADAR_AREA_SCORES.map((area) => area.score));
@@ -13,6 +14,7 @@ export function RadarProfileView() {
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 font-sans">
 
+      <PageHeading title="Radar de afinidad" description="Explora las competencias por área. Esta vista utiliza datos de demostración." />
       <ProfileHeader profile={RADAR_PROFILE} />
       <KpiCards kpis={RADAR_KPIS} />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
