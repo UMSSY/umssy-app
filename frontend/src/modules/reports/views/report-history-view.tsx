@@ -24,7 +24,7 @@ export function ReportHistoryView() {
   };
 
   return (
-    <WorkspacePage title="Historial de reportes">
+    <WorkspacePage title="Historial de reportes" description="Revisa los reportes generados y filtra por tipo de exportación.">
 
       <div className="rounded-lg border border-border bg-surface p-4"><ReportTypeFilter value={reportType} onChange={handleReportTypeChange} /></div>
 

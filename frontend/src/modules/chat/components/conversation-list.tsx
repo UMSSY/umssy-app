@@ -1,6 +1,8 @@
 
 'use client';
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Plus, Search } from 'lucide-react';
 import { Conversation, ConversationFilter } from '../types/conversation.types';
 import { ConversationItem } from './conversation-item';
@@ -49,56 +51,56 @@ export function ConversationList({
   };
 
   return (
-    <div className="relative flex flex-col h-full bg-white border-r border-border">
-      <div className="p-4 border-b border-border space-y-3">
+    <div className="relative flex h-full flex-col border-r border-border bg-surface">
+      <div className="space-y-3 border-b border-border p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-ink tracking-tight">Chats</h2>
+          <h2 className="text-xl font-bold tracking-tight text-ink">Chats</h2>
           {onStartNewChat && activeFilter !== 'unread' && (
-            <button
+            <Button variant="ghost"
               type="button"
               onClick={onStartNewChat}
-              className="hidden md:inline-flex items-center gap-1.5 text-sm font-bold text-accent hover:text-brand-hover"
+              className="hidden items-center gap-1.5 text-sm font-bold text-accent hover:text-accent md:inline-flex"
             >
               <Plus className="size-4" aria-hidden="true" /> Nuevo
-            </button>
+            </Button>
           )}
         </div>
 
         <div className="relative">
-          <input
+          <Input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             aria-label="Buscar conversaciones"
             placeholder="Buscar personas..."
-            className="w-full pl-9 pr-3 py-2 text-sm bg-surface border border-border rounded-lg focus:outline-none focus:bg-white focus:border-accent transition-all text-ink placeholder-text-secondary"
+            className="w-full rounded-lg border border-border bg-surface py-2 pr-3 pl-9 text-sm text-ink transition-all placeholder:text-text-secondary focus:border-accent focus:bg-surface focus-visible:ring-2 focus-visible:ring-ring"
           />
-          <Search className="pointer-events-none absolute left-3 top-3 size-4 text-text-secondary" aria-hidden="true" />
+          <Search className="pointer-events-none absolute top-3 left-3 size-4 text-text-secondary" aria-hidden="true" />
         </div>
 
         <div className="flex items-center gap-2 pt-1">
-          <button
+          <Button variant="ghost"
             type="button"
             onClick={() => onFilterChange('all')}
-            className={`px-3.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+            className={`rounded-md px-3.5 py-1 text-xs font-semibold transition-colors ${
               activeFilter === 'all'
                 ? 'bg-interaction text-accent'
                 : 'bg-surface text-text-secondary hover:bg-surface-soft'
             }`}
           >
             Todos
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost"
             type="button"
             onClick={() => onFilterChange('unread')}
-            className={`px-3.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+            className={`rounded-md px-3.5 py-1 text-xs font-semibold transition-colors ${
               activeFilter === 'unread'
                 ? 'bg-interaction text-accent'
                 : 'bg-surface text-text-secondary hover:bg-surface-soft'
             }`}
           >
             Sin leer
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -127,13 +129,13 @@ export function ConversationList({
 
             {hasMore && (
               <div className="p-3 text-center">
-                <button
+                <Button variant="ghost"
                   type="button"
                   onClick={onLoadMore}
                   className="text-xs font-semibold text-ink-soft hover:text-ink-soft"
                 >
                   Cargar mas conversaciones
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -141,14 +143,14 @@ export function ConversationList({
       </div>
 
       {onStartNewChat && activeFilter !== 'unread' && (
-        <button
+        <Button variant="ghost"
           type="button"
           onClick={onStartNewChat}
-          className="md:hidden absolute bottom-6 right-4 w-12 h-12 bg-accent text-white rounded-xl shadow-sm flex items-center justify-center hover:bg-brand-hover active:scale-95 transition-all focus:outline-none"
+          className="absolute right-4 bottom-6 flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-none transition-all hover:bg-brand-hover focus-visible:ring-2 focus-visible:ring-ring active:scale-95 md:hidden"
           aria-label="Iniciar nueva conversacion"
         >
           <Plus className="size-6" aria-hidden="true" />
-        </button>
+        </Button>
       )}
     </div>
   );

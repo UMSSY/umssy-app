@@ -40,7 +40,7 @@ export function RejectedUsersReportView() {
   const showPagination = !errorMessage && totalItems > 0;
 
   return (
-    <WorkspacePage title="Usuarios rechazados">
+    <WorkspacePage title="Usuarios rechazados" description="Consulta los motivos de rechazo y exporta el listado filtrado.">
 
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
         <EmailSearchInput value={searchInput} onChange={handleSearchChange} />

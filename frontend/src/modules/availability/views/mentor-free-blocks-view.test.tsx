@@ -78,10 +78,10 @@ describe("MentorFreeBlocksView", () => {
     mockedUseMentorFreeBlocks.mockReturnValue({ blocks: [freeBlock], isLoading: false, error: null });
     render(<MentorFreeBlocksView mentorId="m1" />);
 
-    expect(screen.getByText("Mentores")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Volver al perfil del mentor" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Agendar mentoría" })).toBeInTheDocument();
     expect(screen.getByText("5 – 11 de octubre de 2026")).toBeInTheDocument();
-    expect(screen.getByText("Hora de Bolivia (GMT-4)")).toBeInTheDocument();
+    expect(screen.queryByText("Hora de Bolivia (GMT-4)")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Hoy" })).toBeDisabled();
     vi.useRealTimers();
   });

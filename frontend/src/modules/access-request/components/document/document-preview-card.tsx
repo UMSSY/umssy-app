@@ -24,7 +24,7 @@ export function DocumentPreviewCard() {
           <FileText className="size-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[14.5px] font-semibold text-ink 2xl:text-base">{fileName}</p>
+          <p className="truncate text-sm font-semibold text-ink 2xl:text-base">{fileName}</p>
           <p className="text-[12.5px] text-text-secondary 2xl:text-base">{formatFileSize(documentState.fileSize ?? 0)}</p>
         </div>
         <p className="flex items-center gap-1.5 text-[13.5px] font-semibold text-ink 2xl:text-base">
