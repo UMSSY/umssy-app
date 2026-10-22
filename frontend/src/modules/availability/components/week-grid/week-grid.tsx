@@ -177,7 +177,10 @@ export function WeekGrid({
           </li>
         ) : (
           <li className="flex items-center gap-2">
-            <span aria-hidden="true" className="inline-block h-3 w-4 rounded-sm bg-ink" />
+            <span
+              aria-hidden="true"
+              className={cn("inline-block h-3 w-4 rounded-sm", STATE_BUTTON_CLASSES.confirmed)}
+            />
             {WEEK_GRID_LEGEND.confirmed}
           </li>
         )}
