@@ -22,3 +22,14 @@ export const UPDATE_BLOCK_DOCS = {
   summary: 'Edita un bloque de disponibilidad propio que no tenga citas pendientes o confirmadas',
   idDescription: 'ID del bloque de disponibilidad a editar',
 } as const;
+
+export const FIND_MY_AVAILABILITY_STATUS_DOCS = {
+  summary: 'Indica si el mentor en sesión está recibiendo solicitudes de mentoría',
+} as const;
+
+export const UPDATE_AVAILABILITY_STATUS_DOCS = {
+  summary: 'Activa o pausa la recepción de solicitudes de mentoría del mentor en sesión',
+  description:
+    'Solo cambia isAvailableForMentoring (servicio de Epic 6): no modifica citas confirmadas ni fechas bloqueadas. Responde 403 si el id no es el del mentor en sesión',
+  idDescription: 'Identificador (UUID) del mentor en sesión',
+} as const;
