@@ -325,6 +325,17 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
     await blockDate(tokens.mentorA, { blockedOn: day, reason: 'a'.repeat(100) }).expect(201);
   });
 
+  it('6. otro mentor no puede desbloquear la fecha (403) y la fecha sigue bloqueada', async () => {
+    const response = await http()
+      .delete(`/api/blocked-dates/${SEED_BLOCKED_DATE_ID}`)
+      .set('Authorization', `Bearer ${tokens.mentorB}`)
+      .expect(403);
+
+    expect(response.body.detail).toBe('La fecha bloqueada no pertenece al usuario');
+    expect((await listBlockedDates()).map((item) => item.id)).toEqual([SEED_BLOCKED_DATE_ID]);
+    expect(await listBlockedDates(tokens.mentorB)).toEqual([]);
+  });
+
   it('7. los horarios libres no incluyen los del día bloqueado, pero sí los de otros días', async () => {
     const ids = await freeBlockIdsOfMentorA();
 
@@ -333,4 +344,9 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
     expect(ids).not.toContain(plan.next.id);
   });
 
+  it('solo el rol mentor puede bloquear fechas', async () => {
+    const response = await blockDate(tokens.graduate, { blockedOn: futureDayWithoutBlocks() }).expect(403);
+    expect(response.body.ok).toBe(false);
+    await http().post('/api/blocked-dates').send({ blockedOn: futureDayWithoutBlocks() }).expect(401);
+  });
 });
