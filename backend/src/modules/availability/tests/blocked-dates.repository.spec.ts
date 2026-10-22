@@ -7,12 +7,12 @@ const DAY = new Date('2026-10-27T00:00:00.000Z');
 describe('BlockedDatesRepository', () => {
   const tx = {
     $executeRaw: vi.fn(),
-    blockedDate: { findUnique: vi.fn(), create: vi.fn() },
+    blockedDate: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn() },
     availabilityBlock: { findFirst: vi.fn() },
   };
   const prisma = {
     $transaction: vi.fn((work: (client: typeof tx) => Promise<unknown>) => work(tx)),
-    blockedDate: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), delete: vi.fn() },
+    blockedDate: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
     availabilityBlock: { findFirst: vi.fn() },
   };
   let repository: BlockedDatesRepository;
@@ -114,6 +114,14 @@ describe('BlockedDatesRepository', () => {
     prisma.availabilityBlock.findFirst.mockResolvedValue(null);
     await expect(repository.hasActiveAppointmentBetween('mentor-1', DAY, DAY)).resolves.toBe(false);
     expect(prisma.availabilityBlock.findFirst).toHaveBeenCalled();
+  });
+
+  it('actualiza el motivo con el cliente indicado o con el de por defecto', async () => {
+    await repository.updateReason('blocked-1', 'Congreso', tx as never);
+    expect(tx.blockedDate.update).toHaveBeenCalledWith({ where: { id: 'blocked-1' }, data: { reason: 'Congreso' } });
+
+    await repository.updateReason('blocked-1', 'Feria');
+    expect(prisma.blockedDate.update).toHaveBeenCalledWith({ where: { id: 'blocked-1' }, data: { reason: 'Feria' } });
   });
 
   it('borra por id', async () => {

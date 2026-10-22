@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { toBoliviaTime } from '../../../common/utils/date-time.js';
 import { mapRecordNotFound } from '../../../common/utils/map-record-not-found.js';
+import { isTransactionTimeoutError } from '../../../common/utils/transaction-timeout.js';
 import type { TransactionClient } from '../../../common/types/transaction-client.types.js';
 import {
   BlockedDateHasAppointmentException,
@@ -8,6 +9,7 @@ import {
   BlockedDateNotFoundException,
   BlockedDateNotOwnedException,
   DayBlockedException,
+  DayBusyException,
 } from '../exceptions/index.js';
 import { BlockedDateMapper } from '../mappers/blocked-date.mapper.js';
 import { BlockedDatesRepository } from '../repositories/blocked-dates.repository.js';
@@ -39,10 +41,14 @@ export class BlockedDatesService {
     const blockedOn = toCalendarDate(day);
     const { startAt, endAt } = getBoliviaDayRange(day);
 
-    return this.blockedDatesRepository.withDayLock(mentorId, day, async (tx) => {
+    return this.inDayLock(mentorId, day, async (tx) => {
       const existing = await this.blockedDatesRepository.findByDay(mentorId, blockedOn, tx);
       if (existing) {
-        return this.blockedDateMapper.toResponse(existing);
+        const current =
+          reason && reason !== existing.reason
+            ? await this.blockedDatesRepository.updateReason(existing.id, reason, tx)
+            : existing;
+        return this.blockedDateMapper.toResponse(current);
       }
       if (await this.blockedDatesRepository.hasActiveAppointmentBetween(mentorId, startAt, endAt, tx)) {
         throw new BlockedDateHasAppointmentException();
@@ -77,12 +83,15 @@ export class BlockedDatesService {
     return new Set(blockedDates.map((blockedDate) => toDayString(blockedDate.blockedOn)));
   }
 
-  withDayLock<T>(
+  runOnUnblockedDay<T>(
     mentorId: string,
-    day: string,
+    startAt: Date,
     work: (tx: TransactionClient) => Promise<T>,
   ): Promise<T> {
-    return this.blockedDatesRepository.withDayLock(mentorId, day, work);
+    return this.inDayLock(mentorId, toBoliviaTime(startAt).date, async (tx) => {
+      await this.assertDayNotBlocked(mentorId, startAt, tx);
+      return work(tx);
+    });
   }
 
   async assertDayNotBlocked(
@@ -98,6 +107,21 @@ export class BlockedDatesService {
     );
     if (blockedDate) {
       throw new DayBlockedException();
+    }
+  }
+
+  private async inDayLock<T>(
+    mentorId: string,
+    day: string,
+    work: (tx: TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    try {
+      return await this.blockedDatesRepository.withDayLock(mentorId, day, work);
+    } catch (error) {
+      if (isTransactionTimeoutError(error)) {
+        throw new DayBusyException();
+      }
+      throw error;
     }
   }
 

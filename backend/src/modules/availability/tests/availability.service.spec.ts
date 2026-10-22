@@ -60,7 +60,7 @@ describe('AvailabilityService', () => {
   const blockedDatesService = {
     assertDayNotBlocked: vi.fn(),
     findBlockedDays: vi.fn(),
-    withDayLock: vi.fn(),
+    runOnUnblockedDay: vi.fn(),
   };
   const TX = { kind: 'tx' };
   let service: AvailabilityService;
@@ -71,7 +71,10 @@ describe('AvailabilityService', () => {
     availabilityRepository.create.mockResolvedValue(savedBlock);
     blockedDatesService.assertDayNotBlocked.mockResolvedValue(undefined);
     blockedDatesService.findBlockedDays.mockResolvedValue(new Set());
-    blockedDatesService.withDayLock.mockImplementation((_mentorId, _day, work) => work(TX));
+    blockedDatesService.runOnUnblockedDay.mockImplementation(async (mentor, startAt, work) => {
+      await blockedDatesService.assertDayNotBlocked(mentor, startAt, TX);
+      return work(TX);
+    });
     service = new AvailabilityService(
       availabilityRepository as never,
       new AvailabilityMapper(),
@@ -155,15 +158,16 @@ describe('AvailabilityService', () => {
       expect(result.state).toBe('free');
     });
 
-    it('edita dentro del lock del día de destino y revisa ese día en la misma transacción', async () => {
+    it('si el bloque cambia de día, lo mueve dentro del lock y revisa el día de destino', async () => {
       availabilityRepository.findById.mockResolvedValue(block('block-1'));
       availabilityRepository.update.mockResolvedValue(block('block-1'));
 
       await service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD);
 
-      expect(blockedDatesService.withDayLock).toHaveBeenCalledWith(
+      expect(toBoliviaTime(block('block-1').startAt).date).not.toBe(toBoliviaTime(UPDATE_PAYLOAD.startAt).date);
+      expect(blockedDatesService.runOnUnblockedDay).toHaveBeenCalledWith(
         'mentor-1',
-        toBoliviaTime(UPDATE_PAYLOAD.startAt).date,
+        UPDATE_PAYLOAD.startAt,
         expect.any(Function),
       );
       expect(blockedDatesService.assertDayNotBlocked).toHaveBeenCalledWith(
@@ -181,6 +185,26 @@ describe('AvailabilityService', () => {
         DayBlockedException,
       );
       expect(availabilityRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('edita sin lock si el bloque no cambia de día, aunque ese día esté bloqueado', async () => {
+      const sameDay = {
+        ...block('block-1'),
+        startAt: new Date('2026-10-10T20:00:00.000Z'),
+        endAt: new Date('2026-10-10T20:30:00.000Z'),
+      };
+      availabilityRepository.findById.mockResolvedValue(sameDay);
+      availabilityRepository.update.mockResolvedValue(sameDay);
+      blockedDatesService.assertDayNotBlocked.mockRejectedValue(new DayBlockedException());
+
+      await service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD);
+
+      expect(blockedDatesService.runOnUnblockedDay).not.toHaveBeenCalled();
+      expect(availabilityRepository.update).toHaveBeenCalledWith(
+        'block-1',
+        { startAt: UPDATE_PAYLOAD.startAt, endAt: UPDATE_PAYLOAD.endAt },
+        undefined,
+      );
     });
 
     it('responde 409 si el guardado choca con la constraint de no-solape', async () => {
@@ -209,7 +233,7 @@ describe('AvailabilityService', () => {
         statusCode: 409,
         message: 'Ese día está bloqueado',
       });
-      expect(blockedDatesService.withDayLock).toHaveBeenCalledWith(mentorId, '2026-11-03', expect.any(Function));
+      expect(blockedDatesService.runOnUnblockedDay).toHaveBeenCalledWith(mentorId, payload.startAt, expect.any(Function));
       expect(blockedDatesService.assertDayNotBlocked).toHaveBeenCalledWith(mentorId, payload.startAt, TX);
       expect(availabilityRepository.create).not.toHaveBeenCalled();
     });

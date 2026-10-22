@@ -6,6 +6,7 @@ import {
   BlockedDateNotFoundException,
   BlockedDateNotOwnedException,
   DayBlockedException,
+  DayBusyException,
 } from '../exceptions/index.js';
 import { BlockedDateMapper } from '../mappers/blocked-date.mapper.js';
 import { BlockedDatesService } from '../services/blocked-dates.service.js';
@@ -26,6 +27,7 @@ const record = (overrides: Partial<BlockedDate> = {}): BlockedDate => ({
 describe('BlockedDatesService', () => {
   const repository = {
     withDayLock: vi.fn(),
+    updateReason: vi.fn(),
     findByDay: vi.fn(),
     findById: vi.fn(),
     findInRange: vi.fn(),
@@ -104,14 +106,39 @@ describe('BlockedDatesService', () => {
       expect(repository.create).not.toHaveBeenCalled();
     });
 
-    it('si la fecha ya estaba bloqueada devuelve el bloqueo existente sin duplicarlo', async () => {
+    it.each([
+      ['sin motivo', null],
+      ['con el mismo motivo', 'Motivo original'],
+    ])('si la fecha ya estaba bloqueada y llega %s, devuelve el bloqueo existente sin duplicarlo', async (_case, reason) => {
       repository.findByDay.mockResolvedValue(record({ reason: 'Motivo original' }));
 
-      const result = await service.blockDate('mentor-1', { blockedOn: '2026-10-27', reason: 'Otro motivo' });
+      const result = await service.blockDate('mentor-1', { blockedOn: '2026-10-27', reason });
 
       expect(result).toMatchObject({ id: 'blocked-1', reason: 'Motivo original' });
       expect(repository.create).not.toHaveBeenCalled();
+      expect(repository.updateReason).not.toHaveBeenCalled();
       expect(repository.hasActiveAppointmentBetween).not.toHaveBeenCalled();
+    });
+
+    it('si la fecha ya estaba bloqueada y llega otro motivo, actualiza el motivo sin duplicar', async () => {
+      repository.findByDay.mockResolvedValue(record({ reason: 'Motivo original' }));
+      repository.updateReason.mockResolvedValue(record({ reason: 'Congreso' }));
+
+      const result = await service.blockDate('mentor-1', { blockedOn: '2026-10-27', reason: 'Congreso' });
+
+      expect(result).toMatchObject({ id: 'blocked-1', reason: 'Congreso' });
+      expect(repository.updateReason).toHaveBeenCalledWith('blocked-1', 'Congreso', TX);
+      expect(repository.create).not.toHaveBeenCalled();
+    });
+
+    it('responde 409 «intenta de nuevo» si la transacción vence esperando el lock (P2028)', async () => {
+      repository.withDayLock.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Transaction expired', { code: 'P2028', clientVersion: 'test' }),
+      );
+
+      await expect(service.blockDate('mentor-1', { blockedOn: '2026-10-27', reason: null })).rejects.toBeInstanceOf(
+        DayBusyException,
+      );
     });
 
     it('lanza la excepción de dominio que corresponde', async () => {
@@ -204,14 +231,46 @@ describe('BlockedDatesService', () => {
     });
   });
 
-  describe('withDayLock', () => {
-    it('delega el lock del mentor y el día en el repositorio', async () => {
+  describe('runOnUnblockedDay', () => {
+    it('toma el lock del día de Bolivia, revisa el día y ejecuta el trabajo en la misma transacción', async () => {
       const work = vi.fn().mockResolvedValue('hecho');
 
-      await expect(service.withDayLock('mentor-1', '2026-10-27', work)).resolves.toBe('hecho');
+      await expect(
+        service.runOnUnblockedDay('mentor-1', new Date('2026-10-28T01:00:00.000Z'), work),
+      ).resolves.toBe('hecho');
 
-      expect(repository.withDayLock).toHaveBeenCalledWith('mentor-1', '2026-10-27', work);
+      expect(repository.withDayLock).toHaveBeenCalledWith('mentor-1', '2026-10-27', expect.any(Function));
+      expect(repository.findByDay).toHaveBeenCalledWith('mentor-1', new Date('2026-10-27T00:00:00.000Z'), TX);
       expect(work).toHaveBeenCalledWith(TX);
+    });
+
+    it('no ejecuta el trabajo si el día está bloqueado', async () => {
+      repository.findByDay.mockResolvedValue(record());
+      const work = vi.fn();
+
+      await expect(
+        service.runOnUnblockedDay('mentor-1', new Date('2026-10-27T22:00:00.000Z'), work),
+      ).rejects.toBeInstanceOf(DayBlockedException);
+      expect(work).not.toHaveBeenCalled();
+    });
+
+    it('responde 409 «intenta de nuevo» si la transacción vence (P2028)', async () => {
+      repository.withDayLock.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Transaction expired', { code: 'P2028', clientVersion: 'test' }),
+      );
+
+      await expect(
+        service.runOnUnblockedDay('mentor-1', new Date('2026-10-27T22:00:00.000Z'), vi.fn()),
+      ).rejects.toMatchObject({ statusCode: 409, message: 'Hay otra operación en curso para ese día. Intenta de nuevo.' });
+    });
+
+    it('relanza los demás errores sin traducirlos', async () => {
+      const failure = new Error('connection lost');
+      repository.withDayLock.mockRejectedValue(failure);
+
+      await expect(
+        service.runOnUnblockedDay('mentor-1', new Date('2026-10-27T22:00:00.000Z'), vi.fn()),
+      ).rejects.toBe(failure);
     });
   });
 
