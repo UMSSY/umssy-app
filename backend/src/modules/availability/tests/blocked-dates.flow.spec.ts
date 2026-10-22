@@ -12,6 +12,7 @@ import { toBoliviaTime } from '../../../common/utils/date-time.js';
 import { MentorNotFoundException } from '../../mentors/exceptions/mentor-not-found.exception.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { AvailabilityModule } from '../availability.module.js';
+import { ACTIVE_APPOINTMENT_STATUSES } from '../constants/appointment-status.constants.js';
 import { AppointmentStatusTitle } from '../enums/appointment-status-title.enum.js';
 import {
   SEED_BLOCKED_DATE_ID,
@@ -87,18 +88,37 @@ function createStore() {
   return { blocks, blockedDates };
 }
 
+const isActive = (appointment: { status: { title: string } }) =>
+  ACTIVE_APPOINTMENT_STATUSES.some((status) => status === appointment.status.title);
+
 function createRepositories(store: ReturnType<typeof createStore>) {
   const locks = new Map<string, Promise<unknown>>();
+  const openTransactions = new Map<object, string>();
   let sequence = 0;
   const inRange = (block: StoredBlock, mentorId: string, from: Date, to: Date) =>
     block.mentorId === mentorId && block.startAt >= from && block.startAt < to;
+  const assertInDayLock = (tx: unknown, mentorId: string, day: string) => {
+    if (openTransactions.get(tx as object) !== `${mentorId}:${day}`) {
+      throw new Error(`Escritura fuera del lock de ${mentorId} el ${day}`);
+    }
+  };
   const byStart = (first: StoredBlock, second: StoredBlock) =>
     first.startAt.getTime() - second.startAt.getTime();
 
   const blockedDatesRepository = {
     withDayLock: <T>(mentorId: string, day: string, work: (tx: unknown) => Promise<T>) => {
       const key = `${mentorId}:${day}`;
-      const run = (locks.get(key) ?? Promise.resolve()).catch(() => undefined).then(() => work({}));
+      const run = (locks.get(key) ?? Promise.resolve())
+        .catch(() => undefined)
+        .then(async () => {
+          const tx = { key };
+          openTransactions.set(tx, key);
+          try {
+            return await work(tx);
+          } finally {
+            openTransactions.delete(tx);
+          }
+        });
       locks.set(key, run);
       return run;
     },
@@ -117,9 +137,16 @@ function createRepositories(store: ReturnType<typeof createStore>) {
       ),
     hasActiveAppointmentBetween: (mentorId: string, from: Date, to: Date) =>
       Promise.resolve(
-        store.blocks.some((block) => inRange(block, mentorId, from, to) && block.appointments.length > 0),
+        store.blocks.some((block) => inRange(block, mentorId, from, to) && block.appointments.some(isActive)),
       ),
-    create: async (mentorId: string, blockedOn: Date, reason: string | null) => {
+    updateReason: (id: string, reason: string, tx: unknown) => {
+      const blockedDate = store.blockedDates.find((item) => item.id === id) as StoredBlockedDate;
+      assertInDayLock(tx, blockedDate.mentorId, blockedDate.blockedOn.toISOString().slice(0, 10));
+      blockedDate.reason = reason;
+      return Promise.resolve(blockedDate);
+    },
+    create: async (mentorId: string, blockedOn: Date, reason: string | null, tx: unknown) => {
+      assertInDayLock(tx, mentorId, blockedOn.toISOString().slice(0, 10));
       await new Promise((resolve) => setTimeout(resolve, 5));
       sequence += 1;
       const created: StoredBlockedDate = {
@@ -146,16 +173,20 @@ function createRepositories(store: ReturnType<typeof createStore>) {
     findMentorFreeBlocksInRange: (mentorId: string, from: Date, to: Date) =>
       Promise.resolve(
         store.blocks
-          .filter((block) => inRange(block, mentorId, from, to) && block.appointments.length === 0)
+          .filter((block) => inRange(block, mentorId, from, to) && !block.appointments.some(isActive))
           .sort(byStart),
       ),
     findById: (id: string) => Promise.resolve(store.blocks.find((block) => block.id === id) ?? null),
-    update: (id: string, data: { startAt: Date; endAt: Date }) => {
+    update: (id: string, data: { startAt: Date; endAt: Date }, tx?: unknown) => {
       const block = store.blocks.find((item) => item.id === id) as StoredBlock;
+      if (dayOf(block.startAt) !== dayOf(data.startAt)) {
+        assertInDayLock(tx, block.mentorId, dayOf(data.startAt));
+      }
       Object.assign(block, data, { updatedAt: NOW });
       return Promise.resolve(block);
     },
-    create: (mentorId: string, startAt: Date, endAt: Date) => {
+    create: (mentorId: string, startAt: Date, endAt: Date, tx: unknown) => {
+      assertInDayLock(tx, mentorId, dayOf(startAt));
       sequence += 1;
       const created: StoredBlock = {
         id: `00000000-0000-4000-9000-${String(sequence).padStart(12, '0')}`,
