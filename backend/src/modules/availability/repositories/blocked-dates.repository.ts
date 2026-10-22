@@ -68,6 +68,14 @@ export class BlockedDatesRepository {
     return client.blockedDate.create({ data: { mentorId, blockedOn, reason } });
   }
 
+  updateReason(
+    id: string,
+    reason: string,
+    client: TransactionClient = this.prisma,
+  ): Promise<BlockedDate> {
+    return client.blockedDate.update({ where: { id }, data: { reason } });
+  }
+
   delete(id: string): Promise<BlockedDate> {
     return this.prisma.blockedDate.delete({ where: { id } });
   }
