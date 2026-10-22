@@ -11,7 +11,7 @@ describe("Workspace discovery", () => {
  it("finds accented labels and common task names",() => {
   expect(normalizeSearch("  FORMACIÓN ")).toBe("formacion");
   expect(getWorkspaceTasks(["titulado"],"curriculum").map((task) => task.href)).toEqual(["/profile/documents"]);
-  expect(getWorkspaceTasks(["titulado"],"formacion").some((task) => task.href === "/profile/trajectory/education")).toBe(true);
+  expect(getWorkspaceTasks(["titulado"],"formacion").some((task) => task.href === "/profile#education")).toBe(true);
  });
  it("never reveals administration through search",() => {
   expect(getWorkspaceTasks(["titulado"],"aprobar")).toEqual([]);

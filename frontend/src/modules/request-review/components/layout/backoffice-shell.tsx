@@ -6,7 +6,6 @@ import { useBackofficeSession } from "../../hooks/use-backoffice-session";
 import { useBackofficeUser } from "../../hooks/use-backoffice-user";
 import { useStatusCounts } from "../../hooks/use-status-counts";
 import type { ReviewStatus } from "../../types/request-review.types";
-import { BackofficeBrand } from "./backoffice-brand";
 import { BackofficeSessionSkeleton } from "./backoffice-session-skeleton";
 import { BackofficeUserFooter } from "./backoffice-user-footer";
 import type { BackofficeShellProps } from "../../types/backoffice-shell-props.types";
@@ -37,10 +36,8 @@ export function BackofficeShell({ children }: BackofficeShellProps) {
 
   return (
     <AppShell
-      brand={<BackofficeBrand />}
       sidebarFooter={<BackofficeUserFooter user={user} onLogout={logout} />}
       sidebarItemBadges={badges}
-      sidebarWidth="16.5rem"
     >
       {state === "allowed" ? children : <BackofficeSessionSkeleton />}
     </AppShell>

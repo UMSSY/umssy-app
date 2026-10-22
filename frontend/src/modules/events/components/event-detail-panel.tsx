@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { Card } from '@/components/ui/card';
 import { CalendarDays, Clock3, MapPin, UserRound, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,10 +11,13 @@ import {
 } from '../utils/event-card';
 import { DetailRow } from './detail-row';
 import { hasValidEventCapacity } from '../utils/has-valid-event-capacity';
+import { WorkshopCover } from './workshop-cover';
 
 import type { EventDetailPanelProps } from '../types/event-detail-panel-props.types';
 
 export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => { titleRef.current?.focus(); }, [event.id]);
   const hasValidCapacity = hasValidEventCapacity(event);
   const { enrolledCount, capacity, progressPercentage, isFull } =
     calculateEventCapacityStatus(event);
@@ -20,9 +26,10 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
   return (
     <aside
       aria-label={`Detalle de ${event.title}`}
-      className="w-full min-w-0 self-start rounded-lg border border-border bg-surface xl:sticky xl:top-6"
+      className="w-full min-w-0 self-start rounded-lg border border-border bg-surface "
     >
-      <Card className="gap-0 rounded-none border-0 shadow-none bg-transparent space-y-5 px-6 py-7 lg:px-7">
+      <WorkshopCover eventId={event.id} className="h-32 rounded-t-lg" />
+      <Card className="gap-0 space-y-5 rounded-none border-0 bg-transparent px-6 py-7 shadow-none lg:px-7">
         <header className="space-y-3">
           {onClose && (
             <div className="flex justify-end">
@@ -31,13 +38,24 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
               </Button>
             </div>
           )}
-          <span className="inline-flex w-fit rounded-full bg-muted px-3 py-1 text-xs font-medium text-text-secondary">
+          <span className="inline-flex w-fit rounded-md bg-interaction px-3 py-1 text-xs font-semibold text-accent">
             {event.category.name}
           </span>
-          <h2 className="break-words text-lg font-bold leading-6 text-ink">
+          <h2 ref={titleRef} tabIndex={-1} className="text-lg leading-6 font-bold break-words text-ink">
             {event.title}
           </h2>
         </header>
+
+        <Button
+          aria-describedby="event-registration-description"
+          className="mt-2 min-h-11 w-full bg-primary text-primary-foreground hover:bg-brand-hover disabled:bg-muted disabled:text-text-secondary disabled:opacity-100"
+          disabled
+          size="lg"
+          type="button"
+        >
+          Inscripción no disponible
+        </Button>
+        <p id="event-registration-description" className="text-xs text-text-secondary">La inscripción desde la plataforma aún no está habilitada.</p>
 
         <p className="text-sm text-text-secondary">
           Modalidad: {event.modality.title}
@@ -74,12 +92,12 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
           className="space-y-2"
         >
           <h3
-            className="text-xs font-semibold uppercase tracking-wide text-text-secondary"
+            className="text-xs font-semibold tracking-wide text-text-secondary uppercase"
             id="event-description-title"
           >
             Descripción
           </h3>
-          <p className="whitespace-pre-line break-words text-sm leading-5 text-text-secondary">
+          <p className="text-sm leading-5 break-words whitespace-pre-line text-text-secondary">
             {event.description?.trim() || 'Descripción por confirmar.'}
           </p>
         </section>
@@ -87,7 +105,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
         <section aria-labelledby="event-capacity-title" className="space-y-2">
           <div className="flex items-center justify-between gap-3">
             <h3
-              className="text-xs font-semibold uppercase tracking-wide text-text-secondary"
+              className="text-xs font-semibold tracking-wide text-text-secondary uppercase"
               id="event-capacity-title"
             >
               Cupos
@@ -110,7 +128,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
               role="progressbar"
             >
               <div
-                className={`h-full rounded-full transition-[width] ${isFull ? 'bg-ink' : 'bg-ink-soft'}`}
+                className="h-full rounded-full bg-progress transition-[width] duration-300 ease-out"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -130,16 +148,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
           </p>
         </section>
 
-        <Button
-          aria-describedby="event-registration-description"
-          className="mt-2 min-h-11 w-full bg-accent text-white hover:bg-brand-hover disabled:bg-muted disabled:text-text-secondary disabled:opacity-100"
-          disabled
-          size="lg"
-          type="button"
-        >
-          Inscripción no disponible
-        </Button>
-        <p id="event-registration-description" className="text-xs text-text-secondary">La inscripción desde la plataforma aún no está habilitada.</p>
+
       </Card>
     </aside>
   );

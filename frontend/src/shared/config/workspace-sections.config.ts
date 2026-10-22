@@ -6,12 +6,7 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     id: "profile", label: "Perfil profesional", icon: UserRound, patterns: [/^\/profile(?:\/|$)/],
     items: [
       { label: "Resumen", href: "/profile", group: "Perfil" },
-      { label: "Datos personales", href: "/profile/personal-info", group: "Perfil" },
-      { label: "Presentación", href: "/profile/presentation", group: "Perfil" },
-      { label: "Formación académica", href: "/profile/trajectory/education", group: "Trayectoria" },
-      { label: "Experiencia laboral", href: "/profile/trajectory/experience", group: "Trayectoria" },
-      { label: "Habilidades", href: "/profile/trajectory/skills", group: "Trayectoria" },
-      { label: "Certificaciones", href: "/profile/trajectory/certifications", group: "Trayectoria" },
+      { label: "Configuración del perfil", href: "/profile/settings", group: "Perfil" },
       { label: "Documentos y CV", href: "/profile/documents", group: "Documentos y afinidad" },
       { label: "Radar de afinidad", href: "/profile/radar", group: "Documentos y afinidad" },
     ],

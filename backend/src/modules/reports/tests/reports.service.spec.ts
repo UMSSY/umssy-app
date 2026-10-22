@@ -205,6 +205,14 @@ describe('ReportsService', () => {
         'usuarios-rechazados-juan.perez@gmail.com-2026-10-03.csv',
       );
     });
+
+    it('nombra el archivo con la gestión filtrada', async () => {
+      const { fileName } = await buildService().exportRejectedUsersCsv(
+        rejectedUsersFiltersSchema.parse({ period: 'II-2026' }),
+      );
+
+      expect(fileName).toBe('usuarios-rechazados-II-2026.csv');
+    });
   });
 
   describe('getRegisteredUsers', () => {
@@ -355,6 +363,25 @@ describe('ReportsService', () => {
       );
 
       expect(result.items.map((user) => user.id)).toEqual(['g']);
+    });
+
+    it('filtra los rechazados por gestión', async () => {
+      const service = buildService();
+
+      expect(
+        (
+          await service.getRejectedUsers(rejectedQuery({ period: 'II-2026' }))
+        ).items.map((user) => user.id),
+      ).toEqual(['f']);
+      expect(
+        (
+          await service.getRejectedUsers(rejectedQuery({ period: 'II-2025' }))
+        ).items.map((user) => user.id),
+      ).toEqual(['e']);
+      expect(
+        (await service.getRejectedUsers(rejectedQuery({ period: 'ALL' })))
+          .items,
+      ).toHaveLength(2);
     });
 
     it('no busca por nombre ni por identificador', async () => {

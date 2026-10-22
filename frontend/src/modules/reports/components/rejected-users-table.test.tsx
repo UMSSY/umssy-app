@@ -7,7 +7,7 @@ describe("RejectedUsersTable", () => {
     cleanup();
   });
 
-  it("mantiene el alto del recuadro aunque la búsqueda devuelva un solo resultado", () => {
+  it("ajusta el recuadro al resultado sin imponer espacio vacío", () => {
     render(
       <RejectedUsersTable
         users={[
@@ -32,7 +32,7 @@ describe("RejectedUsersTable", () => {
     expect(screen.getAllByRole("row")).toHaveLength(2);
     expect(screen.getByRole("columnheader", { name: "Tipo de Usuario" })).toBeDefined();
     expect(screen.getByRole("cell", { name: "Titulado" })).toBeDefined();
-    expect(container).toHaveClass("min-h-151");
+    expect(container).not.toHaveClass("min-h-151");
     expect(container).toHaveClass("@container");
   });
 

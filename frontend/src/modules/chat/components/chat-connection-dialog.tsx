@@ -1,5 +1,7 @@
+"use client";
 
-'use client';
+import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "@/components/ui/alert-dialog";
 
 interface ChatConnectionDialogProps {
   open: boolean;
@@ -7,56 +9,19 @@ interface ChatConnectionDialogProps {
   onClose: () => void;
 }
 
-export function ChatConnectionDialog({
-  open,
-  onRetry,
-  onClose,
-}: ChatConnectionDialogProps) {
-  if (!open) return null;
-
+export function ChatConnectionDialog({ open, onRetry, onClose }: ChatConnectionDialogProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div
-        role="alertdialog"
-        aria-modal="true"
-        aria-labelledby="chat-error-title"
-        aria-describedby="chat-error-description"
-        className="w-full max-w-sm rounded-xl bg-white p-6 shadow-sm"
-      >
-        <h2
-          id="chat-error-title"
-          className="text-lg font-semibold text-ink"
-        >
-          Error de conexión
-        </h2>
-
-        <p
-          id="chat-error-description"
-          className="mt-3 text-sm text-text-secondary"
-        >
-          No pudimos cargar tus conversaciones.
-          Comprueba tu conexión con el servidor
-          e inténtalo nuevamente.
-        </p>
-
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-border-strong px-4 py-2 text-sm"
-          >
-            Cerrar
-          </button>
-
-          <button
-            type="button"
-            onClick={onRetry}
-            className="rounded-lg bg-ink px-4 py-2 text-sm text-white"
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
-    </div>
+    <AlertDialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Error de conexión</AlertDialogTitle>
+          <AlertDialogDescription>No pudimos cargar tus conversaciones. Comprueba tu conexión e inténtalo nuevamente.</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <Button variant="outline" onClick={onClose}>Cerrar</Button>
+          <Button onClick={onRetry}>Reintentar</Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
