@@ -1,20 +1,16 @@
-import { addWeeks, getWeekRange, toBoliviaTime } from '../../../common/utils/date-time.js';
-import type { AppointmentStatus, Prisma } from '../../../prisma/client.js';
+import { addWeeks, getWeekRange, toBoliviaTime, toUtcIso } from '../../../common/utils/date-time.js';
+import type { Prisma } from '../../../prisma/client.js';
+import { ACTIVE_APPOINTMENT_STATUSES } from '../constants/appointment-status.constants.js';
+import { BLOCK_MAX_HOUR, BLOCK_MIN_HOUR } from '../constants/create-block.constants.js';
 import {
-  BUSY_WEEK_BLOCKS,
-  BUSY_WEEK_BLOCKS_PER_DAY,
-  FALLBACK_TRIO_HOUR,
-  MS_PER_DAY,
-  MS_PER_MINUTE,
-  STEP_MS,
+  MS_PER_DAY, MS_PER_MINUTE, PERFORMANCE_APPOINTMENTS, SEED_APPOINTMENT_IDS,
+  SEED_BLOCK_IDS, SEED_BLOCKED_DATE_ID, SEED_SERIES_ID, STEP_MS,
 } from '../constants/seed-availability.constants.js';
 import { AppointmentStatusTitle } from '../enums/appointment-status-title.enum.js';
-import { BLOCK_MAX_HOUR, BLOCK_MIN_HOUR, BLOCK_STEP_MINUTES } from '../constants/create-block.constants.js';
 import type { AvailabilitySeedResult } from '../types/availability-seed-result.types.js';
 import type { AvailabilitySeedUsers } from '../types/availability-seed-users.types.js';
 import type { SeedBlockPlan } from '../types/seed-block-plan.types.js';
 import type { SeedBlock } from '../types/seed-block.types.js';
-import type { SeedTrioPosition } from '../types/seed-trio-position.types.js';
 import type { SeedWeekRange } from '../types/seed-week-range.types.js';
 import type { SeedWeeks } from '../types/seed-weeks.types.js';
 
@@ -26,200 +22,184 @@ const weekOf = (reference: Date): SeedWeekRange => {
 export function getWeeks(now: Date = new Date()): SeedWeeks {
   const current = weekOf(now);
   return {
-    previous: weekOf(new Date(current.start.getTime() - 7 * MS_PER_DAY)),
+    previous: weekOf(new Date(addWeeks(current.start, -1))),
     current,
-    next: weekOf(new Date(current.start.getTime() + 7 * MS_PER_DAY)),
+    next: weekOf(current.end),
   };
 }
 
-const minutesAt = (hour: number, minute = 0): number => hour * 60 + minute;
+const instantAt = (week: SeedWeekRange, day: number, hour: number): Date =>
+  new Date(week.start.getTime() + day * MS_PER_DAY + hour * 60 * MS_PER_MINUTE);
 
-const instantAt = (week: SeedWeekRange, day: number, minutesOfDay: number): Date =>
-  new Date(week.start.getTime() + day * MS_PER_DAY + minutesOfDay * MS_PER_MINUTE);
-
-const blockAt = (week: SeedWeekRange, day: number, minutesOfDay: number): SeedBlock => {
-  const start = instantAt(week, day, minutesOfDay);
-  return { start, end: new Date(start.getTime() + STEP_MS) };
-};
-
-export function pastBlockRange(week: SeedWeekRange, now: Date): SeedBlock | null {
-  const mondayOpen = instantAt(week, 0, minutesAt(BLOCK_MIN_HOUR));
-  const mondayClose = new Date(mondayOpen.getTime() + 60 * MS_PER_MINUTE);
-  if (now.getTime() >= mondayClose.getTime()) {
-    return { start: mondayOpen, end: mondayClose };
-  }
-
-  const closedSlotEnd = new Date(Math.floor(now.getTime() / STEP_MS) * STEP_MS);
-  const closedSlotStart = new Date(closedSlotEnd.getTime() - STEP_MS);
-  if (closedSlotStart.getTime() >= mondayOpen.getTime()) {
-    return { start: closedSlotStart, end: closedSlotEnd };
-  }
-
-  return null;
-}
-
-function buildBusyWeekBlocks(week: SeedWeekRange): SeedBlock[] {
-  const blocks: SeedBlock[] = [];
-  for (let day = 0; day < 7 && blocks.length < BUSY_WEEK_BLOCKS; day += 1) {
-    const perDay = day < 6 ? BUSY_WEEK_BLOCKS_PER_DAY : 2;
-    for (let slot = 0; slot < perDay && blocks.length < BUSY_WEEK_BLOCKS; slot += 1) {
-      blocks.push(blockAt(week, day, minutesAt(BLOCK_MIN_HOUR, slot * BLOCK_STEP_MINUTES)));
-    }
-  }
-  return blocks;
-}
-
-function pickTrio(now: Date, weeks: SeedWeeks): SeedTrioPosition {
-  const duration = 3 * STEP_MS;
-  const openMinutes = minutesAt(BLOCK_MIN_HOUR);
-  const closeMinutes = BLOCK_MAX_HOUR * 60;
-  const future = new Date(Math.ceil((now.getTime() + STEP_MS) / STEP_MS) * STEP_MS);
-
-  if (future.getTime() < weeks.current.end.getTime()) {
-    const currentDay = Math.floor((future.getTime() - weeks.current.start.getTime()) / MS_PER_DAY);
-    for (let day = currentDay; day < 7; day += 1) {
-      const dayOpen = instantAt(weeks.current, day, openMinutes);
-      const start = new Date(Math.max(future.getTime(), dayOpen.getTime()));
-      const { hours, minutes } = toBoliviaTime(start);
-      const minutesOfDay = hours * 60 + minutes;
-      const fits =
-        minutesOfDay + duration / MS_PER_MINUTE <= closeMinutes &&
-        start.getTime() + duration <= weeks.current.end.getTime();
-      if (fits) {
-        return { start, week: weeks.current };
-      }
-    }
-  }
-
-  return { start: instantAt(weeks.next, 0, minutesAt(FALLBACK_TRIO_HOUR)), week: weeks.next };
-}
+// Los campos PostgreSQL date representan el calendario local, no un instante GMT-4.
+const calendarDate = (instant: Date): Date => new Date(`${toBoliviaTime(instant).date}T00:00:00.000Z`);
 
 export function buildBlockPlan(weeks: SeedWeeks, now: Date = new Date()): SeedBlockPlan {
   const warnings: string[] = [];
-
-  const previousWeekBlocks = [
-    blockAt(weeks.previous, 1, minutesAt(BLOCK_MIN_HOUR)),
-    blockAt(weeks.previous, 1, minutesAt(BLOCK_MIN_HOUR, BLOCK_STEP_MINUTES)),
-  ];
-
-  const position = pickTrio(now, weeks);
-  const free = { start: position.start, end: new Date(position.start.getTime() + STEP_MS) };
-  const pending = {
-    start: new Date(free.start.getTime() + STEP_MS),
-    end: new Date(free.start.getTime() + 2 * STEP_MS),
-  };
-  const confirmed = {
-    start: new Date(free.start.getTime() + 2 * STEP_MS),
-    end: new Date(free.start.getTime() + 3 * STEP_MS),
-  };
-
-  const past = pastBlockRange(weeks.current, now);
-  if (past === null) {
-    warnings.push('Ejecución muy temprana en lunes: no se pudo crear el bloque pasado dentro de la ventana 07:00-22:00 de la semana actual.');
+  let currentStart: Date | undefined;
+  for (let day = 0; day < 7; day += 1) {
+    const open = instantAt(weeks.current, day, BLOCK_MIN_HOUR).getTime();
+    const close = instantAt(weeks.current, day, BLOCK_MAX_HOUR).getTime();
+    const candidate = Math.max(open, Math.ceil((now.getTime() + 1) / STEP_MS) * STEP_MS);
+    if (candidate + STEP_MS <= close) {
+      currentStart = new Date(candidate);
+      break;
+    }
   }
-  if (position.week !== weeks.current) {
-    warnings.push('La semana actual ya no tiene horario disponible: los bloques de prueba (libre, pendiente y confirmada) se crearon en la semana siguiente.');
+  if (!currentStart) {
+    currentStart = instantAt(weeks.current, 6, BLOCK_MAX_HOUR - 0.5);
+    warnings.push('La semana actual ya no tiene horarios futuros entre 07:00 y 22:00; se conserva una cita transcurrida de esta semana y las próximas de la siguiente.');
   }
 
-  return {
-    blocks: [
-      ...previousWeekBlocks,
-      ...(past === null ? [] : [past]),
-      free,
-      pending,
-      confirmed,
-      ...buildBusyWeekBlocks(weeks.next),
-    ],
-    free,
-    pending,
-    confirmed,
-    past,
-    trioWeek: position.week,
-    warnings,
+  const blocks: SeedBlock[] = [];
+  const append = (start: Date, mentorKey: SeedBlock['mentorKey'], appointmentIndex?: number): SeedBlock => {
+    const block: SeedBlock = {
+      id: SEED_BLOCK_IDS[blocks.length], mentorKey, start,
+      end: new Date(start.getTime() + STEP_MS),
+      ...(appointmentIndex === undefined ? {} : { appointmentId: SEED_APPOINTMENT_IDS[appointmentIndex] }),
+    };
+    blocks.push(block);
+    return block;
   };
-}
 
-async function cleanup(tx: Prisma.TransactionClient, users: AvailabilitySeedUsers): Promise<void> {
-  const ids = users.ownedUserIds;
-  await tx.appointment.deleteMany({ where: { OR: [{ mentorId: { in: ids } }, { studentId: { in: ids } }] } });
-  await tx.availabilityBlock.deleteMany({ where: { mentorId: { in: ids } } });
-}
-
-async function seedStatuses(
-  tx: Prisma.TransactionClient,
-): Promise<{ pending: AppointmentStatus; confirmed: AppointmentStatus }> {
-  const ensure = (title: string) =>
-    tx.appointmentStatus.upsert({ where: { title }, create: { title }, update: {} });
-
-  return {
-    pending: await ensure(AppointmentStatusTitle.PENDING),
-    confirmed: await ensure(AppointmentStatusTitle.CONFIRMED),
-  };
-}
-
-async function seedBlocks(tx: Prisma.TransactionClient, mentorId: string, plan: SeedBlockPlan): Promise<number> {
-  const { count } = await tx.availabilityBlock.createMany({
-    data: plan.blocks.map((block) => ({ mentorId, startAt: block.start, endAt: block.end })),
-  });
-  return count;
-}
-
-async function seedAppointments(
-  tx: Prisma.TransactionClient,
-  users: AvailabilitySeedUsers,
-  statuses: { pending: AppointmentStatus; confirmed: AppointmentStatus },
-  plan: SeedBlockPlan,
-): Promise<number> {
-  const trioBlocks = await tx.availabilityBlock.findMany({
-    where: { mentorId: users.mentorId, startAt: { gte: plan.trioWeek.start, lt: plan.trioWeek.end } },
-    select: { id: true, startAt: true },
-  });
-  const idByStart = new Map(trioBlocks.map((block) => [block.startAt.getTime(), block.id]));
-
-  const pendingBlock = idByStart.get(plan.pending.start.getTime());
-  const confirmedBlock = idByStart.get(plan.confirmed.start.getTime());
-  if (!pendingBlock || !confirmedBlock) {
-    throw new Error('No se encontraron los bloques de prueba para crear las citas de la semana del trío.');
+  const current = append(currentStart, 'primary', 0);
+  // Los horarios de mentor.a quedan fuera de la ventana 07:00-12:00 de mentor.b.
+  const next = append(instantAt(weeks.next, 0, 14), 'primary', 1);
+  const past = append(instantAt(weeks.previous, 1, 14), 'primary', 2);
+  for (let index = 0; index < PERFORMANCE_APPOINTMENTS; index += 1) {
+    append(instantAt(weeks.next, Math.floor(index / 10), BLOCK_MIN_HOUR + (index % 10) * 0.5), 'performance', index + 3);
   }
+  const free = append(instantAt(weeks.next, 0, 15), 'primary');
+  const blocked = append(instantAt(weeks.next, 1, 15), 'primary');
+  const firstOccurrence = instantAt(weeks.next, 2, 16);
+  const repeatUntil = calendarDate(new Date(addWeeks(firstOccurrence, 2)));
+  for (let index = 0; index < 3; index += 1) {
+    Object.assign(append(new Date(addWeeks(firstOccurrence, index)), 'primary'), { seriesId: SEED_SERIES_ID, repeatUntil });
+  }
+  return { blocks, current, next, past, free, blocked, blockedOn: calendarDate(blocked.start), warnings };
+}
 
-  const buildAppointment = (block: SeedBlock, blockId: string, statusId: string, message: string) => ({
-    blockId,
-    mentorId: users.mentorId,
-    studentId: users.graduateId,
-    startAt: block.start,
-    endAt: block.end,
-    statusId,
-    message,
-  });
+const mentorOf = (block: SeedBlock, users: AvailabilitySeedUsers): string =>
+  block.mentorKey === 'primary' ? users.mentorId : users.performanceMentorId;
 
-  const { count } = await tx.appointment.createMany({
-    data: [
-      buildAppointment(plan.pending, pendingBlock, statuses.pending.id, 'Cita de prueba pendiente (seed de desarrollo)'),
-      buildAppointment(plan.confirmed, confirmedBlock, statuses.confirmed.id, 'Cita de prueba confirmada (seed de desarrollo)'),
-    ],
+const overlaps = (start: Date, end: Date, otherStart: Date, otherEnd: Date): boolean =>
+  start < otherEnd && end > otherStart;
+
+async function checkReplaceableRecords(
+  tx: Prisma.TransactionClient, users: AvailabilitySeedUsers, plan: SeedBlockPlan,
+): Promise<void> {
+  const existingBlocks = await tx.availabilityBlock.findMany({
+    where: { id: { in: SEED_BLOCK_IDS } },
+    include: { appointments: { select: { id: true } }, proposals: { select: { id: true } } },
   });
-  return count;
+  for (const existing of existingBlocks) {
+    const planned = plan.blocks.find((block) => block.id === existing.id)!;
+    if (existing.mentorId !== mentorOf(planned, users) || existing.proposals.length > 0 ||
+      existing.appointments.some((appointment) => !SEED_APPOINTMENT_IDS.includes(appointment.id))) {
+      throw new Error(`B-08: el bloque ${existing.id} tiene propietario o referencias ajenas; no se reemplazará.`);
+    }
+  }
+  const existingAppointments = await tx.appointment.findMany({
+    where: { id: { in: SEED_APPOINTMENT_IDS } },
+    include: { history: { select: { id: true } }, proposals: { select: { id: true } } },
+  });
+  for (const existing of existingAppointments) {
+    const planned = plan.blocks.find((block) => block.appointmentId === existing.id)!;
+    if (existing.mentorId !== mentorOf(planned, users) || existing.studentId !== users.graduateId ||
+      existing.blockId !== planned.id || existing.history.length > 0 || existing.proposals.length > 0) {
+      throw new Error(`B-08: la cita ${existing.id} tiene participantes o referencias ajenas; no se reemplazará.`);
+    }
+  }
+  const existingBlocked = await tx.blockedDate.findUnique({ where: { id: SEED_BLOCKED_DATE_ID } });
+  if (existingBlocked && existingBlocked.mentorId !== users.mentorId) {
+    throw new Error('B-08: la identidad de la fecha bloqueada pertenece a otro mentor.');
+  }
+}
+
+async function checkForeignCollisions(
+  tx: Prisma.TransactionClient, users: AvailabilitySeedUsers, plan: SeedBlockPlan,
+): Promise<void> {
+  const mentorIds = [users.mentorId, users.performanceMentorId];
+  const from = new Date(Math.min(...plan.blocks.map((block) => block.start.getTime())));
+  const to = new Date(Math.max(...plan.blocks.map((block) => block.end.getTime())));
+  const foreignBlocks = await tx.availabilityBlock.findMany({
+    where: { id: { notIn: SEED_BLOCK_IDS }, mentorId: { in: mentorIds }, startAt: { lt: to }, endAt: { gt: from } },
+  });
+  const foreignAppointments = await tx.appointment.findMany({
+    where: {
+      id: { notIn: SEED_APPOINTMENT_IDS },
+      OR: [{ mentorId: { in: mentorIds } }, { studentId: users.graduateId }],
+      status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } },
+      startAt: { lt: to }, endAt: { gt: from },
+    },
+  });
+  const foreignBlocked = await tx.blockedDate.findMany({
+    where: { id: { not: SEED_BLOCKED_DATE_ID }, mentorId: { in: mentorIds } },
+  });
+  for (const block of plan.blocks) {
+    const mentorId = mentorOf(block, users);
+    if (foreignBlocks.some((other) => other.mentorId === mentorId && overlaps(block.start, block.end, other.startAt, other.endAt)) ||
+      foreignAppointments.some((other) => (other.mentorId === mentorId || (block.appointmentId && other.studentId === users.graduateId)) && overlaps(block.start, block.end, other.startAt, other.endAt)) ||
+      foreignBlocked.some((other) => other.mentorId === mentorId && other.blockedOn.getTime() === calendarDate(block.start).getTime())) {
+      throw new Error(`B-08: el horario ${block.start.toISOString()} colisiona con datos ajenos; se conserva la información existente.`);
+    }
+  }
+  const blockedDayStart = new Date(toUtcIso(toBoliviaTime(plan.blocked.start).date, '00:00'));
+  const blockedDayEnd = new Date(blockedDayStart.getTime() + MS_PER_DAY);
+  if (foreignAppointments.some((other) => other.mentorId === users.mentorId && overlaps(blockedDayStart, blockedDayEnd, other.startAt, other.endAt)) ||
+    foreignBlocked.some((other) => other.mentorId === users.mentorId && other.blockedOn.getTime() === plan.blockedOn.getTime())) {
+    throw new Error('B-08: la fecha a bloquear contiene citas activas o un bloqueo ajeno.');
+  }
 }
 
 export async function seedAvailability(
-  tx: Prisma.TransactionClient,
-  users: AvailabilitySeedUsers,
-  now: Date = new Date(),
+  tx: Prisma.TransactionClient, users: AvailabilitySeedUsers, now: Date = new Date(),
 ): Promise<AvailabilitySeedResult> {
+  if (new Set([users.mentorId, users.performanceMentorId, users.graduateId]).size !== 3) {
+    throw new Error('B-08: se requieren dos mentores y un titulado distintos.');
+  }
   const weeks = getWeeks(now);
   const plan = buildBlockPlan(weeks, now);
+  await checkReplaceableRecords(tx, users, plan);
+  await checkForeignCollisions(tx, users, plan);
+  const orientation = await tx.orientationType.findFirst({ where: { isActive: true }, orderBy: { name: 'asc' } });
+  if (!orientation) {
+    throw new Error('B-08: ejecuta primero el seed de tipos de orientación; no existe un tema activo.');
+  }
+  const statuses = await Promise.all([
+    AppointmentStatusTitle.CONFIRMED, AppointmentStatusTitle.CANCELLED, AppointmentStatusTitle.COMPLETED,
+  ].map((title) => tx.appointmentStatus.upsert({ where: { title }, create: { title }, update: {} })));
+  for (const mentorId of [users.mentorId, users.performanceMentorId]) {
+    await tx.mentorOrientationType.upsert({
+      where: { mentorId_orientationTypeId: { mentorId, orientationTypeId: orientation.id } },
+      create: { mentorId, orientationTypeId: orientation.id }, update: {},
+    });
+  }
 
-  await cleanup(tx, users);
-  const statuses = await seedStatuses(tx);
-  const blocks = await seedBlocks(tx, users.mentorId, plan);
-  const appointments = await seedAppointments(tx, users, statuses, plan);
-
+  // Retirar solo el conjunto reservado evita colisiones transitorias al cambiar de semana.
+  // Las comprobaciones previas impiden cascadas o desvinculaciones de referencias ajenas.
+  await tx.appointment.deleteMany({ where: { id: { in: SEED_APPOINTMENT_IDS } } });
+  await tx.availabilityBlock.deleteMany({ where: { id: { in: SEED_BLOCK_IDS } } });
+  await tx.blockedDate.deleteMany({ where: { id: SEED_BLOCKED_DATE_ID } });
+  await tx.availabilityBlock.createMany({
+    data: plan.blocks.map((block) => ({
+      id: block.id, mentorId: mentorOf(block, users), startAt: block.start, endAt: block.end,
+      seriesId: block.seriesId, repeatUntil: block.repeatUntil,
+    })),
+  });
+  const appointments = plan.blocks.filter((block) => block.appointmentId);
+  await tx.appointment.createMany({
+    data: appointments.map((block) => ({
+      id: block.appointmentId!, blockId: block.id, mentorId: mentorOf(block, users), studentId: users.graduateId,
+      startAt: block.start, endAt: block.end, statusId: statuses[0].id, orientationTypeId: orientation.id,
+      message: 'Cita confirmada de prueba B-08 (seed de desarrollo)', respondedAt: now,
+    })),
+  });
+  await tx.blockedDate.create({
+    data: { id: SEED_BLOCKED_DATE_ID, mentorId: users.mentorId, blockedOn: plan.blockedOn, reason: 'Compromiso académico (seed B-08)' },
+  });
   return {
-    weeks,
-    plan,
-    statuses: Object.keys(statuses).length,
-    blocks,
-    appointments,
-    warnings: plan.warnings,
+    weeks, plan, statuses: statuses.length, blocks: plan.blocks.length, appointments: appointments.length,
+    blockedDates: 1, series: 1, warnings: plan.warnings,
   };
 }

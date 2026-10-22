@@ -29,7 +29,7 @@ export class AvailabilityMapper {
 
   private toState(block: AvailabilityBlockWithAppointments): AvailabilityBlockState {
     const statuses = block.appointments.map((appointment) => appointment.status.title);
-    if (statuses.includes(AppointmentStatusTitle.CONFIRMED)) {
+    if (statuses.includes(AppointmentStatusTitle.CONFIRMED) || statuses.includes(AppointmentStatusTitle.LEGACY_CONFIRMED)) {
       return 'confirmed';
     }
     if (statuses.includes(AppointmentStatusTitle.PENDING)) {
