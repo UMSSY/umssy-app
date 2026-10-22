@@ -4,6 +4,7 @@ import { lockMentorDay } from '../../../common/prisma/lock-mentor-day.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { TransactionClient } from '../../../common/types/transaction-client.types.js';
 import { ACTIVE_APPOINTMENT_STATUSES } from '../constants/appointment-status.constants.js';
+import { MENTOR_DAY_TRANSACTION_OPTIONS } from '../constants/blocked-date.constants.js';
 
 @Injectable()
 export class BlockedDatesRepository {
@@ -17,7 +18,7 @@ export class BlockedDatesRepository {
     return this.prisma.$transaction(async (tx) => {
       await lockMentorDay(tx, mentorId, day);
       return work(tx);
-    });
+    }, MENTOR_DAY_TRANSACTION_OPTIONS);
   }
 
   findByDay(
