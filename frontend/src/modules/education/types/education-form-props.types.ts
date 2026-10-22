@@ -7,5 +7,6 @@ export interface EducationFormProps {
   isPending?: boolean;
   feedback?: Feedback | null;
   onSubmit: (values: EducationFormValues) => void | Promise<void>;
+  onValuesChange?: () => void;
   onCancel: () => void;
 }

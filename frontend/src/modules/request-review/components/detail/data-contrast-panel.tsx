@@ -32,9 +32,9 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
   const pending = fields.length - matching;
 
   return (
-    <section className="overflow-hidden rounded-[10px] border border-border bg-surface" aria-label="Contraste de datos">
+    <section className="overflow-hidden rounded-lg border border-border bg-surface" aria-label="Contraste de datos">
       <header className="flex flex-wrap items-center justify-between gap-2 px-5 py-4">
-        <h2 className="font-tight text-[17px] font-bold text-ink">Contraste de datos</h2>
+        <h2 className="font-tight text-lg font-bold text-ink">Contraste de datos</h2>
         <p className="flex items-center gap-4 text-sm text-ink" aria-live="polite">
           <span className="inline-flex items-center gap-1.5">
             <CircleCheck className="size-4" strokeWidth={1.75} aria-hidden="true" />
@@ -65,7 +65,7 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
             return (
               <TableRow key={field.key} className="border-border">
                 <TableCell className="px-4 py-3 align-middle whitespace-normal">
-                  <Label htmlFor={`contrast-${field.key}`} className="font-semibold leading-snug break-words text-ink">
+                  <Label htmlFor={`contrast-${field.key}`} className="leading-snug font-semibold break-words text-ink">
                     {field.label}
                   </Label>
                 </TableCell>

@@ -132,7 +132,7 @@ export function DocumentsCvView() {
 
   return (
     <ProfilePageLayout
-      title="Currículum Vitae"
+      title="Documentos y CV"
       description="Sube tu CV para tenerlo disponible en el perfil y mantenerlo actualizado"
     >
       {visibleFeedback ? <FeedbackMessage feedback={visibleFeedback} /> : null}
@@ -144,7 +144,7 @@ export function DocumentsCvView() {
         className="hidden"
         onChange={handleFileChange}
       />
-      <div className="grid grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+      <div className="grid grid-cols-2 items-start gap-6">
         <CvUploadCard
           selectedFile={selectedFile}
           hasSavedCv={savedCv !== null}
