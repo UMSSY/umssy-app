@@ -25,6 +25,19 @@ export function createDefaultQuestion(): SurveyQuestionInput {
   return { text: "", type: "SINGLE_CHOICE", isRequired: true, options: ["Opción 1", "Opción 2"] };
 }
 
+export const SURVEY_SAVE_MESSAGES = {
+  published: "Encuesta creada con éxito",
+  draftSaved: "Borrador guardado",
+  noConnection: "Error 503/504: Sin conexión con el servidor",
+  timeout: "Tiempo de solicitud excedido",
+  fallback: "No se pudo guardar la encuesta. Intenta de nuevo.",
+  errorBannerTitle: "Complete los campos obligatorios antes de publicar",
+  notEditable: "Esta encuesta ya fue publicada y no se puede editar.",
+  loadError: "No se pudo cargar la encuesta.",
+} as const;
+
+export const SURVEY_FORM_AUTOSAVE_DELAY_MS = 500;
+
 export const SURVEY_FORM_MESSAGES = {
   titleRequired: "El título de la encuesta es obligatorio",
   periodRequired: "Selecciona la gestión de la encuesta",

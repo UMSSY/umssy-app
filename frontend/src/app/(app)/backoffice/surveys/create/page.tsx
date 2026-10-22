@@ -1,5 +1,6 @@
 import { CreateSurveyView } from "@/modules/surveys";
 
-export default function CreateSurveyPage() {
-  return <CreateSurveyView />;
+export default async function CreateSurveyPage({ searchParams }: { searchParams: Promise<{ resume?: string }> }) {
+  const { resume } = await searchParams;
+  return <CreateSurveyView resume={resume === "1"} />;
 }
