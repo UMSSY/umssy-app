@@ -15,13 +15,13 @@ describe("Table", () => {
         </TableHeader>
         <TableBody>
           <TableRow>
-            <TableCell className="tracking-widest">Ana</TableCell>
+            <TableCell className="extra">Ana</TableCell>
           </TableRow>
         </TableBody>
       </Table>
     )
 
     expect(screen.getByRole("columnheader", { name: "Nombre" })).toHaveAttribute("data-slot", "table-head")
-    expect(screen.getByRole("cell", { name: "Ana" })).toHaveClass("tracking-widest")
+    expect(screen.getByRole("cell", { name: "Ana" })).toHaveClass("extra")
   })
 })

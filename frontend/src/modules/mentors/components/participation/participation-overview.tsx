@@ -53,7 +53,7 @@ function ParticipationPreferencesCard({
         </div>
       </CardHeader>
 
-      <CardContent className="px-5 pt-4 pb-5 sm:px-6 sm:pb-6">
+      <CardContent className="px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
         <div className="flex flex-wrap gap-2">
           {items.map((item) => (
             <span
@@ -77,7 +77,7 @@ export function ParticipationOverview({
     <main className="min-h-full bg-surface-soft px-4 py-6 sm:py-8">
       <div className="mx-auto max-w-5xl space-y-5">
         <div>
-          <div className="[&_[aria-current=page]]:font-normal [&_[aria-current=page]]:text-text-secondary [&>nav]:mb-0 [&>nav]:text-xs">
+          <div className="[&>nav]:mb-0 [&>nav]:text-xs [&_[aria-current=page]]:font-normal [&_[aria-current=page]]:text-text-secondary">
             <Breadcrumbs items={PARTICIPATION_BREADCRUMB_ITEMS} />
           </div>
           <h1 className="mt-2 text-2xl font-bold text-ink">
@@ -103,7 +103,7 @@ export function ParticipationOverview({
             </p>
           </CardHeader>
 
-          <CardContent className="px-5 pt-3 pb-5 sm:px-6 sm:pb-6">
+          <CardContent className="px-5 pb-5 pt-3 sm:px-6 sm:pb-6">
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
               <Check size={13} /> Activo
             </span>

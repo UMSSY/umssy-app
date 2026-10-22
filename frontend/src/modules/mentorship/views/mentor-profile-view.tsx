@@ -57,7 +57,7 @@ export function MentorProfileView({ mentorId }: MentorProfileViewProps) {
 
   return (
     <main className="min-h-screen bg-surface-soft p-4 sm:p-6 md:p-8">
-      <div className="mx-auto w-full max-w-7xl min-w-0">
+      <div className="mx-auto w-full min-w-0 max-w-7xl">
         <MentorProfileNavigation mentorName={mentor.fullName} />
         <MentorProfileHeader
           mentor={mentor}

@@ -13,8 +13,8 @@ describe("Progress", () => {
   })
 
   it("combina la clase recibida con las propias", () => {
-    render(<Progress value={10} aria-label="Avance" className="tracking-widest" />)
-    expect(screen.getByRole("progressbar")).toHaveClass("tracking-widest")
+    render(<Progress value={10} aria-label="Avance" className="extra" />)
+    expect(screen.getByRole("progressbar")).toHaveClass("extra")
   })
 
   it("dibuja la pista y el indicador", () => {

@@ -17,13 +17,13 @@ export function MyPassesView() {
     registrations.find((item) => item.id === selectedId) ?? registrations[0];
 
   return (
-    <div className="flex size-full min-h-screen flex-col bg-transparent lg:flex-row">
+    <div className="flex flex-col lg:flex-row h-full w-full min-h-screen bg-transparent">
       <div className="min-w-0 flex-1 p-8 pt-4 lg:p-12 lg:pt-6">
         <div className="mb-8">
-          <h1 className="mb-1 text-3xl font-extrabold text-ink">
+          <h1 className="text-3xl font-extrabold text-ink mb-1">
             Mis inscripciones
           </h1>
-          <p className="text-sm text-text-secondary">
+          <p className="text-text-secondary text-sm">
             {registrations.length}{' '}
             {registrations.length === 1 ? 'pase' : 'pases'}
           </p>
@@ -34,7 +34,7 @@ export function MyPassesView() {
           <RequestFeedback message={error} isError onRetry={retry}>
             <Link
               href="/login?next=/events/my-passes"
-              className="mr-4 underline"
+              className="underline mr-4"
             >
               Iniciar sesión
             </Link>
@@ -59,7 +59,7 @@ export function MyPassesView() {
         )}
       </div>
       {!isLoading && !error && selected && (
-        <div className="w-full shrink-0 border-l border-border bg-surface-soft/30 p-8 pt-4 lg:w-[480px] lg:p-12 lg:pt-6">
+        <div className="w-full lg:w-[480px] border-l border-border bg-surface-soft/30 p-8 pt-4 lg:p-12 lg:pt-6 shrink-0">
           <PassDetail registration={selected} />
         </div>
       )}

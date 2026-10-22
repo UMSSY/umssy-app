@@ -194,7 +194,7 @@ export function CertificationsView() {
           <div className="flex flex-col gap-6">
             <section
               aria-label="Certificaciones registradas"
-              className={`flex flex-col gap-1 ${certifications.length > 0 ? "max-h-[380px] overflow-y-auto" : ""}`}
+              className={`flex flex-col gap-1 ${certifications.length > 0 ? "overflow-y-auto max-h-[380px]" : ""}`}
             >
               <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background py-2">
                 <p className="text-[12px] font-semibold tracking-wide text-text-secondary">

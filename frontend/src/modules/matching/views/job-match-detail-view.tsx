@@ -82,7 +82,7 @@ export function JobMatchDetailView({ jobOfferId }: JobMatchDetailViewProps) {
             <h3 className="text-sm font-semibold text-ink">
               {JOB_MATCHING_MESSAGES.descriptionTitle}
             </h3>
-            <p className="text-sm whitespace-pre-line text-ink-soft">{data.description}</p>
+            <p className="whitespace-pre-line text-sm text-ink-soft">{data.description}</p>
           </section>
         </Card>
       )}

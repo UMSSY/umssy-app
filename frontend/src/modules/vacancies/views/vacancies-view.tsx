@@ -1,6 +1,4 @@
 "use client";
-
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useVacancies } from "../hooks/use-vacancies";
 
@@ -23,7 +21,7 @@ export function VacanciesView() {
         </p>
 
         <div className="mt-6">
-          <Input unstyled
+          <input
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}

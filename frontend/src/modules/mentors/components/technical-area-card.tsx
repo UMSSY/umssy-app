@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import type { TechnicalAreaResponse } from "@/modules/mentorship/types/technical-area-response.types";
 
@@ -14,8 +13,7 @@ export function TechnicalAreaCard({
   onToggle,
 }: TechnicalAreaCardProps) {
   return (
-    <Button
-      unstyled
+    <button
       type="button"
       role="checkbox"
       aria-checked={isSelected}
@@ -27,7 +25,7 @@ export function TechnicalAreaCard({
       }`}
     >
       <span
-        className={`flex size-5 shrink-0 items-center justify-center rounded border text-white ${
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border text-white ${
           isSelected
             ? "border-[#DC2626] bg-[#DC2626]"
             : "border-gray-400 bg-white"
@@ -43,6 +41,6 @@ export function TechnicalAreaCard({
           </span>
         )}
       </span>
-    </Button>
+    </button>
   );
 }

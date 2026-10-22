@@ -17,9 +17,9 @@ describe("Label", () => {
   })
 
   it("combina la clase recibida con las propias", () => {
-    render(<Label className="tracking-widest">Texto</Label>)
+    render(<Label className="extra">Texto</Label>)
     const label = screen.getByText("Texto")
     expect(label).toHaveAttribute("data-slot", "label")
-    expect(label).toHaveClass("tracking-widest")
+    expect(label).toHaveClass("extra")
   })
 })

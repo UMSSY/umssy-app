@@ -68,7 +68,7 @@ export function SidebarNavItem({
       </SidebarMenuButton>
 
       {isExpanded && (
-        <SidebarMenuSub id={submenuId} className="mx-0 border-l-0 py-2 pr-2 pl-6">
+        <SidebarMenuSub id={submenuId} className="mx-0 border-l-0 py-2 pl-6 pr-2">
           {item.children.map((child) => {
             const isChildActive = isRouteActive(
               pathname,

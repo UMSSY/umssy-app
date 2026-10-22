@@ -1,6 +1,5 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
 /* eslint-disable @next/next/no-img-element */
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -64,7 +63,7 @@ export function ContactSearchModal({ isOpen, onClose, onSelectContact }: Contact
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-heading text-base font-medium text-slate-900">
+          <DialogTitle className="text-slate-900 font-heading text-base font-medium">
             Nueva conversación
           </DialogTitle>
         </DialogHeader>
@@ -85,20 +84,19 @@ export function ContactSearchModal({ isOpen, onClose, onSelectContact }: Contact
         </div>
 
         <div 
-          className="mt-2 flex max-h-[320px] flex-col gap-1 overflow-y-auto pr-1 pb-4"
+          className="flex flex-col gap-1 max-h-[320px] overflow-y-auto mt-2 pr-1 pb-4"
           role="listbox"
           aria-label="Lista de contactos"
         >
           {isSearching ? (
-            <div className="py-6 text-center text-sm text-slate-500" role="status">
+            <div className="text-center text-slate-500 py-6 text-sm" role="status">
               Buscando...
             </div>
           ) : results.length > 0 ? (
             results.map((user, index) => {
               const isSelected = index === selectedIndex;
               return (
-                <Button
-                  unstyled
+                <button
                   key={user.id}
                   ref={(el) => {
                     optionRefs.current[index] = el;
@@ -107,7 +105,7 @@ export function ContactSearchModal({ isOpen, onClose, onSelectContact }: Contact
                   aria-selected={isSelected}
                   onClick={() => handleSelectUser(user)}
                   onMouseEnter={() => setSelectedIndex(index)}
-                  className={`flex cursor-pointer items-center gap-3 rounded-lg p-2.5 text-left transition-colors outline-none ${
+                  className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors text-left outline-none cursor-pointer ${
                     isSelected
                       ? 'bg-slate-100 ring-2 ring-slate-400/50'
                       : 'hover:bg-slate-50 focus-visible:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-400'
@@ -117,29 +115,29 @@ export function ContactSearchModal({ isOpen, onClose, onSelectContact }: Contact
                     <img
                       src={user.avatarUrl}
                       alt={user.fullName}
-                      className="size-10 shrink-0 rounded-full object-cover"
+                      className="w-10 h-10 rounded-full object-cover shrink-0"
                     />
                   ) : (
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700">
+                    <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm shrink-0">
                       {getInitials(user.fullName)}
                     </div>
                   )}
                   <div className="flex flex-col overflow-hidden">
-                    <span className="truncate text-sm font-medium text-slate-800">
+                    <span className="font-medium text-slate-800 text-sm truncate">
                       {user.fullName}
                     </span>
                     {user.headline && (
-                      <span className="truncate text-xs text-slate-500">
+                      <span className="text-xs text-slate-500 truncate">
                         {user.headline}
                       </span>
                     )}
                   </div>
-                </Button>
+                </button>
               );
             })
           ) : (
             searchTerm.trim().length >= 2 && (
-              <div className="py-6 text-center text-sm text-slate-500">
+              <div className="text-center text-slate-500 py-6 text-sm">
                 No se encontraron usuarios
               </div>
             )

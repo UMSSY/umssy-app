@@ -175,8 +175,8 @@ describe("AreaDetailPanel", () => {
   });
 
   it("applies a custom className", () => {
-    render(<AreaDetailPanel area={desarrollo} onClose={vi.fn()} className="tracking-widest" />);
+    render(<AreaDetailPanel area={desarrollo} onClose={vi.fn()} className="custom-panel" />);
 
-    expect(screen.getByRole("region", { name: "Desarrollo" }).className).toContain("tracking-widest");
+    expect(screen.getByRole("region", { name: "Desarrollo" }).className).toContain("custom-panel");
   });
 });

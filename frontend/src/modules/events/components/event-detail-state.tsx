@@ -13,7 +13,7 @@ export function EventDetailState({
   return (
     <aside
       aria-label="Detalle del taller seleccionado"
-      className="flex max-h-[55dvh] min-h-0 w-full shrink-0 overflow-y-auto overscroll-contain border-t border-border bg-surface p-8 text-center lg:h-full lg:max-h-none lg:w-[340px] lg:border-t-0 lg:border-l xl:w-[360px]"
+      className="flex max-h-[55dvh] min-h-0 w-full shrink-0 overflow-y-auto overscroll-contain border-t border-border bg-surface p-8 text-center lg:h-full lg:max-h-none lg:w-[340px] lg:border-l lg:border-t-0 xl:w-[360px]"
     >
       <div className="m-auto flex max-w-xs flex-col items-center gap-3">
         {selectedId && onClose && (

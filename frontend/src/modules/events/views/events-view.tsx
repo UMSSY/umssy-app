@@ -66,9 +66,9 @@ export function EventsView() {
 
   return (
     <div ref={viewRef} className="flex h-dvh min-h-0 w-full flex-col overflow-hidden bg-surface-soft text-foreground lg:flex-row">
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-6 pt-20 pb-8 sm:px-10">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-6 pb-8 pt-20 sm:px-10">
         <header className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
             Talleres disponibles
           </h1>
           <p className="text-sm text-text-secondary">
@@ -108,7 +108,7 @@ export function EventsView() {
         )}
 
         <section aria-label="Listado de talleres">
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {events.map((eventItem) => (
               <EventCard
                 key={eventItem.id}

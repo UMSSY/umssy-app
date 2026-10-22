@@ -1,6 +1,5 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
 import { useRef, useEffect } from 'react';
 import {
   countCharacters,
@@ -62,10 +61,10 @@ export function MessageInputBar({
   return (
     <div
       data-testid="message-input-bar"
-      className="w-full min-w-0 shrink-0 border-t border-[#E3E7EC] bg-white p-3 transition-all md:p-4"
+      className="shrink-0 w-full min-w-0 bg-white border-t border-[#E3E7EC] p-3 md:p-4 transition-all"
     >
-      <form onSubmit={handleSubmit} className="flex w-full min-w-0 flex-col gap-2">
-        <div className="flex w-full min-w-0 items-end gap-2.5 rounded-xl border border-[#E3E7EC] bg-[#F6F7F9] p-2 transition-all focus-within:border-[#0B1F2E] focus-within:bg-white">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full min-w-0">
+        <div className="flex items-end gap-2.5 w-full min-w-0 bg-[#F6F7F9] border border-[#E3E7EC] rounded-xl p-2 focus-within:border-[#0B1F2E] focus-within:bg-white transition-all">
           <textarea
             ref={textareaRef}
             data-testid="message-textarea"
@@ -75,36 +74,35 @@ export function MessageInputBar({
             disabled={disabled || isSending}
             placeholder={placeholder}
             rows={1}
-            className="max-h-[120px] min-h-[40px] w-full min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent p-1 text-sm leading-relaxed [overflow-wrap:anywhere] break-words text-[#0B1F2E] placeholder-[#5B6470] focus:outline-none"
+            className="flex-1 min-w-0 w-full bg-transparent border-0 resize-none text-sm text-[#0B1F2E] placeholder-[#5B6470] focus:outline-none leading-relaxed py-1 px-1 min-h-[40px] max-h-[120px] overflow-y-auto break-words [overflow-wrap:anywhere]"
             aria-label="Campo de redaccion de mensaje"
           />
 
-          <div className="flex shrink-0 items-center gap-2 pb-1">
+          <div className="flex items-center gap-2 shrink-0 pb-1">
             <span
               data-testid="character-counter"
               className={`text-[11px] font-medium tracking-tight select-none ${
                 characterCount >= maxLength
-                  ? 'font-bold text-[#E30613]'
+                  ? 'text-[#E30613] font-bold'
                   : 'text-[#5B6470]'
               }`}
             >
               {characterCount}/{maxLength}
             </span>
 
-            <Button
-              unstyled
+            <button
               type="submit"
               data-testid="send-button"
               disabled={isSendDisabled}
               aria-label="Enviar mensaje"
-              className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all focus:outline-none md:text-sm ${
+              className={`inline-flex items-center justify-center px-4 py-2 text-xs md:text-sm font-semibold rounded-lg text-white transition-all shadow-xs focus:outline-none ${
                 isSendDisabled
-                  ? 'cursor-not-allowed bg-slate-300 text-slate-500 opacity-60 shadow-none'
-                  : 'bg-[#E30613] shadow-sm hover:bg-[#B4050F] active:scale-95'
+                  ? 'bg-slate-300 text-slate-500 cursor-not-allowed opacity-60 shadow-none'
+                  : 'bg-[#E30613] hover:bg-[#B4050F] active:scale-95 shadow-sm'
               }`}
             >
               {isSending ? 'Enviando...' : 'Enviar'}
-            </Button>
+            </button>
           </div>
         </div>
       </form>
