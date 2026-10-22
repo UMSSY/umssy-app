@@ -29,6 +29,7 @@ describe("MentorAvailabilityView", () => {
     vi.mocked(toast.success).mockClear()
     vi.mocked(toast.error).mockClear()
     vi.useFakeTimers({ toFake: ["Date"], now: NOW })
+    vi.spyOn(availabilityApi, "getMyAvailabilityStatus").mockResolvedValue({ mentorId: "m1", isAvailable: true })
   })
 
   afterEach(() => {
@@ -44,6 +45,15 @@ describe("MentorAvailabilityView", () => {
     renderWithQuery(<MentorAvailabilityView />)
 
     expect(screen.getByText("Cargando disponibilidad...")).toBeInTheDocument()
+  })
+
+  it("muestra el interruptor «Recibir solicitudes de mentoría» con el estado actual", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+
+    renderWithQuery(<MentorAvailabilityView />)
+
+    const toggle = screen.getByRole("switch", { name: "Recibir solicitudes de mentoría" })
+    await waitFor(() => expect(toggle).toHaveAttribute("aria-checked", "true"))
   })
 
   it("muestra la sección y la zona horaria de Bolivia", async () => {

@@ -3,6 +3,7 @@ import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { AvailabilityBlock } from "../types/availability-block.types";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
 import type { AvailabilityFilters } from "../types/availability-filters.types";
+import type { MentorAvailabilityStatus } from "../types/mentor-availability-status.types";
 import type { WeekRange } from "@/shared/types/week-range.types";
 
 function toISOString(value: string): string {
@@ -56,5 +57,18 @@ export const availabilityApi = {
 
   deleteAvailabilityBlock: async (id: string): Promise<void> => {
     await apiClient.delete(`/availability-blocks/${encodeURIComponent(id)}`);
+  },
+
+  getMyAvailabilityStatus: async (): Promise<MentorAvailabilityStatus> => {
+    const response = await apiClient.get<ApiResponse<MentorAvailabilityStatus>>("/mentors/me/availability");
+    return response.data.data;
+  },
+
+  updateAvailabilityStatus: async (mentorId: string, isAvailable: boolean): Promise<MentorAvailabilityStatus> => {
+    const response = await apiClient.patch<ApiResponse<MentorAvailabilityStatus>>(
+      `/mentors/${encodeURIComponent(mentorId)}/availability`,
+      { isAvailable },
+    );
+    return response.data.data;
   },
 };
