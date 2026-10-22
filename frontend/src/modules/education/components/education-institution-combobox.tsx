@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getFieldErrorProps } from '@/modules/profile/utils/get-field-error-props';
+import { getFieldErrorProps } from '@/modules/profile';
 import { EDUCATION_INSTITUTION_TEXTS } from '../constants/education-institutions.constants';
 import type { EducationInstitutionComboboxProps } from '../types/education-institution-combobox-props.types';
 import { normalizeEducationText } from '../utils/normalize-education-text';
@@ -95,7 +95,7 @@ export function EducationInstitutionCombobox({ id, value, institutions = [], err
                 variant="ghost"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => select(institution.name)}
-                className="h-auto min-h-10 w-full justify-start px-3 py-2 text-left font-normal break-words whitespace-normal aria-selected:bg-surface-soft"
+                className="h-auto min-h-10 w-full justify-start whitespace-normal break-words px-3 py-2 text-left font-normal aria-selected:bg-surface-soft"
               >
                 {institution.name}
               </Button>

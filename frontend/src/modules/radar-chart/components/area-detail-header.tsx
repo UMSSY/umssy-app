@@ -1,12 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import type { AreaDetailHeaderProps } from "../types/area-detail-components.types";
 
 export function AreaDetailHeader({ titleId, name, order, onClose }: AreaDetailHeaderProps) {
   return (
-    <header className="sticky top-0 z-10 flex items-start justify-between gap-4 bg-surface px-6 py-5">
+    <header className="sticky top-0 z-10 flex items-start justify-between gap-4 bg-surface px-6 pt-5 pb-5">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span
@@ -29,15 +28,14 @@ export function AreaDetailHeader({ titleId, name, order, onClose }: AreaDetailHe
           Información relevante del candidato seleccionado
         </p>
       </div>
-      <Button
-        unstyled
+      <button
         type="button"
         onClick={onClose}
         aria-label="Cerrar detalle del área"
         className="flex size-9 shrink-0 items-center justify-center rounded-full border border-accent/30 bg-surface text-accent outline-none hover:border-accent hover:bg-accent hover:text-surface focus-visible:ring-2 focus-visible:ring-accent/40 motion-safe:transition-colors motion-safe:duration-150"
       >
         <X className="size-4" aria-hidden="true" />
-      </Button>
+      </button>
     </header>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { PageHeading } from '@/shared/components/layout/page-heading';
 import { useState } from 'react';
 import { useMyPasses } from '../hooks/use-my-passes';
 import { RequestFeedback } from '../components/request-feedback';
@@ -17,16 +18,10 @@ export function MyPassesView() {
     registrations.find((item) => item.id === selectedId) ?? registrations[0];
 
   return (
-    <div className="flex size-full min-h-screen flex-col bg-transparent lg:flex-row">
-      <div className="min-w-0 flex-1 p-8 pt-4 lg:p-12 lg:pt-6">
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-7 bg-transparent lg:flex-row">
+      <div className="min-w-0 flex-1">
         <div className="mb-8">
-          <h1 className="mb-1 text-3xl font-extrabold text-ink">
-            Mis inscripciones
-          </h1>
-          <p className="text-sm text-text-secondary">
-            {registrations.length}{' '}
-            {registrations.length === 1 ? 'pase' : 'pases'}
-          </p>
+          <PageHeading title="Mis inscripciones" description={`${registrations.length} ${registrations.length === 1 ? 'pase' : 'pases'}`} />
         </div>
         {isLoading ? (
           <RequestFeedback message="Cargando tus inscripciones..." />
@@ -34,7 +29,7 @@ export function MyPassesView() {
           <RequestFeedback message={error} isError onRetry={retry}>
             <Link
               href="/login?next=/events/my-passes"
-              className="mr-4 underline"
+              className="underline mr-4"
             >
               Iniciar sesión
             </Link>
@@ -42,7 +37,7 @@ export function MyPassesView() {
         ) : registrations.length === 0 ? (
           <MyPassesEmptyState />
         ) : (
-          <div className="max-w-md space-y-4">
+          <div className="space-y-4">
             {registrations.map((item) => (
               <PassCard
                 key={item.id}
@@ -59,7 +54,7 @@ export function MyPassesView() {
         )}
       </div>
       {!isLoading && !error && selected && (
-        <div className="w-full shrink-0 border-l border-border bg-surface-soft/30 p-8 pt-4 lg:w-[480px] lg:p-12 lg:pt-6">
+        <div className="w-full shrink-0 self-start rounded-lg border border-border bg-surface p-6 lg:w-[380px]">
           <PassDetail registration={selected} />
         </div>
       )}

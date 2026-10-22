@@ -32,7 +32,7 @@ export function SidebarNavItem({
   const [isExpanded, setIsExpanded] = useState(hasActiveChild);
 
   if (!item.children) {
-    const isActive = item.href ? isRouteActive(pathname, item.href) : false;
+    const isActive = item.href ? isRouteActive(pathname, item.href, item.activePathPatterns) : false;
 
     return (
       <SidebarMenuItem>
@@ -62,13 +62,13 @@ export function SidebarNavItem({
         <Icon strokeWidth={1.5} aria-hidden="true" />
         <span className="flex-1">{item.label}</span>
         <ChevronDown
-          className={`text-accent transition-transform ${isExpanded ? "rotate-180" : ""}`}
+          className={`text-surface/70 transition-transform ${isExpanded ? "rotate-180" : ""}`}
           aria-hidden="true"
         />
       </SidebarMenuButton>
 
       {isExpanded && (
-        <SidebarMenuSub id={submenuId} className="mx-0 border-l-0 py-2 pr-2 pl-6">
+        <SidebarMenuSub id={submenuId} className="mx-0 border-l-0 py-2 pl-6 pr-2">
           {item.children.map((child) => {
             const isChildActive = isRouteActive(
               pathname,

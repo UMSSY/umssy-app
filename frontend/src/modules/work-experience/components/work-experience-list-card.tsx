@@ -1,8 +1,9 @@
+import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { WorkExperienceListCardProps } from "../types/work-experience-list-card-props.types";
 import { formatWorkPeriod } from "../utils/format-work-period";
 import { sortWorkExperiences } from "../utils/sort-work-experiences";
-import { SectionCard } from "@/modules/profile/components/section-card";
+import { SectionCard } from "@/modules/profile";
 
 export function WorkExperienceListCard({
   experiences = [],
@@ -27,10 +28,10 @@ export function WorkExperienceListCard({
         {sortedExperiences.map((experience) => (
           <li key={experience.id} className="flex items-center justify-between gap-4 py-4 first:pt-0">
             <div className="min-w-0 flex-1">
-              <h3 className="text-[15px] font-bold [overflow-wrap:anywhere] text-ink">
+              <h3 className="text-[15px] font-bold text-ink [overflow-wrap:anywhere]">
                 {experience.position}
               </h3>
-              <p className="mt-0.5 text-[13px] [overflow-wrap:anywhere] text-text-secondary">
+              <p className="mt-0.5 text-[13px] text-text-secondary [overflow-wrap:anywhere]">
                 {experience.companyName} ·{" "}
                 {formatWorkPeriod(experience.startDate, experience.endDate, experience.isCurrent)}
               </p>
@@ -40,21 +41,21 @@ export function WorkExperienceListCard({
                 type="button"
                 variant="ghost"
                 aria-label={`Editar ${experience.position}`}
-                className="h-8 px-2 text-[13px] font-semibold text-ink"
+                className="size-9 p-0 text-ink-soft"
                 disabled={isBusy}
                 onClick={() => onEdit?.(experience)}
               >
-                Editar
+                <Pencil className="size-4" aria-hidden="true" />
               </Button>
               <Button
                 type="button"
                 variant="ghost"
                 aria-label={`Eliminar ${experience.position}`}
-                className="h-8 px-2 text-[13px] font-semibold text-accent hover:bg-interaction hover:text-accent"
+                className="size-9 p-0 text-ink-soft hover:bg-interaction hover:text-ink"
                 disabled={isBusy}
                 onClick={() => onDelete?.(experience)}
               >
-                Eliminar
+                <Trash2 className="size-4" aria-hidden="true" />
               </Button>
             </div>
           </li>

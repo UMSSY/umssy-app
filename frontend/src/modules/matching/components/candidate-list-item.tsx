@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getInitials } from "@/shared/utils/get-initials";
 import type { CandidateWithMatch } from "../types/matching-types";
@@ -15,8 +14,7 @@ export function CandidateListItem({ candidate, selected, onSelect }: CandidateLi
   const isDiscarded = candidate.status === "discarded";
 
   return (
-    <Button
-      unstyled
+    <button
       type="button"
       onClick={() => onSelect(candidate.id)}
       aria-pressed={selected}
@@ -27,7 +25,7 @@ export function CandidateListItem({ candidate, selected, onSelect }: CandidateLi
       )}
     >
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
           {getInitials(candidate.name)}
         </span>
 
@@ -57,13 +55,13 @@ export function CandidateListItem({ candidate, selected, onSelect }: CandidateLi
               </span>
             ))}
             {isDiscarded && (
-              <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">
+              <span className="px-2 py-0.5 text-[10px] font-medium text-ink-soft">
                 Descartado
               </span>
             )}
           </div>
         </div>
       </div>
-    </Button>
+    </button>
   );
 }

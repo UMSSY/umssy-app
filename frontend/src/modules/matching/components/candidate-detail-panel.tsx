@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { AreaDetailPanel } from "@/modules/radar-chart/components/area-detail-panel";
-import type { AreaId } from "@/modules/radar-chart/types/area-detail.types";
+import { AreaDetailPanel } from "@/modules/radar-chart";
+import type { AreaId } from "@/modules/radar-chart";
 import { getCandidateAreaDetail } from "../data/candidate-area-evidence.data";
 import { Button } from "@/components/ui/button";
 import {
@@ -75,7 +75,7 @@ export function CandidateDetailPanel({
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
               {getInitials(candidate.name)}
             </span>
             <div>
@@ -84,7 +84,7 @@ export function CandidateDetailPanel({
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs tracking-wide text-muted-foreground uppercase">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
               Compatibilidad vs. {vacancy.title}
             </p>
             <p className="text-2xl font-semibold text-foreground">{candidate.matchPercent}%</p>
@@ -127,7 +127,7 @@ export function CandidateDetailPanel({
         )}
 
         {actionFeedback && (
-          <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300">
+          <div className="rounded-md border border-border-strong/30 bg-ink-soft/10 px-3 py-2 text-sm text-ink-soft dark:text-ink-soft">
             {actionFeedback}
           </div>
         )}

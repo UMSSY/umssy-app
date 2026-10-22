@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import type { OrientationTypeResponse } from "../../types/orientation-type-response.types";
 
@@ -50,7 +49,7 @@ export function OrientationStep({
       </div>
 
       {!hasSelection && (
-        <p className="text-sm font-medium text-red-600" role="alert">
+        <p className="text-sm font-medium text-accent" role="alert">
           Debe seleccionarse al menos un tipo de orientación para continuar
         </p>
       )}
@@ -62,15 +61,14 @@ export function OrientationStep({
           );
 
           return (
-            <Button
-              unstyled
+            <button
               key={orientation.id}
               type="button"
               onClick={() => toggleOrientation(orientation.id)}
               className={[
                 "flex w-full flex-col items-start gap-3 rounded-lg border p-4 text-left transition-colors",
                 isSelected
-                  ? "border-red-600 bg-red-50"
+                  ? "border-accent bg-interaction"
                   : "border-border bg-surface hover:border-slate-300",
               ].join(" ")}
               aria-pressed={isSelected}
@@ -84,20 +82,20 @@ export function OrientationStep({
                   className={[
                     "flex h-5 w-5 items-center justify-center rounded border",
                     isSelected
-                      ? "border-red-600 bg-red-600 text-white"
+                      ? "border-accent bg-accent text-white"
                       : "border-slate-300 bg-white",
                   ].join(" ")}
                 >
                   {isSelected && (
                     <CheckCircle
-                      className="size-3.5"
+                      className="h-3.5 w-3.5"
                       strokeWidth={3}
                       aria-hidden
                     />
                   )}
                 </div>
               </div>
-            </Button>
+            </button>
           );
         })}
       </div>
