@@ -77,6 +77,14 @@ export class BlockedDatesService {
     return new Set(blockedDates.map((blockedDate) => toDayString(blockedDate.blockedOn)));
   }
 
+  withDayLock<T>(
+    mentorId: string,
+    day: string,
+    work: (tx: TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.blockedDatesRepository.withDayLock(mentorId, day, work);
+  }
+
   async assertDayNotBlocked(
     mentorId: string,
     startAt: Date,
