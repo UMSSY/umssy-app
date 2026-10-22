@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
@@ -31,9 +30,9 @@ function DeleteFlowHarness() {
   return (
     <>
       <p>{hasFile ? "CV_Valeria_Quispe.pdf" : "Sin archivo"}</p>
-      <Button unstyled type="button" onClick={() => setIsOpen(true)}>
+      <button type="button" onClick={() => setIsOpen(true)}>
         Eliminar CV
-      </Button>
+      </button>
       <ConfirmDeleteDialog
         isOpen={isOpen}
         title="¿Eliminar tu CV?"

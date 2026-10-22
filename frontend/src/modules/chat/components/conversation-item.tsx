@@ -1,7 +1,5 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
 /* eslint-disable @next/next/no-img-element */
+'use client';
 
 import { Conversation } from '../types/conversation.types';
 import { formatConversationDate, getInitials } from '../utils/date-formatter';
@@ -33,7 +31,7 @@ export function ConversationItem({
           ? 'Audio'
           : 'Archivo';
       return (
-        <span className="font-medium text-blue-700">
+        <span className="text-blue-700 font-medium">
           [{label}] {lastMessage.content}
         </span>
       );
@@ -43,13 +41,12 @@ export function ConversationItem({
   };
 
   return (
-    <Button
-      unstyled
+    <button
       type="button"
       onClick={() => onSelect(conversation)}
-      className={`flex w-full items-center gap-3 border-b border-slate-100 p-3.5 text-left transition-all hover:bg-slate-50 focus:outline-none ${
+      className={`w-full text-left p-3.5 flex items-center gap-3 transition-all border-b border-slate-100 hover:bg-slate-50 focus:outline-none ${
         isSelected
-          ? 'border-l-4 border-l-[#0B2545] bg-blue-50/80'
+          ? 'bg-blue-50/80 border-l-4 border-l-[#0B2545]'
           : 'border-l-4 border-l-transparent'
       }`}
     >
@@ -59,35 +56,35 @@ export function ConversationItem({
           <img
             src={contact.avatarUrl}
             alt={contact.fullName}
-            className="size-12 rounded-full border border-slate-200 object-cover"
+            className="w-12 h-12 rounded-full object-cover border border-slate-200"
           />
         ) : (
-          <div className="flex size-12 items-center justify-center rounded-full border border-slate-300 bg-slate-200 text-sm font-bold text-slate-700">
+          <div className="w-12 h-12 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm border border-slate-300">
             {getInitials(contact.fullName)}
           </div>
         )}
 
         {contact.isOnline && (
           <span
-            className="absolute right-0 bottom-0 size-3.5 rounded-full border-2 border-white bg-emerald-500 shadow-xs"
+            className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full shadow-xs"
             title="En linea"
           />
         )}
       </div>
 
       {}
-      <div className="min-w-0 flex-1">
-        <div className="mb-1 flex items-center justify-between gap-1">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-1 mb-1">
           <h4
-            className={`truncate text-sm ${
+            className={`text-sm truncate ${
               hasUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-800'
             }`}
           >
             {contact.fullName}
           </h4>
           <span
-            className={`shrink-0 text-xs whitespace-nowrap ${
-              hasUnread ? 'font-semibold text-red-600' : 'text-slate-400'
+            className={`text-xs whitespace-nowrap shrink-0 ${
+              hasUnread ? 'text-red-600 font-semibold' : 'text-slate-400'
             }`}
           >
             {formatConversationDate(lastMessage?.createdAt || conversation.updatedAt)}
@@ -96,8 +93,8 @@ export function ConversationItem({
 
         <div className="flex items-center justify-between gap-2">
           <p
-            className={`flex-1 truncate text-xs ${
-              hasUnread ? 'font-medium text-slate-900' : 'text-slate-500'
+            className={`text-xs truncate flex-1 ${
+              hasUnread ? 'text-slate-900 font-medium' : 'text-slate-500'
             }`}
           >
             {renderMessagePreview()}
@@ -105,12 +102,12 @@ export function ConversationItem({
 
           {}
           {hasUnread && (
-            <span className="min-w-4 shrink-0 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-[10px] font-bold text-white shadow-xs">
+            <span className="shrink-0 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center shadow-xs">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
         </div>
       </div>
-    </Button>
+    </button>
   );
 }

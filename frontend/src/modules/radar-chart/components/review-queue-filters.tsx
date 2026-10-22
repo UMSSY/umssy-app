@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { REVIEW_QUEUE_FILTERS } from "../data/review-queue.data";
 import type { ReviewQueueFilter } from "../types/review-queue.types";
 
@@ -17,8 +16,7 @@ export function ReviewQueueFilters({
         const isActive = activeFilter === filter;
 
         return (
-          <Button
-            unstyled
+          <button
             key={filter}
             type="button"
             onClick={() => onFilterChange(filter)}
@@ -29,7 +27,7 @@ export function ReviewQueueFilters({
             }`}
           >
             {filter}
-          </Button>
+          </button>
         );
       })}
     </div>

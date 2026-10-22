@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   useRef,
   useState,
@@ -124,15 +123,14 @@ export function AreaDetailPreviewView() {
         <div
           role="tablist"
           aria-label="Áreas de afinidad"
-          className={`${CARD_CLASS} flex [scrollbar-width:thin] gap-1 overflow-x-auto px-2 py-1.5`}
+          className={`${CARD_CLASS} flex gap-1 overflow-x-auto px-2 py-1.5 [scrollbar-width:thin]`}
         >
           {AREA_ORDER.map((id, index) => {
             const isSelected =
               selectedAreaId === id;
 
             return (
-              <Button
-                unstyled
+              <button
                 key={id}
                 ref={(element) => {
                   tabRefs.current[index] = element;
@@ -177,7 +175,7 @@ export function AreaDetailPreviewView() {
                     1,
                   )}
                 </span>
-              </Button>
+              </button>
             );
           })}
         </div>

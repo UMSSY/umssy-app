@@ -51,7 +51,7 @@ export function ClearDataDialog() {
         variant="ghost"
         disabled={status !== "idle"}
         onClick={() => setOpen(true)}
-        className="h-[42px] rounded-md px-5 text-[14.5px] font-semibold text-ink 2xl:h-12"
+        className="h-[42px] 2xl:h-12 rounded-md px-5 text-[14.5px] font-semibold text-ink"
       >
         Limpiar datos
       </Button>
@@ -77,7 +77,7 @@ export function ClearDataDialog() {
               type="button"
               disabled={isClearing}
               onClick={handleConfirm}
-              className="h-[42px] rounded-md bg-ink px-5 text-[14.5px] font-semibold text-surface hover:bg-ink/90 2xl:h-12"
+              className="h-[42px] 2xl:h-12 rounded-md bg-ink px-5 text-[14.5px] font-semibold text-surface hover:bg-ink/90"
             >
               {isClearing ? "Limpiando..." : "Limpiar datos"}
             </AlertDialogAction>

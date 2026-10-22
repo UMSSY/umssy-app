@@ -215,7 +215,7 @@ export function TechnicalAreasView() {
             <AlertDialogTitle className="mb-2 text-lg font-bold">
               ¿Descartar cambios?
             </AlertDialogTitle>
-            <AlertDialogDescription className="mb-4 text-left text-sm [text-wrap:wrap] text-gray-600">
+            <AlertDialogDescription className="mb-4 text-left text-sm text-gray-600 [text-wrap:wrap]">
               Tienes cambios sin guardar. Si sales, se perderán.
             </AlertDialogDescription>
           </AlertDialogHeader>

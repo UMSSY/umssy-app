@@ -20,7 +20,7 @@ export function InboxFilters({ search, career, period, onSearchChange, onCareerC
         <Label htmlFor="inbox-search" className={SR_ONLY}>
           Buscar por nombre, C.I. o código SIS
         </Label>
-        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-secondary" strokeWidth={1.75} aria-hidden="true" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" strokeWidth={1.75} aria-hidden="true" />
         <Input
           id="inbox-search"
           type="search"
@@ -29,7 +29,7 @@ export function InboxFilters({ search, career, period, onSearchChange, onCareerC
           autoComplete="off"
           placeholder="Nombre, CI o código SIS"
           onChange={(event) => onSearchChange(event.target.value)}
-          className="h-[42px] rounded-lg border-border bg-surface pr-3 pl-9 text-[14.5px] text-ink focus-visible:border-accent focus-visible:ring-interaction"
+          className="h-[42px] rounded-lg border-border bg-surface pl-9 pr-3 text-[14.5px] text-ink focus-visible:border-accent focus-visible:ring-interaction"
         />
       </div>
 

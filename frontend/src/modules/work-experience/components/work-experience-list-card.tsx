@@ -27,10 +27,10 @@ export function WorkExperienceListCard({
         {sortedExperiences.map((experience) => (
           <li key={experience.id} className="flex items-center justify-between gap-4 py-4 first:pt-0">
             <div className="min-w-0 flex-1">
-              <h3 className="text-[15px] font-bold [overflow-wrap:anywhere] text-ink">
+              <h3 className="text-[15px] font-bold text-ink [overflow-wrap:anywhere]">
                 {experience.position}
               </h3>
-              <p className="mt-0.5 text-[13px] [overflow-wrap:anywhere] text-text-secondary">
+              <p className="mt-0.5 text-[13px] text-text-secondary [overflow-wrap:anywhere]">
                 {experience.companyName} ·{" "}
                 {formatWorkPeriod(experience.startDate, experience.endDate, experience.isCurrent)}
               </p>

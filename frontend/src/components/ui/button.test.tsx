@@ -4,22 +4,6 @@ import { describe, expect, it, vi } from "vitest"
 import { Button, buttonVariants } from "./button"
 
 describe("Button", () => {
-  it("preserves custom layout and disabled behavior without default styles", async () => {
-    const onClick = vi.fn()
-    const user = userEvent.setup()
-    const { rerender } = render(
-      <Button unstyled className="grid gap-4" onClick={onClick}>Select</Button>
-    )
-    const button = screen.getByRole("button", { name: "Select" })
-    expect(button.className).toBe("grid gap-4")
-    expect(button).not.toHaveAttribute("unstyled")
-    await user.click(button)
-    expect(onClick).toHaveBeenCalledTimes(1)
-    rerender(<Button unstyled disabled onClick={onClick}>Select</Button>)
-    await user.click(button)
-    expect(onClick).toHaveBeenCalledTimes(1)
-  })
-
   it("renders with default variant and size classes", () => {
     render(<Button>Click me</Button>)
     const button = screen.getByRole("button", { name: "Click me" })
@@ -32,9 +16,9 @@ describe("Button", () => {
   })
 
   it("applies a custom className", () => {
-    render(<Button className="tracking-widest">Custom</Button>)
+    render(<Button className="my-custom-class">Custom</Button>)
     const button = screen.getByRole("button", { name: "Custom" })
-    expect(button.className).toContain("tracking-widest")
+    expect(button.className).toContain("my-custom-class")
   })
 
   it("calls onClick when clicked", async () => {

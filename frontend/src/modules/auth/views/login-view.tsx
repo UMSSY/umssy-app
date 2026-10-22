@@ -52,7 +52,7 @@ export function LoginView() {
         className="w-full max-w-[420px] rounded-[10px] border border-border bg-surface p-6 shadow-sm sm:p-8"
       >
         <h1 className="font-tight text-[26px] font-extrabold text-ink">Iniciar sesión</h1>
-        <p className="mt-1 mb-6 text-[15px] text-text-secondary">
+        <p className="mb-6 mt-1 text-[15px] text-text-secondary">
           Comunidad verificada de la UMSS
         </p>
 
@@ -122,7 +122,7 @@ export function LoginView() {
           ¿Aún no tienes cuenta?{" "}
           <Link
             href="/request-access"
-            className="font-semibold text-ink underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+            className="font-semibold text-ink underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             Solicita acceso
           </Link>

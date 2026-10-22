@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Vacancy } from "../types/matching-types";
 
@@ -13,13 +12,12 @@ interface VacancyTabsProps {
 export function VacancyTabs({ vacancies, activeVacancyId, onChange }: VacancyTabsProps) {
   return (
     <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
-      <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Vacante activa
       </span>
       <div className="flex flex-wrap gap-1.5">
         {vacancies.map((vacancy) => (
-          <Button
-            unstyled
+          <button
             key={vacancy.id}
             type="button"
             onClick={() => onChange(vacancy.id)}
@@ -31,7 +29,7 @@ export function VacancyTabs({ vacancies, activeVacancyId, onChange }: VacancyTab
             )}
           >
             {vacancy.title}
-          </Button>
+          </button>
         ))}
       </div>
     </div>

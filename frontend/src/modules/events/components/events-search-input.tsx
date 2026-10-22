@@ -11,12 +11,12 @@ export function EventsSearchInput({ value, onChange }: EventsSearchInputProps) {
     <div className="relative w-full sm:w-64">
       <Search
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-text-secondary"
+        className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
       />
       <Input
         type="search"
         value={value}
-        onChange={(event) => onChange(event.target.value.slice(0, SEARCH_MAX_LENGTH))}
+        onChange={(event) => onChange(event.target.value)}
         placeholder="Buscar taller..."
         aria-label="Buscar taller"
         maxLength={SEARCH_MAX_LENGTH}

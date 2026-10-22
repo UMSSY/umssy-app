@@ -61,7 +61,7 @@ export function ConfirmationStep({
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="px-4 pt-2 pb-4">
+        <CardContent className="px-4 pb-4 pt-2">
           <p className="text-sm text-text-secondary">
             {wantsToParticipate
               ? "Participar como mentor"
@@ -93,7 +93,7 @@ export function ConfirmationStep({
           </div>
         </CardHeader>
 
-        <CardContent className="px-4 pt-3 pb-4">
+        <CardContent className="px-4 pb-4 pt-3">
           <div className="flex flex-wrap gap-2">
             {selectedTechnicalAreas.map((area) => (
               <span
@@ -130,7 +130,7 @@ export function ConfirmationStep({
           </div>
         </CardHeader>
 
-        <CardContent className="px-4 pt-3 pb-4">
+        <CardContent className="px-4 pb-4 pt-3">
           <div className="flex flex-wrap gap-2">
             {selectedOrientationTypes.map((orientation) => (
               <span

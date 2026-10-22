@@ -39,18 +39,18 @@ export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
             <div className="min-w-0 flex-1">
               <h2
                 id={`mentor-${mentor.id}`}
-                className="text-lg font-semibold [overflow-wrap:anywhere] text-ink"
+                className="[overflow-wrap:anywhere] text-lg font-semibold text-ink"
               >
                 {mentor.fullName}
               </h2>
 
               {mentor.headline ? (
-                <p className="mt-1 text-sm [overflow-wrap:anywhere] text-text-secondary">
+                <p className="mt-1 [overflow-wrap:anywhere] text-sm text-text-secondary">
                   {mentor.headline}
                 </p>
               ) : null}
               {mentor.education ? (
-                <p className="mt-2 text-sm [overflow-wrap:anywhere] text-text-secondary">
+                <p className="mt-2 [overflow-wrap:anywhere] text-sm text-text-secondary">
                   {mentor.education.degree} · {mentor.education.institution}
                 </p>
               ) : null}
@@ -78,7 +78,7 @@ export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
               {mentor.technicalAreas.map((area) => (
                 <li
                   key={area}
-                  className="max-w-full min-w-0 rounded-md border border-border bg-surface-soft px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-ink-soft"
+                  className="min-w-0 max-w-full [overflow-wrap:anywhere] rounded-md border border-border bg-surface-soft px-2.5 py-1 text-xs text-ink-soft"
                 >
                   {area}
                 </li>
@@ -99,7 +99,7 @@ export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
               {mentor.orientationTypes.map((orientationType) => (
                 <li
                   key={orientationType}
-                  className="max-w-full min-w-0 rounded-md border border-border bg-surface-soft px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-ink-soft"
+                  className="min-w-0 max-w-full [overflow-wrap:anywhere] rounded-md border border-border bg-surface-soft px-2.5 py-1 text-xs text-ink-soft"
                 >
                   {orientationType}
                 </li>

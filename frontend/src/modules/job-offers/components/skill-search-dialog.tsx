@@ -106,8 +106,7 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
                 const isAlreadySelected = isSelected(skill);
                 return (
                   <li key={skill.id}>
-                    <Button
-                      unstyled
+                    <button
                       type="button"
                       disabled={isAlreadySelected}
                       onClick={() => handleChoose(skill)}
@@ -115,7 +114,7 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
                     >
                       {skill.name}
                       {isAlreadySelected && <Badge variant="secondary">{SKILL_SEARCH_TEXT.alreadySelected}</Badge>}
-                    </Button>
+                    </button>
                   </li>
                 );
               })}

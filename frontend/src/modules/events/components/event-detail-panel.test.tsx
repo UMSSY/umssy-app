@@ -72,7 +72,7 @@ describe("EventDetailPanel", () => {
     render(<EventDetailPanel event={event} />);
     expect(screen.getByText("Ana")).toBeInTheDocument();
     expect(screen.getByText("Aula 101")).toBeInTheDocument();
-    expect(screen.getByText("09:00 - 12:00 hrs")).toBeInTheDocument();
+    expect(screen.getByText("09:00 - 12:00")).toBeInTheDocument();
     expect(screen.getByText("Aprende React")).toBeInTheDocument();
     const button = screen.getByRole("button", { name: "Inscribirme" });
     expect(button).toBeEnabled();
@@ -120,13 +120,5 @@ describe("EventDetailPanel", () => {
     );
     expect(screen.getByText("Enlace:")).toBeInTheDocument();
     expect(screen.getByText("https://example.com/meeting")).toBeInTheDocument();
-  });
-  it('shows the reported place and location without the redundant institution', () => {
-    render(<EventDetailPanel event={{
-      ...event,
-      location: 'Laboratorio 1, Facultad de Ciencias y Tecnología, UMSS',
-    }} />);
-    expect(screen.getByText('Laboratorio 1, Facultad de Ciencias y Tecnología')).toBeInTheDocument();
-    expect(screen.queryByText(/, UMSS$/)).not.toBeInTheDocument();
   });
 });

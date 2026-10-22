@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 
@@ -8,8 +7,7 @@ export function SidebarToggleButton() {
   const { open, toggleSidebar } = useSidebar();
 
   return (
-    <Button
-      unstyled
+    <button
       type="button"
       onClick={toggleSidebar}
       aria-label={open ? "Cerrar menú" : "Abrir menú"}
@@ -17,6 +15,6 @@ export function SidebarToggleButton() {
       className="rounded-md p-2 text-ink transition-colors hover:bg-ink/5"
     >
       <Menu className="size-6" aria-hidden="true" />
-    </Button>
+    </button>
   );
 }

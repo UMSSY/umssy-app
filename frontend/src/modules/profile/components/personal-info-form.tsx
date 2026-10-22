@@ -83,7 +83,7 @@ export function PersonalInfoForm({
               value={values.firstName}
               disabled={isSaving}
               onChange={handleChange}
-              className="h-12 w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
+              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
               {...getFieldErrorProps("firstName", errors.firstName)}
             />
           </FormField>
@@ -97,7 +97,7 @@ export function PersonalInfoForm({
               value={values.lastName}
               disabled={isSaving}
               onChange={handleChange}
-              className="h-12 w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
+              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
               {...getFieldErrorProps("lastName", errors.lastName)}
             />
           </FormField>
@@ -111,7 +111,7 @@ export function PersonalInfoForm({
             >
               <SelectTrigger
                 id="cityId"
-                className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 data-placeholder:text-text-secondary/70 data-[size=default]:h-12"
+                className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 data-[size=default]:h-12 data-placeholder:text-text-secondary/70 focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
                 {...getFieldErrorProps("cityId", errors.cityId)}
               >
                 <SelectValue placeholder="Selecciona tu ciudad" />
@@ -135,7 +135,7 @@ export function PersonalInfoForm({
               value={values.phone}
               disabled={isSaving}
               onChange={handleChange}
-              className="h-12 w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
+              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
               {...getFieldErrorProps("phone", errors.phone)}
               aria-describedby={[PHONE_HINT_ID, errors.phone ? getFieldErrorId("phone") : null]
                 .filter(Boolean)
@@ -160,7 +160,7 @@ export function PersonalInfoForm({
               value={values.personalEmail}
               disabled={isSaving}
               onChange={handleChange}
-              className="h-12 w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 disabled:opacity-60 aria-invalid:border-accent aria-invalid:ring-0 aria-invalid:focus:ring-accent/15 md:text-[15px]"
+              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
               {...getFieldErrorProps("personalEmail", errors.personalEmail)}
             />
           </FormField>
