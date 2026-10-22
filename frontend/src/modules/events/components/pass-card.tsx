@@ -10,7 +10,6 @@ export function PassCard({
   date,
   status,
   location,
-  registrationId,
   isSelected,
   onClick,
 }: PassCardProps) {
@@ -23,14 +22,14 @@ export function PassCard({
         onClick={onClick}
         className={`flex h-auto w-full min-w-0 flex-col items-stretch gap-4 rounded-lg p-5 text-left whitespace-normal transition-all ${
           isSelected
-            ? 'bg-ink text-surface hover:bg-ink-soft'
+            ? 'border border-accent/30 bg-interaction text-accent hover:bg-interaction'
             : 'border border-border bg-surface text-ink hover:border-border-strong'
         }`}
       >
         <div
           className={`flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ${
             isSelected
-              ? 'text-surface/85'
+              ? 'text-ink-soft'
               : 'text-text-secondary'
           }`}
         >
@@ -38,12 +37,12 @@ export function PassCard({
         </div>
 
         <div>
-          <h3 className="mb-1 text-[17px] leading-tight font-bold [overflow-wrap:anywhere] break-words">
+          <h3 className="mb-1 text-lg leading-tight font-bold [overflow-wrap:anywhere] break-words">
             {title}
           </h3>
           <div
-            className={`flex items-center gap-2 text-[13px] ${
-              isSelected ? 'text-surface-soft/80' : 'text-text-secondary'
+            className={`flex items-center gap-2 text-sm ${
+              isSelected ? 'text-ink-soft' : 'text-text-secondary'
             }`}
           >
             <Calendar className="size-4 opacity-70" />
@@ -51,9 +50,6 @@ export function PassCard({
           </div>
           <p className="mt-2 text-sm [overflow-wrap:anywhere] break-words">
             {formatEventLocation(location)}
-          </p>
-          <p className="mt-2 text-xs break-all">
-            ID Inscripción: {registrationId}
           </p>
         </div>
       </Button>

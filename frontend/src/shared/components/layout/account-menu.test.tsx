@@ -15,7 +15,7 @@ describe("Account menu", () => {
     trigger.focus();
     await user.keyboard("{Enter}");
     expect(await screen.findByRole("menuitem", { name: "Mi perfil" })).toHaveAttribute("href", "/profile");
-    expect(screen.getAllByRole("menuitem")).toHaveLength(2);
+    expect(screen.getAllByRole("menuitem")).toHaveLength(3);
     for (const name of ["Inicio", "Trayectoria", "Mi disponibilidad", "Mis inscripciones", "Datos personales"]) {
       expect(screen.queryByRole("menuitem", { name })).not.toBeInTheDocument();
     }

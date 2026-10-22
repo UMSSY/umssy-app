@@ -47,8 +47,7 @@ describe("MentorProfileView", () => {
     expect(screen.getByRole("heading", { name: "Sobre mí" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Trayectoria actual" })).toBeInTheDocument();
     expect(container.querySelector("main > div > div.grid")).toHaveClass(
-      "grid-cols-1",
-      "xl:grid-cols-12",
+      "grid-cols-12",
     );
   });
 

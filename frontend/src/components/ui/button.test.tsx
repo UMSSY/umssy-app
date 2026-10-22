@@ -16,9 +16,9 @@ describe("Button", () => {
   })
 
   it("applies a custom className", () => {
-    render(<Button className="my-custom-class">Custom</Button>)
+    render(<Button className="mt-2">Custom</Button>)
     const button = screen.getByRole("button", { name: "Custom" })
-    expect(button.className).toContain("my-custom-class")
+    expect(button.className).toContain("mt-2")
   })
 
   it("calls onClick when clicked", async () => {
@@ -50,7 +50,7 @@ describe("Button", () => {
   it("renders the destructive variant with its class", () => {
     render(<Button variant="destructive">Eliminar</Button>)
     const button = screen.getByRole("button", { name: "Eliminar" })
-    expect(button.className).toContain("bg-ink")
+    expect(button.className).toContain("bg-critical-action")
   })
 
   it("renders the small size with its class", () => {
