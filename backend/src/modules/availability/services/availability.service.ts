@@ -9,6 +9,7 @@ import {
   MentorAvailabilityNotOwnedException,
 } from '../exceptions/index.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
+import { toBoliviaTime } from '../../../common/utils/date-time.js';
 import { BlockedDatesService } from './blocked-dates.service.js';
 import { hasOverlapErrorCode } from '../utils/overlap-error.js';
 import type { AvailabilityBlockResponse } from '../types/availability-block-response.types.js';
@@ -114,8 +115,12 @@ export class AvailabilityService {
       return [];
     }
 
-    const blocks = await this.availabilityRepository.findMentorFreeBlocksInRange(mentorId, from, to);
-    return this.availabilityMapper.toResponseList(blocks);
+    const [blocks, blockedDays] = await Promise.all([
+      this.availabilityRepository.findMentorFreeBlocksInRange(mentorId, from, to),
+      this.blockedDatesService.findBlockedDays(mentorId, from, to),
+    ]);
+    const offeredBlocks = blocks.filter((block) => !blockedDays.has(toBoliviaTime(block.startAt).date));
+    return this.availabilityMapper.toResponseList(offeredBlocks);
   }
 
   async findMyAvailabilityStatus(mentorId: string): Promise<MentorAvailabilityStatusResponse> {
