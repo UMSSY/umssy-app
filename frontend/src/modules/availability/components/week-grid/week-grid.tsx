@@ -167,19 +167,18 @@ export function WeekGrid({
           />
           {variant === "selectable" ? WEEK_GRID_LEGEND.freeSlot : WEEK_GRID_LEGEND.free}
         </li>
-        {variant !== "selectable" && (
-          <li className="flex items-center gap-2">
-            <span aria-hidden="true" className="inline-block h-3 w-4 rounded-sm bg-ink" />
-            {WEEK_GRID_LEGEND.confirmed}
-          </li>
-        )}
-        {variant === "selectable" && (
+        {variant === "selectable" ? (
           <li className="flex items-center gap-2">
             <span
               aria-hidden="true"
               className={cn("inline-block h-3 w-4 rounded-sm", SELECTED_BLOCK_CLASSES)}
             />
             {SELECTED_LEGEND_LABEL}
+          </li>
+        ) : (
+          <li className="flex items-center gap-2">
+            <span aria-hidden="true" className="inline-block h-3 w-4 rounded-sm bg-ink" />
+            {WEEK_GRID_LEGEND.confirmed}
           </li>
         )}
       </ul>
