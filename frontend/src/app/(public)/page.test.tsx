@@ -9,7 +9,7 @@ describe("Public landing", () => {
    vi.spyOn(eventsService,"getEvents").mockResolvedValue({data:[],page:1,offset:0});
    render(<Home />);
    expect(screen.getByRole("heading", {level:1})).toHaveTextContent("Tu comunidad.");
-   expect(screen.getByRole("link", {name:"Explorar talleres"})).toHaveAttribute("href","/workshops");
+   expect(screen.getByRole("link", {name:"Explorar talleres"})).toHaveAttribute("href","#workshops");
    expect(await screen.findByText("Aún no hay talleres publicados. Vuelve pronto.")).toBeInTheDocument();
  });
  it("offers a retry when published workshops cannot be loaded", async () => {
