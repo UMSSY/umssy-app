@@ -149,6 +149,12 @@ function createRepositories(store: ReturnType<typeof createStore>) {
           .filter((block) => inRange(block, mentorId, from, to) && block.appointments.length === 0)
           .sort(byStart),
       ),
+    findById: (id: string) => Promise.resolve(store.blocks.find((block) => block.id === id) ?? null),
+    update: (id: string, data: { startAt: Date; endAt: Date }) => {
+      const block = store.blocks.find((item) => item.id === id) as StoredBlock;
+      Object.assign(block, data, { updatedAt: NOW });
+      return Promise.resolve(block);
+    },
     create: (mentorId: string, startAt: Date, endAt: Date) => {
       sequence += 1;
       const created: StoredBlock = {
@@ -353,6 +359,21 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
       .expect(409);
 
     expect(response.body.detail).toBe('Ese día está bloqueado');
+  });
+
+  it('no deja mover un bloque libre a un día bloqueado (409) y el bloque queda igual', async () => {
+    const day = dayOf(plan.blocked.start);
+    const response = await http()
+      .patch(`/api/availability-blocks/${plan.free.id}`)
+      .set('Authorization', `Bearer ${tokens.mentorA}`)
+      .send({ startAt: `${day}T18:00:00-04:00`, endAt: `${day}T19:00:00-04:00` })
+      .expect(409);
+
+    expect(response.body.detail).toBe('Ese día está bloqueado');
+    expect(store.blocks.find((block) => block.id === plan.free.id)).toMatchObject({
+      startAt: plan.free.start,
+      endAt: plan.free.end,
+    });
   });
 
   it('bloquear la misma fecha varias veces, incluso en paralelo, deja un solo registro', async () => {
