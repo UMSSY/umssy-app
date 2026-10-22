@@ -294,6 +294,37 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
     expect(await listBlockedDates()).toEqual([]);
   });
 
+  it('3. no bloquea un día con una cita confirmada (409) y no guarda nada', async () => {
+    const response = await blockDate(tokens.mentorA, { blockedOn: dayOf(plan.next.start) }).expect(409);
+
+    expect(response.body).toEqual({
+      statusCode: 409,
+      data: null,
+      detail: 'No puedes bloquear un día con citas confirmadas',
+      ok: false,
+    });
+    expect(store.blockedDates).toHaveLength(1);
+  });
+
+  it('4. no bloquea una fecha pasada (400)', async () => {
+    const yesterday = dayOf(new Date(NOW.getTime() - 86_400_000));
+
+    const response = await blockDate(tokens.mentorA, { blockedOn: yesterday }).expect(400);
+
+    expect(response.body.detail).toBe('No se pueden bloquear fechas pasadas');
+    expect(store.blockedDates).toHaveLength(1);
+  });
+
+  it('5. rechaza un motivo de más de 100 caracteres (400) y acepta uno de 100', async () => {
+    const day = futureDayWithoutBlocks();
+
+    const tooLong = await blockDate(tokens.mentorA, { blockedOn: day, reason: 'a'.repeat(101) }).expect(400);
+    expect(JSON.stringify(tooLong.body)).toContain('El motivo admite hasta 100 caracteres');
+    expect(store.blockedDates).toHaveLength(1);
+
+    await blockDate(tokens.mentorA, { blockedOn: day, reason: 'a'.repeat(100) }).expect(201);
+  });
+
   it('7. los horarios libres no incluyen los del día bloqueado, pero sí los de otros días', async () => {
     const ids = await freeBlockIdsOfMentorA();
 
