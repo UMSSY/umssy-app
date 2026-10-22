@@ -39,6 +39,10 @@ describe('AvailabilityMapper', () => {
     expect(mapper.toResponse(buildBlock([AppointmentStatusTitle.CONFIRMED])).state).toBe('confirmed');
   });
 
+  it('muestra como confirmed un bloque con una cita pendiente heredada', () => {
+    expect(mapper.toResponse(buildBlock([AppointmentStatusTitle.LEGACY_PENDING])).state).toBe('confirmed');
+  });
+
   it('reconoce confirmaciones heredadas sin cambiar sus títulos', () => {
     expect(mapper.toResponse(buildBlock([AppointmentStatusTitle.LEGACY_CONFIRMED])).state).toBe('confirmed');
   });
