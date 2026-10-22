@@ -35,7 +35,6 @@ export const BLOCK_STATE_TEXT: Record<AvailabilityBlockState, string> = {
 
 export const WEEK_GRID_LEGEND = {
   free: "Libre",
-  pending: "Solicitud pendiente",
   confirmed: "Cita confirmada",
   freeSlot: "Horario libre",
 } as const;
