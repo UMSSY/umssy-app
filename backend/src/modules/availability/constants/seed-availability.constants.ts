@@ -25,6 +25,11 @@ export const SEED_SERIES_ID = 'b0800003-0000-4000-8000-000000000001';
 
 export const SEED_APPOINTMENT_MESSAGE = 'Cita confirmada de prueba B-08 (seed de desarrollo)';
 export const SEED_BLOCKED_REASON = 'Compromiso académico (seed B-08)';
+// Mensajes con los que el seed anterior a B-08 identificaba sus citas.
+export const LEGACY_SEED_MESSAGES: string[] = [
+  'Cita de prueba pendiente (seed de desarrollo)',
+  'Cita de prueba confirmada (seed de desarrollo)',
+];
 
 export const SEED_AVAILABILITY_MESSAGES = {
   noFutureSlot:
@@ -37,5 +42,7 @@ export const SEED_AVAILABILITY_MESSAGES = {
     `B-08: el horario ${start} colisiona con datos ajenos; se conserva la información existente.`,
   blockedDayBusy: 'B-08: la fecha a bloquear contiene citas activas o un bloqueo ajeno.',
   sameParticipants: 'B-08: se requieren dos mentores y un titulado distintos.',
+  legacyRemoved: (appointments: number, blocks: number) =>
+    `Se retiraron ${appointments} citas del seed anterior y ${blocks} bloques que ocupaban horarios de B-08.`,
   missingOrientation: 'B-08: ejecuta primero el seed de tipos de orientación; no existe un tema activo.',
 } as const;
