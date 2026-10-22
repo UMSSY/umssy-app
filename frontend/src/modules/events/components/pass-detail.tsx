@@ -1,43 +1,43 @@
+import { formatTimeRange } from '../utils/event-card';
+import { formatEventLocation } from '../utils/format-event-location';
 import { Card } from '@/components/ui/card';
 import { MapPin, QrCode, Check } from 'lucide-react';
 
 import {
   formatRegistrationDate,
-  formatRegistrationTime,
 } from '../utils/registration-format';
 import type { PassDetailProps } from '../types/pass-detail-props.types';
 
 export function PassDetail({ registration }: PassDetailProps) {
   return (
-    <div className="flex flex-col gap-5 w-full min-w-0">
-      <Card className="border-0 bg-ink text-surface p-8 rounded-lg flex flex-col gap-6 shadow-sm">
-        <div className="flex items-center gap-2 text-surface/85 text-[11px] font-bold tracking-widest uppercase">
-          <div className="w-1.5 h-1.5 rounded-full bg-ink-soft"></div>
+    <div className="flex w-full min-w-0 flex-col gap-5">
+      <Card className="flex flex-col gap-6 rounded-lg border-0 bg-ink p-8 text-surface shadow-sm">
+        <div className="flex items-center gap-2 text-[11px] font-bold tracking-widest text-surface/85 uppercase">
+          <div className="size-1.5 rounded-full bg-ink-soft"></div>
           Pase UMSS - Oficial
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-[22px] font-bold leading-tight break-words [overflow-wrap:anywhere]">
+          <h2 className="text-[22px] leading-tight font-bold [overflow-wrap:anywhere] break-words">
             {registration.eventName}
           </h2>
-          <p className="text-surface-soft/70 text-sm">
+          <p className="text-sm text-surface-soft/70">
             {formatRegistrationDate(registration.date)} ·{' '}
-            {formatRegistrationTime(registration.startTime)} -{' '}
-            {formatRegistrationTime(registration.endTime)}
+            {formatTimeRange(registration.startTime, registration.endTime)}
           </p>
         </div>
 
-        <div className="flex items-center gap-2 text-surface-soft/70 text-sm">
-          <MapPin className="w-4 h-4 shrink-0" />
-          <span className="min-w-0 break-words [overflow-wrap:anywhere]">
-            {registration.location}
+        <div className="flex items-center gap-2 text-sm text-surface-soft/70">
+          <MapPin className="size-4 shrink-0" />
+          <span className="min-w-0 [overflow-wrap:anywhere] break-words">
+            {formatEventLocation(registration.location)}
           </span>
         </div>
 
-        <div className="bg-surface rounded-3xl p-6 mt-2 flex items-center justify-center">
+        <div className="mt-2 flex items-center justify-center rounded-3xl bg-surface p-6">
           <QrCode
             aria-label="Vista ilustrativa de QR"
-            className="w-full h-auto max-w-[220px] text-ink opacity-90"
+            className="h-auto w-full max-w-[220px] text-ink opacity-90"
             strokeWidth={1}
           />
         </div>
@@ -47,21 +47,21 @@ export function PassDetail({ registration }: PassDetailProps) {
           validar asistencia.
         </p>
 
-        <div className="flex flex-wrap justify-between items-start gap-4 mt-2 border-t border-white/10 pt-5">
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-4 border-t border-white/10 pt-5">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="text-[10px] text-surface-soft/50 uppercase tracking-widest">
+            <span className="text-[10px] tracking-widest text-surface-soft/50 uppercase">
               ID Inscripción
             </span>
-            <span className="font-bold text-sm break-all">
+            <span className="text-sm font-bold break-all">
               {registration.id}
             </span>
           </div>
           <div className="flex flex-col gap-1 text-right">
-            <span className="text-[10px] text-surface-soft/50 uppercase tracking-widest">
+            <span className="text-[10px] tracking-widest text-surface-soft/50 uppercase">
               Estado
             </span>
-            <span className="font-bold text-surface/85 text-sm flex items-center gap-1 justify-end">
-              <Check className="w-4 h-4" /> {registration.status}
+            <span className="flex items-center justify-end gap-1 text-sm font-bold text-surface/85">
+              <Check className="size-4" /> {registration.status}
             </span>
           </div>
         </div>

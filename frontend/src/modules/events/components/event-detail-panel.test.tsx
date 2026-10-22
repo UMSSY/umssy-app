@@ -27,6 +27,12 @@ const event: EventDetail = {
   modality: { id: "m1", title: "Presencial" },
 };
 describe("EventDetailPanel", () => {
+  it('omits the redundant institution from a complete venue', () => {
+    render(<EventDetailPanel event={{ ...event, location: 'Laboratorio 1, Facultad de Ciencias y Tecnología, UMSS' }} />);
+    expect(screen.getByText('Laboratorio 1, Facultad de Ciencias y Tecnología')).toBeInTheDocument();
+    expect(screen.queryByText(/, UMSS$/)).not.toBeInTheDocument();
+  });
+
   it.each([
     { availableSpots: null },
     { availableSpots: undefined },
@@ -73,7 +79,7 @@ describe("EventDetailPanel", () => {
     render(<EventDetailPanel event={event} />);
     expect(screen.getByText("Ana")).toBeInTheDocument();
     expect(screen.getByText("Aula 101")).toBeInTheDocument();
-    expect(screen.getByText("09:00 - 12:00")).toBeInTheDocument();
+    expect(screen.getByText("09:00 - 12:00 hrs")).toBeInTheDocument();
     expect(screen.getByText("Aprende React")).toBeInTheDocument();
     const button = screen.getByRole("button", { name: "Inscripción no disponible" });
     expect(button).toBeDisabled();
