@@ -344,6 +344,29 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
     expect(ids).not.toContain(plan.next.id);
   });
 
+  it('no deja crear un bloque nuevo en un día bloqueado (409)', async () => {
+    const day = dayOf(plan.blocked.start);
+    const response = await http()
+      .post('/api/availability-blocks')
+      .set('Authorization', `Bearer ${tokens.mentorA}`)
+      .send({ startAt: `${day}T11:00:00-04:00`, endAt: `${day}T12:00:00-04:00` })
+      .expect(409);
+
+    expect(response.body.detail).toBe('Ese día está bloqueado');
+  });
+
+  it('bloquear la misma fecha varias veces, incluso en paralelo, deja un solo registro', async () => {
+    const day = futureDayWithoutBlocks();
+
+    const responses = await Promise.all(
+      Array.from({ length: 5 }, () => blockDate(tokens.mentorA, { blockedOn: day, reason: 'Paralelo' })),
+    );
+
+    expect(responses.map((response) => response.status)).toEqual([201, 201, 201, 201, 201]);
+    expect(new Set(responses.map((response) => response.body.data.id)).size).toBe(1);
+    expect(store.blockedDates.filter((item) => item.blockedOn.toISOString().startsWith(day))).toHaveLength(1);
+  });
+
   it('solo el rol mentor puede bloquear fechas', async () => {
     const response = await blockDate(tokens.graduate, { blockedOn: futureDayWithoutBlocks() }).expect(403);
     expect(response.body.ok).toBe(false);
