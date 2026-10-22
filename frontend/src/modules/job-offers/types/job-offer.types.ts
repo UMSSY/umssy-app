@@ -32,3 +32,12 @@ export interface CurrentCompany {
   name: string;
   initials: string;
 }
+export interface JobOffer {
+  id: string;
+  title: string;
+  modality: Modality;
+  contractType: ContractType;
+  status: string;
+  createdAt: string;
+  applicantsCount: number;
+}

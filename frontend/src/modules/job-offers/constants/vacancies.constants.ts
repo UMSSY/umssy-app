@@ -79,8 +79,12 @@ export const PUBLISHED_DIALOG_TEXT = {
   confirm: "Aceptar",
 } as const;
 
+export const PUBLISHED_STATUS = "Publicada";
+
 export const JOB_OFFERS_QUERY_KEYS = {
   skillCatalog: ["job-offers", "skill-catalog"] as const,
+    companyOffers: (companyId: string | null, params?: object) =>
+    ["job-offers", "company", companyId, params] as const,
 };
 
 export const DEFAULT_COMPANY_ID = "a0000000-0000-4000-8000-000000000001";
