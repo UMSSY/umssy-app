@@ -121,7 +121,7 @@ export function WeekGrid({
                   return (
                     <li
                       key={block.id}
-                      className="absolute left-1 right-1 py-0.5"
+                      className="absolute inset-x-1 py-0.5"
                       style={{ top: topPx, height: heightPx }}
                     >
                       <Button
@@ -130,7 +130,7 @@ export function WeekGrid({
                         disabled={!isBlockClickable(variant, block.state)}
                         onClick={() => handleBlockClick(block)}
                         className={cn(
-                          "h-full w-full justify-start rounded-md px-2 text-xs font-semibold",
+                          "size-full justify-start rounded-md px-2 text-xs font-semibold",
                           STATE_BUTTON_CLASSES[block.state],
                           isSelected && SELECTED_BLOCK_CLASSES
                         )}
