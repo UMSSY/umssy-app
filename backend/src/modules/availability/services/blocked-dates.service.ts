@@ -42,7 +42,11 @@ export class BlockedDatesService {
     return this.blockedDatesRepository.withDayLock(mentorId, day, async (tx) => {
       const existing = await this.blockedDatesRepository.findByDay(mentorId, blockedOn, tx);
       if (existing) {
-        return this.blockedDateMapper.toResponse(existing);
+        const current =
+          reason && reason !== existing.reason
+            ? await this.blockedDatesRepository.updateReason(existing.id, reason, tx)
+            : existing;
+        return this.blockedDateMapper.toResponse(current);
       }
       if (await this.blockedDatesRepository.hasActiveAppointmentBetween(mentorId, startAt, endAt, tx)) {
         throw new BlockedDateHasAppointmentException();
