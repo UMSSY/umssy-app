@@ -52,9 +52,9 @@ const eslintConfig = defineConfig([
           format: ["PascalCase"],
         },
       ],
-      "tailwindcss/classnames-order": "warn",
-      "tailwindcss/enforces-shorthand": "warn",
-      "tailwindcss/no-custom-classname": "warn",
+      "tailwindcss/classnames-order": "error",
+      "tailwindcss/enforces-shorthand": "error",
+      "tailwindcss/no-custom-classname": "error",
       "no-restricted-syntax": [
         "error",
         {
@@ -94,7 +94,7 @@ const eslintConfig = defineConfig([
         },
       ],
       "no-restricted-syntax": [
-        "warn",
+        "error",
         {
           selector:
             "Literal[value=/[\\u2600-\\u27BF\\uD83C-\\uDBFF\\uDC00-\\uDFFF]/]",
