@@ -1,8 +1,27 @@
 import Link from "next/link";
-import { ArrowRight, Search, SquarePlus, UserRound } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { PageHeading } from "@/shared/components/layout/page-heading";
 import { buttonVariants } from "@/components/ui/button";
+import { VacancyList } from "@/modules/job-offers";
 import { RECRUITERS_ROUTES } from "../constants/navigation";
+
 export function RecruitersHomeView() {
-  return <main className="mx-auto w-full max-w-7xl space-y-7"><PageHeading title="Portal de empresas" description="Publica oportunidades y encuentra candidatos." /><div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_300px]"><section className="rounded-lg border border-border bg-surface p-8"><SquarePlus className="mb-5 size-8 text-accent" aria-hidden="true" /><h2 className="text-2xl font-bold text-ink">Registrar nueva vacante</h2><ol className="my-7 divide-y divide-border text-sm text-ink-soft">{["Información y condiciones de la oferta","Descripción y habilidades requeridas","Vista previa y publicación"].map((label,index)=><li key={label} className="flex items-center gap-3 py-4"><span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-interaction text-xs font-semibold text-accent">{index+1}</span>{label}</li>)}</ol><Link href={RECRUITERS_ROUTES.newJobOffer} className={buttonVariants()}>Registrar nueva vacante<ArrowRight aria-hidden="true" /></Link></section><aside><h2 className="mb-4 text-lg font-bold">Mi espacio</h2><ul className="divide-y divide-border"><li><Link href="/matching" className="flex items-center gap-3 py-4 text-sm font-medium hover:text-accent"><Search className="size-4" aria-hidden="true" />Buscar candidatos<ArrowRight className="ml-auto size-4" aria-hidden="true" /></Link></li><li><Link href="/profile/personal-info" className="flex items-center gap-3 py-4 text-sm font-medium hover:text-accent"><UserRound className="size-4" aria-hidden="true" />Datos de mi perfil<ArrowRight className="ml-auto size-4" aria-hidden="true" /></Link></li></ul></aside></div></main>;
+  return (
+    <main className="mx-auto w-full max-w-7xl space-y-7">
+      <PageHeading
+        title="Portal de empresas"
+        description="Publica oportunidades y encuentra candidatos."
+      />
+      <section className="space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-2xl font-bold text-ink">Mis vacantes publicadas</h2>
+          <Link href={RECRUITERS_ROUTES.newJobOffer} className={buttonVariants()}>
+            Registrar nueva vacante
+            <ArrowRight aria-hidden="true" />
+          </Link>
+        </div>
+        <VacancyList />
+      </section>
+    </main>
+  );
 }
