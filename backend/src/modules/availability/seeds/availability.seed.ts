@@ -3,8 +3,9 @@ import type { Prisma } from '../../../prisma/client.js';
 import { ACTIVE_APPOINTMENT_STATUSES } from '../constants/appointment-status.constants.js';
 import { BLOCK_MAX_HOUR, BLOCK_MIN_HOUR } from '../constants/create-block.constants.js';
 import {
-  MS_PER_DAY, MS_PER_MINUTE, PERFORMANCE_APPOINTMENTS, SEED_APPOINTMENT_IDS,
-  SEED_BLOCK_IDS, SEED_BLOCKED_DATE_ID, SEED_SERIES_ID, STEP_MS,
+  MS_PER_DAY, MS_PER_MINUTE, PERFORMANCE_APPOINTMENTS, PRIMARY_APPOINTMENTS, SEED_APPOINTMENT_IDS, SEED_APPOINTMENT_MESSAGE,
+  SEED_AVAILABILITY_MESSAGES, SEED_BLOCK_IDS, SEED_BLOCKED_DATE_ID, SEED_BLOCKED_REASON, SEED_SERIES_ID,
+  SERIES_OCCURRENCES, STEP_MS,
 } from '../constants/seed-availability.constants.js';
 import { AppointmentStatusTitle } from '../enums/appointment-status-title.enum.js';
 import type { AvailabilitySeedResult } from '../types/availability-seed-result.types.js';
@@ -48,7 +49,7 @@ export function buildBlockPlan(weeks: SeedWeeks, now: Date = new Date()): SeedBl
   }
   if (!currentStart) {
     currentStart = instantAt(weeks.current, 6, BLOCK_MAX_HOUR - 0.5);
-    warnings.push('La semana actual ya no tiene horarios futuros entre 07:00 y 22:00; se conserva una cita transcurrida de esta semana y las próximas de la siguiente.');
+    warnings.push(SEED_AVAILABILITY_MESSAGES.noFutureSlot);
   }
 
   const blocks: SeedBlock[] = [];
@@ -67,13 +68,13 @@ export function buildBlockPlan(weeks: SeedWeeks, now: Date = new Date()): SeedBl
   const next = append(instantAt(weeks.next, 0, 14), 'primary', 1);
   const past = append(instantAt(weeks.previous, 1, 14), 'primary', 2);
   for (let index = 0; index < PERFORMANCE_APPOINTMENTS; index += 1) {
-    append(instantAt(weeks.next, Math.floor(index / 10), BLOCK_MIN_HOUR + (index % 10) * 0.5), 'performance', index + 3);
+    append(instantAt(weeks.next, Math.floor(index / 10), BLOCK_MIN_HOUR + (index % 10) * 0.5), 'performance', index + PRIMARY_APPOINTMENTS);
   }
   const free = append(instantAt(weeks.next, 0, 15), 'primary');
   const blocked = append(instantAt(weeks.next, 1, 15), 'primary');
   const firstOccurrence = instantAt(weeks.next, 2, 16);
-  const repeatUntil = calendarDate(new Date(addWeeks(firstOccurrence, 2)));
-  for (let index = 0; index < 3; index += 1) {
+  const repeatUntil = calendarDate(new Date(addWeeks(firstOccurrence, SERIES_OCCURRENCES - 1)));
+  for (let index = 0; index < SERIES_OCCURRENCES; index += 1) {
     Object.assign(append(new Date(addWeeks(firstOccurrence, index)), 'primary'), { seriesId: SEED_SERIES_ID, repeatUntil });
   }
   return { blocks, current, next, past, free, blocked, blockedOn: calendarDate(blocked.start), warnings };
@@ -96,7 +97,7 @@ async function checkReplaceableRecords(
     const planned = plan.blocks.find((block) => block.id === existing.id)!;
     if (existing.mentorId !== mentorOf(planned, users) || existing.proposals.length > 0 ||
       existing.appointments.some((appointment) => !SEED_APPOINTMENT_IDS.includes(appointment.id))) {
-      throw new Error(`B-08: el bloque ${existing.id} tiene propietario o referencias ajenas; no se reemplazará.`);
+      throw new Error(SEED_AVAILABILITY_MESSAGES.foreignBlock(existing.id));
     }
   }
   const existingAppointments = await tx.appointment.findMany({
@@ -107,12 +108,12 @@ async function checkReplaceableRecords(
     const planned = plan.blocks.find((block) => block.appointmentId === existing.id)!;
     if (existing.mentorId !== mentorOf(planned, users) || existing.studentId !== users.graduateId ||
       existing.blockId !== planned.id || existing.history.length > 0 || existing.proposals.length > 0) {
-      throw new Error(`B-08: la cita ${existing.id} tiene participantes o referencias ajenas; no se reemplazará.`);
+      throw new Error(SEED_AVAILABILITY_MESSAGES.foreignAppointment(existing.id));
     }
   }
   const existingBlocked = await tx.blockedDate.findUnique({ where: { id: SEED_BLOCKED_DATE_ID } });
   if (existingBlocked && existingBlocked.mentorId !== users.mentorId) {
-    throw new Error('B-08: la identidad de la fecha bloqueada pertenece a otro mentor.');
+    throw new Error(SEED_AVAILABILITY_MESSAGES.foreignBlockedDate);
   }
 }
 
@@ -141,14 +142,14 @@ async function checkForeignCollisions(
     if (foreignBlocks.some((other) => other.mentorId === mentorId && overlaps(block.start, block.end, other.startAt, other.endAt)) ||
       foreignAppointments.some((other) => (other.mentorId === mentorId || (block.appointmentId && other.studentId === users.graduateId)) && overlaps(block.start, block.end, other.startAt, other.endAt)) ||
       foreignBlocked.some((other) => other.mentorId === mentorId && other.blockedOn.getTime() === calendarDate(block.start).getTime())) {
-      throw new Error(`B-08: el horario ${block.start.toISOString()} colisiona con datos ajenos; se conserva la información existente.`);
+      throw new Error(SEED_AVAILABILITY_MESSAGES.collision(block.start.toISOString()));
     }
   }
   const blockedDayStart = new Date(toUtcIso(toBoliviaTime(plan.blocked.start).date, '00:00'));
   const blockedDayEnd = new Date(blockedDayStart.getTime() + MS_PER_DAY);
   if (foreignAppointments.some((other) => other.mentorId === users.mentorId && overlaps(blockedDayStart, blockedDayEnd, other.startAt, other.endAt)) ||
     foreignBlocked.some((other) => other.mentorId === users.mentorId && other.blockedOn.getTime() === plan.blockedOn.getTime())) {
-    throw new Error('B-08: la fecha a bloquear contiene citas activas o un bloqueo ajeno.');
+    throw new Error(SEED_AVAILABILITY_MESSAGES.blockedDayBusy);
   }
 }
 
@@ -156,7 +157,7 @@ export async function seedAvailability(
   tx: Prisma.TransactionClient, users: AvailabilitySeedUsers, now: Date = new Date(),
 ): Promise<AvailabilitySeedResult> {
   if (new Set([users.mentorId, users.performanceMentorId, users.graduateId]).size !== 3) {
-    throw new Error('B-08: se requieren dos mentores y un titulado distintos.');
+    throw new Error(SEED_AVAILABILITY_MESSAGES.sameParticipants);
   }
   const weeks = getWeeks(now);
   const plan = buildBlockPlan(weeks, now);
@@ -164,7 +165,7 @@ export async function seedAvailability(
   await checkForeignCollisions(tx, users, plan);
   const orientation = await tx.orientationType.findFirst({ where: { isActive: true }, orderBy: { name: 'asc' } });
   if (!orientation) {
-    throw new Error('B-08: ejecuta primero el seed de tipos de orientación; no existe un tema activo.');
+    throw new Error(SEED_AVAILABILITY_MESSAGES.missingOrientation);
   }
   const statuses = await Promise.all([
     AppointmentStatusTitle.CONFIRMED, AppointmentStatusTitle.CANCELLED, AppointmentStatusTitle.COMPLETED,
@@ -192,11 +193,11 @@ export async function seedAvailability(
     data: appointments.map((block) => ({
       id: block.appointmentId!, blockId: block.id, mentorId: mentorOf(block, users), studentId: users.graduateId,
       startAt: block.start, endAt: block.end, statusId: statuses[0].id, orientationTypeId: orientation.id,
-      message: 'Cita confirmada de prueba B-08 (seed de desarrollo)', respondedAt: now,
+      message: SEED_APPOINTMENT_MESSAGE, respondedAt: now,
     })),
   });
   await tx.blockedDate.create({
-    data: { id: SEED_BLOCKED_DATE_ID, mentorId: users.mentorId, blockedOn: plan.blockedOn, reason: 'Compromiso académico (seed B-08)' },
+    data: { id: SEED_BLOCKED_DATE_ID, mentorId: users.mentorId, blockedOn: plan.blockedOn, reason: SEED_BLOCKED_REASON },
   });
   return {
     weeks, plan, statuses: statuses.length, blocks: plan.blocks.length, appointments: appointments.length,
