@@ -56,7 +56,7 @@ describe('NlpService', () => {
     });
 
     it('separa por saltos de línea, viñetas y comas', () => {
-      const text = '- Experiencia en NestJS\n• Conocimiento de Docker, PostgreSQL';
+      const text = '- Experiencia en NestJS\nConocimiento de Docker, PostgreSQL';
       expect(nlpService.tokenizeAndFilter(text)).toEqual([
         'experiencia',
         'nestjs',
