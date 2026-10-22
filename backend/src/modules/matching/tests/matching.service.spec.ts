@@ -12,10 +12,6 @@ interface RequirementGapResult {
   message: string;
 }
 
-interface CareerMatchingInput {
-  requiredCareers: string[];
-  candidateCareer: string;
-}
 
 function analyzeRequirementsGap(
   requiredSkills: string[],
@@ -39,21 +35,6 @@ function analyzeRequirementsGap(
   };
 }
 
-function evaluateCareerMatch(input: CareerMatchingInput): boolean {
-  if (!input.requiredCareers || input.requiredCareers.length === 0) {
-    return true;
-  }
-
-  if (!input.candidateCareer || input.candidateCareer.trim() === '') {
-    return false;
-  }
-
-  const normalizedCandidate = input.candidateCareer.trim().toLowerCase();
-
-  return input.requiredCareers.some(
-    (career) => career.trim().toLowerCase() === normalizedCandidate
-  );
-}
 
 const EXPERIENCE_ID = '5b1f0c3e-8a4d-4f0b-9a52-1d6c7e2a9b10';
 
@@ -167,31 +148,58 @@ describe('Matching Gap Analysis QA Suite - Zero Gap UI Behavior', () => {
   });
 });
 
-describe('Matching QA Asserts - Prevención de Falsos Positivos de Carreras', () => {
-  it('debe rechazar el match cuando la carrera del candidato no coincide con ninguna carrera requerida', () => {
-    const isMatch = evaluateCareerMatch({
-      requiredCareers: ['Ingeniería de Sistemas', 'Ingeniería Informática'],
-      candidateCareer: 'Ingeniería Comercial',
-    });
+describe('HU-02A T2.5 - Prevención de falsos positivos de carreras', () => {
+  let service: MatchingService;
 
-    expect(isMatch).toBe(false);
+  beforeEach(() => {
+    service = Object.create(MatchingService.prototype) as MatchingService;
   });
 
-  it('debe aprobar el match únicamente cuando la carrera coincide exactamente (ignorando mayúsculas/espacios)', () => {
-    const isMatch = evaluateCareerMatch({
-      requiredCareers: ['Ingeniería de Sistemas', 'Ingeniería Informática'],
-      candidateCareer: '  ingeniería de sistemas  ',
+  const baseInput = {
+    userCareer: 'Ingeniería de Sistemas',
+    requiredCareer: 'Ingeniería de Sistemas',
+    userExperienceYears: 3,
+    minimumExperienceYears: 2,
+    userSkills: ['TypeScript'],
+    requiredSkills: ['TypeScript'],
+  };
+
+  it('rechaza una carrera diferente aunque coincidan experiencia y habilidades', () => {
+    const result = service.intersectRequirements({
+      ...baseInput,
+      userCareer: 'Ingeniería Comercial',
     });
 
-    expect(isMatch).toBe(true);
+    expect(result.careerMatch).toBe(false);
+    expect(result.experienceMatch).toBe(true);
+    expect(result.allRequiredSkillsMatch).toBe(true);
   });
 
-  it('no debe dar falso positivo si el perfil del candidato no especifica carrera', () => {
-    const isMatch = evaluateCareerMatch({
-      requiredCareers: ['Ingeniería de Sistemas'],
-      candidateCareer: '',
+  it('acepta una carrera coincidente ignorando mayúsculas y espacios', () => {
+    const result = service.intersectRequirements({
+      ...baseInput,
+      userCareer: '  ingeniería de sistemas  ',
     });
 
-    expect(isMatch).toBe(false);
+    expect(result.careerMatch).toBe(true);
+  });
+
+  it('rechaza una carrera vacía cuando la vacante requiere una carrera', () => {
+    const result = service.intersectRequirements({
+      ...baseInput,
+      userCareer: '',
+    });
+
+    expect(result.careerMatch).toBe(false);
+  });
+
+  it('no confunde Ingeniería Informática con Ingeniería de Sistemas', () => {
+    const result = service.intersectRequirements({
+      ...baseInput,
+      userCareer: 'Ingeniería Informática',
+      requiredCareer: 'Ingeniería de Sistemas',
+    });
+
+    expect(result.careerMatch).toBe(false);
   });
 });
