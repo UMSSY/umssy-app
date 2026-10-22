@@ -38,20 +38,27 @@ export class MatchingService {
     return this.skillsClassifierService.classify(rawSkills, detectable);
   }
 
-  intersectRequirements(input: MatchingInput): MatchingResult {
+    intersectRequirements(input: MatchingInput): MatchingResult {
+    const normalize = (value: string): string =>
+      value
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
     const careerMatch =
       !input.requiredCareer ||
-      input.userCareer.toLowerCase() === input.requiredCareer.toLowerCase();
+      normalize(input.userCareer) === normalize(input.requiredCareer);
 
     const experienceMatch =
       input.userExperienceYears >= input.minimumExperienceYears;
 
     const userSkills = new Set(
-      input.userSkills.map((skill) => skill.toLowerCase()),
+      input.userSkills.map((skill) => normalize(skill)),
     );
 
     const matchedSkills = input.requiredSkills.filter((skill) =>
-      userSkills.has(skill.toLowerCase()),
+      userSkills.has(normalize(skill)),
     );
 
     const allRequiredSkillsMatch =
