@@ -21,14 +21,13 @@ describe("SurveyNotificationsView", () => {
     vi.restoreAllMocks();
   });
 
-  it("muestra el título, la ruta de navegación y el total de encuestas", async () => {
+  it("muestra el título, todas las encuestas y cuántas están pendientes", async () => {
     renderView();
 
     expect(screen.getByRole("heading", { level: 1, name: "Notificaciones de encuestas" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/dashboard");
-    const surveyList = screen.getByRole("region", { name: /Encuestas/ });
+    const surveyList = screen.getByRole("region", { name: "Encuestas" });
     expect(await within(surveyList).findAllByRole("listitem")).toHaveLength(5);
-    expect(within(surveyList).getByText("5")).toBeInTheDocument();
+    expect(within(surveyList).getByText("2 pendientes")).toBeInTheDocument();
   });
 
   it("permite responder solo las encuestas pendientes", async () => {
@@ -39,23 +38,30 @@ describe("SurveyNotificationsView", () => {
       "/surveys/employability-2026",
       "/surveys/graduate-follow-up",
     ]);
+    expect(screen.getAllByText("Nueva encuesta disponible para responder.")).toHaveLength(2);
   });
 
   it("marca la encuesta caducada como caducada y sin opción de responder", async () => {
     renderView();
 
     const row = await findSurveyRow("Encuesta de satisfacción 2025");
-    expect(within(row).getAllByText("Encuesta caducada")).toHaveLength(2);
+    expect(within(row).getByText("Esta encuesta estuvo disponible por un tiempo limitado.")).toBeInTheDocument();
+    expect(within(row).getAllByText("Encuesta caducada")).toHaveLength(1);
     expect(within(row).queryByText("Encuesta pendiente")).not.toBeInTheDocument();
     expect(within(row).queryByRole("link")).not.toBeInTheDocument();
+    expect(within(row).getByRole("button", { name: "Encuesta caducada" })).toBeDisabled();
   });
 
-  it("muestra el detalle de las encuestas respondidas con su fecha", async () => {
+  it("marca las encuestas respondidas como registradas, con su fecha y sin acciones", async () => {
     renderView();
 
     const row = await findSurveyRow("Encuesta de inserción laboral");
-    expect(within(row).getByText("Encuesta respondida")).toBeInTheDocument();
-    expect(within(row).getByRole("link", { name: "Ver detalles" })).toHaveAttribute("href", "/surveys/job-placement");
+    expect(
+      within(row).getByText("Gracias por completar la encuesta. Tu información ha sido registrada correctamente."),
+    ).toBeInTheDocument();
+    expect(within(row).getByRole("button", { name: "Encuesta registrada" })).toBeDisabled();
+    expect(within(row).getAllByText("Encuesta registrada")).toHaveLength(1);
+    expect(within(row).queryByRole("link")).not.toBeInTheDocument();
     expect(within(row).getByText("20 sep. 2026")).toBeInTheDocument();
   });
 
@@ -63,7 +69,9 @@ describe("SurveyNotificationsView", () => {
     vi.spyOn(surveysService, "getNotifications").mockResolvedValue([]);
     renderView();
 
-    expect(await screen.findByText("No tienes encuestas por ahora.")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "No hay encuestas disponibles" })).toBeInTheDocument();
+    expect(screen.getByText("Cuando tengas una nueva encuesta asignada, aparecerá aquí.")).toBeInTheDocument();
+    expect(screen.queryByText(/pendiente/)).not.toBeInTheDocument();
   });
 
   it("muestra un error cuando no se pueden cargar las encuestas", async () => {

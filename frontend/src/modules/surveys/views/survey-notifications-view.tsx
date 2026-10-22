@@ -1,22 +1,20 @@
 "use client";
 
 import { FileCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PageBreadcrumb } from "@/shared/components/layout/page-breadcrumb";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
-import {
-  SURVEY_NOTIFICATIONS_BREADCRUMB,
-  SURVEY_NOTIFICATIONS_DESCRIPTION,
-  SURVEY_NOTIFICATIONS_EMPTY_MESSAGE,
-  SURVEY_NOTIFICATIONS_LABEL,
-} from "../constants/survey-notifications.constants";
+import { SURVEY_NOTIFICATIONS_DESCRIPTION, SURVEY_NOTIFICATIONS_LABEL } from "../constants/survey-notifications.constants";
 import { SurveyNotificationItem } from "../components/survey-notification-item";
+import { SurveyNotificationsEmpty } from "../components/survey-notifications-empty";
 import { useSurveyNotifications } from "../hooks/use-survey-notifications";
+import { formatPendingSurveysLabel } from "../utils/format-pending-surveys-label";
 
 const SKELETON_ROWS = 3;
 
 export function SurveyNotificationsView() {
-  const { notifications, isLoading, errorMessage } = useSurveyNotifications();
+  const { notifications, pendingCount, isLoading, errorMessage } = useSurveyNotifications();
 
   const renderContent = () => {
     if (isLoading) {
@@ -38,7 +36,7 @@ export function SurveyNotificationsView() {
     }
 
     if (notifications.length === 0) {
-      return <p className="px-6 py-8 text-sm text-text-secondary">{SURVEY_NOTIFICATIONS_EMPTY_MESSAGE}</p>;
+      return <SurveyNotificationsEmpty />;
     }
 
     return (
@@ -51,22 +49,21 @@ export function SurveyNotificationsView() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-4">
-      <PageBreadcrumb items={SURVEY_NOTIFICATIONS_BREADCRUMB} />
-      <WorkspacePage title={SURVEY_NOTIFICATIONS_LABEL} description={SURVEY_NOTIFICATIONS_DESCRIPTION}>
-        <section aria-labelledby="survey-list-title" className="rounded-lg border border-border bg-surface">
-          <header className="flex items-center gap-3 border-b border-border px-6 py-4">
-            <FileCheck className="size-6 text-accent" strokeWidth={1.5} aria-hidden="true" />
-            <h2 id="survey-list-title" className="font-tight text-lg font-bold text-ink">
-              Encuestas
-            </h2>
-            <span className="rounded-full bg-interaction px-2 py-0.5 text-xs font-semibold text-accent">
-              {notifications.length}
-            </span>
-          </header>
-          {renderContent()}
-        </section>
-      </WorkspacePage>
-    </div>
+    <WorkspacePage title={SURVEY_NOTIFICATIONS_LABEL} description={SURVEY_NOTIFICATIONS_DESCRIPTION}>
+      <Card role="region" aria-labelledby="survey-list-title" className="gap-0 py-0">
+        <CardHeader className="flex items-center gap-3 py-4">
+          <FileCheck className="size-6 text-accent" strokeWidth={1.5} aria-hidden="true" />
+          <CardTitle id="survey-list-title" className="text-ink">
+            Encuestas
+          </CardTitle>
+          {notifications.length > 0 ? (
+            <Badge className="rounded-full bg-interaction font-semibold text-accent">
+              {formatPendingSurveysLabel(pendingCount)}
+            </Badge>
+          ) : null}
+        </CardHeader>
+        <CardContent className="border-t border-border px-0">{renderContent()}</CardContent>
+      </Card>
+    </WorkspacePage>
   );
 }
