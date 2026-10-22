@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { toBoliviaTime } from '../../../common/utils/date-time.js';
 import type { Prisma } from '../../../prisma/client.js';
 import {
-  SEED_APPOINTMENT_IDS, SEED_BLOCK_IDS, SEED_BLOCKED_DATE_ID, SEED_SERIES_ID,
+  LEGACY_SEED_MESSAGES, SEED_APPOINTMENT_IDS, SEED_BLOCK_IDS, SEED_BLOCKED_DATE_ID, SEED_SERIES_ID,
 } from '../constants/seed-availability.constants.js';
 import { buildBlockPlan, getWeeks, seedAvailability } from '../seeds/availability.seed.js';
 
@@ -137,7 +137,39 @@ describe('persistencia del seed', () => {
   it('falla sin borrar ante un solapamiento con bloques ajenos', async () => {
     const { tx, client } = buildTx();
     const plan = buildBlockPlan(getWeeks(MIDWEEK), MIDWEEK);
-    tx.availabilityBlock.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([{ id: 'foreign-block', mentorId: users.mentorId, startAt: plan.next.start, endAt: plan.next.end }]);
+    tx.availabilityBlock.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([{
+      id: 'foreign-block', mentorId: users.mentorId, startAt: plan.next.start, endAt: plan.next.end,
+      appointments: [{ mentorId: users.mentorId, studentId: 'other-graduate', message: null }], proposals: [],
+    }]);
+    await expect(seedAvailability(client, users, MIDWEEK)).rejects.toThrow('colisiona con datos ajenos');
+    expect(tx.availabilityBlock.deleteMany).not.toHaveBeenCalled();
+  });
+
+  it('reemplaza las citas y los bloques libres que dejó el seed anterior', async () => {
+    const { tx, client } = buildTx();
+    const plan = buildBlockPlan(getWeeks(MIDWEEK), MIDWEEK);
+    const legacyAppointment = {
+      id: 'legacy-appointment', mentorId: users.mentorId, studentId: users.graduateId, message: LEGACY_SEED_MESSAGES[0],
+      startAt: plan.current.start, endAt: plan.current.end,
+    };
+    tx.availabilityBlock.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([
+      { id: 'legacy-block', mentorId: users.mentorId, startAt: plan.current.start, endAt: plan.current.end, appointments: [legacyAppointment], proposals: [] },
+      { id: 'free-block', mentorId: users.mentorId, startAt: plan.next.start, endAt: plan.next.end, appointments: [], proposals: [] },
+    ]);
+    tx.appointment.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([legacyAppointment]).mockResolvedValueOnce([{ id: legacyAppointment.id }]);
+    const result = await seedAvailability(client, users, MIDWEEK);
+    expect(tx.appointment.deleteMany).toHaveBeenCalledWith({ where: { id: { in: [...SEED_APPOINTMENT_IDS, 'legacy-appointment'] } } });
+    expect(tx.availabilityBlock.deleteMany).toHaveBeenCalledWith({ where: { id: { in: [...SEED_BLOCK_IDS, 'legacy-block', 'free-block'] } } });
+    expect(result.warnings).toHaveLength(1);
+  });
+
+  it('no reemplaza bloques del seed anterior con propuestas', async () => {
+    const { tx, client } = buildTx();
+    const plan = buildBlockPlan(getWeeks(MIDWEEK), MIDWEEK);
+    tx.availabilityBlock.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([{
+      id: 'legacy-block', mentorId: users.mentorId, startAt: plan.next.start, endAt: plan.next.end,
+      appointments: [], proposals: [{ id: 'proposal-1' }],
+    }]);
     await expect(seedAvailability(client, users, MIDWEEK)).rejects.toThrow('colisiona con datos ajenos');
     expect(tx.availabilityBlock.deleteMany).not.toHaveBeenCalled();
   });

@@ -3,13 +3,14 @@ import type { Prisma } from '../../../prisma/client.js';
 import { ACTIVE_APPOINTMENT_STATUSES } from '../constants/appointment-status.constants.js';
 import { BLOCK_MAX_HOUR, BLOCK_MIN_HOUR } from '../constants/create-block.constants.js';
 import {
-  MS_PER_DAY, MS_PER_MINUTE, PERFORMANCE_APPOINTMENTS, PRIMARY_APPOINTMENTS, SEED_APPOINTMENT_IDS, SEED_APPOINTMENT_MESSAGE,
+  LEGACY_SEED_MESSAGES, MS_PER_DAY, MS_PER_MINUTE, PERFORMANCE_APPOINTMENTS, PRIMARY_APPOINTMENTS, SEED_APPOINTMENT_IDS, SEED_APPOINTMENT_MESSAGE,
   SEED_AVAILABILITY_MESSAGES, SEED_BLOCK_IDS, SEED_BLOCKED_DATE_ID, SEED_BLOCKED_REASON, SEED_SERIES_ID,
   SERIES_OCCURRENCES, STEP_MS,
 } from '../constants/seed-availability.constants.js';
 import { AppointmentStatusTitle } from '../enums/appointment-status-title.enum.js';
 import type { AvailabilitySeedResult } from '../types/availability-seed-result.types.js';
 import type { AvailabilitySeedUsers } from '../types/availability-seed-users.types.js';
+import type { LegacySeedRecords } from '../types/legacy-seed-records.types.js';
 import type { SeedBlockPlan } from '../types/seed-block-plan.types.js';
 import type { SeedBlock } from '../types/seed-block.types.js';
 import type { SeedWeekRange } from '../types/seed-week-range.types.js';
@@ -83,6 +84,12 @@ export function buildBlockPlan(weeks: SeedWeeks, now: Date = new Date()): SeedBl
 const mentorOf = (block: SeedBlock, users: AvailabilitySeedUsers): string =>
   block.mentorKey === 'primary' ? users.mentorId : users.performanceMentorId;
 
+const isLegacyAppointment = (
+  appointment: { mentorId: string; studentId: string; message: string | null }, users: AvailabilitySeedUsers,
+): boolean =>
+  appointment.mentorId === users.mentorId && appointment.studentId === users.graduateId &&
+  LEGACY_SEED_MESSAGES.includes(appointment.message ?? '');
+
 const overlaps = (start: Date, end: Date, otherStart: Date, otherEnd: Date): boolean =>
   start < otherEnd && end > otherStart;
 
@@ -117,16 +124,23 @@ async function checkReplaceableRecords(
   }
 }
 
+// Devuelve lo que dejó el seed anterior para reemplazarlo; cualquier otra colisión detiene el seed.
 async function checkForeignCollisions(
   tx: Prisma.TransactionClient, users: AvailabilitySeedUsers, plan: SeedBlockPlan,
-): Promise<void> {
+): Promise<LegacySeedRecords> {
   const mentorIds = [users.mentorId, users.performanceMentorId];
   const from = new Date(Math.min(...plan.blocks.map((block) => block.start.getTime())));
   const to = new Date(Math.max(...plan.blocks.map((block) => block.end.getTime())));
   const foreignBlocks = await tx.availabilityBlock.findMany({
     where: { id: { notIn: SEED_BLOCK_IDS }, mentorId: { in: mentorIds }, startAt: { lt: to }, endAt: { gt: from } },
+    include: {
+      appointments: { select: { mentorId: true, studentId: true, message: true } },
+      proposals: { select: { id: true } },
+    },
   });
-  const foreignAppointments = await tx.appointment.findMany({
+  const isReplaceable = (block: (typeof foreignBlocks)[number]): boolean =>
+    block.proposals.length === 0 && block.appointments.every((appointment) => isLegacyAppointment(appointment, users));
+  const appointmentsInRange = await tx.appointment.findMany({
     where: {
       id: { notIn: SEED_APPOINTMENT_IDS },
       OR: [{ mentorId: { in: mentorIds } }, { studentId: users.graduateId }],
@@ -134,12 +148,16 @@ async function checkForeignCollisions(
       startAt: { lt: to }, endAt: { gt: from },
     },
   });
+  const foreignAppointments = appointmentsInRange.filter((appointment) => !isLegacyAppointment(appointment, users));
   const foreignBlocked = await tx.blockedDate.findMany({
     where: { id: { not: SEED_BLOCKED_DATE_ID }, mentorId: { in: mentorIds } },
   });
+  const replaceableBlockIds = new Set<string>();
   for (const block of plan.blocks) {
     const mentorId = mentorOf(block, users);
-    if (foreignBlocks.some((other) => other.mentorId === mentorId && overlaps(block.start, block.end, other.startAt, other.endAt)) ||
+    const overlapping = foreignBlocks.filter((other) => other.mentorId === mentorId && overlaps(block.start, block.end, other.startAt, other.endAt));
+    overlapping.filter(isReplaceable).forEach((other) => replaceableBlockIds.add(other.id));
+    if (overlapping.some((other) => !isReplaceable(other)) ||
       foreignAppointments.some((other) => (other.mentorId === mentorId || (block.appointmentId && other.studentId === users.graduateId)) && overlaps(block.start, block.end, other.startAt, other.endAt)) ||
       foreignBlocked.some((other) => other.mentorId === mentorId && other.blockedOn.getTime() === calendarDate(block.start).getTime())) {
       throw new Error(SEED_AVAILABILITY_MESSAGES.collision(block.start.toISOString()));
@@ -151,6 +169,11 @@ async function checkForeignCollisions(
     foreignBlocked.some((other) => other.mentorId === users.mentorId && other.blockedOn.getTime() === plan.blockedOn.getTime())) {
     throw new Error(SEED_AVAILABILITY_MESSAGES.blockedDayBusy);
   }
+  const legacyAppointments = await tx.appointment.findMany({
+    where: { mentorId: users.mentorId, studentId: users.graduateId, message: { in: LEGACY_SEED_MESSAGES } },
+    select: { id: true },
+  });
+  return { appointmentIds: legacyAppointments.map(({ id }) => id), blockIds: [...replaceableBlockIds] };
 }
 
 export async function seedAvailability(
@@ -162,7 +185,7 @@ export async function seedAvailability(
   const weeks = getWeeks(now);
   const plan = buildBlockPlan(weeks, now);
   await checkReplaceableRecords(tx, users, plan);
-  await checkForeignCollisions(tx, users, plan);
+  const legacy = await checkForeignCollisions(tx, users, plan);
   const orientation = await tx.orientationType.findFirst({ where: { isActive: true }, orderBy: { name: 'asc' } });
   if (!orientation) {
     throw new Error(SEED_AVAILABILITY_MESSAGES.missingOrientation);
@@ -177,10 +200,10 @@ export async function seedAvailability(
     });
   }
 
-  // Retirar solo el conjunto reservado evita colisiones transitorias al cambiar de semana.
+  // Retirar solo el conjunto reservado y lo que dejó el seed anterior evita colisiones transitorias al cambiar de semana.
   // Las comprobaciones previas impiden cascadas o desvinculaciones de referencias ajenas.
-  await tx.appointment.deleteMany({ where: { id: { in: SEED_APPOINTMENT_IDS } } });
-  await tx.availabilityBlock.deleteMany({ where: { id: { in: SEED_BLOCK_IDS } } });
+  await tx.appointment.deleteMany({ where: { id: { in: [...SEED_APPOINTMENT_IDS, ...legacy.appointmentIds] } } });
+  await tx.availabilityBlock.deleteMany({ where: { id: { in: [...SEED_BLOCK_IDS, ...legacy.blockIds] } } });
   await tx.blockedDate.deleteMany({ where: { id: SEED_BLOCKED_DATE_ID } });
   await tx.availabilityBlock.createMany({
     data: plan.blocks.map((block) => ({
@@ -201,6 +224,9 @@ export async function seedAvailability(
   });
   return {
     weeks, plan, statuses: statuses.length, blocks: plan.blocks.length, appointments: appointments.length,
-    blockedDates: 1, series: 1, warnings: plan.warnings,
+    blockedDates: 1, series: 1,
+    warnings: legacy.appointmentIds.length + legacy.blockIds.length > 0
+      ? [...plan.warnings, SEED_AVAILABILITY_MESSAGES.legacyRemoved(legacy.appointmentIds.length, legacy.blockIds.length)]
+      : plan.warnings,
   };
 }
