@@ -26,4 +26,33 @@ describe('MentorAvailabilityController', () => {
     const roles = new Reflector().get<string[]>(ROLES_KEY, handler);
     expect(roles).toEqual(['titulado', 'estudiante', 'mentor']);
   });
+
+  it('consulta el estado del mentor en sesión', async () => {
+    const status = { mentorId: MENTOR_ID, isAvailable: true };
+    const availabilityService = { findMyAvailabilityStatus: vi.fn().mockResolvedValue(status) };
+    const controller = new MentorAvailabilityController(availabilityService as any);
+
+    await expect(controller.findMyAvailabilityStatus({ id: MENTOR_ID } as any)).resolves.toBe(status);
+    expect(availabilityService.findMyAvailabilityStatus).toHaveBeenCalledWith(MENTOR_ID);
+  });
+
+  it('delega el cambio con el usuario en sesión y el mentor de la ruta', async () => {
+    const status = { mentorId: MENTOR_ID, isAvailable: false };
+    const availabilityService = { updateAvailabilityStatus: vi.fn().mockResolvedValue(status) };
+    const controller = new MentorAvailabilityController(availabilityService as any);
+
+    const result = await controller.updateAvailabilityStatus(
+      { id: 'session-user' } as any,
+      { id: MENTOR_ID },
+      { isAvailable: false },
+    );
+
+    expect(availabilityService.updateAvailabilityStatus).toHaveBeenCalledWith('session-user', MENTOR_ID, false);
+    expect(result).toBe(status);
+  });
+
+  it.each(['findMyAvailabilityStatus', 'updateAvailabilityStatus'])('solo permite a mentores usar %s', (name) => {
+    const handler = Object.getOwnPropertyDescriptor(MentorAvailabilityController.prototype, name)?.value;
+    expect(new Reflector().get<string[]>(ROLES_KEY, handler)).toEqual(['mentor']);
+  });
 });

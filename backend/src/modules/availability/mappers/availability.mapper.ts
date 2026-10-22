@@ -4,6 +4,7 @@ import type { AvailabilityBlockResponse } from '../types/availability-block-resp
 import type { AvailabilityBlockState } from '../types/availability-block-state.types.js';
 import type { AvailabilityBlockWithAppointments } from '../types/availability-block-with-appointments.types.js';
 import type { DeletedBlockResponse } from '../types/deleted-block-response.types.js';
+import type { MentorAvailabilityStatusResponse } from '../types/mentor-availability-status-response.types.js';
 
 @Injectable()
 export class AvailabilityMapper {
@@ -27,9 +28,13 @@ export class AvailabilityMapper {
     return { id: block.id };
   }
 
+  toAvailabilityStatusResponse(mentorId: string, isAvailable: boolean): MentorAvailabilityStatusResponse {
+    return { mentorId, isAvailable };
+  }
+
   private toState(block: AvailabilityBlockWithAppointments): AvailabilityBlockState {
     const statuses = block.appointments.map((appointment) => appointment.status.title);
-    if (statuses.includes(AppointmentStatusTitle.CONFIRMED)) {
+    if (statuses.includes(AppointmentStatusTitle.CONFIRMED) || statuses.includes(AppointmentStatusTitle.LEGACY_CONFIRMED)) {
       return 'confirmed';
     }
     if (statuses.includes(AppointmentStatusTitle.PENDING)) {
