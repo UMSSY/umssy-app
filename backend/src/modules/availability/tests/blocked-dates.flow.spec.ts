@@ -278,6 +278,22 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
     );
   });
 
+  it('2. desbloquea la fecha del seed y sus horarios libres vuelven sin cambios', async () => {
+    expect(await freeBlockIdsOfMentorA()).not.toContain(plan.blocked.id);
+
+    await http()
+      .delete(`/api/blocked-dates/${SEED_BLOCKED_DATE_ID}`)
+      .set('Authorization', `Bearer ${tokens.mentorA}`)
+      .expect(200, { statusCode: 200, ok: true, detail: 'Operación exitosa', data: { id: SEED_BLOCKED_DATE_ID } });
+
+    expect(await freeBlockIdsOfMentorA()).toContain(plan.blocked.id);
+    expect(store.blocks.find((block) => block.id === plan.blocked.id)).toMatchObject({
+      startAt: plan.blocked.start,
+      endAt: plan.blocked.end,
+    });
+    expect(await listBlockedDates()).toEqual([]);
+  });
+
   it('7. los horarios libres no incluyen los del día bloqueado, pero sí los de otros días', async () => {
     const ids = await freeBlockIdsOfMentorA();
 
