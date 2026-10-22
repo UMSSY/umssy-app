@@ -57,7 +57,7 @@ export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownP
       </ul>
 
       <div className="mt-auto flex items-baseline justify-between gap-3 border-t border-border pt-4 max-lg:mt-6 lg:pt-5">
-        <span className="text-[11px] font-semibold tracking-[0.12em] text-text-secondary uppercase">
+        <span className="text-xs font-semibold tracking-[0.12em] text-text-secondary uppercase">
           Media global
         </span>
         <p className="whitespace-nowrap">

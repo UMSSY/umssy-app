@@ -43,8 +43,8 @@ export function ProfilePhotoField({
     <div className="flex flex-wrap items-center gap-5">
       <ProfileAvatar label="Foto" photoUrl={previewUrl ?? photoUrl} />
       <div className="flex flex-col gap-1">
-        <p className="text-[15px] font-semibold text-ink">Fotografía de perfil</p>
-        <p className="text-[13px] text-text-secondary">
+        <p className="text-base font-semibold text-ink">Fotografía de perfil</p>
+        <p className="text-sm text-text-secondary">
           {previewUrl
             ? "Vista previa: así se verá tu fotografía. Guárdala para actualizar tu perfil."
             : "Ayuda a que otras personas te reconozcan. Formato JPG o PNG, hasta 5 MB."}
@@ -64,7 +64,7 @@ export function ProfilePhotoField({
             <>
               <Button
                 type="button"
-                className="h-10 bg-accent px-4 text-sm text-white hover:bg-brand-hover"
+                className="h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover"
                 disabled={isBusy}
                 onClick={onConfirmPhoto}
               >
@@ -95,7 +95,7 @@ export function ProfilePhotoField({
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-12 border-accent bg-surface px-6 text-[14px] font-semibold text-accent hover:bg-interaction hover:text-accent"
+                  className="h-10 border-brand-red/40 bg-surface px-4 text-sm font-semibold text-danger hover:bg-brand-red/5 hover:text-danger"
                   disabled={isBusy}
                   onClick={() => setIsDeleteDialogOpen(true)}
                 >
@@ -106,7 +106,7 @@ export function ProfilePhotoField({
           )}
         </div>
         {error ? (
-          <p role="alert" className={cn("text-[13px] text-danger", "mt-2")}>
+          <p role="alert" className={cn("text-sm text-danger", "mt-2")}>
             {error}
           </p>
         ) : null}

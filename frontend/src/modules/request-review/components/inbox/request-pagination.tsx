@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import type { RequestPaginationProps } from "../../types/request-pagination-props.types";
 
-const BUTTON_CLASS = "h-[34px] rounded-lg border-border bg-surface px-4 text-[14px] font-semibold text-ink";
+const BUTTON_CLASS = "h-[34px] rounded-lg border-border bg-surface px-4 text-sm font-semibold text-ink";
 
 export function RequestPagination({ from, to, total, hasPrevious, hasNext, onPrevious, onNext }: RequestPaginationProps) {
   return (

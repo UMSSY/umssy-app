@@ -80,6 +80,12 @@ describe("EventDetailPanel", () => {
     fireEvent.click(button);
     expect(screen.getByText("20 cupos disponibles")).toBeInTheDocument();
   });
+  it("places the registration action before the descriptive content", () => {
+    render(<EventDetailPanel event={event} />);
+    const action = screen.getByRole("button", { name: "Inscripción no disponible" });
+    const description = screen.getByText("Aprende React");
+    expect(action.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
   it("disables registration for full workshops", () => {
     render(
       <EventDetailPanel
