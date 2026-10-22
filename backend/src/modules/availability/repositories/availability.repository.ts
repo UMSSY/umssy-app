@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { AvailabilityBlock } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { TransactionClient } from '../../../common/types/transaction-client.types.js';
 import { BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE } from '../constants/block-query.constants.js';
 import { ACTIVE_APPOINTMENT_STATUSES } from '../constants/appointment-status.constants.js';
 import type { AvailabilityBlockWithAppointments } from '../types/availability-block-with-appointments.types.js';
@@ -10,8 +11,13 @@ import type { UpdateBlockData } from '../types/update-block-data.types.js';
 export class AvailabilityRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(mentorId: string, startAt: Date, endAt: Date): Promise<AvailabilityBlock> {
-    return this.prisma.availabilityBlock.create({
+  create(
+    mentorId: string,
+    startAt: Date,
+    endAt: Date,
+    client: TransactionClient = this.prisma,
+  ): Promise<AvailabilityBlock> {
+    return client.availabilityBlock.create({
       data: { mentorId, startAt, endAt },
     });
   }
@@ -47,8 +53,12 @@ export class AvailabilityRepository {
     });
   }
 
-  update(id: string, data: UpdateBlockData): Promise<AvailabilityBlockWithAppointments> {
-    return this.prisma.availabilityBlock.update({
+  update(
+    id: string,
+    data: UpdateBlockData,
+    client: TransactionClient = this.prisma,
+  ): Promise<AvailabilityBlockWithAppointments> {
+    return client.availabilityBlock.update({
       where: { id },
       data,
       include: BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE,
