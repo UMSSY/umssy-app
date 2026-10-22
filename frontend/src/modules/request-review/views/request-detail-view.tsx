@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DetailHeader } from "../components/layout/backoffice-page-header";
 import { DataContrastPanel } from "../components/detail/data-contrast-panel";
@@ -11,23 +10,19 @@ import { VerdictPanel } from "../components/detail/verdict-panel";
 import { DOCUMENT_TYPE_LABELS } from "../constants/request-review.constants";
 import { useDocumentUrl } from "../hooks/use-document-url";
 import { useRequestDetail } from "../hooks/use-request-detail";
-import type { ReviewStatus } from "../types/request-review.types";
 import { formatLongDate } from "../utils/format-long-date";
 import type { RequestDetailViewProps } from "../types/request-detail-view-props.types";
 
 export function RequestDetailView({ id }: RequestDetailViewProps) {
   const { detail, error, isLoading } = useRequestDetail(id);
   const document = useDocumentUrl(id, Boolean(detail?.document));
-  // Estado mostrado tras un dictamen en esta pantalla; se descarta si cambia la solicitud
-  const [verdict, setVerdict] = useState<{ id: string; status: ReviewStatus } | null>(null);
-  const currentStatus = detail ? (verdict?.id === detail.id ? verdict.status : detail.status) : null;
   const sentAt = formatLongDate(detail?.history?.submittedAt);
 
   return (
-    <div className="w-full min-w-0">
+    <div className="mx-auto w-full min-w-0 max-w-7xl">
       <DetailHeader requestCode={detail?.requestCode} />
 
-      <section className="flex w-full min-w-0 flex-col gap-6 p-8">
+      <section className="flex w-full min-w-0 flex-col gap-6">
         {isLoading && (
           <div className="flex flex-col gap-4" data-testid="detail-skeleton">
             <Skeleton className="h-8 w-1/3" />
@@ -41,14 +36,14 @@ export function RequestDetailView({ id }: RequestDetailViewProps) {
           </p>
         )}
 
-        {detail && currentStatus && (
+        {detail && (
           <>
             <div className="flex flex-col gap-1">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="font-tight text-3xl font-extrabold text-ink">
+                <h1 className="font-tight text-3xl font-bold text-ink">
                   {detail.firstName} {detail.lastName}
                 </h1>
-                <StatusBadge status={currentStatus} />
+                <StatusBadge status={detail.status} />
               </div>
               <p className="text-[15px] text-text-secondary">
                 {detail.career}
@@ -80,12 +75,8 @@ export function RequestDetailView({ id }: RequestDetailViewProps) {
               </div>
               <div className="flex min-w-0 flex-col gap-6">
                 <DataContrastPanel detail={detail} />
-                <VerdictPanel
-                  detail={detail}
-                  status={currentStatus}
-                  onStatusChange={(status) => setVerdict({ id: detail.id, status })}
-                />
-                <HistoryCard detail={{ ...detail, status: currentStatus }} />
+                <VerdictPanel detail={detail} />
+                <HistoryCard detail={detail} />
               </div>
             </div>
           </>

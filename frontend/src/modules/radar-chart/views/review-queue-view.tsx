@@ -1,8 +1,8 @@
 "use client";
 
+import { PageHeading } from "@/shared/components/layout/page-heading";
 import { useState } from "react";
 
-import { Epic3Shell } from "../components/epic3-shell";
 import { ReviewProfileDetail } from "../components/review-profile-detail";
 import { ReviewProfileList } from "../components/review-profile-list";
 import { ReviewQueueFilters } from "../components/review-queue-filters";
@@ -13,7 +13,7 @@ import type {
   ReviewQueueFilter,
 } from "../types/review-queue.types";
 
-function ReviewQueueContent() {
+export function ReviewQueueView() {
   const [activeFilter, setActiveFilter] =
     useState<ReviewQueueFilter>("Todos");
 
@@ -49,19 +49,11 @@ function ReviewQueueContent() {
   }
 
   return (
-    <main className="min-h-screen bg-background p-6">
+    <main className="bg-background">
       <div className="mx-auto w-full max-w-7xl">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">
-            Cola de Revisión
-          </h1>
+        <PageHeading className="mb-6" title="Cola de Revisión" description="Revisa los perfiles enviados y su radar de afinidad." />
 
-          <p className="mt-1 text-sm text-text-secondary">
-            Panel Administrador / Radar de Afinidad / Cola de Revisión
-          </p>
-        </div>
-
-        <div className="grid min-h-[650px] grid-cols-1 overflow-hidden rounded-lg border border-border bg-surface lg:grid-cols-[420px_1fr]">
+        <div className="grid min-h-[650px] grid-cols-1 overflow-hidden rounded-lg border border-border bg-surface lg:grid-cols-[320px_minmax(0,1fr)]">
           <section className="border-b border-border lg:border-r lg:border-b-0">
             <div className="border-b border-border p-5">
               <h2 className="font-semibold text-ink">
@@ -93,13 +85,5 @@ function ReviewQueueContent() {
         </div>
       </div>
     </main>
-  );
-}
-
-export function ReviewQueueView() {
-  return (
-    <Epic3Shell>
-      <ReviewQueueContent />
-    </Epic3Shell>
   );
 }

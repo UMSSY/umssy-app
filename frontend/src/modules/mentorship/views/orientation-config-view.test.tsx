@@ -1,8 +1,8 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import {
   act,
   cleanup,
   fireEvent,
-  render,
   screen,
   waitFor,
 } from "@testing-library/react";
@@ -51,20 +51,20 @@ const expectOrientationStyle = (
   expect(card).not.toBeNull();
   if (state === "unselected") {
     expect(input).not.toBeChecked();
-    expect(card).toHaveClass("border-transparent", "bg-gray-50/50");
-    expect(input).toHaveClass("bg-gray-200");
-    expect(input).not.toHaveClass("data-checked:bg-green-600");
-    expect(input).not.toHaveClass("data-checked:bg-red-600");
+    expect(card).toHaveClass("border-transparent", "bg-surface-soft/50");
+    expect(input).toHaveClass("bg-border");
+    expect(input).not.toHaveClass("data-checked:bg-ink-soft");
+    expect(input).not.toHaveClass("data-checked:bg-accent");
     return;
   }
 
   expect(input).toBeChecked();
   if (state === "saved") {
-    expect(card).toHaveClass("border-green-200", "bg-green-50/50");
-    expect(input).toHaveClass("data-checked:bg-green-600");
+    expect(card).toHaveClass("border-border", "bg-surface-soft/50");
+    expect(input).toHaveClass("data-checked:bg-ink-soft");
   } else {
-    expect(card).toHaveClass("border-red-200", "bg-red-50/50");
-    expect(input).toHaveClass("data-checked:bg-red-600");
+    expect(card).toHaveClass("border-accent", "bg-interaction/50");
+    expect(input).toHaveClass("data-checked:bg-accent");
   }
 };
 
@@ -128,7 +128,7 @@ describe("OrientationConfigView", () => {
     expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
   });
 
-  it("recupera el verde al volver a seleccionar una orientación guardada", async () => {
+  it("recupera el estilo persistido al volver a seleccionar una orientación guardada", async () => {
     render(<OrientationConfigView />);
     await screen.findByRole("checkbox", { name: "Orientación técnica" });
 
@@ -224,7 +224,7 @@ describe("OrientationConfigView", () => {
       screen.getByRole("button", { name: "Sí, guardar cambios" }),
     );
 
-    expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
+    expect(await screen.findByRole("button", { name: "Guardando..." })).toBeDisabled();
     expect(checkbox("Orientación profesional")).toHaveAttribute(
       "aria-disabled",
       "true",
@@ -238,7 +238,7 @@ describe("OrientationConfigView", () => {
     );
   });
 
-  it("muestra en verde las orientaciones persistidas tras recargar", async () => {
+  it("muestra el estado guardado de las orientaciones persistidas tras recargar", async () => {
     const { unmount } = render(<OrientationConfigView />);
     await screen.findByRole("checkbox", { name: "Orientación profesional" });
     fireEvent.click(checkbox("Orientación profesional"));

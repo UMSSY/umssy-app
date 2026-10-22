@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { PageBreadcrumb } from "@/shared/components/layout";
+import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import {
-  REJECTED_USERS_BREADCRUMB,
   REJECTED_USERS_PAGE_SIZE,
   SEARCH_DEBOUNCE_MS,
 } from "../constants/reports.constants";
@@ -25,7 +24,6 @@ export function RejectedUsersReportView() {
   const {
     exportCsv,
     isExporting,
-    errorMessage: exportErrorMessage,
     successMessage: exportSuccessMessage,
   } = useExportRejectedUsersCsv(search);
 
@@ -42,22 +40,12 @@ export function RejectedUsersReportView() {
   const showPagination = !errorMessage && totalItems > 0;
 
   return (
-    <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <PageBreadcrumb items={REJECTED_USERS_BREADCRUMB} />
-        <h1 className="font-tight text-3xl font-extrabold text-ink">Reporte de usuarios registrados rechazados</h1>
-      </header>
+    <WorkspacePage title="Usuarios rechazados">
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
         <EmailSearchInput value={searchInput} onChange={handleSearchChange} />
         <ExportCsvButton onClick={exportCsv} isExporting={isExporting} />
       </div>
-
-      {exportErrorMessage && (
-        <p role="alert" className="text-sm text-accent">
-          {exportErrorMessage}
-        </p>
-      )}
 
       <RejectedUsersTable
         users={users}
@@ -82,6 +70,6 @@ export function RejectedUsersReportView() {
       </div>
 
       <ExportSuccessToast message={exportSuccessMessage} />
-    </section>
+    </WorkspacePage>
   );
 }

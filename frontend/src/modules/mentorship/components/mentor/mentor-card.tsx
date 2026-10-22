@@ -12,9 +12,10 @@ import type { MentorDirectoryItem } from "../../types/mentor-directory.types";
 
 type MentorCardProps = {
   mentor: MentorDirectoryItem;
+  isOwnProfile?: boolean;
 };
 
-export function MentorCard({ mentor }: MentorCardProps) {
+export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
   const hasTechnicalAreas = mentor.technicalAreas.length > 0;
 
   return (
@@ -57,11 +58,11 @@ export function MentorCard({ mentor }: MentorCardProps) {
           </div>
           <Badge
             variant="outline"
-            className={`ml-auto gap-1.5 px-2.5 ${mentor.isAvailable ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-border bg-surface-soft text-text-secondary"}`}
+            className={`ml-auto gap-1.5 px-2.5 ${mentor.isAvailable ? "border-transparent text-ink-soft" : "border-transparent text-text-secondary"}`}
           >
             <span
               aria-hidden="true"
-              className={`size-1.5 shrink-0 rounded-full ${mentor.isAvailable ? "bg-emerald-600" : "bg-text-secondary"}`}
+              className={`size-1.5 shrink-0 rounded-full ${mentor.isAvailable ? "bg-ink-soft" : "bg-text-secondary"}`}
             />
             {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
           </Badge>
@@ -119,9 +120,13 @@ export function MentorCard({ mentor }: MentorCardProps) {
             variant: "outline",
             className: "max-w-full border-border-strong text-ink",
           })}
-          aria-label={`Ver perfil de ${mentor.fullName}`}
+          aria-label={
+            isOwnProfile
+              ? `Ver mi perfil de ${mentor.fullName}`
+              : `Ver perfil de ${mentor.fullName}`
+          }
         >
-          Ver perfil
+          {isOwnProfile ? "Ver mi perfil" : "Ver perfil"}
         </Link>
       </CardFooter>
     </Card>

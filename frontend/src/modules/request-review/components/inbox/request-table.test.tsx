@@ -9,6 +9,7 @@ const item: ReviewListItem = {
   fullName: "Ana Pérez",
   email: "ana@umss.test",
   sisCode: "2018001",
+  career: "Licenciatura en Ingeniería de Sistemas",
   documentType: "academic_diploma",
   submittedAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
   status: "in_review",
@@ -20,16 +21,25 @@ describe("RequestTable", () => {
   it("muestra las columnas del mockup y el botón Revisar con su enlace", () => {
     render(<RequestTable items={[item]} />);
 
-    for (const header of ["Solicitante", "Código SIS", "Documento", "Enviada", "Estado", "Acción"]) {
+    for (const header of ["Solicitante", "Código SIS", "Carrera", "Documento", "Enviada", "Estado", "Acción"]) {
       expect(screen.getByRole("columnheader", { name: header })).toBeInTheDocument();
     }
     expect(screen.getByText("Ana Pérez")).toBeInTheDocument();
     expect(screen.getByText("ana@umss.test")).toBeInTheDocument();
     expect(screen.getByText("2018001")).toBeInTheDocument();
+    expect(screen.getByText("Licenciatura en Ingeniería de Sistemas")).toBeInTheDocument();
     expect(screen.getByText("Diploma académico")).toBeInTheDocument();
     expect(screen.getByText("hace 2 h")).toBeInTheDocument();
     expect(screen.getByText("En revisión")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Revisar" })).toHaveAttribute("href", "/backoffice/solicitudes/id-1");
+  });
+
+  it("coloca la columna Carrera entre Código SIS y Documento", () => {
+    render(<RequestTable items={[item]} />);
+
+    const headers = screen.getAllByRole("columnheader").map((header) => header.textContent);
+    expect(headers.indexOf("Carrera")).toBe(headers.indexOf("Código SIS") + 1);
+    expect(headers.indexOf("Documento")).toBe(headers.indexOf("Carrera") + 1);
   });
 
   it("muestra el estado como texto y tolera un documento ausente o desconocido", () => {
@@ -50,7 +60,9 @@ describe("RequestTable", () => {
 
   it("muestra filas de esqueleto mientras carga", () => {
     render(<RequestTable isLoading />);
-    expect(screen.getAllByTestId("request-skeleton-row")).toHaveLength(5);
+    const rows = screen.getAllByTestId("request-skeleton-row");
+    expect(rows).toHaveLength(5);
+    expect(rows[0].querySelectorAll("td")).toHaveLength(screen.getAllByRole("columnheader").length);
   });
 
   it("sin datos renderiza solo los encabezados", () => {
@@ -70,12 +82,12 @@ describe("RequestTable", () => {
     consoleError.mockRestore();
   });
 
-  it("muestra las iniciales en un círculo decorativo y el estado como pastilla legible por su texto", () => {
+  it("muestra las iniciales en un círculo decorativo y el estado legible por su texto", () => {
     const { container } = render(<RequestTable items={[item, { ...item, id: "2", fullName: "María Quispe Mamani", status: "approved" }]} />);
 
     expect(screen.getByText("AP")).toHaveAttribute("aria-hidden", "true");
     expect(screen.getByText("MQ")).toBeInTheDocument();
-    expect(screen.getByText("En revisión").className).toContain("rounded-full");
+    expect(screen.getByText("En revisión").className).toContain("text-ink-soft");
     expect(screen.getByText("Aprobada")).toBeInTheDocument();
     expect(container.querySelectorAll("svg[aria-hidden='true']").length).toBeGreaterThanOrEqual(4);
     expect(container.innerHTML).not.toMatch(/(green|amber|red|yellow)-\d/);
@@ -86,7 +98,7 @@ describe("RequestTable", () => {
 
     expect(screen.getByRole("link", { name: "Revisar" })).toHaveClass("h-[34px]", "bg-surface", "font-semibold", "border-border");
     expect(screen.getByText("AP")).toHaveClass("bg-surface-soft", "border", "font-bold", "text-ink");
-    expect(screen.getByRole("columnheader", { name: "Solicitante" })).toHaveClass("text-text-secondary", "font-semibold");
-    expect(screen.getByText("En revisión")).toHaveClass("bg-surface-soft", "border-ink");
+    expect(screen.getByRole("columnheader", { name: "Solicitante" })).toHaveClass("text-ink-soft", "font-semibold");
+    expect(screen.getByText("En revisión")).toHaveClass("text-ink-soft");
   });
 });

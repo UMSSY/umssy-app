@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { profileService } from "../services/profile.service";
@@ -55,10 +56,6 @@ describe("PersonalInfoView", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Datos personales y contacto" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Datos personales" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
     expect(await screen.findByLabelText(/Nombres/)).toHaveValue("Valeria");
     expect(screen.getByLabelText(/Teléfono/)).toHaveValue("+591 70000000");
     expect(screen.getByLabelText(/Correo personal/)).toHaveValue("valeria@correo.com");
@@ -152,17 +149,13 @@ describe("PresentationView", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Presentación profesional" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Presentación" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
     expect(await screen.findByLabelText(/Titular profesional/)).toHaveValue(
       "Desarrolladora web junior",
     );
     expect(screen.getByText("Valeria Quispe")).toBeInTheDocument();
   });
 
-  it("saves only the stored fields and shows a confirmation", async () => {
+  it("saves the headline and about me and shows a confirmation", async () => {
     const user = userEvent.setup();
     vi.mocked(profileService.updatePresentation).mockResolvedValue({
       ...SAVED_PROFILE,
@@ -173,7 +166,6 @@ describe("PresentationView", () => {
     const headlineInput = await screen.findByLabelText(/Titular profesional/);
     await user.clear(headlineInput);
     await user.type(headlineInput, "Desarrolladora frontend");
-    await user.type(screen.getByLabelText(/Oportunidades que me interesan/), "Remote work");
     await user.click(screen.getByRole("button", { name: "Guardar presentación" }));
 
     expect(profileService.updatePresentation).toHaveBeenCalledWith({
@@ -181,7 +173,7 @@ describe("PresentationView", () => {
       aboutMe: "Systems engineering graduate from UMSS.",
     });
     expect(await screen.findByText("Tu presentación se guardó correctamente.")).toBeInTheDocument();
-    expect(screen.getByLabelText(/Oportunidades que me interesan/)).toHaveValue("Remote work");
+    expect(screen.queryByLabelText(/Oportunidades que me interesan/)).not.toBeInTheDocument();
   });
 
   it("shows the server field errors in Spanish next to each field", async () => {
