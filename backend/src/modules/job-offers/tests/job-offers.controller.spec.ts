@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { JobOffersController } from '../controllers/job-offers.controller.js';
+import { JobOfferModality } from '../types/job-offer.enum.js';
 import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
 import type { JobOffersService } from '../services/job-offers.service.js';
 
@@ -30,11 +31,19 @@ describe('JobOffersController', () => {
     const { controller, service } = createController();
 
     await controller.listPublished();
-    await controller.listByCompany('company-1');
+    await controller.listByCompany('company-1', {
+      modality: JobOfferModality.REMOTE,
+      sortBy: 'createdAt',
+      order: 'desc',
+    });
     await expect(controller.listSkillCatalog()).resolves.toEqual([{ id: 'skill-1', name: 'Docker' }]);
 
     expect(service.listPublished).toHaveBeenCalledOnce();
-    expect(service.listByCompany).toHaveBeenCalledWith('company-1');
+    expect(service.listByCompany).toHaveBeenCalledWith('company-1', {
+      modality: JobOfferModality.REMOTE,
+      sortBy: 'createdAt',
+      order: 'desc',
+    });
   });
 
   it('rechaza un id de empresa que no es UUID con el formato estándar de validación', async () => {
@@ -42,9 +51,12 @@ describe('JobOffersController', () => {
       '__routeArguments__',
       JobOffersController,
       'listByCompany',
-    ) as Record<string, { pipes: { transform: (value: string, metadata: object) => Promise<string> }[] }>;
-    const [pipe] = Object.values(paramTypes)[0].pipes;
-
+    ) as Record<
+      string,
+      { data?: string; pipes: { transform: (value: string, metadata: object) => Promise<string> }[] }
+    >;
+    const companyIdParam = Object.values(paramTypes).find((param) => param.data === 'companyId');
+    const [pipe] = companyIdParam?.pipes ?? [];
     await expect(pipe.transform('no-es-uuid', { type: 'param', data: 'companyId' })).rejects.toBeInstanceOf(
       RequestValidationException,
     );
