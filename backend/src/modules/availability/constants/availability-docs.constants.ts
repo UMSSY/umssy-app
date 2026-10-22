@@ -10,6 +10,7 @@ export const FIND_MENTOR_FREE_BLOCKS_DOCS = {
   idDescription: 'Identificador (UUID) del mentor',
   fromDescription: FIND_MY_BLOCKS_DOCS.fromDescription,
   toDescription: FIND_MY_BLOCKS_DOCS.toDescription,
+  description: 'Tampoco devuelve los bloques de los días que el mentor bloqueó',
 } as const;
 
 export const DELETE_BLOCK_DOCS = {
