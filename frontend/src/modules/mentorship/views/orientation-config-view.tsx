@@ -92,6 +92,16 @@ export function OrientationConfigView() {
     return () => controller.abort();
   }, [loadAttempt]);
 
+  useEffect(() => {
+    if (!showToast) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setShowToast(false);
+    }, 5000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [showToast]);
+
   const handleCheckboxChange = (id: string) => {
     setErrorMessage(null);
     setShowToast(false);
