@@ -116,6 +116,33 @@ describe("RejectedUsersReportView", () => {
     );
   });
 
+  it("filtra por tipo de usuario, vuelve a la primera página y lo incluye en la exportación", async () => {
+    const user = userEvent.setup();
+    const exportSpy = vi.spyOn(reportsService, "exportRejectedUsersCsv").mockResolvedValueOnce({ file: new Blob([]), fileName: "usuarios-rechazados.csv" });
+    vi.spyOn(downloadFileModule, "downloadFile").mockImplementation(() => undefined);
+    renderWithQuery(<RejectedUsersReportView />);
+    await waitFor(() => {
+      expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Página 2" }));
+    await waitFor(() => {
+      expect(screen.getByText("Mostrando 11-20 de 24 usuarios")).toBeDefined();
+    });
+
+    await user.click(screen.getByRole("combobox", { name: "Tipo de usuario" }));
+    await user.click(await screen.findByRole("option", { name: "Empresa" }));
+
+    await waitFor(() => {
+      expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith(
+        { page: 1, limit: 10, userType: "empresa", search: "" },
+        expect.any(AbortSignal),
+      );
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Exportar CSV" }));
+    expect(exportSpy).toHaveBeenCalledWith({ userType: "empresa", search: "" });
+  });
+
   it("navega a la última página", async () => {
     renderWithQuery(<RejectedUsersReportView />);
     await waitFor(() => {
