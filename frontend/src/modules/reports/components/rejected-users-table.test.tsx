@@ -15,6 +15,7 @@ describe("RejectedUsersTable", () => {
             id: "rejected-1",
             fullName: "Luis Cruz Camacho",
             email: "rechazado.luis.cruz23@hotmail.com",
+            userType: "titulado",
             identifier: "202334283",
             documentType: "academic_diploma",
             rejectionReason: null,
@@ -29,6 +30,8 @@ describe("RejectedUsersTable", () => {
     const container = screen.getByRole("table").closest('[data-slot="table-container"]')?.parentElement;
 
     expect(screen.getAllByRole("row")).toHaveLength(2);
+    expect(screen.getByRole("columnheader", { name: "Tipo de Usuario" })).toBeDefined();
+    expect(screen.getByRole("cell", { name: "Titulado" })).toBeDefined();
     expect(container).toHaveClass("min-h-151");
     expect(container).toHaveClass("@container");
   });

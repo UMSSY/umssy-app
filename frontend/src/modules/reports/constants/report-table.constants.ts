@@ -5,7 +5,7 @@ export const TABLE_SKELETON_ROWS = 10;
 export const TABLE_STATE_CONTENT_CLASSES = "sticky left-0 w-[100cqw] whitespace-normal px-6";
 
 export const REGISTERED_USERS_COLUMN_COUNT = 6;
-export const REJECTED_USERS_COLUMN_COUNT = 5;
+export const REJECTED_USERS_COLUMN_COUNT = 6;
 export const REPORT_HISTORY_COLUMN_COUNT = 3;
 
 export const USERS_TABLE_HEAD_CLASSES = "h-auto px-6 py-3 text-[11.5px] font-semibold text-ink";
