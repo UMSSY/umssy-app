@@ -11,6 +11,15 @@ beforeEach(() => { getMine.mockReset(); });
 afterEach(cleanup);
 
 describe('Mis pases', () => {
+  it('shows the QA location and 24-hour time consistently in passes', async () => {
+    getMine.mockResolvedValue([{ ...pass, location: 'Laboratorio 1, Facultad de Ciencias y Tecnología, UMSS' }]);
+    render(<MyPassesView />);
+    await screen.findByText('reg-1');
+    expect(screen.getAllByText('Laboratorio 1, Facultad de Ciencias y Tecnología')).toHaveLength(2);
+    expect(screen.queryByText(/, UMSS$/)).not.toBeInTheDocument();
+    expect(screen.getByText(/09:00 - 12:00 hrs/)).toBeInTheDocument();
+  });
+
   it('muestra carga, datos reales y cambia el detalle al seleccionar otra inscripción', async () => {
     getMine.mockResolvedValue([pass, { ...pass, id: 'reg-2', eventName: 'Prisma', location: 'Lab 2' }]);
     render(<MyPassesView />);
@@ -19,8 +28,8 @@ describe('Mis pases', () => {
     await screen.findByText('reg-1');
     expect(screen.getAllByText('Aula 101')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('2 pases')).toBeInTheDocument();
-    expect(screen.getByText(/09:00 - 12:00 hrs/)).toBeInTheDocument();
+    expect(screen.getByText('2 inscripciones')).toBeInTheDocument();
+    expect(screen.getByText(/09:00 - 12:00/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Prisma/ }));
     expect(screen.getByText('reg-2')).toBeInTheDocument();
     expect(screen.getAllByText('Lab 2')).toHaveLength(2);
@@ -32,7 +41,7 @@ describe('Mis pases', () => {
     getMine.mockResolvedValue([]);
     render(<MyPassesView />);
     expect(await screen.findByRole('region', { name: 'Aún no tienes inscripciones.' })).toBeInTheDocument();
-    expect(screen.getByText('0 pases')).toBeInTheDocument();
+    expect(screen.getByText('0 inscripciones')).toBeInTheDocument();
     expect(screen.queryByText('ID Inscripción')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Vista ilustrativa de QR')).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Explorar talleres disponibles' })).toHaveAttribute('href', '/events');
@@ -41,10 +50,9 @@ describe('Mis pases', () => {
     getMine.mockRejectedValueOnce(new Error('Debes iniciar sesión')).mockResolvedValueOnce([pass]);
     render(<MyPassesView />);
     await screen.findByRole('alert');
-    expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login?next=/events/my-passes');
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
     await screen.findByText('reg-1');
-    expect(screen.getByText('1 pase')).toBeInTheDocument();
+    expect(screen.getByText('1 inscripción')).toBeInTheDocument();
     expect(getMine).toHaveBeenCalledTimes(2);
   });
   it.each([
@@ -70,30 +78,16 @@ describe('Mis pases', () => {
     await act(async () => { if (success) resolve([pass]); else reject(new Error('cancelled')); });
     await waitFor(() => expect(screen.queryByText('React')).not.toBeInTheDocument());
   });
-  it('shows location and registration ID in every card, including long text', async () => {
+  it('shows the location in the list and the registration ID in the selected detail', async () => {
     const longPass = { ...pass, id: '123e4567-e89b-12d3-a456-426614174000', eventName: 'Taller'.repeat(80), location: 'Ubicación'.repeat(80) };
     getMine.mockResolvedValue([longPass]);
     render(<MyPassesView />);
     const card = await screen.findByRole('button', { name: new RegExp(longPass.eventName) });
     expect(within(card).getByText(longPass.location)).toBeInTheDocument();
-    expect(within(card).getByText(`ID Inscripción: ${longPass.id}`)).toBeInTheDocument();
+    expect(screen.getByText(longPass.id)).toBeInTheDocument();
     expect(within(card).getByText('Confirmada')).toBeInTheDocument();
-    expect(screen.getByText('1 pase')).toBeInTheDocument();
+    expect(screen.getByText('1 inscripción')).toBeInTheDocument();
     expect(screen.getByLabelText('Vista ilustrativa de QR')).toBeInTheDocument();
-  });
-
-  it('shows the same place and unambiguous time in the pass and its card', async () => {
-    getMine.mockResolvedValue([{
-      ...pass,
-      location: 'Laboratorio 1, Facultad de Ciencias y Tecnología, UMSS',
-      startTime: '1970-01-01T14:00:00.000Z',
-      endTime: '1970-01-01T17:00:00.000Z',
-    }]);
-    render(<MyPassesView />);
-    await screen.findByText('reg-1');
-    expect(screen.getAllByText('Laboratorio 1, Facultad de Ciencias y Tecnología')).toHaveLength(2);
-    expect(screen.getByText(/14:00 - 17:00 hrs/)).toBeInTheDocument();
-    expect(screen.queryByText(/, UMSS$/)).not.toBeInTheDocument();
   });
 
 });

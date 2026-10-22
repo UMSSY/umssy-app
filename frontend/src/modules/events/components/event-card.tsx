@@ -11,15 +11,16 @@ import {
   formatTimeRange,
 } from '../utils/event-card';
 import type { EventCardProps } from '../types/event.types';
+import { WorkshopCover } from './workshop-cover';
 
 const categoryBadge = cva('rounded-full px-3 py-1 text-xs font-semibold', {
   variants: {
     category: {
-      tecnologia: 'bg-surface-soft text-ink',
-      'ia & datos': 'bg-surface-soft text-ink-soft',
-      diseno: 'bg-surface-soft text-ink',
-      seguridad: 'bg-surface-soft text-ink-soft',
-      other: 'bg-surface-soft text-ink',
+      tecnologia: 'bg-availability text-availability-foreground',
+      'ia & datos': 'bg-brand-soft text-ink',
+      diseno: 'bg-notice text-notice-foreground',
+      seguridad: 'bg-accent text-surface',
+      other: 'bg-interaction text-accent',
     },
   },
   defaultVariants: { category: 'other' },
@@ -77,6 +78,7 @@ export function EventCard({
             : 'border-border hover:border-border-strong',
         )}
       >
+        <WorkshopCover eventId={event.id} className="-mx-5 -mt-5 shrink-0 rounded-t-lg" />
         <div className="flex items-center justify-between gap-2">
           <span className={cn(categoryBadge({ category }))}>
             {categoryName}
@@ -93,17 +95,18 @@ export function EventCard({
         </div>
 
         <div className="flex flex-col gap-2.5">
+          {isSelected ? <span aria-hidden="true" className="h-0.5 w-8 rounded-full bg-brand-red" /> : null}
           <h2 className="text-base leading-snug font-bold text-ink">
             {event.title}
           </h2>
 
           <div className="flex flex-col gap-1.5 text-xs text-text-secondary">
             <div className="flex items-center gap-2">
-              <Calendar className="size-3.5 shrink-0" aria-hidden="true" />
+              <Calendar className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
               <span>{formatEventDate(event.eventDate)}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Clock className="size-3.5 shrink-0" aria-hidden="true" />
+              <Clock className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
               <span>{formatTimeRange(event.startTime, event.endTime)}</span>
             </div>
           </div>
@@ -127,7 +130,7 @@ export function EventCard({
                 data-testid="event-capacity-bar"
                 className={cn(
                   'h-full rounded-full transition-all',
-                  isFull ? 'bg-ink' : 'bg-ink-soft',
+                  'bg-progress',
                 )}
                 style={{ width: `${progressPercentage}%` }}
               />

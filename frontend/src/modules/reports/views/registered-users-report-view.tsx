@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import {
@@ -84,13 +85,14 @@ export function RegisteredUsersReportView() {
   };
 
   return (
-    <WorkspacePage title="Usuarios aceptados">
+    <WorkspacePage title="Usuarios aceptados" description="Consulta usuarios y exporta los resultados con los filtros actuales.">
 
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
+      <div role="search" aria-label="Filtros de usuarios aceptados" className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <UserTypeFilter value={userType} onChange={handleUserTypeChange} />
           <EmailSearchInput value={searchInput} onChange={handleSearchChange} />
         </div>
+        {userType || period || searchInput ? <Button variant="brand" onClick={() => { setUserType(undefined); setPeriod(undefined); setSearchInput(""); setCurrentPage(1); }}>Limpiar filtros</Button> : null}
         <ReportActions onExport={exportCsv} isExporting={isExporting} period={period} onPeriodChange={handlePeriodChange} />
       </div>
 
