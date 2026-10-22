@@ -1,3 +1,4 @@
+import { formatEventLocation } from '../utils/format-event-location';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Check } from 'lucide-react';
@@ -20,24 +21,24 @@ export function PassCard({
         type="button"
         aria-pressed={Boolean(isSelected)}
         onClick={onClick}
-        className={`h-auto items-stretch whitespace-normal w-full min-w-0 text-left p-5 rounded-lg transition-all flex flex-col gap-4 ${
+        className={`flex h-auto w-full min-w-0 flex-col items-stretch gap-4 rounded-lg p-5 text-left whitespace-normal transition-all ${
           isSelected
             ? 'bg-ink text-surface hover:bg-ink-soft'
-            : 'bg-surface text-ink border border-border hover:border-border-strong'
+            : 'border border-border bg-surface text-ink hover:border-border-strong'
         }`}
       >
         <div
-          className={`text-xs font-semibold px-2.5 py-1 rounded-md w-fit flex items-center gap-1.5 ${
+          className={`flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ${
             isSelected
               ? 'text-surface/85'
               : 'text-text-secondary'
           }`}
         >
-          <Check className="w-3 h-3" /> {status}
+          <Check className="size-3" /> {status}
         </div>
 
         <div>
-          <h3 className="font-bold text-[17px] leading-tight mb-1 break-words [overflow-wrap:anywhere]">
+          <h3 className="mb-1 text-[17px] leading-tight font-bold [overflow-wrap:anywhere] break-words">
             {title}
           </h3>
           <div
@@ -45,11 +46,11 @@ export function PassCard({
               isSelected ? 'text-surface-soft/80' : 'text-text-secondary'
             }`}
           >
-            <Calendar className="w-4 h-4 opacity-70" />
+            <Calendar className="size-4 opacity-70" />
             <span className="min-w-0 break-words">{date}</span>
           </div>
-          <p className="mt-2 text-sm break-words [overflow-wrap:anywhere]">
-            {location}
+          <p className="mt-2 text-sm [overflow-wrap:anywhere] break-words">
+            {formatEventLocation(location)}
           </p>
           <p className="mt-2 text-xs break-all">
             ID Inscripción: {registrationId}
