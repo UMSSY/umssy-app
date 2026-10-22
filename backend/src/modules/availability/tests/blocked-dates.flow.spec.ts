@@ -458,7 +458,7 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
     expect(store.blockedDates).toHaveLength(1);
   });
 
-  it('bloquear la misma fecha varias veces, incluso en paralelo, deja un solo registro', async () => {
+  it('bloquear la misma fecha varias veces en paralelo (serializado por el lock del día) deja un solo registro', async () => {
     const day = futureDayWithoutBlocks();
 
     const responses = await Promise.all(
