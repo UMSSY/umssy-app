@@ -83,12 +83,15 @@ export class BlockedDatesService {
     return new Set(blockedDates.map((blockedDate) => toDayString(blockedDate.blockedOn)));
   }
 
-  withDayLock<T>(
+  runOnUnblockedDay<T>(
     mentorId: string,
-    day: string,
+    startAt: Date,
     work: (tx: TransactionClient) => Promise<T>,
   ): Promise<T> {
-    return this.inDayLock(mentorId, day, work);
+    return this.inDayLock(mentorId, toBoliviaTime(startAt).date, async (tx) => {
+      await this.assertDayNotBlocked(mentorId, startAt, tx);
+      return work(tx);
+    });
   }
 
   async assertDayNotBlocked(

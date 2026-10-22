@@ -74,17 +74,12 @@ export class AvailabilityService {
     }
 
     try {
-      const updated = await this.blockedDatesService.withDayLock(
-        mentorId,
-        toBoliviaTime(payload.startAt).date,
-        async (tx) => {
-          await this.blockedDatesService.assertDayNotBlocked(mentorId, payload.startAt, tx);
-          return this.availabilityRepository.update(
-            blockId,
-            { startAt: payload.startAt, endAt: payload.endAt },
-            tx,
-          );
-        },
+      const updated = await this.blockedDatesService.runOnUnblockedDay(mentorId, payload.startAt, (tx) =>
+        this.availabilityRepository.update(
+          blockId,
+          { startAt: payload.startAt, endAt: payload.endAt },
+          tx,
+        ),
       );
       return this.availabilityMapper.toResponse(updated);
     } catch (error) {
@@ -97,13 +92,8 @@ export class AvailabilityService {
 
   async create(mentorId: string, payload: CreateBlockDto): Promise<AvailabilityBlockResponse> {
     try {
-      const block = await this.blockedDatesService.withDayLock(
-        mentorId,
-        toBoliviaTime(payload.startAt).date,
-        async (tx) => {
-          await this.blockedDatesService.assertDayNotBlocked(mentorId, payload.startAt, tx);
-          return this.availabilityRepository.create(mentorId, payload.startAt, payload.endAt, tx);
-        },
+      const block = await this.blockedDatesService.runOnUnblockedDay(mentorId, payload.startAt, (tx) =>
+        this.availabilityRepository.create(mentorId, payload.startAt, payload.endAt, tx),
       );
       return this.availabilityMapper.toResponse({ ...block, appointments: [] });
     } catch (error) {
