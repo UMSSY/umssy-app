@@ -11,7 +11,9 @@ export { REPORTS_NAVIGATION_ITEM } from "./constants/reports-navigation.constant
 export { reportsService } from "./services/reports.service";
 export { EmailSearchInput } from "./components/email-search-input";
 export { ReportFilterSelect } from "./components/report-filter-select";
+export { RefreshButton } from "./components/refresh-button";
 export { ReportTableFooter } from "./components/report-table-footer";
+export { TablePagination } from "./components/table-pagination";
 export { TableMessageRow, TableNoResultsRow, TableSkeletonRows } from "./components/table-state-rows";
 export { getAcademicPeriods } from "./utils/academic-periods";
 export { SEARCH_DEBOUNCE_MS } from "./constants/reports.constants";

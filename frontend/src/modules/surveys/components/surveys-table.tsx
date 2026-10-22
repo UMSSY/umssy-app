@@ -1,8 +1,5 @@
-import Link from "next/link";
 import { cn } from "cn";
-import { Eye } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   TABLE_CELL_CLASSES as CELL_CLASSES,
@@ -15,37 +12,18 @@ import {
 import { formatDateTime } from "@/shared/utils/date.utils";
 import { getInitials } from "@/shared/utils/get-initials";
 import {
-  STATISTICS_AVAILABLE_STATUSES,
-  STATISTICS_UNAVAILABLE_LABEL,
-  SURVEY_STATISTICS_BASE_PATH,
+  NO_PERIOD_LABEL,
   SURVEYS_COLUMN_COUNT as COLUMN_COUNT,
   SURVEYS_EMPTY_MESSAGE,
   SURVEYS_SEARCH_NO_RESULTS_MESSAGE,
 } from "../constants/surveys.constants";
-import type { SurveyListItem } from "../types/survey.types";
 import type { SurveysTableProps } from "../types/surveys-table-props.types";
-import { SurveyStatusBadge } from "./survey-status-badge";
+import { SurveyRowActions } from "./survey-row-actions";
+import { SurveyStatusCell } from "./survey-status-cell";
 
-function renderStatisticsAction(survey: SurveyListItem) {
-  if (!STATISTICS_AVAILABLE_STATUSES.includes(survey.status)) {
-    return <span className="text-sm text-text-secondary">{STATISTICS_UNAVAILABLE_LABEL}</span>;
-  }
-
-  return (
-    <Link
-      href={`${SURVEY_STATISTICS_BASE_PATH}/${survey.id}`}
-      aria-label={`Ver estadísticas de ${survey.title}`}
-      title="Ver estadísticas"
-      className={cn(buttonVariants({ variant: "outline", size: "icon" }), "size-9 rounded-md border-border text-ink-soft hover:text-ink")}
-    >
-      <Eye className="size-4" aria-hidden="true" />
-    </Link>
-  );
-}
-
-export function SurveysTable({ surveys, isLoading, errorMessage, searchTerm = "" }: SurveysTableProps) {
+export function SurveysTable({ surveys, isLoading, errorMessage, searchTerm = "", pendingChange, onToggleStatus }: SurveysTableProps) {
   const renderBody = () => {
-    if (isLoading) {
+    if (isLoading && surveys.length === 0) {
       return <TableSkeletonRows columnCount={COLUMN_COUNT} />;
     }
 
@@ -77,12 +55,18 @@ export function SurveysTable({ surveys, isLoading, errorMessage, searchTerm = ""
             </span>
           </span>
         </TableCell>
-        <TableCell className={cn(CELL_CLASSES, "tabular-nums")}>{survey.period}</TableCell>
+        <TableCell className={cn(CELL_CLASSES, "tabular-nums")}>{survey.period ?? NO_PERIOD_LABEL}</TableCell>
         <TableCell className={cn(CELL_CLASSES, "tabular-nums")}>{formatDateTime(survey.createdAt)}</TableCell>
         <TableCell className={CELL_CLASSES}>
-          <SurveyStatusBadge status={survey.status} />
+          <SurveyStatusCell
+            survey={survey}
+            pendingStatus={pendingChange?.id === survey.id ? pendingChange.status : undefined}
+            onToggle={onToggleStatus}
+          />
         </TableCell>
-        <TableCell className={CELL_CLASSES}>{renderStatisticsAction(survey)}</TableCell>
+        <TableCell className={CELL_CLASSES}>
+          <SurveyRowActions survey={survey} />
+        </TableCell>
       </TableRow>
     ));
   };
@@ -92,12 +76,12 @@ export function SurveysTable({ surveys, isLoading, errorMessage, searchTerm = ""
       <Table className="min-w-225 text-left text-base">
         <TableHeader className="bg-surface-soft">
           <TableRow className="border-border hover:bg-transparent">
-            <TableHead scope="col" className={HEAD_CLASSES}>Título de la encuesta</TableHead>
-            <TableHead scope="col" className={HEAD_CLASSES}>Administrador creador</TableHead>
+            <TableHead scope="col" className={HEAD_CLASSES}>Título de Encuesta</TableHead>
+            <TableHead scope="col" className={HEAD_CLASSES}>Administrador Creador</TableHead>
             <TableHead scope="col" className={HEAD_CLASSES}>Gestión</TableHead>
-            <TableHead scope="col" className={HEAD_CLASSES}>Fecha de creación</TableHead>
+            <TableHead scope="col" className={HEAD_CLASSES}>Fecha de Creación</TableHead>
             <TableHead scope="col" className={HEAD_CLASSES}>Estado</TableHead>
-            <TableHead scope="col" className={HEAD_CLASSES}>Estadísticas</TableHead>
+            <TableHead scope="col" className={HEAD_CLASSES}>Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody aria-busy={isLoading}>{renderBody()}</TableBody>

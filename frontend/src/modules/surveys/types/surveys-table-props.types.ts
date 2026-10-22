@@ -1,3 +1,4 @@
+import type { SurveyStatusChange } from "./survey-status-change.types";
 import type { SurveyListItem } from "./survey.types";
 
 export interface SurveysTableProps {
@@ -5,4 +6,6 @@ export interface SurveysTableProps {
   isLoading: boolean;
   errorMessage?: string;
   searchTerm?: string;
+  pendingChange?: SurveyStatusChange;
+  onToggleStatus: (change: SurveyStatusChange) => void;
 }

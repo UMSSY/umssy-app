@@ -25,7 +25,7 @@ export function isSurveyActive(status: SurveyStatus): boolean {
   return status === "PUBLISHED";
 }
 
-export function getToggledSurveyStatus(status: SurveyStatus): SurveyStatus | null {
+export function getToggledSurveyStatus(status: SurveyStatus): Exclude<SurveyStatus, "DRAFT"> | null {
   if (status === "PUBLISHED") return "CLOSED";
   if (status === "CLOSED") return "PUBLISHED";
   return null;
