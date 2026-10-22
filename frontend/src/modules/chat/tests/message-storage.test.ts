@@ -1,15 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   CHAT_MESSAGES_STORAGE_KEY,
+  CHAT_READ_STATUS_STORAGE_KEY,
   getStoredMessages,
   getMessagesByConversation,
   saveStoredMessage,
   updateStoredMessageStatus,
   rehydrateStoredMessages,
   clearStoredMessages,
+  getStoredConversationReadState,
+  setStoredConversationUnreadCount,
+  markStoredConversationAsRead,
+  clearStoredConversationReadState,
 } from '../services/message-storage';
 import { Message } from '../types/conversation.types';
-import { MOCK_MESSAGES } from '../mocks/mock-messages';
 
 describe('message-storage (Persistencia Local - HU-03 Tarea 1)', () => {
   beforeEach(() => {
@@ -37,16 +41,16 @@ describe('message-storage (Persistencia Local - HU-03 Tarea 1)', () => {
     expect(typeof testMessage.createdAt).toBe('string');
   });
 
-  it('debe inicializar el almacenamiento con los datos mock base si localStorage esta vacio', () => {
+  it('debe inicializar el almacenamiento con una lista vacía si localStorage esta vacio', () => {
     window.localStorage.clear();
 
     const messages = getStoredMessages();
 
-    expect(messages.length).toBe(MOCK_MESSAGES.length);
+    expect(messages.length).toBe(0);
     const serialized = window.localStorage.getItem(CHAT_MESSAGES_STORAGE_KEY);
     expect(serialized).not.toBeNull();
     const parsed = JSON.parse(serialized as string);
-    expect(parsed.length).toBe(MOCK_MESSAGES.length);
+    expect(parsed.length).toBe(0);
   });
 
   it('debe guardar mensajes de forma serializada en localStorage', () => {
@@ -171,11 +175,11 @@ describe('message-storage (Persistencia Local - HU-03 Tarea 1)', () => {
     expect(result).toBeNull();
   });
 
-  it('debe manejar de forma resiliente datos corruptos en localStorage reinicializando con mocks', () => {
+  it('debe manejar de forma resiliente datos corruptos en localStorage reinicializando sin mensajes ficticios', () => {
     window.localStorage.setItem(CHAT_MESSAGES_STORAGE_KEY, 'invalid-json-data');
 
     const messages = getStoredMessages();
-    expect(messages.length).toBe(MOCK_MESSAGES.length);
+    expect(messages.length).toBe(0);
   });
 
   it('debe operar con memoria cache en caso de que localStorage no este disponible', () => {
@@ -184,9 +188,36 @@ describe('message-storage (Persistencia Local - HU-03 Tarea 1)', () => {
       throw new Error('SecurityError: LocalStorage is blocked');
     });
 
+    const stored: Message = { id: 'offline', conversationId: 'c1', senderId: 'u1', content: 'Mensaje real almacenado', timestamp: '2026-10-20T12:00:00Z', createdAt: '2026-10-20T12:00:00Z', status: 'sent' };
+    saveStoredMessage(stored);
     const messages = getStoredMessages();
-    expect(messages.length).toBeGreaterThan(0);
+    expect(messages).toEqual([stored]);
 
     window.localStorage.getItem = originalGetItem;
+  });
+
+  it('debe persistir el estado leido de una conversacion en localStorage y recuperarlo', () => {
+    markStoredConversationAsRead('conv-test-1');
+
+    const state = getStoredConversationReadState();
+    expect(state['conv-test-1']).toBe(0);
+
+    const serialized = window.localStorage.getItem(CHAT_READ_STATUS_STORAGE_KEY);
+    expect(serialized).not.toBeNull();
+    expect(JSON.parse(serialized as string)['conv-test-1']).toBe(0);
+  });
+
+  it('debe actualizar el contador de no leidos y restablecerse al limpiar almacenamiento', () => {
+    setStoredConversationUnreadCount('conv-test-2', 5);
+    expect(getStoredConversationReadState()['conv-test-2']).toBe(5);
+
+    clearStoredConversationReadState();
+    expect(getStoredConversationReadState()['conv-test-2']).toBeUndefined();
+    expect(window.localStorage.getItem(CHAT_READ_STATUS_STORAGE_KEY)).toBeNull();
+  });
+
+  it('debe manejar datos corruptos en CHAT_READ_STATUS_STORAGE_KEY de forma resiliente', () => {
+    window.localStorage.setItem(CHAT_READ_STATUS_STORAGE_KEY, '{invalid json');
+    expect(getStoredConversationReadState()).toEqual({});
   });
 });

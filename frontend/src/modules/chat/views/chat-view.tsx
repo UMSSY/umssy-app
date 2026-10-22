@@ -1,3 +1,6 @@
+"use client";
+
+﻿
 'use client';
 
 import { useState } from 'react';
@@ -10,15 +13,22 @@ import { ConversationList } from '../components/conversation-list';
 import { EmptyChatState } from '../components/empty-chat-state';
 import { ContactSearchModal } from '../components/contact-search-modal';
 import { ChatRoom } from '../components/chat-room';
+import { ChatConnectionDialog } from '../components/chat-connection-dialog';
 
-import { Conversation } from '../types/conversation.types';
-import { User } from '../types/user.types';
-import { sendMessage } from '../services/chat-api';
-import { CURRENT_USER_ID } from '../mocks/mock-users';
+import type { Conversation } from '../types/conversation.types';
+import type { User } from '../types/user.types';
+
+import {
+  sendMessage,
+  getCurrentSessionUserId,
+} from '../services/chat-api';
 
 export function ChatView() {
+  const currentUserId = getCurrentSessionUserId();
+
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [dismissedError, setDismissedError] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -31,20 +41,28 @@ export function ChatView() {
     activeFilter,
     searchQuery,
     isLoading,
+    isError,
+    retryConversations,
     setActiveFilter,
     setSearchQuery,
     handleSelectConversation,
     clearSelectedConversation,
     startConversationWithContact,
+    updateConversationLastMessage,
   } = useConversations();
 
   const {
-  data: messages = [],
-  isLoading: isLoadingMessages,
-  hasMoreMessages,
-  loadMoreMessages,
-  isLoadingMoreMessages,
-} = useMessages(selectedId);
+    data: messages = [],
+    isLoading: isLoadingMessages,
+    hasMoreMessages,
+    loadMoreMessages,
+    isLoadingMoreMessages,
+    isError: isMessagesError,
+    isFetchNextPageError,
+    refetch: retryMessages,
+  } = useMessages(selectedId);
+
+  const showConnectionDialog = isError && !dismissedError;
 
   const handleBackToList = () => {
     clearSelectedConversation();
@@ -58,6 +76,7 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     setIsSearchModalOpen(true);
   };
 
@@ -65,34 +84,58 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     await startConversationWithContact(contactUser);
     setIsSearchModalOpen(false);
   };
 
-  const handleSendMessage = async (content: string) => {
-    if (!selectedId || isSending) return;
+  const handleSendMessage = async (content: string): Promise<void> => {
+    if (!selectedId || isSending) {
+      throw new Error(
+        'No hay una conversaciÃ³n seleccionada o ya se estÃ¡ enviando un mensaje.',
+      );
+    }
+
+    const conversationId = selectedId;
 
     setIsSending(true);
+
     try {
       await sendMessage({
-        conversationId: selectedId,
+        conversationId,
         content,
-        senderId: CURRENT_USER_ID,
+        senderId: currentUserId,
       });
 
+      updateConversationLastMessage(
+        conversationId,
+        content,
+        currentUserId,
+      );
+
       await queryClient.invalidateQueries({
-        queryKey: messagesQueryKey(selectedId),
+        queryKey: messagesQueryKey(conversationId),
       });
-    } catch {
     } finally {
       setIsSending(false);
     }
   };
 
+  const handleRetryConversations = async () => {
+    setDismissedError(true);
+
+    try {
+      await retryConversations();
+    } catch {
+    } finally {
+      setDismissedError(false);
+    }
+  };
+
   return (
-    <div className="flex h-screen h-[100dvh] w-full max-w-full bg-slate-50 overflow-hidden font-sans">
+    <div className="flex h-full min-h-0 w-full max-w-full flex-1 overflow-hidden bg-surface-soft font-sans">
       <aside
-        className={`w-full md:w-80 lg:w-96 h-full shrink-0 overflow-hidden ${
+        className={`h-full w-full shrink-0 overflow-hidden md:w-80 lg:w-[340px] ${
           selectedId ? 'hidden md:block' : 'block'
         }`}
       >
@@ -100,6 +143,7 @@ export function ChatView() {
           conversations={conversations}
           selectedId={selectedId}
           isLoading={isLoading}
+          isError={isError}
           hasMore={hasMore}
           activeFilter={activeFilter}
           searchQuery={searchQuery}
@@ -112,15 +156,16 @@ export function ChatView() {
       </aside>
 
       <main
-        className={`flex-1 h-full min-w-0 min-h-0 bg-white flex flex-col overflow-hidden ${
+        className={`flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white ${
           !selectedId ? 'hidden md:flex' : 'flex'
         }`}
       >
         {selectedConversation ? (
           <ChatRoom
+            key={selectedConversation.id}
             conversation={selectedConversation}
             messages={messages}
-            currentUserId={CURRENT_USER_ID}
+            currentUserId={currentUserId}
             onBack={handleBackToList}
             onSendMessage={handleSendMessage}
             isLoadingMessages={isLoadingMessages}
@@ -128,6 +173,11 @@ export function ChatView() {
             hasMoreMessages={hasMoreMessages}
             onLoadMoreMessages={loadMoreMessages}
             isLoadingMoreMessages={isLoadingMoreMessages}
+            isMessagesError={isMessagesError}
+            isLoadingOlderError={isFetchNextPageError}
+            onRetryMessages={() => {
+              void retryMessages();
+            }}
           />
         ) : (
           <EmptyChatState
@@ -138,6 +188,14 @@ export function ChatView() {
         )}
       </main>
 
+      <ChatConnectionDialog
+        open={showConnectionDialog}
+        onClose={() => setDismissedError(true)}
+        onRetry={() => {
+          void handleRetryConversations();
+        }}
+      />
+
       <ContactSearchModal
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
@@ -146,3 +204,4 @@ export function ChatView() {
     </div>
   );
 }
+

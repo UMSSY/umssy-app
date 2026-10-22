@@ -4,9 +4,8 @@ import { useState } from "react";
 import { EducationDeleteDialog } from "../components/education-delete-dialog";
 import { EducationForm } from "../components/education-form";
 import { EducationListCard } from "../components/education-list-card";
-import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
-import { ProfilePageLayout } from "@/modules/profile/components/profile-page-layout";
-import { TrajectorySteps } from "@/modules/profile/components/trajectory-steps";
+import { FeedbackMessage } from "@/modules/profile";
+import { ProfilePageLayout } from "@/modules/profile";
 import { EDUCATION_UI_TEXTS } from "../constants/education-ui.constants";
 import { useDeleteEducation } from "../hooks/use-delete-education";
 import { useEducations } from "../hooks/use-educations";
@@ -22,7 +21,6 @@ export function EducationView() {
   const [editingEducation, setEditingEducation] = useState<EducationItem | null>(null);
   const [pendingDelete, setPendingDelete] = useState<EducationItem | null>(null);
   const [formVersion, setFormVersion] = useState(0);
-  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const resetForm = () => {
     setEditingEducation(null);
@@ -38,19 +36,10 @@ export function EducationView() {
 
   const isBusy = saveMutation.isSaving || deleteMutation.isDeleting || pendingDelete !== null;
 
-  const handleAdd = () => {
-    if (isBusy) return;
-    saveMutation.clearFeedback();
-    deleteMutation.clearFeedback();
-    resetForm();
-    setIsFormOpen(true);
-  };
-
   const handleCancel = () => {
     if (isBusy) return;
     saveMutation.clearFeedback();
     resetForm();
-    setIsFormOpen(false);
   };
 
   const handleEdit = (education: EducationItem) => {
@@ -59,7 +48,6 @@ export function EducationView() {
     deleteMutation.clearFeedback();
     setEditingEducation(education);
     setFormVersion((version) => version + 1);
-    setIsFormOpen(true);
   };
 
   const handleDelete = (education: EducationItem) => {
@@ -93,33 +81,28 @@ export function EducationView() {
 
   return (
     <ProfilePageLayout
-      activeTab="trajectory"
       title={EDUCATION_UI_TEXTS.pageTitle}
       description={EDUCATION_UI_TEXTS.pageDescription}
     >
-      <TrajectorySteps activeStep="education" />
       <FeedbackMessage feedback={pendingDelete ? null : deleteMutation.feedback} />
-      <div className={`grid grid-cols-1 items-start gap-6 ${isFormOpen ? "lg:grid-cols-2" : ""}`}>
+      <div className="grid grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.3fr)]">
         <EducationListCard
           educations={educations}
           isLoading={isLoading}
           error={error}
           isBusy={isBusy}
-          onAdd={handleAdd}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
-        {isFormOpen ? (
-          <EducationForm
-            key={`${editingEducation?.id ?? "new"}-${formVersion}`}
-            initialValues={editingEducation ? toEducationFormValues(editingEducation) : undefined}
-            allowMissingEndDate={editingEducation?.endDate === null}
-            isPending={saveMutation.isSaving}
-            feedback={saveMutation.feedback}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-          />
-        ) : null}
+        <EducationForm
+          key={`${editingEducation?.id ?? "new"}-${formVersion}`}
+          initialValues={editingEducation ? toEducationFormValues(editingEducation) : undefined}
+          allowMissingEndDate={editingEducation?.endDate === null}
+          isPending={saveMutation.isSaving}
+          feedback={saveMutation.feedback}
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+        />
       </div>
       <EducationDeleteDialog
         isOpen={pendingDelete !== null}

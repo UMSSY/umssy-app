@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import { requestReviewService } from "../../services/request-review.service";
@@ -9,6 +10,14 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/backoffice/solicitudes",
   useRouter: () => ({ replace }),
 }));
+
+vi.mock("../../hooks/use-backoffice-user", async () => {
+  const { useAuth } = await import("@/shared/contexts/auth-context");
+  const { getRolesLabel } = await import("@/modules/auth");
+  return {
+    useBackofficeUser: () => ({ fullName: "Personal administrativo", role: getRolesLabel(useAuth().roles) }),
+  };
+});
 
 const tokenFor = (roleTag: string) => `h.${btoa(JSON.stringify({ sub: "u1", roleTag }))}.s`;
 
@@ -25,7 +34,7 @@ describe("BackofficeShell", () => {
 
   it("un administrativo ve el layout con la opción Solicitudes y su contenido", () => {
     sessionStorage.setItem("accessToken", tokenFor("administrativo"));
-    render(
+    renderWithQuery(
       <BackofficeShell>
         <p>Contenido del backoffice</p>
       </BackofficeShell>,
@@ -38,7 +47,7 @@ describe("BackofficeShell", () => {
   });
 
   it("sin token redirige al login y no muestra el contenido", async () => {
-    render(
+    renderWithQuery(
       <BackofficeShell>
         <p>Contenido del backoffice</p>
       </BackofficeShell>,
@@ -50,7 +59,7 @@ describe("BackofficeShell", () => {
 
   it.each(["titulado", "estudiante", "mentor", "empresa"])("el rol %s es redirigido al inicio", async (role) => {
     sessionStorage.setItem("accessToken", tokenFor(role));
-    render(
+    renderWithQuery(
       <BackofficeShell>
         <p>Contenido del backoffice</p>
       </BackofficeShell>,
@@ -62,7 +71,7 @@ describe("BackofficeShell", () => {
 
   it("Cerrar sesión borra el token y va al login", () => {
     sessionStorage.setItem("accessToken", tokenFor("administrativo"));
-    render(
+    renderWithQuery(
       <BackofficeShell>
         <p>Contenido</p>
       </BackofficeShell>,
@@ -81,7 +90,7 @@ describe("BackofficeShell", () => {
     it("muestra la insignia de pendientes con el total que devuelve el listado (limit=1)", async () => {
       sessionStorage.setItem("accessToken", tokenFor("administrativo"));
       listRequests.mockResolvedValue({ ok: true, data: { items: [], total: 18, page: 1, offset: 0 } });
-      render(
+      renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>
         </BackofficeShell>,
@@ -94,7 +103,7 @@ describe("BackofficeShell", () => {
     it("si el conteo falla no hay insignia ni error", async () => {
       sessionStorage.setItem("accessToken", tokenFor("administrativo"));
       listRequests.mockResolvedValue({ ok: false, status: 0, message: "sin red" });
-      render(
+      renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>
         </BackofficeShell>,
@@ -106,7 +115,7 @@ describe("BackofficeShell", () => {
     });
 
     it("sin sesión no pide el conteo", () => {
-      render(
+      renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>
         </BackofficeShell>,
@@ -117,14 +126,14 @@ describe("BackofficeShell", () => {
     it("la barra tiene la marca de texto, el pie con iniciales y no menciona egresados ni el lema", async () => {
       sessionStorage.setItem("accessToken", tokenFor("administrativo"));
       listRequests.mockResolvedValue({ ok: false, status: 0, message: "x" });
-      render(
+      renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>
         </BackofficeShell>,
       );
 
-      expect(screen.getByText("UMSSY")).toBeInTheDocument();
-      expect(screen.getByText("Backoffice de verificación")).toBeInTheDocument();
+      expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeInTheDocument();
+
       expect(screen.getByText("PA")).toBeInTheDocument();
       expect(screen.queryByText("Registro de auditoría")).toBeNull();
       const text = document.body.textContent?.toLowerCase() ?? "";
@@ -139,34 +148,34 @@ describe("BackofficeShell", () => {
     const listRequests = vi.spyOn(requestReviewService, "listRequests");
     beforeEach(() => listRequests.mockResolvedValue({ ok: false, status: 0, message: "x" }));
 
-    it("usa un solo AppShell: una barra lateral de 248 px y el botón de menú solo en móvil", () => {
+    it("usa un solo AppShell: una barra lateral de 264 px y el botón de menú accesible", () => {
       sessionStorage.setItem("accessToken", tokenFor("administrativo"));
-      const { container } = render(
+      const { container } = renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>
         </BackofficeShell>,
       );
 
       expect(container.querySelectorAll("[data-slot='sidebar']").length).toBeLessThanOrEqual(1);
-      expect(container.querySelector("[style*='--sidebar-width: 15.5rem']")).not.toBeNull();
+      expect(container.querySelector("[style*='--sidebar-width: 16.5rem']")).not.toBeNull();
       const toggle = screen.getByRole("button", { name: /menú/i });
-      expect(toggle.parentElement).toHaveClass("md:hidden");
-      expect(screen.getByText("Contenido").parentElement).not.toHaveClass("px-8");
+      expect(toggle).toHaveAttribute("aria-expanded", "true");
+      expect(screen.getByText("Contenido").parentElement).toHaveClass("px-8");
     });
 
-    it("la barra lateral no muestra un chevron junto a la marca y el ítem activo permite la barra roja en el borde", () => {
+    it("la barra lateral no muestra un chevron junto a la marca y el ítem activo muestra un punto claro", () => {
       sessionStorage.setItem("accessToken", tokenFor("administrativo"));
-      render(
+      renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>
         </BackofficeShell>,
       );
 
-      const brand = screen.getByText("UMSSY").parentElement as HTMLElement;
+      const brand = screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" }).parentElement as HTMLElement;
       expect(brand.querySelector("svg")).toBeNull();
       expect(screen.queryByText("›")).toBeNull();
-      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("overflow-visible");
-      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("data-active:before:-left-3");
+      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("data-active:bg-surface/8");
+      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("data-active:before:rounded-full");
     });
   });
 });

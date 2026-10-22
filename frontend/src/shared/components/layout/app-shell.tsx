@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties } from "react";
 import { cn } from "cn";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SIDEBAR_STYLE } from "@/shared/constants/sidebar.constants";
@@ -9,19 +9,7 @@ import type { NavigationItem } from "@/shared/types/navigation-item.types";
 import { AppSidebar } from "./app-sidebar";
 import { SessionUserCard } from "@/modules/auth";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
-import { SidebarToggleButton } from "./sidebar-toggle-button";
-
-// Props opcionales: sin ellas el render es idéntico al anterior
-interface AppShellExtras {
-  brand?: ReactNode;
-  sidebarFooter?: ReactNode;
-  sidebarItemClassName?: string;
-  sidebarItemBadges?: Record<string, ReactNode>;
-  sidebarWidth?: string;
-  // Reemplaza la cabecera por defecto (que lleva el botón de menú)
-  header?: ReactNode;
-  contentClassName?: string;
-}
+import { AppHeader } from "./app-header";
 
 export function AppShell({
   children,
@@ -35,24 +23,45 @@ export function AppShell({
   sidebarWidth,
   header,
   contentClassName,
-}: AppShellProps & AppShellExtras) {
+}: AppShellProps) {
   return (
-    <SidebarProvider style={sidebarWidth ? ({ ...SIDEBAR_STYLE, "--sidebar-width": sidebarWidth } as CSSProperties) : SIDEBAR_STYLE}>
+    <SidebarProvider
+      style={
+        sidebarWidth
+          ? ({
+              ...SIDEBAR_STYLE,
+              "--sidebar-width": sidebarWidth,
+            } as CSSProperties)
+          : SIDEBAR_STYLE
+      }
+    >
       <AppSidebar
         items={items as NavigationItem[] | undefined}
         user={user}
         brand={brand}
-        footer={sidebarFooter ?? (!user && getAccessToken() ? <SessionUserCard /> : undefined)}
+        footer={
+          sidebarFooter ??
+          (!user && getAccessToken() ? <SessionUserCard /> : undefined)
+        }
         itemClassName={sidebarItemClassName}
         itemBadges={sidebarItemBadges}
       />
-      <SidebarInset className="bg-surface-soft">
-        {header ?? (
-          <header className={fullBleed ? "absolute left-4 top-3 z-10 flex items-center" : "flex items-center px-4 py-3"}>
-            <SidebarToggleButton />
-          </header>
+      <SidebarInset
+        className={cn(
+          "min-w-0 bg-surface-soft",
+          contentClassName && "h-dvh min-h-0 overflow-hidden",
         )}
-        <div className={cn("flex-1", contentClassName ?? (fullBleed ? "flex min-w-0 flex-col" : "px-8 pb-8"))}>{children}</div>
+      >
+        {header ?? <AppHeader />}
+        <div
+          className={cn(
+            "flex-1",
+            contentClassName ??
+              (fullBleed ? "flex min-w-0 flex-col" : "px-8 py-8"),
+          )}
+        >
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

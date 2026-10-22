@@ -13,9 +13,9 @@ export function EventDetailState({
   return (
     <aside
       aria-label="Detalle del taller seleccionado"
-      className="flex min-h-80 w-full shrink-0 items-center justify-center border-t border-border bg-surface p-8 text-center lg:min-h-svh lg:w-[340px] lg:self-stretch lg:border-l lg:border-t-0 xl:w-[360px]"
+      className="flex min-h-64 w-full min-w-0 self-start rounded-lg border border-border bg-surface p-6 text-center xl:sticky xl:top-6"
     >
-      <div className="mx-auto flex max-w-xs flex-col items-center gap-3">
+      <div className="m-auto flex max-w-xs flex-col items-center gap-3">
         {selectedId && onClose && (
           <Button variant="outline" onClick={onClose}>Cerrar detalle</Button>
         )}

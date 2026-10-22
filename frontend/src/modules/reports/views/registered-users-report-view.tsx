@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { PageBreadcrumb } from "@/shared/components/layout";
+import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import {
   CONNECTION_ERROR_MESSAGE,
-  REGISTERED_USERS_BREADCRUMB,
   REGISTERED_USERS_CONNECTION_TOAST_ID,
   REGISTERED_USERS_PAGE_SIZE,
   REGISTERED_USERS_SLOW_TOAST_ID,
@@ -23,7 +22,7 @@ import { UserTypeFilter } from "../components/user-type-filter";
 import { useExportRegisteredUsersCsv } from "../hooks/use-export-registered-users-csv";
 import { useRegisteredUsers } from "../hooks/use-registered-users";
 import type { AcademicPeriod } from "../types/registered-user.types";
-import type { RoleTag } from "@/modules/auth/types/auth-types";
+import type { RoleTag } from "@/modules/auth";
 
 export function RegisteredUsersReportView() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,7 +35,6 @@ export function RegisteredUsersReportView() {
   const {
     exportCsv,
     isExporting,
-    errorMessage: exportErrorMessage,
     successMessage: exportSuccessMessage,
   } = useExportRegisteredUsersCsv(userType, period, search);
 
@@ -86,25 +84,15 @@ export function RegisteredUsersReportView() {
   };
 
   return (
-    <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <PageBreadcrumb items={REGISTERED_USERS_BREADCRUMB} />
-        <h1 className="font-tight text-3xl font-extrabold text-ink">Reporte de usuarios registrados aceptados</h1>
-      </header>
+    <WorkspacePage title="Usuarios aceptados">
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <UserTypeFilter value={userType} onChange={handleUserTypeChange} />
           <EmailSearchInput value={searchInput} onChange={handleSearchChange} />
         </div>
         <ReportActions onExport={exportCsv} isExporting={isExporting} period={period} onPeriodChange={handlePeriodChange} />
       </div>
-
-      {exportErrorMessage && (
-        <p role="alert" className="text-sm text-accent">
-          {exportErrorMessage}
-        </p>
-      )}
 
       <RegisteredUsersTable users={users} isLoading={isLoading} errorMessage={errorMessage} searchTerm={search} />
 
@@ -120,6 +108,6 @@ export function RegisteredUsersReportView() {
       />
 
       <ExportSuccessToast message={exportSuccessMessage} />
-    </section>
+    </WorkspacePage>
   );
 }

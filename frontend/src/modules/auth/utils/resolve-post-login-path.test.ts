@@ -2,19 +2,30 @@ import { describe, expect, it } from "vitest";
 import { resolvePostLoginPath } from "./resolve-post-login-path";
 
 describe("resolvePostLoginPath", () => {
-  it.each(["titulado", "estudiante", "mentor", "empresa"])("el rol %s vuelve a la ruta privada pedida", (role) => {
+  it.each(["titulado", "mentor"])("el rol %s vuelve a la ruta privada pedida", (role) => {
     expect(resolvePostLoginPath(role, "/events/my-passes")).toBe("/events/my-passes");
-    expect(resolvePostLoginPath(role, "/reports/history?x=1")).toBe("/reports/history?x=1");
+    expect(resolvePostLoginPath(role, "/vacancies/abc?tab=details")).toBe("/vacancies/abc?tab=details");
+  });
+
+  it.each(["estudiante", "empresa"])("returns %s accounts to chat after login", (role) => {
+    expect(resolvePostLoginPath([role], "/chat")).toBe("/chat");
+  });
+
+  it("does not return users to another role's view or to unknown routes", () => {
+    expect(resolvePostLoginPath(["empresa"], "/vacancies/abc")).toBe("/recruiters");
+    expect(resolvePostLoginPath(["empresa"], "/profile")).toBe("/profile");
+    expect(resolvePostLoginPath(["titulado"], "/matching")).toBe("/dashboard");
+    expect(resolvePostLoginPath(["titulado"], "/reports/history")).toBe("/dashboard");
   });
 
   it("sin next usa el destino por defecto de cada rol", () => {
-    expect(resolvePostLoginPath("titulado", null)).toBe("/profile");
+    expect(resolvePostLoginPath("titulado", null)).toBe("/dashboard");
     expect(resolvePostLoginPath("administrativo", null)).toBe("/backoffice/solicitudes");
-    expect(resolvePostLoginPath("", undefined)).toBe("/profile");
+    expect(resolvePostLoginPath("", undefined)).toBe("/dashboard");
   });
 
   it.each(["//evil.com", "https://evil.com", "/\\evil.com", "/login", "/"])("ignora el next peligroso %s", (next) => {
-    expect(resolvePostLoginPath("titulado", next)).toBe("/profile");
+    expect(resolvePostLoginPath("titulado", next)).toBe("/dashboard");
     expect(resolvePostLoginPath("administrativo", next)).toBe("/backoffice/solicitudes");
   });
 
@@ -24,6 +35,17 @@ describe("resolvePostLoginPath", () => {
   });
 
   it("un rol sin acceso al backoffice no vuelve a él", () => {
-    expect(resolvePostLoginPath("titulado", "/backoffice/solicitudes")).toBe("/profile");
+    expect(resolvePostLoginPath("titulado", "/backoffice/solicitudes")).toBe("/dashboard");
   });
+  it('lets administrative accounts resume common functions without selecting a role', () => {
+    expect(resolvePostLoginPath(['administrativo'], '/chat')).toBe('/backoffice/solicitudes');
+    expect(resolvePostLoginPath(['administrativo'], '/affinity-radar/review-queue')).toBe('/affinity-radar/review-queue');
+    expect(resolvePostLoginPath(['administrativo', 'mentor'], '/mentor/availability')).toBe('/mentor/availability');
+  });
+
+  it('chooses the company portal for a company session and denies backoffice return without that role', () => {
+    expect(resolvePostLoginPath(['empresa'], null)).toBe('/recruiters');
+    expect(resolvePostLoginPath(['empresa'], '/backoffice/solicitudes')).toBe('/recruiters');
+  });
+
 });

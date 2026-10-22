@@ -106,6 +106,16 @@ describe("PersonalDataForm", () => {
     ]);
   });
 
+  it.each(["Expedido", "Carrera"])("la lista de %s se despliega debajo del campo sin tapar su valor", async (name) => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.click(screen.getByRole("combobox", { name }));
+
+    await screen.findAllByRole("option");
+    expect(document.querySelector("[data-slot=select-content][data-open]")).toHaveAttribute("data-align-trigger", "false");
+  });
+
   it("reemplaza el año de ingreso por el año de titulación", () => {
     const { container } = renderForm();
 
@@ -139,7 +149,9 @@ describe("PersonalDataForm", () => {
 
     expect(container.firstElementChild?.className).not.toMatch(/max-w-/);
     expect(screen.getByRole("heading", { level: 1 })).toHaveClass("text-3xl", "2xl:text-4xl");
-    expect(container.querySelector("form")).toHaveClass("2xl:gap-x-8", "2xl:gap-y-6");
+    expect(screen.getByRole("group", { name: "Identidad" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Contacto" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Datos complementarios" })).toBeInTheDocument();
     expect(screen.getByText("Carrera")).toHaveClass("2xl:text-base");
   });
 
