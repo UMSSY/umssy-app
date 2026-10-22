@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { toBoliviaTime } from '../../../common/utils/date-time.js';
 import { AppointmentStatusTitle } from '../enums/appointment-status-title.enum.js';
 import { AvailabilityMapper } from '../mappers/availability.mapper.js';
 import {
@@ -56,7 +57,12 @@ describe('AvailabilityService', () => {
     updatedAt: new Date('2026-11-01T12:00:00.000Z'),
   };
   const mentorsService = { findOne: vi.fn(), updateAvailability: vi.fn() };
-  const blockedDatesService = { assertDayNotBlocked: vi.fn(), findBlockedDays: vi.fn() };
+  const blockedDatesService = {
+    assertDayNotBlocked: vi.fn(),
+    findBlockedDays: vi.fn(),
+    withDayLock: vi.fn(),
+  };
+  const TX = { kind: 'tx' };
   let service: AvailabilityService;
 
   beforeEach(() => {
@@ -65,6 +71,7 @@ describe('AvailabilityService', () => {
     availabilityRepository.create.mockResolvedValue(savedBlock);
     blockedDatesService.assertDayNotBlocked.mockResolvedValue(undefined);
     blockedDatesService.findBlockedDays.mockResolvedValue(new Set());
+    blockedDatesService.withDayLock.mockImplementation((_mentorId, _day, work) => work(TX));
     service = new AvailabilityService(
       availabilityRepository as never,
       new AvailabilityMapper(),
@@ -139,12 +146,41 @@ describe('AvailabilityService', () => {
 
       const result = await service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD);
 
-      expect(availabilityRepository.update).toHaveBeenCalledWith('block-1', {
-        startAt: UPDATE_PAYLOAD.startAt,
-        endAt: UPDATE_PAYLOAD.endAt,
-      });
+      expect(availabilityRepository.update).toHaveBeenCalledWith(
+        'block-1',
+        { startAt: UPDATE_PAYLOAD.startAt, endAt: UPDATE_PAYLOAD.endAt },
+        TX,
+      );
       expect(result.id).toBe('block-1');
       expect(result.state).toBe('free');
+    });
+
+    it('edita dentro del lock del día de destino y revisa ese día en la misma transacción', async () => {
+      availabilityRepository.findById.mockResolvedValue(block('block-1'));
+      availabilityRepository.update.mockResolvedValue(block('block-1'));
+
+      await service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD);
+
+      expect(blockedDatesService.withDayLock).toHaveBeenCalledWith(
+        'mentor-1',
+        toBoliviaTime(UPDATE_PAYLOAD.startAt).date,
+        expect.any(Function),
+      );
+      expect(blockedDatesService.assertDayNotBlocked).toHaveBeenCalledWith(
+        'mentor-1',
+        UPDATE_PAYLOAD.startAt,
+        TX,
+      );
+    });
+
+    it('responde 409 y no mueve el bloque si el día de destino está bloqueado', async () => {
+      availabilityRepository.findById.mockResolvedValue(block('block-1'));
+      blockedDatesService.assertDayNotBlocked.mockRejectedValue(new DayBlockedException());
+
+      await expect(service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD)).rejects.toBeInstanceOf(
+        DayBlockedException,
+      );
+      expect(availabilityRepository.update).not.toHaveBeenCalled();
     });
 
     it('responde 409 si el guardado choca con la constraint de no-solape', async () => {
@@ -173,7 +209,8 @@ describe('AvailabilityService', () => {
         statusCode: 409,
         message: 'Ese día está bloqueado',
       });
-      expect(blockedDatesService.assertDayNotBlocked).toHaveBeenCalledWith(mentorId, payload.startAt);
+      expect(blockedDatesService.withDayLock).toHaveBeenCalledWith(mentorId, '2026-11-03', expect.any(Function));
+      expect(blockedDatesService.assertDayNotBlocked).toHaveBeenCalledWith(mentorId, payload.startAt, TX);
       expect(availabilityRepository.create).not.toHaveBeenCalled();
     });
 
@@ -198,6 +235,7 @@ describe('AvailabilityService', () => {
         mentorId,
         payload.startAt,
         payload.endAt,
+        TX,
       );
       expect(payload.startAt).toBeInstanceOf(Date);
     });

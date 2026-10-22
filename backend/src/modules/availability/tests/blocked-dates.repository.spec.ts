@@ -8,12 +8,12 @@ describe('BlockedDatesRepository', () => {
   const tx = {
     $executeRaw: vi.fn(),
     blockedDate: { findUnique: vi.fn(), create: vi.fn() },
-    availabilityBlock: { count: vi.fn() },
+    availabilityBlock: { findFirst: vi.fn() },
   };
   const prisma = {
     $transaction: vi.fn((work: (client: typeof tx) => Promise<unknown>) => work(tx)),
     blockedDate: { findUnique: vi.fn(), findMany: vi.fn(), create: vi.fn(), delete: vi.fn() },
-    availabilityBlock: { count: vi.fn() },
+    availabilityBlock: { findFirst: vi.fn() },
   };
   let repository: BlockedDatesRepository;
 
@@ -35,6 +35,10 @@ describe('BlockedDatesRepository', () => {
 
       expect(result).toBe('hecho');
       expect(order).toEqual(['lock', 'work']);
+      expect(prisma.$transaction).toHaveBeenCalledWith(expect.any(Function), {
+        maxWait: 5_000,
+        timeout: 10_000,
+      });
       expect(tx.$executeRaw.mock.calls[0][1]).toBe('mentor-day:mentor-1:2026-10-27');
     });
 
@@ -74,20 +78,21 @@ describe('BlockedDatesRepository', () => {
   });
 
   it.each([
-    [1, true],
-    [0, false],
-  ])('con %i bloques con cita activa en el día responde %s', async (count, expected) => {
+    [{ id: 'block-1' }, true],
+    [null, false],
+  ])('con %o como primer bloque con cita activa responde %s', async (found, expected) => {
     const from = new Date('2026-10-27T04:00:00.000Z');
     const to = new Date('2026-10-28T04:00:00.000Z');
-    tx.availabilityBlock.count.mockResolvedValue(count);
+    tx.availabilityBlock.findFirst.mockResolvedValue(found);
 
     await expect(repository.hasActiveAppointmentBetween('mentor-1', from, to, tx as never)).resolves.toBe(expected);
-    expect(tx.availabilityBlock.count).toHaveBeenCalledWith({
+    expect(tx.availabilityBlock.findFirst).toHaveBeenCalledWith({
       where: {
         mentorId: 'mentor-1',
         startAt: { gte: from, lt: to },
         appointments: { some: { status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } } } },
       },
+      select: { id: true },
     });
   });
 
@@ -105,10 +110,10 @@ describe('BlockedDatesRepository', () => {
     });
   });
 
-  it('cuenta citas activas con el cliente por defecto si no recibe uno', async () => {
-    prisma.availabilityBlock.count.mockResolvedValue(0);
+  it('busca citas activas con el cliente por defecto si no recibe uno', async () => {
+    prisma.availabilityBlock.findFirst.mockResolvedValue(null);
     await expect(repository.hasActiveAppointmentBetween('mentor-1', DAY, DAY)).resolves.toBe(false);
-    expect(prisma.availabilityBlock.count).toHaveBeenCalled();
+    expect(prisma.availabilityBlock.findFirst).toHaveBeenCalled();
   });
 
   it('borra por id', async () => {

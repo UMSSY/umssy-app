@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { BlockedDate } from '../../../prisma/client.js';
+import { Prisma, type BlockedDate } from '../../../prisma/client.js';
 import {
   BlockedDateHasAppointmentException,
   BlockedDateInPastException,
@@ -43,6 +43,7 @@ describe('BlockedDatesService', () => {
     repository.hasActiveAppointmentBetween.mockResolvedValue(false);
     repository.create.mockImplementation(async (mentorId, blockedOn, reason) => record({ mentorId, blockedOn, reason }));
     repository.findInRange.mockResolvedValue([]);
+    repository.delete.mockResolvedValue(record());
     service = new BlockedDatesService(repository as never, new BlockedDateMapper());
   });
 
@@ -134,6 +135,25 @@ describe('BlockedDatesService', () => {
       expect(repository.delete).not.toHaveBeenCalled();
     });
 
+    it('responde 404 si otra solicitud la desbloqueó justo antes (P2025)', async () => {
+      repository.findById.mockResolvedValue(record());
+      repository.delete.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Record not found', { code: 'P2025', clientVersion: 'test' }),
+      );
+
+      await expect(service.unblockDate('mentor-1', 'blocked-1')).rejects.toBeInstanceOf(
+        BlockedDateNotFoundException,
+      );
+    });
+
+    it('relanza otros errores de la base al desbloquear', async () => {
+      const failure = new Error('connection lost');
+      repository.findById.mockResolvedValue(record());
+      repository.delete.mockRejectedValue(failure);
+
+      await expect(service.unblockDate('mentor-1', 'blocked-1')).rejects.toBe(failure);
+    });
+
     it('desbloquea la fecha propia y devuelve su id', async () => {
       repository.findById.mockResolvedValue(record());
       await expect(service.unblockDate('mentor-1', 'blocked-1')).resolves.toEqual({ id: 'blocked-1' });
@@ -181,6 +201,17 @@ describe('BlockedDatesService', () => {
       );
 
       expect([...days]).toEqual(['2026-10-27', '2026-10-29']);
+    });
+  });
+
+  describe('withDayLock', () => {
+    it('delega el lock del mentor y el día en el repositorio', async () => {
+      const work = vi.fn().mockResolvedValue('hecho');
+
+      await expect(service.withDayLock('mentor-1', '2026-10-27', work)).resolves.toBe('hecho');
+
+      expect(repository.withDayLock).toHaveBeenCalledWith('mentor-1', '2026-10-27', work);
+      expect(work).toHaveBeenCalledWith(TX);
     });
   });
 

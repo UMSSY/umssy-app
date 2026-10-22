@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { toBoliviaTime } from '../../../common/utils/date-time.js';
+import { mapRecordNotFound } from '../../../common/utils/map-record-not-found.js';
 import type { TransactionClient } from '../../../common/types/transaction-client.types.js';
 import {
   BlockedDateHasAppointmentException,
@@ -59,7 +60,10 @@ export class BlockedDatesService {
     if (blockedDate.mentorId !== mentorId) {
       throw new BlockedDateNotOwnedException();
     }
-    await this.blockedDatesRepository.delete(id);
+    await mapRecordNotFound(
+      this.blockedDatesRepository.delete(id),
+      () => new BlockedDateNotFoundException(),
+    );
     return this.blockedDateMapper.toDeletedResponse(blockedDate);
   }
 
@@ -71,6 +75,14 @@ export class BlockedDatesService {
   async findBlockedDays(mentorId: string, from: Date, to: Date): Promise<Set<string>> {
     const blockedDates = await this.findInRange(mentorId, from, to);
     return new Set(blockedDates.map((blockedDate) => toDayString(blockedDate.blockedOn)));
+  }
+
+  withDayLock<T>(
+    mentorId: string,
+    day: string,
+    work: (tx: TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.blockedDatesRepository.withDayLock(mentorId, day, work);
   }
 
   async assertDayNotBlocked(

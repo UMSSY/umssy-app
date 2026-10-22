@@ -74,10 +74,18 @@ export class AvailabilityService {
     }
 
     try {
-      const updated = await this.availabilityRepository.update(blockId, {
-        startAt: payload.startAt,
-        endAt: payload.endAt,
-      });
+      const updated = await this.blockedDatesService.withDayLock(
+        mentorId,
+        toBoliviaTime(payload.startAt).date,
+        async (tx) => {
+          await this.blockedDatesService.assertDayNotBlocked(mentorId, payload.startAt, tx);
+          return this.availabilityRepository.update(
+            blockId,
+            { startAt: payload.startAt, endAt: payload.endAt },
+            tx,
+          );
+        },
+      );
       return this.availabilityMapper.toResponse(updated);
     } catch (error) {
       if (hasOverlapErrorCode(error)) {
@@ -88,12 +96,14 @@ export class AvailabilityService {
   }
 
   async create(mentorId: string, payload: CreateBlockDto): Promise<AvailabilityBlockResponse> {
-    await this.blockedDatesService.assertDayNotBlocked(mentorId, payload.startAt);
     try {
-      const block = await this.availabilityRepository.create(
+      const block = await this.blockedDatesService.withDayLock(
         mentorId,
-        payload.startAt,
-        payload.endAt,
+        toBoliviaTime(payload.startAt).date,
+        async (tx) => {
+          await this.blockedDatesService.assertDayNotBlocked(mentorId, payload.startAt, tx);
+          return this.availabilityRepository.create(mentorId, payload.startAt, payload.endAt, tx);
+        },
       );
       return this.availabilityMapper.toResponse({ ...block, appointments: [] });
     } catch (error) {
