@@ -74,10 +74,18 @@ export class AvailabilityService {
     }
 
     try {
-      const updated = await this.availabilityRepository.update(blockId, {
-        startAt: payload.startAt,
-        endAt: payload.endAt,
-      });
+      const updated = await this.blockedDatesService.withDayLock(
+        mentorId,
+        toBoliviaTime(payload.startAt).date,
+        async (tx) => {
+          await this.blockedDatesService.assertDayNotBlocked(mentorId, payload.startAt, tx);
+          return this.availabilityRepository.update(
+            blockId,
+            { startAt: payload.startAt, endAt: payload.endAt },
+            tx,
+          );
+        },
+      );
       return this.availabilityMapper.toResponse(updated);
     } catch (error) {
       if (hasOverlapErrorCode(error)) {
