@@ -52,13 +52,13 @@ export function DocumentViewer({ url, mimeType, fileName, caption }: DocumentVie
       </div>
       <div className={isPdf ? "flex h-[36rem] items-center justify-center p-4" : "flex items-center justify-center overflow-auto p-6"}>
         {isPdf ? (
-          <iframe src={`${url}${PDF_VIEWER_FRAGMENT}`} title="Documento de respaldo" className="size-full bg-surface" />
+          <iframe src={`${url}${PDF_VIEWER_FRAGMENT}`} title="Documento de respaldo" className="h-full w-full bg-surface" />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={url}
             alt="Documento de respaldo"
-            className="max-h-[32rem] max-w-full origin-center bg-surface shadow-lg transition-transform"
+            className="max-h-[32rem] max-w-full origin-center bg-surface shadow-sm transition-transform"
             style={{ transform: `scale(${scale}) rotate(${rotation}deg)` }}
           />
         )}

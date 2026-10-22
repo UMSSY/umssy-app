@@ -2,7 +2,7 @@
 
 import type { CertificationDocumentsPanelProps } from "../types/certification-documents-panel-props.types";
 import { CertificationDocumentItem } from "./certification-document-item";
-import { SectionCard } from "@/modules/profile/components/section-card";
+import { SectionCard } from "@/modules/profile";
 
 export function CertificationDocumentsPanel({
   certifications = [],
@@ -19,7 +19,7 @@ export function CertificationDocumentsPanel({
     <SectionCard title="Documentos de respaldo">
       <div className="flex flex-col gap-6">
         {form ? (
-          <div className="animate-in duration-300 ease-out fade-in slide-in-from-top-4">{form}</div>
+          <div className="animate-in fade-in slide-in-from-top-4 duration-300 ease-out">{form}</div>
         ) : null}
         <section aria-label="Documentos cargados" className="flex flex-col gap-1">
           {certificationsWithDocument.length === 0 ? (

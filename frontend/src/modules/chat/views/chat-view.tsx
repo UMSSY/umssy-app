@@ -1,3 +1,5 @@
+"use client";
+
 ﻿
 'use client';
 
@@ -131,9 +133,9 @@ export function ChatView() {
   };
 
   return (
-    <div className="flex size-full min-h-0 max-w-full flex-1 overflow-hidden bg-surface-soft font-sans">
+    <div className="flex h-full min-h-0 w-full max-w-full flex-1 overflow-hidden bg-surface-soft font-sans">
       <aside
-        className={`size-full shrink-0 overflow-hidden md:w-80 lg:w-96 ${
+        className={`h-full w-full shrink-0 overflow-hidden md:w-80 lg:w-[340px] ${
           selectedId ? 'hidden md:block' : 'block'
         }`}
       >
