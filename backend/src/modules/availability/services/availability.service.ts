@@ -6,6 +6,7 @@ import {
   BlockNotFoundException,
   BlockNotOwnedException,
   BlockOverlapException,
+  MentorAvailabilityNotOwnedException,
 } from '../exceptions/index.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { hasOverlapErrorCode } from '../utils/overlap-error.js';
@@ -14,6 +15,7 @@ import type { CreateBlockDto } from '../requests/create-block.request.js';
 import type { WeekQueryDto } from '../requests/week-query.request.js';
 import type { DeletedBlockResponse } from '../types/deleted-block-response.types.js';
 import type { UpdateBlockDto } from '../requests/update-block.request.js';
+import type { MentorAvailabilityStatusResponse } from '../types/mentor-availability-status-response.types.js';
 
 @Injectable()
 export class AvailabilityService {
@@ -111,5 +113,22 @@ export class AvailabilityService {
 
     const blocks = await this.availabilityRepository.findMentorFreeBlocksInRange(mentorId, from, to);
     return this.availabilityMapper.toResponseList(blocks);
+  }
+
+  async findMyAvailabilityStatus(mentorId: string): Promise<MentorAvailabilityStatusResponse> {
+    const mentor = await this.mentorsService.findOne(mentorId);
+    return this.availabilityMapper.toAvailabilityStatusResponse(mentor.id, mentor.isAvailable);
+  }
+
+  async updateAvailabilityStatus(
+    userId: string,
+    mentorId: string,
+    isAvailable: boolean,
+  ): Promise<MentorAvailabilityStatusResponse> {
+    if (userId !== mentorId) {
+      throw new MentorAvailabilityNotOwnedException();
+    }
+    const updated = await this.mentorsService.updateAvailability(mentorId, isAvailable);
+    return this.availabilityMapper.toAvailabilityStatusResponse(updated.id, updated.isAvailableForMentoring);
   }
 }

@@ -6,6 +6,7 @@ import {
   BlockNotFoundException,
   BlockNotOwnedException,
   BlockOverlapException,
+  MentorAvailabilityNotOwnedException,
 } from '../exceptions/index.js';
 import { AvailabilityService } from '../services/availability.service.js';
 import { MentorNotFoundException } from '../../mentors/exceptions/mentor-not-found.exception.js';
@@ -53,7 +54,7 @@ describe('AvailabilityService', () => {
     createdAt: new Date('2026-11-01T12:00:00.000Z'),
     updatedAt: new Date('2026-11-01T12:00:00.000Z'),
   };
-  const mentorsService = { findOne: vi.fn() };
+  const mentorsService = { findOne: vi.fn(), updateAvailability: vi.fn() };
   let service: AvailabilityService;
 
   beforeEach(() => {
@@ -319,6 +320,50 @@ describe('AvailabilityService', () => {
 
       expect(result.state).toBe('free');
       expect(result).not.toHaveProperty('appointments');
+    });
+  });
+
+  describe('findMyAvailabilityStatus', () => {
+    it('lee el estado con el servicio de mentores de Epic 6', async () => {
+      mentorsService.findOne.mockResolvedValue({ id: mentorId, isAvailable: false });
+
+      await expect(service.findMyAvailabilityStatus(mentorId)).resolves.toEqual({ mentorId, isAvailable: false });
+      expect(mentorsService.findOne).toHaveBeenCalledWith(mentorId);
+    });
+
+    it('propaga el 404 si el usuario no es un mentor activo', async () => {
+      mentorsService.findOne.mockRejectedValue(new MentorNotFoundException());
+
+      await expect(service.findMyAvailabilityStatus(mentorId)).rejects.toBeInstanceOf(MentorNotFoundException);
+    });
+  });
+
+  describe('updateAvailabilityStatus', () => {
+    it.each([true, false])('guarda isAvailable=%s con el servicio de Epic 6', async (isAvailable) => {
+      mentorsService.updateAvailability.mockResolvedValue({ id: mentorId, isAvailableForMentoring: isAvailable });
+
+      await expect(service.updateAvailabilityStatus(mentorId, mentorId, isAvailable)).resolves.toEqual({
+        mentorId,
+        isAvailable,
+      });
+      expect(mentorsService.updateAvailability).toHaveBeenCalledWith(mentorId, isAvailable);
+    });
+
+    it('no toca bloques, citas ni fechas bloqueadas al pausar', async () => {
+      mentorsService.updateAvailability.mockResolvedValue({ id: mentorId, isAvailableForMentoring: false });
+
+      await service.updateAvailabilityStatus(mentorId, mentorId, false);
+
+      for (const method of Object.values(availabilityRepository)) {
+        expect(method).not.toHaveBeenCalled();
+      }
+    });
+
+    it('rechaza con 403 cambiar la disponibilidad de otro mentor', async () => {
+      await expect(service.updateAvailabilityStatus(mentorId, 'otro-mentor', false)).rejects.toBeInstanceOf(
+        MentorAvailabilityNotOwnedException,
+      );
+      expect(mentorsService.updateAvailability).not.toHaveBeenCalled();
     });
   });
 });
