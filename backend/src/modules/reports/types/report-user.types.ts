@@ -32,6 +32,7 @@ export interface RejectedUserResponse {
   readonly id: string;
   readonly fullName: string;
   readonly email: string;
+  readonly userType: RoleName;
   readonly identifier: string;
   readonly documentType: ReportDocumentType | null;
   readonly rejectionReason: string | null;

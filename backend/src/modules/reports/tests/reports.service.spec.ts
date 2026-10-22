@@ -159,9 +159,9 @@ describe('ReportsService', () => {
       );
 
       expect(content).toBe(
-        `${CSV_BOM}Usuario,Correo,Identificador,Documento,Fecha de Registro\r\n` +
-          'Fabio León,usuario@example.com,ID-1,Diploma académico,31/07/2026\r\n' +
-          'Elena Soto,usuario@example.com,ID-1,Diploma académico,31/12/2025\r\n',
+        `${CSV_BOM}Usuario,Correo,Tipo de Usuario,Identificador,Documento,Fecha de Registro\r\n` +
+          'Fabio León,usuario@example.com,Titulado,ID-1,Diploma académico,31/07/2026\r\n' +
+          'Elena Soto,usuario@example.com,Titulado,ID-1,Diploma académico,31/12/2025\r\n',
       );
     });
 
@@ -334,10 +334,10 @@ describe('ReportsService', () => {
 
       expect(result.items.map((user) => user.id)).toEqual(['f', 'e']);
       expect(result.items[0]).toMatchObject({
+        userType: 'titulado',
         documentType: 'academic_diploma',
         rejectionReason: 'Correo inválido',
       });
-      expect(result.items[0]).not.toHaveProperty('userType');
     });
 
     it('busca dentro de los rechazados por correo', async () => {

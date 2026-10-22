@@ -13,6 +13,7 @@ const REJECTED_USERS: RejectedUser[] = Array.from({ length: 24 }, (_, index) => 
   id: `rejected-${index + 1}`,
   fullName: index === 0 ? "Juan Carlos Peres Rojas" : `Usuario rechazado ${index + 1}`,
   email: index === 0 ? "juan.perez@gmail.com" : `usuario${index + 1}@gmail.com`,
+  userType: "titulado",
   identifier: `2019${index.toString().padStart(5, "0")}`,
   documentType: index === 1 ? "national_title" : "academic_diploma",
   rejectionReason: null,
