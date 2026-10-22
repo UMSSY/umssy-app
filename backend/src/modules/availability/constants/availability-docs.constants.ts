@@ -33,3 +33,20 @@ export const UPDATE_AVAILABILITY_STATUS_DOCS = {
     'Solo cambia isAvailableForMentoring (servicio de Epic 6): no modifica citas confirmadas ni fechas bloqueadas. Responde 403 si el id no es el del mentor en sesión',
   idDescription: 'Identificador (UUID) del mentor en sesión',
 } as const;
+
+export const BLOCK_DATE_DOCS = {
+  summary: 'Bloquea una fecha del mentor en sesión: sus horarios dejan de ofrecerse sin borrar los bloques',
+  description:
+    'blockedOn en AAAA-MM-DD (hora de Bolivia) desde hoy y reason opcional de hasta 100 caracteres. Si la fecha ya estaba bloqueada devuelve el bloqueo existente. Responde 400 si la fecha ya pasó y 409 si el día tiene una cita confirmada',
+} as const;
+
+export const UNBLOCK_DATE_DOCS = {
+  summary: 'Desbloquea una fecha del mentor en sesión; sus bloques libres vuelven a ofrecerse',
+  idDescription: 'UUID de la fecha bloqueada',
+} as const;
+
+export const FIND_BLOCKED_DATES_DOCS = {
+  summary: 'Lista las fechas bloqueadas del mentor en sesión dentro de un rango de hasta 7 días',
+  fromDescription: FIND_MY_BLOCKS_DOCS.fromDescription,
+  toDescription: FIND_MY_BLOCKS_DOCS.toDescription,
+} as const;
