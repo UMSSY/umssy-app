@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { toBoliviaTime } from '../../../common/utils/date-time.js';
+import { mapRecordNotFound } from '../../../common/utils/map-record-not-found.js';
 import type { TransactionClient } from '../../../common/types/transaction-client.types.js';
 import {
   BlockedDateHasAppointmentException,
@@ -59,7 +60,10 @@ export class BlockedDatesService {
     if (blockedDate.mentorId !== mentorId) {
       throw new BlockedDateNotOwnedException();
     }
-    await this.blockedDatesRepository.delete(id);
+    await mapRecordNotFound(
+      this.blockedDatesRepository.delete(id),
+      () => new BlockedDateNotFoundException(),
+    );
     return this.blockedDateMapper.toDeletedResponse(blockedDate);
   }
 
