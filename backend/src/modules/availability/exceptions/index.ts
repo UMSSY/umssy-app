@@ -4,6 +4,8 @@ export * from './block-not-owned.exception.js';
 export * from './block-overlap.exception.js';
 export * from './blocked-date-has-appointment.exception.js';
 export * from './blocked-date-in-past.exception.js';
+export * from './blocked-date-not-found.exception.js';
+export * from './blocked-date-not-owned.exception.js';
 export * from './day-blocked.exception.js';
 export * from './invalid-block-time.exception.js';
 export * from './mentor-availability-not-owned.exception.js';
