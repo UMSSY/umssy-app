@@ -88,12 +88,14 @@ export class AvailabilityService {
   }
 
   async create(mentorId: string, payload: CreateBlockDto): Promise<AvailabilityBlockResponse> {
-    await this.blockedDatesService.assertDayNotBlocked(mentorId, payload.startAt);
     try {
-      const block = await this.availabilityRepository.create(
+      const block = await this.blockedDatesService.withDayLock(
         mentorId,
-        payload.startAt,
-        payload.endAt,
+        toBoliviaTime(payload.startAt).date,
+        async (tx) => {
+          await this.blockedDatesService.assertDayNotBlocked(mentorId, payload.startAt, tx);
+          return this.availabilityRepository.create(mentorId, payload.startAt, payload.endAt, tx);
+        },
       );
       return this.availabilityMapper.toResponse({ ...block, appointments: [] });
     } catch (error) {
