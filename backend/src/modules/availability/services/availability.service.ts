@@ -9,6 +9,7 @@ import {
   MentorAvailabilityNotOwnedException,
 } from '../exceptions/index.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
+import { BlockedDatesService } from './blocked-dates.service.js';
 import { hasOverlapErrorCode } from '../utils/overlap-error.js';
 import type { AvailabilityBlockResponse } from '../types/availability-block-response.types.js';
 import type { CreateBlockDto } from '../requests/create-block.request.js';
@@ -23,6 +24,7 @@ export class AvailabilityService {
     private readonly availabilityRepository: AvailabilityRepository,
     private readonly availabilityMapper: AvailabilityMapper,
     private readonly mentorsService: MentorsService,
+    private readonly blockedDatesService: BlockedDatesService,
   ) {}
 
   async remove(mentorId: string, blockId: string): Promise<DeletedBlockResponse> {
@@ -85,6 +87,7 @@ export class AvailabilityService {
   }
 
   async create(mentorId: string, payload: CreateBlockDto): Promise<AvailabilityBlockResponse> {
+    await this.blockedDatesService.assertDayNotBlocked(mentorId, payload.startAt);
     try {
       const block = await this.availabilityRepository.create(
         mentorId,
