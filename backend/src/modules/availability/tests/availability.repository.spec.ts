@@ -42,6 +42,11 @@ describe('AvailabilityRepository', () => {
   });
 
   describe('findMentorFreeBlocksInRange', () => {
+    it('excluye confirmaciones nuevas y heredadas, pero no canceladas ni completadas', () => {
+      expect(ACTIVE_APPOINTMENT_STATUSES).toEqual(expect.arrayContaining(['CONFIRMED', 'CONFIRMADA', 'PENDIENTE']));
+      expect(ACTIVE_APPOINTMENT_STATUSES).not.toContain('CANCELLED');
+      expect(ACTIVE_APPOINTMENT_STATUSES).not.toContain('COMPLETED');
+    });
     it('busca solo los bloques sin cita pendiente ni confirmada dentro del rango', async () => {
       const from = new Date('2026-10-05T04:00:00.000Z');
       const to = new Date('2026-10-12T04:00:00.000Z');
