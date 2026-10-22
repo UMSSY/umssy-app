@@ -48,14 +48,15 @@ export class BlockedDatesRepository {
     to: Date,
     client: TransactionClient = this.prisma,
   ): Promise<boolean> {
-    const count = await client.availabilityBlock.count({
+    const block = await client.availabilityBlock.findFirst({
       where: {
         mentorId,
         startAt: { gte: from, lt: to },
         appointments: { some: { status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } } } },
       },
+      select: { id: true },
     });
-    return count > 0;
+    return block !== null;
   }
 
   create(
