@@ -76,9 +76,11 @@ function setupSeeds() {
   seedAvailability.mockResolvedValue({
     weeks: {},
     plan: {},
-    statuses: 2,
-    blocks: 56,
-    appointments: 2,
+    statuses: 3,
+    blocks: 58,
+    appointments: 53,
+    blockedDates: 1,
+    series: 1,
     warnings: ['aviso'],
   });
   seedAccessRequests.mockResolvedValue({
@@ -163,18 +165,20 @@ describe('runSeed', () => {
     expect(seedEventRegistrations).toHaveBeenCalledWith(tx, 'e1');
     expect(seedAvailability).toHaveBeenCalledWith(
       tx,
-      expect.objectContaining({ mentorId: 'm1', graduateId: 'g1' }),
+      expect.objectContaining({ mentorId: 'm1', performanceMentorId: 'm2', graduateId: 'g1' }),
       expect.any(Date),
     );
     expect(seedAccessRequests).toHaveBeenCalledWith(tx);
     expect(seedChat).toHaveBeenCalledWith(tx);
     expect(summary).toMatchObject({
       roles: 5,
-      statuses: 2,
+      statuses: 3,
       users: 11,
       userRoles: 7,
-      blocks: 56,
-      appointments: 2,
+      blocks: 58,
+      appointments: 53,
+      blockedDates: 1,
+      series: 1,
       warnings: ['aviso'],
       accessRequests: { statuses: 5, documentTypes: 2, careers: 2 },
     });

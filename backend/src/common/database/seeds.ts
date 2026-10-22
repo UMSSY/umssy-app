@@ -90,7 +90,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
         {
           mentorId: users.mentorA.id,
           graduateId: users.graduate.id,
-          ownedUserIds: Object.values(users).map((user) => user.id),
+          performanceMentorId: users.mentorB.id,
         },
         now,
       ),
@@ -111,6 +111,8 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
       userRoles: usersResult.userRoles,
       blocks: availabilityResult.blocks,
       appointments: availabilityResult.appointments,
+      blockedDates: availabilityResult.blockedDates,
+      series: availabilityResult.series,
       legacyRoles: usersResult.legacyRoles,
       warnings: availabilityResult.warnings,
       accessRequests: accessRequestsResult,
@@ -132,6 +134,7 @@ async function main(): Promise<void> {
     logger.log(
       `Seed completado — roles: ${summary.roles}, estados: ${summary.statuses}, usuarios: ${summary.users}, ` +
         `roles de usuario nuevos: ${summary.userRoles}, bloques: ${summary.blocks}, citas: ${summary.appointments}, ` +
+        `fechas bloqueadas: ${summary.blockedDates}, series: ${summary.series}, ` +
         `solicitudes (estados: ${summary.accessRequests.statuses}, tipos de documento: ${summary.accessRequests.documentTypes}, carreras: ${summary.accessRequests.careers})` +
         (summary.legacyRoles > 0
           ? ` (roles en mayúscula eliminados: ${summary.legacyRoles})`
