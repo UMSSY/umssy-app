@@ -407,6 +407,35 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
     });
   });
 
+  it('bloquea un día cuya única cita está cancelada', async () => {
+    const day = futureDayWithoutBlocks();
+    store.blocks.push({
+      id: 'cancelled-block',
+      mentorId: MENTOR_A,
+      startAt: new Date(`${day}T14:00:00.000Z`),
+      endAt: new Date(`${day}T15:00:00.000Z`),
+      seriesId: null,
+      repeatUntil: null,
+      createdAt: NOW,
+      updatedAt: NOW,
+      appointments: [{ status: { title: AppointmentStatusTitle.CANCELLED } }],
+    });
+
+    await blockDate(tokens.mentorA, { blockedOn: day }).expect(201);
+  });
+
+  it('deja editar un bloque dentro de su día bloqueado sin moverlo de día', async () => {
+    const day = dayOf(plan.blocked.start);
+    const response = await http()
+      .patch(`/api/availability-blocks/${plan.blocked.id}`)
+      .set('Authorization', `Bearer ${tokens.mentorA}`)
+      .send({ startAt: `${day}T09:00:00-04:00`, endAt: `${day}T09:30:00-04:00` })
+      .expect(200);
+
+    expect(response.body.data.startAt).toBe(new Date(`${day}T09:00:00-04:00`).toISOString());
+    expect(await freeBlockIdsOfMentorA()).not.toContain(plan.blocked.id);
+  });
+
   it('bloquear la misma fecha varias veces, incluso en paralelo, deja un solo registro', async () => {
     const day = futureDayWithoutBlocks();
 
