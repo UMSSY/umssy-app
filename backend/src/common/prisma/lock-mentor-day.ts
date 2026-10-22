@@ -1,8 +1,9 @@
 import type { TransactionClient } from '../types/transaction-client.types.js';
 import { buildMentorDayLockKey } from '../utils/mentor-day-lock-key.js';
 
-// Bloquear una fecha y reservar una cita del mismo día toman este lock dentro de su
-// transacción, así nunca queda una cita confirmada en una fecha bloqueada (HU-08 CA15).
+// Toda escritura en un día de un mentor (bloquear la fecha, crear o mover un bloque y, desde #1164,
+// reservar una cita) debe tomar este lock en su transacción: así nunca queda una cita o un bloque
+// nuevo en una fecha bloqueada (HU-08 CA15).
 export async function lockMentorDay(
   tx: TransactionClient,
   mentorId: string,
