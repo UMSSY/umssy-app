@@ -116,4 +116,20 @@ describe("availabilityApi", () => {
 
     expect(deleteSpy).toHaveBeenCalledWith("/availability-blocks/a%2Fb%26c")
   })
+
+  it("getMyAvailabilityStatus lee el estado del mentor en sesión", async () => {
+    const status = { mentorId: "m1", isAvailable: true }
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValue(envelope(status))
+
+    await expect(availabilityApi.getMyAvailabilityStatus()).resolves.toEqual(status)
+    expect(getSpy).toHaveBeenCalledWith("/mentors/me/availability")
+  })
+
+  it("updateAvailabilityStatus envía isAvailable al mentor codificado", async () => {
+    const status = { mentorId: "a/b", isAvailable: false }
+    const patchSpy = vi.spyOn(apiClient, "patch").mockResolvedValue(envelope(status))
+
+    await expect(availabilityApi.updateAvailabilityStatus("a/b", false)).resolves.toEqual(status)
+    expect(patchSpy).toHaveBeenCalledWith("/mentors/a%2Fb/availability", { isAvailable: false })
+  })
 })
