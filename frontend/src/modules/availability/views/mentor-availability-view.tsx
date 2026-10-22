@@ -14,6 +14,7 @@ import {
 import { AvailabilityLoading } from "../components/availability-loading";
 import { BlockForm } from "../components/block-form";
 import { EditBlockPanel } from "../components/edit-block-panel";
+import { ReceiveRequestsSwitch } from "../components/receive-requests-switch";
 import { WeekGrid } from "../components/week-grid/week-grid";
 import { useCreateAvailabilityBlock } from "../hooks/use-create-availability-block";
 import { useMyBlocks } from "../hooks/use-my-blocks";
@@ -66,7 +67,11 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6">
       <header>
-        <PageHeading title={MY_AVAILABILITY_TEXT.title} description={MY_AVAILABILITY_EYEBROW} />
+        <PageHeading
+          title={MY_AVAILABILITY_TEXT.title}
+          description={MY_AVAILABILITY_EYEBROW}
+          actions={<ReceiveRequestsSwitch />}
+        />
       </header>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
@@ -132,7 +137,7 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
         </div>
 
         {isEditing ? (
-          <div className="min-w-0 animate-in fade-in slide-in-from-right duration-200">
+          <div className="min-w-0 animate-in duration-200 fade-in slide-in-from-right">
             {isLoading ? (
               <AvailabilityLoading />
             ) : (
