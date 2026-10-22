@@ -381,6 +381,18 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
     expect(ids).not.toContain(plan.next.id);
   });
 
+  it('crea un bloque en un día libre y el titulado lo ve entre los horarios libres', async () => {
+    const day = futureDayWithoutBlocks();
+    const response = await http()
+      .post('/api/availability-blocks')
+      .set('Authorization', `Bearer ${tokens.mentorA}`)
+      .send({ startAt: `${day}T11:00:00-04:00`, endAt: `${day}T12:00:00-04:00` })
+      .expect(201);
+
+    expect(response.body.data).toMatchObject({ mentorId: MENTOR_A, state: 'free' });
+    expect(await freeBlockIdsOfMentorA()).toContain(response.body.data.id);
+  });
+
   it('no deja crear un bloque nuevo en un día bloqueado (409)', async () => {
     const day = dayOf(plan.blocked.start);
     const response = await http()
