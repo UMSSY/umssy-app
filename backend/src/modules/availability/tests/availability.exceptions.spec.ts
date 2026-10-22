@@ -10,6 +10,7 @@ import {
   BlockedDateNotFoundException,
   BlockedDateNotOwnedException,
   DayBlockedException,
+  DayBusyException,
   InvalidBlockTimeException,
   MentorAvailabilityNotOwnedException,
 } from '../exceptions/index.js';
@@ -27,6 +28,7 @@ describe('availability exceptions', () => {
     [new BlockedDateNotFoundException(), 404],
     [new BlockedDateNotOwnedException(), 403],
     [new DayBlockedException(), 409],
+    [new DayBusyException(), 409],
   ])('%o usa el status esperado', (exception, statusCode) => {
     expect(exception).toBeInstanceOf(DomainException);
     expect(exception.statusCode).toBe(statusCode);
