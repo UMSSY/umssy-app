@@ -3,10 +3,11 @@ import {
   DEFAULT_COMPANY_JOB_OFFERS_FILTERS,
   type ListCompanyJobOffersRequest,
 } from '../requests/list-company-job-offers.request.js';
-import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
+import { JobOfferContractType, JobOfferModality, JobOfferStatus } from '../types/job-offer.enum.js';
 import { buildCompanyJobOffersQuery } from '../utils/build-company-job-offers-query.js';
 
 const COMPANY_ID = 'a0000000-0000-4000-8000-000000000001';
+const NOT_DELETED = { title: { not: JobOfferStatus.DELETED } };
 
 function build(filters: Partial<ListCompanyJobOffersRequest> = {}) {
   return buildCompanyJobOffersQuery(COMPANY_ID, {
@@ -18,14 +19,19 @@ function build(filters: Partial<ListCompanyJobOffersRequest> = {}) {
 describe('buildCompanyJobOffersQuery', () => {
   it('sin filtros trae solo las vacantes de la empresa, de la más reciente a la más antigua', () => {
     expect(build()).toEqual({
-      where: { companyId: COMPANY_ID },
+      where: { companyId: COMPANY_ID, status: NOT_DELETED },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     });
+  });
+  
+  it('nunca lista las vacantes eliminadas, pero sí las publicadas y cerradas', () => {
+    expect(build().where.status).toEqual({ title: { not: 'Eliminada' } });
   });
 
   it('filtra por modalidad usando el título del catálogo', () => {
     expect(build({ modality: JobOfferModality.HYBRID }).where).toEqual({
       companyId: COMPANY_ID,
+      status: NOT_DELETED,
       modality: { title: 'Híbrido' },
     });
   });
@@ -33,6 +39,7 @@ describe('buildCompanyJobOffersQuery', () => {
   it('filtra por tipo de contrato usando el título del catálogo', () => {
     expect(build({ contractType: JobOfferContractType.INTERNSHIP }).where).toEqual({
       companyId: COMPANY_ID,
+      status: NOT_DELETED,
       contractType: { title: 'Pasantía' },
     });
   });
@@ -80,6 +87,7 @@ describe('buildCompanyJobOffersQuery', () => {
       }).where,
     ).toEqual({
       companyId: COMPANY_ID,
+      status: NOT_DELETED,
       modality: { title: 'Remoto' },
       contractType: { title: 'Tiempo completo' },
       createdAt: { gte: new Date('2026-10-01T04:00:00.000Z') },

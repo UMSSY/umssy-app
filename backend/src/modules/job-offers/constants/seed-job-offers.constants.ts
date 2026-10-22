@@ -128,7 +128,7 @@ export const SEED_JOB_OFFERS = [
     category: 'Desarrollo de software',
     modality: JobOfferModality.HYBRID,
     contractType: JobOfferContractType.PART_TIME,
-    status: JobOfferStatus.PAUSED,
+        status: JobOfferStatus.CLOSED,
     positionsAvailable: 1,
     salaryMin: 4000,
     salaryMax: 5500,
