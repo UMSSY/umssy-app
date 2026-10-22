@@ -6,6 +6,7 @@ import {
   BlockNotOwnedException,
   BlockOverlapException,
   InvalidBlockTimeException,
+  MentorAvailabilityNotOwnedException,
 } from '../exceptions/index.js';
 
 describe('availability exceptions', () => {
@@ -15,6 +16,7 @@ describe('availability exceptions', () => {
     [new BlockNotOwnedException(), 403],
     [new BlockHasAppointmentException(), 409],
     [new InvalidBlockTimeException(), 400],
+    [new MentorAvailabilityNotOwnedException(), 403],
   ])('%o usa el status esperado', (exception, statusCode) => {
     expect(exception).toBeInstanceOf(DomainException);
     expect(exception.statusCode).toBe(statusCode);
