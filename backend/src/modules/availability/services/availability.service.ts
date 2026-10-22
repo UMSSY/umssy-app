@@ -10,6 +10,7 @@ import {
 } from '../exceptions/index.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { toBoliviaTime } from '../../../common/utils/date-time.js';
+import type { TransactionClient } from '../../../common/types/transaction-client.types.js';
 import { BlockedDatesService } from './blocked-dates.service.js';
 import { hasOverlapErrorCode } from '../utils/overlap-error.js';
 import type { AvailabilityBlockResponse } from '../types/availability-block-response.types.js';
@@ -73,19 +74,18 @@ export class AvailabilityService {
       throw new BlockHasAppointmentException();
     }
 
-    try {
-      const updated = await this.blockedDatesService.withDayLock(
-        mentorId,
-        toBoliviaTime(payload.startAt).date,
-        async (tx) => {
-          await this.blockedDatesService.assertDayNotBlocked(mentorId, payload.startAt, tx);
-          return this.availabilityRepository.update(
-            blockId,
-            { startAt: payload.startAt, endAt: payload.endAt },
-            tx,
-          );
-        },
+    const save = (tx?: TransactionClient) =>
+      this.availabilityRepository.update(
+        blockId,
+        { startAt: payload.startAt, endAt: payload.endAt },
+        tx,
       );
+    const movesToAnotherDay = toBoliviaTime(block.startAt).date !== toBoliviaTime(payload.startAt).date;
+
+    try {
+      const updated = movesToAnotherDay
+        ? await this.blockedDatesService.runOnUnblockedDay(mentorId, payload.startAt, save)
+        : await save();
       return this.availabilityMapper.toResponse(updated);
     } catch (error) {
       if (hasOverlapErrorCode(error)) {
@@ -97,13 +97,8 @@ export class AvailabilityService {
 
   async create(mentorId: string, payload: CreateBlockDto): Promise<AvailabilityBlockResponse> {
     try {
-      const block = await this.blockedDatesService.withDayLock(
-        mentorId,
-        toBoliviaTime(payload.startAt).date,
-        async (tx) => {
-          await this.blockedDatesService.assertDayNotBlocked(mentorId, payload.startAt, tx);
-          return this.availabilityRepository.create(mentorId, payload.startAt, payload.endAt, tx);
-        },
+      const block = await this.blockedDatesService.runOnUnblockedDay(mentorId, payload.startAt, (tx) =>
+        this.availabilityRepository.create(mentorId, payload.startAt, payload.endAt, tx),
       );
       return this.availabilityMapper.toResponse({ ...block, appointments: [] });
     } catch (error) {
