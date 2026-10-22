@@ -43,3 +43,8 @@ export const listCompanyJobOffersSchema = z
   );
 
 export type ListCompanyJobOffersRequest = z.infer<typeof listCompanyJobOffersSchema>;
+
+export const DEFAULT_COMPANY_JOB_OFFERS_FILTERS: ListCompanyJobOffersRequest = {
+  sortBy: 'createdAt',
+  order: 'desc',
+};

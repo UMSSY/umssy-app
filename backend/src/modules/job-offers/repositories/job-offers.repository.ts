@@ -4,6 +4,7 @@ import {
   JOB_OFFER_CREATED_SELECT,
   JOB_OFFER_SELECT,
 } from '../constants/job-offer.constants.js';
+import type { ListCompanyJobOffersRequest } from '../requests/list-company-job-offers.request.js';
 import type { CreateJobOfferData } from '../types/create-job-offer-data.type.js';
 import type { JobOfferCatalogIds } from '../types/job-offer-catalog-ids.type.js';
 import { JobOfferStatus } from '../types/job-offer.enum.js';
@@ -11,6 +12,7 @@ import type {
   JobOfferCreatedRecord,
   JobOfferRecord,
 } from '../types/job-offer-record.type.js';
+import { buildCompanyJobOffersQuery } from '../utils/build-company-job-offers-query.js';
 
 @Injectable()
 export class JobOffersRepository {
@@ -66,12 +68,11 @@ export class JobOffersRepository {
       select: JOB_OFFER_SELECT,
     });
   }
-
-  findByCompany(companyId: string): Promise<JobOfferRecord[]> {
-    return this.prisma.jobOffer.findMany({
-      where: { companyId },
-      orderBy: { createdAt: 'desc' },
-      select: JOB_OFFER_SELECT,
-    });
+  findByCompany(
+    companyId: string,
+    filters: ListCompanyJobOffersRequest,
+  ): Promise<JobOfferRecord[]> {
+    const { where, orderBy } = buildCompanyJobOffersQuery(companyId, filters);
+    return this.prisma.jobOffer.findMany({ where, orderBy, select: JOB_OFFER_SELECT });
   }
 }
