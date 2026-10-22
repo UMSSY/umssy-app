@@ -18,7 +18,7 @@ export function MyPassesView() {
     registrations.find((item) => item.id === selectedId) ?? registrations[0];
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-7 bg-transparent lg:flex-row">
+    <div className="mx-auto flex size-full max-w-7xl flex-col gap-7 bg-transparent lg:flex-row">
       <div className="min-w-0 flex-1">
         <div className="mb-8">
           <PageHeading title="Mis inscripciones" description={`${registrations.length} ${registrations.length === 1 ? 'pase' : 'pases'}`} />
@@ -29,7 +29,7 @@ export function MyPassesView() {
           <RequestFeedback message={error} isError onRetry={retry}>
             <Link
               href="/login?next=/events/my-passes"
-              className="underline mr-4"
+              className="mr-4 underline"
             >
               Iniciar sesión
             </Link>
