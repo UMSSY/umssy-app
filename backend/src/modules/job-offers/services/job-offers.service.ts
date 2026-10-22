@@ -62,7 +62,6 @@ export class JobOffersService {
     const records = await this.jobOffersRepository.findPublished(new Date());
     return records.map((record) => this.jobOfferMapper.toResponse(record));
   }
-
     async listByCompany(
     companyId: string,
     filters: ListCompanyJobOffersRequest = DEFAULT_COMPANY_JOB_OFFERS_FILTERS,

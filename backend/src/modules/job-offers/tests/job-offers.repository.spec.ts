@@ -104,7 +104,6 @@ describe('JobOffersRepository', () => {
       select: JOB_OFFER_SELECT,
     });
   });
-
     it('lista las vacantes de una empresa sin filtros, de la más reciente a la más antigua', async () => {
     prisma.jobOffer.findMany.mockResolvedValue([]);
 

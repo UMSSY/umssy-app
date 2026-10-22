@@ -68,8 +68,7 @@ export class JobOffersRepository {
       select: JOB_OFFER_SELECT,
     });
   }
-
-    findByCompany(
+  findByCompany(
     companyId: string,
     filters: ListCompanyJobOffersRequest,
   ): Promise<JobOfferRecord[]> {
