@@ -7,19 +7,16 @@ export const DAY_LABELS = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"] as
 
 export const STATE_BUTTON_VARIANT: Record<AvailabilityBlockState, "outline" | "default"> = {
   free: "outline",
-  pending: "outline",
   confirmed: "default",
 };
 
 export const STATE_BUTTON_CLASSES: Record<AvailabilityBlockState, string> = {
   free: "",
-  pending: "border-2 border-dashed border-ink",
   confirmed: "bg-ink border-ink text-white hover:bg-ink",
 };
 
 export const STATE_LABELS_ES: Record<AvailabilityBlockState, string> = {
   free: "libre",
-  pending: "pendiente",
   confirmed: "confirmada",
 };
 
@@ -29,7 +26,6 @@ export const SELECTED_LEGEND_LABEL = "Tu selección";
 
 export const BLOCK_STATE_TEXT: Record<AvailabilityBlockState, string> = {
   free: "Libre",
-  pending: "Pendiente",
   confirmed: "Confirmada",
 };
 
