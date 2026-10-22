@@ -57,7 +57,6 @@ describe('RequirementTermsService', () => {
     const result = await service.extractAndMatchRequirements(
       'Conocimientos en C++, C#, Node.js y .NET',
     );
-    // El catálogo mock no tiene estas skills, así que solo verificamos que no falle
     expect(Array.isArray(result)).toBe(true);
   });
 
