@@ -436,6 +436,16 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
     expect(await freeBlockIdsOfMentorA()).not.toContain(plan.blocked.id);
   });
 
+  it('volver a bloquear una fecha con otro motivo actualiza el motivo sin duplicarla', async () => {
+    const response = await blockDate(tokens.mentorA, {
+      blockedOn: dayOf(plan.blocked.start),
+      reason: 'Congreso nacional',
+    }).expect(201);
+
+    expect(response.body.data).toMatchObject({ id: SEED_BLOCKED_DATE_ID, reason: 'Congreso nacional' });
+    expect(store.blockedDates).toHaveLength(1);
+  });
+
   it('bloquear la misma fecha varias veces, incluso en paralelo, deja un solo registro', async () => {
     const day = futureDayWithoutBlocks();
 
