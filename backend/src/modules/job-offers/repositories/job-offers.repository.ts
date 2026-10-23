@@ -75,4 +75,15 @@ export class JobOffersRepository {
     const { where, orderBy } = buildCompanyJobOffersQuery(companyId, filters);
     return this.prisma.jobOffer.findMany({ where, orderBy, select: JOB_OFFER_SELECT });
   }
+
+  findByCompanyAndId(companyId: string, jobOfferId: string): Promise<JobOfferRecord | null> {
+    return this.prisma.jobOffer.findFirst({
+      where: {
+        id: jobOfferId,
+        companyId,
+        status: { title: { not: JobOfferStatus.DELETED } },
+      },
+      select: JOB_OFFER_SELECT,
+    });
+  }
 }
