@@ -15,7 +15,7 @@ import { trimFormValues } from "../utils/trim-form-values";
 import { validatePersonalInfo } from "../utils/validate-personal-info";
 import { FormField } from "./form-field";
 import { ProfilePhotoField } from "./profile-photo-field";
-import { FormSection } from "@/shared/components/layout/form-section";
+import { SectionCard } from "./section-card";
 
 export function PersonalInfoForm({
   initialValues,
@@ -65,14 +65,14 @@ export function PersonalInfoForm({
   };
 
   return (
-    <div className="rounded-lg border border-border bg-surface">
-      <div className="border-b border-border p-6 lg:px-8">
+    <SectionCard
+      title="Tu información personal"
+      description="Completa los campos para crear tu perfil. Podrás editarlos más adelante."
+    >
       <ProfilePhotoField {...photo} />
 
-      </div>
-      <form onSubmit={handleSubmit} noValidate className="px-6 pt-6 lg:px-8">
-        <FormSection title="Identidad" description="Tu nombre en la comunidad.">
-          <div className="grid gap-5 md:grid-cols-2">
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-8 pt-8">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-5">
           <FormField id="firstName" label="Nombres" isRequired error={errors.firstName}>
             <Input
               id="firstName"
@@ -83,7 +83,7 @@ export function PersonalInfoForm({
               value={values.firstName}
               disabled={isSaving}
               onChange={handleChange}
-              className="h-11"
+              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
               {...getFieldErrorProps("firstName", errors.firstName)}
             />
           </FormField>
@@ -97,14 +97,10 @@ export function PersonalInfoForm({
               value={values.lastName}
               disabled={isSaving}
               onChange={handleChange}
-              className="h-11"
+              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
               {...getFieldErrorProps("lastName", errors.lastName)}
             />
           </FormField>
-          </div>
-        </FormSection>
-        <FormSection title="Contacto" description="Dónde pueden encontrarte.">
-          <div className="grid gap-5 md:grid-cols-2">
           <FormField id="cityId" label="Ciudad de residencia" isRequired error={errors.cityId}>
             <Select
               name="cityId"
@@ -115,14 +111,14 @@ export function PersonalInfoForm({
             >
               <SelectTrigger
                 id="cityId"
-                className="w-full data-[size=default]:h-11"
+                className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 data-[size=default]:h-12 data-placeholder:text-text-secondary/70 focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
                 {...getFieldErrorProps("cityId", errors.cityId)}
               >
                 <SelectValue placeholder="Selecciona tu ciudad" />
               </SelectTrigger>
               <SelectContent>
                 {cities.map((city) => (
-                  <SelectItem key={city.id} value={city.id} className="text-base">
+                  <SelectItem key={city.id} value={city.id} className="text-[15px]">
                     {city.title}
                   </SelectItem>
                 ))}
@@ -139,13 +135,13 @@ export function PersonalInfoForm({
               value={values.phone}
               disabled={isSaving}
               onChange={handleChange}
-              className="h-11"
+              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
               {...getFieldErrorProps("phone", errors.phone)}
               aria-describedby={[PHONE_HINT_ID, errors.phone ? getFieldErrorId("phone") : null]
                 .filter(Boolean)
                 .join(" ")}
             />
-            <p id={PHONE_HINT_ID} className="text-sm text-text-secondary">
+            <p id={PHONE_HINT_ID} className="text-[13px] text-text-secondary">
               {PHONE_HINT}
             </p>
           </FormField>
@@ -164,30 +160,30 @@ export function PersonalInfoForm({
               value={values.personalEmail}
               disabled={isSaving}
               onChange={handleChange}
-              className="h-11"
+              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
               {...getFieldErrorProps("personalEmail", errors.personalEmail)}
             />
           </FormField>
-          </div>
-        </FormSection>
-        <div className="-mx-6 flex flex-wrap items-center justify-between gap-4 rounded-b-lg border-t border-border bg-surface px-6 py-5 lg:-mx-8 lg:px-8">
-          <p className="text-sm text-text-secondary">* Campos obligatorios</p>
+        </div>
+
+        <div className="flex items-center justify-between gap-6">
+          <p className="text-[13px] text-text-secondary">* Campos obligatorios</p>
           <div className="flex gap-3">
             <Button
               type="button"
               variant="outline"
-              className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+              className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
               disabled={isSaving}
               onClick={handleCancel}
             >
               Cancelar
             </Button>
-            <Button type="submit" className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
+            <Button type="submit" className={cn("h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger", "min-w-44")} disabled={isSaving}>
               {isSaving ? "Guardando..." : "Guardar perfil"}
             </Button>
           </div>
         </div>
       </form>
-    </div>
+    </SectionCard>
   );
 }

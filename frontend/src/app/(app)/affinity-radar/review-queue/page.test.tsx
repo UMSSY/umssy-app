@@ -18,7 +18,7 @@ describe('ColaRevisionPage', () => {
     render(<ColaRevisionPage />)
 
     expect(
-      screen.getByRole('heading', { name: 'Revisión de radares' }),
+      screen.getByRole('heading', { name: 'Cola de Revisión' }),
     ).toBeDefined()
 
     expect(

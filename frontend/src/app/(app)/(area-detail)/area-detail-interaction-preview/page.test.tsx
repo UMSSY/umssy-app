@@ -41,7 +41,7 @@ describe("AreaDetailInteractionPreviewPage", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "Detalle por área",
+        name: "Prueba de interacción del detalle por área",
       }),
     ).toBeInTheDocument();
   });

@@ -1,5 +1,4 @@
-import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
-import { act, cleanup, waitFor } from "@testing-library/react";
+import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EDUCATION_FEEDBACK_MESSAGES } from "../constants/education-feedback.constants";
 import { educationsService } from "../services/educations.service";
@@ -35,8 +34,8 @@ describe("useEducations", () => {
     expect(result.current.isLoading).toBe(true);
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    await waitFor(() => expect(result.current.educations).toEqual(records));
-    await waitFor(() => expect(result.current.error).toBeNull());
+    expect(result.current.educations).toEqual(records);
+    expect(result.current.error).toBeNull();
   });
 
   it("completes loading when the user has no records", async () => {
@@ -45,8 +44,8 @@ describe("useEducations", () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    await waitFor(() => expect(result.current.educations).toEqual([]));
-    await waitFor(() => expect(result.current.error).toBeNull());
+    expect(result.current.educations).toEqual([]);
+    expect(result.current.error).toBeNull();
   });
 
   it("reports a Spanish error instead of exposing backend details", async () => {
@@ -55,8 +54,8 @@ describe("useEducations", () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    await waitFor(() => expect(result.current.educations).toEqual([]));
-    await waitFor(() => expect(result.current.error).toBe(EDUCATION_FEEDBACK_MESSAGES.loadError));
+    expect(result.current.educations).toEqual([]);
+    expect(result.current.error).toBe(EDUCATION_FEEDBACK_MESSAGES.loadError);
   });
 
   it("ignores a successful response after unmounting", async () => {
@@ -72,7 +71,7 @@ describe("useEducations", () => {
       resolveRequest([EDUCATION]);
     });
 
-    await waitFor(() => expect(result.current.educations).toEqual([]));
+    expect(result.current.educations).toEqual([]);
     expect(result.current.isLoading).toBe(true);
   });
 
@@ -89,7 +88,7 @@ describe("useEducations", () => {
       rejectRequest(new Error("Network Error"));
     });
 
-    await waitFor(() => expect(result.current.error).toBeNull());
+    expect(result.current.error).toBeNull();
     expect(result.current.isLoading).toBe(true);
   });
 
@@ -103,8 +102,8 @@ describe("useEducations", () => {
       await result.current.reload();
     });
 
-    await waitFor(() => expect(result.current.educations).toEqual([EDUCATION]));
-    await waitFor(() => expect(result.current.error).toBeNull());
+    expect(result.current.educations).toEqual([EDUCATION]);
+    expect(result.current.error).toBeNull();
   });
 
   it("keeps the refreshed list when the initial request finishes after a save", async () => {
@@ -117,8 +116,8 @@ describe("useEducations", () => {
     await act(async () => { await result.current.reload(); });
     await act(async () => { resolveInitial([]); });
 
-    await waitFor(() => expect(result.current.educations).toEqual([EDUCATION]));
-    await waitFor(() => expect(result.current.error).toBeNull());
+    expect(result.current.educations).toEqual([EDUCATION]);
+    expect(result.current.error).toBeNull();
   });
 
   it("ignores an older reload error after a newer reload succeeds", async () => {
@@ -138,8 +137,8 @@ describe("useEducations", () => {
       await olderReload;
     });
 
-    await waitFor(() => expect(result.current.educations).toEqual([EDUCATION]));
-    await waitFor(() => expect(result.current.error).toBeNull());
+    expect(result.current.educations).toEqual([EDUCATION]);
+    expect(result.current.error).toBeNull();
     expect(result.current.isLoading).toBe(false);
   });
 
@@ -160,7 +159,7 @@ describe("useEducations", () => {
       await result.current.reload();
     });
 
-    await waitFor(() => expect(result.current.educations).toEqual([EDUCATION]));
+    expect(result.current.educations).toEqual([EDUCATION]);
     expect(educationsService.getEducations).toHaveBeenCalledTimes(2);
   });
 });

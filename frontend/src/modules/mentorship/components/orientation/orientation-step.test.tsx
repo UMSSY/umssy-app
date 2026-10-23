@@ -1,5 +1,9 @@
-import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OrientationStep } from "./orientation-step";
 import type { OrientationTypeResponse } from "../../types/orientation-type-response.types";

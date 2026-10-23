@@ -46,7 +46,16 @@ vi.mock('../../modules/chat/seeds/chat.seed.js', () => ({
   seedChat: (...args: unknown[]) => seedChat(...args),
 }));
 
-const { runSeed } = await import('../database/seeds.js');
+const { createSeedClient, loadSeedEnv, runSeed } =
+  await import('../database/seeds.js');
+
+const validEnv = {
+  DB_USER: 'u',
+  DB_PASSWORD: 'p',
+  DB_NAME: 'n',
+  DB_HOST: 'h',
+  DB_PORT: '5432',
+};
 
 function setupSeeds() {
   const user = (id: string) => ({ id });
@@ -84,6 +93,53 @@ function setupSeeds() {
     messages: 11,
   });
 }
+
+describe('loadSeedEnv', () => {
+  it('lee la configuración de base de datos válida', () => {
+    expect(loadSeedEnv(validEnv as NodeJS.ProcessEnv)).toMatchObject({
+      DB_HOST: 'h',
+      DB_PORT: 5432,
+    });
+  });
+
+  it('lanza un error en español con las variables inválidas', () => {
+    expect(() => loadSeedEnv({} as NodeJS.ProcessEnv)).toThrow(
+      'Configuración de base de datos inválida',
+    );
+  });
+
+  it('usa process.env por defecto', () => {
+    vi.stubEnv('DB_USER', 'u');
+    vi.stubEnv('DB_PASSWORD', 'p');
+    vi.stubEnv('DB_NAME', 'n');
+    vi.stubEnv('DB_HOST', 'h');
+    vi.stubEnv('DB_PORT', '5432');
+    expect(loadSeedEnv().DB_NAME).toBe('n');
+  });
+});
+
+describe('createSeedClient', () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('crea un cliente con el esquema indicado', () => {
+    vi.stubEnv('DB_USER', 'u');
+    vi.stubEnv('DB_PASSWORD', 'p');
+    vi.stubEnv('DB_NAME', 'n');
+    vi.stubEnv('DB_HOST', 'h');
+    vi.stubEnv('DB_PORT', '5432');
+
+    expect(
+      createSeedClient({
+        ...validEnv,
+        DB_PORT: 5432,
+        DB_SCHEMA: 'test',
+      } as never),
+    ).toBeDefined();
+    expect(
+      createSeedClient({ ...validEnv, DB_PORT: 5432 } as never),
+    ).toBeDefined();
+  });
+});
 
 describe('runSeed', () => {
   afterEach(() => vi.clearAllMocks());

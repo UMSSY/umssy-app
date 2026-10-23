@@ -1,5 +1,4 @@
-import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, it, expect } from "vitest";
 import { ProgressStepper } from "./progress-stepper";
 
@@ -19,7 +18,7 @@ describe("ProgressStepper", () => {
     render(<ProgressStepper currentStep={2} />);
 
     const activeStep = screen.getByText("2");
-    expect(activeStep.closest("li")?.getAttribute("aria-current")).toBe("step");
+    expect(activeStep.getAttribute("aria-current")).toBe("step");
   });
 
   it("marca como completados los pasos anteriores al actual", () => {
@@ -29,7 +28,7 @@ describe("ProgressStepper", () => {
     expect(screen.queryByText("2")).toBeNull();
 
     const activeStep = screen.getByText("3");
-    expect(activeStep.closest("li")?.getAttribute("aria-current")).toBe("step");
+    expect(activeStep.getAttribute("aria-current")).toBe("step");
 
     const checkIcons = document.querySelectorAll("svg");
     expect(checkIcons.length).toBe(2);
@@ -43,7 +42,7 @@ describe("ProgressStepper", () => {
     expect(screen.queryByText("3")).toBeNull();
 
     const activeStep = screen.getByText("4");
-    expect(activeStep.closest("li")?.getAttribute("aria-current")).toBe("step");
+    expect(activeStep.getAttribute("aria-current")).toBe("step");
 
     const checkIcons = document.querySelectorAll("svg");
     expect(checkIcons.length).toBe(3);

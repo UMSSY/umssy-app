@@ -1,4 +1,4 @@
-import { SHORT_MONTH_LABELS } from "@/modules/profile";
+import { SHORT_MONTH_LABELS } from "@/modules/profile/config/short-month-labels.config";
 import { CURRENT_JOB_LABEL } from "../constants/work-experience.constants";
 
 function getMonthAndYear(yearMonth: string): { month: string; year: string } {

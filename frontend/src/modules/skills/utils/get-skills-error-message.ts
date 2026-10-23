@@ -1,5 +1,5 @@
 import { SKILLS_ERROR_MESSAGES_BY_STATUS } from "../constants/skills.constants";
-import type { HttpError } from "@/modules/profile";
+import type { HttpError } from "@/modules/profile/types/http-error.types";
 
 export function getSkillsErrorMessage(error: unknown, fallbackMessage: string): string {
   if (typeof error !== "object" || error === null) {

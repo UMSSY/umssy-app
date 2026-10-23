@@ -65,8 +65,7 @@ export function useMatching() {
   }
 
   function confirmSchedule(name: string, date: string, time: string) {
-    const displayDate = date.split("-").reverse().join("/");
-    setActionFeedback(`Entrevista con ${name} propuesta para el ${displayDate} a las ${time}.`);
+    setActionFeedback(`Entrevista con ${name} propuesta para el ${date} a las ${time}.`);
   }
 
   return {

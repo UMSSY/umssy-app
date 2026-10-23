@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { EducationView } from "@/modules/education";
 
-export default function ProfileSectionPage() {
-  return redirect("/profile#education");
+export default function EducationPage() {
+  return <EducationView />;
 }

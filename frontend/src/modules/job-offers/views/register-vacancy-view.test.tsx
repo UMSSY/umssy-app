@@ -1,4 +1,3 @@
-import { Button as TestButton } from "@/components/ui/button";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_CONDITIONS, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
@@ -47,16 +46,16 @@ vi.mock("../components/vacancy-stepper", () => ({
 vi.mock("../components/information-step", () => ({
   InformationStep: ({ onCancel, onContinue }: { onCancel: () => void; onContinue: () => void }) => (
     <div data-testid="information-step">
-      <TestButton onClick={onCancel}>Cancelar</TestButton>
-      <TestButton onClick={onContinue}>Continuar</TestButton>
+      <button onClick={onCancel}>Cancelar</button>
+      <button onClick={onContinue}>Continuar</button>
     </div>
   ),
 }));
 vi.mock("../components/requirements-step", () => ({
   RequirementsStep: ({ onPrevious, onContinue }: { onPrevious: () => void; onContinue: () => void }) => (
     <div data-testid="requirements-step">
-      <TestButton onClick={onPrevious}>Anterior</TestButton>
-      <TestButton onClick={onContinue}>Continuar</TestButton>
+      <button onClick={onPrevious}>Anterior</button>
+      <button onClick={onContinue}>Continuar</button>
     </div>
   ),
 }));
@@ -73,9 +72,9 @@ vi.mock("../components/preview-step", () => ({
       <span>{props.isSubmitting ? "enviando" : "libre"}</span>
       <span>{props.isPublished ? "publicada" : "pendiente"}</span>
       <span>{props.company.name}</span>
-      <TestButton onClick={props.onPrevious}>Anterior</TestButton>
-      <TestButton onClick={props.onConfirm}>Confirmar</TestButton>
-      <TestButton onClick={props.onFinish}>Aceptar</TestButton>
+      <button onClick={props.onPrevious}>Anterior</button>
+      <button onClick={props.onConfirm}>Confirmar</button>
+      <button onClick={props.onFinish}>Aceptar</button>
     </div>
   ),
 }));
@@ -196,9 +195,8 @@ describe("RegisterVacancyView", () => {
     publication.isSuccess = true;
     render(<RegisterVacancyView />);
 
-    expect(screen.getByRole("heading", { name: "Vacante publicada" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Volver a mi empresa" })).toHaveAttribute("href", "/recruiters");
-    fireEvent.click(screen.getByRole("button", { name: "Publicar otra vacante" }));
+    expect(screen.getByText("publicada")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
 
     expect(publication.reset).toHaveBeenCalledOnce();
     expect(form.reset).toHaveBeenCalledOnce();

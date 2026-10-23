@@ -2,11 +2,11 @@ import {
   readRecord,
   readArray,
   readString,
-} from '@/modules/events';
+} from '../../events/utils/response-validation';
 import type { EventCategoryItem } from '../types/event-category-item.types';
 import { apiClient } from '@/shared/services/api-client';
 
-import { REQUEST_TIMEOUT_MS } from '@/modules/events';
+import { REQUEST_TIMEOUT_MS } from '../../events/constants/events.constants';
 
 export const eventCategoriesService = {
   async getAll(): Promise<EventCategoryItem[]> {

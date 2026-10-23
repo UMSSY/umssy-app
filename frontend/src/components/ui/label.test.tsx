@@ -17,9 +17,9 @@ describe("Label", () => {
   })
 
   it("combina la clase recibida con las propias", () => {
-    render(<Label className="mt-2">Texto</Label>)
+    render(<Label className="extra">Texto</Label>)
     const label = screen.getByText("Texto")
     expect(label).toHaveAttribute("data-slot", "label")
-    expect(label).toHaveClass("mt-2")
+    expect(label).toHaveClass("extra")
   })
 })

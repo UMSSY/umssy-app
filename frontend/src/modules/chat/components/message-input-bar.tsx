@@ -1,22 +1,17 @@
 
-"use client";
+'use client';
 
-import { useRef, useEffect } from "react";
-import type {
-  ChangeEvent,
-  FormEvent,
-  KeyboardEvent,
-} from "react";
+import { useRef, useEffect } from 'react';
+import type { ChangeEvent, FormEvent, KeyboardEvent } from 'react';
 
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from '@/components/ui/button';
 
 import {
   countCharacters,
   truncateToMaxCharacters,
   isWhitespaceOnly,
   MAX_MESSAGE_LENGTH,
-} from "../utils/unicode-counter";
+} from '../utils/unicode-counter';
 
 interface MessageInputBarProps {
   value: string;
@@ -36,18 +31,18 @@ export function MessageInputBar({
   disabled = false,
   isSending = false,
   maxLength = MAX_MESSAGE_LENGTH,
-  placeholder = "Escribe un mensaje...",
+  placeholder = 'Escribe un mensaje...',
   onKeyDown,
 }: MessageInputBarProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Ajusta la altura del textarea hasta un máximo de 120px.
+  // Ajusta la altura del textarea según el contenido, hasta 120px.
   useEffect(() => {
     const textarea = textareaRef.current;
 
     if (!textarea) return;
 
-    textarea.style.height = "auto";
+    textarea.style.height = 'auto';
 
     const newHeight = Math.min(textarea.scrollHeight, 120);
 
@@ -62,9 +57,7 @@ export function MessageInputBar({
     isWhitespaceOnly(value) ||
     characterCount > maxLength;
 
-  const handleChange = (
-    event: ChangeEvent<HTMLTextAreaElement>
-  ) => {
+  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const rawValue = event.target.value;
 
     const truncatedValue = truncateToMaxCharacters(
@@ -75,9 +68,7 @@ export function MessageInputBar({
     onChange(truncatedValue);
   };
 
-  const handleSubmit = (
-    event: FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!isSendDisabled) {
@@ -88,14 +79,14 @@ export function MessageInputBar({
   return (
     <div
       data-testid="message-input-bar"
-      className="w-full min-w-0 shrink-0 border-t border-border bg-surface p-3 transition-all md:p-4"
+      className="w-full min-w-0 shrink-0 border-t border-[#E3E7EC] bg-white p-3 transition-all md:p-4"
     >
       <form
         onSubmit={handleSubmit}
         className="flex w-full min-w-0 flex-col gap-2"
       >
-        <div className="flex w-full min-w-0 items-end gap-2.5 rounded-xl border border-border bg-surface-soft p-2 transition-all focus-within:border-ink focus-within:bg-surface">
-          <Textarea
+        <div className="flex w-full min-w-0 items-end gap-2.5 rounded-xl border border-[#E3E7EC] bg-[#F6F7F9] p-2 transition-all focus-within:border-[#0B1F2E] focus-within:bg-white">
+          <textarea
             ref={textareaRef}
             data-testid="message-textarea"
             value={value}
@@ -104,17 +95,17 @@ export function MessageInputBar({
             disabled={disabled || isSending}
             placeholder={placeholder}
             rows={1}
-            className="max-h-[120px] min-h-[40px] w-full min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent p-1 text-sm leading-relaxed [overflow-wrap:anywhere] break-words text-ink placeholder:text-text-secondary focus-visible:ring-2 focus-visible:ring-ring"
+            className="max-h-[120px] min-h-[40px] w-full min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent p-1 text-sm leading-relaxed [overflow-wrap:anywhere] break-words text-[#0B1F2E] placeholder:text-[#5B6470] focus:outline-none"
             aria-label="Campo de redacción de mensaje"
           />
 
           <div className="flex shrink-0 items-center gap-2 pb-1">
             <span
               data-testid="character-counter"
-              className={`text-xs font-medium tracking-tight select-none ${
+              className={`text-[11px] font-medium tracking-tight select-none ${
                 characterCount >= maxLength
-                  ? "font-bold text-accent"
-                  : "text-text-secondary"
+                  ? 'font-bold text-[#E30613]'
+                  : 'text-[#5B6470]'
               }`}
             >
               {characterCount}/{maxLength}
@@ -127,13 +118,13 @@ export function MessageInputBar({
               data-testid="send-button"
               disabled={isSendDisabled}
               aria-label="Enviar mensaje"
-              className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold shadow-xs transition-all focus-visible:ring-2 focus-visible:ring-ring md:text-sm ${
+              className={`h-auto rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all md:text-sm ${
                 isSendDisabled
-                  ? "cursor-not-allowed bg-border-strong text-text-secondary opacity-60 shadow-none"
-                  : "bg-primary text-primary-foreground shadow-none hover:bg-brand-hover"
+                  ? 'cursor-not-allowed bg-slate-300 text-slate-500 opacity-60 shadow-none'
+                  : 'bg-[#E30613] shadow-sm hover:bg-[#B4050F] active:scale-95'
               }`}
             >
-              {isSending ? "Enviando..." : "Enviar"}
+              {isSending ? 'Enviando...' : 'Enviar'}
             </Button>
           </div>
         </div>

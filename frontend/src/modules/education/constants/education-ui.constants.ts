@@ -1,6 +1,6 @@
 export const EDUCATION_UI_TEXTS = {
-  pageTitle: "Formación académica",
-  pageDescription: "Agrega y actualiza tus estudios.",
+  pageTitle: "Trayectoria",
+  pageDescription: "Muestra tus estudios, experiencia, habilidades y certificaciones",
   listTitle: "Formación registrada",
   listDescription: "Puedes agregar varias entradas y actualizar cada una.",
   listFooter: "Los nuevos estudios aparecerán aquí después de guardar.",

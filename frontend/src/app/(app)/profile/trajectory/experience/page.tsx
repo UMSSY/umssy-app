@@ -1,5 +1,6 @@
-import { redirect } from "next/navigation";
+import { WorkExperienceView } from "@/modules/work-experience";
 
-export default function ProfileSectionPage() {
-  return redirect("/profile#experience");
+export default function WorkExperiencePage() {
+  return <WorkExperienceView />;
 }
+

@@ -1,40 +1,39 @@
 
-import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-
 import {
   afterEach,
   describe,
   expect,
   it,
   vi,
-} from "vitest";
+} from 'vitest';
 
 import {
   cleanup,
   fireEvent,
+  render,
   screen,
   waitFor,
-} from "@testing-library/react";
+} from '@testing-library/react';
 
 import {
   QueryClient,
   QueryClientProvider,
-} from "@tanstack/react-query";
+} from '@tanstack/react-query';
 
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import { ChatView } from "../views/chat-view";
-import ChatPage from "@/app/(app)/chat/page";
-import AppLayout from "@/app/(app)/layout";
+import { ChatView } from '../views/chat-view';
+import ChatPage from '@/app/(app)/chat/page';
+import AppLayout from '@/app/(app)/layout';
 
-import { stubMatchMedia } from "@/shared/testing/stub-match-media";
+import { stubMatchMedia } from '@/shared/testing/stub-match-media';
 
-import * as chatApi from "../services/chat-api";
+import * as chatApi from '../services/chat-api';
 
-import type { Conversation } from "../types/conversation.types";
+import type { Conversation } from '../types/conversation.types';
 
-vi.mock("next/navigation", () => ({
-  usePathname: () => "/chat",
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/chat',
   useRouter: () => ({
     replace: vi.fn(),
     push: vi.fn(),
@@ -42,9 +41,9 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-vi.mock("@/modules/auth", async (importOriginal) => {
+vi.mock('@/modules/auth', async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("@/modules/auth")>();
+    await importOriginal<typeof import('@/modules/auth')>();
 
   return {
     ...actual,
@@ -59,13 +58,14 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-// Datos ficticios utilizados únicamente en las pruebas.
+// Usuarios genéricos exclusivos de las pruebas.
+// No se consultan ni se insertan en la base de datos.
 const testConversations: Conversation[] = [
   {
-    id: "test-conversation-1",
+    id: 'test-conversation-1',
     contact: {
-      id: "test-user-1",
-      fullName: "Usuario de Prueba 1",
+      id: 'test-user-1',
+      fullName: 'Usuario de Prueba 1',
       avatarUrl: null,
       isOnline: true,
     },
@@ -74,10 +74,10 @@ const testConversations: Conversation[] = [
     updatedAt: new Date().toISOString(),
   },
   {
-    id: "test-conversation-2",
+    id: 'test-conversation-2',
     contact: {
-      id: "test-user-2",
-      fullName: "Usuario de Prueba 2",
+      id: 'test-user-2',
+      fullName: 'Usuario de Prueba 2',
       avatarUrl: null,
       isOnline: false,
     },
@@ -103,165 +103,132 @@ function renderWithQueryClient(ui: ReactNode) {
   );
 }
 
-describe("ChatView & ChatPage", () => {
-  it(
-    "debe mostrar las conversaciones obtenidas mediante el servicio",
-    async () => {
-      vi.spyOn(chatApi, "getConversations")
-        .mockResolvedValue(testConversations);
+describe('ChatView & ChatPage', () => {
+  it('debe mostrar las conversaciones obtenidas mediante el servicio', async () => {
+    vi.spyOn(chatApi, 'getConversations')
+      .mockResolvedValue(testConversations);
 
-      renderWithQueryClient(<ChatView />);
+    renderWithQueryClient(<ChatView />);
 
+    expect(
+      await screen.findByText('Usuario de Prueba 1'),
+    ).toBeDefined();
+
+    expect(
+      screen.getByText('Usuario de Prueba 2'),
+    ).toBeDefined();
+  });
+
+  it('debe seleccionar una conversación y mostrar el contacto conectado', async () => {
+    vi.spyOn(chatApi, 'getConversations')
+      .mockResolvedValue(testConversations);
+
+    renderWithQueryClient(<ChatView />);
+
+    const conversationItem =
+      await screen.findByText('Usuario de Prueba 1');
+
+    fireEvent.click(conversationItem);
+
+    await waitFor(() => {
       expect(
-        await screen.findByText("Usuario de Prueba 1"),
-      ).toBeDefined();
+        screen.getByTestId('chat-contact-name')
+          .textContent,
+      ).toBe('Usuario de Prueba 1');
+    });
 
+    expect(
+      screen.getByText('En línea'),
+    ).toBeDefined();
+
+    expect(
+      screen.getByTestId('chat-room'),
+    ).toBeDefined();
+  });
+
+  it('debe seleccionar una conversación y mostrar el contacto desconectado', async () => {
+    vi.spyOn(chatApi, 'getConversations')
+      .mockResolvedValue(testConversations);
+
+    renderWithQueryClient(<ChatView />);
+
+    const conversationItem =
+      await screen.findByText('Usuario de Prueba 2');
+
+    fireEvent.click(conversationItem);
+
+    await waitFor(() => {
       expect(
-        screen.getByText("Usuario de Prueba 2"),
-      ).toBeDefined();
-    },
-  );
+        screen.getByTestId('chat-contact-name')
+          .textContent,
+      ).toBe('Usuario de Prueba 2');
+    });
 
-  it(
-    "debe seleccionar una conversación y mostrar el contacto conectado",
-    async () => {
-      vi.spyOn(chatApi, "getConversations")
-        .mockResolvedValue(testConversations);
+    expect(
+      screen.getByText('Desconectado'),
+    ).toBeDefined();
+  });
 
-      renderWithQueryClient(<ChatView />);
+  it('debe cambiar el filtro y abrir el modal de nueva conversación', async () => {
+    vi.spyOn(chatApi, 'getConversations')
+      .mockResolvedValue(testConversations);
 
-      const conversationItem =
-        await screen.findByText("Usuario de Prueba 1");
+    renderWithQueryClient(<ChatView />);
 
-      fireEvent.click(conversationItem);
+    await screen.findByText('Usuario de Prueba 1');
 
-      await waitFor(() => {
-        expect(
-          screen.getByTestId("chat-contact-name").textContent,
-        ).toBe("Usuario de Prueba 1");
-      });
+    const unreadTab = screen.getByText('Sin leer');
 
-      expect(
-        screen.getByText("En línea"),
-      ).toBeDefined();
+    fireEvent.click(unreadTab);
 
-      expect(
-        screen.getByTestId("chat-room"),
-      ).toBeDefined();
-    },
-  );
+    const newChatButton = screen.getByText(
+      'Iniciar una nueva conversacion',
+    );
 
-  it(
-    "debe seleccionar una conversación y mostrar el contacto desconectado",
-    async () => {
-      vi.spyOn(chatApi, "getConversations")
-        .mockResolvedValue(testConversations);
+    fireEvent.click(newChatButton);
 
-      renderWithQueryClient(<ChatView />);
+    expect(
+      await screen.findByText(/Nueva conversación/i),
+    ).toBeDefined();
+  });
 
-      const conversationItem =
-        await screen.findByText("Usuario de Prueba 2");
+  it('debe renderizar la página de chat con una sola navegación principal', async () => {
+    stubMatchMedia();
 
-      fireEvent.click(conversationItem);
+    sessionStorage.setItem(
+      'accessToken',
+      `h.${btoa(JSON.stringify({
+        roleTag: 'titulado',
+      }))}.s`,
+    );
 
-      await waitFor(() => {
-        expect(
-          screen.getByTestId("chat-contact-name").textContent,
-        ).toBe("Usuario de Prueba 2");
-      });
+    vi.spyOn(chatApi, 'getConversations')
+      .mockResolvedValue(testConversations);
 
-      expect(
-        screen.getByText("Desconectado"),
-      ).toBeDefined();
-    },
-  );
+    renderWithQueryClient(
+      <AppLayout>
+        <ChatPage />
+      </AppLayout>,
+    );
 
-  it(
-    "debe cambiar el filtro y abrir el modal de nueva conversación",
-    async () => {
-      vi.spyOn(chatApi, "getConversations")
-        .mockResolvedValue(testConversations);
+    expect(
+      screen.getByText('Chats'),
+    ).toBeDefined();
 
-      renderWithQueryClient(<ChatView />);
+    expect(
+      screen.getAllByRole('navigation', {
+        name: 'Menú principal',
+      }),
+    ).toHaveLength(1);
 
-      await screen.findByText("Usuario de Prueba 1");
+    expect(
+      screen.getByRole('link', {
+        name: 'Chat',
+      }),
+    ).toHaveAttribute('href', '/chat');
 
-      fireEvent.click(
-        screen.getByRole("button", {
-          name: "Sin leer",
-        }),
-      );
-
-      expect(
-        screen.queryByText("Usuario de Prueba 2"),
-      ).toBeNull();
-
-      fireEvent.click(
-        screen.getByRole("button", {
-          name: "Todos",
-        }),
-      );
-
-      expect(
-        await screen.findByText("Usuario de Prueba 2"),
-      ).toBeDefined();
-
-      fireEvent.click(
-        screen.getByRole("button", {
-          name: "Iniciar nueva conversación",
-        }),
-      );
-
-      expect(
-        await screen.findByRole("heading", {
-          name: "Nueva conversación",
-        }),
-      ).toBeDefined();
-    },
-  );
-
-  it(
-    "debe renderizar la página de chat con una sola navegación principal",
-    async () => {
-      stubMatchMedia();
-
-      sessionStorage.setItem(
-        "accessToken",
-        `h.${btoa(
-          JSON.stringify({
-            roleTag: "titulado",
-          }),
-        )}.s`,
-      );
-
-      vi.spyOn(chatApi, "getConversations")
-        .mockResolvedValue(testConversations);
-
-      renderWithQueryClient(
-        <AppLayout>
-          <ChatPage />
-        </AppLayout>,
-      );
-
-      expect(
-        screen.getByText("Chats"),
-      ).toBeDefined();
-
-      expect(
-        screen.getAllByRole("navigation", {
-          name: "Menú principal",
-        }),
-      ).toHaveLength(1);
-
-      expect(
-        screen.getByRole("link", {
-          name: /Chat|Mensajes/i,
-        }),
-      ).toHaveAttribute("href", "/chat");
-
-      expect(
-        await screen.findByText("Usuario de Prueba 1"),
-      ).toBeDefined();
-    },
-  );
+    expect(
+      await screen.findByText('Usuario de Prueba 1'),
+    ).toBeDefined();
+  });
 });

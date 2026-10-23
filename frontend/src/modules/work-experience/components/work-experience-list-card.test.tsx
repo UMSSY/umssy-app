@@ -1,5 +1,4 @@
-import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
 import { WorkExperienceListCard } from "./work-experience-list-card";
@@ -25,7 +24,7 @@ describe("WorkExperienceListCard", () => {
     render(<WorkExperienceListCard experiences={[EXPERIENCE]} />);
 
     const heading = screen.getByRole("heading", { name: LONG_POSITION });
-    expect(heading).toHaveClass("wrap-anywhere");
+    expect(heading).toHaveClass("[overflow-wrap:anywhere]");
     expect(heading.parentElement).toHaveClass("min-w-0", "flex-1");
     expect(screen.getByRole("button", { name: `Editar ${LONG_POSITION}` })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: `Eliminar ${LONG_POSITION}` })).toBeInTheDocument();

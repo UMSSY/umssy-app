@@ -1,5 +1,5 @@
 import { EDUCATION_FEEDBACK_MESSAGES } from "../constants/education-feedback.constants";
-import { SHORT_MONTH_LABELS } from "@/modules/profile";
+import { SHORT_MONTH_LABELS } from "@/modules/profile/config/short-month-labels.config";
 
 function formatEducationDate(date: string): string {
   const [year, month] = date.split("-");

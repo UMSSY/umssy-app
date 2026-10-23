@@ -1,8 +1,5 @@
 "use client";
 
-import { readSessionStorage, writeSessionStorage } from "@/shared/services/storage/browser-session-storage";
-
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
 import { CERTIFICATION_DOCUMENT_MESSAGES } from "../config/certification-document.config";
 import { certificationsService } from "../services/certifications.service";
@@ -10,8 +7,8 @@ import type { CertificationDocumentChange } from "../types/certification-documen
 import type { CertificationDocumentResult } from "../types/certification-document-result.types";
 import type { CertificationDocumentPreview } from "../types/certification-document-preview.types";
 import type { Certification } from "../types/certification.types";
-import type { Feedback } from "@/modules/profile";
-import type { UploadedDocumentInfo } from "@/modules/profile";
+import type { Feedback } from "@/modules/profile/types/feedback.types";
+import type { UploadedDocumentInfo } from "@/modules/profile/types/uploaded-document-info.types";
 import { getDocumentFileName } from "../utils/get-document-file-name";
 import { isCorruptedFileError } from "../utils/is-corrupted-file-error";
 import { getFileFormat } from "../utils/get-file-format";
@@ -30,8 +27,6 @@ function getFailureMessage(isReplacing: boolean, error: unknown): string {
 }
 
 export function useCertificationDocument() {
-  const queryClient = useQueryClient();
-  const mutation = useMutation({ mutationFn: (request: () => Promise<void>) => request() });
   const [isOpening, setIsOpening] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [uploadedInfo, setUploadedInfo] = useState<Record<string, UploadedDocumentInfo>>({});
@@ -48,7 +43,7 @@ export function useCertificationDocument() {
   );
 
   useEffect(() => {
-    const stored = readSessionStorage(STORAGE_KEY);
+    const stored = sessionStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -69,7 +64,7 @@ export function useCertificationDocument() {
     setFeedback(null);
     try {
       if (isReplacing && change.file) {
-        await mutation.mutateAsync(() => certificationsService.uploadDocument(certificationId, change.file!));
+        await certificationsService.uploadDocument(certificationId, change.file);
         setUploadedInfo((current) => {
           const next = {
             ...current,
@@ -79,14 +74,14 @@ export function useCertificationDocument() {
               uploadedAt: formatIssueDate(getTodayIsoDate()),
             },
           };
-          writeSessionStorage(STORAGE_KEY, JSON.stringify(next));
+          sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
           return next;
         });
       } else {
-        await mutation.mutateAsync(() => certificationsService.deleteDocument(certificationId));
+        await certificationsService.deleteDocument(certificationId);
         setUploadedInfo((current) => {
           const next = Object.fromEntries(Object.entries(current).filter(([id]) => id !== certificationId));
-          writeSessionStorage(STORAGE_KEY, JSON.stringify(next));
+          sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
           return next;
         });
       }
@@ -117,10 +112,7 @@ export function useCertificationDocument() {
     setIsOpening(true);
     setFeedback(null);
     try {
-      const file = await queryClient.fetchQuery({
-        queryKey: ["certification-documents", certification.id],
-        queryFn: () => certificationsService.getDocument(certification.id),
-      });
+      const file = await certificationsService.getDocument(certification.id);
       if (!file) {
         setFeedback({ type: "error", message: CERTIFICATION_DOCUMENT_MESSAGES.notFound });
         return;

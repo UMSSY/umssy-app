@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { WorkspacePage } from "@/shared/components/layout/workspace-page";
+import { PageBreadcrumb } from "@/shared/components/layout";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import {
   CONNECTION_ERROR_MESSAGE,
-  EMAIL_SEARCH_LABEL,
+  REGISTERED_USERS_BREADCRUMB,
   REGISTERED_USERS_CONNECTION_TOAST_ID,
   REGISTERED_USERS_PAGE_SIZE,
   REGISTERED_USERS_SLOW_TOAST_ID,
@@ -15,16 +14,16 @@ import {
   SEARCH_DEBOUNCE_MS,
   SLOW_REQUEST_MESSAGE,
 } from "../constants/reports.constants";
+import { EmailSearchInput } from "../components/email-search-input";
 import { ExportSuccessToast } from "../components/export-success-toast";
 import { RegisteredUsersTable } from "../components/registered-users-table";
 import { ReportActions } from "../components/report-actions";
-import { ReportSearchInput } from "../components/report-search-input";
 import { ReportTableFooter } from "../components/report-table-footer";
 import { UserTypeFilter } from "../components/user-type-filter";
 import { useExportRegisteredUsersCsv } from "../hooks/use-export-registered-users-csv";
 import { useRegisteredUsers } from "../hooks/use-registered-users";
 import type { AcademicPeriod } from "../types/registered-user.types";
-import type { RoleTag } from "@/modules/auth";
+import type { RoleTag } from "@/modules/auth/types/auth-types";
 
 export function RegisteredUsersReportView() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -86,14 +85,17 @@ export function RegisteredUsersReportView() {
   };
 
   return (
-    <WorkspacePage title="Usuarios aceptados" description="Consulta usuarios y exporta los resultados con los filtros actuales.">
+    <section className="flex flex-col gap-6">
+      <header className="flex flex-col gap-2">
+        <PageBreadcrumb items={REGISTERED_USERS_BREADCRUMB} />
+        <h1 className="font-tight text-3xl font-extrabold text-ink">Reporte de usuarios registrados aceptados</h1>
+      </header>
 
-      <div role="search" aria-label="Filtros de usuarios aceptados" className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <UserTypeFilter value={userType} onChange={handleUserTypeChange} />
-          <ReportSearchInput value={searchInput} onChange={handleSearchChange} label={EMAIL_SEARCH_LABEL} />
+          <EmailSearchInput value={searchInput} onChange={handleSearchChange} />
         </div>
-        {userType || period || searchInput ? <Button variant="brand" onClick={() => { setUserType(undefined); setPeriod(undefined); setSearchInput(""); setCurrentPage(1); }}>Limpiar filtros</Button> : null}
         <ReportActions onExport={exportCsv} isExporting={isExporting} period={period} onPeriodChange={handlePeriodChange} />
       </div>
 
@@ -111,6 +113,6 @@ export function RegisteredUsersReportView() {
       />
 
       <ExportSuccessToast message={exportSuccessMessage} />
-    </WorkspacePage>
+    </section>
   );
 }

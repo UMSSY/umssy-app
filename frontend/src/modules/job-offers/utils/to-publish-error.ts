@@ -1,4 +1,4 @@
-import { isApiError as isAxiosError } from "@/shared/services/api-client";
+import { isAxiosError } from "axios";
 import { PUBLISH_MESSAGES } from "../constants/vacancies.constants";
 import type { PublishError } from "../types/job-offer.types";
 

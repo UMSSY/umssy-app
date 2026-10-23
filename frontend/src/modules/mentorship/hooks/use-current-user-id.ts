@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { profileService } from "@/modules/profile";
+import { profileService } from "@/modules/profile/services/profile.service";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 
 export function useCurrentUserId() {

@@ -1,27 +1,17 @@
 
-"use client";
+'use client';
 
 /* eslint-disable @next/next/no-img-element */
 
-import {
-  useState,
-  useRef,
-  useEffect,
-  type KeyboardEvent,
-} from "react";
+import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
-import { useContactSearch } from "../hooks/use-contact-search";
-import { getInitials } from "../utils/date-formatter";
-import type { User } from "../types/user.types";
+import { useContactSearch } from '../hooks/use-contact-search';
+import { getInitials } from '../utils/date-formatter';
+import type { User } from '../types/user.types';
 
 interface ContactSearchModalProps {
   isOpen: boolean;
@@ -34,7 +24,7 @@ export function ContactSearchModal({
   onClose,
   onSelectContact,
 }: ContactSearchModalProps) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 
   const { results, isSearching } = useContactSearch(searchTerm);
@@ -42,19 +32,16 @@ export function ContactSearchModal({
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
-    if (
-      selectedIndex >= 0 &&
-      optionRefs.current[selectedIndex]
-    ) {
+    if (selectedIndex >= 0 && optionRefs.current[selectedIndex]) {
       optionRefs.current[selectedIndex]?.scrollIntoView({
-        block: "nearest",
-        behavior: "smooth",
+        block: 'nearest',
+        behavior: 'smooth',
       });
     }
   }, [selectedIndex]);
 
   const handleClose = () => {
-    setSearchTerm("");
+    setSearchTerm('');
     setSelectedIndex(-1);
     onClose();
   };
@@ -64,10 +51,8 @@ export function ContactSearchModal({
     handleClose();
   };
 
-  const handleKeyDown = (
-    e: KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (e.key === "Escape") {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
       e.preventDefault();
       e.stopPropagation();
       handleClose();
@@ -76,25 +61,20 @@ export function ContactSearchModal({
 
     if (results.length === 0) return;
 
-    if (e.key === "ArrowDown") {
+    if (e.key === 'ArrowDown') {
       e.preventDefault();
-
       setSelectedIndex((prev) =>
         prev < results.length - 1 ? prev + 1 : 0
       );
-    } else if (e.key === "ArrowUp") {
+    } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-
       setSelectedIndex((prev) =>
         prev > 0 ? prev - 1 : results.length - 1
       );
-    } else if (e.key === "Enter") {
+    } else if (e.key === 'Enter') {
       e.preventDefault();
 
-      if (
-        selectedIndex >= 0 &&
-        selectedIndex < results.length
-      ) {
+      if (selectedIndex >= 0 && selectedIndex < results.length) {
         handleSelectUser(results[selectedIndex]);
       }
     }
@@ -109,12 +89,14 @@ export function ContactSearchModal({
     >
       <DialogContent
         className="sm:max-w-md"
+        role="dialog"
+        aria-modal="true"
         aria-labelledby="contact-search-title"
       >
         <DialogHeader>
           <DialogTitle
             id="contact-search-title"
-            className="font-heading text-base font-medium text-ink"
+            className="font-heading text-base font-medium text-slate-900"
           >
             Nueva conversación
           </DialogTitle>
@@ -142,7 +124,7 @@ export function ContactSearchModal({
         >
           {isSearching ? (
             <div
-              className="py-6 text-center text-sm text-text-secondary"
+              className="py-6 text-center text-sm text-slate-500"
               role="status"
             >
               Buscando...
@@ -163,13 +145,11 @@ export function ContactSearchModal({
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => handleSelectUser(user)}
-                  onMouseEnter={() =>
-                    setSelectedIndex(index)
-                  }
-                  className={`flex h-auto w-full min-w-0 cursor-pointer items-center justify-start gap-3 rounded-lg p-2.5 text-left whitespace-normal transition-colors outline-none ${
+                  onMouseEnter={() => setSelectedIndex(index)}
+                  className={`h-auto w-full justify-start gap-3 rounded-lg p-2.5 text-left font-normal transition-colors outline-none ${
                     isSelected
-                      ? "bg-surface-soft ring-2 ring-ring/20"
-                      : "hover:bg-surface-soft focus-visible:bg-surface-soft focus-visible:ring-2 focus-visible:ring-ring"
+                      ? 'bg-slate-100 ring-2 ring-slate-400/50'
+                      : 'hover:bg-slate-50 focus-visible:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-400'
                   }`}
                 >
                   {user.avatarUrl ? (
@@ -179,18 +159,18 @@ export function ContactSearchModal({
                       className="size-10 shrink-0 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-border text-sm font-bold text-ink-soft">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700">
                       {getInitials(user.fullName)}
                     </div>
                   )}
 
                   <div className="flex min-w-0 flex-col overflow-hidden">
-                    <span className="truncate text-sm font-medium text-ink">
+                    <span className="truncate text-sm font-medium text-slate-800">
                       {user.fullName}
                     </span>
 
                     {user.headline && (
-                      <span className="truncate text-xs text-text-secondary">
+                      <span className="truncate text-xs text-slate-500">
                         {user.headline}
                       </span>
                     )}
@@ -200,7 +180,7 @@ export function ContactSearchModal({
             })
           ) : (
             searchTerm.trim().length >= 2 && (
-              <div className="py-6 text-center text-sm text-text-secondary">
+              <div className="py-6 text-center text-sm text-slate-500">
                 No se encontraron usuarios
               </div>
             )

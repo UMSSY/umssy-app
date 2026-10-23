@@ -1,4 +1,3 @@
-import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { parseRegistration } from '../utils/registration-response';
 import { readRecord, readArray } from '../utils/response-validation';
 import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';
@@ -7,7 +6,7 @@ import type { Registration } from '../types/registration.types';
 
 export const registrationsService = {
   async getMine(signal?: AbortSignal): Promise<Registration[]> {
-    const token = getAccessToken();
+    const token = sessionStorage.getItem('accessToken');
     if (!token)
       throw new Error('Debes iniciar sesión para ver tus inscripciones.');
     if (!apiClient.defaults.baseURL)

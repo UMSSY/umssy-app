@@ -40,5 +40,3 @@ export {
 export {
   AreaDetailInteractionPreviewView,
 } from "./views/area-detail-interaction-preview-view";
-export { AffinityRadarAxisTick } from "./components/affinity-radar-axis-tick";
-export { AffinityRadarDot } from "./components/affinity-radar-dot";

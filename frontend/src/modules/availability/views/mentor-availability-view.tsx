@@ -1,9 +1,9 @@
 "use client";
 
-import { PageHeading } from "@/shared/components/layout";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import { addWeeks, getWeekRange } from "@/shared/utils/date-time";
 import { cn } from "cn";
 import {
@@ -11,10 +11,13 @@ import {
   MY_AVAILABILITY_TEXT,
 } from "../constants/my-availability.constants";
 import { AvailabilityLoading } from "../components/availability-loading";
-import { AvailabilityBlockEditor } from "../components/availability-block-editor";
+import { BlockForm } from "../components/block-form";
+import { EditBlockPanel } from "../components/edit-block-panel";
 import { WeekGrid } from "../components/week-grid/week-grid";
+import { useCreateAvailabilityBlock } from "../hooks/use-create-availability-block";
 import { useMyBlocks } from "../hooks/use-my-blocks";
 import type { AvailabilityBlock } from "../types/availability-block.types";
+import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
 import type { MentorAvailabilityViewProps } from "../types/mentor-availability-view-props.types";
 import { formatWeekLabel } from "../utils/format-week-label";
 
@@ -24,7 +27,8 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
   );
   const [editBlockId, setEditBlockId] = useState<string | null>(null);
   const { blocks, isLoading, error } = useMyBlocks(weekStart);
-  const [isCreating, setIsCreating] = useState(false);
+  const { createBlock, isSubmitting } = useCreateAvailabilityBlock();
+  const [formKey, setFormKey] = useState(0);
   const weekRange = getWeekRange(weekStart);
   const currentWeekStart = getWeekRange(new Date()).startAt;
 
@@ -41,22 +45,35 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
     setEditBlockId(null);
   };
 
+  const handleCreate = async (values: CreateAvailabilityBlockInput) => {
+    const block = await createBlock(values);
+    if (block) {
+      setFormKey((key) => key + 1);
+      setWeekStart(getWeekRange(block.startAt).startAt);
+    }
+  };
+
+  const handleCancelCreate = () => {
+    setFormKey((key) => key + 1);
+  };
+
   const editBlock = editBlockId
     ? blocks.find((item) => item.id === editBlockId) ?? null
     : null;
-  const isEditing = Boolean(editBlock) && !error;
+  const isEditing = Boolean(editBlockId) && !error;
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-6">
+    <div className="space-y-4 p-6">
       <header>
-        <PageHeading title={MY_AVAILABILITY_TEXT.title} description={`${MY_AVAILABILITY_EYEBROW}. Selecciona un bloque para editarlo o registra uno nuevo.`} actions={<Button onClick={() => setIsCreating(true)} disabled={isLoading || Boolean(error)}><Plus aria-hidden="true" />Añadir bloque</Button>} />
+        <p className="text-xs font-semibold text-muted-foreground">{MY_AVAILABILITY_EYEBROW}</p>
+        <h1 className="text-2xl font-bold">{MY_AVAILABILITY_TEXT.title}</h1>
       </header>
 
-      <div>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-4">
           <nav
             aria-label={MY_AVAILABILITY_TEXT.weekNavigation}
-            className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-3"
+            className="flex flex-wrap items-center gap-2"
           >
             <Button
               variant="outline"
@@ -84,6 +101,7 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
             >
               {MY_AVAILABILITY_TEXT.today}
             </Button>
+            <p className="ml-auto text-sm text-muted-foreground">{BOLIVIA_TIME_LABEL}</p>
           </nav>
 
           {isLoading ? (
@@ -113,8 +131,26 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
           )}
         </div>
 
-        {isCreating || isEditing ? <AvailabilityBlockEditor key={editBlockId ?? "create"} block={isEditing ? editBlock : undefined} onClose={() => { setIsCreating(false); handleClosePanel(); }} onCreated={(block) => setWeekStart(getWeekRange(block.startAt).startAt)} /> : null}
+        {isEditing ? (
+          <div className="min-w-0 animate-in fade-in slide-in-from-right duration-200">
+            {isLoading ? (
+              <AvailabilityLoading />
+            ) : (
+              <EditBlockPanel key={editBlockId} block={editBlock} onClose={handleClosePanel} />
+            )}
+          </div>
+        ) : (
+          <div className="min-w-0">
+            <BlockForm
+              key={formKey}
+              mode="create"
+              isSubmitting={isSubmitting}
+              onSubmit={handleCreate}
+              onCancel={handleCancelCreate}
+            />
+          </div>
+        )}
       </div>
-    </main>
+    </div>
   );
 }

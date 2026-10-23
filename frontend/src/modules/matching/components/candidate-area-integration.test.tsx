@@ -1,4 +1,3 @@
-import { Button as TestButton } from "@/components/ui/button";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AffinityAxisId } from "../types/matching-types";
@@ -9,8 +8,8 @@ import { CandidateDetailPanel } from "./candidate-detail-panel";
 vi.mock("./radar-chart", () => ({
   RadarChart: ({ onAxisSelect }: { onAxisSelect: (area: AffinityAxisId) => void }) => (
     <div>
-      <TestButton type="button" onClick={() => onAxisSelect("data-ai")}>Seleccionar Data/AI</TestButton>
-      <TestButton type="button" onClick={() => onAxisSelect("cloud-devops")}>Seleccionar Cloud/DevOps</TestButton>
+      <button type="button" onClick={() => onAxisSelect("data-ai")}>Seleccionar Data/AI</button>
+      <button type="button" onClick={() => onAxisSelect("cloud-devops")}>Seleccionar Cloud/DevOps</button>
     </div>
   ),
 }));

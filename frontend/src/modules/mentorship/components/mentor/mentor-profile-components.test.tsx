@@ -1,5 +1,4 @@
-import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -201,9 +200,9 @@ describe("Mentor profile components", () => {
       container.querySelector('[data-slot="avatar-fallback"]'),
     ).toHaveTextContent("AR");
     const availability = screen.getByText("Disponible para mentoría");
-    expect(availability).toHaveClass("border-transparent", "text-ink-soft");
+    expect(availability).toHaveClass("bg-emerald-50", "text-emerald-800");
     expect(availability.querySelector('[aria-hidden="true"]')).toHaveClass(
-      "bg-ink-soft",
+      "bg-emerald-600",
     );
     expect(availability.parentElement).toContainElement(
       screen.getByRole("heading", { name: "Ana Rojas" }),
@@ -249,7 +248,7 @@ describe("Mentor profile components", () => {
       screen.getByRole("button", { name: "Solicitar mentoría" }),
     ).toBeDisabled();
     expect(screen.getByText("No disponible")).toHaveClass(
-      "border-transparent",
+      "bg-surface-soft",
       "text-text-secondary",
     );
     expect(screen.queryByText("Disponible para mentoría")).not.toBeInTheDocument();

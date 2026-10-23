@@ -1,4 +1,4 @@
-import type { Feedback } from "@/modules/profile";
+import type { Feedback } from "@/modules/profile/types/feedback.types";
 import type { SkillItem } from "./skill-item.types";
 
 export interface UseSkillsResult {
@@ -11,6 +11,6 @@ export interface UseSkillsResult {
   addSkill: (skill: SkillItem) => void;
   removeSkill: (skillId: string) => void;
   createCustomSkill: (name: string) => void;
-  saveSkills: (selection?: SkillItem[]) => Promise<boolean>;
+  saveSkills: () => Promise<void>;
   reload: () => Promise<void>;
 }

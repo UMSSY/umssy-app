@@ -44,7 +44,7 @@ describe("Directory and profile query flows", () => {
     expect(
       await screen.findAllByRole("link", { name: /Ver perfil de/ }),
     ).toHaveLength(2);
-    expect(screen.getByRole("status")).toHaveTextContent("2 mentores encontrados");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("shows an informative empty state without fabricated cards", async () => {

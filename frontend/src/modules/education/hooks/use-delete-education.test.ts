@@ -1,5 +1,4 @@
-import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
-import { act, cleanup, waitFor } from "@testing-library/react";
+import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { educationsService } from "../services/educations.service";
 import type { EducationItem } from "../types/education-item.types";
@@ -68,7 +67,9 @@ describe("useDeleteEducation", () => {
       void result.current.deleteEducation(RECORD);
     });
     expect(result.current.isDeleting).toBe(true);
-    await waitFor(() => expect(educationsService.deleteEducation).toHaveBeenCalledExactlyOnceWith(RECORD.id));
+    expect(educationsService.deleteEducation).toHaveBeenCalledExactlyOnceWith(
+      RECORD.id,
+    );
     await act(async () => {
       finishDelete();
     });

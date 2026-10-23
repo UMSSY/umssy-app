@@ -1,5 +1,4 @@
-import type { DocumentType } from "@/modules/access-request";
-import type { AcademicPeriod } from "./registered-user.types";
+import type { DocumentType } from "@/modules/access-request/constants/document-types.constants";
 
 export interface RejectedUser {
   id: string;
@@ -14,8 +13,7 @@ export interface RejectedUser {
 export interface RejectedUsersParams {
   page: number;
   limit: number;
-  period?: AcademicPeriod;
   search?: string;
 }
 
-export type RejectedUsersExportParams = Pick<RejectedUsersParams, "period" | "search">;
+export type RejectedUsersExportParams = Pick<RejectedUsersParams, "search">;

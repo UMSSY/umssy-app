@@ -1,4 +1,4 @@
-import { BUSINESS_TIMEZONE } from "@/modules/profile";
+import { BUSINESS_TIMEZONE } from "@/modules/profile/constants/validation.constants";
 
 export function getTodayIsoDate(): string {
   return new Intl.DateTimeFormat("en-CA", {

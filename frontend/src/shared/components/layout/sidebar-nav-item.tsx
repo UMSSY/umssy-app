@@ -16,6 +16,7 @@ import { SIDEBAR_ITEM_CLASS, SIDEBAR_SUB_ITEM_CLASS } from "@/shared/constants/s
 import type { SidebarNavItemProps } from "@/shared/types/sidebar-nav-item-props.types";
 import { isRouteActive } from "@/shared/utils/is-route-active";
 
+// className y badge son opcionales: sin ellos el render es el de siempre
 export function SidebarNavItem({
   item,
   pathname,
@@ -24,16 +25,14 @@ export function SidebarNavItem({
 }: SidebarNavItemProps & { className?: string; badge?: ReactNode }) {
   const Icon = item.icon;
   const submenuId = useId();
-  const hasActiveChild = item.activePathPatterns?.some((pattern) => pattern.test(pathname)) === true ||
+  const hasActiveChild =
     item.children?.some((child) =>
       isRouteActive(pathname, child.href, child.activePathPatterns),
-    ) === true;
-  const [collapsedPath, setCollapsedPath] = useState<string | null>(null);
-  const [isManuallyExpanded, setIsManuallyExpanded] = useState(false);
-  const isExpanded = hasActiveChild ? collapsedPath !== pathname : isManuallyExpanded;
+    ) ?? false;
+  const [isExpanded, setIsExpanded] = useState(hasActiveChild);
 
   if (!item.children) {
-    const isActive = item.href ? isRouteActive(pathname, item.href, item.activePathPatterns) : false;
+    const isActive = item.href ? isRouteActive(pathname, item.href) : false;
 
     return (
       <SidebarMenuItem>
@@ -52,28 +51,24 @@ export function SidebarNavItem({
   }
 
   return (
-    <SidebarMenuItem>
+    <SidebarMenuItem className={hasActiveChild ? "rounded-md bg-surface/5" : undefined}>
       <SidebarMenuButton
         isActive={hasActiveChild}
         aria-expanded={isExpanded}
         aria-controls={submenuId}
-        onClick={() => {
-          if (hasActiveChild) setCollapsedPath(isExpanded ? pathname : null);
-          else setIsManuallyExpanded(!isExpanded);
-        }}
-        className={cn(SIDEBAR_ITEM_CLASS, className)}
+        onClick={() => setIsExpanded((previous) => !previous)}
+        className={SIDEBAR_ITEM_CLASS}
       >
         <Icon strokeWidth={1.5} aria-hidden="true" />
         <span className="flex-1">{item.label}</span>
         <ChevronDown
-          className={cn("ml-auto text-text-secondary transition-transform duration-150", isExpanded && "rotate-180")}
+          className={`text-accent transition-transform ${isExpanded ? "rotate-180" : ""}`}
           aria-hidden="true"
         />
       </SidebarMenuButton>
 
-      <div id={submenuId} aria-hidden={!isExpanded} inert={!isExpanded} className={cn("grid transition-all duration-200 ease-out", isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0")}>
-        <div className="min-h-0 overflow-hidden">
-        <SidebarMenuSub className="mr-0 mb-2 ml-5 gap-0.5 border-sidebar-border py-1 pr-0 pl-3">
+      {isExpanded && (
+        <SidebarMenuSub id={submenuId} className="mx-0 border-l-0 py-2 pl-6 pr-2">
           {item.children.map((child) => {
             const isChildActive = isRouteActive(
               pathname,
@@ -98,7 +93,7 @@ export function SidebarNavItem({
                     <ChildIcon size={16} strokeWidth={1.75} aria-hidden="true" />
                   ) : (
                     <span
-                      className={cn("size-1 shrink-0 rounded-full", isChildActive ? "bg-accent" : "bg-border-strong")}
+                      className={`size-1.5 shrink-0 rounded-full ${isChildActive ? "bg-accent" : "bg-surface/40"}`}
                       aria-hidden="true"
                     />
                   )}
@@ -108,8 +103,7 @@ export function SidebarNavItem({
             );
           })}
         </SidebarMenuSub>
-        </div>
-      </div>
+      )}
     </SidebarMenuItem>
   );
 }

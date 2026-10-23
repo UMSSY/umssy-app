@@ -1,9 +1,21 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { homeService } from "../services/home.service";
 
 export function useHome() {
-  const query = useQuery({ queryKey: ["home", "welcome"], queryFn: () => homeService.getWelcomeMessage() });
-  return { backendMessage: query.isError ? "No se pudo conectar con el servidor." : query.data ?? "Cargando..." };
+  const [backendMessage, setBackendMessage] = useState<string>("Loading...");
+
+  useEffect(() => {
+    homeService
+      .getWelcomeMessage()
+      .then((data) => {
+        setBackendMessage(data);
+      })
+      .catch(() => {
+        setBackendMessage("Error connecting to backend");
+      });
+  }, []);
+
+  return { backendMessage };
 }

@@ -6,7 +6,7 @@ import {
 import { ROLE_NAMES } from '../../../common/enums/roles.enum.js';
 import { ACADEMIC_PERIOD_PATTERN } from '../utils/academic-period.js';
 
-export const searchSchema = z.string().trim().optional();
+const searchSchema = z.string().trim().optional();
 
 export const ALL_FILTER_VALUE = 'ALL';
 
@@ -48,7 +48,6 @@ export const registeredUsersQuerySchema = paginationSchema.extend({
 });
 
 export const rejectedUsersFiltersSchema = z.object({
-  period: academicPeriodSchema,
   search: searchSchema,
 });
 

@@ -1,11 +1,7 @@
 import { FileText } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateTime } from "@/shared/utils/date.utils";
-import {
-  FILE_NAME_SEARCH_NO_RESULTS_MESSAGE,
-  REPORT_HISTORY_EMPTY_MESSAGE,
-  REPORT_TYPE_LABELS,
-} from "../constants/generated-report.constants";
+import { REPORT_HISTORY_EMPTY_MESSAGE, REPORT_TYPE_LABELS } from "../constants/generated-report.constants";
 import {
   REPORT_HISTORY_COLUMN_COUNT as COLUMN_COUNT,
   REPORT_HISTORY_HEAD_CLASSES as HEAD_CLASSES,
@@ -13,7 +9,7 @@ import {
   TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES,
 } from "../constants/report-table.constants";
 import type { ReportHistoryTableProps } from "../types/report-history-table-props.types";
-import { TableMessageRow, TableNoResultsRow, TableSkeletonRows } from "./table-state-rows";
+import { TableMessageRow, TableSkeletonRows } from "./table-state-rows";
 
 function renderDateTime(isoDate: string) {
   const [date, time] = formatDateTime(isoDate).split(" ");
@@ -36,7 +32,6 @@ export function ReportHistoryTable({
   isLoading,
   errorMessage,
   emptyMessage = REPORT_HISTORY_EMPTY_MESSAGE,
-  searchTerm = "",
 }: ReportHistoryTableProps) {
   const headClasses = `${HEAD_CLASSES} px-2 whitespace-normal md:px-6 md:whitespace-nowrap`;
   const cellClasses = `${CELL_CLASSES} px-2 py-3 whitespace-normal md:px-6 md:py-4`;
@@ -48,10 +43,6 @@ export function ReportHistoryTable({
 
     if (errorMessage) {
       return <TableMessageRow columnCount={COLUMN_COUNT} message={errorMessage} />;
-    }
-
-    if (reports.length === 0 && searchTerm) {
-      return <TableNoResultsRow columnCount={COLUMN_COUNT} message={FILE_NAME_SEARCH_NO_RESULTS_MESSAGE} />;
     }
 
     if (reports.length === 0) {

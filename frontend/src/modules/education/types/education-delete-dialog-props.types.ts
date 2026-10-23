@@ -1,4 +1,4 @@
-import type { Feedback } from "@/modules/profile";
+import type { Feedback } from "@/modules/profile/types/feedback.types";
 
 export interface EducationDeleteDialogProps {
   isOpen: boolean;

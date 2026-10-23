@@ -7,6 +7,5 @@ export interface NavigationItem {
   roles?: readonly RoleTag[];
   icon: LucideIcon;
   href?: string;
-  activePathPatterns?: readonly RegExp[];
   children?: NavigationChildItem[];
 }

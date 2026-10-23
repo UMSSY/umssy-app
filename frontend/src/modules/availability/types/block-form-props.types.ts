@@ -9,5 +9,4 @@ export interface BlockFormProps {
   submitError?: string | null;
   onSubmit: (values: CreateAvailabilityBlockInput) => void;
   onCancel: () => void;
-  onValuesChange?: () => void;
 }

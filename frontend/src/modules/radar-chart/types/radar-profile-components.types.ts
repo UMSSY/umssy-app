@@ -34,7 +34,6 @@ export interface AffinityRadarAxisTickProps {
 }
 
 export interface AffinityRadarDotProps {
-  className?: string;
   area: RadarAreaScore;
   cx?: number;
   cy?: number;

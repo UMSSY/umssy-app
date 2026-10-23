@@ -1,4 +1,4 @@
-import type { RoleTag } from "@/modules/auth";
+import type { RoleTag } from "@/modules/auth/types/auth-types";
 
 export const USER_TYPE_LABELS: Record<RoleTag, string> = {
   titulado: "Titulado",

@@ -40,7 +40,7 @@ describe("AppRouteLayout", () => {
   });
 
   it.each([
-    ["/events", "false"],
+    ["/events", "true"],
     ["/events/my-passes", "false"],
   ])("keeps the main navigation on workshop pages %s", (pathname, fullBleed) => {
     route.pathname = pathname;
@@ -75,7 +75,7 @@ describe("AppRouteLayout", () => {
 
     expect(screen.getAllByTestId("app-shell")).toHaveLength(1);
     expect(screen.getByTestId("app-shell")).toContainElement(
-      screen.getByRole("heading", { name: "Revisión de radares" }),
+      screen.getByRole("heading", { name: "Cola de Revisión" }),
     );
   });
 

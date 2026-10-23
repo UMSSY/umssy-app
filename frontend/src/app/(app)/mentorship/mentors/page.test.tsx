@@ -44,7 +44,7 @@ describe("MentorDirectoryPage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "Encuentra un mentor",
+        name: "Directorio de mentores",
       }),
     ).toBeInTheDocument();
   });

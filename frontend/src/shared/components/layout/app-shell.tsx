@@ -1,7 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "cn";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SIDEBAR_STYLE } from "@/shared/constants/sidebar.constants";
@@ -10,8 +9,17 @@ import type { NavigationItem } from "@/shared/types/navigation-item.types";
 import { AppSidebar } from "./app-sidebar";
 import { SessionUserCard } from "@/modules/auth";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
-import { ChatDock, MessagingUiProvider } from "@/modules/chat";
-import { AppHeader } from "./app-header";
+import { SidebarToggleButton } from "./sidebar-toggle-button";
+
+interface AppShellExtras {
+  brand?: ReactNode;
+  sidebarFooter?: ReactNode;
+  sidebarItemClassName?: string;
+  sidebarItemBadges?: Record<string, ReactNode>;
+  sidebarWidth?: string;
+  header?: ReactNode;
+  contentClassName?: string;
+}
 
 export function AppShell({
   children,
@@ -25,13 +33,9 @@ export function AppShell({
   sidebarWidth,
   header,
   contentClassName,
-}: AppShellProps) {
-  const pathname = usePathname();
+}: AppShellProps & AppShellExtras) {
   return (
-    <MessagingUiProvider>
     <SidebarProvider
-      data-app-shell="true"
-      className={cn("flex-col bg-background", contentClassName && "h-dvh min-h-0 overflow-hidden")}
       style={
         sidebarWidth
           ? ({
@@ -41,10 +45,7 @@ export function AppShell({
           : SIDEBAR_STYLE
       }
     >
-      {header ?? <AppHeader brand={brand} />}
-      <div className="flex min-h-0 min-w-0 flex-1">
       <AppSidebar
-        showBrand={Boolean(header)}
         items={items as NavigationItem[] | undefined}
         user={user}
         brand={brand}
@@ -57,24 +58,31 @@ export function AppShell({
       />
       <SidebarInset
         className={cn(
-          "min-h-0 min-w-0 bg-background",
-          contentClassName && "overflow-hidden",
+          "min-w-0 bg-surface-soft",
+          contentClassName && "h-dvh min-h-0 overflow-hidden",
         )}
       >
+        {header ?? (
+          <header
+            className={
+              fullBleed
+                ? "absolute left-4 top-3 z-10 flex items-center"
+                : "flex items-center px-4 py-3"
+            }
+          >
+            <SidebarToggleButton />
+          </header>
+        )}
         <div
-          key={pathname}
           className={cn(
-            "flex-1 animate-in duration-200 ease-out fade-in",
+            "flex-1",
             contentClassName ??
-              (fullBleed ? "flex min-w-0 flex-col" : "px-12 py-10"),
+              (fullBleed ? "flex min-w-0 flex-col" : "px-8 pb-8"),
           )}
         >
           {children}
         </div>
       </SidebarInset>
-      <ChatDock />
-      </div>
     </SidebarProvider>
-    </MessagingUiProvider>
   );
 }

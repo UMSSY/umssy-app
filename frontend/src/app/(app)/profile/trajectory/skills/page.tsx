@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { SkillsView } from "@/modules/skills";
 
-export default function ProfileSectionPage() {
-  return redirect("/profile#skills");
+export default function SkillsPage() {
+  return <SkillsView />;
 }

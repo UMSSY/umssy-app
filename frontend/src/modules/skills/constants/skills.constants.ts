@@ -44,7 +44,7 @@ export const SKILLS_VALIDATION_MESSAGES = {
 } as const;
 
 export const SKILLS_UI_TEXTS = {
-  pageTitle: "Habilidades",
+  pageTitle: "Trayectoria",
   pageDescription: "Selecciona tecnologías y herramientas que dominas o agrega las tuyas.",
   searchCardTitle: "Buscar en el catálogo",
   mySkillsTitle: "Mis habilidades",

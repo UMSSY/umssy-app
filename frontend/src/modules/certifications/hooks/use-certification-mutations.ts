@@ -1,6 +1,5 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedback.config";
 import { certificationsService } from "../services/certifications.service";
@@ -9,14 +8,13 @@ import type { CreateCertificationDto } from "../types/create-certification-dto.t
 import type { UpdateCertificationDto } from "../types/update-certification-dto.types";
 import type { CertificationMutationMessages } from "../types/certification-mutation-messages.types";
 import type { CertificationMutationOptions } from "../types/certification-mutation-options.types";
-import type { Feedback } from "@/modules/profile";
+import type { Feedback } from "@/modules/profile/types/feedback.types";
 
 function useCertificationMutation<TVariables>(
   mutationFn: (variables: TVariables) => Promise<Certification>,
   messages: CertificationMutationMessages,
   options: CertificationMutationOptions,
 ) {
-  const mutation = useMutation({ mutationFn: (variables: TVariables) => mutationFn(variables) });
   const [isPending, setIsPending] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
@@ -24,7 +22,7 @@ function useCertificationMutation<TVariables>(
     setIsPending(true);
     setFeedback(null);
     try {
-      const certification = await mutation.mutateAsync(variables);
+      const certification = await mutationFn(variables);
       setFeedback({ type: "success", message: messages.success });
       options.onSuccess?.(certification);
       return certification;

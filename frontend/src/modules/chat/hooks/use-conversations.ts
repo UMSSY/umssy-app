@@ -1,41 +1,56 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Conversation, ConversationFilter } from '../types/conversation.types';
 import { User } from '../types/user.types';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import {
   getConversations,
   getOrCreateConversation,
   markConversationAsRead,
 } from '../services/chat-api';
 import { setStoredConversationUnreadCount } from '../services/message-storage';
-import { useMessagingUi } from '../contexts/messaging-ui-context';
 
 const PAGE_SIZE = 10;
 
 export function useConversations() {
-  const ui = useMessagingUi();
-  const [localSelectedId, setLocalSelectedId] = useState<string | null>(null);
-  const selectedId = ui ? ui.selectedId : localSelectedId;
-  const setSelectedId = ui?.setSelectedId ?? setLocalSelectedId;
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState<ConversationFilter>('all');
   const [keptInUnreadId, setKeptInUnreadId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const queryClient = useQueryClient();
-  const queryKey = ['chat', 'conversations'];
-  const query = useQuery({ queryKey, queryFn: () => getConversations() });
-  const conversationsData = useMemo(() => query.data ?? [], [query.data]);
-  const isLoading = query.isFetching;
-  const isError = query.isError && !query.isFetching;
-  function setConversationsData(update: (current: Conversation[]) => Conversation[]) {
-    queryClient.setQueryData<Conversation[]>(queryKey, (current) => update(current ?? []));
-  }
-  const startMutation = useMutation({ mutationFn: (id: string) => getOrCreateConversation(id) });
-  const readMutation = useMutation({ mutationFn: (id: string) => markConversationAsRead(id) });
+  const [conversationsData, setConversationsData] = useState<Conversation[]>([]);
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isError, setIsError] = useState<boolean>(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [pendingContactId, setPendingContactId] = useState<string | null>(null);
-  const retryConversations = () => { void query.refetch(); };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getConversations()
+      .then((data) => {
+        if (isMounted) {
+          setConversationsData(data);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setIsError(true);
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [loadAttempt]);
+
+  const retryConversations = () => {
+    setIsError(false);
+    setIsLoading(true);
+    setLoadAttempt((attempt) => attempt + 1);
+  };
 
   const sortedConversations = useMemo(() => {
     return [...conversationsData].sort((a, b) => {
@@ -110,7 +125,7 @@ export function useConversations() {
       setKeptInUnreadId(null);
     }
 
-    readMutation.mutate(conversation.id);
+    markConversationAsRead(conversation.id);
 
     if (conversation.unreadCount > 0) {
       setConversationsData((prev) =>
@@ -190,7 +205,7 @@ export function useConversations() {
 
     setPendingContactId(contactUser.id);
     try {
-      const conversation = await startMutation.mutateAsync(contactUser.id);
+      const conversation = await getOrCreateConversation(contactUser.id);
 
       setConversationsData((prev) => {
         const exists = prev.some((c) => c.id === conversation.id);

@@ -1,5 +1,4 @@
-import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { profileService } from "../services/profile.service";
@@ -56,6 +55,10 @@ describe("PersonalInfoView", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Datos personales y contacto" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Datos personales" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     expect(await screen.findByLabelText(/Nombres/)).toHaveValue("Valeria");
     expect(screen.getByLabelText(/Teléfono/)).toHaveValue("+591 70000000");
     expect(screen.getByLabelText(/Correo personal/)).toHaveValue("valeria@correo.com");
@@ -149,10 +152,14 @@ describe("PresentationView", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Presentación profesional" }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Presentación" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     expect(await screen.findByLabelText(/Titular profesional/)).toHaveValue(
       "Desarrolladora web junior",
     );
-    expect(screen.queryByText("Así se verá en tu perfil")).not.toBeInTheDocument();
+    expect(screen.getByText("Valeria Quispe")).toBeInTheDocument();
   });
 
   it("saves the headline and about me and shows a confirmation", async () => {

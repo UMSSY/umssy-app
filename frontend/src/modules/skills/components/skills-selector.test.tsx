@@ -1,5 +1,4 @@
-import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CUSTOM_SKILL_HINT, SKILL_NAME_MAX_LENGTH, SKILLS_VALIDATION_MESSAGES } from "../constants/skills.constants";

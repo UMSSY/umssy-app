@@ -1,5 +1,4 @@
-import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
-import { act, cleanup, waitFor } from "@testing-library/react";
+import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EDUCATION_FEEDBACK_MESSAGES } from "../constants/education-feedback.constants";
 import { educationsService } from "../services/educations.service";
@@ -120,7 +119,7 @@ describe("useSaveEducation", () => {
       void result.current.save(PAYLOAD);
     });
     expect(result.current.isSaving).toBe(true);
-    await waitFor(() => expect(educationsService.createEducation).toHaveBeenCalledOnce());
+    expect(educationsService.createEducation).toHaveBeenCalledOnce();
 
     await act(async () => { finishRequest(RECORD); });
     expect(onSaved).toHaveBeenCalledOnce();

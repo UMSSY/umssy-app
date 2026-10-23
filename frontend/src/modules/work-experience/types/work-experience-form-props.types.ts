@@ -1,4 +1,4 @@
-import type { Feedback } from "@/modules/profile";
+import type { Feedback } from "@/modules/profile/types/feedback.types";
 import type { WorkExperienceFormValues } from "./work-experience-form-values.types";
 
 export interface WorkExperienceFormProps {
@@ -6,6 +6,5 @@ export interface WorkExperienceFormProps {
   isPending?: boolean;
   feedback?: Feedback | null;
   onSubmit: (values: WorkExperienceFormValues) => void | Promise<void>;
-  onValuesChange?: () => void;
   onCancel: () => void;
 }

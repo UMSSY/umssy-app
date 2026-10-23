@@ -20,7 +20,6 @@ export interface ReportHistoryParams {
   page: number;
   limit: number;
   reportType?: ReportType;
-  search?: string;
 }
 
 export interface ReportHistoryState {

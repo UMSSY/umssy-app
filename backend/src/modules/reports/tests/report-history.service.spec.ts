@@ -83,10 +83,7 @@ describe('ReportHistoryService', () => {
         historyQuery({ page: 3, limit: 10 }),
       );
 
-      expect(findPage).toHaveBeenCalledWith('admin-1', 20, 10, {
-        reportType: undefined,
-        search: undefined,
-      });
+      expect(findPage).toHaveBeenCalledWith('admin-1', 20, 10, undefined);
       expect(result).toMatchObject({
         totalItems: 25,
         totalPages: 3,
@@ -119,10 +116,7 @@ describe('ReportHistoryService', () => {
         historyQuery({ reportType: 'REJECTED_USERS' }),
       );
 
-      expect(findPage).toHaveBeenCalledWith('admin-1', 0, 10, {
-        reportType: 'REJECTED_USERS',
-        search: undefined,
-      });
+      expect(findPage).toHaveBeenCalledWith('admin-1', 0, 10, 'REJECTED_USERS');
     });
 
     it.each([{}, { reportType: 'ALL' }])(
@@ -132,10 +126,7 @@ describe('ReportHistoryService', () => {
 
         await service.getReportHistory('admin-1', historyQuery(input));
 
-        expect(findPage).toHaveBeenCalledWith('admin-1', 0, 10, {
-          reportType: undefined,
-          search: undefined,
-        });
+        expect(findPage).toHaveBeenCalledWith('admin-1', 0, 10, undefined);
       },
     );
 
@@ -143,22 +134,6 @@ describe('ReportHistoryService', () => {
       expect(
         reportHistoryQuerySchema.safeParse({ reportType: 'GRADUATES' }).success,
       ).toBe(false);
-    });
-  });
-
-  describe('búsqueda por nombre de archivo', () => {
-    it('pide al repositorio los reportes que coinciden con el nombre buscado', async () => {
-      const { service, findPage } = buildService();
-
-      await service.getReportHistory(
-        'admin-1',
-        historyQuery({ search: '  rechazados  ' }),
-      );
-
-      expect(findPage).toHaveBeenCalledWith('admin-1', 0, 10, {
-        reportType: undefined,
-        search: 'rechazados',
-      });
     });
   });
 

@@ -1,5 +1,4 @@
-import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CERTIFICATION_DOCUMENT_MESSAGES } from "../config/certification-document.config";
@@ -47,7 +46,6 @@ async function renderView() {
   await act(async () => {
     render(<CertificationsView />);
   });
-  await waitFor(() => expect(screen.queryByText("Cargando certificaciones...")).not.toBeInTheDocument());
   return userEvent.setup();
 }
 
@@ -85,12 +83,14 @@ describe("CertificationsView", () => {
     expect(screen.getByText("Cargando certificaciones...")).toBeInTheDocument();
   });
 
-  it("shows one certification list with its attached documents and no editor at rest", async () => {
+  it("always shows the certifications and the documents cards side by side", async () => {
     await renderView();
-    expect(screen.getByRole("list", { name: "Certificaciones" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Agregar certificación" })).toBeInTheDocument();
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.queryByText("Documentos de respaldo", { selector: "[data-slot=card-title]" })).not.toBeInTheDocument();
+
+    expect(screen.getByText("Tus certificaciones")).toBeInTheDocument();
+    expect(screen.getByText("Documentos de respaldo", { selector: "[data-slot=card-title]" })).toBeInTheDocument();
+    expect(screen.getByText("CERTIFICACIONES REGISTRADAS")).toBeInTheDocument();
+    expect(screen.queryByRole("form")).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
   });
 
   it("shows exactly one document indicator per certification card", async () => {
@@ -121,7 +121,7 @@ describe("CertificationsView", () => {
     await renderView();
 
     expect(screen.getByText("Aún no has agregado certificaciones.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Agregar certificación" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "+ Agregar certificación" })).toBeInTheDocument();
     expect(screen.queryByRole("list", { name: "Certificaciones" })).not.toBeInTheDocument();
     expect(screen.queryByRole("form")).not.toBeInTheDocument();
   });
@@ -130,62 +130,76 @@ describe("CertificationsView", () => {
     await renderView();
 
     expect(screen.queryByText("Aún no has agregado certificaciones.")).not.toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Agregar certificación" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "+ Agregar certificación" })).toHaveLength(1);
   });
 
-  it("keeps records in the page flow rather than a nested scrolling preview", async () => {
+  it("keeps the header sticky and the list in a scrollable container", async () => {
     await renderView();
-    expect(screen.getByRole("list", { name: "Certificaciones" })).not.toHaveClass("overflow-y-auto");
-    expect(getCertificationNames()).toHaveLength(2);
+
+    const region = screen.getByRole("region", { name: "Certificaciones registradas" });
+    const header = screen.getByText("CERTIFICACIONES REGISTRADAS").parentElement;
+
+    expect(region).toHaveClass("overflow-y-auto");
+    expect(region).toHaveClass("max-h-[380px]");
+    expect(header).toHaveClass("sticky", "top-0", "z-10");
+    expect(region).toContainElement(header);
+    expect(region).toContainElement(screen.getByRole("list", { name: "Certificaciones" }));
   });
 
-  it("opens a focused empty dialog when adding a certification", async () => {
+  it("focuses an empty form when adding a certification from the header", async () => {
     const user = await renderView();
-    await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
-    const dialog = screen.getByRole("dialog", { name: "Agregar certificación" });
-    const input = within(dialog).getByLabelText(/Nombre de la certificación/);
-    expect(input).toHaveValue("");
-    await waitFor(() => expect(input).toHaveFocus());
+
+    await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+    expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("Scrum Master");
+
+    await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
+
+    const nameInput = screen.getByLabelText(/Nombre de la certificación/);
+    expect(nameInput).toHaveValue("");
+    expect(nameInput).toHaveFocus();
   });
 
-  it("keeps document selection inside the certification editor", async () => {
+  it("opens the unified form at the top of the documents panel", async () => {
+    vi.mocked(certificationsService.getCertifications).mockResolvedValue([{ ...SCRUM, hasDocument: true }, AWS]);
     const user = await renderView();
-    await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
-    const dialog = screen.getByRole("dialog");
-    expect(within(dialog).getByRole("form", { name: "Agregar certificación" })).toBeInTheDocument();
-    expect(within(dialog).getByLabelText(/Archivo de respaldo/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
+
+    const form = screen.getByRole("form", { name: "Agregar certificación" });
+    const panel = screen.getByText("Documentos de respaldo", { selector: "[data-slot=card-title]" }).closest("[data-slot=card]");
+    const documentsList = within(panel as HTMLElement).getByRole("list");
+
+    expect(panel).toContainElement(form);
+    expect(form.compareDocumentPosition(documentsList) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("confirms discarding before a new empty certification can be opened", async () => {
+  it("resets the form when adding again while it is already open", async () => {
     const user = await renderView();
-    await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
+
+    await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
     await user.type(screen.getByLabelText(/Nombre de la certificación/), "CCNA");
-    await user.click(screen.getByRole("button", { name: "Cancelar" }));
-    await user.click(screen.getByRole("button", { name: "Seguir editando" }));
-    expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("CCNA");
-    await user.click(screen.getByRole("button", { name: "Cancelar" }));
-    await user.click(screen.getByRole("button", { name: "Descartar cambios" }));
-    await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
+    await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
+
     expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("");
   });
 
-  it("opens another record only after the first editor has been closed", async () => {
+  it("resets the form with the data of another certification when editing a different card", async () => {
     const user = await renderView();
+
     await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
     await user.type(screen.getByLabelText(/Nombre de la certificación/), " extra");
-    await user.click(screen.getByRole("button", { name: "Cancelar" }));
-    await user.click(screen.getByRole("button", { name: "Descartar cambios" }));
     await user.click(screen.getByRole("button", { name: "Editar AWS Cloud Practitioner" }));
+
     expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("AWS Cloud Practitioner");
   });
 
-  it("reloads the saved values when the same record is opened after discarding", async () => {
+  it("resets the form when editing the same card again", async () => {
     const user = await renderView();
+
     await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
     await user.type(screen.getByLabelText(/Nombre de la certificación/), " extra");
-    await user.click(screen.getByRole("button", { name: "Cancelar" }));
-    await user.click(screen.getByRole("button", { name: "Descartar cambios" }));
     await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
+
     expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("Scrum Master");
   });
 
@@ -204,7 +218,7 @@ describe("CertificationsView", () => {
     const user = await renderView();
 
     vi.mocked(certificationsService.getCertifications).mockResolvedValue([SCRUM, AWS, created]);
-    await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
+    await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
     await fillCertificationForm(user);
     await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
@@ -223,7 +237,7 @@ describe("CertificationsView", () => {
   it("keeps the typed values when adding fails", async () => {
     vi.mocked(certificationsService.createCertification).mockRejectedValue(new Error("failed"));
     const user = await renderView();
-    await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
+    await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
     await fillCertificationForm(user);
     await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
@@ -244,7 +258,7 @@ describe("CertificationsView", () => {
 
     expect(screen.getByRole("form", { name: "Editar certificación" })).toBeInTheDocument();
     expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("Scrum Master");
-    expect(screen.getByLabelText(/Fecha de obtención/)).toHaveValue("10/05/2022");
+    expect(screen.getByLabelText(/Fecha de obtención/)).toHaveValue("2022-05-10");
 
     await user.clear(screen.getByLabelText(/Nombre de la certificación/));
     await user.type(screen.getByLabelText(/Nombre de la certificación/), "Professional Scrum Master");
@@ -285,44 +299,77 @@ describe("CertificationsView", () => {
   });
 
   describe("submitting state isolation", () => {
-    it("protects the active editor while its save is pending", async () => {
+    it("shows the spinner only on the save button and leaves the rest of the view enabled", async () => {
       const saving = createDeferred<Certification>();
+      vi.mocked(certificationsService.getCertifications).mockResolvedValue([
+        { ...SCRUM, hasDocument: true },
+        AWS,
+      ]);
       vi.mocked(certificationsService.updateCertification).mockReturnValue(saving.promise);
       const user = await renderView();
+
       await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
       await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
-      expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
-      expect(screen.getByRole("button", { name: "Cerrar formulario" })).toBeDisabled();
-      expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
-      await user.keyboard("{Escape}");
-      expect(screen.getByRole("dialog")).toBeInTheDocument();
-      await act(async () => { saving.resolve(SCRUM); await saving.promise; });
-      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+
+      const form = screen.getByRole("form", { name: "Editar certificación" });
+      expect(within(form).getByRole("button", { name: "Guardando..." })).toBeDisabled();
+      expect(within(form).getByRole("button", { name: "Cancelar" })).toBeDisabled();
+      expect(document.querySelectorAll(".animate-spin")).toHaveLength(1);
+      expect(form.querySelectorAll(".animate-spin")).toHaveLength(1);
+
+      expect(screen.getAllByRole("button", { name: "+ Agregar certificación" })[0]).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Editar Scrum Master" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Editar AWS Cloud Practitioner" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Eliminar Scrum Master" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Previsualizar documento de Scrum Master" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Ver documento de Scrum Master" })).toBeEnabled();
+
+      await act(async () => {
+        saving.resolve({ ...SCRUM, hasDocument: true });
+        await saving.promise;
+      });
     });
 
-    it("keeps closing disabled until the certification document has uploaded", async () => {
+    it("keeps the rest of the view enabled while the document of a new certification is uploading", async () => {
       const uploading = createDeferred<void>();
-      vi.mocked(certificationsService.createCertification).mockResolvedValue(createCertification("ccna", "CCNA", "2024-01-15"));
+      vi.mocked(certificationsService.createCertification).mockResolvedValue(
+        createCertification("ccna", "CCNA", "2024-01-15"),
+      );
       vi.mocked(certificationsService.uploadDocument).mockReturnValue(uploading.promise);
       const user = await renderView();
-      await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
+
+      await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
       await fillCertificationForm(user);
       await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
+
       expect(await screen.findByRole("button", { name: "Guardando..." })).toBeDisabled();
-      expect(screen.getByRole("button", { name: "Cerrar formulario" })).toBeDisabled();
-      await act(async () => { uploading.resolve(); await uploading.promise; });
-      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+      expect(document.querySelectorAll(".animate-spin")).toHaveLength(1);
+      expect(screen.getByRole("button", { name: "+ Agregar certificación" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Editar Scrum Master" })).toBeEnabled();
+
+      await act(async () => {
+        uploading.resolve();
+        await uploading.promise;
+      });
     });
 
-    it("prevents submitting the same certification twice while saving", async () => {
+    it("does not close a different form opened while the previous one was saving", async () => {
       const saving = createDeferred<Certification>();
       vi.mocked(certificationsService.updateCertification).mockReturnValue(saving.promise);
       const user = await renderView();
+
       await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
       await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
-      fireEvent.submit(screen.getByRole("form"));
-      expect(certificationsService.updateCertification).toHaveBeenCalledTimes(1);
-      await act(async () => { saving.resolve(SCRUM); await saving.promise; });
+      await user.click(screen.getByRole("button", { name: "Editar AWS Cloud Practitioner" }));
+
+      await act(async () => {
+        saving.resolve(SCRUM);
+        await saving.promise;
+      });
+
+      expect(screen.getByRole("form", { name: "Editar certificación" })).toBeInTheDocument();
+      expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("AWS Cloud Practitioner");
+      expect(screen.getByRole("button", { name: "Guardar certificación" })).toBeEnabled();
     });
   });
 
@@ -367,15 +414,17 @@ describe("CertificationsView", () => {
     expect(getCertificationNames()).toEqual(["AWS Cloud Practitioner"]);
   });
 
-  it("returns to the summary before allowing deletion of an edited record", async () => {
+  it("closes the edit form when the certification being edited is deleted", async () => {
     const user = await renderView();
+
     await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
-    await user.click(screen.getByRole("button", { name: "Cancelar" }));
     await user.click(screen.getByRole("button", { name: "Eliminar Scrum Master" }));
-    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Eliminar" }));
+    const dialog = await screen.findByRole("alertdialog");
+    vi.mocked(certificationsService.getCertifications).mockResolvedValue([AWS]);
+    await user.click(within(dialog).getByRole("button", { name: "Eliminar" }));
+
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
-    expect(certificationsService.deleteCertification).toHaveBeenCalledWith("scrum");
-    expect(screen.queryByRole("form")).not.toBeInTheDocument();
+    expect(screen.queryByRole("form", { name: "Agregar certificación" })).not.toBeInTheDocument();
   });
 
   it("shows an error when the certification cannot be deleted", async () => {
@@ -407,7 +456,7 @@ describe("CertificationsView", () => {
         .mockResolvedValueOnce(undefined);
       const user = await renderView();
 
-      await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
+      await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
       await fillCertificationForm(user);
       await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
@@ -451,7 +500,7 @@ describe("CertificationsView", () => {
       vi.mocked(certificationsService.uploadDocument).mockRejectedValue(new Error("failed"));
       const user = await renderView();
 
-      await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
+      await user.click(screen.getByRole("button", { name: "+ Agregar certificación" }));
       await fillCertificationForm(user);
       await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
@@ -499,8 +548,8 @@ describe("CertificationsView", () => {
         );
         expect(certificationsService.getCertifications).toHaveBeenCalled();
         expect(
-          await screen.findByRole("button", { name: "Previsualizar documento de Scrum Master" }),
-        ).toHaveTextContent("Ver documento");
+          await screen.findByRole("button", { name: "Ver documento de Scrum Master" }),
+        ).toHaveTextContent("certificate.pdf");
       });
 
       it("prevents saving without a document when the current one is removed and shows the required error", async () => {
@@ -557,7 +606,7 @@ describe("CertificationsView", () => {
       vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:certificate");
       const user = await renderView();
 
-      await user.click(screen.getByRole("button", { name: "Previsualizar documento de Scrum Master" }));
+      await user.click(screen.getByRole("button", { name: "Ver documento de Scrum Master" }));
 
       const dialog = await screen.findByRole("dialog");
       expect(certificationsService.getDocument).toHaveBeenCalledWith("scrum");
@@ -610,7 +659,7 @@ describe("CertificationsView", () => {
       vi.mocked(certificationsService.getDocument).mockRejectedValue(new Error("failed"));
       const user = await renderView();
 
-      await user.click(screen.getByRole("button", { name: "Previsualizar documento de Scrum Master" }));
+      await user.click(screen.getByRole("button", { name: "Ver documento de Scrum Master" }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
         CERTIFICATION_DOCUMENT_MESSAGES.openError,

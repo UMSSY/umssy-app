@@ -1,16 +1,48 @@
-"use client";
+'use client';
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { eventCategoriesService } from "../services/event-categories.service";
+import { useEffect, useState } from 'react';
+import { eventCategoriesService } from '../services/event-categories.service';
+
+import type { CategoriesResult } from '../types/categories-result.types';
 
 export function useEventCategories() {
-  const queryClient = useQueryClient();
-  const queryKey = ["event-categories"];
-  const query = useQuery({ queryKey, queryFn: () => eventCategoriesService.getAll() });
+  const [result, setResult] = useState<CategoriesResult | null>(null);
+  const [reloadVersion, setReloadVersion] = useState(0);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    eventCategoriesService
+      .getAll()
+      .then((categories) => {
+        if (!isCancelled) {
+          setResult({
+            categories,
+            error: null,
+          });
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setResult({
+            categories: [],
+            error: 'No se pudieron cargar las categorías.',
+          });
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [reloadVersion]);
+
   return {
-    categories: query.data ?? [],
-    isLoading: query.isFetching,
-    error: query.isError && !query.isFetching ? "No se pudieron cargar las categorías." : null,
-    retry: () => { void queryClient.resetQueries({ queryKey, exact: true }); },
+    retry: () => {
+      setResult(null);
+      setReloadVersion((version) => version + 1);
+    },
+    categories: result?.categories ?? [],
+    isLoading: result === null,
+    error: result?.error ?? null,
   };
 }

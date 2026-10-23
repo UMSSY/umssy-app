@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { PersonalInfoView } from "@/modules/profile";
 
-export default function ProfileSectionPage() {
-  return redirect("/profile/settings#personal-info");
+export default function PersonalInfoPage() {
+  return <PersonalInfoView />;
 }

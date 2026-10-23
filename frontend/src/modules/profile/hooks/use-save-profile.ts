@@ -1,6 +1,5 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { PROFILE_FEEDBACK_MESSAGES } from "../constants/profile-feedback.constants";
 import { profileService } from "../services/profile.service";
@@ -13,7 +12,6 @@ import { getProfileErrorMessage } from "../utils/get-profile-error-message";
 import { getProfileFieldErrors } from "../utils/get-profile-field-errors";
 
 export function useSaveProfile(onSaved: (profile: ProfileResponse) => void) {
-  const mutation = useMutation({ mutationFn: (request: () => Promise<ProfileResponse>) => request() });
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ProfileFieldErrors>({});
@@ -43,7 +41,7 @@ export function useSaveProfile(onSaved: (profile: ProfileResponse) => void) {
     setIsSaving(true);
     clearFeedback();
     try {
-      const profile = await mutation.mutateAsync(request);
+      const profile = await request();
       if (!mountedRef.current) return false;
       onSaved(profile);
       setFeedback({ type: "success", message: successMessage });
