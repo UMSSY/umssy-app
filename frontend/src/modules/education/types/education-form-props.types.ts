@@ -1,5 +1,5 @@
 import type { EducationFormValues } from "./education-form-values.types";
-import type { Feedback } from "@/modules/profile/types/feedback.types";
+import type { Feedback } from "@/modules/profile";
 
 export interface EducationFormProps {
   initialValues?: EducationFormValues;
@@ -7,5 +7,6 @@ export interface EducationFormProps {
   isPending?: boolean;
   feedback?: Feedback | null;
   onSubmit: (values: EducationFormValues) => void | Promise<void>;
+  onValuesChange?: () => void;
   onCancel: () => void;
 }

@@ -110,20 +110,20 @@ export function InformationStep({
       : undefined);
 
   return (
-    <div className="mt-6 rounded-xl border border-border bg-surface">
+    <div className="rounded-lg border border-border bg-surface">
       <div className="border-b border-border px-6 py-4">
-        <h2 className="text-[22px] font-bold text-ink">
-          Información y condiciones de la oferta
+        <h2 className="text-lg font-bold text-ink">
+          Informacion y condiciones de la oferta
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 px-6 py-6 lg:grid-cols-2">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 gap-x-8 gap-y-5 p-6 md:grid-cols-2">
+        <div className="md:col-span-2">
           <div className="flex justify-between">
             <Label htmlFor="title" className="text-[12.5px] font-semibold">
-              Título del puesto <span className="text-danger">*</span>
+              Título del puesto <span className="text-ink-soft">*</span>
             </Label>
-            <span className="text-[11px] text-slate-400">{conditions.title.length}/{MAX_TITLE_CHARS}</span>
+            <span className="text-xs text-text-secondary">{conditions.title.length}/{MAX_TITLE_CHARS}</span>
           </div>
           <Input 
             id="title" 
@@ -141,7 +141,7 @@ export function InformationStep({
 
         <div>
           <Label className="text-[12.5px] font-semibold">
-            Modalidad  <span className="text-danger">*</span>
+            Modalidad  <span className="text-ink-soft">*</span>
           </Label>
           <ToggleGroup
             id="modality"
@@ -158,7 +158,7 @@ export function InformationStep({
                 key={modality}
                 value={modality}
                 variant="outline"
-                className="h-auto w-full rounded-md px-3 py-2 text-sm font-semibold text-ink data-[pressed]:border-ink data-[pressed]:bg-ink data-[pressed]:text-white"
+                className="h-auto w-full rounded-md px-3 py-2 text-sm font-semibold text-ink data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-white"
               >
                 {modality}
               </ToggleGroupItem>
@@ -169,7 +169,7 @@ export function InformationStep({
 
         <div>
           <Label htmlFor="mapsLink" className="text-[12.5px] font-semibold">
-            Enlace de Google Maps <span className="text-danger">*</span>
+            Enlace de Google Maps <span className="text-ink-soft">*</span>
           </Label>
           <Input
             id="mapsLink"
@@ -183,9 +183,10 @@ export function InformationStep({
           <FieldError fieldId="mapsLink" message={mapsLinkMessage} />
         </div>
 
+        <h3 className="mt-3 border-t border-border pt-6 text-sm font-semibold text-ink md:col-span-2">Condiciones del puesto</h3>
         <div>
           <Label htmlFor="contractType" className="text-[12.5px] font-semibold">
-            Tipo de contrato <span className="text-danger">*</span>
+            Tipo de contrato <span className="text-ink-soft">*</span>
           </Label>
           <Select value={conditions.contractType} onValueChange={handleContractTypeChange}>
             <SelectTrigger id="contractType" className={`mt-1.5 w-full ${FIELD_FOCUS_CLASS}`}>
@@ -204,7 +205,7 @@ export function InformationStep({
 
         <div>
           <Label htmlFor="category" className="text-[12.5px] font-semibold">
-            Categoría <span className="text-danger">*</span>
+            Categoría <span className="text-ink-soft">*</span>
           </Label>
           <Input 
             id="category" 
@@ -220,7 +221,7 @@ export function InformationStep({
 
         <div>
           <Label htmlFor="vacancyCount" className="text-[12.5px] font-semibold">
-            Número de vacantes <span className="text-danger">*</span>
+            Número de vacantes <span className="text-ink-soft">*</span>
           </Label>
           <Input 
             id="vacancyCount" 
@@ -238,7 +239,7 @@ export function InformationStep({
 
         <div>
           <Label htmlFor="salary" className="text-[12.5px] font-semibold">
-            Salario {!isInternship && <span className="text-danger">*</span>}
+            Salario {!isInternship && <span className="text-ink-soft">*</span>}
           </Label>
           <Input 
             id="salary" 
@@ -257,7 +258,7 @@ export function InformationStep({
 
         <div>
           <Label htmlFor="languages" className="text-[12.5px] font-semibold">
-            Idiomas <span className="text-danger">*</span>
+            Idiomas <span className="text-ink-soft">*</span>
           </Label>
           <Input 
             id="languages" 

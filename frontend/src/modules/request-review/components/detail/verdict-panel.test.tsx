@@ -201,7 +201,7 @@ describe("VerdictPanel", () => {
   describe("diseño del dictamen y del diálogo", () => {
     it("Aprobar es el botón primario de tinta y Rechazar el de contorno rojo, lado a lado", () => {
       setup();
-      expect(screen.getByRole("button", { name: "Aprobar solicitud" })).toHaveClass("bg-ink", "text-surface");
+      expect(screen.getByRole("button", { name: "Aprobar solicitud" })).toHaveClass("bg-primary", "text-primary-foreground");
       expect(screen.getByRole("button", { name: "Rechazar" })).toHaveClass("border-accent", "text-accent");
     });
 

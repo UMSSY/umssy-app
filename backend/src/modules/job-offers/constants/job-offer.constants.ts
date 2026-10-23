@@ -25,7 +25,15 @@ export const JOB_OFFER_VALIDATION_MESSAGES = {
   SKILLS_TOO_MANY: `No se pueden seleccionar mas de ${JOB_OFFER_MAX_SKILLS} habilidades`,
   INVALID_SKILL_ID: 'El identificador de la habilidad no es valido',
   INVALID_COMPANY_ID: 'El identificador de la empresa no es valido',
+  INVALID_DATE: 'La fecha debe tener el formato AAAA-MM-DD',
+  DATE_RANGE_INVALID: 'La fecha inicial no puede ser mayor a la fecha final',
+  INVALID_SORT_BY: 'Solo se puede ordenar por fecha o por postulantes',
+  INVALID_SORT_ORDER: 'El orden debe ser ascendente o descendente',
+  SEARCH_TOO_LONG: `La busqueda no debe exceder los ${JOB_OFFER_TITLE_MAX_LENGTH} caracteres`,
 } as const;
+
+export const JOB_OFFER_SORT_FIELDS = ['createdAt', 'applicants'] as const;
+export const JOB_OFFER_SORT_ORDERS = ['asc', 'desc'] as const;
 
 export const JOB_OFFER_SELECT = {
   id: true,

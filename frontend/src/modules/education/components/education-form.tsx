@@ -3,7 +3,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Loader2, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DateField } from "@/shared/components/date-field";
 import { Textarea } from "@/components/ui/textarea";
 import { EMPTY_EDUCATION_FORM_VALUES } from "../constants/education-form-defaults.constants";
 import { EDUCATION_UI_TEXTS } from "../constants/education-ui.constants";
@@ -17,11 +17,11 @@ import { EDUCATION_DEGREE_TEXTS } from "../constants/education-degree-ui.constan
 import { getEducationDegrees, resolveEducationDegree } from "../utils/resolve-education-degree";
 import type { EducationFormProps } from "../types/education-form-props.types";
 import type { EducationFormValues } from "../types/education-form-values.types";
-import { getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
+import { getFieldErrorProps } from "@/modules/profile";
 import { validateEducationForm } from "../utils/validate-education-form";
-import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
-import { FormField } from "@/modules/profile/components/form-field";
-import { SectionCard } from "@/modules/profile/components/section-card";
+import { FeedbackMessage } from "@/modules/profile";
+import { FormField } from "@/modules/profile";
+import { FormFieldset } from "@/shared/components/layout/form-fieldset";
 
 export function EducationForm({
   initialValues,
@@ -30,6 +30,7 @@ export function EducationForm({
   feedback = null,
   onSubmit,
   onCancel,
+  onValuesChange,
 }: EducationFormProps) {
   const { institutions, isLoading: loadingInstitutions, error: institutionsError, reload: reloadInstitutions } = useEducationInstitutions();
   const catalogUnavailable = loadingInstitutions || !!institutionsError || !institutions.length;
@@ -45,6 +46,7 @@ export function EducationForm({
   const errors = hasSubmitted ? validateEducationForm(values, allowMissingEndDate, institutions) : {};
 
   const handleInstitutionChange = (institution: string) => {
+    onValuesChange?.();
     setValues((current) => {
       const previous = resolveEducationInstitution(current.institution, institutions);
       const next = resolveEducationInstitution(institution, institutions);
@@ -54,10 +56,11 @@ export function EducationForm({
     });
   };
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = event.target;
+  const handleValueChange = (name: keyof EducationFormValues, value: string) => {
+    onValuesChange?.();
     setValues((current) => ({ ...current, [name]: value }));
   };
+  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => handleValueChange(event.target.name as keyof EducationFormValues, event.target.value);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -72,8 +75,9 @@ export function EducationForm({
   };
 
   return (
-    <SectionCard title={title} className="min-w-0">
+    <div className="min-w-0">
       <form aria-label={title} aria-busy={isPending} noValidate onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <FormFieldset title="Estudio">
         <FormField id="education-institution" label={EDUCATION_UI_TEXTS.institutionLabel} isRequired error={errors.institution}>
           <EducationInstitutionCombobox
             id="education-institution"
@@ -102,37 +106,39 @@ export function EducationForm({
             value={values.degree}
             degrees={degrees}
             disabled={isPending || catalogUnavailable || !selectedInstitution || !degrees.length}
-            onChange={(degree) => setValues((current) => ({ ...current, degree }))}
+            onChange={(degree) => { onValuesChange?.(); setValues((current) => ({ ...current, degree })); }}
           />
           {degreeHint ? <p id="education-degree-hint" role="status" className="text-sm text-text-secondary">{degreeHint}</p> : null}
         </FormField>
+        </FormFieldset>
+        <FormFieldset title="Periodo y detalle">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <FormField id="education-startDate" label={EDUCATION_UI_TEXTS.startDateLabel} isRequired error={errors.startDate}>
-            <Input
+            <DateField
               id="education-startDate"
               {...getFieldErrorProps("education-startDate", errors.startDate)}
               name="startDate"
-              type="date"
+
               min={EDUCATION_MIN_DATE}
               required
               value={values.startDate}
               disabled={isPending}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              onValueChange={(value) => handleValueChange("startDate", value)}
+              className="h-11"
             />
           </FormField>
           <FormField id="education-endDate" label={EDUCATION_UI_TEXTS.endDateLabel} isRequired={!allowMissingEndDate} error={errors.endDate}>
-            <Input
+            <DateField
               id="education-endDate"
               {...getFieldErrorProps("education-endDate", errors.endDate)}
               name="endDate"
-              type="date"
+
               min={EDUCATION_MIN_DATE}
               required={!allowMissingEndDate}
               value={values.endDate}
               disabled={isPending}
-              onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              onValueChange={(value) => handleValueChange("endDate", value)}
+              className="h-11"
             />
           </FormField>
         </div>
@@ -149,7 +155,7 @@ export function EducationForm({
               value={values.description ?? ""}
               disabled={isPending}
               onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 resize-y pt-3 pb-9 field-sizing-fixed min-h-0 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              className="field-sizing-fixed min-h-36 resize-y pb-9 text-sm"
             />
             <span id="education-description-count" className="pointer-events-none absolute right-6 bottom-3 text-xs text-text-secondary">
               {(values.description ?? "").length}/{EDUCATION_DESCRIPTION_MAX_LENGTH}
@@ -157,12 +163,13 @@ export function EducationForm({
           </div>
         </FormField>
 
+        </FormFieldset>
         <FeedbackMessage feedback={feedback} />
-        <div className="flex flex-wrap justify-end gap-3 pt-2">
+        <div className="flex flex-wrap justify-end gap-3 border-t border-border pt-5">
           <Button
             type="button"
             variant="outline"
-            className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+            className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
             disabled={isPending}
             onClick={onCancel}
           >
@@ -170,7 +177,7 @@ export function EducationForm({
           </Button>
           <Button
             type="submit"
-            className="h-12 min-w-44 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger"
+            className="h-10 min-w-40 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover"
             disabled={isPending || catalogUnavailable}
           >
             {isPending ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : null}
@@ -178,6 +185,6 @@ export function EducationForm({
           </Button>
         </div>
       </form>
-    </SectionCard>
+    </div>
   );
 }

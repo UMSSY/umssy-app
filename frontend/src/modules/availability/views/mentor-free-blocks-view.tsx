@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { PageHeading } from "@/shared/components/layout";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import { addWeeks, getWeekRange } from "@/shared/utils/date-time";
 import { cn } from "cn";
 import { AvailabilityLoading } from "../components/availability-loading";
@@ -23,17 +24,13 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
   const goToNextWeek = () => setWeekStart(addWeeks(weekStart, 1));
 
   return (
-    <div className="space-y-4 p-6">
-      <header>
-        <p className="text-xs font-semibold text-muted-foreground">
-          {MENTOR_FREE_BLOCKS_TEXT.eyebrow}
-        </p>
-        <h1 className="text-2xl font-bold">{MENTOR_FREE_BLOCKS_TEXT.heading}</h1>
-      </header>
+    <div className="mx-auto w-full max-w-7xl space-y-6">
+      <Link href={`/mentors/${mentorId}`} className="inline-flex items-center gap-2 text-sm text-accent underline-offset-4 hover:underline"><ChevronLeft className="size-4" aria-hidden="true" />Volver al perfil del mentor</Link>
+      <PageHeading title={MENTOR_FREE_BLOCKS_TEXT.heading} description="Revisa los horarios disponibles y selecciona un bloque." />
 
       <nav
         aria-label={MENTOR_FREE_BLOCKS_TEXT.weekNavigation}
-        className="flex flex-wrap items-center gap-2"
+        className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface-soft p-3"
       >
         <Button
           variant="outline"
@@ -61,7 +58,6 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
         >
           {MENTOR_FREE_BLOCKS_TEXT.today}
         </Button>
-        <p className="ml-auto text-sm text-muted-foreground">{BOLIVIA_TIME_LABEL}</p>
       </nav>
 
       {isLoading ? (

@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useEducationInstitutions } from "../hooks/use-education-institutions";
@@ -193,6 +194,15 @@ describe("EducationForm", () => {
       expect(screen.getByText("La fecha de fin es obligatoria.")).toBeInTheDocument();
     });
 
+    it("rejects nonempty invalid dates even when a legacy end date may be omitted", async () => {
+      const { user, onSubmit } = setupForm({ initialValues: { ...VALUES, endDate: "" }, allowMissingEndDate: true });
+      fireEvent.change(screen.getByLabelText(/Hasta/), { target: { value: "31/02/2026" } });
+      await user.click(screen.getByRole("button", { name: "Guardar formación" }));
+      expect(onSubmit).not.toHaveBeenCalled();
+      expect(screen.getByLabelText(/Hasta/)).toHaveValue("31/02/2026");
+      expect(screen.getByLabelText(/Hasta/)).toHaveAttribute("aria-invalid", "true");
+    });
+
     it("revalidates both dates when correcting the start date and allows no description", async () => {
       const { user, onSubmit } = setupForm({ initialValues: { ...VALUES, startDate: "2026-01-01", description: "" } });
       await user.click(screen.getByRole("button", { name: "Guardar formación" }));
@@ -212,8 +222,8 @@ describe("EducationForm", () => {
 
       await user.type(screen.getByLabelText(/Institución/), VALUES.institution);
       await user.type(screen.getByLabelText(/Título o carrera/), VALUES.degree);
-      await user.type(screen.getByLabelText(/Desde/), VALUES.startDate);
-      await user.type(screen.getByLabelText(/Hasta/), VALUES.endDate);
+      await user.type(screen.getByLabelText(/Desde/), VALUES.startDate.split("-").reverse().join(""));
+      await user.type(screen.getByLabelText(/Hasta/), VALUES.endDate.split("-").reverse().join(""));
       await user.type(screen.getByLabelText(/Descripción/), VALUES.description);
       await user.click(screen.getByRole("button", { name: "Guardar formación" }));
 
@@ -226,8 +236,8 @@ describe("EducationForm", () => {
       expect(screen.getByRole("form", { name: "Editar formación" })).toBeInTheDocument();
       expect(screen.getByLabelText(/Institución/)).toHaveValue(VALUES.institution);
       expect(screen.getByLabelText(/Título o carrera/)).toHaveValue(VALUES.degree);
-      expect(screen.getByLabelText(/Desde/)).toHaveValue(VALUES.startDate);
-      expect(screen.getByLabelText(/Hasta/)).toHaveValue(VALUES.endDate);
+      expect(screen.getByLabelText(/Desde/)).toHaveValue(VALUES.startDate.split("-").reverse().join("/"));
+      expect(screen.getByLabelText(/Hasta/)).toHaveValue(VALUES.endDate.split("-").reverse().join("/"));
       expect(screen.getByLabelText(/Descripción/)).toHaveValue(VALUES.description);
 
       await user.clear(screen.getByLabelText(/Título o carrera/));

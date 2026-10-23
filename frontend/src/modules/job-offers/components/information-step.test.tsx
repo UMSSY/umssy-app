@@ -1,3 +1,4 @@
+import { Button as TestButton } from "@/components/ui/button";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -8,9 +9,9 @@ import { InformationStep } from "./information-step";
 vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange }: { children: React.ReactNode; onValueChange?: (value: string | null) => void }) => (
     <div>
-      <button type="button" onClick={() => onValueChange?.("Medio tiempo")}>elegir-contrato</button>
-      <button type="button" onClick={() => onValueChange?.(null)}>limpiar-contrato</button>
-      <button type="button" onClick={() => onValueChange?.("Pasantía")}>elegir-pasantia</button>
+      <TestButton type="button" onClick={() => onValueChange?.("Medio tiempo")}>elegir-contrato</TestButton>
+      <TestButton type="button" onClick={() => onValueChange?.(null)}>limpiar-contrato</TestButton>
+      <TestButton type="button" onClick={() => onValueChange?.("Pasantía")}>elegir-pasantia</TestButton>
       {children}
     </div>
   ),

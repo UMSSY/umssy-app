@@ -6,6 +6,10 @@ import {
 import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
 import { JobOffersRepository } from '../repositories/job-offers.repository.js';
 import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
+import {
+  DEFAULT_COMPANY_JOB_OFFERS_FILTERS,
+  type ListCompanyJobOffersRequest,
+} from '../requests/list-company-job-offers.request.js';
 import type { JobOfferCreatedResponse } from '../responses/job-offer-created.response.js';
 import type {
   JobOfferResponse,
@@ -58,10 +62,12 @@ export class JobOffersService {
     const records = await this.jobOffersRepository.findPublished(new Date());
     return records.map((record) => this.jobOfferMapper.toResponse(record));
   }
-
-  async listByCompany(companyId: string): Promise<JobOfferResponse[]> {
+    async listByCompany(
+    companyId: string,
+    filters: ListCompanyJobOffersRequest = DEFAULT_COMPANY_JOB_OFFERS_FILTERS,
+  ): Promise<JobOfferResponse[]> {
     await this.ensureCompanyExists(companyId);
-    const records = await this.jobOffersRepository.findByCompany(companyId);
+    const records = await this.jobOffersRepository.findByCompany(companyId, filters);
     return records.map((record) => this.jobOfferMapper.toResponse(record));
   }
 
