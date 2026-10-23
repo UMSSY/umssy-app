@@ -1,23 +1,29 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  cleanup,
-} from '@testing-library/react';
+import { screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
 import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
 
 import { ChatView } from '../views/chat-view';
-import ChatPage from '../../../app/chat/page';
+import ChatPage from '@/app/(app)/chat/page';
+import AppLayout from '@/app/(app)/layout';
+import { stubMatchMedia } from '@/shared/testing/stub-match-media';
 import * as chatApi from '../services/chat-api';
 
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  sessionStorage.clear();
+  vi.unstubAllGlobals();
+});
+
+vi.mock('next/navigation', () => ({ usePathname: () => '/chat', useRouter: () => ({ replace: vi.fn() }) }));
+
+vi.mock('@/modules/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/modules/auth')>();
+  return { ...actual, SessionUserCard: () => null };
 });
 
 const mockList = [
@@ -70,7 +76,7 @@ const renderWithQueryClient = (ui: React.ReactNode) => {
 };
 
 describe('ChatView & ChatPage', () => {
-  it('debe renderizar ChatView con estado vacio y permitir seleccionar conversacion', async () => {
+  it('debe renderizar ChatView con estado vacio y permitir seleccionar conversación', async () => {
     vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
 
     renderWithQueryClient(<ChatView />);
@@ -80,17 +86,17 @@ describe('ChatView & ChatPage', () => {
     });
 
     expect(
-      screen.getByText(/Selecciona una conversacion/i),
+      screen.getByText(/Selecciona una conversación/i),
     ).toBeDefined();
 
     const newChatButtons = screen.getAllByText(
-      'Iniciar una nueva conversacion',
+      'Iniciar una nueva conversación',
     );
 
     fireEvent.click(newChatButtons[0]);
 
     expect(
-      await screen.findByText('Nueva conversación'),
+      await screen.findByRole("heading", { name: "Nueva conversación" }),
     ).toBeDefined();
 
     const conversationItem = screen.getByText('Maria Fernandez');
@@ -110,11 +116,11 @@ describe('ChatView & ChatPage', () => {
     fireEvent.click(backButton);
 
     expect(
-      screen.getByText(/Selecciona una conversacion/i),
+      screen.getByText(/Selecciona una conversación/i),
     ).toBeDefined();
   });
 
-  it('debe renderizar la conversacion seleccionada sin foto mostrando desconectado', async () => {
+  it('debe renderizar la conversación seleccionada sin foto mostrando desconectado', async () => {
     vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
 
     renderWithQueryClient(<ChatView />);
@@ -134,7 +140,7 @@ describe('ChatView & ChatPage', () => {
     expect(screen.getByText('Desconectado')).toBeDefined();
   });
 
-  it('debe conmutar de unread a all y abrir modal al pulsar nueva conversacion', async () => {
+  it('debe conmutar de unread a all y abrir modal al pulsar nueva conversación', async () => {
     vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
 
     renderWithQueryClient(<ChatView />);
@@ -148,21 +154,26 @@ describe('ChatView & ChatPage', () => {
     fireEvent.click(unreadTab);
 
     const newBtn = screen.getByText(
-      'Iniciar una nueva conversacion',
+      'Iniciar una nueva conversación',
     );
 
     fireEvent.click(newBtn);
 
     expect(
-      await screen.findByText('Nueva conversación'),
+      await screen.findByRole("heading", { name: "Nueva conversación" }),
     ).toBeDefined();
   });
 
-  it('debe renderizar ChatPage montando ChatView', async () => {
+  it('renders the chat page inside one app navigation', async () => {
+    stubMatchMedia();
+    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
     vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
 
-    renderWithQueryClient(<ChatPage />);
+    renderWithQueryClient(<AppLayout><ChatPage /></AppLayout>);
 
     expect(screen.getByText('Chats')).toBeDefined();
+    expect(screen.getAllByRole('navigation', { name: 'Menú principal' })).toHaveLength(1);
+    expect(screen.getByRole('link', { name: 'Mensajes' })).toHaveAttribute('href', '/chat');
+    expect(await screen.findByText('Maria Fernandez')).toBeDefined();
   });
 });

@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
+import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import { BackofficeShell } from "./backoffice-shell";
@@ -9,11 +10,18 @@ vi.mock("next/navigation", () => ({ usePathname: () => "/backoffice/solicitudes"
 vi.mock("../../hooks/use-backoffice-session", () => ({
   useBackofficeSession: () => ({ state: session.state, logout: vi.fn() }),
 }));
+vi.mock("../../hooks/use-backoffice-user", async () => {
+  const { useAuth } = await import("@/shared/contexts/auth-context");
+  const { getRolesLabel } = await import("@/modules/auth");
+  return {
+    useBackofficeUser: () => ({ fullName: "Personal administrativo", role: getRolesLabel(useAuth().roles) }),
+  };
+});
 vi.mock("../../services/request-review.service", () => ({
   requestReviewService: { listRequests: vi.fn().mockResolvedValue({ ok: false, status: 0, message: "x" }) },
 }));
 
-const FORBIDDEN_TEXTS = ["Universidad para el futuro", "Mentorías", "Inicio"];
+const FORBIDDEN_TEXTS = ["Universidad para el futuro", "Mentorías"];
 
 describe("BackofficeShell: nunca pinta el shell por defecto", () => {
   beforeEach(() => stubMatchMedia());
@@ -26,14 +34,14 @@ describe("BackofficeShell: nunca pinta el shell por defecto", () => {
     "con la sesión en estado %s muestra el shell del backoffice con un esqueleto y sin contenido",
     (state) => {
       session.state = state;
-      render(
+      renderWithQuery(
         <BackofficeShell>
           <p>Contenido protegido</p>
         </BackofficeShell>,
       );
 
-      expect(screen.getByText("UMSSY")).toBeInTheDocument();
-      expect(screen.getByText("Backoffice de verificación")).toBeInTheDocument();
+      expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeInTheDocument();
+
       expect(screen.getByTestId("backoffice-session-skeleton")).toBeInTheDocument();
       expect(screen.queryByText("Contenido protegido")).toBeNull();
       for (const text of FORBIDDEN_TEXTS) expect(screen.queryByText(text)).toBeNull();
@@ -43,7 +51,7 @@ describe("BackofficeShell: nunca pinta el shell por defecto", () => {
 
   it("con sesión de administrativo muestra el contenido y tampoco el shell por defecto", () => {
     session.state = "allowed";
-    render(
+    renderWithQuery(
       <BackofficeShell>
         <p>Contenido protegido</p>
       </BackofficeShell>,

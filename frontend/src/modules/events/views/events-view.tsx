@@ -1,5 +1,10 @@
 'use client';
 
+import { cn } from "@/lib/utils";
+import { PageHeading } from "@/shared/components/layout";
+import Link from "next/link";
+import { Ticket } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef, useState } from 'react';
 import { RequestFeedback } from '../components/request-feedback';
@@ -9,9 +14,9 @@ import { EventDetailPanel } from '../components/event-detail-panel';
 import { useEvent } from '../hooks/use-event';
 import { useEvents } from '../hooks/use-events';
 import { useEventsFilters } from '../hooks/use-events-filters';
-import { useEventCategories } from '../../event-categories/hooks/use-event-categories';
+import { useEventCategories } from '@/modules/event-categories';
 import { EventsSearchInput } from '../components/events-search-input';
-import { CategoryFilterChips } from '../../event-categories/components/category-filter-chips';
+import { CategoryFilterChips } from '@/modules/event-categories';
 import type { EventItem } from '../types/event.types';
 
 export function EventsView() {
@@ -26,7 +31,7 @@ export function EventsView() {
   const { events, error, hasMore, isLoading, isLoadingMore, loadMore, retry } =
     useEvents(filters);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const viewRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<HTMLElement>(null);
 
   const handleSelectEvent = (selectedEvent: EventItem) => {
     setSelectedEventId(selectedEvent.id);
@@ -41,12 +46,11 @@ export function EventsView() {
     }
     function handleOutsideClick(event: MouseEvent) {
       const target = event.target;
-      if (!(target instanceof Element) || !viewRef.current?.contains(target)) return;
-      if (target.closest('[role="search"]')) {
-        setSelectedEventId(null);
-        return;
-      }
-      if (target.closest('aside, button, a, input, textarea, select, label, [role="button"], [contenteditable="true"]')) return;
+      if (!(target instanceof Element)) return;
+      if (
+        viewRef.current?.contains(target) &&
+        target.closest('aside, [aria-label="Listado de talleres"] button[aria-pressed]')
+      ) return;
       setSelectedEventId(null);
     }
     function handleSearchFocus(event: FocusEvent) {
@@ -66,21 +70,14 @@ export function EventsView() {
   }, [selectedEventId]);
 
   return (
-    <div ref={viewRef} className="flex min-h-svh w-full flex-1 flex-col bg-surface-soft text-foreground lg:flex-row">
-      <div className="flex min-w-0 flex-1 flex-col gap-6 px-6 pb-8 pt-20 sm:px-10">
-        <header className="flex flex-col gap-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
-            Talleres disponibles
-          </h1>
-          <p className="text-sm text-text-secondary">
-            {events.length} talleres cargados
-          </p>
-        </header>
-
+    <main ref={viewRef} className="@container/events mx-auto w-full max-w-browse space-y-8">
+      <PageHeading title="Talleres y eventos" description={isLoading && !events.length ? "Cargando actividades de la comunidad…" : `${events.length} talleres disponibles`} actions={<Link href="/events/my-passes" className={buttonVariants({ variant: "outline" })}><Ticket aria-hidden="true" />Mis inscripciones</Link>} />
+      <div className={cn("grid items-start transition-[grid-template-columns,gap] duration-300 ease-out", selectedEventId ? "grid-cols-1 gap-6 @4xl/events:grid-cols-(--grid-template-columns-event-browser-open)" : "grid-cols-1 gap-0 @4xl/events:grid-cols-(--grid-template-columns-event-browser)")}>
+      <div className="min-w-0 space-y-6">
         <div
           role="search"
           aria-label="Filtros de talleres"
-          className="flex flex-wrap items-center gap-2.5"
+          className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-4"
         >
           <EventsSearchInput value={searchInput} onChange={(value) => {
             setSelectedEventId(null);
@@ -109,7 +106,7 @@ export function EventsView() {
         )}
 
         <section aria-label="Listado de talleres">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-(--grid-template-columns-event-cards) gap-5">
             {events.map((eventItem) => (
               <EventCard
                 key={eventItem.id}
@@ -135,6 +132,7 @@ export function EventsView() {
           {hasMore && !error && (
             <div className="flex justify-center pt-6">
               <Button
+                variant="outline"
                 type="button"
                 onClick={loadMore}
                 disabled={isLoadingMore}
@@ -147,7 +145,8 @@ export function EventsView() {
         </section>
       </div>
 
-      {detail.event ? (
+      <div className="order-first min-w-0 @4xl/events:sticky @4xl/events:top-24 @4xl/events:order-none @4xl/events:max-h-event-detail @4xl/events:overflow-x-hidden @4xl/events:overflow-y-auto @4xl/events:overscroll-contain">
+      {selectedEventId && (detail.event ? (
         <EventDetailPanel event={detail.event} onClose={() => setSelectedEventId(null)} />
       ) : (
         <EventDetailState
@@ -158,7 +157,9 @@ export function EventsView() {
           retry={detail.retry}
           onClose={() => setSelectedEventId(null)}
         />
-      )}
-    </div>
+      ))}
+      </div>
+      </div>
+    </main>
   );
 }

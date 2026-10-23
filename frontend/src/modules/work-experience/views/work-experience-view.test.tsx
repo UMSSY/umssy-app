@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
@@ -48,15 +49,11 @@ describe("WorkExperienceView", () => {
   it("shows the saved experiences with their period", async () => {
     render(<WorkExperienceView />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Trayectoria" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Experiencia laboral" })).toBeInTheDocument();
     expect(screen.getByText("Cargando experiencia laboral...")).toBeInTheDocument();
     expect(await screen.findByText("Desarrolladora web junior")).toBeInTheDocument();
     expect(screen.getByText(/Mar 2025 – Actualidad/)).toBeInTheDocument();
     expect(screen.getByText(/Mar 2023 – Dic 2024/)).toBeInTheDocument();
-    expect(screen.getByText("Experiencia laboral").closest("li")).toHaveAttribute(
-      "aria-current",
-      "step",
-    );
   });
 
   it("shows the empty message when there are no experiences", async () => {
@@ -81,6 +78,7 @@ describe("WorkExperienceView", () => {
     render(<WorkExperienceView />);
     await screen.findByText("Desarrolladora web junior");
 
+    await user.click(screen.getByRole("button", { name: "Añadir experiencia" }));
     await user.type(screen.getByLabelText(/Empresa/), "Synapse Labs");
     await user.type(screen.getByLabelText(/Cargo/), "Desarrolladora web junior");
     fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2025-03-01" } });
@@ -101,7 +99,7 @@ describe("WorkExperienceView", () => {
     await waitFor(() =>
       expect(workExperienceService.getWorkExperiences).toHaveBeenCalledTimes(2),
     );
-    expect(screen.getByLabelText(/Empresa/)).toHaveValue("");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("edits an experience from the list", async () => {
@@ -177,7 +175,7 @@ describe("WorkExperienceView", () => {
     );
   });
 
-  it("clears the form when the experience being edited is deleted", async () => {
+  it("returns to the summary before deleting a previously edited experience", async () => {
     const user = userEvent.setup();
     vi.mocked(workExperienceService.deleteWorkExperience).mockResolvedValue();
     render(<WorkExperienceView />);
@@ -185,13 +183,15 @@ describe("WorkExperienceView", () => {
 
     await user.click(screen.getByRole("button", { name: "Editar Asistente de laboratorio" }));
     expect(screen.getByRole("form", { name: "Editar experiencia" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
 
     await user.click(screen.getByRole("button", { name: "Eliminar Asistente de laboratorio" }));
     await user.click(
       within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Eliminar" }),
     );
 
-    expect(await screen.findByRole("form", { name: "Agregar experiencia" })).toBeInTheDocument();
+    expect(await screen.findByRole("status")).toHaveTextContent(WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("shows an error when the experience cannot be deleted", async () => {
@@ -225,8 +225,8 @@ describe("WorkExperienceView", () => {
     await user.click(screen.getByRole("button", { name: "Editar Asistente de laboratorio" }));
     await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
-    expect(screen.getByRole("button", { name: "Editar Desarrolladora web junior" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Eliminar Desarrolladora web junior" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Editar Desarrolladora web junior", hidden: true })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Eliminar Desarrolladora web junior", hidden: true })).toBeDisabled();
 
     finishSave(PAST_JOB);
 
@@ -237,7 +237,7 @@ describe("WorkExperienceView", () => {
     );
   });
 
-  it("goes back to the add form when the edition is cancelled", async () => {
+  it("returns to the summary when editing is cancelled", async () => {
     const user = userEvent.setup();
     render(<WorkExperienceView />);
     await screen.findByText("Asistente de laboratorio");
@@ -245,6 +245,7 @@ describe("WorkExperienceView", () => {
     await user.click(screen.getByRole("button", { name: "Editar Asistente de laboratorio" }));
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
 
-    expect(screen.getByRole("form", { name: "Agregar experiencia" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Añadir experiencia" })).toBeEnabled();
   });
 });

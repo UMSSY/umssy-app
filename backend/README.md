@@ -124,7 +124,40 @@ Required environment variables in `.env`:
 
 - `JWT_SECRET` — secret used to sign tokens. You can generate with `openssl rand -base64 32` and paste in `JWT_SECRET` in `.env`.
 
-<!-- TODO: modificar readme para cumplir con la configuracion y runs de los seeds -->
+## Seeds
+
+### Production
+
+```bash
+pnpm run seed:production
+# Equivalent command, usable in any environment:
+pnpm run seed:catalogs
+```
+
+Loads only required catalogs in a transaction. Creates no users or demo records.
+
+To explicitly initialize an administrator:
+
+```bash
+pnpm run seed:admin --email admin@example.com
+```
+
+Loads required catalogs and creates one account with the `administrativo` role. The generated password is stored with bcrypt and printed only after the transaction commits; save it immediately. Reruns with the same email preserve the password. Existing non-admin accounts are never promoted, and a different email cannot create a second administrator.
+
+The previous `seed:production --email ...` command is now `seed:admin --email ...`.
+
+### Development
+
+```bash
+pnpm run seed
+pnpm run seed:run
+```
+Test password: `Prueba123`. Development commands refuse to run when `NODE_ENV=production`.
+
+Repeated demo data is generated from shared user, availability, appointment and chat plans. Stable record keys preserve existing relationships and reruns use `skipDuplicates`. Catalog values and special scenarios remain explicit.
+
+`SEED_TRANSACTION_TIMEOUT_MS` controls the transaction timeout (default: `120000`; range: `1–600000` ms). Seed commands do not apply migrations.
+
    ## Resources
 - [NestJS Documentation](https://docs.nestjs.com?utm_source=gemini) — Learn more about the framework.
 - [NestJS Courses](https://courses.nestjs.com/?utm_source=gemini) — Official video courses for hands-on experience.

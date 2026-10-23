@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { afterEach, describe, expect, it } from "vitest";
 import { RecruitersHomeView } from "./recruiters-home-view";
 
@@ -8,8 +9,8 @@ describe("RecruitersHomeView", () => {
   it("muestra el portal y un acceso al registro de vacantes", () => {
     render(<RecruitersHomeView />);
 
-    expect(screen.getByRole("heading", { name: "Portal de empresas" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Registrar nueva vacante" })).toHaveAttribute(
+    expect(screen.getByRole("heading", { name: "Mi empresa" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Publicar vacante" })).toHaveAttribute(
       "href",
       "/recruiters/job-offers/new",
     );

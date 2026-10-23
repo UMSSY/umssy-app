@@ -26,24 +26,24 @@ export const metadata: Metadata = {
     title: "UMSSY",
   },
   icons: {
-    icon: "/icons/icon-192x192.png",
-    apple: "/icons/icon-192x192.png",
+    icon: "/icons/icon-umssy.svg",
+    apple: "/icons/icon-umssy.svg",
   },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1e3a8a",
+  themeColor: "#0B1F2E",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode })  {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="es"
       className={`${inter.variable} ${interTight.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col">
         <Providers>
           <RegisterServiceWorker />
           {children}

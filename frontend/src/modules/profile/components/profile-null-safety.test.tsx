@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ProfileSummary } from "../types/profile-summary.types";
 import { ContactInfoCard } from "./contact-info-card";
@@ -15,7 +16,6 @@ const PROFILE_WITH_EMPTY_FIELDS = {
   phone: null,
   personalEmail: null,
   aboutMe: null,
-  interestedOpportunities: null,
 } as unknown as ProfileSummary;
 
 describe("profile components with missing data", () => {
@@ -39,7 +39,9 @@ describe("profile components with missing data", () => {
   it("renders the presentation summary when the profile fields are null", () => {
     render(<PresentationSummaryCard profile={PROFILE_WITH_EMPTY_FIELDS} />);
 
-    expect(screen.getByText("Cuenta quién eres y en qué te especializas.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Cuenta quién eres, en qué te especializas y qué oportunidades laborales te interesan."),
+    ).toBeInTheDocument();
   });
 
   it("renders the preview card when the values are null", () => {
@@ -49,7 +51,6 @@ describe("profile components with missing data", () => {
         presentation={{
           headline: null as unknown as string,
           aboutMe: null as unknown as string,
-          interestedOpportunities: null as unknown as string,
         }}
       />,
     );
@@ -65,7 +66,7 @@ describe("profile components with missing data", () => {
       </>,
     );
 
-    expect(screen.getByText("Formación registrada")).toBeInTheDocument();
+    expect(screen.getByText("Formación académica")).toBeInTheDocument();
     expect(screen.getByText("Aún no registraste experiencia laboral.")).toBeInTheDocument();
   });
 });

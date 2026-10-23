@@ -5,14 +5,9 @@ import {
   screen,
 } from "@testing-library/react";
 
-import type { ReactNode } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import ColaRevisionPage from "./page";
-
-vi.mock("@/modules/radar-chart/components/epic3-shell", () => ({
-  Epic3Shell: ({ children }: { children: ReactNode }) => children,
-}));
 
 afterEach(() => {
   cleanup();
@@ -23,7 +18,7 @@ describe('ColaRevisionPage', () => {
     render(<ColaRevisionPage />)
 
     expect(
-      screen.getByRole('heading', { name: 'Cola de Revisión' }),
+      screen.getByRole('heading', { name: 'Revisión de radares' }),
     ).toBeDefined()
 
     expect(

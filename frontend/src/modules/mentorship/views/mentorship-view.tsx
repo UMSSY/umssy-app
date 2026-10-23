@@ -1,7 +1,9 @@
 "use client";
 
+import { useAuth } from "@/shared/contexts/auth-context";
+
 import { useState } from "react";
-import axios from "axios";
+import { isApiError } from "@/shared/services/api-client";
 
 import { Button } from "@/components/ui/button";
 import { activateMentor } from "../services/mentor-activation.service";
@@ -16,6 +18,7 @@ import { useMentorshipWizard } from "../hooks/use-mentorship-wizard";
 import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
 
 export function MentorshipView() {
+  const { refreshRoles } = useAuth();
   const {
     currentStep,
     selectedTechnicalAreaIds,
@@ -83,11 +86,12 @@ export function MentorshipView() {
         technicalAreaIds: selectedTechnicalAreaIds,
         orientationTypeIds: selectedOrientationTypeIds,
       });
+      await refreshRoles();
 
       clearMentorshipWizardDraft();
       setIsActivated(true);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (isApiError(error)) {
         const status = error.response?.status;
 
         if (status === 400) {

@@ -137,11 +137,40 @@ describe('JobOffersService', () => {
     expect(result[0]).toMatchObject({ id: 'offer-1', company: { name: 'TechBolivia S.R.L.' } });
   });
 
-  it('lista las vacantes de una empresa existente', async () => {
+  it('lista las vacantes de una empresa existente sin filtros', async () => {
     const result = await service.listByCompany('company-1');
 
-    expect(repository.findByCompany).toHaveBeenCalledWith('company-1');
+    expect(repository.findByCompany).toHaveBeenCalledWith('company-1', {
+      sortBy: 'createdAt',
+      order: 'desc',
+    });
     expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ id: 'offer-1', company: { name: 'TechBolivia S.R.L.' } });
+  });
+
+  it('pasa los filtros al repositorio al listar las vacantes de una empresa', async () => {
+    const filters = {
+      modality: JobOfferModality.REMOTE,
+      dateFrom: '2026-10-01',
+      sortBy: 'createdAt' as const,
+      order: 'asc' as const,
+    };
+
+    await service.listByCompany('company-1', filters);
+
+    expect(repository.findByCompany).toHaveBeenCalledWith('company-1', filters);
+  });
+
+  it('devuelve una lista vacía si ninguna vacante coincide con los filtros', async () => {
+    repository.findByCompany.mockResolvedValue([]);
+
+    expect(
+      await service.listByCompany('company-1', {
+        contractType: JobOfferContractType.INTERNSHIP,
+        sortBy: 'createdAt',
+        order: 'desc',
+      }),
+    ).toEqual([]);
   });
 
   it('rechaza listar vacantes de una empresa que no existe', async () => {

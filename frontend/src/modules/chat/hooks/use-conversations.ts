@@ -1,44 +1,41 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Conversation, ConversationFilter } from '../types/conversation.types';
 import { User } from '../types/user.types';
-import { getConversations, getOrCreateConversation } from '../services/chat-api';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import {
+  getConversations,
+  getOrCreateConversation,
+  markConversationAsRead,
+} from '../services/chat-api';
+import { setStoredConversationUnreadCount } from '../services/message-storage';
+import { useMessagingUi } from '../contexts/messaging-ui-context';
 
 const PAGE_SIZE = 10;
 
 export function useConversations() {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const ui = useMessagingUi();
+  const [localSelectedId, setLocalSelectedId] = useState<string | null>(null);
+  const selectedId = ui ? ui.selectedId : localSelectedId;
+  const setSelectedId = ui?.setSelectedId ?? setLocalSelectedId;
   const [filter, setFilter] = useState<ConversationFilter>('all');
   const [keptInUnreadId, setKeptInUnreadId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [conversationsData, setConversationsData] = useState<Conversation[]>([]);
+  const queryClient = useQueryClient();
+  const queryKey = ['chat', 'conversations'];
+  const query = useQuery({ queryKey, queryFn: () => getConversations() });
+  const conversationsData = useMemo(() => query.data ?? [], [query.data]);
+  const isLoading = query.isFetching;
+  const isError = query.isError && !query.isFetching;
+  function setConversationsData(update: (current: Conversation[]) => Conversation[]) {
+    queryClient.setQueryData<Conversation[]>(queryKey, (current) => update(current ?? []));
+  }
+  const startMutation = useMutation({ mutationFn: (id: string) => getOrCreateConversation(id) });
+  const readMutation = useMutation({ mutationFn: (id: string) => markConversationAsRead(id) });
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
   const [pendingContactId, setPendingContactId] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    getConversations()
-      .then((data) => {
-        if (isMounted) {
-          setConversationsData(data);
-          setIsLoading(false);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setIsError(true);
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const retryConversations = () => { void query.refetch(); };
 
   const sortedConversations = useMemo(() => {
     return [...conversationsData].sort((a, b) => {
@@ -63,11 +60,18 @@ export function useConversations() {
         .replace(/[\u0300-\u036f]/g, '');
 
       list = list.filter((item) => {
-        const normalizedName = item.contact.fullName
+        const normalizedName = (item.contact?.fullName || '')
           .toLowerCase()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '');
-        return normalizedName.includes(normalizedQuery);
+        const normalizedContent = (item.lastMessage?.content || '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+        return (
+          normalizedName.includes(normalizedQuery) ||
+          normalizedContent.includes(normalizedQuery)
+        );
       });
     }
 
@@ -106,6 +110,8 @@ export function useConversations() {
       setKeptInUnreadId(null);
     }
 
+    readMutation.mutate(conversation.id);
+
     if (conversation.unreadCount > 0) {
       setConversationsData((prev) =>
         prev.map((item) =>
@@ -125,14 +131,42 @@ export function useConversations() {
     setConversationsData((prev) => {
       return prev.map((item) => {
         if (item.id === conversationId) {
+          const newUnread = selectedId === conversationId ? 0 : item.unreadCount + 1;
+          setStoredConversationUnreadCount(conversationId, newUnread);
           return {
             ...item,
             updatedAt: timestamp,
-            unreadCount: selectedId === conversationId ? 0 : item.unreadCount + 1,
+            unreadCount: newUnread,
             lastMessage: {
               id: `msg-${Date.now()}`,
               senderId: item.contact.id,
               content: newContent,
+              isAttachment: false,
+              createdAt: timestamp,
+            },
+          };
+        }
+        return item;
+      });
+    });
+  };
+
+  const updateConversationLastMessage = (
+    conversationId: string,
+    content: string,
+    senderId: string
+  ) => {
+    const timestamp = new Date().toISOString();
+    setConversationsData((prev) => {
+      return prev.map((item) => {
+        if (item.id === conversationId) {
+          return {
+            ...item,
+            updatedAt: timestamp,
+            lastMessage: {
+              id: `msg-${Date.now()}`,
+              senderId,
+              content,
               isAttachment: false,
               createdAt: timestamp,
             },
@@ -156,7 +190,7 @@ export function useConversations() {
 
     setPendingContactId(contactUser.id);
     try {
-      const conversation = await getOrCreateConversation(contactUser.id);
+      const conversation = await startMutation.mutateAsync(contactUser.id);
 
       setConversationsData((prev) => {
         const exists = prev.some((c) => c.id === conversation.id);
@@ -179,12 +213,14 @@ export function useConversations() {
     searchQuery,
     isLoading,
     isError,
+    retryConversations,
     loadMore,
     setActiveFilter,
     setSearchQuery,
     handleSelectConversation,
     clearSelectedConversation,
     simulateIncomingMessage,
+    updateConversationLastMessage,
     startConversationWithContact,
   };
 }

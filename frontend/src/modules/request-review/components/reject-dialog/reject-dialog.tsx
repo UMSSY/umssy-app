@@ -34,11 +34,12 @@ export function RejectDialog({ detail, open, onOpenChange, onRejected }: RejectD
     setIsRejecting(true);
     setRejectError(null);
     const result = await requestReviewService.rejectRequest(detail.id, rejection.reason);
-    setIsRejecting(false);
     if (result.ok) {
+      await onRejected(result.data.notificationSent);
+      setIsRejecting(false);
       onOpenChange(false);
-      onRejected(result.data.notificationSent);
     } else {
+      setIsRejecting(false);
       setRejectError(result.message);
     }
   }
@@ -54,11 +55,11 @@ export function RejectDialog({ detail, open, onOpenChange, onRejected }: RejectD
   }
 
   const REJECT_BUTTON_CLASS =
-    "h-[42px] rounded-lg bg-accent px-5 text-[14.5px] font-semibold text-surface hover:bg-accent/90 disabled:bg-border disabled:text-text-secondary disabled:opacity-100";
+    "h-10 rounded-lg bg-accent px-5 text-sm font-semibold text-surface hover:bg-accent/90 disabled:bg-border disabled:text-text-secondary disabled:opacity-100";
 
   return (
   <AlertDialog open={open} onOpenChange={handleOpenChange}>
-    <AlertDialogContent className="gap-5 rounded-[10px] p-8 data-[size=default]:sm:max-w-[36rem]">
+    <AlertDialogContent className="gap-5 rounded-lg p-8 data-[size=default]:sm:max-w-[36rem]">
       <AlertDialogHeader className="relative text-left">
         <AlertDialogTitle className="font-tight text-[26px] font-extrabold text-ink">Rechazar solicitud</AlertDialogTitle>
         <Button
@@ -71,7 +72,7 @@ export function RejectDialog({ detail, open, onOpenChange, onRejected }: RejectD
         >
           <X strokeWidth={1.75} aria-hidden="true" />
         </Button>
-        <AlertDialogDescription className="text-[15px] text-text-secondary">
+        <AlertDialogDescription className="text-base text-text-secondary">
           {detail.firstName} {detail.lastName} recibirá este motivo por correo ({detail.email}).
         </AlertDialogDescription>
       </AlertDialogHeader>
@@ -84,7 +85,7 @@ export function RejectDialog({ detail, open, onOpenChange, onRejected }: RejectD
                 key={option}
                 htmlFor={`reject-reason-${index}`}
                 className={cn(
-                  "flex h-[52px] cursor-pointer items-center gap-3 rounded-lg border px-4 text-[15px] font-normal text-ink",
+                  "flex h-[52px] cursor-pointer items-center gap-3 rounded-lg border px-4 text-base font-normal text-ink",
                   choice === option ? "border-accent bg-interaction" : "border-border bg-surface",
                 )}
               >
@@ -110,8 +111,13 @@ export function RejectDialog({ detail, open, onOpenChange, onRejected }: RejectD
             className="min-h-24 max-w-full rounded-lg [overflow-wrap:anywhere]"
           />
           <p className="text-xs text-text-secondary" aria-live="polite">
-            {rejection.length}/{REJECTION_MAX_LENGTH}
+            {rejection.hintLength}/{rejection.hintMaxLength}
           </p>
+          {rejection.reservedLength > 0 && (
+            <p className="text-xs text-text-secondary">
+              El motivo elegido ocupa {rejection.reservedLength} de los {REJECTION_MAX_LENGTH} caracteres del mensaje.
+            </p>
+          )}
           {rejection.error && (
             <p role="alert" className="text-sm text-ink">
               {rejection.error}
@@ -128,7 +134,7 @@ export function RejectDialog({ detail, open, onOpenChange, onRejected }: RejectD
         <AlertDialogCancel
             type="button"
             disabled={isRejecting}
-            className="h-[42px] rounded-lg border border-border bg-surface px-5 text-[14.5px] font-semibold text-ink hover:bg-surface-soft"
+            className="h-10 rounded-lg border border-border bg-surface px-5 text-sm font-semibold text-ink hover:bg-surface-soft"
           >
           Cancelar
         </AlertDialogCancel>

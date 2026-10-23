@@ -39,7 +39,7 @@ describe("PersonalDataField", () => {
     render(<PersonalDataField id="firstName" label="Nombres" />);
 
     const input = screen.getByLabelText("Nombres");
-    expect(input).toHaveClass("h-[42px]", "2xl:h-12", "2xl:text-base", "rounded-md", "border-border", "focus-visible:border-accent");
+    expect(input).toHaveClass("h-10", "2xl:h-12", "2xl:text-base", "rounded-md", "border-border", "focus-visible:border-accent");
     expect(input).not.toHaveClass("h-8");
   });
 

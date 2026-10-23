@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { FormFieldset } from "@/shared/components/layout/form-fieldset";
 import { Mail } from "lucide-react";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
+import { SIS_CODE_LENGTH } from "../../constants/personal-data-rules.constants";
 import { usePersonalDataBind } from "../../hooks/use-personal-data-bind";
 import type { PersonalDataFieldName } from "../../types/access-request.types";
 import { CareerSelect } from "./career-select";
@@ -12,7 +14,6 @@ import { PersonalDataField } from "./personal-data-field";
 import { PersonalDataFormActions } from "./personal-data-form-actions";
 import { PersonalDataIntro } from "./personal-data-intro";
 
-// Orden visual del formulario: el primer campo con error es el que recibe el foco
 const FIELD_ORDER: readonly PersonalDataFieldName[] = [
   "firstName",
   "lastName",
@@ -27,9 +28,8 @@ const FIELD_ORDER: readonly PersonalDataFieldName[] = [
 ];
 
 export function PersonalDataForm() {
-  const { fieldErrors, submit } = useAccessRequestForm();
+  const { fieldErrors, submit, values, setValue } = useAccessRequestForm();
   const bind = usePersonalDataBind();
-  // Cada envío terminado incrementa el contador; el efecto enfoca el primer error solo cuando cambia
   const [submitCount, setSubmitCount] = useState(0);
   const handledCount = useRef(0);
 
@@ -37,7 +37,6 @@ export function PersonalDataForm() {
     if (submitCount === handledCount.current) return;
     handledCount.current = submitCount;
     const firstWithError = FIELD_ORDER.find((field) => fieldErrors[field]);
-    // Los ids de los controles (inputs y disparadores de los selects) son los nombres de los campos
     if (firstWithError) document.getElementById(firstWithError)?.focus();
   }, [submitCount, fieldErrors]);
 
@@ -55,7 +54,8 @@ export function PersonalDataForm() {
     <div className="flex w-full flex-col gap-5">
       <PersonalDataIntro />
 
-      <form noValidate onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:gap-x-8 2xl:gap-y-6">
+      <form noValidate onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-surface p-6">
+        <FormFieldset title="Identidad"><div className="grid gap-5 md:grid-cols-2">
         <PersonalDataField
           id="firstName"
           {...bind("firstName")}
@@ -83,10 +83,12 @@ export function PersonalDataForm() {
           isRequired
           help="Figura en tu carnet universitario o en tu kárdex."
           inputMode="numeric"
-          maxLength={20}
+          maxLength={SIS_CODE_LENGTH}
           placeholder="Ej. 201904512"
         />
 
+        </div></FormFieldset>
+        <FormFieldset title="Contacto"><div className="grid gap-5 md:grid-cols-2">
         <PersonalDataField
           id="email"
           {...bind("email")}
@@ -114,9 +116,13 @@ export function PersonalDataForm() {
           placeholder="Ej. 70712345"
         />
 
+        </div></FormFieldset>
+        <FormFieldset title="Datos complementarios"><div className="grid gap-5 md:grid-cols-2">
         <PersonalDataField
           id="birthDate"
-          {...bind("birthDate")}
+          value={values.birthDate}
+          error={fieldErrors.birthDate}
+          onValueChange={(value) => setValue("birthDate", value)}
           label="Fecha de nacimiento"
           isRequired
           type="date"
@@ -135,6 +141,7 @@ export function PersonalDataForm() {
 
         <CareerSelect />
 
+        </div></FormFieldset>
         <PersonalDataFormActions />
       </form>
     </div>

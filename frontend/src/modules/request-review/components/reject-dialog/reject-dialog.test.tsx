@@ -12,7 +12,7 @@ describe("RejectDialog: estilo", () => {
 
     const cancel = await screen.findByRole("button", { name: "Cancelar" });
     expect(cancel).toHaveClass("bg-surface", "border", "border-border");
-    expect(screen.getByText("Documento ilegible").closest("label")).toHaveClass("text-[15px]");
+    expect(screen.getByText("Documento ilegible").closest("label")).toHaveClass("text-base");
     fireEvent.click(cancel);
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
@@ -22,5 +22,29 @@ describe("RejectDialog: estilo", () => {
 
     const hint = await screen.findByLabelText("Indicación para el solicitante");
     expect(hint).toHaveClass("max-w-full", "[overflow-wrap:anywhere]");
+  });
+
+  it("el contador cuenta solo la indicación: 0/500 vacío y sin sumar el motivo elegido", async () => {
+    render(<RejectDialog detail={detail} open onOpenChange={vi.fn()} onRejected={vi.fn()} />);
+    expect(await screen.findByText("0/500")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Documento ilegible"));
+    expect(screen.getByText("0/480")).toBeInTheDocument();
+    expect(screen.getByText("El motivo elegido ocupa 20 de los 500 caracteres del mensaje.")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Indicación para el solicitante"), { target: { value: "Sube el PDF original." } });
+    expect(screen.getByText("21/480")).toBeInTheDocument();
+  });
+
+  it("al superar el límite del mensaje muestra el aviso de la indicación y bloquea el envío", async () => {
+    render(<RejectDialog detail={detail} open onOpenChange={vi.fn()} onRejected={vi.fn()} />);
+    await screen.findByText("0/500");
+
+    fireEvent.click(screen.getByText("Documento ilegible"));
+    fireEvent.change(screen.getByLabelText("Indicación para el solicitante"), { target: { value: "a".repeat(481) } });
+
+    expect(screen.getByRole("alert")).toHaveTextContent("La indicación no puede superar los 480 caracteres");
+    expect(screen.queryByText(/El motivo no puede superar/)).toBeNull();
+    expect(screen.getByRole("button", { name: "Rechazar y notificar" })).toBeDisabled();
   });
 });

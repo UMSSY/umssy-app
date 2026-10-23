@@ -1,6 +1,8 @@
 import { notifyManager } from "@tanstack/react-query";
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
 import type { ApiResponse, PaginatedData } from "@/shared/types/api-response.types";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import * as downloadFileModule from "@/shared/utils/download-file";
@@ -66,7 +68,7 @@ describe("RejectedUsersReportView", () => {
   it("muestra el título, el buscador, los botones y la primera página", async () => {
     renderWithQuery(<RejectedUsersReportView />);
 
-    expect(screen.getByRole("heading", { name: "Reporte de usuarios registrados rechazados" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Usuarios rechazados" })).toBeDefined();
     expect(screen.getByPlaceholderText("Buscar por correo electrónico")).toBeDefined();
     expect(screen.getByRole("button", { name: "actualizar" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
@@ -79,6 +81,38 @@ describe("RejectedUsersReportView", () => {
     expect(screen.getByText("Título en provisión nacional")).toBeDefined();
     expect(screen.getByText("Mostrando 1-10 de 24 usuarios")).toBeDefined();
     expect(reportsService.getRejectedUsers).toHaveBeenCalledWith({ page: 1, limit: 10, search: "" }, expect.any(AbortSignal));
+  });
+
+  it("filtra por gestión, vuelve a la primera página y permite quitar el filtro", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-08T12:00:00-04:00"));
+    const user = userEvent.setup();
+    renderWithQuery(<RejectedUsersReportView />);
+    await waitFor(() => {
+      expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Página 2" }));
+    await waitFor(() => {
+      expect(screen.getByText("Mostrando 11-20 de 24 usuarios")).toBeDefined();
+    });
+
+    await user.click(screen.getByRole("button", { name: "Gestión" }));
+    await user.click(await screen.findByRole("menuitemradio", { name: "I-2026" }));
+
+    expect(await screen.findByRole("button", { name: "Gestión I-2026" })).toBeDefined();
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith(
+      { page: 1, limit: 10, period: "I-2026", search: "" },
+      expect.any(AbortSignal),
+    );
+
+    await user.click(screen.getByRole("button", { name: "Gestión I-2026" }));
+    await user.click(await screen.findByRole("menuitemradio", { name: "Todas" }));
+
+    expect(await screen.findByRole("button", { name: "Gestión" })).toBeDefined();
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith(
+      { page: 1, limit: 10, period: undefined, search: "" },
+      expect.any(AbortSignal),
+    );
   });
 
   it("navega a la última página", async () => {
@@ -313,6 +347,7 @@ describe("RejectedUsersReportView", () => {
   it("muestra un mensaje si falla la exportación", async () => {
     vi.spyOn(reportsService, "exportRejectedUsersCsv").mockRejectedValueOnce(new Error("Network error"));
     const downloadSpy = vi.spyOn(downloadFileModule, "downloadFile");
+    const toastErrorSpy = vi.spyOn(toast, "error");
     renderWithQuery(<RejectedUsersReportView />);
     await waitFor(() => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
@@ -320,7 +355,9 @@ describe("RejectedUsersReportView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Exportar CSV" }));
 
-    expect((await screen.findByRole("alert")).textContent).toBe("No se pudo exportar el reporte. Inténtalo de nuevo.");
+    await waitFor(() =>
+      expect(toastErrorSpy).toHaveBeenCalledWith("No se pudo exportar el reporte. Inténtalo de nuevo.", expect.any(Object)),
+    );
     expect(downloadSpy).not.toHaveBeenCalled();
     expect(screen.queryByText("La exportación de la tabla ha sido un éxito")).toBeNull();
   });

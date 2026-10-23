@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { JOB_OFFER_CREATED_SELECT, JOB_OFFER_SELECT } from '../constants/job-offer.constants.js';
 import { JobOffersRepository } from '../repositories/job-offers.repository.js';
+import { JobOfferContractType, JobOfferModality, JobOfferStatus } from '../types/job-offer.enum.js';
+
+const NOT_DELETED = { title: { not: JobOfferStatus.DELETED } };
 
 function createPrisma() {
   return {
@@ -103,15 +106,44 @@ describe('JobOffersRepository', () => {
       select: JOB_OFFER_SELECT,
     });
   });
-
-  it('lista las vacantes de una empresa', async () => {
+    it('lista las vacantes de una empresa sin filtros, de la más reciente a la más antigua', async () => {
     prisma.jobOffer.findMany.mockResolvedValue([]);
 
-    await repository.findByCompany('company-1');
+    await repository.findByCompany('company-1', { sortBy: 'createdAt', order: 'desc' });
 
     expect(prisma.jobOffer.findMany).toHaveBeenCalledWith({
-      where: { companyId: 'company-1' },
-      orderBy: { createdAt: 'desc' },
+      where: { companyId: 'company-1', status: NOT_DELETED },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('aplica los filtros al listar las vacantes de una empresa', async () => {
+    prisma.jobOffer.findMany.mockResolvedValue([]);
+
+    await repository.findByCompany('company-1', {
+      modality: JobOfferModality.REMOTE,
+      contractType: JobOfferContractType.PART_TIME,
+      dateFrom: '2026-10-01',
+      dateTo: '2026-10-31',
+      search: 'react',
+      sortBy: 'createdAt',
+      order: 'asc',
+    });
+
+    expect(prisma.jobOffer.findMany).toHaveBeenCalledWith({
+      where: {
+        companyId: 'company-1',
+        status: NOT_DELETED,
+        modality: { title: 'Remoto' },
+        contractType: { title: 'Medio tiempo' },
+        createdAt: {
+          gte: new Date('2026-10-01T04:00:00.000Z'),
+          lt: new Date('2026-11-01T04:00:00.000Z'),
+        },
+        title: { contains: 'react', mode: 'insensitive' },
+      },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
       select: JOB_OFFER_SELECT,
     });
   });

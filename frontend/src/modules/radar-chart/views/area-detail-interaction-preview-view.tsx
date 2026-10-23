@@ -1,18 +1,14 @@
 import { AreaDetailInteraction } from "../components/area-detail-interaction";
-import { Epic3Shell } from "../components/epic3-shell";
+import { PageHeading } from "@/shared/components/layout";
 
 export function AreaDetailInteractionPreviewView() {
   return (
-    <Epic3Shell>
-      <main className="min-h-screen bg-background p-6">
-        <div className="mx-auto max-w-6xl">
-          <h1 className="mb-6 text-2xl font-bold">
-            Prueba de interacción del detalle por área
-          </h1>
+    <main className="bg-background">
+      <div className="mx-auto max-w-7xl">
+        <PageHeading className="mb-6" title="Detalle por área" description="Explora cada competencia y compara sus niveles. Vista de demostración." />
 
-          <AreaDetailInteraction initialArea="desarrollo" />
-        </div>
-      </main>
-    </Epic3Shell>
+        <AreaDetailInteraction initialArea="desarrollo" />
+      </div>
+    </main>
   );
 }

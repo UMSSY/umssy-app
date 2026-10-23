@@ -24,7 +24,7 @@ export function ReportFilterSelect<TValue extends string>({
       <Select items={items} value={value ?? ALL_FILTER_VALUE} onValueChange={handleValueChange}>
         <SelectTrigger
           aria-labelledby={labelId}
-          className="w-full cursor-pointer rounded-md border-border bg-surface px-3 pb-2 pt-1.5 hover:border-ink-soft hover:bg-surface-soft focus-visible:border-accent focus-visible:ring-3 focus-visible:ring-interaction data-[size=default]:h-auto data-popup-open:border-accent data-popup-open:ring-3 data-popup-open:ring-interaction"
+          className="w-full cursor-pointer rounded-md border-border bg-surface px-3 pt-1.5 pb-2 hover:border-ink-soft hover:bg-surface-soft focus-visible:border-accent focus-visible:ring-3 focus-visible:ring-interaction data-popup-open:border-accent data-popup-open:ring-3 data-popup-open:ring-interaction data-[size=default]:h-auto"
         >
           <span className="flex flex-1 flex-col items-start">
             <span id={labelId} className="text-xs text-text-secondary">
@@ -39,7 +39,8 @@ export function ReportFilterSelect<TValue extends string>({
             <SelectItem
               key={option.value}
               value={option.value}
-              className="rounded-none px-3 py-2 text-ink-soft focus:bg-surface-soft focus:text-ink data-selected:font-semibold data-selected:text-ink"
+              variant="subtle"
+              className="rounded-none px-3 py-2 text-ink-soft data-selected:font-semibold"
             >
               {option.label}
             </SelectItem>

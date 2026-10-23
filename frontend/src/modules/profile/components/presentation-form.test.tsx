@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_PRESENTATION_VALUES } from "../config/profile-form-defaults.config";
@@ -9,15 +10,13 @@ import { PresentationForm } from "./presentation-form";
 const SAVED_VALUES: PresentationValues = {
   headline: "Desarrolladora web junior",
   aboutMe: "Systems engineering graduate from UMSS.",
-  interestedOpportunities: "",
 };
 
-function renderForm(initialValues = EMPTY_PRESENTATION_VALUES, fullName = "", isSaving = false) {
+function renderForm(initialValues = EMPTY_PRESENTATION_VALUES, isSaving = false) {
   const onSubmit = vi.fn();
   render(
     <PresentationForm
       initialValues={initialValues}
-      fullName={fullName}
       isSaving={isSaving}
       onSubmit={onSubmit}
     />,
@@ -30,36 +29,37 @@ describe("PresentationForm", () => {
     cleanup();
   });
 
-  it("renders the form, the preview and the writing tips", () => {
+  it("renders focused inputs without a duplicate preview", () => {
     renderForm();
-
     expect(screen.getByText("Escribe tu presentación")).toBeInTheDocument();
-    expect(screen.getByText("Así se verá en tu perfil")).toBeInTheDocument();
-    expect(screen.getByText("Para escribirla mejor")).toBeInTheDocument();
-    expect(screen.getByText("Tu nombre")).toBeInTheDocument();
-    expect(screen.getByText("Tu titular profesional")).toBeInTheDocument();
-    expect(
-      screen.getByText("Aquí se mostrará tu presentación una vez que la guardes."),
-    ).toBeInTheDocument();
+    expect(screen.getAllByRole("textbox")).toHaveLength(2);
+    expect(screen.queryByText("Así se verá en tu perfil")).not.toBeInTheDocument();
   });
 
-  it("updates the preview while typing", async () => {
-    const { user } = renderForm(EMPTY_PRESENTATION_VALUES, "Valeria Quispe");
-
+  it("keeps changes in the editor until the user saves", async () => {
+    const { onSubmit, user } = renderForm();
     await user.type(screen.getByLabelText(/Titular profesional/), "Desarrolladora web junior");
-    await user.type(screen.getByLabelText(/Oportunidades que me interesan/), "Remote work");
+    await user.type(screen.getByLabelText(/Acerca de/), "Looking for remote work.");
+    expect(screen.getByLabelText(/Titular profesional/)).toHaveValue("Desarrolladora web junior");
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.queryByText("Así se verá en tu perfil")).not.toBeInTheDocument();
+  });
 
-    expect(screen.getByText("Valeria Quispe")).toBeInTheDocument();
-    expect(screen.getByText("VQ")).toBeInTheDocument();
-    expect(screen.getByText("Desarrolladora web junior")).toBeInTheDocument();
-    expect(screen.getByText("Remote work", { selector: "p" })).toBeInTheDocument();
+  it("only shows the headline and about me fields", () => {
+    renderForm();
+
+    expect(screen.getAllByRole("textbox")).toHaveLength(2);
+    expect(screen.queryByLabelText(/Oportunidades que me interesan/)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/Acerca de/)).toHaveAttribute(
+      "placeholder",
+      "Cuenta quién eres, en qué te especializas y qué oportunidades laborales te interesan.",
+    );
   });
 
   it("shows the server field errors next to their fields", () => {
     render(
       <PresentationForm
         initialValues={EMPTY_PRESENTATION_VALUES}
-        fullName=""
         serverErrors={{ headline: "Ingresa un titular con hasta 150 caracteres." }}
         onSubmit={vi.fn()}
       />,
@@ -93,14 +93,12 @@ describe("PresentationForm", () => {
     expect(onSubmit).toHaveBeenCalledWith({
       headline: "Desarrolladora web junior",
       aboutMe: "Graduate from UMSS.",
-      interestedOpportunities: "",
     });
   });
 
   it("shows an error next to each empty required field and does not submit", async () => {
     const { onSubmit, user } = renderForm();
 
-    await user.type(screen.getByLabelText(/Oportunidades que me interesan/), "Remote work");
     await user.click(screen.getByRole("button", { name: "Guardar presentación" }));
 
     expect(onSubmit).not.toHaveBeenCalled();
@@ -109,10 +107,6 @@ describe("PresentationForm", () => {
     );
     expect(screen.getByLabelText(/Acerca de/)).toHaveAccessibleDescription(
       PROFILE_VALIDATION_MESSAGES.required,
-    );
-    expect(screen.getByLabelText(/Oportunidades que me interesan/)).not.toHaveAttribute(
-      "aria-invalid",
-      "true",
     );
   });
 
@@ -136,7 +130,7 @@ describe("PresentationForm", () => {
   });
 
   it("disables the form while saving", () => {
-    renderForm(SAVED_VALUES, "Valeria Quispe", true);
+    renderForm(SAVED_VALUES, true);
 
     expect(screen.getByLabelText(/Acerca de/)).toBeDisabled();
     expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
