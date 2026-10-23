@@ -1,14 +1,21 @@
-import { ChartNoAxesCombined } from "lucide-react";
+"use client";
+
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
-import { SurveyEmptyState } from "../components/survey-empty-state";
+import { SurveyStatisticsTable } from "../components/survey-statistics-table";
+import { useSurveys } from "../hooks/use-surveys";
 
 export function SurveyStatisticsView() {
+  const { surveys, isLoading, hasError } = useSurveys();
+
   return (
-    <WorkspacePage title="Estadísticas de encuestas" description="Consulta los resultados y la participación de cada encuesta.">
-      <SurveyEmptyState
-        icon={ChartNoAxesCombined}
-        title="Todavía no hay estadísticas"
-        description="Cuando las encuestas reciban respuestas, aquí se mostrarán sus resultados."
+    <WorkspacePage
+      title="Estadísticas de encuestas"
+      description="Consulta los resultados, la participación y las métricas de cada encuesta."
+    >
+      <SurveyStatisticsTable
+        surveys={surveys}
+        isLoading={isLoading}
+        hasError={hasError}
       />
     </WorkspacePage>
   );

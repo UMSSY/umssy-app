@@ -5,11 +5,13 @@ import { SurveysController } from './controllers/surveys.controller.js';
 import { SurveyMapper } from './mappers/survey.mapper.js';
 import { CareersRepository } from './repositories/careers.repository.js';
 import { SurveysRepository } from './repositories/surveys.repository.js';
+import { ReportsModule } from '../reports/reports.module.js';
 import { CareersService } from './services/careers.service.js';
+import { SurveyPdfService } from './services/survey-pdf.service.js';
 import { SurveysService } from './services/surveys.service.js';
 
 @Module({
-  imports: [JwtAuthModule],
+  imports: [JwtAuthModule, ReportsModule],
   controllers: [SurveysController, CareersController],
   providers: [
     SurveysService,
@@ -17,6 +19,7 @@ import { SurveysService } from './services/surveys.service.js';
     SurveysRepository,
     CareersRepository,
     SurveyMapper,
+    SurveyPdfService,
   ],
 })
 export class SurveysModule {}

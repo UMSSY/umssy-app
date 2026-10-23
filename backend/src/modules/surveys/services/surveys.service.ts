@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   CareerNotFoundException,
   InvalidSurveyScheduleException,
+  SurveyNotFoundException,
   SurveyTitleAlreadyExistsException,
 } from '../exceptions/index.js';
 import { SurveyMapper } from '../mappers/survey.mapper.js';
@@ -9,8 +10,12 @@ import { CareersRepository } from '../repositories/careers.repository.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import type { CreateSurveyRequest } from '../requests/create-survey.schema.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
+import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
 import { getScheduleError } from '../utils/survey-schedule.js';
+
+import { ReportHistoryService } from '../../reports/services/report-history.service.js';
+import { SurveyPdfService } from './survey-pdf.service.js';
 
 @Injectable()
 export class SurveysService {
@@ -18,6 +23,8 @@ export class SurveysService {
     private readonly surveysRepository: SurveysRepository,
     private readonly careersRepository: CareersRepository,
     private readonly surveyMapper: SurveyMapper,
+    private readonly surveyPdfService: SurveyPdfService,
+    private readonly reportHistoryService: ReportHistoryService,
   ) {}
 
   async create(
@@ -50,6 +57,38 @@ export class SurveysService {
   async listSurveys(): Promise<SurveySummaryResponse[]> {
     const records = await this.surveysRepository.findAll();
     return records.map((record) => this.surveyMapper.toSummaryResponse(record));
+  }
+
+  async getStatistics(id: string): Promise<SurveyStatisticsResponse> {
+    const stats = await this.surveysRepository.findStatistics(id);
+    if (!stats) throw new SurveyNotFoundException();
+    return stats;
+  }
+
+  async exportSurveyPdf(
+    id: string,
+    userId: string,
+  ): Promise<{ fileName: string; buffer: Buffer }> {
+    const stats = await this.getStatistics(id);
+    const buffer = await this.surveyPdfService.generatePdf(stats);
+
+    const safeTitle = stats.title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40);
+
+    const dateSuffix = new Date().toISOString().slice(0, 10);
+    const fileName = `reporte-encuesta-${safeTitle || 'estadisticas'}-${dateSuffix}.pdf`;
+
+    await this.reportHistoryService.registerGeneratedReport(userId, {
+      fileName,
+      reportType: 'SURVEY_STATISTICS',
+    });
+
+    return { fileName, buffer };
   }
 
   private async ensureCareerExists(careerId: string): Promise<void> {

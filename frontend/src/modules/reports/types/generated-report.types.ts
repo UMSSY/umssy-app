@@ -7,7 +7,8 @@ export type ReportType =
   | "MENTORS"
   | "COMPANIES"
   | "ADMINS"
-  | "REJECTED_USERS";
+  | "REJECTED_USERS"
+  | "SURVEY_STATISTICS";
 
 export interface GeneratedReport {
   id: string;
