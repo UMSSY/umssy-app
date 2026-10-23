@@ -7,7 +7,7 @@ import { RadarCard } from "./radar-card";
 
 const CARD_CLASS = "flex flex-col p-5";
 const VALUE_CLASS = "font-heading text-3xl leading-none font-semibold tabular-nums";
-const TITLE_CLASS = "mt-3 text-[11px] font-semibold tracking-[0.12em] text-ink-soft uppercase";
+const TITLE_CLASS = "mt-3 text-xs font-semibold tracking-[0.12em] text-ink-soft uppercase";
 const DETAIL_CLASS = "mt-1 text-xs text-text-secondary";
 const HIGHLIGHT_CLASS = "font-semibold text-accent";
 const VARIATION_ICON_CLASS = "size-3.5 shrink-0";
@@ -27,7 +27,7 @@ export function KpiCards({ kpis }: KpiCardsProps) {
           className={cn(
             DETAIL_CLASS,
             "inline-flex items-center gap-1 font-semibold",
-            isVariationNegative ? "text-danger" : "text-accent",
+            isVariationNegative ? "text-ink-soft" : "text-accent",
           )}
         >
           {kpis.variationVsPrevious > 0 && (

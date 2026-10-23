@@ -22,7 +22,7 @@ export function MentorProfileView({ mentorId }: MentorProfileViewProps) {
 
   if (isPending || (isError && isFetching)) {
     return (
-      <main className="mx-auto w-full max-w-7xl p-4 sm:p-8">
+      <main className="mx-auto w-full max-w-7xl">
         <MentorQuerySkeleton isProfile />
       </main>
     );
@@ -30,7 +30,7 @@ export function MentorProfileView({ mentorId }: MentorProfileViewProps) {
 
   if (isError) {
     return (
-      <main className="mx-auto w-full max-w-7xl p-4 sm:p-8">
+      <main className="mx-auto w-full max-w-7xl">
         <MentorQueryFeedback
           title="No pudimos cargar el perfil"
           description="Ocurrió un problema al consultar este perfil. Puedes reintentar o volver al directorio."
@@ -45,7 +45,7 @@ export function MentorProfileView({ mentorId }: MentorProfileViewProps) {
 
   if (!mentor) {
     return (
-      <main className="min-h-screen bg-surface-soft p-8">
+      <main className="mx-auto w-full max-w-7xl">
         <MentorQueryFeedback
           title="Mentor no encontrado"
           description="No se pudo encontrar el perfil solicitado."
@@ -56,16 +56,16 @@ export function MentorProfileView({ mentorId }: MentorProfileViewProps) {
   }
 
   return (
-    <main className="min-h-screen bg-surface-soft p-4 sm:p-6 md:p-8">
-      <div className="mx-auto w-full min-w-0 max-w-7xl">
+    <main className="bg-background">
+      <div className="mx-auto w-full max-w-7xl min-w-0">
         <MentorProfileNavigation mentorName={mentor.fullName} />
         <MentorProfileHeader
           mentor={mentor}
           showRequestAction={canVerifyIdentity && currentUserId !== mentor.id}
         />
 
-        <div className="mt-8 grid min-w-0 grid-cols-1 gap-8 xl:grid-cols-12">
-          <div className="flex min-w-0 flex-col gap-8 xl:col-span-8">
+        <div className="mt-6 grid min-w-0 grid-cols-12 gap-6">
+          <div className="col-span-8 flex min-w-0 flex-col gap-6">
             {mentor.aboutMe && <MentorAbout description={mentor.aboutMe} />}
 
             <MentorGuidanceTypes
@@ -74,7 +74,7 @@ export function MentorProfileView({ mentorId }: MentorProfileViewProps) {
             />
           </div>
 
-          <div className="flex min-w-0 flex-col gap-8 xl:col-span-4">
+          <div className="col-span-4 flex min-w-0 flex-col gap-6">
             <MentorCareer mentor={mentor} />
 
             <MentorTechnicalAreas areas={mentor.technicalAreas} />

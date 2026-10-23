@@ -8,13 +8,13 @@ interface ReviewStatusBadgeProps {
 function getStatusClasses(status: ReviewProfileStatus): string {
   switch (status) {
     case "Completado":
-      return "border-ink/15 bg-ink text-surface";
+      return "border-availability-border bg-availability text-availability-foreground";
 
     case "Procesando":
-      return "border-gold/30 bg-gold/15 text-ink";
+      return "border-availability-border text-availability-foreground";
 
     case "Pendiente":
-      return "border-accent/20 bg-interaction text-accent";
+      return "border-notice-border bg-notice text-notice-foreground";
   }
 }
 

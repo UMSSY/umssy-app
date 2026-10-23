@@ -12,14 +12,11 @@ import { getFieldErrorProps } from "../utils/get-field-error-props";
 import { trimFormValues } from "../utils/trim-form-values";
 import { validatePresentation } from "../utils/validate-presentation";
 import { FormField } from "./form-field";
-import { ProfilePreviewCard } from "./profile-preview-card";
 import { SectionCard } from "./section-card";
-import { WritingTipsCard } from "./writing-tips-card";
+import { FormFieldset } from "@/shared/components/layout/form-fieldset";
 
 export function PresentationForm({
   initialValues,
-  fullName,
-  photoUrl,
   isSaving = false,
   serverErrors = {},
   onEdit,
@@ -56,12 +53,12 @@ export function PresentationForm({
   };
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_380px] items-start gap-6">
+    <div>
       <SectionCard
         title="Escribe tu presentación"
-        description="Un resumen claro ayuda a entender qué haces y qué buscas."
       >
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+          <FormFieldset title="Tu especialidad">
           <FormField id="headline" label="Titular profesional" isRequired error={errors.headline}>
             <Input
               id="headline"
@@ -71,10 +68,12 @@ export function PresentationForm({
               value={values.headline}
               disabled={isSaving}
               onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              className="h-11"
               {...getFieldErrorProps("headline", errors.headline)}
             />
           </FormField>
+          </FormFieldset>
+          <FormFieldset title="Sobre ti">
           <FormField id="aboutMe" label="Acerca de" isRequired error={errors.aboutMe}>
             <Textarea
               id="aboutMe"
@@ -84,26 +83,27 @@ export function PresentationForm({
               value={values.aboutMe}
               disabled={isSaving}
               onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 resize-y py-3 field-sizing-fixed min-h-0 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              className="field-sizing-fixed min-h-36 resize-y text-sm"
               {...getFieldErrorProps("aboutMe", errors.aboutMe)}
             />
           </FormField>
 
-          <div className="flex items-center justify-between gap-6 pt-3">
-            <p className="text-[13px] text-text-secondary">
-              Los dos textos aparecerán en tu perfil público.
+          </FormFieldset>
+          <div className="flex flex-wrap items-center justify-end gap-4 border-t border-border pt-5">
+            <p className="text-sm text-text-secondary">
+              Los cambios se muestran al guardar.
             </p>
             <div className="flex gap-3">
               <Button
                 type="button"
                 variant="outline"
-                className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+                className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
                 disabled={isSaving}
                 onClick={handleCancel}
               >
                 Cancelar
               </Button>
-              <Button type="submit" className={cn("h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger", "min-w-52")} disabled={isSaving}>
+              <Button type="submit" className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
                 {isSaving ? "Guardando..." : "Guardar presentación"}
               </Button>
             </div>
@@ -111,10 +111,6 @@ export function PresentationForm({
         </form>
       </SectionCard>
 
-      <div className="flex flex-col gap-6">
-        <ProfilePreviewCard fullName={fullName} photoUrl={photoUrl} presentation={values} />
-        <WritingTipsCard />
-      </div>
     </div>
   );
 }
