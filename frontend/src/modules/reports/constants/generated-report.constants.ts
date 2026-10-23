@@ -19,7 +19,6 @@ export const REPORT_TYPE_FILTER_OPTIONS: ReportType[] = [
   "COMPANIES",
   "ADMINS",
   "REJECTED_USERS",
-  "SURVEY_STATISTICS",
 ];
 
 export const REPORT_TYPE_SELECT_OPTIONS = REPORT_TYPE_FILTER_OPTIONS.map((reportType) => ({
