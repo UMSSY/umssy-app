@@ -76,7 +76,7 @@ const renderWithQueryClient = (ui: React.ReactNode) => {
 };
 
 describe('ChatView & ChatPage', () => {
-  it('debe renderizar ChatView con estado vacio y permitir seleccionar conversacion', async () => {
+  it('debe renderizar ChatView con estado vacio y permitir seleccionar conversación', async () => {
     vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
 
     renderWithQueryClient(<ChatView />);
@@ -86,17 +86,17 @@ describe('ChatView & ChatPage', () => {
     });
 
     expect(
-      screen.getByText(/Selecciona una conversacion/i),
+      screen.getByText(/Selecciona una conversación/i),
     ).toBeDefined();
 
     const newChatButtons = screen.getAllByText(
-      'Iniciar una nueva conversacion',
+      'Iniciar una nueva conversación',
     );
 
     fireEvent.click(newChatButtons[0]);
 
     expect(
-      await screen.findByText(/Nueva conversaci\u00f3n/i),
+      await screen.findByRole("heading", { name: "Nueva conversación" }),
     ).toBeDefined();
 
     const conversationItem = screen.getByText('Maria Fernandez');
@@ -116,11 +116,11 @@ describe('ChatView & ChatPage', () => {
     fireEvent.click(backButton);
 
     expect(
-      screen.getByText(/Selecciona una conversacion/i),
+      screen.getByText(/Selecciona una conversación/i),
     ).toBeDefined();
   });
 
-  it('debe renderizar la conversacion seleccionada sin foto mostrando desconectado', async () => {
+  it('debe renderizar la conversación seleccionada sin foto mostrando desconectado', async () => {
     vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
 
     renderWithQueryClient(<ChatView />);
@@ -140,7 +140,7 @@ describe('ChatView & ChatPage', () => {
     expect(screen.getByText('Desconectado')).toBeDefined();
   });
 
-  it('debe conmutar de unread a all y abrir modal al pulsar nueva conversacion', async () => {
+  it('debe conmutar de unread a all y abrir modal al pulsar nueva conversación', async () => {
     vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
 
     renderWithQueryClient(<ChatView />);
@@ -154,13 +154,13 @@ describe('ChatView & ChatPage', () => {
     fireEvent.click(unreadTab);
 
     const newBtn = screen.getByText(
-      'Iniciar una nueva conversacion',
+      'Iniciar una nueva conversación',
     );
 
     fireEvent.click(newBtn);
 
     expect(
-      await screen.findByText(/Nueva conversaci\u00f3n/i),
+      await screen.findByRole("heading", { name: "Nueva conversación" }),
     ).toBeDefined();
   });
 
@@ -173,7 +173,7 @@ describe('ChatView & ChatPage', () => {
 
     expect(screen.getByText('Chats')).toBeDefined();
     expect(screen.getAllByRole('navigation', { name: 'Menú principal' })).toHaveLength(1);
-    expect(screen.getByRole('link', { name: 'Chat' })).toHaveAttribute('href', '/chat');
+    expect(screen.getByRole('link', { name: 'Mensajes' })).toHaveAttribute('href', '/chat');
     expect(await screen.findByText('Maria Fernandez')).toBeDefined();
   });
 });

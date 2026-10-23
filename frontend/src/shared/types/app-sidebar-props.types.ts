@@ -3,6 +3,7 @@ import type { NavigationItem } from "./navigation-item.types";
 import type { SidebarUser } from "./sidebar-user.types";
 
 export interface AppSidebarProps {
+  showBrand?: boolean;
   items?: NavigationItem[];
   user?: SidebarUser;
   brand?: ReactNode;

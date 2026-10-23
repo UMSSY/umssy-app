@@ -1,4 +1,3 @@
-import { BrandLogo } from "@/shared/components/layout/brand-logo";
 import { Check, ShieldCheck } from "lucide-react";
 import type { RequestStepsSidebarProps } from "../../types/request-steps-sidebar-props.types";
 
@@ -15,11 +14,10 @@ const STEPS = [
 
 export function RequestStepsSidebar({ currentStep = 1 }: RequestStepsSidebarProps) {
   return (
-    <aside className="flex w-full flex-col justify-between gap-10 bg-sidebar px-8 py-8 text-surface lg:min-h-screen lg:w-80 2xl:w-80">
+    <aside className="flex w-72 shrink-0 flex-col justify-between gap-10 border-r border-sidebar-border bg-sidebar px-6 py-8 text-sidebar-foreground">
       <div>
-        <div className="mb-8 rounded-md bg-surface px-4 py-5"><BrandLogo className="w-full" priority /></div>
-        <h2 className="text-[22px] font-bold">Solicitud de acceso</h2>
-        <p className="mt-2 mb-[22px] max-w-75 text-[13px] text-surface/65">
+        <h2 className="text-2xl font-bold">Solicitud de acceso</h2>
+        <p className="mt-2 mb-[22px] max-w-75 text-sm text-text-secondary">
           Cuatro pasos para unirte a la comunidad verificada de la carrera.
         </p>
 
@@ -36,10 +34,10 @@ export function RequestStepsSidebar({ currentStep = 1 }: RequestStepsSidebarProp
                     <span
                       className={`flex size-7.5 shrink-0 items-center justify-center rounded-full border text-sm font-semibold ${
                         isActive
-                          ? "border-surface bg-surface text-accent"
+                          ? "border-accent bg-interaction text-accent"
                           : isCompleted
-                            ? "border-surface bg-surface text-ink"
-                            : "border-surface/35 text-surface/70"
+                            ? "border-accent bg-accent text-surface"
+                            : "border-border-strong text-text-secondary"
                       }`}
                     >
                       {isCompleted ? (
@@ -53,19 +51,19 @@ export function RequestStepsSidebar({ currentStep = 1 }: RequestStepsSidebarProp
                     </span>
                     <div>
                       <p
-                        className={`text-[14.5px] font-semibold ${
-                          isActive ? "text-surface" : "text-surface/85"
+                        className={`text-sm font-semibold ${
+                          isActive ? "text-ink" : "text-ink-soft"
                         }`}
                       >
                         {step.label}
                       </p>
-                      <p className="text-[13px] text-surface/60">{step.description}</p>
+                      <p className="text-sm text-text-secondary">{step.description}</p>
                     </div>
                   </div>
                   {isLast ? null : (
                     <span
                       aria-hidden="true"
-                      className="ml-3.5 block h-[18px] w-[1.5px] bg-surface/20"
+                      className="ml-3.5 block h-[18px] w-[1.5px] bg-border"
                     />
                   )}
                 </li>
@@ -75,9 +73,9 @@ export function RequestStepsSidebar({ currentStep = 1 }: RequestStepsSidebarProp
         </nav>
       </div>
 
-      <div className="flex items-start gap-3 border-t border-surface/12 pt-[18px]">
-        <ShieldCheck aria-hidden="true" className="size-5 shrink-0 text-surface/85" />
-        <p className="text-[13px] text-surface/72">
+      <div className="flex items-start gap-3 border-t border-sidebar-border pt-[18px]">
+        <ShieldCheck aria-hidden="true" className="size-5 shrink-0 text-accent" />
+        <p className="text-sm text-ink-soft">
           Tus documentos se guardan cifrados y solo los revisa el personal autorizado de la
           carrera.
         </p>
