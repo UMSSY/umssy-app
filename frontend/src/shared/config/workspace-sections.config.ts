@@ -46,7 +46,13 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
   },
   { id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [] },
   { id: "radar-review", label: "Revisión de radares", icon: Radar, patterns: [/^\/affinity-radar\/review-queue\/?$/], items: [] },
-  { id: "vacancies", label: "Vacantes", icon: BriefcaseBusiness, patterns: [/^\/vacancies(?:\/|$)/], items: [] },
+  {
+    id: "vacancies", label: "Vacantes", icon: BriefcaseBusiness, patterns: [/^\/vacancies(?:\/|$)/],
+    items: [
+      { label: "Todas las vacantes", href: "/vacancies" },
+      { label: "Vacantes para ti", href: "/vacancies/recommended" },
+    ],
+  },
   { id: "chat", label: "Chat", icon: MessageCircle, patterns: [/^\/chat(?:\/|$)/], items: [] },
   { id: "home", label: "Inicio", icon: House, patterns: [/^\/dashboard\/?$/], items: [] },
 ];
