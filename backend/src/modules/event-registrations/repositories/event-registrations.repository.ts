@@ -1,10 +1,24 @@
 import { CONFIRMED_REGISTRATION_TITLE } from '../constants/event-registrations.constants.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { PersistEventRegistrationPayload } from '../types/event-registrations.types.js';
 
 @Injectable()
 export class EventRegistrationsRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  create(payload: PersistEventRegistrationPayload) {
+    return this.prisma.eventRegistration.create({
+      data: payload,
+      select: {
+        id: true,
+        eventId: true,
+        userId: true,
+        statusId: true,
+        qrToken: true,
+      },
+    });
+  }
 
   findByUserId(userId: string) {
     return this.prisma.eventRegistration.findMany({
