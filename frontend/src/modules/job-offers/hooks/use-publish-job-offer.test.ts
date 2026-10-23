@@ -1,15 +1,16 @@
 import { AxiosError } from "axios";
-import { onlineManager } from "@tanstack/react-query";
+import { onlineManager, QueryClient } from "@tanstack/react-query";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper";
+import { JOB_OFFERS_QUERY_KEYS } from "../constants/vacancies.constants";
 import { jobOffersService } from "../services/job-offers.service";
 import { buildSessionToken, COMPANY_ID, EMPTY_CONDITIONS, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
 import { toJobOfferPayload } from "../utils/to-job-offer-payload";
 import { usePublishJobOffer } from "./use-publish-job-offer";
 
-vi.mock("../services/job-offers.service", () => ({ jobOffersService: { publish: vi.fn() } }));
+vi.mock("../services/job-offers.service", () => ({ jobOffersService: { publish: vi.fn(), update: vi.fn() } }));
 
 const CREATED = { id: "1", createdAt: "2026-10-12T00:00:00.000Z" };
 
@@ -118,5 +119,18 @@ describe("usePublishJobOffer", () => {
 
     await waitFor(() => expect(result.current.status).toBe("idle"));
     expect(result.current.error).toBeNull();
+  });
+
+  it("en edición actualiza la vacante de la empresa e invalida su listado y detalles", async () => {
+    vi.mocked(jobOffersService.update).mockResolvedValue({ id: "offer-1" } as never);
+    const invalidate = vi.spyOn(QueryClient.prototype, "invalidateQueries");
+    const { result } = renderHook(() => usePublishJobOffer("offer-1"), createQueryWrapper());
+
+    await act(() => result.current.submit(VALID_CONDITIONS));
+
+    expect(jobOffersService.update).toHaveBeenCalledWith(COMPANY_ID, "offer-1", toJobOfferPayload(VALID_CONDITIONS));
+    expect(jobOffersService.publish).not.toHaveBeenCalled();
+    await waitFor(() => expect(result.current.status).toBe("success"));
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: JOB_OFFERS_QUERY_KEYS.company(COMPANY_ID) });
   });
 });

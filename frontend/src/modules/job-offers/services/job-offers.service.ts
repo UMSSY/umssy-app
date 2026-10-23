@@ -4,23 +4,10 @@ import type {
   CreateJobOfferPayload,
   JobOffer,
   JobOfferCreatedResponse,
+  JobOfferDetailsResponse,
 } from "../types/job-offer.types";
 import type { SkillOption } from "../types/vacancy-conditions.types";
 import type { JobOfferListParams } from "../utils/filter-job-offers";
-
-export interface JobOfferDetail {
-  id: string;
-  title: string;
-  modality: string;
-  contractType: string;
-  category: string;
-  positionsAvailable: number;
-  salaryRange: string;
-  languages: string;
-  locationUrl: string;
-  description: string;
-  skills: SkillOption[];
-}
 
 const SKILL_CATALOG_ENDPOINT = "/job-offers/skills";
 
@@ -47,26 +34,33 @@ export const jobOffersService = {
 
   getByCompany: async (companyId: string, params?: JobOfferListParams): Promise<JobOffer[]> => {
     const response = await apiClient.get<
-      ApiResponse<Array<Omit<JobOffer, "applicantsCount"> & { applicantsCount?: number }>>
+      ApiResponse<Array<JobOfferDetailsResponse & { applicantsCount?: number }>>
     >(buildCompanyJobOffersEndpoint(companyId), { params });
     return (response.data.data ?? []).map((offer) => ({
-      id: offer.id,
-      title: offer.title,
-      modality: offer.modality,
-      contractType: offer.contractType,
-      status: offer.status,
-      createdAt: offer.createdAt,
+      ...offer,
       applicantsCount: offer.applicantsCount ?? 0,
     }));
   },
 
-  getById: async (id: string): Promise<JobOfferDetail> => {
-    const response = await apiClient.get<ApiResponse<JobOfferDetail>>(`/job-offers/${id}`);
+  getByCompanyAndId: async (
+    companyId: string,
+    jobOfferId: string,
+  ): Promise<JobOfferDetailsResponse> => {
+    const response = await apiClient.get<ApiResponse<JobOfferDetailsResponse>>(
+      `${buildCompanyJobOffersEndpoint(companyId)}/${jobOfferId}`,
+    );
     return response.data.data;
   },
 
-  update: async (id: string, payload: CreateJobOfferPayload): Promise<JobOfferDetail> => {
-    const response = await apiClient.put<ApiResponse<JobOfferDetail>>(`/job-offers/${id}`, payload);
+  update: async (
+    companyId: string,
+    jobOfferId: string,
+    payload: CreateJobOfferPayload,
+  ): Promise<JobOfferDetailsResponse> => {
+    const response = await apiClient.put<ApiResponse<JobOfferDetailsResponse>>(
+      `${buildCompanyJobOffersEndpoint(companyId)}/${jobOfferId}`,
+      payload,
+    );
     return response.data.data;
   },
 };

@@ -10,17 +10,22 @@ import {
   Put,
   Query,
   StandardSchemaValidationPipe,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import {
   ApiBody,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
+import { Roles } from '../../../common/decorators/roles.decorator.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { buildRequestValidationException } from '../../../common/utils/build-request-validation-exception.js';
 import { toApiBody } from '../../../common/utils/to-api-body.js';
 import {
@@ -44,21 +49,20 @@ import type {
 } from '../responses/job-offer.response.js';
 import { JobOffersService } from '../services/job-offers.service.js';
 import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
-
 const companyIdPipe = new ParseUUIDPipe({
   exceptionFactory: () =>
     new RequestValidationException([
       { field: 'companyId', message: JOB_OFFER_VALIDATION_MESSAGES.INVALID_COMPANY_ID },
     ]),
 });
-
-const jobIdPipe = new ParseUUIDPipe({
+const jobOfferIdPipe = new ParseUUIDPipe({
   exceptionFactory: () =>
     new RequestValidationException([
-      { field: 'id', message: 'El ID de la vacante no es válido' },
+      { field: 'jobOfferId', message: JOB_OFFER_VALIDATION_MESSAGES.INVALID_JOB_OFFER_ID },
     ]),
 });
 
+// TODO: verificar el companyId de todas las operaciones de empresa contra la sesión (Epic 1)
 @ApiTags('job-offers')
 @UsePipes(
   new StandardSchemaValidationPipe({
@@ -93,24 +97,6 @@ export class JobOffersController {
     @Body({ schema: createJobOfferSchema }) request: CreateJobOfferRequest,
   ): Promise<JobOfferCreatedResponse> {
     return this.jobOffersService.create(companyId, request);
-  }
-
-  @Get('job-offers/:id')
-  @ApiOperation({ summary: 'Obtiene el detalle de una vacante por su ID' })
-  @ApiOkResponse({ description: 'Detalle de la vacante' })
-  getById(@Param('id', jobIdPipe) id: string): Promise<JobOfferResponse> {
-    return this.jobOffersService.findById(id);
-  }
-
-  @Put('job-offers/:id')
-  @ApiOperation({ summary: 'Edita una vacante existente' })
-  @ApiBody(toApiBody(createJobOfferSchema))
-  @ApiOkResponse({ description: 'Vacante editada correctamente' })
-  update(
-    @Param('id', jobIdPipe) id: string,
-    @Body({ schema: createJobOfferSchema }) request: CreateJobOfferRequest,
-  ): Promise<JobOfferResponse> {
-    return this.jobOffersService.update(id, request);
   }
 
   @Get('companies/:companyId/job-offers')
@@ -156,5 +142,33 @@ export class JobOffersController {
     @Query({ schema: listCompanyJobOffersSchema }) filters: ListCompanyJobOffersRequest,
   ): Promise<JobOfferResponse[]> {
     return this.jobOffersService.listByCompany(companyId, filters);
+  }
+
+  @Get('companies/:companyId/job-offers/:jobOfferId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('empresa')
+  @ApiOperation({ summary: 'Obtiene los detalles de una vacante de la empresa' })
+  @ApiOkResponse({ description: 'Detalles de la vacante solicitada' })
+  @ApiNotFoundResponse({ description: 'La vacante no existe o no pertenece a la empresa' })
+  getByCompanyAndId(
+    @Param('companyId', companyIdPipe) companyId: string,
+    @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
+  ): Promise<JobOfferResponse> {
+    return this.jobOffersService.getByCompanyAndId(companyId, jobOfferId);
+  }
+
+  @Put('companies/:companyId/job-offers/:jobOfferId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('empresa')
+  @ApiOperation({ summary: 'Edita una vacante de la empresa' })
+  @ApiBody(toApiBody(createJobOfferSchema))
+  @ApiOkResponse({ description: 'Vacante actualizada' })
+  @ApiNotFoundResponse({ description: 'La vacante no existe o no pertenece a la empresa' })
+  update(
+    @Param('companyId', companyIdPipe) companyId: string,
+    @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
+    @Body({ schema: createJobOfferSchema }) request: CreateJobOfferRequest,
+  ): Promise<JobOfferResponse> {
+    return this.jobOffersService.update(companyId, jobOfferId, request);
   }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -31,6 +32,7 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
     errors,
     hasUnsavedChanges,
     isLoading,
+    loadError,
     updateField,
     selectModality,
     validateField,
@@ -66,8 +68,20 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
 
   if (isLoading) {
     return (
-      <main className="mx-auto flex w-full max-w-7xl items-center justify-center py-20">
-        <div className="size-8 animate-spin rounded-full border-b-2 border-[#b3141b]"></div>
+      <main className="mx-auto flex w-full max-w-7xl items-center justify-center gap-3 py-20 text-sm text-text-secondary" role="status">
+        <LoaderCircle aria-hidden="true" className="size-6 animate-spin text-accent" />
+        Cargando vacante...
+      </main>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <main className="mx-auto w-full max-w-7xl space-y-4 py-10" role="alert">
+        <p className="text-sm text-ink">{loadError}</p>
+        <Link href="/recruiters" className={buttonVariants({ variant: "outline" })}>
+          Volver a mi empresa
+        </Link>
       </main>
     );
   }

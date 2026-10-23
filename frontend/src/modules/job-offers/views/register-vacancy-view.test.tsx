@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_CONDITIONS, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
 import { RegisterVacancyView } from "./register-vacancy-view";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
 const { form, publication, leaveGuard } = vi.hoisted(() => ({
   form: {
     currentStep: 1,
@@ -32,9 +34,6 @@ const { form, publication, leaveGuard } = vi.hoisted(() => ({
     cancelLeave: vi.fn(),
   },
 }));
-
-const mockPush = vi.fn();
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
 
 const useLeaveGuard = vi.fn((isActive: boolean) => {
   void isActive;
@@ -77,7 +76,7 @@ vi.mock("../components/preview-step", () => ({
       <span>{props.isPublished ? "publicada" : "pendiente"}</span>
       <span>{props.company.name}</span>
       <TestButton onClick={props.onPrevious}>Anterior</TestButton>
-      <TestButton onClick={props.onConfirm}>Confirmar publicación</TestButton>
+      <TestButton onClick={props.onConfirm}>Confirmar</TestButton>
       <TestButton onClick={props.onFinish}>Aceptar</TestButton>
     </div>
   ),
@@ -99,7 +98,15 @@ describe("RegisterVacancyView", () => {
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
-    mockPush.mockClear();
+  });
+
+  it("muestra solo el paso actual", () => {
+    setStep(1);
+    render(<RegisterVacancyView />);
+
+    expect(screen.getByTestId("information-step")).toBeInTheDocument();
+    expect(screen.queryByTestId("requirements-step")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("preview-step")).not.toBeInTheDocument();
   });
 
   it("conecta Continuar de cada paso con su validación", () => {
@@ -117,14 +124,13 @@ describe("RegisterVacancyView", () => {
     expect(form.handleRequirementsContinue).toHaveBeenCalledOnce();
   });
 
-  it("Cancelar sin cambios no abre el diálogo y redirige", () => {
+  it("Cancelar sin cambios no abre el diálogo", () => {
     setStep(1);
     render(<RegisterVacancyView />);
 
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
 
     expect(screen.queryByText("¿Descartar los cambios?")).not.toBeInTheDocument();
-    expect(mockPush).toHaveBeenCalledWith("/recruiters");
   });
 
   it("Cancelar con cambios pide confirmación y descarta al confirmar", async () => {
@@ -138,7 +144,17 @@ describe("RegisterVacancyView", () => {
     expect(form.reset).toHaveBeenCalledOnce();
     expect(publication.reset).toHaveBeenCalledOnce();
     await waitFor(() => expect(screen.queryByText("¿Descartar los cambios?")).not.toBeInTheDocument());
-    expect(mockPush).toHaveBeenCalledWith("/recruiters");
+  });
+
+  it("Seguir editando cierra el diálogo sin descartar", async () => {
+    setStep(1, VALID_CONDITIONS, true);
+    render(<RegisterVacancyView />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Seguir editando" }));
+
+    await waitFor(() => expect(screen.queryByText("¿Descartar los cambios?")).not.toBeInTheDocument());
+    expect(form.reset).not.toHaveBeenCalled();
   });
 
   it("activa el aviso de salida solo con cambios y sin publicar", () => {
@@ -152,14 +168,50 @@ describe("RegisterVacancyView", () => {
     expect(useLeaveGuard).toHaveBeenLastCalledWith(false);
   });
 
+  it("muestra el diálogo de salida y delega la decisión", () => {
+    setStep(1, VALID_CONDITIONS, true);
+    leaveGuard.isLeaveDialogOpen = true;
+    render(<RegisterVacancyView />);
+
+    expect(screen.getByText("¿Salir sin publicar?")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Salir" }));
+    expect(leaveGuard.confirmLeave).toHaveBeenCalledOnce();
+
+    fireEvent.click(screen.getByRole("button", { name: "Quedarme" }));
+    expect(leaveGuard.cancelLeave).toHaveBeenCalled();
+  });
+
   it("publica con los datos acumulados y muestra el estado del envío", () => {
     setStep(3, VALID_CONDITIONS, true);
     publication.isSubmitting = true;
     render(<RegisterVacancyView />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Confirmar publicación" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar" }));
 
     expect(publication.submit).toHaveBeenCalledWith(VALID_CONDITIONS);
     expect(screen.getByText("enviando")).toBeInTheDocument();
+    expect(screen.getByText("TechBolivia S.R.L.")).toBeInTheDocument();
+  });
+
+  it("al aceptar el éxito limpia la publicación y el formulario", () => {
+    setStep(3, VALID_CONDITIONS, true);
+    publication.isSuccess = true;
+    render(<RegisterVacancyView />);
+
+    expect(screen.getByRole("heading", { name: "Vacante publicada" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Volver a mi empresa" })).toHaveAttribute("href", "/recruiters");
+    fireEvent.click(screen.getByRole("button", { name: "Publicar otra vacante" }));
+
+    expect(publication.reset).toHaveBeenCalledOnce();
+    expect(form.reset).toHaveBeenCalledOnce();
+  });
+
+  it("vuelve al paso anterior desde la vista previa", () => {
+    setStep(3, VALID_CONDITIONS, true);
+    render(<RegisterVacancyView />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Anterior" }));
+
+    expect(form.goBack).toHaveBeenCalledOnce();
   });
 });

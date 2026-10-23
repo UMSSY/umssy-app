@@ -1,7 +1,7 @@
 import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import type { JobOffer } from "../types/job-offer.types";
 import Link from "next/link";
+import { Button, buttonVariants } from "@/components/ui/button";
+import type { JobOffer } from "../types/job-offer.types";
 
 const dateFormatter = new Intl.DateTimeFormat("es-BO", {
   day: "2-digit",
@@ -10,24 +10,39 @@ const dateFormatter = new Intl.DateTimeFormat("es-BO", {
   timeZone: "UTC",
 });
 
-export function VacancyCard({ offer }: { offer: JobOffer }) {
+interface VacancyCardProps {
+  offer: JobOffer;
+  onDetails: (id: string) => void;
+}
+
+export function VacancyCard({ offer, onDetails }: VacancyCardProps) {
   return (
     <li className="flex items-end justify-between gap-4 rounded-lg border border-border bg-surface p-5">
-      <div>
-        <h3 className="text-base font-bold text-ink">{offer.title}</h3>
+      <div className="min-w-0">
+        <h3 className="text-base font-bold text-ink">
+          <Button
+            type="button"
+            variant="link"
+            className="h-auto min-h-11 justify-start rounded-none border-0 bg-transparent p-0 text-left text-base font-bold text-ink hover:bg-transparent hover:text-ink"
+            onClick={() => onDetails(offer.id)}
+          >
+            {offer.title}
+          </Button>
+        </h3>
         <p className="mt-1 text-sm text-text-secondary">
           Publicado: {dateFormatter.format(new Date(offer.createdAt))} · Modalidad:{" "}
           {offer.modality} · Postulantes: {offer.applicantsCount} candidatos
         </p>
         <p className="mt-1 text-sm text-text-secondary">Tipo de contrato: {offer.contractType}</p>
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           <Button variant="outline" size="sm" disabled>
             Ver postulantes
           </Button>
-          <Link href={`/recruiters/job-offers/${offer.id}/edit`}>
-            <Button variant="outline" size="sm">
-              Editar
-            </Button>
+          <Link
+            href={`/recruiters/job-offers/${offer.id}/edit`}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            Editar
           </Link>
         </div>
       </div>
