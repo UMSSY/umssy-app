@@ -19,7 +19,7 @@ export function AppHeader({ brand }: AppHeaderProps) {
         <SidebarToggleButton />
         {brand ?? <Link href="/dashboard" aria-label="UMSSY, ir al inicio" className="block shrink-0 outline-offset-4"><BrandLogo variant="on-dark" className="w-28 sm:w-40" priority /></Link>}
       </div>
-      <div className="hidden min-w-0 flex-1 sm:block"><NavigationSearch /></div>
+      <div className="min-w-0 flex-1"><NavigationSearch /></div>
       <div className="flex shrink-0 items-center gap-1 sm:gap-4">
         <ChatPanel roles={roles} />
         <AccountMenu roles={roles} />
