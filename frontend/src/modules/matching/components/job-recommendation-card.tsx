@@ -18,7 +18,7 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
 
   return (
     <Card className="h-full gap-3 p-4">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h2 className="font-tight text-lg font-bold text-ink">{job.title}</h2>
           <p className="text-sm text-text-secondary">
