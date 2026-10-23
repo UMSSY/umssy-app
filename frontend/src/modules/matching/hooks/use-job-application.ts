@@ -24,7 +24,6 @@ export function useJobApplication(jobOfferId: string) {
       queryClient.setQueryData<MyJobApplication>(queryKey, { hasApplied: true, application });
     },
     onError: (error) => {
-      // AC-02.8: si ya existía la postulación, se muestra el estado "Ya te postulaste".
       if (isApiError(error) && error.response?.status === CONFLICT_STATUS) {
         return queryClient.invalidateQueries({ queryKey });
       }

@@ -60,7 +60,6 @@ export class JobApplicationsService {
         await this.repository.create(userId, jobOfferId, status.id),
       );
     } catch (error) {
-      // Dos clics simultáneos: la restricción única (job_offer_id, user_id) decide.
       if (isUniqueViolation(error)) {
         throw new DuplicateJobApplicationException();
       }
