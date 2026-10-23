@@ -66,7 +66,7 @@ export function AppShell({
           className={cn(
             "flex-1 animate-in duration-200 ease-out fade-in",
             contentClassName ??
-              (fullBleed ? "flex min-w-0 flex-col" : "px-12 py-10"),
+              (fullBleed ? "flex min-w-0 flex-col" : "px-4 py-6 sm:px-6 sm:py-8 lg:px-12 lg:py-10"),
           )}
         >
           {children}

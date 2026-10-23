@@ -4,3 +4,8 @@ export { SurveysView } from "./views/surveys-view";
 export { CREATE_SURVEY_PATH, SURVEYS_PATH } from "./constants/survey-routes.constants";
 export { surveysService } from "./services/surveys.service";
 export type { Career, CreateSurveyPayload, CreatedSurvey, QuestionType, SurveyStatus, SurveySummary } from "./types/survey.types";
+export { SurveyNotificationsView } from "./views/survey-notifications-view";
+export { PendingSurveysBadge } from "./components/pending-surveys-badge";
+export { useSurveyNotifications } from "./hooks/use-survey-notifications";
+export { SURVEY_NOTIFICATIONS_LABEL, SURVEY_NOTIFICATIONS_PATH } from "./constants/survey-notifications.constants";
+export type { SurveyNotification, SurveyNotificationStatus } from "./types/survey-notification.types";
