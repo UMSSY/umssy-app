@@ -10,10 +10,12 @@ import { SkillsClassifierService } from './services/skills-classifier.service.js
 import { VacancyRankingService } from './services/vacancy-ranking.service.js';
 import { WeightedScoreService } from './services/weighted-score.service.js';
 import { ActiveJobOffersService } from './services/active-job-offers.service.js';
+import { JobRecommendationsController } from './controllers/job-recommendations.controller.js';
+import { JobRecommendationsService } from './services/job-recommendations.service.js';
 
 @Module({
   imports: [JwtAuthModule, SkillsModule, JobOffersModule],
-  controllers: [MatchingController],
+  controllers: [MatchingController, JobRecommendationsController],
   providers: [
     MatchingService,
     ActiveJobOffersService,
@@ -22,6 +24,7 @@ import { ActiveJobOffersService } from './services/active-job-offers.service.js'
     SkillsClassifierService,
     VacancyRankingService,
     WeightedScoreService,
+    JobRecommendationsService,
   ],
   exports: [
     MatchingService,
