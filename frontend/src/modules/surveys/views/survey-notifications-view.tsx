@@ -49,14 +49,14 @@ export function SurveyNotificationsView() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-6">
+    <main className="mx-auto w-full max-w-7xl min-w-0 space-y-6">
       <PageHeading
         title={SURVEY_NOTIFICATIONS_LABEL}
         description={SURVEY_NOTIFICATIONS_DESCRIPTION}
         className="border-b-0 pb-0"
       />
       <Card role="region" aria-labelledby="survey-list-title" className="gap-0 py-0">
-        <CardHeader className="flex items-center gap-3 py-4">
+        <CardHeader className="flex flex-wrap items-center gap-3 py-4">
           <FileCheck className="size-6 text-accent" strokeWidth={1.5} aria-hidden="true" />
           <CardTitle id="survey-list-title" className="text-ink">
             Encuestas

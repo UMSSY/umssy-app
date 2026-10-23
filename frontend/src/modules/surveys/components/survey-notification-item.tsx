@@ -38,13 +38,13 @@ export function SurveyNotificationItem({ notification }: SurveyNotificationItemP
   };
 
   return (
-    <li className="flex flex-col gap-4 px-6 py-4 md:min-h-27 md:flex-row md:items-center md:gap-3">
+    <li className="flex min-w-0 flex-col gap-4 p-4 sm:px-6 md:min-h-27 md:flex-row md:items-center md:gap-3">
       <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-lg", tone)}>
         <FileCheck className="size-6" strokeWidth={1.5} aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1 space-y-1">
-        <h3 className="text-lg font-semibold text-ink">{title}</h3>
-        <p className="text-sm text-text-secondary">{SURVEY_STATUS_MESSAGES[status]}</p>
+        <h3 className="text-lg font-semibold [overflow-wrap:anywhere] text-ink">{title}</h3>
+        <p className="text-sm [overflow-wrap:anywhere] text-text-secondary">{SURVEY_STATUS_MESSAGES[status]}</p>
         {isPending ? <Badge className={tone}>{SURVEY_STATUS_LABELS.pending}</Badge> : null}
       </div>
       <time dateTime={publishedAt} className="shrink-0 text-sm text-text-secondary md:w-24 md:text-right">
