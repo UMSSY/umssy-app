@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { cn } from "cn";
-import { ArrowLeft, Info } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { ArrowLeft, FileDown, Info } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshButton } from "@/modules/reports";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { SURVEY_ANALYTICS_MESSAGES } from "../constants/survey-analytics.constants";
+import { SURVEY_REPORT_MESSAGES } from "../constants/survey-report.constants";
 import { ALL_CAREERS_LABEL } from "../constants/survey-form.constants";
 import { SURVEYS_BASE_PATH } from "../constants/surveys.constants";
+import { SurveyExportPreviewDialog } from "../components/survey-export-preview-dialog";
 import { SurveyMetricsGrid } from "../components/survey-metrics-grid";
 import { SurveyQuestionResultCard } from "../components/survey-question-result-card";
+import { useExportSurveyPdf } from "../hooks/use-export-survey-pdf";
 import { useSurveyAnalytics } from "../hooks/use-survey-analytics";
 import type { SurveyAnalyticsViewProps } from "../types/survey-analytics-view-props.types";
 
@@ -19,7 +22,14 @@ const BACK_LINK_CLASSES = cn(buttonVariants({ variant: "ghost" }), "w-fit gap-2 
 
 export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
   const { metrics, statistics, isLoading, isUnavailable, isError, refresh } = useSurveyAnalytics(id);
+  const { preview, isGenerating, generate, download, closePreview } = useExportSurveyPdf();
   const survey = statistics?.survey;
+  // Sin respuestas (n=0) no se genera un PDF vacío.
+  const canExport = Boolean(statistics && metrics && statistics.totalResponses > 0);
+
+  const handleExport = () => {
+    if (statistics && metrics) void generate({ statistics, metrics, generatedAt: new Date().toISOString() });
+  };
   const description = survey
     ? `${survey.period} · ${survey.targetCareer ?? ALL_CAREERS_LABEL} · ${statistics.questions.length} preguntas`
     : "Métricas de participación y resultados de cada pregunta.";
@@ -57,7 +67,22 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
     <WorkspacePage
       title={survey ? `Analíticas: ${survey.title}` : "Analíticas de la encuesta"}
       description={description}
-      actions={<RefreshButton label="Actualizar" onClick={refresh} isRefreshing={isLoading} />}
+      actions={
+        <>
+          <RefreshButton label="Actualizar" onClick={refresh} isRefreshing={isLoading} />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleExport}
+            disabled={!canExport || isGenerating}
+            title={statistics && !canExport ? SURVEY_REPORT_MESSAGES.noResponses : undefined}
+            className="h-auto gap-2 px-4 py-2.5"
+          >
+            <FileDown className="size-4" aria-hidden="true" />
+            {isGenerating ? SURVEY_REPORT_MESSAGES.generating : SURVEY_REPORT_MESSAGES.exportLabel}
+          </Button>
+        </>
+      }
     >
       <Link href={SURVEYS_BASE_PATH} className={BACK_LINK_CLASSES}>
         <ArrowLeft className="size-4" aria-hidden="true" />
@@ -70,6 +95,8 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
         <h2 className="font-tight text-xl font-bold text-ink">Resultados por pregunta</h2>
         {renderQuestions()}
       </section>
+
+      <SurveyExportPreviewDialog preview={preview} onDownload={download} onClose={closePreview} />
     </WorkspacePage>
   );
 }
