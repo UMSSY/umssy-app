@@ -13,7 +13,7 @@ function toState(name: string, fulfilled: boolean): RequirementState {
   return { name, status: fulfilled ? 'Cumple' : 'Pendiente' };
 }
 
-// Quita vacíos y repetidos (sin distinguir mayúsculas ni tildes) conservando la primera grafía.
+
 function uniqueNames(names: readonly string[]): string[] {
   const seen = new Set<string>();
   const result: string[] = [];
@@ -59,8 +59,7 @@ function buildExperienceRequirements(
   return [toState(name, fulfilled)];
 }
 
-// "Presentó" = entregó el documento por la plataforma (S-04.4). Hoy el sistema
-// no registra entregas, así que sin `presentedOthers` todos quedan Pendiente.
+
 function buildOtherRequirements(
   others: readonly string[],
   presented: readonly string[],
@@ -102,7 +101,7 @@ const CATEGORY_BY_SCORE_CATEGORY: Record<
 > = {
   skills: 'skill',
   academicRequirements: 'academic',
-  // La experiencia se muestra en el grupo "Académicos" (decisión de T4.2, propuesta).
+  
   experienceRequirements: 'academic',
   otherRequirements: 'other',
 };
