@@ -19,10 +19,10 @@ export function RequestDetailView({ id }: RequestDetailViewProps) {
   const sentAt = formatLongDate(detail?.history?.submittedAt);
 
   return (
-    <div className="w-full min-w-0">
+    <main className="mx-auto w-full max-w-7xl min-w-0">
       <DetailHeader requestCode={detail?.requestCode} />
 
-      <section className="flex w-full min-w-0 flex-col gap-6 p-8">
+      <section className="flex w-full min-w-0 flex-col gap-6">
         {isLoading && (
           <div className="flex flex-col gap-4" data-testid="detail-skeleton">
             <Skeleton className="h-8 w-1/3" />
@@ -31,7 +31,7 @@ export function RequestDetailView({ id }: RequestDetailViewProps) {
         )}
 
         {error && (
-          <p role="alert" className="rounded-[10px] border border-border bg-surface p-4 text-sm text-ink">
+          <p role="alert" className="rounded-lg border border-border bg-surface p-4 text-sm text-ink">
             {error}
           </p>
         )}
@@ -40,12 +40,12 @@ export function RequestDetailView({ id }: RequestDetailViewProps) {
           <>
             <div className="flex flex-col gap-1">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="font-tight text-3xl font-extrabold text-ink">
+                <h1 className="font-tight text-3xl font-bold text-ink">
                   {detail.firstName} {detail.lastName}
                 </h1>
                 <StatusBadge status={detail.status} />
               </div>
-              <p className="text-[15px] text-text-secondary">
+              <p className="text-base text-text-secondary">
                 {detail.career}
                 {sentAt ? `. Solicitud enviada el ${sentAt}.` : "."}
               </p>
@@ -54,13 +54,13 @@ export function RequestDetailView({ id }: RequestDetailViewProps) {
             <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.37fr)_minmax(0,1fr)]">
               <div className="min-w-0">
                 {!detail.document && (
-                  <p className="rounded-[10px] border border-border bg-surface p-4 text-sm text-text-secondary">
+                  <p className="rounded-lg border border-border bg-surface p-4 text-sm text-text-secondary">
                     Esta solicitud no tiene un documento adjunto.
                   </p>
                 )}
                 {detail.document && document.isLoading && <Skeleton className="h-[32rem] w-full" />}
                 {detail.document && document.error && (
-                  <p role="alert" className="rounded-[10px] border border-border bg-surface p-4 text-sm text-ink">
+                  <p role="alert" className="rounded-lg border border-border bg-surface p-4 text-sm text-ink">
                     {document.error}
                   </p>
                 )}
@@ -82,6 +82,6 @@ export function RequestDetailView({ id }: RequestDetailViewProps) {
           </>
         )}
       </section>
-    </div>
+    </main>
   );
 }

@@ -36,9 +36,10 @@ export const reportsService = {
     page,
     limit,
     reportType,
+    search,
   }: ReportHistoryParams): Promise<ApiResponse<PaginatedData<GeneratedReport>>> => {
     const { data } = await apiClient.get<ApiResponse<PaginatedData<GeneratedReport>>>("/reports/history", {
-      params: { page, limit, reportType },
+      params: { page, limit, reportType, search: search || undefined },
     });
 
     return data;
@@ -62,11 +63,11 @@ export const reportsService = {
     downloadCsv("/reports/registered-users/export", { userType, period, search }, REGISTERED_USERS_CSV_FALLBACK_NAME),
 
   getRejectedUsers: async (
-    { page, limit, search }: RejectedUsersParams,
+    { page, limit, period, search }: RejectedUsersParams,
     signal?: AbortSignal,
   ): Promise<ApiResponse<PaginatedData<RejectedUser>>> => {
     const { data } = await apiClient.get<ApiResponse<PaginatedData<RejectedUser>>>("/reports/rejected-users", {
-      params: { page, limit, search: search || undefined },
+      params: { page, limit, period, search: search || undefined },
       signal,
       timeout: SLOW_REQUEST_THRESHOLD_MS,
     });
@@ -74,6 +75,10 @@ export const reportsService = {
     return data;
   },
 
-  exportRejectedUsersCsv: ({ search }: RejectedUsersExportParams): Promise<ExportedFile> =>
-    downloadCsv("/reports/rejected-users/export", { search: search || undefined }, REJECTED_USERS_CSV_FALLBACK_NAME),
+  exportRejectedUsersCsv: ({ period, search }: RejectedUsersExportParams): Promise<ExportedFile> =>
+    downloadCsv(
+      "/reports/rejected-users/export",
+      { period, search: search || undefined },
+      REJECTED_USERS_CSV_FALLBACK_NAME,
+    ),
 };

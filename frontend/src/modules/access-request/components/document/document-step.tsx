@@ -35,7 +35,7 @@ export function DocumentStep() {
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-extrabold tracking-tight text-ink 2xl:text-4xl">Documento de respaldo</h1>
-          <p className="max-w-155 text-[15px] text-text-secondary 2xl:text-lg">
+          <p className="max-w-155 text-base text-text-secondary 2xl:text-lg">
             {`El nombre del documento debe coincidir con el que escribiste en el paso anterior: ${fullName}`}
           </p>
         </div>
@@ -57,7 +57,7 @@ export function DocumentStep() {
             <SelectTrigger
               id="documentType"
               aria-required="true"
-              className="w-full rounded-md border-border bg-surface px-3 text-[15px] text-ink focus-visible:border-accent focus-visible:ring-interaction data-[size=default]:h-[42px] 2xl:text-base 2xl:data-[size=default]:h-12"
+              className="w-full rounded-md border-border bg-surface px-3 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction data-[size=default]:h-10 2xl:text-base 2xl:data-[size=default]:h-12"
             >
               <SelectValue placeholder="Elige el tipo de documento" />
             </SelectTrigger>
@@ -85,7 +85,7 @@ export function DocumentStep() {
             variant="ghost"
             disabled={!isIdle}
             onClick={() => goToStep(1)}
-            className="h-[42px] rounded-md px-5 text-[14.5px] font-semibold text-ink 2xl:h-12"
+            className="h-10 rounded-md px-5 text-sm font-semibold text-ink 2xl:h-12"
           >
             <ArrowLeft aria-hidden="true" />
             Volver a mis datos
@@ -94,7 +94,7 @@ export function DocumentStep() {
             type="button"
             disabled={!hasDocument || !isIdle}
             onClick={() => void submitRequest()}
-            className="h-[42px] 2xl:h-12 rounded-md bg-ink px-5 text-[14.5px] font-semibold text-surface hover:bg-ink/90"
+            className="h-10 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover 2xl:h-12"
           >
             {status === "sending" ? "Enviando..." : "Enviar solicitud"}
           </Button>
@@ -102,7 +102,7 @@ export function DocumentStep() {
       </div>
 
       <aside className="h-fit rounded-xl border border-border bg-surface p-5">
-        <h2 className="text-[15px] font-bold text-ink 2xl:text-lg">Para que tu solicitud se apruebe sin demoras</h2>
+        <h2 className="text-base font-bold text-ink 2xl:text-lg">Para que tu solicitud se apruebe sin demoras</h2>
         <ul className="mt-3 flex flex-col gap-2.5">
           {RECOMMENDATIONS.map((tip) => (
             <li key={tip} className="flex gap-2 text-[13.5px] text-ink 2xl:text-base">
