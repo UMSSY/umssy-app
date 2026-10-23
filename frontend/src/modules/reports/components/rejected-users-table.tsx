@@ -6,7 +6,7 @@ import {
   OTHER_REJECTION_REASON,
   REJECTION_REASONS,
 } from "@/modules/request-review";
-import { EMPTY_DOCUMENT_LABEL } from "../constants/registered-users.constants";
+import { EMPTY_DOCUMENT_LABEL, USER_TYPE_LABELS } from "../constants/registered-users.constants";
 import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
 import {
   REJECTED_USERS_COLUMN_COUNT as COLUMN_COUNT,
@@ -49,6 +49,7 @@ export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm 
       <TableRow key={user.id} className="group border-border hover:bg-surface-soft">
         <TableCell className={`${CELL_CLASSES} ${STICKY_CELL_CLASSES} text-ink`}>{user.fullName}</TableCell>
         <TableCell className={CELL_CLASSES}>{user.email}</TableCell>
+        <TableCell className={CELL_CLASSES}>{USER_TYPE_LABELS[user.userType] ?? user.userType}</TableCell>
         <TableCell className={`${CELL_CLASSES} tabular-nums`}>{user.identifier}</TableCell>
         <TableCell className={CELL_CLASSES}>
           <span className="flex items-center gap-2">
@@ -71,11 +72,12 @@ export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm 
     <div className="flex flex-col gap-2">
       <TableScrollHint />
       <div className={CONTAINER_CLASSES}>
-        <Table className="min-w-200 text-left text-base">
+        <Table className="min-w-225 text-left text-base">
           <TableHeader className="bg-surface-soft">
             <TableRow className="border-border hover:bg-transparent">
               <TableHead scope="col" className={`${HEAD_CLASSES} ${STICKY_HEAD_CLASSES}`}>Usuario</TableHead>
               <TableHead scope="col" className={HEAD_CLASSES}>Correo</TableHead>
+              <TableHead scope="col" className={HEAD_CLASSES}>Tipo de Usuario</TableHead>
               <TableHead scope="col" className={HEAD_CLASSES}>Identificador</TableHead>
               <TableHead scope="col" className={HEAD_CLASSES}>Documento</TableHead>
               <TableHead scope="col" className={HEAD_CLASSES}>Fecha de Registro</TableHead>

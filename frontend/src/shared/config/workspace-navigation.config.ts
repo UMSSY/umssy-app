@@ -1,4 +1,4 @@
-import { BookOpen, BriefcaseBusiness, Building2, CalendarClock, FileText, GraduationCap, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, Building2, CalendarClock, ChartNoAxesCombined, ClipboardList, FileText, GraduationCap, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
 import type { WorkspaceArea, WorkspaceTask } from "@/shared/types/workspace-navigation.types";
 
 export const WORKSPACE_AREAS: readonly WorkspaceArea[] = [
@@ -15,6 +15,9 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
   { label: "Usuarios rechazados", href: "/backoffice/reports/rejected-users", icon: FileText, area: "management", keywords: "reporte motivos" },
   { label: "Historial de reportes", href: "/backoffice/reports/history", icon: CalendarClock, area: "management" },
   { label: "Revisión de radares", href: "/affinity-radar/review-queue", icon: Radar, area: "management" },
+  { label: "Encuestas", href: "/backoffice/surveys", icon: ClipboardList, area: "management", keywords: "formularios cuestionarios satisfacción" },
+  { label: "Crear encuesta", href: "/backoffice/surveys/create", icon: SquarePlus, area: "management", keywords: "nueva encuesta formulario preguntas" },
+  { label: "Estadísticas de encuestas", href: "/backoffice/surveys/statistics", icon: ChartNoAxesCombined, area: "management", keywords: "resultados respuestas gráficos" },
   { label: "Portal de empresa", href: "/recruiters", icon: Building2, area: "company" },
   { label: "Publicar vacante", href: "/recruiters/job-offers/new", icon: SquarePlus, area: "company", keywords: "empleo oferta trabajo" },
   { label: "Buscar candidatos", href: "/matching", icon: Search, area: "company", keywords: "afinidad reclutamiento" },

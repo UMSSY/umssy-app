@@ -36,6 +36,8 @@ describe("AppSidebar", () => {
     ["/mentorship/orientation", "Mentorías", "Tipos de orientación"],
     ["/backoffice/reports/history", "Reportes", "Historial de reportes"],
     ["/profile/settings", "Mi perfil", "Configuración del perfil"],
+    ["/backoffice/surveys/create", "Encuestas", "Crear encuesta"],
+    ["/backoffice/surveys/statistics", "Encuestas", "Estadísticas de encuestas"],
   ])("opens the current group and marks only the current destination for %s", (pathname, group, destination) => {
     route.pathname = pathname; renderSidebar();
     expect(screen.getByRole("button", { name: group })).toHaveAttribute("aria-expanded", "true");
@@ -68,9 +70,12 @@ describe("AppSidebar", () => {
     view.rerender(<SidebarProvider><AppSidebar /></SidebarProvider>);
     expect(screen.getAllByRole("link", { name: "Mi disponibilidad" })).toHaveLength(1);
     expect(screen.queryByRole("button", { name: "Reportes" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Encuestas" })).toBeNull();
     sessionRoles.current = ["administrativo"];
     view.rerender(<SidebarProvider><AppSidebar /></SidebarProvider>);
     expect(screen.getByRole("button", { name: "Reportes" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Encuestas" }));
+    expect(screen.getByRole("link", { name: "Encuestas" })).toHaveAttribute("href", "/backoffice/surveys");
     expect(screen.queryByRole("button", { name: "Mentorías" })).toBeNull();
   });
 });

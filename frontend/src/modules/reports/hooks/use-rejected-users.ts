@@ -17,6 +17,7 @@ import {
 import { REPORTS_QUERY_KEYS } from "../constants/reports-query-keys.constants";
 import { reportsService } from "../services/reports.service";
 import type { AcademicPeriod } from "../types/registered-user.types";
+import type { RoleTag } from "@/modules/auth";
 
 function notifyRequestError(error: unknown, id: string) {
   if (!isAxiosError(error)) return;
@@ -34,10 +35,10 @@ function notifyRequestError(error: unknown, id: string) {
   }
 }
 
-export function useRejectedUsers(page: number, period?: AcademicPeriod, search = "") {
+export function useRejectedUsers(page: number, userType?: RoleTag, period?: AcademicPeriod, search = "") {
   const query = useQuery({
-    queryKey: REPORTS_QUERY_KEYS.rejectedUsers(page, period, search),
-    queryFn: ({ signal }) => reportsService.getRejectedUsers({ page, limit: REJECTED_USERS_PAGE_SIZE, period, search }, signal),
+    queryKey: REPORTS_QUERY_KEYS.rejectedUsers(page, userType, period, search),
+    queryFn: ({ signal }) => reportsService.getRejectedUsers({ page, limit: REJECTED_USERS_PAGE_SIZE, userType, period, search }, signal),
     placeholderData: keepPreviousData,
   });
   const { error, errorUpdatedAt, refetch } = query;

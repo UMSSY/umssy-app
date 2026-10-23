@@ -33,6 +33,7 @@ export const REGISTERED_USERS_CSV_HEADERS = [
 export const REJECTED_USERS_CSV_HEADERS = [
   'Usuario',
   'Correo',
+  'Tipo de Usuario',
   'Identificador',
   'Documento',
   'Fecha de Registro',
@@ -66,6 +67,7 @@ export function toRejectedUserCsvRow(user: RejectedUserResponse): string[] {
   return [
     user.fullName,
     user.email,
+    USER_TYPE_LABELS[user.userType],
     user.identifier,
     toDocumentLabel(user.documentType),
     formatReportDate(user.registeredAt),
