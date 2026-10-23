@@ -25,4 +25,4 @@ export type EventWithRelations = Prisma.EventGetPayload<{
       };
     };
   };
-}>;
+}> & { coverMimeType?: string | null; status?: { title: string }; supportThreshold?: number | null; votingDeadline?: Date | null };

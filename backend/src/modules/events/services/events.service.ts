@@ -24,6 +24,7 @@ export class EventsService {
       categoryId,
       statusId,
       isPublishedOnly,
+      ...(payload.includeProposals && { includeProposals: true }),
       search,
       skip: offset,
       take: limit,
