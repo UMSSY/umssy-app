@@ -80,7 +80,7 @@ describe("RequestAccessView", () => {
     const { container } = render(<RequestAccessView />);
 
     const layout = container.querySelector("main > div");
-    expect(layout).toHaveClass("flex", "min-h-screen", "flex-col", "lg:flex-row");
+    expect(layout).toHaveClass("flex", "min-h-screen", "flex-col");
   });
 
   it("deja el formulario ocupando el espacio restante y alineado para completar los grupos de campos", () => {

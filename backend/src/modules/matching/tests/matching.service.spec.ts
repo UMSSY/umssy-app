@@ -3,6 +3,7 @@ import { MatchingService } from '../services/matching.service.js';
 import { SkillDictionaryService } from '../../job-connect/services/skill-dictionary.service.js';
 import { SkillsClassifierService } from '../services/skills-classifier.service.js';
 import { SkillCatalogService } from '../../skills/services/skill-catalog.service.js';
+import { NlpService } from '../services/nlp.service.js';
 
 interface RequirementGapResult {
   totalRequired: number;
@@ -11,7 +12,6 @@ interface RequirementGapResult {
   isZeroGap: boolean;
   message: string;
 }
-
 
 function analyzeRequirementsGap(
   requiredSkills: string[],
@@ -35,6 +35,15 @@ function analyzeRequirementsGap(
   };
 }
 
+function evaluateCareerMatch(params: {
+  requiredCareers: string[];
+  candidateCareer: string;
+}): boolean {
+  const normalizedCandidate = params.candidateCareer.trim().toLowerCase();
+  return params.requiredCareers.some(
+    (career) => career.trim().toLowerCase() === normalizedCandidate
+  );
+}
 
 const EXPERIENCE_ID = '5b1f0c3e-8a4d-4f0b-9a52-1d6c7e2a9b10';
 
@@ -50,14 +59,21 @@ const SKILL_CATALOG = [
 describe('MatchingService', () => {
   let service: MatchingService;
   let skillCatalogService: { listCatalog: ReturnType<typeof vi.fn> };
+  let nlpService: { normalizeText: ReturnType<typeof vi.fn>; tokenizeAndFilter: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     skillCatalogService = { listCatalog: vi.fn().mockResolvedValue(SKILL_CATALOG) };
+
+    nlpService = {
+      normalizeText: vi.fn((text: string) => (text ? text.toLowerCase() : '')),
+      tokenizeAndFilter: vi.fn((text: string) => (text ? text.split(' ') : [])),
+    };
 
     service = new MatchingService(
       new SkillDictionaryService(),
       new SkillsClassifierService(),
       skillCatalogService as unknown as SkillCatalogService,
+      nlpService as unknown as NlpService,
     );
   });
 
@@ -151,10 +167,6 @@ describe('Matching Gap Analysis QA Suite - Zero Gap UI Behavior', () => {
 describe('HU-02A T2.5 - Prevención de falsos positivos de carreras', () => {
   let service: MatchingService;
 
-  beforeEach(() => {
-    service = Object.create(MatchingService.prototype) as MatchingService;
-  });
-
   const baseInput = {
     userCareer: 'Ingeniería de Sistemas',
     requiredCareer: 'Ingeniería de Sistemas',
@@ -164,10 +176,23 @@ describe('HU-02A T2.5 - Prevención de falsos positivos de carreras', () => {
     requiredSkills: ['TypeScript'],
   };
 
+  beforeEach(() => {
+    service = Object.create(MatchingService.prototype) as MatchingService;
+  });
+
+  it('debe aprobar el match únicamente cuando la carrera coincide exactamente (ignorando mayúsculas/espacios)', () => {
+    const isMatch = evaluateCareerMatch({
+      requiredCareers: ['Ingeniería de Sistemas', 'Ingeniería Informática'],
+      candidateCareer: '   ingeniería de sistemas   ',
+    });
+    expect(isMatch).toBe(true);
+  });
+
   it('rechaza una carrera diferente aunque coincidan experiencia y habilidades', () => {
     const result = service.intersectRequirements({
       ...baseInput,
       userCareer: 'Ingeniería Comercial',
+      requiredCareer: 'Ingeniería de Sistemas',
     });
 
     expect(result.careerMatch).toBe(false);
@@ -178,7 +203,7 @@ describe('HU-02A T2.5 - Prevención de falsos positivos de carreras', () => {
   it('acepta una carrera coincidente ignorando mayúsculas y espacios', () => {
     const result = service.intersectRequirements({
       ...baseInput,
-      userCareer: '  ingeniería de sistemas  ',
+      userCareer: '   ingeniería de sistemas  ',
     });
 
     expect(result.careerMatch).toBe(true);
@@ -188,6 +213,16 @@ describe('HU-02A T2.5 - Prevención de falsos positivos de carreras', () => {
     const result = service.intersectRequirements({
       ...baseInput,
       userCareer: '',
+    });
+
+    expect(result.careerMatch).toBe(false);
+  });
+
+  it('no confunde Ingeniería Informática con Ingeniería de Sistemas', () => {
+    const result = service.intersectRequirements({
+      ...baseInput,
+      userCareer: 'Ingeniería Informática',
+      requiredCareer: 'Ingeniería de Sistemas',
     });
 
     expect(result.careerMatch).toBe(false);
