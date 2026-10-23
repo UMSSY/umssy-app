@@ -31,12 +31,13 @@ describe('Match score: pruebas de estrés matemático y pesos parametrizables (T
       index < fulfilled ? met : pending,
     );
 
-  it.each([,
- ,
- ,
- ,
- ,
- ,
+  it.each([
+    [0, 4, 0],
+    [1, 8, 13],
+    [1, 3, 33],
+    [2, 4, 50],
+    [2, 3, 67],
+    [4, 4, 100],
   ])(
     'con %i de %i habilidades cumplidas el puntaje es %i',
     (fulfilled, total, expected) => {
