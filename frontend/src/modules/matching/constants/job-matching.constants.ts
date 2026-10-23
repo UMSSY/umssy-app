@@ -5,7 +5,7 @@ export function getJobMatchEndpoint(jobOfferId: string): string {
   return `/job-offers/${jobOfferId}/match`;
 }
 
-export const JOBS_ROUTE = "/vacancies";
+export const JOBS_ROUTE = "/vacancies/recommended";
 export const PROFILE_SKILLS_ROUTE = "/profile/trajectory/skills";
 
 export const JOB_MATCHING_QUERY_KEYS = {

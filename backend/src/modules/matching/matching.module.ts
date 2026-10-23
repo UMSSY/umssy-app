@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { JobOffersModule } from '../job-offers/job-offers.module.js';
 import { SkillsModule } from '../skills/skills.module.js';
@@ -12,7 +12,11 @@ import { WeightedScoreService } from './services/weighted-score.service.js';
 import { ActiveJobOffersService } from './services/active-job-offers.service.js';
 
 @Module({
-  imports: [JwtAuthModule, SkillsModule, JobOffersModule],
+  imports: [
+    JwtAuthModule,
+    SkillsModule,
+    forwardRef(() => JobOffersModule),
+  ],
   controllers: [MatchingController],
   providers: [
     MatchingService,
