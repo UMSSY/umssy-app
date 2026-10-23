@@ -1,6 +1,7 @@
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { JobOffer } from "../types/job-offer.types";
+import Link from "next/link";
 
 const dateFormatter = new Intl.DateTimeFormat("es-BO", {
   day: "2-digit",
@@ -11,7 +12,7 @@ const dateFormatter = new Intl.DateTimeFormat("es-BO", {
 
 export function VacancyCard({ offer }: { offer: JobOffer }) {
   return (
-        <li className="flex items-end justify-between gap-4 rounded-lg border border-border bg-surface p-5">
+    <li className="flex items-end justify-between gap-4 rounded-lg border border-border bg-surface p-5">
       <div>
         <h3 className="text-base font-bold text-ink">{offer.title}</h3>
         <p className="mt-1 text-sm text-text-secondary">
@@ -23,9 +24,11 @@ export function VacancyCard({ offer }: { offer: JobOffer }) {
           <Button variant="outline" size="sm" disabled>
             Ver postulantes
           </Button>
-          <Button variant="outline" size="sm" disabled>
-            Editar
-          </Button>
+          <Link href={`/recruiters/job-offers/${offer.id}/edit`}>
+            <Button variant="outline" size="sm">
+              Editar
+            </Button>
+          </Link>
         </div>
       </div>
       <Button

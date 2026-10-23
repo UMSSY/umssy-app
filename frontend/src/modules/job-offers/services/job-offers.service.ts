@@ -8,6 +8,20 @@ import type {
 import type { SkillOption } from "../types/vacancy-conditions.types";
 import type { JobOfferListParams } from "../utils/filter-job-offers";
 
+export interface JobOfferDetail {
+  id: string;
+  title: string;
+  modality: string;
+  contractType: string;
+  category: string;
+  positionsAvailable: number;
+  salaryRange: string;
+  languages: string;
+  locationUrl: string;
+  description: string;
+  skills: SkillOption[];
+}
+
 const SKILL_CATALOG_ENDPOINT = "/job-offers/skills";
 
 function buildCompanyJobOffersEndpoint(companyId: string): string {
@@ -44,5 +58,15 @@ export const jobOffersService = {
       createdAt: offer.createdAt,
       applicantsCount: offer.applicantsCount ?? 0,
     }));
+  },
+
+  getById: async (id: string): Promise<JobOfferDetail> => {
+    const response = await apiClient.get<ApiResponse<JobOfferDetail>>(`/job-offers/${id}`);
+    return response.data.data;
+  },
+
+  update: async (id: string, payload: CreateJobOfferPayload): Promise<JobOfferDetail> => {
+    const response = await apiClient.put<ApiResponse<JobOfferDetail>>(`/job-offers/${id}`, payload);
+    return response.data.data;
   },
 };

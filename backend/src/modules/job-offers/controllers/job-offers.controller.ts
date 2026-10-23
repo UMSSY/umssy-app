@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
   StandardSchemaValidationPipe,
   UsePipes,
@@ -43,6 +44,7 @@ import type {
 } from '../responses/job-offer.response.js';
 import { JobOffersService } from '../services/job-offers.service.js';
 import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
+
 const companyIdPipe = new ParseUUIDPipe({
   exceptionFactory: () =>
     new RequestValidationException([
@@ -50,7 +52,13 @@ const companyIdPipe = new ParseUUIDPipe({
     ]),
 });
 
-// TODO: proteger con JwtAuthGuard y el rol empresa cuando el login devuelva el companyId (Epic 1)
+const jobIdPipe = new ParseUUIDPipe({
+  exceptionFactory: () =>
+    new RequestValidationException([
+      { field: 'id', message: 'El ID de la vacante no es válido' },
+    ]),
+});
+
 @ApiTags('job-offers')
 @UsePipes(
   new StandardSchemaValidationPipe({
@@ -87,7 +95,25 @@ export class JobOffersController {
     return this.jobOffersService.create(companyId, request);
   }
 
-    @Get('companies/:companyId/job-offers')
+  @Get('job-offers/:id')
+  @ApiOperation({ summary: 'Obtiene el detalle de una vacante por su ID' })
+  @ApiOkResponse({ description: 'Detalle de la vacante' })
+  getById(@Param('id', jobIdPipe) id: string): Promise<JobOfferResponse> {
+    return this.jobOffersService.findById(id);
+  }
+
+  @Put('job-offers/:id')
+  @ApiOperation({ summary: 'Edita una vacante existente' })
+  @ApiBody(toApiBody(createJobOfferSchema))
+  @ApiOkResponse({ description: 'Vacante editada correctamente' })
+  update(
+    @Param('id', jobIdPipe) id: string,
+    @Body({ schema: createJobOfferSchema }) request: CreateJobOfferRequest,
+  ): Promise<JobOfferResponse> {
+    return this.jobOffersService.update(id, request);
+  }
+
+  @Get('companies/:companyId/job-offers')
   @ApiOperation({ summary: 'Lista las vacantes de una empresa, con filtros opcionales' })
   @ApiQuery({ name: 'modality', required: false, enum: JobOfferModality })
   @ApiQuery({ name: 'contractType', required: false, enum: JobOfferContractType })

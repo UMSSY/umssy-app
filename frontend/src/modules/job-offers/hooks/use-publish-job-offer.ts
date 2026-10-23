@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { PUBLISH_MESSAGES } from "../constants/vacancies.constants";
 import { jobOffersService } from "../services/job-offers.service";
@@ -23,11 +23,28 @@ function hasErrors(conditions: VacancyConditions): boolean {
   return Object.keys(found).length > 0;
 }
 
-export function usePublishJobOffer() {
+export function usePublishJobOffer(jobOfferId?: string) {
   const [localError, setLocalError] = useState<PublishError | null>(null);
+  const queryClient = useQueryClient();
+
   const mutation = useMutation({
-    mutationFn: ({ companyId, payload }: PublishVariables) => jobOffersService.publish(companyId, payload),
+    mutationFn: async ({ companyId, payload }: PublishVariables) => {
+      if (jobOfferId) {
+        await jobOffersService.update(jobOfferId, payload);
+      } else {
+        await jobOffersService.publish(companyId, payload);
+      }
+    },
     networkMode: "always",
+    onSuccess: () => {
+      const company = getCurrentCompany();
+      if (company.id) {
+        queryClient.invalidateQueries({ queryKey: ["company-job-offers", company.id] });
+      }
+      if (jobOfferId) {
+        queryClient.invalidateQueries({ queryKey: ["job-offer", jobOfferId] });
+      }
+    },
   });
 
   const submit = async (conditions: VacancyConditions): Promise<void> => {
