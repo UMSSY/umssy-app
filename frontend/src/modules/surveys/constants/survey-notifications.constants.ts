@@ -6,8 +6,8 @@ export const SURVEY_NOTIFICATIONS_DESCRIPTION = "Consulta los avisos de nuevas e
 export const SURVEY_NOTIFICATIONS_LOAD_ERROR_MESSAGE = "No se pudieron cargar tus encuestas. Intenta nuevamente.";
 export const SURVEY_NOTIFICATIONS_EMPTY_TITLE = "No hay encuestas disponibles";
 export const SURVEY_NOTIFICATIONS_EMPTY_DESCRIPTION = "Cuando tengas una nueva encuesta asignada, aparecerá aquí.";
+export const SURVEY_NOTIFICATIONS_SKELETON_ROWS = 3;
 
-// Trazos decorativos alrededor del icono del estado vacío.
 export const EMPTY_STATE_RAY_CLASSES = [
   "-left-7 top-1/2 -translate-y-1/2",
   "-right-7 top-1/2 -translate-y-1/2",
@@ -36,7 +36,7 @@ export const SURVEY_STATUS_MESSAGES: Record<SurveyNotificationStatus, string> = 
 export const SURVEY_STATUS_TONES: Record<SurveyNotificationStatus, string> = {
   pending: "bg-danger/10 text-danger",
   expired: "bg-danger/10 text-danger",
-  answered: "bg-emerald-50 text-emerald-700",
+  answered: "bg-availability text-availability-foreground",
 };
 
 export const ANSWER_SURVEY_LABEL = "Responder encuesta";
