@@ -6,7 +6,7 @@ import type { SurveyTables } from "../types/survey-records.types";
 import type { SurveyInput } from "../types/survey.types";
 import { surveysService } from "./surveys.service";
 
-const SEEDED_SURVEYS = 24;
+const SEEDED_SURVEYS = 25;
 
 function buildInput(overrides: Partial<SurveyInput> = {}): SurveyInput {
   return {
@@ -96,7 +96,7 @@ describe("surveysService", () => {
 
     it("guarda los cambios en localStorage", async () => {
       await surveysService.createSurvey(buildInput({ title: "Persistente" }));
-      const stored = JSON.parse(localStorage.getItem("umssy.surveys.mock-db.v1") ?? "{}") as SurveyTables;
+      const stored = JSON.parse(localStorage.getItem("umssy.surveys.mock-db.v2") ?? "{}") as SurveyTables;
 
       expect(stored.surveys.some((survey) => survey.title === "Persistente")).toBe(true);
     });
@@ -176,6 +176,17 @@ describe("surveysService", () => {
       data.questions.forEach((question) => {
         expect(question.options.reduce((sum, option) => sum + option.count, 0)).toBe(question.totalSelections);
       });
+    });
+
+    it("la encuesta de ejemplo tiene resultados fijos para revisar los gráficos", async () => {
+      const metrics = await surveysService.getSurveyMetrics("srv-demo");
+      const statistics = await surveysService.getSurveyStatistics("srv-demo");
+
+      expect(metrics.data).toMatchObject({ respondedCount: 248, completedCount: 211, invitedCount: 420, completionRate: 85.1 });
+      expect(statistics.data.questions).toHaveLength(6);
+      expect(statistics.data.questions[0].options.map((option) => option.count)).toEqual([132, 26, 31, 12, 37, 8]);
+      expect(statistics.data.questions[1].options[4]).toMatchObject({ text: "Más de 12 meses", count: 0, percentage: 0 });
+      expect(statistics.data.questions[4]).toMatchObject({ type: "MULTIPLE_CHOICE", answeredBy: 190, totalSelections: 198 });
     });
 
     it("no tiene estadísticas para un borrador", async () => {

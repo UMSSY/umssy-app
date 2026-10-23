@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const STORAGE_KEY = "umssy.surveys.mock-db.v1";
+const STORAGE_KEY = "umssy.surveys.mock-db.v2";
 
 async function loadStore() {
   vi.resetModules();
@@ -15,7 +15,7 @@ describe("almacén de encuestas de ejemplo", () => {
   it("arranca con los datos iniciales cuando no hay nada guardado", async () => {
     const { readSurveyTables } = await loadStore();
 
-    expect(readSurveyTables().surveys).toHaveLength(24);
+    expect(readSurveyTables().surveys).toHaveLength(25);
   });
 
   it("recupera las tablas guardadas al recargar la página", async () => {
@@ -31,7 +31,7 @@ describe("almacén de encuestas de ejemplo", () => {
     localStorage.setItem(STORAGE_KEY, "{dañado");
     const { readSurveyTables } = await loadStore();
 
-    expect(readSurveyTables().surveys).toHaveLength(24);
+    expect(readSurveyTables().surveys).toHaveLength(25);
     expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 
@@ -41,7 +41,7 @@ describe("almacén de encuestas de ejemplo", () => {
 
     resetSurveyTables();
 
-    expect(readSurveyTables().surveys).toHaveLength(24);
+    expect(readSurveyTables().surveys).toHaveLength(25);
   });
 
   it("genera siempre los mismos datos de ejemplo", async () => {

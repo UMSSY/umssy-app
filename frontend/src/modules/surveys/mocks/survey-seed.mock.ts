@@ -11,6 +11,7 @@ import type {
   SurveyTables,
 } from "../types/survey-records.types";
 import type { SurveyStatus, SurveyTargetCareer } from "../types/survey.types";
+import { buildShowcaseSurvey } from "./survey-showcase.mock";
 import { SURVEY_TEMPLATES } from "./survey-templates.mock";
 
 // TODO: eliminar con el almacén de ejemplo cuando existan las tablas de encuestas en el backend.
@@ -185,6 +186,13 @@ export function buildSurveySeed(): SurveyTables {
       });
     });
   });
+
+  const showcase = buildShowcaseSurvey(graduates);
+  surveys.push(showcase.survey);
+  surveyQuestions.push(...showcase.surveyQuestions);
+  surveyOptions.push(...showcase.surveyOptions);
+  surveyResponses.push(...showcase.surveyResponses);
+  surveyAnswers.push(...showcase.surveyAnswers);
 
   return { admins: ADMINS, graduates, surveys, surveyQuestions, surveyOptions, surveyResponses, surveyAnswers };
 }

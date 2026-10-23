@@ -5,7 +5,7 @@ import { buildSurveySeed } from "./survey-seed.mock";
 // TODO: eliminar cuando existan las tablas de encuestas en el backend.
 // Base de datos de ejemplo: las tablas viven en memoria y se guardan en localStorage
 // para que lo creado sobreviva a recargar la página.
-const SURVEY_STORE_STORAGE_KEY = "umssy.surveys.mock-db.v1";
+const SURVEY_STORE_STORAGE_KEY = "umssy.surveys.mock-db.v2";
 
 let tables: SurveyTables | null = null;
 

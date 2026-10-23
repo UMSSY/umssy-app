@@ -10,7 +10,7 @@ import { SurveysView } from "./surveys-view";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
-const FIRST_PAGE = "Mostrando 1-10 de 24 encuestas";
+const FIRST_PAGE = "Mostrando 1-10 de 25 encuestas";
 
 function getBodyRows() {
   return screen.getAllByRole("row").slice(1);
@@ -51,18 +51,18 @@ describe("SurveysView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Página 2" }));
 
-    await waitFor(() => expect(screen.getByText("Mostrando 11-20 de 24 encuestas")).toBeDefined());
+    await waitFor(() => expect(screen.getByText("Mostrando 11-20 de 25 encuestas")).toBeDefined());
     expect(spy).toHaveBeenLastCalledWith({ page: 2, limit: 10, period: undefined, search: "" });
   });
 
   it("cambia la cantidad de filas por página y vuelve a la primera", async () => {
     await renderLoaded();
     fireEvent.click(screen.getByRole("button", { name: "Página 2" }));
-    await waitFor(() => expect(screen.getByText("Mostrando 11-20 de 24 encuestas")).toBeDefined());
+    await waitFor(() => expect(screen.getByText("Mostrando 11-20 de 25 encuestas")).toBeDefined());
 
     fireEvent.change(screen.getByLabelText("Filas por página"), { target: { value: "20" } });
 
-    await waitFor(() => expect(screen.getByText("Mostrando 1-20 de 24 encuestas")).toBeDefined());
+    await waitFor(() => expect(screen.getByText("Mostrando 1-20 de 25 encuestas")).toBeDefined());
     expect(getBodyRows()).toHaveLength(20);
   });
 
@@ -71,7 +71,7 @@ describe("SurveysView", () => {
     const user = userEvent.setup();
     await renderLoaded();
     fireEvent.click(screen.getByRole("button", { name: "Página 2" }));
-    await waitFor(() => expect(screen.getByText("Mostrando 11-20 de 24 encuestas")).toBeDefined());
+    await waitFor(() => expect(screen.getByText("Mostrando 11-20 de 25 encuestas")).toBeDefined());
 
     await user.click(screen.getByRole("combobox", { name: "Gestión académica" }));
     await user.click(await screen.findByRole("option", { name: "I-2025" }));
@@ -104,12 +104,13 @@ describe("SurveysView", () => {
 
   it("desactiva una encuesta activa con el toggle y avisa con un toast", async () => {
     await renderLoaded();
-    const [activeToggle] = screen.getAllByRole("switch", { name: "Activa" });
+    const activeToggles = screen.getAllByRole("switch", { name: "Activa" });
+    const [activeToggle] = activeToggles;
 
     fireEvent.click(activeToggle);
 
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith("La encuesta ahora está inactiva", expect.any(Object)));
-    await waitFor(() => expect(screen.getAllByRole("switch", { name: "Activa" }).length).toBeLessThan(3));
+    await waitFor(() => expect(screen.getAllByRole("switch", { name: "Activa" }).length).toBe(activeToggles.length - 1));
   });
 
   it("avisa si no se pudo cambiar el estado", async () => {
