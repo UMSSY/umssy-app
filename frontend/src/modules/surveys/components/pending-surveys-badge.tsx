@@ -19,7 +19,6 @@ function PendingSurveysCount() {
   );
 }
 
-// El menú lateral también se dibuja fuera del QueryClientProvider (por ejemplo, en pruebas de otras páginas).
 export function PendingSurveysBadge() {
   const queryClient = useContext(QueryClientContext);
   return queryClient ? <PendingSurveysCount /> : null;
