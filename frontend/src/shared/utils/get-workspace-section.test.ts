@@ -13,7 +13,7 @@ describe("Unified navigation", () => {
       ...filterNavigationByRoles(SIDEBAR_NAVIGATION, [role]).map(({ href }) => href),
       ...WORKSPACE_SECTIONS.flatMap(({ items }) => items.filter(({ href }) => getRouteRoles(href).includes(role)).map(({ href }) => href)),
     ]);
-    expect(getWorkspaceTasks([role]).every(({ href }) => destinations.has(href))).toBe(true);
+    expect(getWorkspaceTasks([role]).every(({ href }) => destinations.has(href.split(/[?#]/, 1)[0]))).toBe(true);
   });
   it("resolves reports before the broader administrative area", () => {
     expect(getWorkspaceSection("/backoffice/reports/history", ["administrativo"])?.id).toBe("reports");

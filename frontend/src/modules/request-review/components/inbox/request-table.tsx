@@ -13,7 +13,7 @@ import { StatusBadge } from "../common/status-badge";
 import type { RequestTableProps } from "../../types/request-table-props.types";
 
 const HEAD_CLASS = "h-10 px-5 lg:px-4 text-[11.5px] font-semibold text-ink-soft";
-const CELL_CLASS = "px-5 lg:px-4 text-[14.5px] text-ink";
+const CELL_CLASS = "px-5 lg:px-4 text-sm text-ink";
 const WRAP_CLASS = "lg:whitespace-normal";
 const TABLE_COLUMN_COUNT = 7;
 
@@ -54,7 +54,7 @@ export function RequestTable({ items = [], isLoading = false }: RequestTableProp
                     </span>
                     <div className="flex flex-col">
                       <span className="font-semibold text-ink">{item.fullName}</span>
-                      <span className="text-[13px] text-text-secondary">{item.email}</span>
+                      <span className="text-sm text-text-secondary">{item.email}</span>
                     </div>
                   </div>
                 </TableCell>
@@ -73,7 +73,7 @@ export function RequestTable({ items = [], isLoading = false }: RequestTableProp
                 <TableCell className={cn(CELL_CLASS, "text-right")}>
                   <Link
                     href={`${INBOX_PATH}/${item.id}`}
-                    className={cn(buttonVariants({ variant: "outline" }), "h-[34px] rounded-lg border-border bg-surface px-4 text-[14px] font-semibold text-ink")}
+                    className={cn(buttonVariants({ variant: "outline" }), "h-[34px] rounded-lg border-border bg-surface px-4 text-sm font-semibold text-ink")}
                   >
                     Revisar
                   </Link>

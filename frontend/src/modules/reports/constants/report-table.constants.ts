@@ -8,14 +8,14 @@ export const REGISTERED_USERS_COLUMN_COUNT = 6;
 export const REJECTED_USERS_COLUMN_COUNT = 5;
 export const REPORT_HISTORY_COLUMN_COUNT = 3;
 
-export const USERS_TABLE_HEAD_CLASSES = "h-auto px-6 py-3 text-[11.5px] font-semibold text-ink";
-export const REPORT_HISTORY_HEAD_CLASSES = "h-auto px-6 py-3 text-[11.5px] font-semibold text-text-secondary";
-export const TABLE_CELL_CLASSES = "px-6 py-4 text-ink-soft";
+export const USERS_TABLE_HEAD_CLASSES = "h-10 px-4 py-2 text-xs font-semibold text-ink";
+export const REPORT_HISTORY_HEAD_CLASSES = "h-10 px-4 py-2 text-xs font-semibold text-text-secondary";
+export const TABLE_CELL_CLASSES = "px-4 py-3 text-sm text-ink-soft";
 const STICKY_MOBILE_WIDTH_CLASSES =
   "w-32 min-w-32 px-3 whitespace-normal wrap-break-word md:w-auto md:min-w-0 md:px-6 md:whitespace-nowrap";
 export const STICKY_HEAD_CLASSES = `sticky left-0 z-10 bg-surface-soft ${STICKY_MOBILE_WIDTH_CLASSES}`;
 export const STICKY_CELL_CLASSES = `sticky left-0 z-10 bg-surface group-hover:bg-surface-soft ${STICKY_MOBILE_WIDTH_CLASSES}`;
-export const TABLE_CONTAINER_CLASSES = "@container min-h-151 rounded-lg border border-border bg-surface";
+export const TABLE_CONTAINER_CLASSES = "@container overflow-hidden rounded-lg border border-border bg-surface";
 
 export const REJECTION_REASON_SHORT_LABELS: Record<RejectionReason, string> = {
   "Documento ilegible": "Documento ilegible",

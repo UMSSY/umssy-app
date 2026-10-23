@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import {
   CONNECTION_ERROR_MESSAGE,
+  EMAIL_SEARCH_LABEL,
   REGISTERED_USERS_CONNECTION_TOAST_ID,
   REGISTERED_USERS_PAGE_SIZE,
   REGISTERED_USERS_SLOW_TOAST_ID,
@@ -13,10 +15,10 @@ import {
   SEARCH_DEBOUNCE_MS,
   SLOW_REQUEST_MESSAGE,
 } from "../constants/reports.constants";
-import { EmailSearchInput } from "../components/email-search-input";
 import { ExportSuccessToast } from "../components/export-success-toast";
 import { RegisteredUsersTable } from "../components/registered-users-table";
 import { ReportActions } from "../components/report-actions";
+import { ReportSearchInput } from "../components/report-search-input";
 import { ReportTableFooter } from "../components/report-table-footer";
 import { UserTypeFilter } from "../components/user-type-filter";
 import { useExportRegisteredUsersCsv } from "../hooks/use-export-registered-users-csv";
@@ -84,13 +86,14 @@ export function RegisteredUsersReportView() {
   };
 
   return (
-    <WorkspacePage title="Usuarios aceptados">
+    <WorkspacePage title="Usuarios aceptados" description="Consulta usuarios y exporta los resultados con los filtros actuales.">
 
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
+      <div role="search" aria-label="Filtros de usuarios aceptados" className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <UserTypeFilter value={userType} onChange={handleUserTypeChange} />
-          <EmailSearchInput value={searchInput} onChange={handleSearchChange} />
+          <ReportSearchInput value={searchInput} onChange={handleSearchChange} label={EMAIL_SEARCH_LABEL} />
         </div>
+        {userType || period || searchInput ? <Button variant="brand" onClick={() => { setUserType(undefined); setPeriod(undefined); setSearchInput(""); setCurrentPage(1); }}>Limpiar filtros</Button> : null}
         <ReportActions onExport={exportCsv} isExporting={isExporting} period={period} onPeriodChange={handlePeriodChange} />
       </div>
 

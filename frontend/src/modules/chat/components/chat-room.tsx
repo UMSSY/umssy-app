@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from "@/components/ui/button";
 import {
   useCallback,
   useEffect,
@@ -17,6 +18,7 @@ import { MessageInputBar } from './message-input-bar';
 import { ChatErrorState } from './chat-error-state';
 import { getInitials } from '../utils/date-formatter';
 import { isContentValidForSend } from '../utils/unicode-counter';
+import { useMessagingUi } from '../contexts/messaging-ui-context';
 
 interface ChatRoomProps {
   conversation: Conversation;
@@ -32,6 +34,7 @@ interface ChatRoomProps {
   isMessagesError?: boolean;
   isLoadingOlderError?: boolean;
   onRetryMessages?: () => void;
+  isCompact?: boolean;
 }
 
 function getMessageDate(message: Message): string {
@@ -115,8 +118,15 @@ function ChatRoomContent({
   isMessagesError = false,
   isLoadingOlderError = false,
   onRetryMessages,
+  isCompact = false,
 }: ChatRoomProps) {
-  const [inputText, setInputText] = useState('');
+  const ui = useMessagingUi();
+  const [localInputText, setLocalInputText] = useState('');
+  const inputText = ui ? ui.drafts[conversation.id] ?? '' : localInputText;
+  const setInputText = (content: string) => {
+    if (ui) ui.setDraft(conversation.id, content);
+    else setLocalInputText(content);
+  };
   const [sendError, setSendError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const sendPendingRef = useRef(false);
@@ -249,7 +259,8 @@ function ChatRoomContent({
 
     try {
       await onSendMessage(content);
-      setInputText('');
+      if (ui) ui.clearSubmittedDraft(conversation.id, inputText);
+      else setLocalInputText('');
     } catch {
       setSendError(true);
     } finally {
@@ -270,22 +281,22 @@ function ChatRoomContent({
   return (
     <div
       data-testid="chat-room"
-      className="flex flex-col h-full w-full min-w-0 min-h-0 bg-surface-soft overflow-hidden"
+      className="flex size-full min-h-0 min-w-0 flex-col overflow-hidden bg-surface-soft"
     >
       <header
         data-testid="chat-room-header"
-        className="shrink-0 w-full min-w-0 bg-white border-b border-border p-3 md:p-4 flex items-center justify-between z-10"
+        className="z-10 flex w-full min-w-0 shrink-0 items-center justify-between border-b border-border bg-surface p-3 md:p-4"
       >
         <div className="flex items-center gap-3">
-          <button
+          <Button variant="ghost"
             type="button"
             data-testid="chat-back-button"
             onClick={onBack}
-            className="md:hidden p-1.5 -ml-1 text-text-secondary hover:text-ink rounded-lg hover:bg-surface-soft transition-colors"
+            className={isCompact ? "-ml-1 rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-soft hover:text-ink" : "-ml-1 rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-soft hover:text-ink md:hidden"}
             aria-label="Volver a la lista de chats"
           >
             <ArrowLeft className="size-5" aria-hidden="true" />
-          </button>
+          </Button>
 
           <div className="relative shrink-0">
             {conversation.contact.avatarUrl ? (
@@ -295,10 +306,10 @@ function ChatRoomContent({
                 width={40}
                 height={40}
                 unoptimized
-                className="w-10 h-10 rounded-full object-cover border border-border"
+                className="size-10 rounded-full border border-border object-cover"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-border text-ink flex items-center justify-center font-bold text-xs border border-border">
+              <div className="flex size-10 items-center justify-center rounded-full border border-border bg-border text-xs font-bold text-ink">
                 {getInitials(conversation.contact.fullName)}
               </div>
             )}
@@ -306,7 +317,7 @@ function ChatRoomContent({
             {conversation.contact.isOnline && (
               <span
                 data-testid="online-indicator"
-                className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-ink-soft border-2 border-white rounded-full shadow-xs"
+                className="absolute right-0 bottom-0 size-2.5 rounded-full border-2 border-surface bg-ink-soft shadow-xs"
                 title="En linea"
               />
             )}
@@ -315,7 +326,7 @@ function ChatRoomContent({
           <div>
             <h3
               data-testid="chat-contact-name"
-              className="text-sm md:text-base font-bold text-ink leading-tight"
+              className="text-sm leading-tight font-bold text-ink md:text-base"
             >
               {conversation.contact.fullName}
             </h3>
@@ -333,7 +344,7 @@ function ChatRoomContent({
         ref={messagesContainerRef}
         data-testid="messages-container"
         onScroll={handleMessagesScroll}
-        className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-4 md:p-6 space-y-3 bg-surface-soft"
+        className="min-h-0 min-w-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto bg-surface-soft p-4 md:p-6"
       >
         {isMessagesError && !isLoadingMessages && (
           <ChatErrorState
@@ -366,13 +377,13 @@ function ChatRoomContent({
 
         {hasMoreMessages && !isLoadingMoreMessages && !isMessagesError && (
           <div className="flex justify-center py-2">
-            <button
+            <Button variant="ghost"
               type="button"
               onClick={() => void loadOlderMessages()}
-              className="px-4 py-2 text-xs font-medium text-ink bg-white border border-border rounded-lg hover:bg-surface-soft"
+              className="rounded-lg border border-border bg-surface px-4 py-2 text-xs font-medium text-ink hover:bg-surface-soft"
             >
               Cargar mensajes anteriores
-            </button>
+            </Button>
           </div>
         )}
 
@@ -402,14 +413,14 @@ function ChatRoomContent({
               aria-hidden="true"
               className="space-y-4 motion-safe:animate-pulse"
             >
-              <div className="h-12 w-2/3 rounded-2xl bg-border" />
-              <div className="ml-auto h-16 w-1/2 rounded-2xl bg-border" />
-              <div className="h-12 w-1/2 rounded-2xl bg-border" />
+              <div className="h-12 w-2/3 rounded-lg bg-border" />
+              <div className="ml-auto h-16 w-1/2 rounded-lg bg-border" />
+              <div className="h-12 w-1/2 rounded-lg bg-border" />
             </div>
           </div>
         ) : messages.length === 0 && !isMessagesError ? (
-          <div className="flex flex-col items-center justify-center h-full text-center p-6 text-text-secondary">
-            <div className="w-12 h-12 rounded-full bg-surface-soft text-ink flex items-center justify-center mx-auto mb-3">
+          <div className="flex h-full flex-col items-center justify-center p-6 text-center text-text-secondary">
+            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-surface-soft text-ink">
               <MessageCircle className="size-6" aria-hidden="true" />
             </div>
 
@@ -417,7 +428,7 @@ function ChatRoomContent({
               Sala de chat con {conversation.contact.fullName}
             </p>
 
-            <p className="text-xs text-text-secondary mt-1">
+            <p className="mt-1 text-xs text-text-secondary">
               Aún no hay mensajes. Envía el primero para comenzar la conversación.
             </p>
           </div>
@@ -446,11 +457,11 @@ function ChatRoomContent({
                 {showDateSeparator && (
                   <div
                     data-testid={`date-separator-${message.id}`}
-                    className="flex items-center gap-3 my-5"
+                    className="my-5 flex items-center gap-3"
                   >
                     <div className="h-px flex-1 bg-border" />
 
-                    <span className="text-[11px] font-semibold text-text-secondary text-center whitespace-nowrap">
+                    <span className="text-center text-xs font-semibold whitespace-nowrap text-text-secondary">
                       {formatMessageDate(messageDate)}
                     </span>
 
@@ -465,10 +476,10 @@ function ChatRoomContent({
                   }`}
                 >
                   <div
-                    className={`max-w-[85%] md:max-w-[70%] min-w-0 rounded-2xl px-4 py-2.5 text-sm shadow-xs [overflow-wrap:anywhere] break-words ${
+                    className={`max-w-[85%] min-w-0 rounded-lg px-4 py-2.5 text-sm [overflow-wrap:anywhere] break-words shadow-xs md:max-w-[70%] ${
                       isOwn
-                        ? 'bg-ink text-white rounded-tr-xs'
-                        : 'bg-white text-ink border border-border rounded-tl-xs'
+                        ? 'rounded-tr-xs bg-accent text-surface'
+                        : 'rounded-tl-xs border border-border bg-surface text-ink'
                     }`}
                   >
                     <p
@@ -486,7 +497,7 @@ function ChatRoomContent({
                     </p>
 
                     <div
-                      className={`flex items-center gap-1.5 justify-end mt-1 text-[10px] ${
+                      className={`mt-1 flex items-center justify-end gap-1.5 text-[10px] ${
                         isOwn
                           ? 'text-slate-300'
                           : 'text-text-secondary'

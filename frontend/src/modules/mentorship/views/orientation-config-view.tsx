@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react";
+import { PageHeading } from "@/shared/components/layout";
+import { Label } from "@/components/ui/label";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -30,7 +32,7 @@ export function OrientationConfigView() {
   const [draftIds, setSelectedIds] = useState<string[] | null>(null);
   const selectedIds = draftIds ?? savedIds;
   const [showToast, setShowToast] = useState(false);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleCheckboxChange = (id: string) => {
@@ -62,21 +64,17 @@ export function OrientationConfigView() {
         "No se pudieron guardar los cambios. Intente nuevamente.",
       );
     } finally {
-      setIsConfirmModalOpen(false);
+      setIsDiscardDialogOpen(false);
     }
   };
 
-  const handleOpenConfirmModal = () => {
-    if (selectedIds.length === 0 || isSaving || hasLoadError) return;
-
-    setIsConfirmModalOpen(true);
-  };
+  const hasChanges = selectedIds.length !== savedIds.length || selectedIds.some((id) => !savedIds.includes(id));
 
   if (isLoading) {
     return (
       <main className="mx-auto min-h-full max-w-7xl bg-background">
         <Card
-          className="mx-auto max-w-3xl gap-0 rounded-xl border border-border bg-white py-0 shadow-none ring-0"
+          className="mx-auto max-w-3xl gap-0 rounded-lg border border-border bg-white py-0 shadow-none ring-0"
           aria-busy="true"
         >
           <CardHeader className="gap-0 p-6 sm:p-8">
@@ -99,7 +97,7 @@ export function OrientationConfigView() {
   if (!isMentorActive) {
     return (
       <main className="mx-auto min-h-full max-w-7xl bg-background">
-        <Card className="mx-auto max-w-3xl gap-0 rounded-xl border border-border bg-white py-0 shadow-none ring-0">
+        <Card className="mx-auto max-w-3xl gap-0 rounded-lg border border-border bg-white py-0 shadow-none ring-0">
           <CardHeader className="gap-0 p-6 pb-0 sm:p-8 sm:pb-0">
             <CardTitle
               role="heading"
@@ -118,7 +116,7 @@ export function OrientationConfigView() {
               href="/mentorship"
               className={buttonVariants({
                 className:
-                  "h-10 rounded-lg bg-accent px-6 text-sm font-semibold text-white hover:bg-brand-hover active:translate-y-0",
+                  "h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground hover:bg-brand-hover active:translate-y-0",
               })}
             >
               Activar participación como mentor
@@ -130,20 +128,13 @@ export function OrientationConfigView() {
   }
 
   return (
-    <div className="min-h-full w-full bg-background">
+    <main className="min-h-full w-full bg-background">
       <div className="flex w-full flex-col">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
 
-          <div className="flex flex-col gap-1">
-            <h1 className="font-tight text-3xl font-bold tracking-tight text-ink">
-              Editar tipos de orientación
-            </h1>
-            <p className="text-sm text-text-secondary">
-              Selecciona los tipos de orientación que deseas brindar.
-            </p>
-          </div>
+          <PageHeading title="Editar tipos de orientación" description="Selecciona los tipos de orientación que deseas brindar." />
 
-          <Card className="w-full max-w-none gap-6 rounded-xl border border-border bg-white py-0 shadow-none ring-0">
+          <Card className="w-full max-w-none gap-6 rounded-lg border border-border bg-white py-0 shadow-none ring-0">
             <CardContent className="flex flex-col gap-6 px-4 pt-4 sm:px-8 sm:pt-8">
               {hasLoadError && (
                 <Alert className="flex items-center justify-between gap-4 rounded-lg border border-danger/20 bg-interaction p-4 text-sm text-danger">
@@ -175,11 +166,11 @@ export function OrientationConfigView() {
                     const isSaved = savedIds.includes(option.id);
 
                     return (
-                      <label
+                      <Label
                         key={option.id}
                         className={`group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors ${
                           !isSelected
-                            ? "border-transparent bg-surface-soft/50 hover:bg-gray-50"
+                            ? "border-transparent bg-surface-soft/50 hover:bg-interaction"
                             : isSaved
                               ? "border-border bg-surface-soft/50"
                               : "border-accent bg-interaction/50"
@@ -188,7 +179,7 @@ export function OrientationConfigView() {
                         <div className="flex min-w-0 flex-1 flex-col gap-1">
                           <span
                             id={`orientation-label-${option.id}`}
-                            className="min-w-0 break-words text-sm font-semibold text-ink"
+                            className="min-w-0 text-sm font-semibold break-words text-ink"
                           >
                             {option.name}
                           </span>
@@ -212,20 +203,21 @@ export function OrientationConfigView() {
                               !isSelected
                                 ? ""
                                 : isSaved
-                                  ? "data-checked:bg-ink-soft"
+                                  ? "data-checked:bg-accent"
                                   : "data-checked:bg-accent"
                             }`}
                           />
                         </div>
-                      </label>
+                      </Label>
                     );
                   })}
                 </div>
               )}
             </CardContent>
-            <CardFooter className="mx-4 flex items-center justify-between gap-4 border-t border-border bg-transparent px-0 pb-4 pt-4 sm:mx-8 sm:pb-8">
+            <CardFooter className="mx-4 flex items-center justify-between gap-4 border-t border-border bg-transparent px-0 py-4 sm:mx-8 sm:pb-8">
               <Link
                 href="/mentors/participation"
+                onClick={(event) => { if (hasChanges) { event.preventDefault(); setIsDiscardDialogOpen(true); } }}
                 className={buttonVariants({
                   className:
                     "h-10 rounded-lg bg-surface-soft px-6 text-sm font-semibold text-ink hover:bg-interaction active:translate-y-0",
@@ -235,9 +227,9 @@ export function OrientationConfigView() {
               </Link>
               <Button
                 type="button"
-                onClick={handleOpenConfirmModal}
-                disabled={selectedIds.length === 0 || isSaving || hasLoadError}
-                className="h-10 rounded-lg bg-accent px-6 text-sm font-semibold text-white shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => void handleSave()}
+                disabled={!hasChanges || selectedIds.length === 0 || isSaving || hasLoadError}
+                className="h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSaving ? "Guardando..." : "Guardar cambios"}
               </Button>
@@ -247,38 +239,36 @@ export function OrientationConfigView() {
       </div>
 
       <AlertDialog
-        open={isConfirmModalOpen}
+        open={isDiscardDialogOpen}
         onOpenChange={(open) => {
-          if (!isSaving) setIsConfirmModalOpen(open);
+          if (!isSaving) setIsDiscardDialogOpen(open);
         }}
       >
-        <AlertDialogContent className="max-w-md gap-0 rounded-2xl border border-border bg-surface p-8 text-ink shadow-none ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
+        <AlertDialogContent className="max-w-md gap-0 rounded-lg border border-border bg-surface p-8 text-ink shadow-none ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
           <AlertDialogHeader className="place-items-start text-left">
-            <AlertDialogTitle className="font-tight text-[22px] font-bold text-ink">
-              ¿Guardar cambios?
+            <AlertDialogTitle className="font-tight text-2xl font-bold text-ink">
+              ¿Descartar cambios?
             </AlertDialogTitle>
-            <AlertDialogDescription className="mt-2 text-[15px] text-text-secondary">
-              Se actualizarán los tipos de orientación que seleccionaste.
+            <AlertDialogDescription className="mt-2 text-base text-text-secondary">
+              Tienes cambios sin guardar. Si vuelves a tu participación, se perderán.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mx-0 mb-0 mt-8 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
+          <AlertDialogFooter className="mx-0 mt-8 mb-0 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
             <AlertDialogCancel
               type="button"
               disabled={isSaving}
-              className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+              className="h-10 border-border-strong bg-surface px-6 text-sm font-semibold text-ink hover:bg-surface-soft"
             >
-              Cancelar
+              Seguir editando
             </AlertDialogCancel>
             <AlertDialogAction
+              nativeButton={false}
               type="button"
-              onClick={handleSave}
+              render={<Link href="/mentors/participation" />}
               disabled={isSaving}
-              className="h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-brand-hover"
+              className="h-10 bg-critical-action px-6 text-sm font-semibold text-critical-action-foreground hover:bg-brand-hover"
             >
-              {isSaving ? (
-                <LoaderCircle aria-hidden="true" className="animate-spin" />
-              ) : null}
-              {isSaving ? "Guardando..." : "Sí, guardar cambios"}
+              Descartar cambios
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -286,7 +276,7 @@ export function OrientationConfigView() {
 
       {showToast && (
         <Alert
-          className="fixed right-4 bottom-4 left-4 z-50 flex w-auto items-center gap-3 rounded-xl border-0 bg-ink px-6 py-3 text-white shadow-none sm:right-8 sm:bottom-8 sm:left-auto"
+          className="fixed inset-x-4 bottom-4 z-50 flex w-auto items-center gap-3 rounded-lg border border-border bg-surface px-6 py-3 text-ink shadow-none sm:right-8 sm:bottom-8 sm:left-auto"
           role="status"
         >
           <CheckCircle2 size={20} className="text-ink-soft" />
@@ -295,6 +285,6 @@ export function OrientationConfigView() {
           </span>
         </Alert>
       )}
-    </div>
+    </main>
   );
 }
