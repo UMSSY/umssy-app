@@ -169,4 +169,13 @@ describe('Match score: pruebas de estrés matemático y pesos parametrizables (T
     expect(score(['Docker'])).toBe(50);
     expect(score([])).toBe(0);
   });
+
+  it('mantiene un puntaje finito con pesos válidos muy grandes', () => {
+    expect(
+      calculateWeightedScore(
+        { ...emptyRequirements, skills: [met], academicRequirements: [pending] },
+        { ...MATCH_SCORE_WEIGHTS, skills: 1e308, academicRequirements: 1e308 },
+      ),
+    ).toBe(50);
+  });
 });
