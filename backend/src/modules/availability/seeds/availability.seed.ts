@@ -15,6 +15,7 @@ import type { SeedBlockPlan } from '../types/seed-block-plan.types.js';
 import type { SeedBlock } from '../types/seed-block.types.js';
 import type { SeedWeekRange } from '../types/seed-week-range.types.js';
 import type { SeedWeeks } from '../types/seed-weeks.types.js';
+import { toCalendarDate } from '../utils/bolivia-day.js';
 
 const weekOf = (reference: Date): SeedWeekRange => {
   const range = getWeekRange(reference);
@@ -34,7 +35,7 @@ const instantAt = (week: SeedWeekRange, day: number, hour: number): Date =>
   new Date(week.start.getTime() + day * MS_PER_DAY + hour * 60 * MS_PER_MINUTE);
 
 // Los campos PostgreSQL date representan el calendario local, no un instante GMT-4.
-const calendarDate = (instant: Date): Date => new Date(`${toBoliviaTime(instant).date}T00:00:00.000Z`);
+const calendarDate = (instant: Date): Date => toCalendarDate(toBoliviaTime(instant).date);
 
 export function buildBlockPlan(weeks: SeedWeeks, now: Date = new Date()): SeedBlockPlan {
   const warnings: string[] = [];

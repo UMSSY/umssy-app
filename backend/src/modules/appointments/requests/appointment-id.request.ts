@@ -1,5 +1,6 @@
 import { z } from 'zod';
+import { APPOINTMENT_MESSAGES } from '../constants/appointment-docs.constants.js';
 
 export const appointmentIdSchema = z.uuid({
-  error: 'El id de la cita no es válido',
+  error: APPOINTMENT_MESSAGES.invalidId,
 });

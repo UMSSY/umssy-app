@@ -16,7 +16,12 @@ import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
-import { APPOINTMENT_RESPONSE_SCHEMA } from '../constants/appointment-docs.constants.js';
+import {
+  APPOINTMENT_MESSAGES,
+  APPOINTMENT_RESPONSE_SCHEMA,
+  FIND_APPOINTMENT_DOCS,
+  FIND_MY_APPOINTMENTS_DOCS,
+} from '../constants/appointment-docs.constants.js';
 import { appointmentIdSchema } from '../requests/appointment-id.request.js';
 import { myAppointmentsQuerySchema } from '../requests/my-appointments-query.request.js';
 import { AppointmentsService } from '../services/appointments.service.js';
@@ -29,33 +34,31 @@ import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.j
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('mentor', 'titulado', 'estudiante')
 @ApiUnauthorizedResponse({
-  description: 'La sesión es requerida o no es válida',
+  description: APPOINTMENT_MESSAGES.unauthorizedSession,
 })
 @ApiForbiddenResponse({
-  description: 'El usuario no tiene acceso a las citas solicitadas',
+  description: APPOINTMENT_MESSAGES.forbiddenAccess,
 })
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Get('me')
   @ApiOperation({
-    summary: 'Consulta las citas propias próximas o pasadas',
-    description:
-      'Incluye citas confirmadas y confirmaciones heredadas, normalizadas a CONFIRMED',
+    summary: FIND_MY_APPOINTMENTS_DOCS.summary,
+    description: FIND_MY_APPOINTMENTS_DOCS.description,
   })
   @ApiQuery({
     name: 'scope',
     required: false,
     enum: ['upcoming', 'past'],
-    description:
-      'Por defecto upcoming; la clasificación utiliza la hora de fin de la cita',
+    description: FIND_MY_APPOINTMENTS_DOCS.scopeDescription,
     schema: { default: 'upcoming' },
   })
   @ApiBadRequestResponse({
-    description: 'Los parámetros de consulta no son válidos',
+    description: FIND_MY_APPOINTMENTS_DOCS.invalidQueryDescription,
   })
   @ApiOkResponse({
-    description: 'Citas propias con horarios UTC y nombre de la contraparte',
+    description: FIND_MY_APPOINTMENTS_DOCS.responseDescription,
     schema: {
       type: 'object',
       properties: {
@@ -76,19 +79,21 @@ export class AppointmentsController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Consulta una cita únicamente si el usuario participa en ella',
+    summary: FIND_APPOINTMENT_DOCS.summary,
   })
   @ApiParam({
     name: 'id',
     format: 'uuid',
-    description: 'Identificador de la cita',
+    description: FIND_APPOINTMENT_DOCS.idDescription,
   })
   @ApiBadRequestResponse({
-    description: 'El identificador de la cita no es válido',
+    description: FIND_APPOINTMENT_DOCS.invalidIdDescription,
   })
-  @ApiNotFoundResponse({ description: 'La cita no existe' })
+  @ApiNotFoundResponse({
+    description: FIND_APPOINTMENT_DOCS.notFoundDescription,
+  })
   @ApiOkResponse({
-    description: 'Detalle de una cita del participante autenticado',
+    description: FIND_APPOINTMENT_DOCS.responseDescription,
     schema: {
       type: 'object',
       properties: {
