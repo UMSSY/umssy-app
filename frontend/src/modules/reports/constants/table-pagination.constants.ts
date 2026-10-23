@@ -1,5 +1,7 @@
-export const MAX_VISIBLE_ITEMS = 7;
-export const EDGE_BLOCK_SIZE = 5;
+// Páginas fijas al inicio y al final: con 7 páginas se ve "1 2 3 … 7".
+export const EDGE_BLOCK_SIZE = 3;
+// Páginas vecinas que se muestran a cada lado de la página actual.
+export const SIBLING_PAGES = 1;
 
 export const PAGE_BUTTON_CLASSES =
   "size-9 rounded-md border-border bg-surface text-sm font-semibold text-ink-soft hover:bg-surface-soft hover:text-ink";
