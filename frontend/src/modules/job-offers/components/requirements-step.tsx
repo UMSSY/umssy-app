@@ -1,5 +1,6 @@
 "use client";
 
+import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,18 +61,15 @@ export function RequirementsStep({
   };
 
   return (
-    <div className="mt-6 rounded-xl border border-border bg-surface">
+    <div className="rounded-lg border border-border bg-surface">
       <div className="flex items-center gap-3 border-b border-border px-6 py-4">
         <h2 className="text-[16px] font-bold text-ink">Requisitos técnicos</h2>
-        <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-800">
-          Chips Seleccionables
-        </span>
       </div>
 
-      <div className="px-6 py-6">
+      <div className="p-6">
         <div className="mb-8">
           <Label htmlFor="description" className="mb-2 text-[12.5px] font-semibold text-ink">
-            Descripcion del puesto <span className="text-danger">*</span>
+            Descripcion del puesto <span className="text-ink-soft">*</span>
           </Label>
           <Textarea
             id="description"
@@ -81,11 +79,11 @@ export function RequirementsStep({
             placeholder="Buscamos un desarrollador backend..."
             aria-invalid={Boolean(errors.description)}
             aria-describedby={errors.description ? "description-error" : undefined}
-            className="min-h-[120px] whitespace-pre-wrap bg-white p-4 text-[14px] text-ink"
+            className="min-h-[120px] bg-white p-4 text-sm whitespace-pre-wrap text-ink"
           />
           <div className="mt-1 flex justify-end">
             <span
-              className={`text-[11px] font-medium ${conditions.description.length >= MAX_DESCRIPTION_CHARS ? "text-danger" : "text-slate-400"}`}
+              className={`text-xs font-medium ${conditions.description.length >= MAX_DESCRIPTION_CHARS ? "text-danger" : "text-text-secondary"}`}
             >
               {conditions.description.length}/{MAX_DESCRIPTION_CHARS}
             </span>
@@ -95,20 +93,18 @@ export function RequirementsStep({
 
         <div id="skills" tabIndex={-1}>
           <div className="mb-4 flex items-center gap-2">
-            <div className="flex h-4 w-4 items-center justify-center rounded-full border border-amber-500 text-[10px] font-bold text-amber-500">
-              i
-            </div>
-            <p className="text-[13px] text-text-secondary">
-              Selecciona las habilidades requeridas para facilitar el procesamiento de la oferta.
+            <Info className="size-4 shrink-0 text-accent" aria-hidden="true" />
+            <p className="text-sm text-text-secondary">
+              Selecciona las habilidades que necesita el puesto.
             </p>
           </div>
 
           {catalog.status === "loading" && (
-            <p className="text-[13px] text-text-secondary">{SKILLS_CATALOG_MESSAGES.loading}</p>
+            <p className="text-sm text-text-secondary">{SKILLS_CATALOG_MESSAGES.loading}</p>
           )}
 
           {catalog.status === "error" && (
-            <div role="alert" className="flex items-center gap-3 text-[13px] text-danger">
+            <div role="alert" className="flex items-center gap-3 text-sm text-danger">
               <span>{SKILLS_CATALOG_MESSAGES.error}</span>
               <Button type="button" variant="outline" size="sm" onClick={catalog.reload}>
                 {SKILLS_CATALOG_MESSAGES.retry}
@@ -127,7 +123,7 @@ export function RequirementsStep({
                     pressed={selected}
                     disabled={!selected && isSkillLimitReached}
                     onPressedChange={() => toggleSkill(skill)}
-                    className="h-auto rounded-full px-4 py-1.5 text-[13px] font-medium text-text-secondary data-[pressed]:border-ink data-[pressed]:bg-ink data-[pressed]:text-white"
+                    className="h-auto rounded-full px-4 py-1.5 text-sm font-medium text-text-secondary data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-white"
                   >
                     {skill.name}
                   </Toggle>
@@ -143,7 +139,7 @@ export function RequirementsStep({
           )}
 
           {isSkillLimitReached && (
-            <p className="mt-3 text-[12px] font-medium text-text-secondary">{VACANCY_MESSAGES.skillsLimit}</p>
+            <p className="mt-3 text-xs font-medium text-text-secondary">{VACANCY_MESSAGES.skillsLimit}</p>
           )}
           <FieldError fieldId="skills" message={errors.skills} />
         </div>

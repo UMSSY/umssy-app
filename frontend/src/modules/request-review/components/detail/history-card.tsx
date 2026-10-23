@@ -27,8 +27,8 @@ export function HistoryCard({ detail }: HistoryCardProps) {
   if (entries.length === 0) return null;
 
   return (
-    <section className="flex flex-col gap-3 rounded-[10px] border border-border bg-surface p-5" aria-label="Historial de esta solicitud">
-      <h2 className="text-[15px] font-semibold text-ink">Historial de esta solicitud</h2>
+    <section className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5" aria-label="Historial de esta solicitud">
+      <h2 className="text-base font-semibold text-ink">Historial de esta solicitud</h2>
       <ul className="flex flex-col gap-2">
         {entries.map((entry) => (
           <li key={entry.label} className="flex items-center gap-2 text-sm text-ink">

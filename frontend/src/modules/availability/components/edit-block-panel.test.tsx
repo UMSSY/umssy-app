@@ -35,13 +35,13 @@ describe("EditBlockPanel", () => {
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
     expect(screen.getByText("Modifica la hora de inicio o de fin del bloque.")).toBeInTheDocument()
     expect(screen.getByText("Lunes 13 de mayo")).toBeInTheDocument()
-    expect(screen.getByLabelText(/Día/)).toHaveValue("2030-05-13")
+    expect(screen.getByLabelText(/Día/)).toHaveValue("13/05/2030")
     expect(screen.getByLabelText(/Desde/)).toHaveTextContent("10:00")
     expect(screen.getByLabelText(/Hasta/)).toHaveTextContent("12:00")
     expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeInTheDocument()
     expect(
       screen.getByRole("button", { name: "Eliminar bloque" }),
-    ).toHaveClass("border-danger", "text-danger")
+    ).toHaveClass("bg-critical-action", "text-critical-action-foreground")
     expect(
       screen.queryByText("Solo se puede editar si el bloque no tiene ninguna cita asociada."),
     ).not.toBeInTheDocument()

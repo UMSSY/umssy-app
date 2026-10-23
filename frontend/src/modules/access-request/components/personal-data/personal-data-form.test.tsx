@@ -62,7 +62,7 @@ describe("PersonalDataForm", () => {
     renderForm();
 
     const trigger = screen.getByRole("combobox", { name: "Expedido" });
-    expect(trigger).toHaveClass("data-[size=default]:h-[42px]", "2xl:data-[size=default]:h-12", "focus-visible:border-accent");
+    expect(trigger).toHaveClass("data-[size=default]:h-10", "2xl:data-[size=default]:h-12", "focus-visible:border-accent");
     expect(trigger).not.toHaveClass("data-[size=default]:h-8");
   });
 
@@ -70,7 +70,7 @@ describe("PersonalDataForm", () => {
     const { container } = renderForm();
 
     const button = screen.getByRole("button", { name: "Continuar al siguiente paso" });
-    expect(button).toHaveClass("bg-ink", "text-surface", "2xl:h-12");
+    expect(button).toHaveClass("bg-primary", "text-primary-foreground", "2xl:h-12");
     expect(button.querySelector("svg.lucide-chevron-right")).not.toBeNull();
     // El botón principal es el último de la fila (a la derecha) y la fila va dentro del contenedor con el borde superior
     const row = button.parentElement as HTMLElement;
@@ -90,7 +90,7 @@ describe("PersonalDataForm", () => {
     renderForm();
 
     expect(screen.getByLabelText(/^Correo electrónico/)).toHaveAttribute("type", "email");
-    expect(screen.getByLabelText(/^Fecha de nacimiento/)).toHaveAttribute("type", "date");
+    expect(screen.getByLabelText(/^Fecha de nacimiento/)).toHaveAttribute("type", "text");
     expect(screen.getByLabelText(/Teléfono/)).toHaveAttribute("maxlength", "8");
   });
 
@@ -140,7 +140,7 @@ describe("PersonalDataForm", () => {
     renderForm();
 
     const trigger = screen.getByRole("combobox", { name: "Carrera" });
-    expect(trigger).toHaveClass("w-full", "data-[size=default]:h-[42px]");
+    expect(trigger).toHaveClass("w-full", "data-[size=default]:h-10");
     expect(trigger.closest("div.md\\:col-span-2")).not.toBeNull();
   });
 
@@ -149,7 +149,9 @@ describe("PersonalDataForm", () => {
 
     expect(container.firstElementChild?.className).not.toMatch(/max-w-/);
     expect(screen.getByRole("heading", { level: 1 })).toHaveClass("text-3xl", "2xl:text-4xl");
-    expect(container.querySelector("form")).toHaveClass("2xl:gap-x-8", "2xl:gap-y-6");
+    expect(screen.getByRole("group", { name: "Identidad" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Contacto" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Datos complementarios" })).toBeInTheDocument();
     expect(screen.getByText("Carrera")).toHaveClass("2xl:text-base");
   });
 

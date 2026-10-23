@@ -1,5 +1,6 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent, cleanup } from "@testing-library/react";
 import { ChatRoom } from '../components/chat-room';
 import { MessageInputBar } from '../components/message-input-bar';
 import { Conversation, Message } from '../types/conversation.types';
@@ -60,7 +61,7 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
     expect(inputBar).toBeDefined();
     expect(inputBar.className).toContain('shrink-0');
     expect(inputBar.className).toContain('border-t');
-    expect(inputBar.className).toContain('bg-white');
+    expect(inputBar.className).toContain('bg-surface');
 
     const textarea = screen.getByTestId('message-textarea');
     expect(textarea).toBeDefined();

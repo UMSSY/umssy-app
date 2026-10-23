@@ -1,14 +1,13 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Plus, Search } from 'lucide-react';
 
 import type {
   Conversation,
   ConversationFilter,
 } from '../types/conversation.types';
-
 import { ConversationItem } from './conversation-item';
 import { ConversationSkeleton } from './conversation-skeleton';
 import { EmptyChatState } from './empty-chat-state';
@@ -42,39 +41,33 @@ export function ConversationList({
   onLoadMore,
   onStartNewChat,
 }: ConversationListProps) {
-  const isFiltered = Boolean(
-    searchQuery.trim() || activeFilter === 'unread'
-  );
+  const isFiltered = Boolean(searchQuery.trim() || activeFilter === 'unread');
 
   const getEmptyMessage = () => {
     if (activeFilter === 'unread') {
       return 'No tienes mensajes sin leer.';
     }
-
     if (searchQuery.trim().length > 0) {
       return 'No se encontraron conversaciones que coincidan con tu búsqueda.';
     }
-
     return 'Aún no tienes ninguna conversación registrada.';
   };
 
   return (
-    <div className="relative flex h-full flex-col border-r border-slate-200 bg-white">
-      <div className="space-y-3 border-b border-slate-100 p-4">
+    <div className="relative flex h-full flex-col border-r border-border bg-surface">
+      <div className="space-y-3 border-b border-border p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-tight text-slate-900">
-            Chats
-          </h2>
-
+          <h2 className="text-xl font-bold tracking-tight text-ink">Chats</h2>
           {onStartNewChat && activeFilter !== 'unread' && (
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={onStartNewChat}
-              className="hidden h-auto items-center px-0 text-xs font-bold text-red-600 hover:bg-transparent hover:text-red-700 md:inline-flex"
+              className="hidden items-center gap-1.5 text-sm font-bold text-accent hover:text-accent md:inline-flex"
             >
-              + Nuevo
+              <Plus className="size-4" aria-hidden="true" />
+              Nuevo
             </Button>
           )}
         </div>
@@ -84,25 +77,14 @@ export function ConversationList({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Buscar personas..."
             aria-label="Buscar conversaciones"
-            className="h-9 w-full rounded-lg border-transparent bg-slate-100 py-2 pr-3 pl-9 text-sm text-slate-800 placeholder:text-slate-400 focus-visible:border-[#0B2545] focus-visible:bg-white"
+            placeholder="Buscar personas..."
+            className="w-full rounded-lg border border-border bg-surface py-2 pr-3 pl-9 text-sm text-ink transition-all placeholder:text-text-secondary focus:border-accent focus:bg-surface focus-visible:ring-2 focus-visible:ring-ring"
           />
-
-          <svg
-            className="pointer-events-none absolute top-2.5 left-3 size-4 text-slate-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <Search
+            className="pointer-events-none absolute top-3 left-3 size-4 text-text-secondary"
             aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          />
         </div>
 
         <div className="flex items-center gap-2 pt-1">
@@ -112,25 +94,24 @@ export function ConversationList({
             size="sm"
             onClick={() => onFilterChange('all')}
             aria-pressed={activeFilter === 'all'}
-            className={`h-auto rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
+            className={`rounded-md px-3.5 py-1 text-xs font-semibold transition-colors ${
               activeFilter === 'all'
-                ? 'bg-[#0B2545] text-white shadow-xs hover:bg-[#16364B] hover:text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-interaction text-accent'
+                : 'bg-surface text-text-secondary hover:bg-surface-soft'
             }`}
           >
             Todos
           </Button>
-
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={() => onFilterChange('unread')}
             aria-pressed={activeFilter === 'unread'}
-            className={`h-auto rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
+            className={`rounded-md px-3.5 py-1 text-xs font-semibold transition-colors ${
               activeFilter === 'unread'
-                ? 'bg-[#0B2545] text-white shadow-xs hover:bg-[#16364B] hover:text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-interaction text-accent'
+                : 'bg-surface text-text-secondary hover:bg-surface-soft'
             }`}
           >
             Sin leer
@@ -140,14 +121,8 @@ export function ConversationList({
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
-          <div
-            role="status"
-            aria-label="Cargando conversaciones"
-          >
-            <span className="sr-only">
-              Cargando conversaciones...
-            </span>
-
+          <div role="status" aria-label="Cargando conversaciones">
+            <span className="sr-only">Cargando conversaciones...</span>
             <ConversationSkeleton />
           </div>
         ) : isError ? null : conversations.length === 0 ? (
@@ -157,7 +132,7 @@ export function ConversationList({
             onAction={isFiltered ? undefined : onStartNewChat}
           />
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-border">
             {conversations.map((item) => (
               <ConversationItem
                 key={item.id}
@@ -166,7 +141,6 @@ export function ConversationList({
                 onSelect={onSelectConversation}
               />
             ))}
-
             {hasMore && (
               <div className="p-3 text-center">
                 <Button
@@ -175,7 +149,7 @@ export function ConversationList({
                   size="sm"
                   onClick={onLoadMore}
                   disabled={!onLoadMore}
-                  className="h-auto text-xs font-semibold text-blue-600 hover:bg-transparent hover:text-blue-800"
+                  className="text-xs font-semibold text-ink-soft hover:text-ink-soft"
                 >
                   Cargar más conversaciones
                 </Button>
@@ -191,23 +165,10 @@ export function ConversationList({
           variant="default"
           size="icon-lg"
           onClick={onStartNewChat}
-          className="absolute right-4 bottom-6 flex size-12 items-center justify-center rounded-xl bg-red-600 text-white shadow-lg transition-all hover:bg-red-700 active:scale-95 md:hidden"
+          className="absolute right-4 bottom-6 flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-none transition-all hover:bg-brand-hover focus-visible:ring-2 focus-visible:ring-ring active:scale-95 md:hidden"
           aria-label="Iniciar nueva conversación"
         >
-          <svg
-            className="size-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
+          <Plus className="size-6" aria-hidden="true" />
         </Button>
       )}
     </div>
