@@ -1,3 +1,4 @@
+import { Button as TestButton } from "@/components/ui/button";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -31,9 +32,9 @@ function DeleteFlowHarness() {
   return (
     <>
       <p>{hasFile ? "CV_Valeria_Quispe.pdf" : "Sin archivo"}</p>
-      <button type="button" onClick={() => setIsOpen(true)}>
+      <TestButton type="button" onClick={() => setIsOpen(true)}>
         Eliminar CV
-      </button>
+      </TestButton>
       <ConfirmDeleteDialog
         isOpen={isOpen}
         title="¿Eliminar tu CV?"

@@ -30,8 +30,8 @@ export function CvUploadCard({
       <SectionCard title="Subir currículum">
         <div className="flex flex-col items-center gap-2 rounded-lg bg-surface-soft px-6 py-12 text-center">
           <CircleCheck aria-hidden="true" className="size-6 text-ink-soft" />
-          <p className="text-[15px] font-semibold text-ink">Ya tienes un CV guardado</p>
-          <p className="text-[13px] text-text-secondary">
+          <p className="text-base font-semibold text-ink">Ya tienes un CV guardado</p>
+          <p className="text-sm text-text-secondary">
             Para cambiarlo, usa «Reemplazar CV» en «Archivo guardado».
           </p>
         </div>
@@ -42,7 +42,7 @@ export function CvUploadCard({
   return (
     <SectionCard title="Subir currículum">
       <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border-strong bg-interaction/40 px-6 py-12 text-center">
-        <p className="text-[15px] font-semibold text-ink">Selecciona tu CV en formato PDF</p>
+        <p className="text-base font-semibold text-ink">Selecciona tu CV en formato PDF</p>
         <Button
           type="button"
           variant="outline"
@@ -53,7 +53,7 @@ export function CvUploadCard({
           Seleccionar PDF
         </Button>
         {selectedFile ? (
-          <p className="mt-2 text-[13px] break-all text-text-secondary">
+          <p className="mt-2 text-sm break-all text-text-secondary">
             {selectedFile.name} · {formatFileSize(selectedFile.size)}
           </p>
         ) : null}
@@ -61,7 +61,7 @@ export function CvUploadCard({
       <div className="mt-6 flex justify-end">
         <Button
           type="button"
-          className="h-10 bg-accent px-4 text-sm text-white hover:bg-brand-hover"
+          className="h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover"
           disabled={!selectedFile || isBusy}
           onClick={selectedFile ? () => onConfirmUpload(selectedFile) : undefined}
         >

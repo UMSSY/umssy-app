@@ -48,12 +48,9 @@ describe('GeneratedReportsRepository', () => {
     it('filtra por el tipo de reporte indicado', async () => {
       const { repository, adminExportHistory } = buildRepository();
 
-      const page = await repository.findPage(
-        'admin-1',
-        10,
-        10,
-        'REJECTED_USERS',
-      );
+      const page = await repository.findPage('admin-1', 10, 10, {
+        reportType: 'REJECTED_USERS',
+      });
 
       expect(adminExportHistory.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -71,6 +68,24 @@ describe('GeneratedReportsRepository', () => {
         ],
         total: 1,
       });
+    });
+  });
+
+  describe('findPage con búsqueda', () => {
+    it('busca por nombre de archivo sin distinguir mayúsculas', async () => {
+      const { repository, adminExportHistory } = buildRepository();
+
+      await repository.findPage('admin-1', 0, 10, { search: 'Rechazados' });
+
+      const where = {
+        userId: 'admin-1',
+        reportType: { in: [...REPORT_TYPES] },
+        reportName: { contains: 'Rechazados', mode: 'insensitive' },
+      };
+      expect(adminExportHistory.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where }),
+      );
+      expect(adminExportHistory.count).toHaveBeenCalledWith({ where });
     });
   });
 
