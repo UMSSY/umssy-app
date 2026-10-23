@@ -1,5 +1,5 @@
-import { PresentationView } from "@/modules/profile";
+import { redirect } from "next/navigation";
 
-export default function PresentationPage() {
-  return <PresentationView />;
+export default function ProfileSectionPage() {
+  return redirect("/profile/settings#presentation");
 }

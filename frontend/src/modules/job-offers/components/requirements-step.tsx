@@ -66,7 +66,7 @@ export function RequirementsStep({
         <h2 className="text-[16px] font-bold text-ink">Requisitos técnicos</h2>
       </div>
 
-      <div className="px-6 py-6">
+      <div className="p-6">
         <div className="mb-8">
           <Label htmlFor="description" className="mb-2 text-[12.5px] font-semibold text-ink">
             Descripcion del puesto <span className="text-ink-soft">*</span>
@@ -79,7 +79,7 @@ export function RequirementsStep({
             placeholder="Buscamos un desarrollador backend..."
             aria-invalid={Boolean(errors.description)}
             aria-describedby={errors.description ? "description-error" : undefined}
-            className="min-h-[120px] whitespace-pre-wrap bg-white p-4 text-[14px] text-ink"
+            className="min-h-[120px] bg-white p-4 text-sm whitespace-pre-wrap text-ink"
           />
           <div className="mt-1 flex justify-end">
             <span
@@ -94,17 +94,17 @@ export function RequirementsStep({
         <div id="skills" tabIndex={-1}>
           <div className="mb-4 flex items-center gap-2">
             <Info className="size-4 shrink-0 text-accent" aria-hidden="true" />
-            <p className="text-[13px] text-text-secondary">
+            <p className="text-sm text-text-secondary">
               Selecciona las habilidades que necesita el puesto.
             </p>
           </div>
 
           {catalog.status === "loading" && (
-            <p className="text-[13px] text-text-secondary">{SKILLS_CATALOG_MESSAGES.loading}</p>
+            <p className="text-sm text-text-secondary">{SKILLS_CATALOG_MESSAGES.loading}</p>
           )}
 
           {catalog.status === "error" && (
-            <div role="alert" className="flex items-center gap-3 text-[13px] text-danger">
+            <div role="alert" className="flex items-center gap-3 text-sm text-danger">
               <span>{SKILLS_CATALOG_MESSAGES.error}</span>
               <Button type="button" variant="outline" size="sm" onClick={catalog.reload}>
                 {SKILLS_CATALOG_MESSAGES.retry}
@@ -123,7 +123,7 @@ export function RequirementsStep({
                     pressed={selected}
                     disabled={!selected && isSkillLimitReached}
                     onPressedChange={() => toggleSkill(skill)}
-                    className="h-auto rounded-full px-4 py-1.5 text-[13px] font-medium text-text-secondary data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-white"
+                    className="h-auto rounded-full px-4 py-1.5 text-sm font-medium text-text-secondary data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-white"
                   >
                     {skill.name}
                   </Toggle>
@@ -139,7 +139,7 @@ export function RequirementsStep({
           )}
 
           {isSkillLimitReached && (
-            <p className="mt-3 text-[12px] font-medium text-text-secondary">{VACANCY_MESSAGES.skillsLimit}</p>
+            <p className="mt-3 text-xs font-medium text-text-secondary">{VACANCY_MESSAGES.skillsLimit}</p>
           )}
           <FieldError fieldId="skills" message={errors.skills} />
         </div>

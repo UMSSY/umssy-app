@@ -95,7 +95,7 @@ describe("WorkExperienceForm", () => {
     );
 
     const endDate = screen.getByLabelText("Hasta");
-    expect(endDate).toHaveValue("2024-12-31");
+    expect(endDate).toHaveValue("31/12/2024");
 
     await user.click(screen.getByRole("checkbox", { name: "Trabajo actualmente aquí" }));
 

@@ -7,13 +7,13 @@ afterEach(cleanup);
 describe("Area section menu", () => {
   it("replaces two profile tab rows with one keyboard-accessible section menu", async () => {
     const user = userEvent.setup();
-    render(<WorkspaceSectionMenu pathname="/profile/trajectory/certifications" roles={["titulado"]} />);
+    render(<WorkspaceSectionMenu pathname="/profile/settings" roles={["titulado"]} />);
     const trigger = screen.getByRole("button", { name: "Secciones de Perfil profesional" });
     trigger.focus();
     await user.keyboard("{Enter}");
-    expect(await screen.findByRole("menuitem", { name: "Certificaciones" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("menuitem", { name: "Experiencia laboral" })).toHaveAttribute("href", "/profile/trajectory/experience");
-    expect(screen.getByRole("menuitem", { name: "Formación académica" })).toHaveAttribute("href", "/profile/trajectory/education");
+    expect(await screen.findByRole("menuitem", { name: "Configuración del perfil" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("menuitem", { name: "Resumen" })).toHaveAttribute("href", "/profile");
+    expect(screen.getByRole("menuitem", { name: "Documentos y CV" })).toHaveAttribute("href", "/profile/documents");
     expect(screen.getAllByRole("menu")).toHaveLength(1);
     await user.keyboard("{Escape}");
     await waitFor(() => expect(trigger).toHaveAttribute("aria-expanded", "false"));

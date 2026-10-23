@@ -34,9 +34,9 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
           />
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="mt-1 font-heading text-2xl font-semibold tracking-tight break-words text-ink">
+          <h2 className="mt-1 font-heading text-xl font-semibold tracking-tight break-words text-ink">
             {profile.name}
-          </h1>
+          </h2>
           <p className="mt-1 text-sm text-text-secondary">
             {profile.title} · {profile.yearsOfExperience} años de experiencia
           </p>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   PENDING_SKILL_ID_PREFIX,
   SKILLS_ERROR_MESSAGES,
@@ -10,18 +10,27 @@ import {
 import { skillsService } from "../services/skills.service";
 import type { Feedback } from "@/modules/profile";
 import type { SkillItem } from "../types/skill-item.types";
+import type { SkillsProfileResponse } from "../types/skills-profile-response.types";
 import type { UseSkillsResult } from "../types/use-skills-result.types";
 import { getSkillsErrorMessage } from "../utils/get-skills-error-message";
 
-function resolveSkill(skill: SkillItem): Promise<SkillItem> {
-  if (skill.id.startsWith(PENDING_SKILL_ID_PREFIX)) {
-    return skillsService.createCustomSkill(skill.name);
-  }
-
-  return Promise.resolve(skill);
-}
-
 export function useSkills(): UseSkillsResult {
+  const queryClient = useQueryClient();
+  const savingRef = useRef(false);
+  const customRequestsRef = useRef(new Map<string, Promise<SkillItem>>());
+  function resolveSkill(skill: SkillItem): Promise<SkillItem> {
+    if (!skill.id.startsWith(PENDING_SKILL_ID_PREFIX)) return Promise.resolve(skill);
+    const existing = customRequestsRef.current.get(skill.id);
+    if (existing) return existing;
+    const request = skillsService.createCustomSkill(skill.name).then((created) => {
+      queryClient.setQueryData<SkillsProfileResponse>(["skills", "profile"], (current) => current ? {
+        ...current, catalog: [...current.catalog.filter((item) => item.id !== created.id), created],
+      } : current);
+      return created;
+    }).catch((error) => { customRequestsRef.current.delete(skill.id); throw error; });
+    customRequestsRef.current.set(skill.id, request);
+    return request;
+  }
   const query = useQuery({
     queryKey: ["skills", "profile"],
     queryFn: async () => {
@@ -77,23 +86,30 @@ export function useSkills(): UseSkillsResult {
     addSkill({ id: `${PENDING_SKILL_ID_PREFIX}${trimmedName.toLowerCase()}`, name: trimmedName });
   }
 
-  async function saveSkills(): Promise<void> {
-    if (hasLoadError || isLoading || isSaving) {
-      return;
+  async function saveSkills(selection: SkillItem[] = selectedSkills): Promise<boolean> {
+    if (hasLoadError || isLoading || isSaving || savingRef.current) {
+      return false;
     }
 
+    savingRef.current = true;
     setFeedback(null);
 
     try {
-      const savedSkills = await mutation.mutateAsync(selectedSkills ?? []);
-      setSelectedSkills(savedSkills ?? []);
+      const savedSkills = await mutation.mutateAsync(selection);
+      queryClient.setQueryData<SkillsProfileResponse>(["skills", "profile"], (current) => ({
+        catalog: current?.catalog ?? catalogSkills, selected: savedSkills ?? [],
+      }));
+      setSelectedSkills(null);
       setFeedback({ type: "success", message: SKILLS_SUCCESS_MESSAGES.saved });
+      return true;
     } catch (error) {
       setFeedback({
         type: "error",
         message: getSkillsErrorMessage(error, SKILLS_ERROR_MESSAGES.save),
       });
-
+      return false;
+    } finally {
+      savingRef.current = false;
     }
   }
 
