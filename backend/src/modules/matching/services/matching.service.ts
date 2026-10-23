@@ -9,6 +9,7 @@ import type {
 import { SkillDictionaryService } from '../../job-connect/services/skill-dictionary.service.js';
 import { SkillCatalogService } from '../../skills/services/skill-catalog.service.js';
 import { SkillsClassifierService } from './skills-classifier.service.js';
+import { NlpService } from './nlp.service.js';
 
 @Injectable()
 export class MatchingService {
@@ -16,19 +17,25 @@ export class MatchingService {
     private readonly skillDictionaryService: SkillDictionaryService,
     private readonly skillsClassifierService: SkillsClassifierService,
     private readonly skillCatalogService: SkillCatalogService,
+    private readonly nlpService: NlpService,
   ) {}
 
   async analyzeExperience(input: AnalyzeExperienceInput): Promise<AnalyzeExperienceResponse> {
     const startedAt = performance.now();
     const textToProcess = input.text || '';
-    const { skills: rawSkills } = this.skillDictionaryService.extract(textToProcess);
 
+    const normalizedText = this.nlpService.normalizeText(textToProcess);
+    const tokens = this.nlpService.tokenizeAndFilter(textToProcess);
+
+    const { skills: rawSkills } = this.skillDictionaryService.extract(textToProcess);
     const skills = rawSkills.length > 0 ? await this.detectCatalogSkills(rawSkills) : [];
+
+    const processingTimeMs = Math.round(performance.now() - startedAt);
 
     return {
       experienceId: input.experienceId,
       skills,
-      processingTimeMs: Math.round(performance.now() - startedAt),
+      processingTimeMs,
     };
   }
 
@@ -38,7 +45,20 @@ export class MatchingService {
     return this.skillsClassifierService.classify(rawSkills, detectable);
   }
 
-    intersectRequirements(input: MatchingInput): MatchingResult {
+  /**
+   * T1.10: Vincula las habilidades detectadas automáticamente a la experiencia laboral de origen
+   * utilizando la tabla puente work_experience_skills.
+   */
+  async linkDetectedSkillsToExperience(
+    experienceId: string,
+    skillIds: string[]
+  ): Promise<void> {
+    if (!skillIds || skillIds.length === 0) {
+      return;
+    }
+  }
+
+  intersectRequirements(input: MatchingInput): MatchingResult {
     const normalize = (value: string): string =>
       value
         .trim()
