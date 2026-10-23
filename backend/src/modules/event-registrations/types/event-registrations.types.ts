@@ -7,3 +7,14 @@ export interface MyRegistrationResponse {
   location: string;
   status: string;
 }
+
+export interface CreateEventRegistrationPayload {
+  eventId: string;
+  userId: string;
+  statusId: string;
+}
+
+export interface PersistEventRegistrationPayload
+  extends CreateEventRegistrationPayload {
+  qrToken: string;
+}
