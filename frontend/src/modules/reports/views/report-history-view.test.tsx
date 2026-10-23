@@ -68,7 +68,7 @@ describe("ReportHistoryView", () => {
     expect(screen.getAllByText("Rechazados").length).toBeGreaterThan(0);
     expect(screen.getByRole("cell", { name: "2026-09-28 19:45" })).toBeDefined();
     expect(screen.queryByText(SECOND_PAGE_REPORT)).toBeNull();
-    expect(reportsService.getReportHistory).toHaveBeenCalledWith({ page: 1, limit: 10 });
+    expect(reportsService.getReportHistory).toHaveBeenCalledWith({ page: 1, limit: 10, search: "" });
   });
 
 
@@ -104,7 +104,7 @@ describe("ReportHistoryView", () => {
     expect(screen.queryByText(FIRST_PAGE_REPORT)).toBeNull();
     expect(getColumnHeaders()).toEqual(COLUMN_HEADERS);
     expect(getBodyRows()).toHaveLength(2);
-    expect(reportsService.getReportHistory).toHaveBeenLastCalledWith({ page: 2, limit: 10 });
+    expect(reportsService.getReportHistory).toHaveBeenLastCalledWith({ page: 2, limit: 10, search: "" });
     expect(screen.getByRole("button", { name: "Página 2" }).getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("button", { name: "Página siguiente" }).hasAttribute("disabled")).toBe(true);
 
@@ -158,6 +158,65 @@ describe("ReportHistoryView", () => {
     });
   });
 
+  describe("búsqueda por nombre del archivo", () => {
+    function getSearchInput() {
+      return screen.getByPlaceholderText<HTMLInputElement>("Buscar por nombre del archivo");
+    }
+
+    it("busca por nombre después de dejar de escribir y vuelve a la primera página", async () => {
+      render(<ReportHistoryView />);
+      await waitFor(() => {
+        expect(screen.getByText(FIRST_PAGE_REPORT)).toBeDefined();
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Página siguiente" }));
+      await waitFor(() => {
+        expect(screen.getByText(SECOND_PAGE_REPORT)).toBeDefined();
+      });
+
+      fireEvent.change(getSearchInput(), { target: { value: " Rechazados " } });
+
+      await waitFor(() => {
+        expect(reportsService.getReportHistory).toHaveBeenLastCalledWith({
+          page: 1,
+          limit: 10,
+          reportType: undefined,
+          search: "Rechazados",
+        });
+      });
+      expect(screen.getByRole("button", { name: "Limpiar búsqueda" })).toBeDefined();
+    });
+
+    it("muestra un mensaje si ningún reporte coincide con el nombre buscado", async () => {
+      render(<ReportHistoryView />);
+      await waitFor(() => {
+        expect(screen.getByText(FIRST_PAGE_REPORT)).toBeDefined();
+      });
+
+      vi.spyOn(reportsService, "getReportHistory").mockResolvedValue({
+        statusCode: 200,
+        data: { items: [], totalItems: 0 },
+        detail: "Sin datos",
+        ok: true,
+      });
+      fireEvent.change(getSearchInput(), { target: { value: "inexistente" } });
+
+      expect(await screen.findByText("No se encontró ningún reporte con el nombre")).toBeDefined();
+    });
+
+    it("limpia la búsqueda con el botón de la x", async () => {
+      render(<ReportHistoryView />);
+      await waitFor(() => {
+        expect(screen.getByText(FIRST_PAGE_REPORT)).toBeDefined();
+      });
+
+      fireEvent.change(getSearchInput(), { target: { value: "Lista" } });
+      fireEvent.click(screen.getByRole("button", { name: "Limpiar búsqueda" }));
+
+      expect(getSearchInput().value).toBe("");
+      expect(screen.queryByRole("button", { name: "Limpiar búsqueda" })).toBeNull();
+    });
+  });
+
   describe("filtro por tipo de reporte", () => {
     async function selectReportType(label: string) {
       const user = userEvent.setup();
@@ -183,6 +242,7 @@ describe("ReportHistoryView", () => {
           page: 1,
           limit: 10,
           reportType: "REJECTED_USERS",
+          search: "",
         });
       });
       expect(screen.getByRole("button", { name: "Página 1" }).getAttribute("aria-current")).toBe("page");
@@ -198,7 +258,7 @@ describe("ReportHistoryView", () => {
       await selectReportType("Todos");
 
       await waitFor(() => {
-        expect(reportsService.getReportHistory).toHaveBeenLastCalledWith({ page: 1, limit: 10, reportType: undefined });
+        expect(reportsService.getReportHistory).toHaveBeenLastCalledWith({ page: 1, limit: 10, reportType: undefined, search: "" });
       });
     });
 
