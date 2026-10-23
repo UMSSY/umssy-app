@@ -28,8 +28,8 @@ export function NavigationSearch() {
 
   return (
     <>
-      <Button variant="outline" onClick={() => { setSearch(""); setIsOpen(true); }} className="h-9 w-full max-w-3xl justify-start gap-3 border-app-header-foreground/30 bg-app-header-foreground/5 text-app-header-foreground hover:bg-app-header-foreground/10 hover:text-app-header-foreground focus-visible:ring-app-header-foreground">
-        <Search aria-hidden="true" /><span className="flex-1 text-left font-normal">Buscar una sección…</span><kbd className="rounded border border-app-header-foreground/25 px-1.5 py-0.5 text-xs font-normal text-app-header-foreground/80">Ctrl K</kbd>
+      <Button aria-label="Buscar una sección" variant="outline" onClick={() => { setSearch(""); setIsOpen(true); }} className="h-9 w-full max-w-3xl min-w-0 justify-start gap-3 border-app-header-foreground/30 bg-app-header-foreground/5 text-app-header-foreground hover:bg-app-header-foreground/10 hover:text-app-header-foreground focus-visible:ring-app-header-foreground">
+        <Search aria-hidden="true" /><span className="hidden flex-1 text-left font-normal sm:block">Buscar una sección…</span><kbd className="hidden rounded border border-app-header-foreground/25 px-1.5 py-0.5 text-xs font-normal text-app-header-foreground/80 sm:block">Ctrl K</kbd>
       </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="gap-4 sm:max-w-xl">
