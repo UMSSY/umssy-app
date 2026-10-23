@@ -4,7 +4,7 @@ import { FileCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { WorkspacePage } from "@/shared/components/layout/workspace-page";
+import { PageHeading } from "@/shared/components/layout/page-heading";
 import { SURVEY_NOTIFICATIONS_DESCRIPTION, SURVEY_NOTIFICATIONS_LABEL } from "../constants/survey-notifications.constants";
 import { SurveyNotificationItem } from "../components/survey-notification-item";
 import { SurveyNotificationsEmpty } from "../components/survey-notifications-empty";
@@ -49,7 +49,12 @@ export function SurveyNotificationsView() {
   };
 
   return (
-    <WorkspacePage title={SURVEY_NOTIFICATIONS_LABEL} description={SURVEY_NOTIFICATIONS_DESCRIPTION}>
+    <main className="mx-auto w-full max-w-7xl space-y-6">
+      <PageHeading
+        title={SURVEY_NOTIFICATIONS_LABEL}
+        description={SURVEY_NOTIFICATIONS_DESCRIPTION}
+        className="border-b-0 pb-0"
+      />
       <Card role="region" aria-labelledby="survey-list-title" className="gap-0 py-0">
         <CardHeader className="flex items-center gap-3 py-4">
           <FileCheck className="size-6 text-accent" strokeWidth={1.5} aria-hidden="true" />
@@ -64,6 +69,6 @@ export function SurveyNotificationsView() {
         </CardHeader>
         <CardContent className="border-t border-border px-0">{renderContent()}</CardContent>
       </Card>
-    </WorkspacePage>
+    </main>
   );
 }

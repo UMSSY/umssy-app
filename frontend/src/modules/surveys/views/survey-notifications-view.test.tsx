@@ -30,6 +30,20 @@ describe("SurveyNotificationsView", () => {
     expect(within(surveyList).getByText("2 pendientes")).toBeInTheDocument();
   });
 
+  it("actualiza el contador según la cantidad de encuestas pendientes", async () => {
+    vi.spyOn(surveysService, "getNotifications").mockResolvedValue(
+      Array.from({ length: 5 }, (_, index) => ({
+        id: `pending-${index}`,
+        title: `Encuesta pendiente ${index + 1}`,
+        publishedAt: "2026-10-15",
+        status: "pending" as const,
+      })),
+    );
+    renderView();
+
+    expect(await screen.findByText("5 pendientes")).toBeInTheDocument();
+  });
+
   it("permite responder solo las encuestas pendientes", async () => {
     renderView();
 

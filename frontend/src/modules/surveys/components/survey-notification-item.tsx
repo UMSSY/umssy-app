@@ -21,10 +21,7 @@ export function SurveyNotificationItem({ notification }: SurveyNotificationItemP
   const renderAction = () => {
     if (isPending) {
       return (
-        <Link
-          href={`${SURVEYS_PATH}/${id}`}
-          className={cn(buttonVariants(), "w-full bg-danger text-surface transition hover:bg-danger hover:brightness-90")}
-        >
+        <Link href={`${SURVEYS_PATH}/${id}`} className={cn(buttonVariants({ variant: "brand" }), "w-full")}>
           {ANSWER_SURVEY_LABEL}
           <ArrowRight data-icon="inline-end" aria-hidden="true" />
         </Link>
@@ -41,18 +38,16 @@ export function SurveyNotificationItem({ notification }: SurveyNotificationItemP
   };
 
   return (
-    <li className="flex flex-col gap-4 px-6 py-4 md:flex-row md:items-center">
+    <li className="flex flex-col gap-4 px-6 py-4 md:min-h-27 md:flex-row md:items-center md:gap-3">
       <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-lg", tone)}>
         <FileCheck className="size-6" strokeWidth={1.5} aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="font-semibold text-ink">{title}</h3>
-          {isPending ? <Badge className={tone}>{SURVEY_STATUS_LABELS.pending}</Badge> : null}
-        </div>
+        <h3 className="text-lg font-semibold text-ink">{title}</h3>
         <p className="text-sm text-text-secondary">{SURVEY_STATUS_MESSAGES[status]}</p>
+        {isPending ? <Badge className={tone}>{SURVEY_STATUS_LABELS.pending}</Badge> : null}
       </div>
-      <time dateTime={publishedAt} className="shrink-0 text-sm text-text-secondary md:w-28 md:text-right">
+      <time dateTime={publishedAt} className="shrink-0 text-sm text-text-secondary md:w-24 md:text-right">
         {formatSurveyDate(publishedAt)}
       </time>
       <div className="w-full shrink-0 md:w-52">{renderAction()}</div>
