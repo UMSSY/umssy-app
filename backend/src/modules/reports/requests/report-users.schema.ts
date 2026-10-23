@@ -48,6 +48,7 @@ export const registeredUsersQuerySchema = paginationSchema.extend({
 });
 
 export const rejectedUsersFiltersSchema = z.object({
+  userType: userTypeSchema,
   period: academicPeriodSchema,
   search: searchSchema,
 });
