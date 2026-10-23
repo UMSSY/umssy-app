@@ -1,11 +1,11 @@
+import { JobApplicationsController } from './controllers/job-applications.controller.js';
+import { JobApplicationsService } from './services/job-applications.service.js';
+import { JobApplicationsRepository } from './repositories/job-applications.repository.js';
 import { Module } from '@nestjs/common';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { JobOffersModule } from '../job-offers/job-offers.module.js';
 import { SkillsModule } from '../skills/skills.module.js';
-import { JobApplicationsController } from './controllers/job-applications.controller.js';
 import { MatchingController } from './controllers/matching.controller.js';
-import { JobApplicationsRepository } from './repositories/job-applications.repository.js';
-import { JobApplicationsService } from './services/job-applications.service.js';
 import { MatchingService } from './services/matching.service.js';
 import { NlpService } from './services/nlp.service.js';
 import { RequirementTermsService } from './services/requirement-terms.service.js';
@@ -18,10 +18,10 @@ import { ActiveJobOffersService } from './services/active-job-offers.service.js'
   imports: [JwtAuthModule, SkillsModule, JobOffersModule],
   controllers: [MatchingController, JobApplicationsController],
   providers: [
+    JobApplicationsService,
+    JobApplicationsRepository,
     MatchingService,
     ActiveJobOffersService,
-    JobApplicationsRepository,
-    JobApplicationsService,
     NlpService,
     RequirementTermsService,
     SkillsClassifierService,

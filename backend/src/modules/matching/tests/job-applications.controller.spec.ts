@@ -9,24 +9,40 @@ const USER_ID = 'b2a1c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
 
 describe('HU-02B T2.8 - JobApplicationsController', () => {
   it('protege el controlador con JwtAuthGuard', () => {
-    expect(Reflect.getMetadata(GUARDS_METADATA, JobApplicationsController)).toEqual([JwtAuthGuard]);
+    expect(
+      Reflect.getMetadata(GUARDS_METADATA, JobApplicationsController),
+    ).toEqual([JwtAuthGuard]);
   });
 
   it('postula con el id de la vacante y el usuario autenticado', async () => {
     const response = { id: 'application-1', status: 'En revisión' };
-    const service = { apply: vi.fn().mockResolvedValue(response), findMine: vi.fn() };
-    const controller = new JobApplicationsController(service as unknown as JobApplicationsService);
+    const service = {
+      apply: vi.fn().mockResolvedValue(response),
+      findMine: vi.fn(),
+    };
+    const controller = new JobApplicationsController(
+      service as unknown as JobApplicationsService,
+    );
 
-    await expect(controller.apply(OFFER_ID, USER_ID)).resolves.toEqual(response);
+    await expect(controller.apply(OFFER_ID, USER_ID)).resolves.toEqual(
+      response,
+    );
     expect(service.apply).toHaveBeenCalledWith(USER_ID, OFFER_ID);
   });
 
   it('consulta la postulación propia de la vacante', async () => {
     const response = { hasApplied: false, application: null };
-    const service = { apply: vi.fn(), findMine: vi.fn().mockResolvedValue(response) };
-    const controller = new JobApplicationsController(service as unknown as JobApplicationsService);
+    const service = {
+      apply: vi.fn(),
+      findMine: vi.fn().mockResolvedValue(response),
+    };
+    const controller = new JobApplicationsController(
+      service as unknown as JobApplicationsService,
+    );
 
-    await expect(controller.findMine(OFFER_ID, USER_ID)).resolves.toEqual(response);
+    await expect(controller.findMine(OFFER_ID, USER_ID)).resolves.toEqual(
+      response,
+    );
     expect(service.findMine).toHaveBeenCalledWith(USER_ID, OFFER_ID);
   });
 });
