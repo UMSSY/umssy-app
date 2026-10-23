@@ -24,7 +24,8 @@ async function bootstrap(): Promise<void> {
 
   const config = buildSwaggerConfig();
 
-  const documentFactory = () => cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
+  const documentFactory = () =>
+    cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
   SwaggerModule.setup('docs', app, documentFactory, {
     swaggerOptions: { persistAuthorization: true },
   });
@@ -37,6 +38,21 @@ async function bootstrap(): Promise<void> {
       corsOrigins.length > 0 ? corsOrigins.join(', ') : '(default: all origins)'
     }`,
   );
+
+  const localUrl = new URL(await app.getUrl());
+  if (localUrl.hostname === '[::]' || localUrl.hostname === '0.0.0.0') {
+    localUrl.hostname = 'localhost';
+  }
+
+  console.log(`[bootstrap] API local: ${localUrl.origin}/api`);
+  console.log(`[bootstrap] Swagger local: ${localUrl.origin}/docs`);
+  for (const origin of corsOrigins) {
+    if (/^https?:\/\//.test(origin)) {
+      console.log(
+        `[bootstrap] Frontend configurado (login): ${origin.replace(/\/+$/, '')}/login`,
+      );
+    }
+  }
 }
 
 try {
