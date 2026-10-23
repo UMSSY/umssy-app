@@ -5,7 +5,12 @@ import {
   SURVEY_CREATED_SELECT,
   SURVEY_SUMMARY_SELECT,
 } from '../constants/survey.constants.js';
+import { SurveysStorageUnavailableException } from '../exceptions/surveys-storage-unavailable.exception.js';
 import type { CreateSurveyData } from '../types/create-survey-data.type.js';
+import type {
+  SurveysDatabaseClient,
+  SurveysTransactionClient,
+} from '../types/surveys-database-client.type.js';
 import type {
   SurveyCreatedRecord,
   SurveySummaryRecord,
@@ -16,12 +21,19 @@ import type {
 export class SurveysRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  // TODO: usar this.prisma directamente cuando DevOps agregue los modelos Survey, SurveyQuestion y SurveyQuestionOption al schema de Prisma
+  private get database(): SurveysDatabaseClient {
+    const database = this.prisma as unknown as Partial<SurveysDatabaseClient>;
+    if (!database.survey) throw new SurveysStorageUnavailableException();
+    return database as SurveysDatabaseClient;
+  }
+
   async existsWithTitle({
     title,
     careerId,
     academicPeriod,
   }: SurveyTitleScope): Promise<boolean> {
-    const survey = await this.prisma.survey.findFirst({
+    const survey = await this.database.survey.findFirst({
       where: {
         title: { equals: title, mode: 'insensitive' },
         careerId,
@@ -32,7 +44,7 @@ export class SurveysRepository {
     return survey !== null;
   }
 
-  create(data: CreateSurveyData): Promise<SurveyCreatedRecord> {
+  async create(data: CreateSurveyData): Promise<SurveyCreatedRecord> {
     const { questions, ...survey } = data;
     const questionRows = questions.map((question, index) => ({
       id: randomUUID(),
@@ -49,7 +61,7 @@ export class SurveysRepository {
       })),
     );
 
-    return this.prisma.$transaction(async (tx) => {
+    return this.database.$transaction(async (tx: SurveysTransactionClient) => {
       const created = await tx.survey.create({
         data: survey,
         select: SURVEY_CREATED_SELECT,
@@ -69,8 +81,8 @@ export class SurveysRepository {
     });
   }
 
-  findAll(): Promise<SurveySummaryRecord[]> {
-    return this.prisma.survey.findMany({
+  async findAll(): Promise<SurveySummaryRecord[]> {
+    return this.database.survey.findMany({
       select: SURVEY_SUMMARY_SELECT,
       orderBy: { createdAt: 'desc' },
     });

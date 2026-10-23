@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { SurveyQuestionType, SurveyStatus } from '../../../prisma/enums.js';
 import type { CreateSurveyRequest } from '../requests/create-survey.schema.js';
 import type { CareerResponse } from '../responses/career.response.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
@@ -10,9 +9,11 @@ import type {
   SurveyCreatedRecord,
   SurveySummaryRecord,
 } from '../types/survey-record.type.js';
-import type {
-  SurveyQuestionTypeValue,
-  SurveyStatusValue,
+import {
+  SurveyQuestionType,
+  SurveyStatus,
+  type SurveyQuestionTypeValue,
+  type SurveyStatusValue,
 } from '../types/survey.enum.js';
 
 const STATUS_TO_RECORD: Record<SurveyStatusValue, SurveyStatus> = {
@@ -25,14 +26,20 @@ const STATUS_TO_RESPONSE: Record<SurveyStatus, SurveyStatusValue> = {
   [SurveyStatus.PUBLISHED]: 'published',
 };
 
-const QUESTION_TYPE_TO_RECORD: Record<SurveyQuestionTypeValue, SurveyQuestionType> = {
+const QUESTION_TYPE_TO_RECORD: Record<
+  SurveyQuestionTypeValue,
+  SurveyQuestionType
+> = {
   single_choice: SurveyQuestionType.SINGLE_CHOICE,
   multiple_choice: SurveyQuestionType.MULTIPLE_CHOICE,
 };
 
 @Injectable()
 export class SurveyMapper {
-  toCreateData(request: CreateSurveyRequest, createdById: string): CreateSurveyData {
+  toCreateData(
+    request: CreateSurveyRequest,
+    createdById: string,
+  ): CreateSurveyData {
     return {
       title: request.title,
       description: request.description ?? null,

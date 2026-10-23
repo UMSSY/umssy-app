@@ -151,8 +151,6 @@ model User {
   openedAccessRequests   AccessRequest[]      @relation("AccessRequestOpenedBy")
   reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
 
-  createdSurveys Survey[] @relation("SurveyCreatedBy")
-
   conversationsAsUserA Conversation[]            @relation("UserAConversations")
   conversationsAsUserB Conversation[]            @relation("UserBConversations")
   chatMessages         Message[]
@@ -676,7 +674,6 @@ model Career {
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   accessRequests AccessRequest[]
-  surveys        Survey[]
 
   @@map("careers")
 }
@@ -821,66 +818,3 @@ model UserPresence {
   @@map("user_presences")
 }
 
-enum SurveyStatus {
-  DRAFT
-  PUBLISHED
-}
-
-enum SurveyQuestionType {
-  SINGLE_CHOICE
-  MULTIPLE_CHOICE
-}
-
-model Survey {
-  id             String       @id @default(uuid()) @db.Uuid
-  title          String       @db.VarChar(150)
-  description    String?      @db.VarChar(500)
-  careerId       String?      @map("career_id") @db.Uuid
-  academicPeriod String?      @map("academic_period") @db.VarChar(7)
-  opensAt        DateTime?    @map("opens_at") @db.Timestamptz(6)
-  closesAt       DateTime?    @map("closes_at") @db.Timestamptz(6)
-  status         SurveyStatus @default(DRAFT)
-  createdById    String       @map("created_by_id") @db.Uuid
-  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  career    Career?          @relation(fields: [careerId], references: [id], onDelete: Restrict)
-  createdBy User             @relation("SurveyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  questions SurveyQuestion[]
-
-  @@index([careerId, academicPeriod])
-  @@index([createdById])
-  @@index([status])
-  @@map("surveys")
-}
-
-model SurveyQuestion {
-  id         String             @id @default(uuid()) @db.Uuid
-  surveyId   String             @map("survey_id") @db.Uuid
-  position   Int
-  statement  String             @db.VarChar(250)
-  type       SurveyQuestionType
-  isRequired Boolean            @default(true) @map("is_required")
-  createdAt  DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  survey  Survey                 @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  options SurveyQuestionOption[]
-
-  @@unique([surveyId, position])
-  @@map("survey_questions")
-}
-
-model SurveyQuestionOption {
-  id         String   @id @default(uuid()) @db.Uuid
-  questionId String   @map("question_id") @db.Uuid
-  position   Int
-  label      String   @db.VarChar(100)
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  question SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  @@unique([questionId, position])
-  @@map("survey_question_options")
-}

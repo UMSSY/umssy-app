@@ -5,6 +5,7 @@ import {
   SURVEY_CREATED_SELECT,
   SURVEY_SUMMARY_SELECT,
 } from '../constants/survey.constants.js';
+import { SurveysStorageUnavailableException } from '../exceptions/surveys-storage-unavailable.exception.js';
 import { CareersRepository } from '../repositories/careers.repository.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import type { CreateSurveyData } from '../types/create-survey-data.type.js';
@@ -21,7 +22,9 @@ function createPrisma() {
     tx,
     survey: { findFirst: vi.fn(), findMany: vi.fn() },
     career: { findMany: vi.fn(), findUnique: vi.fn() },
-    $transaction: vi.fn((operation: (client: typeof tx) => unknown) => operation(tx)),
+    $transaction: vi.fn((operation: (client: typeof tx) => unknown) =>
+      operation(tx),
+    ),
   };
 }
 
@@ -47,8 +50,14 @@ describe('SurveysRepository', () => {
   });
 
   it('busca títulos repetidos sin distinguir mayúsculas dentro de la misma carrera y gestión', async () => {
-    prisma.survey.findFirst.mockResolvedValueOnce({ id: 'survey-1' }).mockResolvedValueOnce(null);
-    const scope = { title: 'Encuesta', careerId: 'career-1', academicPeriod: 'II-2026' };
+    prisma.survey.findFirst
+      .mockResolvedValueOnce({ id: 'survey-1' })
+      .mockResolvedValueOnce(null);
+    const scope = {
+      title: 'Encuesta',
+      careerId: 'career-1',
+      academicPeriod: 'II-2026',
+    };
 
     expect(await repository.existsWithTitle(scope)).toBe(true);
     expect(await repository.existsWithTitle(scope)).toBe(false);
@@ -96,7 +105,8 @@ describe('SurveysRepository', () => {
       select: SURVEY_CREATED_SELECT,
     });
 
-    const [{ data: questions }] = prisma.tx.surveyQuestion.createMany.mock.calls[0];
+    const [{ data: questions }] =
+      prisma.tx.surveyQuestion.createMany.mock.calls[0];
     expect(questions).toHaveLength(2);
     expect(questions[0]).toMatchObject({
       surveyId: 'survey-1',
@@ -105,13 +115,26 @@ describe('SurveysRepository', () => {
       type: 'SINGLE_CHOICE',
       isRequired: true,
     });
-    expect(questions[1]).toMatchObject({ position: 2, type: 'MULTIPLE_CHOICE', isRequired: false });
+    expect(questions[1]).toMatchObject({
+      position: 2,
+      type: 'MULTIPLE_CHOICE',
+      isRequired: false,
+    });
     expect(questions[0].id).toMatch(UUID_PATTERN);
 
-    const [{ data: options }] = prisma.tx.surveyQuestionOption.createMany.mock.calls[0];
+    const [{ data: options }] =
+      prisma.tx.surveyQuestionOption.createMany.mock.calls[0];
     expect(options).toHaveLength(5);
-    expect(options[0]).toEqual({ questionId: questions[0].id, position: 1, label: 'Sí' });
-    expect(options[4]).toEqual({ questionId: questions[1].id, position: 3, label: 'C' });
+    expect(options[0]).toEqual({
+      questionId: questions[0].id,
+      position: 1,
+      label: 'Sí',
+    });
+    expect(options[4]).toEqual({
+      questionId: questions[1].id,
+      position: 3,
+      label: 'C',
+    });
     expect(prisma.tx.surveyQuestion.createMany).toHaveBeenCalledTimes(1);
     expect(prisma.tx.surveyQuestionOption.createMany).toHaveBeenCalledTimes(1);
   });
@@ -127,7 +150,9 @@ describe('SurveysRepository', () => {
   it('omite la inserción de opciones si ninguna pregunta tiene', async () => {
     await repository.create({
       ...BASE_DATA,
-      questions: [{ statement: '', type: 'SINGLE_CHOICE', isRequired: true, options: [] }],
+      questions: [
+        { statement: '', type: 'SINGLE_CHOICE', isRequired: true, options: [] },
+      ],
     });
 
     expect(prisma.tx.surveyQuestion.createMany).toHaveBeenCalledTimes(1);
@@ -156,9 +181,13 @@ describe('CareersRepository', () => {
   });
 
   it('lista las carreras ordenadas por título', async () => {
-    prisma.career.findMany.mockResolvedValue([{ id: 'career-1', title: 'Sistemas' }]);
+    prisma.career.findMany.mockResolvedValue([
+      { id: 'career-1', title: 'Sistemas' },
+    ]);
 
-    expect(await repository.findAll()).toEqual([{ id: 'career-1', title: 'Sistemas' }]);
+    expect(await repository.findAll()).toEqual([
+      { id: 'career-1', title: 'Sistemas' },
+    ]);
     expect(prisma.career.findMany).toHaveBeenCalledWith({
       select: CAREER_SELECT,
       orderBy: { title: 'asc' },
@@ -166,7 +195,9 @@ describe('CareersRepository', () => {
   });
 
   it('indica si la carrera existe', async () => {
-    prisma.career.findUnique.mockResolvedValueOnce({ id: 'career-1' }).mockResolvedValueOnce(null);
+    prisma.career.findUnique
+      .mockResolvedValueOnce({ id: 'career-1' })
+      .mockResolvedValueOnce(null);
 
     expect(await repository.exists('career-1')).toBe(true);
     expect(await repository.exists('missing')).toBe(false);
@@ -174,5 +205,22 @@ describe('CareersRepository', () => {
       where: { id: 'career-1' },
       select: { id: true },
     });
+  });
+});
+
+describe('SurveysRepository sin modelos de encuestas en Prisma', () => {
+  it('responde que el registro de encuestas no está disponible', async () => {
+    const repository = new SurveysRepository({} as PrismaService);
+
+    await expect(repository.findAll()).rejects.toBeInstanceOf(
+      SurveysStorageUnavailableException,
+    );
+    await expect(
+      repository.existsWithTitle({
+        title: 'Encuesta',
+        careerId: null,
+        academicPeriod: null,
+      }),
+    ).rejects.toMatchObject({ statusCode: 503 });
   });
 });

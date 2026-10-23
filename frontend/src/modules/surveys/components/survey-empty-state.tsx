@@ -1,6 +1,5 @@
 import type { SurveyEmptyStateProps } from "../types/survey-empty-state-props.types";
 
-// Estado vacío común de las pantallas de encuestas mientras se desarrolla su contenido.
 export function SurveyEmptyState({ icon: Icon, title, description }: SurveyEmptyStateProps) {
   return (
     <section className="flex flex-col items-center gap-3 rounded-lg border border-border bg-surface p-10 text-center">

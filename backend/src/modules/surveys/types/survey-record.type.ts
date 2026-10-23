@@ -1,17 +1,21 @@
 import type { Prisma } from '../../../prisma/client.js';
-import type {
-  CAREER_SELECT,
-  SURVEY_CREATED_SELECT,
-  SURVEY_SUMMARY_SELECT,
-} from '../constants/survey.constants.js';
+import type { CAREER_SELECT } from '../constants/survey.constants.js';
+import type { SurveyStatus } from './survey.enum.js';
 
-export type SurveyCreatedRecord = Prisma.SurveyGetPayload<{
-  select: typeof SURVEY_CREATED_SELECT;
-}>;
+export interface SurveyCreatedRecord {
+  id: string;
+  title: string;
+  status: SurveyStatus;
+  createdAt: Date;
+}
 
-export type SurveySummaryRecord = Prisma.SurveyGetPayload<{
-  select: typeof SURVEY_SUMMARY_SELECT;
-}>;
+export interface SurveySummaryRecord extends SurveyCreatedRecord {
+  academicPeriod: string | null;
+  opensAt: Date | null;
+  closesAt: Date | null;
+  career: { id: string; title: string } | null;
+  _count: { questions: number };
+}
 
 export type CareerRecord = Prisma.CareerGetPayload<{
   select: typeof CAREER_SELECT;

@@ -183,7 +183,6 @@ export type CareerWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Career"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Career"> | Date | string
   accessRequests?: Prisma.AccessRequestListRelationFilter
-  surveys?: Prisma.SurveyListRelationFilter
 }
 
 export type CareerOrderByWithRelationInput = {
@@ -193,7 +192,6 @@ export type CareerOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   accessRequests?: Prisma.AccessRequestOrderByRelationAggregateInput
-  surveys?: Prisma.SurveyOrderByRelationAggregateInput
 }
 
 export type CareerWhereUniqueInput = Prisma.AtLeast<{
@@ -206,7 +204,6 @@ export type CareerWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Career"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Career"> | Date | string
   accessRequests?: Prisma.AccessRequestListRelationFilter
-  surveys?: Prisma.SurveyListRelationFilter
 }, "id" | "title">
 
 export type CareerOrderByWithAggregationInput = {
@@ -238,7 +235,6 @@ export type CareerCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accessRequests?: Prisma.AccessRequestCreateNestedManyWithoutCareerInput
-  surveys?: Prisma.SurveyCreateNestedManyWithoutCareerInput
 }
 
 export type CareerUncheckedCreateInput = {
@@ -248,7 +244,6 @@ export type CareerUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutCareerInput
-  surveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCareerInput
 }
 
 export type CareerUpdateInput = {
@@ -258,7 +253,6 @@ export type CareerUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequests?: Prisma.AccessRequestUpdateManyWithoutCareerNestedInput
-  surveys?: Prisma.SurveyUpdateManyWithoutCareerNestedInput
 }
 
 export type CareerUncheckedUpdateInput = {
@@ -268,7 +262,6 @@ export type CareerUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutCareerNestedInput
-  surveys?: Prisma.SurveyUncheckedUpdateManyWithoutCareerNestedInput
 }
 
 export type CareerCreateManyInput = {
@@ -324,11 +317,6 @@ export type CareerScalarRelationFilter = {
   isNot?: Prisma.CareerWhereInput
 }
 
-export type CareerNullableScalarRelationFilter = {
-  is?: Prisma.CareerWhereInput | null
-  isNot?: Prisma.CareerWhereInput | null
-}
-
 export type CareerCreateNestedOneWithoutAccessRequestsInput = {
   create?: Prisma.XOR<Prisma.CareerCreateWithoutAccessRequestsInput, Prisma.CareerUncheckedCreateWithoutAccessRequestsInput>
   connectOrCreate?: Prisma.CareerCreateOrConnectWithoutAccessRequestsInput
@@ -343,29 +331,12 @@ export type CareerUpdateOneRequiredWithoutAccessRequestsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CareerUpdateToOneWithWhereWithoutAccessRequestsInput, Prisma.CareerUpdateWithoutAccessRequestsInput>, Prisma.CareerUncheckedUpdateWithoutAccessRequestsInput>
 }
 
-export type CareerCreateNestedOneWithoutSurveysInput = {
-  create?: Prisma.XOR<Prisma.CareerCreateWithoutSurveysInput, Prisma.CareerUncheckedCreateWithoutSurveysInput>
-  connectOrCreate?: Prisma.CareerCreateOrConnectWithoutSurveysInput
-  connect?: Prisma.CareerWhereUniqueInput
-}
-
-export type CareerUpdateOneWithoutSurveysNestedInput = {
-  create?: Prisma.XOR<Prisma.CareerCreateWithoutSurveysInput, Prisma.CareerUncheckedCreateWithoutSurveysInput>
-  connectOrCreate?: Prisma.CareerCreateOrConnectWithoutSurveysInput
-  upsert?: Prisma.CareerUpsertWithoutSurveysInput
-  disconnect?: Prisma.CareerWhereInput | boolean
-  delete?: Prisma.CareerWhereInput | boolean
-  connect?: Prisma.CareerWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.CareerUpdateToOneWithWhereWithoutSurveysInput, Prisma.CareerUpdateWithoutSurveysInput>, Prisma.CareerUncheckedUpdateWithoutSurveysInput>
-}
-
 export type CareerCreateWithoutAccessRequestsInput = {
   id?: string
   title: string
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  surveys?: Prisma.SurveyCreateNestedManyWithoutCareerInput
 }
 
 export type CareerUncheckedCreateWithoutAccessRequestsInput = {
@@ -374,7 +345,6 @@ export type CareerUncheckedCreateWithoutAccessRequestsInput = {
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  surveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCareerInput
 }
 
 export type CareerCreateOrConnectWithoutAccessRequestsInput = {
@@ -399,7 +369,6 @@ export type CareerUpdateWithoutAccessRequestsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  surveys?: Prisma.SurveyUpdateManyWithoutCareerNestedInput
 }
 
 export type CareerUncheckedUpdateWithoutAccessRequestsInput = {
@@ -408,59 +377,6 @@ export type CareerUncheckedUpdateWithoutAccessRequestsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  surveys?: Prisma.SurveyUncheckedUpdateManyWithoutCareerNestedInput
-}
-
-export type CareerCreateWithoutSurveysInput = {
-  id?: string
-  title: string
-  description?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  accessRequests?: Prisma.AccessRequestCreateNestedManyWithoutCareerInput
-}
-
-export type CareerUncheckedCreateWithoutSurveysInput = {
-  id?: string
-  title: string
-  description?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  accessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutCareerInput
-}
-
-export type CareerCreateOrConnectWithoutSurveysInput = {
-  where: Prisma.CareerWhereUniqueInput
-  create: Prisma.XOR<Prisma.CareerCreateWithoutSurveysInput, Prisma.CareerUncheckedCreateWithoutSurveysInput>
-}
-
-export type CareerUpsertWithoutSurveysInput = {
-  update: Prisma.XOR<Prisma.CareerUpdateWithoutSurveysInput, Prisma.CareerUncheckedUpdateWithoutSurveysInput>
-  create: Prisma.XOR<Prisma.CareerCreateWithoutSurveysInput, Prisma.CareerUncheckedCreateWithoutSurveysInput>
-  where?: Prisma.CareerWhereInput
-}
-
-export type CareerUpdateToOneWithWhereWithoutSurveysInput = {
-  where?: Prisma.CareerWhereInput
-  data: Prisma.XOR<Prisma.CareerUpdateWithoutSurveysInput, Prisma.CareerUncheckedUpdateWithoutSurveysInput>
-}
-
-export type CareerUpdateWithoutSurveysInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  accessRequests?: Prisma.AccessRequestUpdateManyWithoutCareerNestedInput
-}
-
-export type CareerUncheckedUpdateWithoutSurveysInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  accessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutCareerNestedInput
 }
 
 
@@ -470,12 +386,10 @@ export type CareerUncheckedUpdateWithoutSurveysInput = {
 
 export type CareerCountOutputType = {
   accessRequests: number
-  surveys: number
 }
 
 export type CareerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accessRequests?: boolean | CareerCountOutputTypeCountAccessRequestsArgs
-  surveys?: boolean | CareerCountOutputTypeCountSurveysArgs
 }
 
 /**
@@ -495,13 +409,6 @@ export type CareerCountOutputTypeCountAccessRequestsArgs<ExtArgs extends runtime
   where?: Prisma.AccessRequestWhereInput
 }
 
-/**
- * CareerCountOutputType without action
- */
-export type CareerCountOutputTypeCountSurveysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.SurveyWhereInput
-}
-
 
 export type CareerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -510,7 +417,6 @@ export type CareerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   createdAt?: boolean
   updatedAt?: boolean
   accessRequests?: boolean | Prisma.Career$accessRequestsArgs<ExtArgs>
-  surveys?: boolean | Prisma.Career$surveysArgs<ExtArgs>
   _count?: boolean | Prisma.CareerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["career"]>
 
@@ -541,7 +447,6 @@ export type CareerSelectScalar = {
 export type CareerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["career"]>
 export type CareerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accessRequests?: boolean | Prisma.Career$accessRequestsArgs<ExtArgs>
-  surveys?: boolean | Prisma.Career$surveysArgs<ExtArgs>
   _count?: boolean | Prisma.CareerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CareerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -551,7 +456,6 @@ export type $CareerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name: "Career"
   objects: {
     accessRequests: Prisma.$AccessRequestPayload<ExtArgs>[]
-    surveys: Prisma.$SurveyPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -954,7 +858,6 @@ readonly fields: CareerFieldRefs;
 export interface Prisma__CareerClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   accessRequests<T extends Prisma.Career$accessRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Career$accessRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  surveys<T extends Prisma.Career$surveysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Career$surveysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SurveyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1403,30 +1306,6 @@ export type Career$accessRequestsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.AccessRequestScalarFieldEnum | Prisma.AccessRequestScalarFieldEnum[]
-}
-
-/**
- * Career.surveys
- */
-export type Career$surveysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Survey
-   */
-  select?: Prisma.SurveySelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Survey
-   */
-  omit?: Prisma.SurveyOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SurveyInclude<ExtArgs> | null
-  where?: Prisma.SurveyWhereInput
-  orderBy?: Prisma.SurveyOrderByWithRelationInput | Prisma.SurveyOrderByWithRelationInput[]
-  cursor?: Prisma.SurveyWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.SurveyScalarFieldEnum | Prisma.SurveyScalarFieldEnum[]
 }
 
 /**

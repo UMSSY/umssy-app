@@ -1,7 +1,4 @@
-import type {
-  SurveyQuestionType,
-  SurveyStatus,
-} from '../../../prisma/client.js';
+import type { SurveyQuestionType, SurveyStatus } from './survey.enum.js';
 
 export interface CreateSurveyOptionData {
   label: string;
