@@ -55,7 +55,7 @@ export function PreviewStep({
   return (
     <div className="mt-8 w-full">
       <h3 className="mb-4 text-lg font-semibold text-ink">
-        VISTA PREVIA DE LA PUBLICACIÓN
+        Revisa tu publicación
       </h3>
 
       <div className="mx-auto max-w-3xl rounded-lg border border-border bg-white p-8 shadow-none">

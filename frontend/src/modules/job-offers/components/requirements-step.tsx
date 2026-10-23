@@ -70,7 +70,7 @@ export function RequirementsStep({
       <div className="p-6">
         <div className="mb-8">
           <Label htmlFor="description" className="mb-2 text-[12.5px] font-semibold text-ink">
-            Descripcion del puesto <span className="text-ink-soft">*</span>
+            Descripción del puesto <span className="text-ink-soft">*</span>
           </Label>
           <Textarea
             id="description"

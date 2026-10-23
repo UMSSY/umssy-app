@@ -121,7 +121,7 @@ export function InformationStep({
         <div className="md:col-span-2">
           <div className="flex justify-between">
             <Label htmlFor="title" className="text-[12.5px] font-semibold">
-              Titulo del puesto <span className="text-ink-soft">*</span>
+              Título del puesto <span className="text-ink-soft">*</span>
             </Label>
             <span className="text-xs text-text-secondary">{conditions.title.length}/{MAX_TITLE_CHARS}</span>
           </div>
@@ -205,7 +205,7 @@ export function InformationStep({
 
         <div>
           <Label htmlFor="category" className="text-[12.5px] font-semibold">
-            Categoria <span className="text-ink-soft">*</span>
+            Categoría <span className="text-ink-soft">*</span>
           </Label>
           <Input 
             id="category" 
@@ -221,7 +221,7 @@ export function InformationStep({
 
         <div>
           <Label htmlFor="vacancyCount" className="text-[12.5px] font-semibold">
-            Numero de vacantes <span className="text-ink-soft">*</span>
+            Número de vacantes <span className="text-ink-soft">*</span>
           </Label>
           <Input 
             id="vacancyCount" 
@@ -239,7 +239,7 @@ export function InformationStep({
 
         <div>
           <Label htmlFor="salary" className="text-[12.5px] font-semibold">
-            Salario <span className="text-ink-soft">*</span>
+            Salario {!isInternship && <span className="text-ink-soft">*</span>}
           </Label>
           <Input 
             id="salary" 
