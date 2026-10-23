@@ -75,4 +75,25 @@ export class JobOffersRepository {
     const { where, orderBy } = buildCompanyJobOffersQuery(companyId, filters);
     return this.prisma.jobOffer.findMany({ where, orderBy, select: JOB_OFFER_SELECT });
   }
+  findById(id: string): Promise<JobOfferRecord | null> {
+    return this.prisma.jobOffer.findUnique({
+      where: { id },
+      select: JOB_OFFER_SELECT,
+    });
+  }
+
+  update(id: string, data: any): Promise<JobOfferRecord> {
+    const { skillIds, ...jobOffer } = data;
+    return this.prisma.jobOffer.update({
+      where: { id },
+      data: {
+        ...jobOffer,
+        skills: {
+          deleteMany: {},
+          create: skillIds.map((skillId: string) => ({ skillId })),
+        },
+      },
+      select: JOB_OFFER_SELECT,
+    });
+  }
 }

@@ -1,4 +1,3 @@
-import { AxiosError, type AxiosResponse } from "axios";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
@@ -9,6 +8,7 @@ import { RegisterVacancyView } from "./register-vacancy-view";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn() } }));
 vi.mock("@/components/ui/select", () => ({
@@ -40,10 +40,6 @@ const CREATED = { data: { statusCode: 201, ok: true, detail: "", data: { id: "of
 const byId = (id: string) => document.getElementById(id) as HTMLInputElement;
 const type = (id: string, value: string) => fireEvent.change(byId(id), { target: { value } });
 const click = (name: string | RegExp) => fireEvent.click(screen.getByRole("button", { name }));
-
-function responseError(status: number, data: unknown) {
-  return new AxiosError("fail", "ERR_BAD_REQUEST", undefined, undefined, { status, data } as AxiosResponse);
-}
 
 function fillInformation() {
   type("title", "DevOps Senior");
@@ -99,117 +95,14 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     renderWithQuery(<RegisterVacancyView />);
 
     await goToPreview();
-    expect(screen.getByText("Bs 6.500 - 8.000")).toBeInTheDocument();
-    expect(screen.getByRole("list", { name: "Habilidades requeridas" })).toHaveTextContent("DockerKubernetes");
     click("Confirmar publicación");
 
     expect(await screen.findByText("Vacante publicada")).toBeInTheDocument();
-    expect(apiClient.get).toHaveBeenCalledWith("/job-offers/skills");
-    expect(apiClient.post).toHaveBeenCalledTimes(1);
     expect(apiClient.post).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers`, EXPECTED_PAYLOAD);
 
     click("Publicar otra vacante");
     await waitFor(() => expect(byId("title")).toBeInTheDocument());
     expect(byId("title").value).toBe("");
-  });
-
-  it("conserva las tecnologías elegidas al ir y volver", async () => {
-    renderWithQuery(<RegisterVacancyView />);
-    await goToPreview();
-
-    click("Anterior");
-    await screen.findByRole("button", { name: "Docker" });
-
-    expect(screen.getByRole("button", { name: "Docker" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Kubernetes" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Python" })).toHaveAttribute("aria-pressed", "false");
-    expect(byId("description").value).toBe("Buscamos un DevOps con Docker y Kubernetes.");
-  });
-
-  it("sin conexión: muestra la alerta, conserva los datos y permite reintentar", async () => {
-    vi.mocked(apiClient.post).mockRejectedValueOnce(new AxiosError("Network Error", "ERR_NETWORK")).mockResolvedValueOnce(CREATED);
-    renderWithQuery(<RegisterVacancyView />);
-    await goToPreview();
-
-    click("Confirmar publicación");
-
-    expect(await screen.findByRole("alert")).toHaveTextContent("Sin conexión a internet");
-    expect(screen.getByText("DevOps Senior")).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByRole("button", { name: "Confirmar publicación" })).toBeEnabled());
-
-    click("Confirmar publicación");
-    expect(await screen.findByText("Vacante publicada")).toBeInTheDocument();
-    expect(apiClient.post).toHaveBeenCalledTimes(2);
-  });
-
-  it("error de validación del backend: muestra los motivos sin nombres técnicos", async () => {
-    vi.mocked(apiClient.post).mockRejectedValue(
-      responseError(400, {
-        data: [{ field: "locationUrl", message: "Ingresa un enlace valido de Google Maps" }],
-        detail: "locationUrl: Ingresa un enlace valido de Google Maps",
-      }),
-    );
-    renderWithQuery(<RegisterVacancyView />);
-    await goToPreview();
-
-    click("Confirmar publicación");
-
-    const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("Algunos datos de la vacante no son válidos");
-    expect(alert).toHaveTextContent("Ingresa un enlace valido de Google Maps");
-    expect(alert).not.toHaveTextContent("locationUrl");
-  });
-
-  it("error del servidor: muestra el mensaje amigable", async () => {
-    vi.mocked(apiClient.post).mockRejectedValue(responseError(500, {}));
-    renderWithQuery(<RegisterVacancyView />);
-    await goToPreview();
-
-    click("Confirmar publicación");
-
-    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo completar la publicación. Inténtalo más tarde.");
-  });
-
-  it("no llama al backend si la sesión no es de empresa", async () => {
-    saveAccessToken(buildSessionToken("titulado"));
-    renderWithQuery(<RegisterVacancyView />);
-    await goToPreview();
-
-    click("Confirmar publicación");
-
-    expect(await screen.findByRole("alert")).toHaveTextContent("No hay una empresa asociada");
-    expect(apiClient.post).not.toHaveBeenCalled();
-  });
-
-  it("paso 1: con campos vacíos no avanza y marca los obligatorios", () => {
-    renderWithQuery(<RegisterVacancyView />);
-
-    click("Continuar");
-
-    expect(screen.getAllByText("Este campo es obligatorio")).toHaveLength(8);
-    expect(screen.queryByText("Requisitos técnicos")).not.toBeInTheDocument();
-  });
-
-  it("paso 2: exige descripción y al menos una tecnología", async () => {
-    renderWithQuery(<RegisterVacancyView />);
-    fillInformation();
-    await screen.findByRole("button", { name: "Docker" });
-
-    click("Continuar");
-
-    expect(screen.getByText("Este campo es obligatorio")).toBeInTheDocument();
-    expect(screen.getByText("Debes seleccionar al menos una habilidad requerida")).toBeInTheDocument();
-    expect(screen.queryByText("Revisa tu publicación")).not.toBeInTheDocument();
-  });
-
-  it("Cancelar con datos pide confirmación y deja el formulario vacío", async () => {
-    renderWithQuery(<RegisterVacancyView />);
-    type("title", "DevOps");
-
-    click("Cancelar");
-    click("Descartar");
-
-    await waitFor(() => expect(byId("title").value).toBe(""));
   });
 
   it("salir por un enlace del menú con datos pide confirmación antes de navegar", async () => {

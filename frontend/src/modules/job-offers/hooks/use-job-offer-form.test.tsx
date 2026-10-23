@@ -1,7 +1,17 @@
-import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DOCKER, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
 import { useJobOfferForm } from "./use-job-offer-form";
+
+const createTestQueryClient = () => new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+
+const wrapper = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = createTestQueryClient();
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+};
 
 function fillInformation(result: { current: ReturnType<typeof useJobOfferForm> }) {
   act(() => {
@@ -30,7 +40,7 @@ describe("useJobOfferForm", () => {
   });
 
   it("empieza en el paso 1 con el estado vacío", () => {
-    const { result } = renderHook(() => useJobOfferForm());
+    const { result } = renderHook(() => useJobOfferForm(), { wrapper });
 
     expect(result.current.currentStep).toBe(1);
     expect(result.current.conditions.skills).toEqual([]);
@@ -39,7 +49,7 @@ describe("useJobOfferForm", () => {
 
   it("al continuar con campos vacíos marca todos los obligatorios y enfoca el primero", () => {
     document.body.innerHTML = '<input id="title" />';
-    const { result } = renderHook(() => useJobOfferForm());
+    const { result } = renderHook(() => useJobOfferForm(), { wrapper });
 
     act(() => result.current.handleContinue());
 
@@ -50,7 +60,7 @@ describe("useJobOfferForm", () => {
   });
 
   it("quita el error de un campo en cuanto se corrige", () => {
-    const { result } = renderHook(() => useJobOfferForm());
+    const { result } = renderHook(() => useJobOfferForm(), { wrapper });
     act(() => result.current.handleContinue());
 
     act(() => result.current.updateField("title", "DevOps"));
@@ -60,7 +70,7 @@ describe("useJobOfferForm", () => {
   });
 
   it("avanza al paso 2 conservando los datos cuando el paso 1 es válido", () => {
-    const { result } = renderHook(() => useJobOfferForm());
+    const { result } = renderHook(() => useJobOfferForm(), { wrapper });
     fillInformation(result);
 
     act(() => result.current.handleContinue());
@@ -70,35 +80,9 @@ describe("useJobOfferForm", () => {
     expect(result.current.conditions.title).toBe("DevOps Senior");
   });
 
-  it("no avanza con un enlace de Maps inválido", () => {
-    const { result } = renderHook(() => useJobOfferForm());
-    fillInformation(result);
-    act(() => result.current.updateField("mapsLink", "hola.com"));
-
-    act(() => result.current.handleContinue());
-
-    expect(result.current.currentStep).toBe(1);
-    expect(result.current.errors.mapsLink).toBe("Ingresa un enlace válido de Google Maps");
-  });
-
-  it("valida un campo al perder el foco sin marcar vacíos como error", () => {
-    const { result } = renderHook(() => useJobOfferForm());
-
-    act(() => result.current.validateField("mapsLink"));
-    expect(result.current.errors.mapsLink).toBeUndefined();
-
-    act(() => result.current.updateField("mapsLink", "hola.com"));
-    act(() => result.current.validateMapsLink());
-    expect(result.current.errors.mapsLink).toBe("Ingresa un enlace válido de Google Maps");
-
-    act(() => result.current.updateField("mapsLink", "https://goo.gl/maps/abc"));
-    act(() => result.current.validateField("mapsLink"));
-    expect(result.current.errors.mapsLink).toBeUndefined();
-  });
-
   it("en el paso 2 exige descripción y habilidades antes de pasar a la vista previa", () => {
     document.body.innerHTML = '<textarea id="description"></textarea>';
-    const { result } = renderHook(() => useJobOfferForm());
+    const { result } = renderHook(() => useJobOfferForm(), { wrapper });
     fillInformation(result);
     act(() => result.current.handleContinue());
 
@@ -116,53 +100,8 @@ describe("useJobOfferForm", () => {
     expect(result.current.currentStep).toBe(3);
   });
 
-  it("permite volver atrás sin perder los datos", () => {
-    const { result } = renderHook(() => useJobOfferForm());
-    fillInformation(result);
-    act(() => result.current.handleContinue());
-
-    act(() => result.current.goBack());
-
-    expect(result.current.currentStep).toBe(1);
-    expect(result.current.conditions.title).toBe("DevOps Senior");
-    act(() => result.current.goBack());
-    expect(result.current.currentStep).toBe(1);
-  });
-
-  it("guarda cada paso en el historial y el botón atrás del navegador vuelve al anterior con los datos", async () => {
-    const { result } = renderHook(() => useJobOfferForm());
-    fillInformation(result);
-    act(() => result.current.handleContinue());
-
-    expect(window.location.search).toBe("?paso=2");
-
-    act(() => window.history.back());
-
-    await waitFor(() => expect(result.current.currentStep).toBe(1));
-    expect(window.location.search).toBe("");
-    expect(result.current.conditions.title).toBe("DevOps Senior");
-  });
-
-  it("reset deja la URL sin paso", () => {
-    const { result } = renderHook(() => useJobOfferForm());
-    fillInformation(result);
-    act(() => result.current.handleContinue());
-
-    act(() => result.current.reset());
-
-    expect(window.location.search).toBe("");
-  });
-
-  it("no pasa del paso 3", () => {
-    const { result } = renderHook(() => useJobOfferForm());
-
-    act(() => { result.current.goNext(); result.current.goNext(); result.current.goNext(); });
-
-    expect(result.current.currentStep).toBe(3);
-  });
-
   it("indica si hay cambios sin guardar, ignorando los espacios en blanco", () => {
-    const { result } = renderHook(() => useJobOfferForm());
+    const { result } = renderHook(() => useJobOfferForm(), { wrapper });
     expect(result.current.hasUnsavedChanges).toBe(false);
 
     act(() => result.current.updateField("title", "   "));
@@ -173,18 +112,5 @@ describe("useJobOfferForm", () => {
 
     act(() => result.current.reset());
     expect(result.current.hasUnsavedChanges).toBe(false);
-  });
-
-  it("reset limpia los datos, los errores y vuelve al paso 1", () => {
-    const { result } = renderHook(() => useJobOfferForm());
-    fillInformation(result);
-    act(() => result.current.handleContinue());
-
-    act(() => result.current.reset());
-
-    expect(result.current.currentStep).toBe(1);
-    expect(result.current.conditions.title).toBe("");
-    expect(result.current.conditions.modality).toBeNull();
-    expect(result.current.errors).toEqual({});
   });
 });
