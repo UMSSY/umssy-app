@@ -7,6 +7,7 @@ import {
 import type { ListCompanyJobOffersRequest } from '../requests/list-company-job-offers.request.js';
 import type { CreateJobOfferData } from '../types/create-job-offer-data.type.js';
 import type { JobOfferCatalogIds } from '../types/job-offer-catalog-ids.type.js';
+import type { UpdateJobOfferData } from '../types/update-job-offer-data.type.js';
 import { JobOfferStatus } from '../types/job-offer.enum.js';
 import type {
   JobOfferCreatedRecord,
@@ -75,23 +76,25 @@ export class JobOffersRepository {
     const { where, orderBy } = buildCompanyJobOffersQuery(companyId, filters);
     return this.prisma.jobOffer.findMany({ where, orderBy, select: JOB_OFFER_SELECT });
   }
-  findById(id: string): Promise<JobOfferRecord | null> {
-    return this.prisma.jobOffer.findUnique({
-      where: { id },
+
+  findByCompanyAndId(companyId: string, jobOfferId: string): Promise<JobOfferRecord | null> {
+    return this.prisma.jobOffer.findFirst({
+      where: {
+        id: jobOfferId,
+        companyId,
+        status: { title: { not: JobOfferStatus.DELETED } },
+      },
       select: JOB_OFFER_SELECT,
     });
   }
 
-  update(id: string, data: any): Promise<JobOfferRecord> {
+  update(jobOfferId: string, data: UpdateJobOfferData): Promise<JobOfferRecord> {
     const { skillIds, ...jobOffer } = data;
     return this.prisma.jobOffer.update({
-      where: { id },
+      where: { id: jobOfferId },
       data: {
         ...jobOffer,
-        skills: {
-          deleteMany: {},
-          create: skillIds.map((skillId: string) => ({ skillId })),
-        },
+        skills: { deleteMany: {}, create: skillIds.map((skillId) => ({ skillId })) },
       },
       select: JOB_OFFER_SELECT,
     });
