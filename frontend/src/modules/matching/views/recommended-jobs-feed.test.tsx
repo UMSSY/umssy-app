@@ -10,7 +10,6 @@ vi.mock("../hooks/use-recommended-jobs", () => ({
 
 const mockedUseRecommendedJobs = vi.mocked(useRecommendedJobs);
 
-// Vacantes del mockup V04, ya ordenadas por el backend de mayor a menor afinidad.
 const JOBS: RecommendedJob[] = [
   { jobOfferId: "devops", title: "DevOps Senior", companyName: "TechBolivia", modality: "Remoto", score: 92, matchedSkills: ["Docker"], skills: ["Docker", "Terraform"] },
   { jobOfferId: "backend", title: "Backend Developer", companyName: "Sofía Corp", modality: "Híbrido", score: 77, matchedSkills: ["Node.js"], skills: ["Node.js", "Redis"] },

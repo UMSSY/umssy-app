@@ -54,7 +54,6 @@ export const JOB_MATCHING_MESSAGES = {
   noMatchesAction: "Revisar mi perfil",
 } as const;
 
-// Umbral propuesto en AC-06.5 para "Solo alta afinidad"; pendiente de confirmar con el PO.
 export const HIGH_AFFINITY_THRESHOLD = 70;
 
 export const EMPTY_JOB_FEED_FILTERS: JobFeedFilters = {

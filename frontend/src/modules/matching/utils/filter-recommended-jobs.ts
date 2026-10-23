@@ -15,7 +15,6 @@ function matchesModality(job: RecommendedJob, modality: string | null): boolean 
   return normalizeSearchText(job.modality) === normalizeSearchText(modality);
 }
 
-// Filtra sin reordenar: el backend ya entrega las vacantes de mayor a menor afinidad.
 export function filterRecommendedJobs(
   jobs: readonly RecommendedJob[],
   filters: JobFeedFilters,
