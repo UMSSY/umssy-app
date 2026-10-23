@@ -26,7 +26,7 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
           </p>
         </div>
         <p className="shrink-0 text-sm font-semibold text-ink">
-          {job.score}% {JOB_MATCHING_MESSAGES.scoreCaption}
+          {job.score}% {JOB_MATCHING_MESSAGES.affinityCaption}
         </p>
       </div>
       <div className="flex flex-col gap-2">
