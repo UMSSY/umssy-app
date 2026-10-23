@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { JOB_OFFER_CREATED_SELECT, JOB_OFFER_SELECT } from '../constants/job-offer.constants.js';
 import { JobOffersRepository } from '../repositories/job-offers.repository.js';
+import { JobOfferContractType, JobOfferModality, JobOfferStatus } from '../types/job-offer.enum.js';
+
+const NOT_DELETED = { title: { not: JobOfferStatus.DELETED } };
 
 function createPrisma() {
   return {
@@ -9,7 +12,7 @@ function createPrisma() {
     jobOfferModality: { findUnique: vi.fn() },
     jobOfferContractType: { findUnique: vi.fn() },
     jobOfferStatus: { findUnique: vi.fn() },
-    jobOffer: { create: vi.fn(), findMany: vi.fn() },
+    jobOffer: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
   };
 }
 
@@ -103,15 +106,90 @@ describe('JobOffersRepository', () => {
       select: JOB_OFFER_SELECT,
     });
   });
-
-  it('lista las vacantes de una empresa', async () => {
+    it('lista las vacantes de una empresa sin filtros, de la más reciente a la más antigua', async () => {
     prisma.jobOffer.findMany.mockResolvedValue([]);
 
-    await repository.findByCompany('company-1');
+    await repository.findByCompany('company-1', { sortBy: 'createdAt', order: 'desc' });
 
     expect(prisma.jobOffer.findMany).toHaveBeenCalledWith({
-      where: { companyId: 'company-1' },
-      orderBy: { createdAt: 'desc' },
+      where: { companyId: 'company-1', status: NOT_DELETED },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('aplica los filtros al listar las vacantes de una empresa', async () => {
+    prisma.jobOffer.findMany.mockResolvedValue([]);
+
+    await repository.findByCompany('company-1', {
+      modality: JobOfferModality.REMOTE,
+      contractType: JobOfferContractType.PART_TIME,
+      dateFrom: '2026-10-01',
+      dateTo: '2026-10-31',
+      search: 'react',
+      sortBy: 'createdAt',
+      order: 'asc',
+    });
+
+    expect(prisma.jobOffer.findMany).toHaveBeenCalledWith({
+      where: {
+        companyId: 'company-1',
+        status: NOT_DELETED,
+        modality: { title: 'Remoto' },
+        contractType: { title: 'Medio tiempo' },
+        createdAt: {
+          gte: new Date('2026-10-01T04:00:00.000Z'),
+          lt: new Date('2026-11-01T04:00:00.000Z'),
+        },
+        title: { contains: 'react', mode: 'insensitive' },
+      },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('consulta una vacante por empresa e id con sus relaciones detalladas', async () => {
+    const record = { id: 'offer-1' };
+    prisma.jobOffer.findFirst.mockResolvedValue(record);
+
+    await expect(repository.findByCompanyAndId('company-1', 'offer-1')).resolves.toBe(record);
+
+    expect(prisma.jobOffer.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'offer-1',
+        companyId: 'company-1',
+        status: { title: { not: JobOfferStatus.DELETED } },
+      },
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('actualiza la vacante reemplazando sus habilidades en una sola operación', async () => {
+    prisma.jobOffer.update.mockResolvedValue({ id: 'offer-1' });
+
+    await repository.update('offer-1', {
+      modalityId: 'modality-1',
+      contractTypeId: 'contract-1',
+      title: 'DevOps',
+      description: 'Descripción',
+      category: 'Tecnología',
+      positionsAvailable: 2,
+      salaryRange: 'Bs 6.500',
+      languages: 'Español',
+      locationUrl: 'https://maps.google.com/?q=x',
+      skillIds: ['skill-1', 'skill-2'],
+    });
+
+    expect(prisma.jobOffer.update).toHaveBeenCalledWith({
+      where: { id: 'offer-1' },
+      data: expect.objectContaining({
+        title: 'DevOps',
+        modalityId: 'modality-1',
+        skills: {
+          deleteMany: {},
+          create: [{ skillId: 'skill-1' }, { skillId: 'skill-2' }],
+        },
+      }),
       select: JOB_OFFER_SELECT,
     });
   });

@@ -2,10 +2,15 @@ import { Injectable } from '@nestjs/common';
 import {
   CompanyNotFoundException,
   JobOfferCatalogNotFoundException,
+  JobOfferNotFoundException,
 } from '../exceptions/index.js';
 import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
 import { JobOffersRepository } from '../repositories/job-offers.repository.js';
 import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
+import {
+  DEFAULT_COMPANY_JOB_OFFERS_FILTERS,
+  type ListCompanyJobOffersRequest,
+} from '../requests/list-company-job-offers.request.js';
 import type { JobOfferCreatedResponse } from '../responses/job-offer-created.response.js';
 import type {
   JobOfferResponse,
@@ -41,14 +46,7 @@ export class JobOffersService {
       modalityId,
       contractTypeId,
       statusId,
-      title: request.title,
-      description: request.description,
-      category: request.category,
-      positionsAvailable: request.positionsAvailable,
-      salaryRange: formatSalaryRange(request.salaryMin, request.salaryMax),
-      languages: request.languages,
-      locationUrl: request.locationUrl,
-      skillIds: request.skillIds,
+      ...this.toOfferFields(request),
     });
 
     return this.jobOfferMapper.toCreatedResponse(record);
@@ -58,15 +56,63 @@ export class JobOffersService {
     const records = await this.jobOffersRepository.findPublished(new Date());
     return records.map((record) => this.jobOfferMapper.toResponse(record));
   }
-
-  async listByCompany(companyId: string): Promise<JobOfferResponse[]> {
+  async listByCompany(
+    companyId: string,
+    filters: ListCompanyJobOffersRequest = DEFAULT_COMPANY_JOB_OFFERS_FILTERS,
+  ): Promise<JobOfferResponse[]> {
     await this.ensureCompanyExists(companyId);
-    const records = await this.jobOffersRepository.findByCompany(companyId);
+    const records = await this.jobOffersRepository.findByCompany(companyId, filters);
     return records.map((record) => this.jobOfferMapper.toResponse(record));
+  }
+
+  async getByCompanyAndId(companyId: string, jobOfferId: string): Promise<JobOfferResponse> {
+    await this.ensureCompanyExists(companyId);
+    const record = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
+    if (!record) throw new JobOfferNotFoundException();
+    return this.jobOfferMapper.toResponse(record);
+  }
+
+  async update(
+    companyId: string,
+    jobOfferId: string,
+    request: CreateJobOfferRequest,
+  ): Promise<JobOfferResponse> {
+    await this.ensureCompanyExists(companyId);
+    const existing = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
+    if (!existing) throw new JobOfferNotFoundException();
+    await this.jobOfferSkillsService.validateSkillIds(request.skillIds);
+
+    const { modalityId, contractTypeId } = await this.jobOffersRepository.findCatalogIds(
+      request.modality,
+      request.contractType,
+      JobOfferStatus.PUBLISHED,
+    );
+    if (!modalityId) throw new JobOfferCatalogNotFoundException('modalidad');
+    if (!contractTypeId) throw new JobOfferCatalogNotFoundException('tipo de contrato');
+
+    const record = await this.jobOffersRepository.update(jobOfferId, {
+      modalityId,
+      contractTypeId,
+      ...this.toOfferFields(request),
+    });
+    return this.jobOfferMapper.toResponse(record);
   }
 
   listSkillCatalog(): Promise<JobOfferSkillResponse[]> {
     return this.jobOfferSkillsService.listCatalog();
+  }
+
+  private toOfferFields(request: CreateJobOfferRequest) {
+    return {
+      title: request.title,
+      description: request.description,
+      category: request.category,
+      positionsAvailable: request.positionsAvailable,
+      salaryRange: formatSalaryRange(request.salaryMin, request.salaryMax),
+      languages: request.languages,
+      locationUrl: request.locationUrl,
+      skillIds: request.skillIds,
+    };
   }
 
   private async ensureCompanyExists(companyId: string): Promise<void> {

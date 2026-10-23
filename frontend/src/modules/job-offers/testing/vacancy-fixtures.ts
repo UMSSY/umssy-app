@@ -26,7 +26,7 @@ export const EMPTY_CONDITIONS: VacancyConditions = {
 export const VALID_CONDITIONS: VacancyConditions = {
   title: "DevOps Senior",
   modality: "Híbrido",
-  mapsLink: "https://maps.google.com/?q=Av.+Ballivian+742+Cochabamba",
+  mapsLink: "https://maps.app.goo.gl/TechBolivia",
   contractType: "Tiempo completo",
   category: "Tecnología",
   vacancyCount: "2",
