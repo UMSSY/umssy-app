@@ -3,7 +3,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import { formatBlockRange } from "@/shared/utils/date-time";
 import { BLOCK_SELECTION_TEXT } from "../../constants/block-selection.constants";
 import type { BlockSelectionPanelProps } from "../../types/block-selection-panel-props.types";
@@ -56,7 +55,6 @@ export function BlockSelectionPanel({
                 {getBlockDurationMinutes(selectedBlock.startAt, selectedBlock.endAt)}{" "}
                 {BLOCK_SELECTION_TEXT.minutesUnit}
               </CardDescription>
-              <CardDescription className="text-xs">{BOLIVIA_TIME_LABEL}</CardDescription>
             </CardContent>
           </Card>
         ) : (
@@ -65,7 +63,7 @@ export function BlockSelectionPanel({
       </CardContent>
 
       <CardFooter className="bg-transparent">
-        <Button type="button" className="w-full bg-accent text-surface hover:bg-danger" disabled>
+        <Button type="button" className="w-full bg-primary text-primary-foreground hover:bg-brand-hover" disabled>
           {BLOCK_SELECTION_TEXT.requestAppointment}
         </Button>
       </CardFooter>

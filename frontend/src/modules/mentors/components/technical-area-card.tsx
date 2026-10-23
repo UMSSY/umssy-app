@@ -1,5 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import type { TechnicalAreaResponse } from "@/modules/mentorship/types/technical-area-response.types";
+import type { TechnicalAreaResponse } from "@/modules/mentorship";
 
 type TechnicalAreaCardProps = {
   area: TechnicalAreaResponse;
@@ -13,22 +14,22 @@ export function TechnicalAreaCard({
   onToggle,
 }: TechnicalAreaCardProps) {
   return (
-    <button
+    <Button variant="ghost"
       type="button"
       role="checkbox"
       aria-checked={isSelected}
       onClick={() => onToggle(area.id)}
-      className={`flex items-center gap-3 rounded-lg border p-4 text-left transition ${
+      className={`flex h-auto items-center justify-start gap-3 rounded-lg border p-4 text-left whitespace-normal transition ${
         isSelected
-          ? "border-[#DC2626] bg-[#FEE2E2]"
-          : "border-gray-200 bg-[#F3F4F6]"
+          ? "border-accent bg-interaction"
+          : "border-border bg-surface-soft"
       }`}
     >
       <span
-        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border text-white ${
+        className={`flex size-5 shrink-0 items-center justify-center rounded border text-surface ${
           isSelected
-            ? "border-[#DC2626] bg-[#DC2626]"
-            : "border-gray-400 bg-white"
+            ? "border-accent bg-accent"
+            : "border-border-strong bg-surface"
         }`}
       >
         {isSelected && <Check size={14} />}
@@ -36,11 +37,11 @@ export function TechnicalAreaCard({
       <span>
         <span className="block font-medium">{area.name}</span>
         {area.description && (
-          <span className="block text-xs text-gray-500">
+          <span className="block text-xs text-text-secondary">
             {area.description}
           </span>
         )}
       </span>
-    </button>
+    </Button>
   );
 }

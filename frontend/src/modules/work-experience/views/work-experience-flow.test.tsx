@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { workExperienceService } from "../services/work-experience.service";
@@ -47,6 +48,7 @@ async function addExperience(
   user: ReturnType<typeof userEvent.setup>,
   values: { companyName: string; position: string; startDate: string; endDate?: string },
 ) {
+  await user.click(screen.getByRole("button", { name: "Añadir experiencia" }));
   await user.type(screen.getByLabelText(/Empresa/), values.companyName);
   await user.type(screen.getByLabelText(/Cargo/), values.position);
   fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: values.startDate } });
@@ -138,6 +140,7 @@ describe("WorkExperienceView flow", () => {
       endDate: "2024-12-31",
     });
 
+    await user.click(screen.getByRole("button", { name: "Añadir experiencia" }));
     await user.type(screen.getByLabelText(/Empresa/), "UMSS");
     await user.type(screen.getByLabelText(/Cargo/), "Practicante");
     fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2024-07-01" } });
