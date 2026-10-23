@@ -6,7 +6,7 @@ import type { JobOfferDetailsResponse } from "../types/job-offer.types";
 import { jobOffersService } from "./job-offers.service";
 
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn() } }));
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
 
 describe("jobOffersService", () => {
   beforeEach(() => {
@@ -110,5 +110,14 @@ describe("jobOffersService", () => {
     expect(apiClient.get).toHaveBeenCalledWith(
       `/companies/${COMPANY_ID}/job-offers/offer-1`,
     );
+  });
+
+  it("edita la vacante en el endpoint de la empresa", async () => {
+    const updated = { id: "offer-1", title: "DevOps Senior" };
+    vi.mocked(apiClient.put).mockResolvedValue({ data: { statusCode: 200, ok: true, detail: "", data: updated } });
+    const payload = toJobOfferPayload(VALID_CONDITIONS);
+
+    await expect(jobOffersService.update(COMPANY_ID, "offer-1", payload)).resolves.toEqual(updated);
+    expect(apiClient.put).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`, payload);
   });
 });

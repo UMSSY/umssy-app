@@ -14,6 +14,7 @@ function createController() {
     listPublished: vi.fn().mockResolvedValue([]),
     listByCompany: vi.fn().mockResolvedValue([]),
     getByCompanyAndId: vi.fn().mockResolvedValue({ id: 'offer-1' }),
+    update: vi.fn().mockResolvedValue({ id: 'offer-1' }),
     listSkillCatalog: vi.fn().mockResolvedValue([{ id: 'skill-1', name: 'Docker' }]),
   };
   return { controller: new JobOffersController(service as unknown as JobOffersService), service };
@@ -98,6 +99,23 @@ describe('JobOffersController', () => {
       'getByCompanyAndId',
     )?.value;
     if (!handler) throw new Error('No se encontró el handler de detalles de vacante');
+
+    expect(Reflect.getMetadata('__guards__', handler)).toEqual([JwtAuthGuard, RolesGuard]);
+    expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(['empresa']);
+  });
+
+  it('delega la edición de una vacante de la empresa', async () => {
+    const { controller, service } = createController();
+    const request = { title: 'DevOps' } as CreateJobOfferRequest;
+
+    await expect(controller.update('company-1', 'offer-1', request)).resolves.toEqual({
+      id: 'offer-1',
+    });
+    expect(service.update).toHaveBeenCalledWith('company-1', 'offer-1', request);
+  });
+
+  it('exige sesión y rol empresa para editar una vacante', () => {
+    const handler = JobOffersController.prototype.update;
 
     expect(Reflect.getMetadata('__guards__', handler)).toEqual([JwtAuthGuard, RolesGuard]);
     expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(['empresa']);

@@ -1,8 +1,8 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { PUBLISH_MESSAGES } from "../constants/vacancies.constants";
+import { JOB_OFFERS_QUERY_KEYS, PUBLISH_MESSAGES } from "../constants/vacancies.constants";
 import { jobOffersService } from "../services/job-offers.service";
 import type { CreateJobOfferPayload, PublishError } from "../types/job-offer.types";
 import type { VacancyConditions } from "../types/vacancy-conditions.types";
@@ -23,11 +23,22 @@ function hasErrors(conditions: VacancyConditions): boolean {
   return Object.keys(found).length > 0;
 }
 
-export function usePublishJobOffer() {
+export function usePublishJobOffer(jobOfferId?: string) {
   const [localError, setLocalError] = useState<PublishError | null>(null);
+  const queryClient = useQueryClient();
+
   const mutation = useMutation({
-    mutationFn: ({ companyId, payload }: PublishVariables) => jobOffersService.publish(companyId, payload),
+    mutationFn: async ({ companyId, payload }: PublishVariables) => {
+      if (jobOfferId) {
+        await jobOffersService.update(companyId, jobOfferId, payload);
+      } else {
+        await jobOffersService.publish(companyId, payload);
+      }
+    },
     networkMode: "always",
+    // La raíz de la empresa cubre el listado y los detalles de sus vacantes.
+    onSuccess: (_data, { companyId }) =>
+      queryClient.invalidateQueries({ queryKey: JOB_OFFERS_QUERY_KEYS.company(companyId) }),
   });
 
   const submit = async (conditions: VacancyConditions): Promise<void> => {

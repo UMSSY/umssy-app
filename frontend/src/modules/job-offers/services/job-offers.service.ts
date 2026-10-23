@@ -51,4 +51,16 @@ export const jobOffersService = {
     );
     return response.data.data;
   },
+
+  update: async (
+    companyId: string,
+    jobOfferId: string,
+    payload: CreateJobOfferPayload,
+  ): Promise<JobOfferDetailsResponse> => {
+    const response = await apiClient.put<ApiResponse<JobOfferDetailsResponse>>(
+      `${buildCompanyJobOffersEndpoint(companyId)}/${jobOfferId}`,
+      payload,
+    );
+    return response.data.data;
+  },
 };

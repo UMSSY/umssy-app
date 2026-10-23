@@ -46,14 +46,7 @@ export class JobOffersService {
       modalityId,
       contractTypeId,
       statusId,
-      title: request.title,
-      description: request.description,
-      category: request.category,
-      positionsAvailable: request.positionsAvailable,
-      salaryRange: formatSalaryRange(request.salaryMin, request.salaryMax),
-      languages: request.languages,
-      locationUrl: request.locationUrl,
-      skillIds: request.skillIds,
+      ...this.toOfferFields(request),
     });
 
     return this.jobOfferMapper.toCreatedResponse(record);
@@ -79,8 +72,47 @@ export class JobOffersService {
     return this.jobOfferMapper.toResponse(record);
   }
 
+  async update(
+    companyId: string,
+    jobOfferId: string,
+    request: CreateJobOfferRequest,
+  ): Promise<JobOfferResponse> {
+    await this.ensureCompanyExists(companyId);
+    const existing = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
+    if (!existing) throw new JobOfferNotFoundException();
+    await this.jobOfferSkillsService.validateSkillIds(request.skillIds);
+
+    const { modalityId, contractTypeId } = await this.jobOffersRepository.findCatalogIds(
+      request.modality,
+      request.contractType,
+      JobOfferStatus.PUBLISHED,
+    );
+    if (!modalityId) throw new JobOfferCatalogNotFoundException('modalidad');
+    if (!contractTypeId) throw new JobOfferCatalogNotFoundException('tipo de contrato');
+
+    const record = await this.jobOffersRepository.update(jobOfferId, {
+      modalityId,
+      contractTypeId,
+      ...this.toOfferFields(request),
+    });
+    return this.jobOfferMapper.toResponse(record);
+  }
+
   listSkillCatalog(): Promise<JobOfferSkillResponse[]> {
     return this.jobOfferSkillsService.listCatalog();
+  }
+
+  private toOfferFields(request: CreateJobOfferRequest) {
+    return {
+      title: request.title,
+      description: request.description,
+      category: request.category,
+      positionsAvailable: request.positionsAvailable,
+      salaryRange: formatSalaryRange(request.salaryMin, request.salaryMax),
+      languages: request.languages,
+      locationUrl: request.locationUrl,
+      skillIds: request.skillIds,
+    };
   }
 
   private async ensureCompanyExists(companyId: string): Promise<void> {
