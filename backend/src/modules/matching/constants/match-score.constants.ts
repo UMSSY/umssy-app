@@ -5,13 +5,16 @@ export const MATCH_SCORE_WEIGHTS = {
   otherRequirements: 5,
 } as const;
 
-export type ScoreCategory = keyof typeof MATCH_SCORE_WEIGHTS;
+export const SCORE_CATEGORIES = [
+  'skills',
+  'academicRequirements',
+  'experienceRequirements',
+  'otherRequirements',
+] as const;
+
+export type ScoreCategory = typeof SCORE_CATEGORIES[number];
 
 export type MatchScoreWeights = Readonly<Record<ScoreCategory, number>>;
-
-export const SCORE_CATEGORIES = Object.keys(
-  MATCH_SCORE_WEIGHTS,
-) as ScoreCategory[];
 
 export const MATCH_SCORE_WEIGHT_ENV_VARS: Readonly<
   Record<ScoreCategory, string>
@@ -21,3 +24,4 @@ export const MATCH_SCORE_WEIGHT_ENV_VARS: Readonly<
   experienceRequirements: 'MATCH_SCORE_WEIGHT_EXPERIENCE',
   otherRequirements: 'MATCH_SCORE_WEIGHT_OTHER',
 };
+

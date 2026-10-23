@@ -2,6 +2,12 @@
 
 Tareas: #1257, #1258, #1278, #1279, #1249 y #1261. Las dos últimas continúan las tareas anteriores #236 y #275 de ranking y fórmula ponderada.
 
+Entrega por PR:
+
+- HU-02B, postulación (#1257, #1258): #1370.
+- HU-06, feed por afinidad y endpoints de recomendación (#1278, #1279): PR de la rama `feature/grupo-5-hu06-feed-afinidad-v2`.
+- Fórmula ponderada (#1261): los pesos configurables se integraron en #1351; #1364 añade la protección ante pesos finitos muy grandes, las variables en `.env.example` y este documento.
+
 ## Uso e integración
 
 - La pantalla `/vacancies/recommended` tiene un acceso en Oportunidades, búsqueda por cargo, empresa o habilidad, modalidad, alta afinidad y limpieza. Filtrar conserva el orden del servidor. Alta afinidad usa el umbral propuesto de 70%; su aprobación funcional corresponde al PO.
