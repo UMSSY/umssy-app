@@ -9,17 +9,22 @@ import {
   Post,
   Query,
   StandardSchemaValidationPipe,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
 import {
   ApiBody,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
+import { Roles } from '../../../common/decorators/roles.decorator.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { buildRequestValidationException } from '../../../common/utils/build-request-validation-exception.js';
 import { toApiBody } from '../../../common/utils/to-api-body.js';
 import {
@@ -49,8 +54,14 @@ const companyIdPipe = new ParseUUIDPipe({
       { field: 'companyId', message: JOB_OFFER_VALIDATION_MESSAGES.INVALID_COMPANY_ID },
     ]),
 });
+const jobOfferIdPipe = new ParseUUIDPipe({
+  exceptionFactory: () =>
+    new RequestValidationException([
+      { field: 'jobOfferId', message: JOB_OFFER_VALIDATION_MESSAGES.INVALID_JOB_OFFER_ID },
+    ]),
+});
 
-// TODO: proteger con JwtAuthGuard y el rol empresa cuando el login devuelva el companyId (Epic 1)
+// TODO: verificar el companyId de todas las operaciones de empresa contra la sesión (Epic 1)
 @ApiTags('job-offers')
 @UsePipes(
   new StandardSchemaValidationPipe({
@@ -87,7 +98,7 @@ export class JobOffersController {
     return this.jobOffersService.create(companyId, request);
   }
 
-    @Get('companies/:companyId/job-offers')
+  @Get('companies/:companyId/job-offers')
   @ApiOperation({ summary: 'Lista las vacantes de una empresa, con filtros opcionales' })
   @ApiQuery({ name: 'modality', required: false, enum: JobOfferModality })
   @ApiQuery({ name: 'contractType', required: false, enum: JobOfferContractType })
@@ -130,5 +141,18 @@ export class JobOffersController {
     @Query({ schema: listCompanyJobOffersSchema }) filters: ListCompanyJobOffersRequest,
   ): Promise<JobOfferResponse[]> {
     return this.jobOffersService.listByCompany(companyId, filters);
+  }
+
+  @Get('companies/:companyId/job-offers/:jobOfferId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('empresa')
+  @ApiOperation({ summary: 'Obtiene los detalles de una vacante de la empresa' })
+  @ApiOkResponse({ description: 'Detalles de la vacante solicitada' })
+  @ApiNotFoundResponse({ description: 'La vacante no existe o no pertenece a la empresa' })
+  getByCompanyAndId(
+    @Param('companyId', companyIdPipe) companyId: string,
+    @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
+  ): Promise<JobOfferResponse> {
+    return this.jobOffersService.getByCompanyAndId(companyId, jobOfferId);
   }
 }
