@@ -50,7 +50,7 @@ export function ReviewStep() {
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-extrabold tracking-tight text-ink 2xl:text-4xl">Revisión de la carrera</h1>
         {/* TODO: indicar qué hacer tras un rechazo cuando se defina el reenvío (el issue #495 no lo define) */}
-        <p className="max-w-155 text-[15px] text-text-secondary 2xl:text-lg">
+        <p className="max-w-155 text-base text-text-secondary 2xl:text-lg">
           {isRejected
             ? "Tu solicitud fue rechazada."
             : `Estamos revisando tu solicitud. Te avisaremos a ${values.email.trim()} cuando tengamos novedades.`}
@@ -63,7 +63,7 @@ export function ReviewStep() {
         <p className="text-[12.5px] text-text-secondary 2xl:text-base">
           Guárdalo: lo necesitarás para consultar el estado de tu solicitud.
         </p>
-        <p className={cn("text-[14.5px] font-semibold 2xl:text-base", isRejected ? "text-danger" : "text-ink")}>
+        <p className={cn("text-sm font-semibold 2xl:text-base", isRejected ? "text-danger" : "text-ink")}>
           {`Estado: ${statusLabel}`}
         </p>
         {isRejected && submission.rejectionReason ? (
@@ -95,7 +95,7 @@ export function ReviewStep() {
               {index < stages.length - 1 ? <span aria-hidden="true" className="my-1 h-5 w-[1.5px] bg-border-strong" /> : null}
             </div>
             <div className="pb-2">
-              <p className={cn("text-[14.5px] font-semibold 2xl:text-base", stage.state === "current" ? "text-ink" : "text-ink-soft")}>
+              <p className={cn("text-sm font-semibold 2xl:text-base", stage.state === "current" ? "text-ink" : "text-ink-soft")}>
                 {stage.label}
                 <span className="sr-only">{`: ${STATE_TEXT[stage.state]}`}</span>
               </p>

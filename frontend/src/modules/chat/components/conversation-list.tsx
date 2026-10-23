@@ -1,6 +1,9 @@
 
 'use client';
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, Search } from 'lucide-react';
 import { Conversation, ConversationFilter } from '../types/conversation.types';
 import { ConversationItem } from './conversation-item';
 import { ConversationSkeleton } from './conversation-skeleton';
@@ -48,67 +51,56 @@ export function ConversationList({
   };
 
   return (
-    <div className="relative flex flex-col h-full bg-white border-r border-slate-200">
-      <div className="p-4 border-b border-slate-100 space-y-3">
+    <div className="relative flex h-full flex-col border-r border-border bg-surface">
+      <div className="space-y-3 border-b border-border p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Chats</h2>
+          <h2 className="text-xl font-bold tracking-tight text-ink">Chats</h2>
           {onStartNewChat && activeFilter !== 'unread' && (
-            <button
+            <Button variant="ghost"
               type="button"
               onClick={onStartNewChat}
-              className="hidden md:inline-flex items-center text-xs font-bold text-red-600 hover:text-red-700"
+              className="hidden items-center gap-1.5 text-sm font-bold text-accent hover:text-accent md:inline-flex"
             >
-              + Nuevo
-            </button>
+              <Plus className="size-4" aria-hidden="true" /> Nuevo
+            </Button>
           )}
         </div>
 
         <div className="relative">
-          <input
+          <Input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
+            aria-label="Buscar conversaciones"
             placeholder="Buscar personas..."
-            className="w-full pl-9 pr-3 py-2 text-sm bg-slate-100 border border-transparent rounded-lg focus:outline-none focus:bg-white focus:border-[#0B2545] transition-all text-slate-800 placeholder-slate-400"
+            className="w-full rounded-lg border border-border bg-surface py-2 pr-3 pl-9 text-sm text-ink transition-all placeholder:text-text-secondary focus:border-accent focus:bg-surface focus-visible:ring-2 focus-visible:ring-ring"
           />
-          <svg
-            className="w-4 h-4 text-slate-400 absolute left-3 top-3"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <Search className="pointer-events-none absolute top-3 left-3 size-4 text-text-secondary" aria-hidden="true" />
         </div>
 
         <div className="flex items-center gap-2 pt-1">
-          <button
+          <Button variant="ghost"
             type="button"
             onClick={() => onFilterChange('all')}
-            className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all ${
+            className={`rounded-md px-3.5 py-1 text-xs font-semibold transition-colors ${
               activeFilter === 'all'
-                ? 'bg-[#0B2545] text-white shadow-xs'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-interaction text-accent'
+                : 'bg-surface text-text-secondary hover:bg-surface-soft'
             }`}
           >
             Todos
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost"
             type="button"
             onClick={() => onFilterChange('unread')}
-            className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all ${
+            className={`rounded-md px-3.5 py-1 text-xs font-semibold transition-colors ${
               activeFilter === 'unread'
-                ? 'bg-[#0B2545] text-white shadow-xs'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-interaction text-accent'
+                : 'bg-surface text-text-secondary hover:bg-surface-soft'
             }`}
           >
             Sin leer
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -137,13 +129,13 @@ export function ConversationList({
 
             {hasMore && (
               <div className="p-3 text-center">
-                <button
+                <Button variant="ghost"
                   type="button"
                   onClick={onLoadMore}
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+                  className="text-xs font-semibold text-ink-soft hover:text-ink-soft"
                 >
                   Cargar mas conversaciones
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -151,21 +143,14 @@ export function ConversationList({
       </div>
 
       {onStartNewChat && activeFilter !== 'unread' && (
-        <button
+        <Button variant="ghost"
           type="button"
           onClick={onStartNewChat}
-          className="md:hidden absolute bottom-6 right-4 w-12 h-12 bg-red-600 text-white rounded-xl shadow-lg flex items-center justify-center hover:bg-red-700 active:scale-95 transition-all focus:outline-none"
+          className="absolute right-4 bottom-6 flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-none transition-all hover:bg-brand-hover focus-visible:ring-2 focus-visible:ring-ring active:scale-95 md:hidden"
           aria-label="Iniciar nueva conversacion"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-        </button>
+          <Plus className="size-6" aria-hidden="true" />
+        </Button>
       )}
     </div>
   );

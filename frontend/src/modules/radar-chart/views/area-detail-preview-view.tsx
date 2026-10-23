@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   useRef,
   useState,
@@ -20,7 +21,7 @@ import type { AreaId } from "../types/area-detail.types";
 import { formatDecimal } from "../utils/format-decimal";
 
 const CARD_CLASS =
-  "rounded-2xl border border-border bg-surface";
+  "rounded-lg border border-border bg-surface";
 
 const TAB_PANEL_ID = "area-detail-tabpanel";
 
@@ -65,7 +66,7 @@ export function AreaDetailPreviewView() {
 
   return (
     <main className="bg-background font-sans">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <div>
           <nav aria-label="Ruta de navegación">
             <ol className="flex items-center gap-1 text-xs text-text-secondary">
@@ -123,14 +124,14 @@ export function AreaDetailPreviewView() {
         <div
           role="tablist"
           aria-label="Áreas de afinidad"
-          className={`${CARD_CLASS} flex gap-1 overflow-x-auto px-2 py-1.5 [scrollbar-width:thin]`}
+          className={`${CARD_CLASS} flex [scrollbar-width:thin] gap-1 overflow-x-auto px-2 py-1.5`}
         >
           {AREA_ORDER.map((id, index) => {
             const isSelected =
               selectedAreaId === id;
 
             return (
-              <button
+              <Button
                 key={id}
                 ref={(element) => {
                   tabRefs.current[index] = element;
@@ -161,7 +162,7 @@ export function AreaDetailPreviewView() {
                 className="group relative flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap text-text-secondary outline-none after:absolute after:inset-x-3 after:-bottom-1.5 after:h-0.5 after:rounded-full hover:text-ink focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 aria-selected:text-ink aria-selected:after:bg-accent motion-safe:transition-colors"
               >
                 <span
-                  className="flex size-5 items-center justify-center rounded-full bg-surface-soft text-[11px] font-semibold text-text-secondary tabular-nums group-aria-selected:bg-accent group-aria-selected:text-surface motion-safe:transition-colors"
+                  className="flex size-5 items-center justify-center rounded-full bg-background text-xs font-semibold text-text-secondary tabular-nums group-aria-selected:bg-accent group-aria-selected:text-surface motion-safe:transition-colors"
                   aria-hidden="true"
                 >
                   {index + 1}
@@ -175,7 +176,7 @@ export function AreaDetailPreviewView() {
                     1,
                   )}
                 </span>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -198,7 +199,7 @@ export function AreaDetailPreviewView() {
             />
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border-strong bg-surface px-6 py-14 text-center">
+          <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border-strong bg-surface px-6 py-14 text-center">
             <MousePointerClick
               className="size-6 text-border-strong"
               aria-hidden="true"

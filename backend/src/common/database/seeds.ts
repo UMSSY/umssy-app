@@ -3,7 +3,6 @@ import 'dotenv/config';
 import { pathToFileURL } from 'node:url';
 
 import { Logger } from '@nestjs/common';
-import { PrismaPg } from '@prisma/adapter-pg';
 
 import { seedEvents } from '../../modules/events/seeds/events.seed.js';
 import { seedEventRegistrations } from '../../modules/event-registrations/seeds/event-registrations.seed.js';
@@ -18,34 +17,20 @@ import {
   hashSeedPassword,
   seedUsers,
 } from '../../modules/users/seeds/users.seed.js';
-import { PrismaClient, type Prisma } from '../../prisma/client.js';
-import { buildDatabaseConnectionString } from '../prisma/build-connection-string.js';
-import type { SeedEnv } from '../types/seed-env.types.js';
+import type { PrismaClient, Prisma } from '../../prisma/client.js';
 import type { SeedSummary } from '../types/seed-summary.types.js';
-import { SeedEnvSchema } from './seed-env.schema.js';
+import { createSeedClient } from './seed-client.js';
 import { SeedOptionsSchema } from './seed-options.schema.js';
 import { runSeedStage } from './run-seed-stage.js';
 
-export function loadSeedEnv(source: NodeJS.ProcessEnv = process.env): SeedEnv {
-  const parsed = SeedEnvSchema.safeParse(source);
-  if (!parsed.success) {
-    const detail = parsed.error.issues
-      .map((issue) => `${issue.path.join('.') || '(raíz)'}: ${issue.message}`)
-      .join(' | ');
-    throw new Error(`Configuración de base de datos inválida — ${detail}`);
-  }
-  return parsed.data;
-}
-
-export function createSeedClient(env: SeedEnv = loadSeedEnv()): PrismaClient {
-  const adapter = new PrismaPg(
-    { connectionString: buildDatabaseConnectionString() },
-    env.DB_SCHEMA ? { schema: env.DB_SCHEMA } : undefined,
-  );
-  return new PrismaClient({ adapter });
-}
+export { createSeedClient, loadSeedEnv } from './seed-client.js';
 
 export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'Los datos de demostración no se pueden cargar en producción',
+    );
+  }
   const options = SeedOptionsSchema.safeParse(process.env);
   if (!options.success) {
     throw new Error(
