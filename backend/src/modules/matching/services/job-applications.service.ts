@@ -27,7 +27,8 @@ function toResponse(record: JobApplicationRecord): JobApplicationResponse {
 
 function isUniqueViolation(error: unknown): boolean {
   return (
-    error instanceof Prisma.PrismaClientKnownRequestError && error.code === UNIQUE_VIOLATION_CODE
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === UNIQUE_VIOLATION_CODE
   );
 }
 
@@ -35,7 +36,10 @@ function isUniqueViolation(error: unknown): boolean {
 export class JobApplicationsService {
   constructor(private readonly repository: JobApplicationsRepository) {}
 
-  async apply(userId: string, jobOfferId: string): Promise<JobApplicationResponse> {
+  async apply(
+    userId: string,
+    jobOfferId: string,
+  ): Promise<JobApplicationResponse> {
     if (!(await this.repository.isOfferOpen(jobOfferId, new Date()))) {
       throw new JobOfferUnavailableException();
     }
@@ -44,13 +48,17 @@ export class JobApplicationsService {
       throw new DuplicateJobApplicationException();
     }
 
-    const status = await this.repository.findStatusId(JOB_APPLICATION_STATUS.IN_REVIEW);
+    const status = await this.repository.findStatusId(
+      JOB_APPLICATION_STATUS.IN_REVIEW,
+    );
     if (!status) {
       throw new JobApplicationStatusMissingException();
     }
 
     try {
-      return toResponse(await this.repository.create(userId, jobOfferId, status.id));
+      return toResponse(
+        await this.repository.create(userId, jobOfferId, status.id),
+      );
     } catch (error) {
       // Dos clics simultáneos: la restricción única (job_offer_id, user_id) decide.
       if (isUniqueViolation(error)) {
@@ -60,8 +68,14 @@ export class JobApplicationsService {
     }
   }
 
-  async findMine(userId: string, jobOfferId: string): Promise<MyJobApplicationResponse> {
+  async findMine(
+    userId: string,
+    jobOfferId: string,
+  ): Promise<MyJobApplicationResponse> {
     const record = await this.repository.findByUserAndOffer(userId, jobOfferId);
-    return { hasApplied: record !== null, application: record ? toResponse(record) : null };
+    return {
+      hasApplied: record !== null,
+      application: record ? toResponse(record) : null,
+    };
   }
 }

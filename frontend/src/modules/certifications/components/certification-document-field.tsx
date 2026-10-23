@@ -11,7 +11,7 @@ import { getFieldErrorProps } from "@/modules/profile";
 import { FormField } from "@/modules/profile";
 
 const OUTLINE_BUTTON_CLASS =
-  "h-10 shrink-0 border-border-strong bg-surface px-4 text-[13px] font-semibold text-ink hover:bg-surface-soft";
+  "h-10 shrink-0 border-border-strong bg-surface px-4 text-sm font-semibold text-ink hover:bg-surface-soft";
 
 export function CertificationDocumentField({
   id = "certification-document",
@@ -90,7 +90,7 @@ export function CertificationDocumentField({
           )}
           <p
             role={isReading ? "status" : undefined}
-            className="text-[13px] break-all text-text-secondary"
+            className="text-sm break-all text-text-secondary"
           >
             {getDescription()}
           </p>
@@ -133,7 +133,7 @@ export function CertificationDocumentField({
         </div>
       </div>
       {isUploading && selectedFile ? (
-        <p role="status" className="flex items-center gap-2 text-[13px] text-text-secondary">
+        <p role="status" className="flex items-center gap-2 text-sm text-text-secondary">
           <Loader2 aria-hidden="true" className="size-4 animate-spin" />
           Subiendo documento...
         </p>

@@ -14,7 +14,11 @@ const RECORD: JobApplicationRecord = {
   id: 'application-1',
   appliedAt: new Date('2026-11-10T14:00:00.000Z'),
   status: { title: 'En revisión' },
-  jobOffer: { id: OFFER_ID, title: 'DevOps Senior', company: { title: 'TechBolivia' } },
+  jobOffer: {
+    id: OFFER_ID,
+    title: 'DevOps Senior',
+    company: { title: 'TechBolivia' },
+  },
 };
 
 const RESPONSE = {
@@ -41,14 +45,20 @@ describe('HU-02B T2.8 - JobApplicationsService', () => {
     repository.findByUserAndOffer.mockResolvedValue(null);
     repository.findStatusId.mockResolvedValue({ id: 'status-in-review' });
     repository.create.mockResolvedValue(RECORD);
-    service = new JobApplicationsService(repository as unknown as JobApplicationsRepository);
+    service = new JobApplicationsService(
+      repository as unknown as JobApplicationsRepository,
+    );
   });
 
   it('AC-02.7: crea la postulación en estado "En revisión" y devuelve el resumen', async () => {
     await expect(service.apply(USER_ID, OFFER_ID)).resolves.toEqual(RESPONSE);
 
     expect(repository.findStatusId).toHaveBeenCalledWith('En revisión');
-    expect(repository.create).toHaveBeenCalledWith(USER_ID, OFFER_ID, 'status-in-review');
+    expect(repository.create).toHaveBeenCalledWith(
+      USER_ID,
+      OFFER_ID,
+      'status-in-review',
+    );
   });
 
   it('AC-02.8: rechaza una segunda postulación a la misma vacante', async () => {

@@ -39,14 +39,21 @@ export class JobApplicationsRepository {
     });
   }
 
-  findByUserAndOffer(userId: string, jobOfferId: string): Promise<JobApplicationRecord | null> {
+  findByUserAndOffer(
+    userId: string,
+    jobOfferId: string,
+  ): Promise<JobApplicationRecord | null> {
     return this.prisma.jobApplication.findUnique({
       where: { jobOfferId_userId: { jobOfferId, userId } },
       select: JOB_APPLICATION_SELECT,
     });
   }
 
-  create(userId: string, jobOfferId: string, statusId: string): Promise<JobApplicationRecord> {
+  create(
+    userId: string,
+    jobOfferId: string,
+    statusId: string,
+  ): Promise<JobApplicationRecord> {
     return this.prisma.jobApplication.create({
       data: { userId, jobOfferId, statusId },
       select: JOB_APPLICATION_SELECT,

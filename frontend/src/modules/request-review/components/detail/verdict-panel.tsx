@@ -37,8 +37,8 @@ export function VerdictPanel({ detail }: VerdictPanelProps) {
   }
 
   return (
-    <section className="flex flex-col gap-4 rounded-[10px] border border-border bg-surface p-5" aria-label="Dictamen">
-      <h2 className="font-tight text-[17px] font-bold text-ink">Dictamen</h2>
+    <section className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-5" aria-label="Dictamen">
+      <h2 className="font-tight text-lg font-bold text-ink">Dictamen</h2>
 
       {detail.status === "in_review" ? (
         <>
@@ -46,7 +46,7 @@ export function VerdictPanel({ detail }: VerdictPanelProps) {
             <Button
               onClick={() => setConfirmOpen(true)}
               disabled={isApproving}
-              className="h-[42px] flex-1 rounded-lg bg-ink px-5 text-[14.5px] font-semibold text-surface hover:bg-ink/90"
+              className="h-10 flex-1 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
             >
               <Check strokeWidth={1.75} aria-hidden="true" />
               Aprobar solicitud
@@ -55,7 +55,7 @@ export function VerdictPanel({ detail }: VerdictPanelProps) {
               variant="outline"
               onClick={() => setRejectOpen(true)}
               disabled={isApproving}
-              className="h-[42px] flex-1 rounded-lg border-accent bg-surface px-5 text-[14.5px] font-semibold text-accent hover:bg-interaction hover:text-accent"
+              className="h-10 flex-1 rounded-lg border-accent bg-surface px-5 text-sm font-semibold text-accent hover:bg-interaction hover:text-accent"
             >
               <X strokeWidth={1.75} aria-hidden="true" />
               Rechazar

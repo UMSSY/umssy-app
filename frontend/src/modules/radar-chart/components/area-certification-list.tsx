@@ -25,7 +25,7 @@ export function AreaCertificationList({ certifications }: AreaCertificationListP
                   {`${certification.issuer} · ${certification.year}`}
                 </p>
                 {certification.credentialId && (
-                  <p className="mt-1 font-mono text-[11px] break-all text-ink-soft">
+                  <p className="mt-1 font-mono text-xs break-all text-ink-soft">
                     {`ID ${certification.credentialId}`}
                   </p>
                 )}

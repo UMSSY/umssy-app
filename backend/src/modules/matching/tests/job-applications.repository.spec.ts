@@ -21,7 +21,9 @@ describe('HU-02B T2.8 - JobApplicationsRepository', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    repository = new JobApplicationsRepository(prisma as unknown as PrismaService);
+    repository = new JobApplicationsRepository(
+      prisma as unknown as PrismaService,
+    );
   });
 
   it('considera abierta solo una vacante publicada y vigente', async () => {
@@ -42,13 +44,19 @@ describe('HU-02B T2.8 - JobApplicationsRepository', () => {
   it('devuelve false cuando la vacante no está disponible', async () => {
     prisma.jobOffer.findFirst.mockResolvedValue(null);
 
-    await expect(repository.isOfferOpen('offer-1', new Date())).resolves.toBe(false);
+    await expect(repository.isOfferOpen('offer-1', new Date())).resolves.toBe(
+      false,
+    );
   });
 
   it('busca el estado por título', async () => {
-    prisma.jobApplicationStatus.findUnique.mockResolvedValue({ id: 'status-1' });
+    prisma.jobApplicationStatus.findUnique.mockResolvedValue({
+      id: 'status-1',
+    });
 
-    await expect(repository.findStatusId('En revisión')).resolves.toEqual({ id: 'status-1' });
+    await expect(repository.findStatusId('En revisión')).resolves.toEqual({
+      id: 'status-1',
+    });
     expect(prisma.jobApplicationStatus.findUnique).toHaveBeenCalledWith({
       where: { title: 'En revisión' },
       select: { id: true },

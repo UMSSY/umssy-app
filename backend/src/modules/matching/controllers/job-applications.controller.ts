@@ -1,4 +1,13 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiConflictResponse,
@@ -28,14 +37,24 @@ const jobOfferIdPipe = new ParseUUIDPipe({
 @UseGuards(JwtAuthGuard)
 @Controller('job-offers/:id/applications')
 export class JobApplicationsController {
-  constructor(private readonly jobApplicationsService: JobApplicationsService) {}
+  constructor(
+    private readonly jobApplicationsService: JobApplicationsService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Postula al usuario autenticado a una vacante publicada' })
-  @ApiCreatedResponse({ description: 'Postulación registrada en estado "En revisión"' })
-  @ApiNotFoundResponse({ description: 'La vacante no existe o no está disponible' })
-  @ApiConflictResponse({ description: 'El usuario ya se postuló a esta vacante' })
+  @ApiOperation({
+    summary: 'Postula al usuario autenticado a una vacante publicada',
+  })
+  @ApiCreatedResponse({
+    description: 'Postulación registrada en estado "En revisión"',
+  })
+  @ApiNotFoundResponse({
+    description: 'La vacante no existe o no está disponible',
+  })
+  @ApiConflictResponse({
+    description: 'El usuario ya se postuló a esta vacante',
+  })
   apply(
     @Param('id', jobOfferIdPipe) jobOfferId: string,
     @CurrentUserId() userId: string,
@@ -44,8 +63,12 @@ export class JobApplicationsController {
   }
 
   @Get('me')
-  @ApiOperation({ summary: 'Indica si el usuario autenticado ya se postuló a la vacante' })
-  @ApiOkResponse({ description: 'Postulación del usuario o null si aún no se postuló' })
+  @ApiOperation({
+    summary: 'Indica si el usuario autenticado ya se postuló a la vacante',
+  })
+  @ApiOkResponse({
+    description: 'Postulación del usuario o null si aún no se postuló',
+  })
   findMine(
     @Param('id', jobOfferIdPipe) jobOfferId: string,
     @CurrentUserId() userId: string,
