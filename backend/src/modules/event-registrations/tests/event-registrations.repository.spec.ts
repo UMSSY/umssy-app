@@ -3,14 +3,39 @@ import { EventRegistrationsRepository } from '../repositories/event-registration
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 
 describe('EventRegistrationsRepository', () => {
+  const create = vi.fn();
   const findMany = vi.fn();
   let repository: EventRegistrationsRepository;
 
   beforeEach(() => {
+    create.mockReset();
     findMany.mockReset();
     repository = new EventRegistrationsRepository({
-      eventRegistration: { findMany },
+      eventRegistration: { create, findMany },
     } as unknown as PrismaService);
+  });
+
+  it('persiste la inscripción con su token QR', async () => {
+    const payload = {
+      eventId: 'event-1',
+      userId: 'user-1',
+      statusId: 'status-1',
+      qrToken: 'a'.repeat(64),
+    };
+    create.mockResolvedValue({ id: 'reg-1', ...payload });
+
+    await repository.create(payload);
+
+    expect(create).toHaveBeenCalledWith({
+      data: payload,
+      select: {
+        id: true,
+        eventId: true,
+        userId: true,
+        statusId: true,
+        qrToken: true,
+      },
+    });
   });
 
   it('consulta por userId con el select y orden esperados', async () => {
