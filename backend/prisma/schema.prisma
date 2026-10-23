@@ -227,16 +227,31 @@ model WorkExperience {
   @@map("work_experiences")
 }
 
+model RadarArea {
+  id          String   @id @db.VarChar(50)
+  name        String   @unique @db.VarChar(80)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  skills Skill[]
+
+  @@map("radar_areas")
+}
+
 model Skill {
   id        String   @id @default(uuid()) @db.Uuid
   name      String   @unique
   isCustom  Boolean  @default(false) @map("is_custom")
+  areaId    String?  @map("area_id") @db.VarChar(50)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  area           RadarArea?      @relation(fields: [areaId], references: [id], onDelete: SetNull)
   userSkills     UserSkill[]
   jobOfferSkills JobOfferSkill[]
 
+  @@index([areaId])
   @@map("skills")
 }
 
@@ -256,11 +271,15 @@ model JobOfferSkill {
 }
 
 model UserSkill {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  skillId   String   @map("skill_id") @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  skillId            String   @map("skill_id") @db.Uuid
+  source             String   @default("manual") @db.VarChar(20)
+  verificationStatus String   @default("pending") @map("verification_status") @db.VarChar(20)
+  isHighRelevance    Boolean  @default(false) @map("is_high_relevance")
+  evidenceRefs       Json?    @default("[]") @map("evidence_refs")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   skill Skill @relation(fields: [skillId], references: [id], onDelete: Restrict)
@@ -614,6 +633,7 @@ model JobOfferStatus {
 
   @@map("job_offer_statuses")
 }
+
 model AdminExportHistory {
   id         String   @id @default(uuid()) @db.Uuid
   userId     String   @map("user_id") @db.Uuid
@@ -817,4 +837,3 @@ model UserPresence {
 
   @@map("user_presences")
 }
-
