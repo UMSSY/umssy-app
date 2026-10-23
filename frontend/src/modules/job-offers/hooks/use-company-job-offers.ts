@@ -26,6 +26,7 @@ export function useCompanyJobOffers(filters: JobOfferFilters) {
     companyId === null || query.isError ? "error" : query.isPending ? "loading" : "ready";
 
   return {
+    companyId,
     offers: query.data ?? [],
     status,
     reload: () => {
@@ -33,4 +34,3 @@ export function useCompanyJobOffers(filters: JobOfferFilters) {
     },
   };
 }
-

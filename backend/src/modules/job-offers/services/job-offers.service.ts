@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   CompanyNotFoundException,
   JobOfferCatalogNotFoundException,
+  JobOfferNotFoundException,
 } from '../exceptions/index.js';
 import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
 import { JobOffersRepository } from '../repositories/job-offers.repository.js';
@@ -62,13 +63,20 @@ export class JobOffersService {
     const records = await this.jobOffersRepository.findPublished(new Date());
     return records.map((record) => this.jobOfferMapper.toResponse(record));
   }
-    async listByCompany(
+  async listByCompany(
     companyId: string,
     filters: ListCompanyJobOffersRequest = DEFAULT_COMPANY_JOB_OFFERS_FILTERS,
   ): Promise<JobOfferResponse[]> {
     await this.ensureCompanyExists(companyId);
     const records = await this.jobOffersRepository.findByCompany(companyId, filters);
     return records.map((record) => this.jobOfferMapper.toResponse(record));
+  }
+
+  async getByCompanyAndId(companyId: string, jobOfferId: string): Promise<JobOfferResponse> {
+    await this.ensureCompanyExists(companyId);
+    const record = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
+    if (!record) throw new JobOfferNotFoundException();
+    return this.jobOfferMapper.toResponse(record);
   }
 
   listSkillCatalog(): Promise<JobOfferSkillResponse[]> {
