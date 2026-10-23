@@ -50,11 +50,11 @@ export function ReviewQueueView() {
 
   return (
     <main className="bg-background">
-      <div className="mx-auto w-full max-w-7xl">
-        <PageHeading className="mb-6" title="Cola de Revisión" description="Revisa los perfiles enviados y su radar de afinidad." />
+      <div className="@container/review mx-auto w-full max-w-7xl">
+        <PageHeading className="mb-6" title="Revisión de radares" description="Selecciona un perfil para revisar sus competencias. Los datos y acciones de esta vista son de demostración." />
 
-        <div className="grid min-h-[650px] grid-cols-1 overflow-hidden rounded-lg border border-border bg-surface lg:grid-cols-[320px_minmax(0,1fr)]">
-          <section className="border-b border-border lg:border-r lg:border-b-0">
+        <div className="grid min-h-96 grid-cols-1 items-start overflow-hidden rounded-lg border border-border bg-surface @4xl/review:grid-cols-[20rem_minmax(0,1fr)]">
+          <section className="border-b border-border @4xl/review:border-r @4xl/review:border-b-0">
             <div className="border-b border-border p-5">
               <h2 className="font-semibold text-ink">
                 Perfiles enviados
@@ -77,11 +77,11 @@ export function ReviewQueueView() {
             />
           </section>
 
-          <ReviewProfileDetail
+          <div className="min-w-0"><ReviewProfileDetail
             profile={selectedProfile}
             localAction={localAction}
             onAction={setLocalAction}
-          />
+          /></div>
         </div>
       </div>
     </main>

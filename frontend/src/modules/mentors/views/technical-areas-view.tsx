@@ -129,7 +129,7 @@ export function TechnicalAreasView() {
           type="button"
           onClick={handleSubmit}
           disabled={hasNoSelection || isSaving || isLoading || hasLoadError}
-          className="h-auto gap-2 rounded-lg bg-accent px-6 py-2 font-medium text-white hover:bg-accent active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-auto gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSaving ? (
             "Guardando..."
@@ -164,7 +164,7 @@ export function TechnicalAreasView() {
             <AlertDialogTitle className="mb-2 text-lg font-bold">
               ¿Descartar cambios?
             </AlertDialogTitle>
-            <AlertDialogDescription className="mb-4 text-left text-sm text-text-secondary [text-wrap:wrap]">
+            <AlertDialogDescription className="mb-4 text-left text-sm [text-wrap:wrap] text-text-secondary">
               Tienes cambios sin guardar. Si sales, se perderán.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -178,7 +178,7 @@ export function TechnicalAreasView() {
             <AlertDialogAction
               type="button"
               onClick={() => router.push("/mentors/participation")}
-              className="h-auto rounded-lg bg-accent px-4 py-2 text-white hover:bg-accent active:translate-y-0"
+              className="h-auto rounded-lg bg-critical-action px-4 py-2 text-critical-action-foreground hover:bg-critical-action/90 active:translate-y-0"
             >
               Descartar
             </AlertDialogAction>

@@ -5,16 +5,16 @@ import { REPORT_HISTORY_PAGE_SIZE } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
 import type { ReportHistoryState, ReportType } from "../types/generated-report.types";
 
-export function useReportHistory(page: number, reportType?: ReportType) {
+export function useReportHistory(page: number, reportType?: ReportType, search = "") {
   const [state, setState] = useState<ReportHistoryState | null>(null);
   const [refreshCount, setRefreshCount] = useState(0);
-  const requestKey = `${page}-${reportType ?? "ALL"}-${refreshCount}`;
+  const requestKey = `${page}-${reportType ?? "ALL"}-${search}-${refreshCount}`;
 
   useEffect(() => {
     let isCancelled = false;
 
     reportsService
-      .getReportHistory({ page, limit: REPORT_HISTORY_PAGE_SIZE, reportType })
+      .getReportHistory({ page, limit: REPORT_HISTORY_PAGE_SIZE, reportType, search })
       .then((response) => {
         if (!isCancelled) setState({ requestKey, result: response.data });
       })
@@ -25,7 +25,7 @@ export function useReportHistory(page: number, reportType?: ReportType) {
     return () => {
       isCancelled = true;
     };
-  }, [page, reportType, requestKey]);
+  }, [page, reportType, search, requestKey]);
 
   const refresh = useCallback(() => setRefreshCount((count) => count + 1), []);
 

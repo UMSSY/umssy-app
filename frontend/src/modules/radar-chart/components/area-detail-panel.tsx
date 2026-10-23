@@ -21,7 +21,7 @@ export function AreaDetailPanel({ area, onClose, className }: AreaDetailPanelPro
       key={area.id}
       aria-labelledby={titleId}
       className={cn(
-        "flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-surface font-sans text-sm text-ink shadow-[0_1px_2px_rgba(11,31,46,0.04),0_8px_24px_-12px_rgba(11,31,46,0.12)] duration-200 fade-in slide-in-from-bottom-1 motion-safe:animate-in",
+        "flex min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-surface font-sans text-sm text-ink shadow-[0_1px_2px_rgba(11,31,46,0.04),0_8px_24px_-12px_rgba(11,31,46,0.12)] duration-200 fade-in slide-in-from-bottom-1 motion-safe:animate-in",
         className,
       )}
     >
@@ -38,7 +38,7 @@ export function AreaDetailPanel({ area, onClose, className }: AreaDetailPanelPro
         gap={area.gap}
         globalAverage={area.globalAverage}
       />
-      <div className="grid max-h-[60vh] min-w-0 grid-cols-1 divide-y divide-border overflow-y-auto [scrollbar-color:var(--color-border-strong)_transparent] [scrollbar-width:thin] lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+      <div className="grid max-h-[60vh] min-w-0 [scrollbar-width:thin] [scrollbar-color:var(--color-border-strong)_transparent] grid-cols-1 divide-y divide-border overflow-y-auto lg:grid-cols-3 lg:divide-x lg:divide-y-0">
         <AreaSection
           title="Cursos y certificaciones"
           icon={GraduationCap}

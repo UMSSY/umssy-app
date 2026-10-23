@@ -14,7 +14,7 @@ describe("Navigation search", () => {
   });
   it("shows no results for unknown or unauthorized sections", async () => {
     render(<NavigationSearch />);
-    fireEvent.click(screen.getByRole("button", { name: /Buscar sección/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Buscar una sección/ }));
     const dialog = await screen.findByRole("dialog");
     fireEvent.change(within(dialog).getByRole("textbox"), { target: { value: "aprobar" } });
     expect(within(dialog).getByText("No hay secciones con ese nombre.")).toBeInTheDocument();
