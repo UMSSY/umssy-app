@@ -32,16 +32,16 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
   const pending = fields.length - matching;
 
   return (
-    <section className="overflow-hidden rounded-[10px] border border-border bg-surface" aria-label="Contraste de datos">
+    <section className="overflow-hidden rounded-lg border border-border bg-surface" aria-label="Contraste de datos">
       <header className="flex flex-wrap items-center justify-between gap-2 px-5 py-4">
-        <h2 className="font-tight text-[17px] font-bold text-ink">Contraste de datos</h2>
+        <h2 className="font-tight text-lg font-bold text-ink">Contraste de datos</h2>
         <p className="flex items-center gap-4 text-sm text-ink" aria-live="polite">
           <span className="inline-flex items-center gap-1.5">
             <CircleCheck className="size-4" strokeWidth={1.75} aria-hidden="true" />
             {matching} coinciden
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <CircleAlert className="size-4 text-gold" strokeWidth={1.75} aria-hidden="true" />
+            <CircleAlert className="size-4 text-ink-soft" strokeWidth={1.75} aria-hidden="true" />
             {pending} por verificar
           </span>
         </p>
@@ -65,7 +65,7 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
             return (
               <TableRow key={field.key} className="border-border">
                 <TableCell className="px-4 py-3 align-middle whitespace-normal">
-                  <Label htmlFor={`contrast-${field.key}`} className="font-semibold leading-snug break-words text-ink">
+                  <Label htmlFor={`contrast-${field.key}`} className="leading-snug font-semibold break-words text-ink">
                     {field.label}
                   </Label>
                 </TableCell>
@@ -80,7 +80,7 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
                   />
                 </TableCell>
                 <TableCell className="px-2 align-middle">
-                  <Icon className={matches ? "size-5 text-ink" : "size-5 text-gold"} strokeWidth={1.75} aria-hidden="true" />
+                  <Icon className={matches ? "size-5 text-ink" : "size-5 text-ink-soft"} strokeWidth={1.75} aria-hidden="true" />
                   <span className="sr-only">{matches ? "Coincide" : "Por verificar"}</span>
                 </TableCell>
               </TableRow>

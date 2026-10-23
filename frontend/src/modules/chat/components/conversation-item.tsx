@@ -1,12 +1,15 @@
 
-'use client';
+"use client";
 
 /* eslint-disable @next/next/no-img-element */
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
-import type { Conversation } from '../types/conversation.types';
-import { formatConversationDate, getInitials } from '../utils/date-formatter';
+import type { Conversation } from "../types/conversation.types";
+import {
+  formatConversationDate,
+  getInitials,
+} from "../utils/date-formatter";
 
 interface ConversationItemProps {
   conversation: Conversation;
@@ -25,7 +28,7 @@ export function ConversationItem({
   const renderMessagePreview = () => {
     if (!lastMessage) {
       return (
-        <span className="text-slate-400 italic">
+        <span className="text-text-secondary italic">
           Conversación iniciada
         </span>
       );
@@ -33,14 +36,14 @@ export function ConversationItem({
 
     if (lastMessage.isAttachment) {
       const label =
-        lastMessage.attachmentType === 'image'
-          ? 'Foto'
-          : lastMessage.attachmentType === 'audio'
-            ? 'Audio'
-            : 'Archivo';
+        lastMessage.attachmentType === "image"
+          ? "Foto"
+          : lastMessage.attachmentType === "audio"
+            ? "Audio"
+            : "Archivo";
 
       return (
-        <span className="font-medium text-blue-700">
+        <span className="font-medium text-ink-soft">
           [{label}] {lastMessage.content}
         </span>
       );
@@ -55,10 +58,10 @@ export function ConversationItem({
       variant="ghost"
       onClick={() => onSelect(conversation)}
       aria-pressed={isSelected}
-      className={`h-auto w-full justify-start gap-3 rounded-none border-x-0 border-t-0 border-b border-slate-100 bg-transparent p-3.5 text-left font-normal whitespace-normal transition-all hover:bg-slate-50 focus:outline-none ${
+      className={`flex h-auto w-full items-center justify-start gap-3 rounded-none border-0 border-b border-border p-3.5 text-left font-normal whitespace-normal transition-all hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent ${
         isSelected
-          ? 'border-l-4 border-l-[#0B2545] bg-blue-50/80 hover:bg-blue-50/80'
-          : 'border-l-4 border-l-transparent'
+          ? "bg-interaction ring-1 ring-border-strong ring-inset"
+          : "bg-surface"
       }`}
     >
       <div className="relative shrink-0">
@@ -66,17 +69,17 @@ export function ConversationItem({
           <img
             src={contact.avatarUrl}
             alt={contact.fullName}
-            className="size-12 rounded-full border border-slate-200 object-cover"
+            className="size-12 rounded-full border border-border object-cover"
           />
         ) : (
-          <div className="flex size-12 items-center justify-center rounded-full border border-slate-300 bg-slate-200 text-sm font-bold text-slate-700">
+          <div className="flex size-12 items-center justify-center rounded-full border border-border-strong bg-border text-sm font-bold text-ink-soft">
             {getInitials(contact.fullName)}
           </div>
         )}
 
         {contact.isOnline && (
           <span
-            className="absolute right-0 bottom-0 size-3.5 rounded-full border-2 border-white bg-emerald-500 shadow-xs"
+            className="absolute right-0 bottom-0 size-3.5 rounded-full border-2 border-surface bg-ink-soft shadow-xs"
             title="En línea"
           />
         )}
@@ -87,8 +90,8 @@ export function ConversationItem({
           <h4
             className={`truncate text-sm ${
               hasUnread
-                ? 'font-bold text-slate-900'
-                : 'font-semibold text-slate-800'
+                ? "font-bold text-ink"
+                : "font-semibold text-ink"
             }`}
           >
             {contact.fullName}
@@ -97,8 +100,8 @@ export function ConversationItem({
           <span
             className={`shrink-0 text-xs whitespace-nowrap ${
               hasUnread
-                ? 'font-semibold text-red-600'
-                : 'text-slate-400'
+                ? "font-semibold text-accent"
+                : "text-text-secondary"
             }`}
           >
             {formatConversationDate(
@@ -111,16 +114,16 @@ export function ConversationItem({
           <p
             className={`min-w-0 flex-1 truncate text-xs ${
               hasUnread
-                ? 'font-medium text-slate-900'
-                : 'text-slate-500'
+                ? "font-medium text-ink"
+                : "text-text-secondary"
             }`}
           >
             {renderMessagePreview()}
           </p>
 
           {hasUnread && (
-            <span className="min-w-4 shrink-0 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-[10px] font-bold text-white shadow-xs">
-              {unreadCount > 99 ? '99+' : unreadCount}
+            <span className="min-w-4 shrink-0 rounded-full bg-accent px-1.5 py-0.5 text-center text-[10px] font-bold text-surface shadow-xs">
+              {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}
         </div>

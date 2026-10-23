@@ -1,9 +1,10 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import type { AffinityRadarDotProps } from "../types/radar-profile-components.types";
 import { formatDecimal } from "../utils/format-decimal";
 
-export function AffinityRadarDot({ area, cx, cy, onAreaClick }: AffinityRadarDotProps) {
+export function AffinityRadarDot({ area, cx, cy, onAreaClick, className }: AffinityRadarDotProps) {
   return (
     <g
       data-testid={`radar-dot-${area.id}`}
@@ -17,7 +18,7 @@ export function AffinityRadarDot({ area, cx, cy, onAreaClick }: AffinityRadarDot
         cy={cy}
         r={4.5}
         strokeWidth={2}
-        className="fill-accent stroke-surface motion-safe:transition-[r] group-hover:[r:6px]"
+        className={cn("fill-accent stroke-surface group-hover:[r:6px] motion-safe:transition-[r]", className)}
       />
     </g>
   );
