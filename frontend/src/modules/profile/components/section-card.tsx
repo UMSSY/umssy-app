@@ -1,3 +1,6 @@
+"use client";
+
+import { useProfileSurface } from "../contexts/profile-surface-context";
 import {
   Card,
   CardAction,
@@ -10,22 +13,29 @@ import { cn } from "@/lib/utils";
 import type { SectionCardProps } from "../types/section-card-props.types";
 
 export function SectionCard({ title, description, action, children, className, contentClassName }: SectionCardProps) {
+  const isEmbedded = useProfileSurface();
+  if (isEmbedded) return <section className={cn("border-t border-border px-8 py-7", className)}>
+    <header className="mb-5 flex items-start justify-between gap-4">
+      <div className="min-w-0"><h2 className="text-xl font-bold text-ink">{title}</h2>{description ? <p className="mt-1 text-sm text-text-secondary">{description}</p> : null}</div>
+      {action ? <div className="shrink-0">{action}</div> : null}
+    </header>
+    <div className={contentClassName}>{children}</div>
+  </section>;
   return (
     <Card
       className={cn(
-        "gap-6 rounded-2xl border border-border bg-surface py-7 text-ink shadow-none ring-0",
+        "gap-5 rounded-lg border border-border bg-surface py-0 text-ink shadow-none ring-0",
         className,
       )}
     >
-      <CardHeader className="gap-2 px-8">
-        <span aria-hidden="true" className="mb-1 block h-0.75 w-6.5 bg-gold" />
-        <CardTitle className="font-tight text-[22px] font-bold text-ink">{title}</CardTitle>
+      <CardHeader className="gap-1.5 rounded-t-lg border-b border-accent/15 bg-interaction px-5 py-4">
+        <CardTitle className="font-tight text-lg font-bold text-accent">{title}</CardTitle>
         {description ? (
-          <CardDescription className="text-[15px] text-text-secondary">{description}</CardDescription>
+          <CardDescription className="text-sm leading-relaxed text-availability-foreground">{description}</CardDescription>
         ) : null}
-        {action ? <CardAction className="row-span-3">{action}</CardAction> : null}
+        {action ? <CardAction className="row-span-2">{action}</CardAction> : null}
       </CardHeader>
-      <CardContent className={cn("px-8", contentClassName)}>{children}</CardContent>
+      <CardContent className={cn("px-5 pb-5", contentClassName)}>{children}</CardContent>
     </Card>
   );
 }

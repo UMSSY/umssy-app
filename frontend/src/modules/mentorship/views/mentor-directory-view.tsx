@@ -1,5 +1,13 @@
 "use client";
 
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { normalizeSearch } from "@/shared/utils/get-workspace-tasks";
+import { PageHeading } from "@/shared/components/layout";
 import { MentorDirectoryGrid } from "../components/mentor/mentor-directory-grid";
 import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
 import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
@@ -7,24 +15,29 @@ import { useCurrentUserId } from "../hooks/use-current-user-id";
 import { useMentorDirectory } from "../hooks/use-mentor-directory";
 
 export function MentorDirectoryView() {
+  const [search, setSearch] = useState("");
+  const [area, setArea] = useState("");
+  const [isAvailableOnly, setIsAvailableOnly] = useState(false);
   const { currentUserId } = useCurrentUserId();
   const { data: mentors, isPending, isError, isFetching, refetch } =
     useMentorDirectory();
 
+  const areas = [...new Set((mentors ?? []).flatMap((mentor) => mentor.technicalAreas))].sort((a,b) => a.localeCompare(b,"es"));
+  const filteredMentors = (mentors ?? []).filter((mentor) => normalizeSearch([mentor.fullName,mentor.headline,...mentor.technicalAreas].join(" ")).includes(normalizeSearch(search)) && (!area || mentor.technicalAreas.includes(area)) && (!isAvailableOnly || mentor.isAvailable));
+  function handleClearFilters() { setSearch(""); setArea(""); setIsAvailableOnly(false); }
   return (
-    <main className="min-h-full bg-surface-soft px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <main className="min-h-full bg-background">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <header>
-          <h1 className="font-tight text-2xl font-bold text-ink sm:text-3xl">
-            Directorio de mentores
-          </h1>
-
-          <p className="mt-2 max-w-3xl text-sm text-text-secondary sm:text-base">
-            Conoce a los mentores activos y sus principales áreas de
-            experiencia profesional.
-          </p>
+          <PageHeading title="Encuentra un mentor" description="Busca por nombre o área de experiencia." />
         </header>
 
+        <div role="search" aria-label="Filtros de mentores" className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-surface p-4">
+          <Input type="search" className="min-w-56 flex-1" aria-label="Buscar mentor" placeholder="Nombre o especialidad" value={search} onChange={(event) => setSearch(event.target.value)} />
+          <div className="flex items-center gap-2"><Label htmlFor="mentor-area">Área</Label><NativeSelect id="mentor-area" className="max-w-64" value={area} onChange={(event) => setArea(event.target.value)}><NativeSelectOption value="">Todas las áreas</NativeSelectOption>{areas.map((name) => <NativeSelectOption key={name} value={name}>{name}</NativeSelectOption>)}</NativeSelect></div>
+          <Label className="flex items-center gap-2"><Checkbox checked={isAvailableOnly} onCheckedChange={setIsAvailableOnly} />Con disponibilidad</Label>
+          {search || area || isAvailableOnly ? <Button variant="ghost" onClick={handleClearFilters}>Limpiar filtros</Button> : null}
+        </div>
         {isPending || (isError && isFetching) ? (
           <MentorQuerySkeleton />
         ) : isError ? (
@@ -41,7 +54,7 @@ export function MentorDirectoryView() {
             description="Por el momento no hay mentores activos para mostrar. Vuelve a consultar más adelante."
           />
         ) : (
-          <MentorDirectoryGrid mentors={mentors} currentUserId={currentUserId} />
+          <><p role="status" className="text-sm text-text-secondary">{filteredMentors.length} mentores encontrados</p>{filteredMentors.length ? <MentorDirectoryGrid mentors={filteredMentors} currentUserId={currentUserId} /> : <div className="rounded-lg border border-border bg-surface p-8 text-center"><h2 className="mb-4 text-lg font-semibold">No hay mentores con estos filtros</h2><Button variant="outline" onClick={handleClearFilters}>Limpiar filtros</Button></div>}</>
         )}
       </div>
     </main>

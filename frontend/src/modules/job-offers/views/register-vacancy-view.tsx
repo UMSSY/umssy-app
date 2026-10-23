@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { PageHeading } from "@/shared/components/layout";
 import { useState } from "react";
 import { ConfirmDialog } from "../components/confirm-dialog";
 import { InformationStep } from "../components/information-step";
@@ -46,13 +49,18 @@ export function RegisterVacancyView() {
     reset();
   };
 
-  return (
-    <div className="mx-auto w-full max-w-5xl">
-      <h1 className="mb-6 font-tight text-3xl font-extrabold text-ink">Publicar vacante</h1>
+  if (publication.isSuccess) {
+    return <main className="mx-auto w-full max-w-7xl space-y-6"><PageHeading title="Vacante publicada" description="La oferta se registró correctamente." /><section className="max-w-2xl rounded-lg border border-border bg-surface p-6"><h2 className="text-lg font-semibold">{conditions.title}</h2><p className="mt-2 text-sm text-text-secondary">{conditions.modality} · {conditions.contractType}</p><div className="mt-6 flex gap-3 border-t border-border pt-5"><Link href="/recruiters" className={buttonVariants()}>Volver a mi empresa</Link><Button variant="outline" onClick={handleFinish}>Publicar otra vacante</Button></div></section></main>;
+  }
 
-      <div className="rounded-lg border border-border bg-surface p-6 shadow-sm">
+  return (
+    <main className="mx-auto w-full max-w-7xl">
+      <PageHeading className="mb-6" title="Publicar vacante" description="Define la oferta, agrega los requisitos y revisa la publicación antes de confirmarla." />
+
+      <div className="space-y-6">
         <VacancyStepper currentStep={currentStep} />
 
+        <div key={currentStep} className="animate-in duration-200 fade-in-0 slide-in-from-right-1">
         {currentStep === 1 && (
           <InformationStep
             conditions={conditions}
@@ -87,6 +95,7 @@ export function RegisterVacancyView() {
             onFinish={handleFinish}
           />
         )}
+        </div>
       </div>
 
       <ConfirmDialog
@@ -108,6 +117,6 @@ export function RegisterVacancyView() {
         onConfirm={leaveGuard.confirmLeave}
         onCancel={leaveGuard.cancelLeave}
       />
-    </div>
+    </main>
   );
 }

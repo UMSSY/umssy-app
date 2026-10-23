@@ -9,7 +9,8 @@ import { RegisterVacancyView } from "./register-vacancy-view";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/shared/services/api-client", () => ({ apiClient: { get: vi.fn(), post: vi.fn() } }));
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn() } }));
 vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange }: { children: React.ReactNode; onValueChange?: (value: string) => void }) => (
     <div data-testid="select" onClick={() => onValueChange?.("Tiempo completo")}>{children}</div>
@@ -71,7 +72,7 @@ async function fillRequirements() {
 async function goToPreview() {
   fillInformation();
   await fillRequirements();
-  await screen.findByText("VISTA PREVIA DE LA PUBLICACIÓN");
+  await screen.findByText("Revisa tu publicación");
 }
 
 describe("Registrar vacante: wizard completo conectado al backend", () => {
@@ -107,7 +108,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     expect(apiClient.post).toHaveBeenCalledTimes(1);
     expect(apiClient.post).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers`, EXPECTED_PAYLOAD);
 
-    click("Aceptar");
+    click("Publicar otra vacante");
     await waitFor(() => expect(byId("title")).toBeInTheDocument());
     expect(byId("title").value).toBe("");
   });
@@ -198,7 +199,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
 
     expect(screen.getByText("Este campo es obligatorio")).toBeInTheDocument();
     expect(screen.getByText("Debes seleccionar al menos una habilidad requerida")).toBeInTheDocument();
-    expect(screen.queryByText("VISTA PREVIA DE LA PUBLICACIÓN")).not.toBeInTheDocument();
+    expect(screen.queryByText("Revisa tu publicación")).not.toBeInTheDocument();
   });
 
   it("Cancelar con datos pide confirmación y deja el formulario vacío", async () => {

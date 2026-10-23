@@ -15,7 +15,6 @@ import { getInitials } from "@/shared/utils/get-initials";
 import type {
   ReviewAction,
   ReviewAffinityArea,
-  ReviewAffinityLevel,
   ReviewProfile,
 } from "../types/review-queue.types";
 import { ReviewStatusBadge } from "./review-status-badge";
@@ -24,22 +23,6 @@ interface ReviewProfileDetailProps {
   profile: ReviewProfile | null;
   localAction: ReviewAction | null;
   onAction: (action: ReviewAction) => void;
-}
-
-function getLevelClass(level: ReviewAffinityLevel): string {
-  switch (level) {
-    case "Experto":
-      return "bg-accent";
-
-    case "Avanzado":
-      return "bg-gold";
-
-    case "Intermedio":
-      return "bg-ink-soft";
-
-    case "Base":
-      return "bg-border-strong";
-  }
 }
 
 function ReviewAffinityRadarChart({
@@ -67,13 +50,13 @@ function ReviewAffinityRadarChart({
             {average.toFixed(2)}
           </p>
 
-          <p className="text-[9px] uppercase tracking-widest text-text-secondary">
+          <p className="text-xs tracking-widest text-text-secondary uppercase">
             Promedio
           </p>
         </div>
       </div>
 
-      <div className="h-[330px] w-full">
+      <div className="h-96 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={areas} outerRadius="65%">
             <PolarGrid stroke="var(--color-border)" />
@@ -82,7 +65,7 @@ function ReviewAffinityRadarChart({
               dataKey="area"
               tick={{
                 fill: "var(--color-text-secondary)",
-                fontSize: 11,
+                fontSize: 12,
               }}
             />
 
@@ -98,7 +81,7 @@ function ReviewAffinityRadarChart({
             />
 
             <Radar
-              name="Profile Affinity Score"
+              name="Puntaje de afinidad del perfil"
               dataKey="puntuacion"
               stroke="var(--color-accent)"
               strokeWidth={2}
@@ -115,8 +98,8 @@ function ReviewAffinityRadarChart({
       </div>
 
       <div className="flex items-center gap-2 text-xs text-text-secondary">
-        <span className="h-2.5 w-5 rounded-sm bg-interaction" />
-        Profile Affinity Score
+        <span aria-hidden="true" className="h-2.5 w-5 rounded-sm border border-accent bg-accent/15" />
+        Puntaje de afinidad del perfil
       </div>
     </section>
   );
@@ -142,16 +125,14 @@ function ReviewAreaBreakdownPanel({
       <ul className="mt-5 space-y-4">
         {areas.map((area) => (
           <li key={area.area}>
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
               <span
-                className={`h-1.5 w-1.5 rounded-full ${getLevelClass(
-                  area.nivel,
-                )}`}
+                className="size-1.5 rounded-full bg-brand-red"
               />
 
               <span className="text-ink">{area.area}</span>
 
-              <span className="ml-auto text-[10px] text-text-secondary">
+              <span className="ml-auto text-xs text-text-secondary">
                 {area.nivel}
               </span>
 
@@ -160,11 +141,9 @@ function ReviewAreaBreakdownPanel({
               </span>
             </div>
 
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-soft">
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-soft">
               <div
-                className={`h-full rounded-full ${getLevelClass(
-                  area.nivel,
-                )}`}
+                className="h-full rounded-full bg-brand-red"
                 style={{
                   width: `${area.puntuacion * 10}%`,
                 }}
@@ -175,14 +154,14 @@ function ReviewAreaBreakdownPanel({
       </ul>
 
       <div className="mt-6 flex items-baseline justify-between border-t border-border pt-4">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-text-secondary">
+        <span className="text-xs font-semibold tracking-widest text-text-secondary uppercase">
           Media global
         </span>
 
         <span className="text-xl font-bold text-accent">
           {average.toFixed(2)}
 
-          <span className="ml-1 text-[10px] font-normal text-text-secondary">
+          <span className="ml-1 text-xs font-normal text-text-secondary">
             / 10
           </span>
         </span>
@@ -198,7 +177,7 @@ export function ReviewProfileDetail({
 }: ReviewProfileDetailProps) {
   if (!profile) {
     return (
-      <section className="bg-surface p-6 lg:p-8">
+      <section className="@container/detail bg-surface p-6">
         <div className="flex h-full min-h-[500px] items-center justify-center">
           <div className="max-w-sm text-center">
             <h2 className="text-lg font-semibold text-ink">
@@ -217,7 +196,7 @@ export function ReviewProfileDetail({
   const showActions = profile.estado !== "Completado";
 
   return (
-    <section className="bg-surface p-6 lg:p-8">
+    <section className="@container/detail bg-surface p-6">
       <div className="mx-auto w-full max-w-3xl">
         <div className="flex items-start gap-4 border-b border-border pb-5">
           <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-surface-soft text-sm font-semibold text-ink">
@@ -251,7 +230,7 @@ export function ReviewProfileDetail({
           </div>
         </div>
 
-        <div className="mt-6 grid gap-5 xl:grid-cols-[1fr_280px]">
+        <div className="mt-6 grid gap-6 @3xl/detail:grid-cols-2">
           <ReviewAffinityRadarChart
             areas={profile.areas}
             average={profile.afinidadGlobal}
@@ -290,7 +269,7 @@ export function ReviewProfileDetail({
                 className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
                   localAction === "approved"
                     ? "border-border bg-surface-soft text-ink"
-                    : "border-destructive/20 bg-destructive/10 text-destructive"
+                    : "border-border bg-surface-soft text-ink"
                 }`}
               >
                 {localAction === "approved"

@@ -1,4 +1,5 @@
-import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { skillsService } from "../services/skills.service";
 import { useSkills } from "./use-skills";
@@ -174,7 +175,7 @@ describe("useSkills", () => {
     const { result } = await renderLoadedHook();
     expect(result.current.selectedSkills).toEqual([PYTHON]);
 
-    let saveActionPromise: Promise<void> | undefined;
+    let saveActionPromise: Promise<boolean> | undefined;
     act(() => {
       saveActionPromise = result.current.saveSkills();
     });
