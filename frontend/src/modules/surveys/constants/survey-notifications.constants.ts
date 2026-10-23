@@ -17,7 +17,7 @@ export const EMPTY_STATE_RAY_CLASSES = [
   "-right-4 bottom-3 -rotate-45",
 ];
 
-export const SURVEYS_QUERY_KEYS = {
+export const SURVEY_NOTIFICATIONS_QUERY_KEYS = {
   notifications: ["surveys", "notifications"] as const,
 };
 
