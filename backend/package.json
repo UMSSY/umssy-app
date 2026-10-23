@@ -18,7 +18,8 @@
     "migrate": "prisma migrate dev --name",
     "migrate:apply": "prisma migrate deploy && prisma generate",
     "seed": "prisma db seed",
-    "seed:run": "tsc -p tsconfig.seed.json && node dist-seed/src/common/database/seeds.js",
+    "seed:run": "tsc -p tsconfig.seed.json && node dist-seed/src/common/database/development-seeds.js",
+    "seed:production": "tsc -p tsconfig.seed.json && node dist-seed/src/common/database/catalog-seeds.js",
     "vercel-build": "prisma generate && pnpm vercel:migrate && pnpm build",
     "vercel:migrate": "sh -c 'if [ \"$VERCEL_ENV\" = \"production\" ]; then prisma migrate deploy; else echo \"vercel:migrate skipped (VERCEL_ENV=$VERCEL_ENV)\"; fi'",
     "generate": "prisma generate",
@@ -30,7 +31,9 @@
     "test:e2e": "dotenv run -f .env.test -- vitest run --config ./vitest.config.e2e.ts",
     "migrate:test:apply": "dotenv run -f .env.test -- pnpm migrate:apply",
     "test:all": "concurrently \"pnpm test\" \"pnpm test:e2e\"",
-    "lint:standards": "eslint \"src/**/*.ts\" \"test/**/*.ts\""
+    "lint:standards": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
+    "seed:catalogs": "pnpm run seed:production",
+    "seed:admin": "tsc -p tsconfig.seed.json && node dist-seed/src/common/database/production-seeds.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.1.0",

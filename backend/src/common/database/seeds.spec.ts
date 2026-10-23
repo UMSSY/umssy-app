@@ -108,6 +108,17 @@ function buildClient() {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('combined events and availability seed', () => {
+  it('rejects production before hashing passwords or opening transactions', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const { client, prisma } = buildClient();
+    await expect(runSeed(prisma)).rejects.toThrow(
+      'no se pueden cargar en producción',
+    );
+    expect(hashSeedPassword).not.toHaveBeenCalled();
+    expect(client.$transaction).not.toHaveBeenCalled();
+    expect(seedUsers).not.toHaveBeenCalled();
+  });
+
   it('seeds passes for the original event user while retaining the availability user', async () => {
     vi.stubEnv('SEED_TRANSACTION_TIMEOUT_MS', undefined);
     const { tx, client, prisma } = buildClient();
