@@ -1,3 +1,6 @@
+import { JobApplicationsController } from './controllers/job-applications.controller.js';
+import { JobApplicationsService } from './services/job-applications.service.js';
+import { JobApplicationsRepository } from './repositories/job-applications.repository.js';
 import { Module } from '@nestjs/common';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { JobOffersModule } from '../job-offers/job-offers.module.js';
@@ -16,8 +19,10 @@ import { JobMatchService } from './services/job-match.service.js';
 
 @Module({
   imports: [JwtAuthModule, SkillsModule, JobOffersModule],
-  controllers: [MatchingController, JobMatchController],
+  controllers: [MatchingController, JobMatchController, JobApplicationsController],
   providers: [
+    JobApplicationsService,
+    JobApplicationsRepository,
     MatchingService,
     ActiveJobOffersService,
     NlpService,
