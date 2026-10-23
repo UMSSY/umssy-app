@@ -22,6 +22,11 @@ export function calculateWeightedScore(
 ): number {
   assertValidWeights(weights);
 
+  const scale = Math.max(
+    ...SCORE_CATEGORIES.map((category) => weights[category]),
+  );
+  if (scale === 0) return 100;
+
   let totalWeight = 0;
   let matchedWeight = 0;
 
@@ -29,7 +34,7 @@ export function calculateWeightedScore(
     const items = requirements[category];
     if (items.length === 0) continue;
 
-    const weight = weights[category];
+    const weight = weights[category] / scale;
     const fulfilled = items.filter(({ status }) => status === 'Cumple').length;
     totalWeight += weight;
     matchedWeight += (weight * fulfilled) / items.length;
