@@ -9,6 +9,7 @@ import {
   toCategorizedRequirements,
 } from '../utils/build-score-requirements.js';
 import { WeightedScoreService } from './weighted-score.service.js';
+import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
 @Injectable()
 export class JobMatchService {
@@ -16,6 +17,7 @@ export class JobMatchService {
     private readonly jobMatchRepository: JobMatchRepository,
     private readonly userSkillService: UserSkillService,
     private readonly weightedScoreService: WeightedScoreService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async getMatch(
@@ -32,9 +34,36 @@ export class JobMatchService {
 
     const userSkills = await this.userSkillService.getUserSkills(userId);
 
+    const educationRecord = await this.prisma.education.findFirst({
+      where: { userId },
+      orderBy: { startDate: 'desc' },
+      select: { degree: true },
+    });
+
+    const experiences = await this.prisma.workExperience.findMany({
+      where: { userId },
+      select: { startDate: true, endDate: true, isCurrent: true },
+    });
+
+    const totalExperienceYears = experiences.reduce((total, exp) => {
+      const start = new Date(exp.startDate);
+      const end = exp.isCurrent || !exp.endDate ? new Date() : new Date(exp.endDate);
+      const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+      return total + (months / 12);
+    }, 0);
+
     const requirements = buildScoreRequirements(
-      { skills: vacancy.skills.map(({ skill }) => skill.name) },
-      { skills: userSkills.map(({ name }) => name) },
+      { 
+        skills: vacancy.skills.map(({ skill }) => skill.name),
+        careers: [],            
+        minExperienceYears: 0,  
+        others: [],             
+      },
+      { 
+        skills: userSkills.map(({ name }) => name),
+        career: educationRecord?.degree ?? null, 
+        experienceYears: totalExperienceYears,   
+      },
     );
 
     return {

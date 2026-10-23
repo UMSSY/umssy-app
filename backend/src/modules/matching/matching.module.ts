@@ -1,3 +1,6 @@
+import { JobApplicationsController } from './controllers/job-applications.controller.js';
+import { JobApplicationsService } from './services/job-applications.service.js';
+import { JobApplicationsRepository } from './repositories/job-applications.repository.js';
 import { Module } from '@nestjs/common';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { JobOffersModule } from '../job-offers/job-offers.module.js';
@@ -13,11 +16,20 @@ import { ActiveJobOffersService } from './services/active-job-offers.service.js'
 import { JobMatchController } from './controllers/job-match.controller.js';
 import { JobMatchRepository } from './repositories/job-match.repository.js';
 import { JobMatchService } from './services/job-match.service.js';
+import { JobRecommendationsController } from './controllers/job-recommendations.controller.js';
+import { JobRecommendationsService } from './services/job-recommendations.service.js';
 
 @Module({
   imports: [JwtAuthModule, SkillsModule, JobOffersModule],
-  controllers: [MatchingController, JobMatchController],
+  controllers: [
+    MatchingController,
+    JobMatchController,
+    JobApplicationsController,
+    JobRecommendationsController,
+  ],
   providers: [
+    JobApplicationsService,
+    JobApplicationsRepository,
     MatchingService,
     ActiveJobOffersService,
     NlpService,
@@ -27,6 +39,7 @@ import { JobMatchService } from './services/job-match.service.js';
     WeightedScoreService,
     JobMatchRepository, 
     JobMatchService, 
+    JobRecommendationsService,
   ],
   exports: [
     MatchingService,
