@@ -50,14 +50,20 @@ function createRepositories() {
 
 describe('SurveysService', () => {
   let repositories: ReturnType<typeof createRepositories>;
+  let pdfService: { generatePdf: ReturnType<typeof vi.fn> };
+  let reportHistoryService: { registerGeneratedReport: ReturnType<typeof vi.fn> };
   let service: SurveysService;
 
   beforeEach(() => {
     repositories = createRepositories();
+    pdfService = { generatePdf: vi.fn().mockResolvedValue(Buffer.from('mock-pdf')) };
+    reportHistoryService = { registerGeneratedReport: vi.fn().mockResolvedValue({}) };
     service = new SurveysService(
       repositories.surveys as unknown as SurveysRepository,
       repositories.careers as unknown as CareersRepository,
       new SurveyMapper(),
+      pdfService as never,
+      reportHistoryService as never,
     );
   });
 
@@ -203,7 +209,7 @@ describe('SurveysService', () => {
         closesAt: NOW,
         createdAt: NOW,
         career: { id: CAREER_ID, title: 'Ingeniería de Sistemas' },
-        _count: { questions: 4 },
+        _count: { questions: 4, responses: 0 },
       },
     ]);
 
@@ -219,8 +225,34 @@ describe('SurveysService', () => {
         opensAt: NOW.toISOString(),
         closesAt: NOW.toISOString(),
         questionCount: 4,
+        responseCount: 0,
         createdAt: NOW.toISOString(),
       },
     ]);
+  });
+
+  it('exporta el PDF de la encuesta y registra la exportación en el historial', async () => {
+    vi.spyOn(service, 'getStatistics').mockResolvedValue({
+      id: 'survey-1',
+      title: 'Encuesta IA',
+      description: null,
+      status: 'PUBLISHED',
+      academicPeriod: '1-2026',
+      career: { id: CAREER_ID, name: 'Informática' },
+      opensAt: NOW.toISOString(),
+      closesAt: NOW.toISOString(),
+      totalResponses: 10,
+      questions: [],
+    });
+
+    const result = await service.exportSurveyPdf('survey-1', 'admin-1');
+
+    expect(pdfService.generatePdf).toHaveBeenCalled();
+    expect(reportHistoryService.registerGeneratedReport).toHaveBeenCalledWith('admin-1', {
+      fileName: expect.stringMatching(/^reporte-encuesta-encuesta-ia-\d{4}-\d{2}-\d{2}\.pdf$/),
+      reportType: 'SURVEY_STATISTICS',
+    });
+    expect(result.buffer).toBeInstanceOf(Buffer);
+    expect(result.fileName).toContain('reporte-encuesta-encuesta-ia');
   });
 });

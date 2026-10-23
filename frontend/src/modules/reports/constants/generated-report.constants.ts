@@ -8,6 +8,7 @@ export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
   COMPANIES: "Empresas",
   ADMINS: "Administradores",
   REJECTED_USERS: "Rechazados",
+  SURVEY_STATISTICS: "Estadísticas de Encuestas",
 };
 
 export const REPORT_TYPE_FILTER_OPTIONS: ReportType[] = [
@@ -18,6 +19,7 @@ export const REPORT_TYPE_FILTER_OPTIONS: ReportType[] = [
   "COMPANIES",
   "ADMINS",
   "REJECTED_USERS",
+  "SURVEY_STATISTICS",
 ];
 
 export const REPORT_TYPE_SELECT_OPTIONS = REPORT_TYPE_FILTER_OPTIONS.map((reportType) => ({

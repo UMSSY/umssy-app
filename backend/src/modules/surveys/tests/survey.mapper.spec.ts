@@ -70,7 +70,7 @@ describe('SurveyMapper', () => {
         closesAt: null,
         createdAt: CREATED_AT,
         career: null,
-        _count: { questions: 0 },
+        _count: { questions: 0, responses: 0 },
       }),
     ).toEqual({
       id: 'survey-1',
@@ -81,6 +81,7 @@ describe('SurveyMapper', () => {
       opensAt: null,
       closesAt: null,
       questionCount: 0,
+      responseCount: 0,
       createdAt: CREATED_AT.toISOString(),
     });
   });

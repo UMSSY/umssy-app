@@ -4,7 +4,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -12,6 +14,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiProduces,
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
@@ -26,6 +29,7 @@ import {
   type CreateSurveyRequest,
 } from '../requests/create-survey.schema.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
+import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
 import { SurveysService } from '../services/surveys.service.js';
 
@@ -53,5 +57,26 @@ export class SurveysController {
   @ApiOkResponse({ description: 'Encuestas, de la más reciente a la más antigua' })
   list(): Promise<SurveySummaryResponse[]> {
     return this.surveysService.listSurveys();
+  }
+
+  @Get(':id/statistics')
+  @ApiOperation({ summary: 'Obtiene las estadísticas y resultados de una encuesta' })
+  @ApiOkResponse({ description: 'Estadísticas de la encuesta con desglose de respuestas por opción' })
+  statistics(@Param('id') id: string): Promise<SurveyStatisticsResponse> {
+    return this.surveysService.getStatistics(id);
+  }
+
+  @Get(':id/export-pdf')
+  @ApiOperation({ summary: 'Exporta el informe estadístico de una encuesta en formato PDF' })
+  @ApiProduces('application/pdf')
+  async exportPdf(
+    @Param('id') id: string,
+    @CurrentUserId() userId: string,
+  ): Promise<StreamableFile> {
+    const { fileName, buffer } = await this.surveysService.exportSurveyPdf(id, userId);
+    return new StreamableFile(buffer, {
+      type: 'application/pdf',
+      disposition: `attachment; filename="${fileName}"`,
+    });
   }
 }
