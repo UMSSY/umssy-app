@@ -26,7 +26,7 @@ function offer(id: string, skills: string[]): JobOfferResponse {
   };
 }
 
-describe('HU-06 recommendations and detail contract', () => {
+describe('HU-06 recommendations contract', () => {
   const findUnique = vi.fn();
   const listPublished = vi.fn();
   let service: JobRecommendationsService;
@@ -64,23 +64,16 @@ describe('HU-06 recommendations and detail contract', () => {
     );
   });
 
-  it('uses exactly the same score and requirement statuses in feed and detail', async () => {
-    const feed = await service.recommendations('user');
-    for (const item of feed.items) {
-      const detail = await service.detail('user', item.jobOfferId);
-      expect(detail.score).toBe(item.score);
-      expect(detail.hasPendingRequirements).toBe(
-        detail.requirements.some((r) => r.status === 'Pendiente'),
-      );
-    }
-  });
-
   it('recalculates on every request after profile skills change', async () => {
-    expect((await service.detail('user', 'partial')).score).toBe(50);
+    const scoreOf = async () =>
+      (await service.recommendations('user')).items.find(
+        (item) => item.jobOfferId === 'partial',
+      )?.score;
+    expect(await scoreOf()).toBe(50);
     findUnique.mockResolvedValue({
       userSkills: ['Python', 'SQL'].map((name) => ({ skill: { name } })),
     });
-    expect((await service.detail('user', 'partial')).score).toBe(100);
+    expect(await scoreOf()).toBe(100);
   });
 
   it.each([null, { userSkills: [] }])(
@@ -101,12 +94,6 @@ describe('HU-06 recommendations and detail contract', () => {
       isProfileComplete: true,
       items: [],
     });
-  });
-
-  it('rejects an unavailable offer and never returns draft or expired details', async () => {
-    await expect(service.detail('user', 'not-published')).rejects.toMatchObject(
-      { statusCode: 404 },
-    );
   });
 
   it('propagates connection failures so the UI can offer retry', async () => {

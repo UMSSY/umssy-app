@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { JobOfferResponse } from '../../job-offers/responses/job-offer.response.js';
 import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
-import { JobOfferUnavailableException } from '../exceptions/job-offer-unavailable.exception.js';
 import type {
   JobMatch,
   JobRecommendations,
@@ -54,13 +53,6 @@ export class JobRecommendationsService {
         matchedSkills: match.matchedSkills,
       })),
     };
-  }
-
-  async detail(userId: string, offerId: string): Promise<JobMatch> {
-    const offers = await this.offers.listPublished();
-    const offer = offers.find((item) => item.id === offerId);
-    if (!offer) throw new JobOfferUnavailableException();
-    return this.match(offer, await this.profileSkills(userId));
   }
 
   private async profileSkills(userId: string): Promise<string[]> {
