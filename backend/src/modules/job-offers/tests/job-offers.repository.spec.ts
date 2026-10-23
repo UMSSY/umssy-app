@@ -12,7 +12,7 @@ function createPrisma() {
     jobOfferModality: { findUnique: vi.fn() },
     jobOfferContractType: { findUnique: vi.fn() },
     jobOfferStatus: { findUnique: vi.fn() },
-    jobOffer: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
+    jobOffer: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
   };
 }
 
@@ -160,6 +160,36 @@ describe('JobOffersRepository', () => {
         companyId: 'company-1',
         status: { title: { not: JobOfferStatus.DELETED } },
       },
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('actualiza la vacante reemplazando sus habilidades en una sola operación', async () => {
+    prisma.jobOffer.update.mockResolvedValue({ id: 'offer-1' });
+
+    await repository.update('offer-1', {
+      modalityId: 'modality-1',
+      contractTypeId: 'contract-1',
+      title: 'DevOps',
+      description: 'Descripción',
+      category: 'Tecnología',
+      positionsAvailable: 2,
+      salaryRange: 'Bs 6.500',
+      languages: 'Español',
+      locationUrl: 'https://maps.google.com/?q=x',
+      skillIds: ['skill-1', 'skill-2'],
+    });
+
+    expect(prisma.jobOffer.update).toHaveBeenCalledWith({
+      where: { id: 'offer-1' },
+      data: expect.objectContaining({
+        title: 'DevOps',
+        modalityId: 'modality-1',
+        skills: {
+          deleteMany: {},
+          create: [{ skillId: 'skill-1' }, { skillId: 'skill-2' }],
+        },
+      }),
       select: JOB_OFFER_SELECT,
     });
   });

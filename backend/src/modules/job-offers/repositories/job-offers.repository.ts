@@ -7,6 +7,7 @@ import {
 import type { ListCompanyJobOffersRequest } from '../requests/list-company-job-offers.request.js';
 import type { CreateJobOfferData } from '../types/create-job-offer-data.type.js';
 import type { JobOfferCatalogIds } from '../types/job-offer-catalog-ids.type.js';
+import type { UpdateJobOfferData } from '../types/update-job-offer-data.type.js';
 import { JobOfferStatus } from '../types/job-offer.enum.js';
 import type {
   JobOfferCreatedRecord,
@@ -82,6 +83,18 @@ export class JobOffersRepository {
         id: jobOfferId,
         companyId,
         status: { title: { not: JobOfferStatus.DELETED } },
+      },
+      select: JOB_OFFER_SELECT,
+    });
+  }
+
+  update(jobOfferId: string, data: UpdateJobOfferData): Promise<JobOfferRecord> {
+    const { skillIds, ...jobOffer } = data;
+    return this.prisma.jobOffer.update({
+      where: { id: jobOfferId },
+      data: {
+        ...jobOffer,
+        skills: { deleteMany: {}, create: skillIds.map((skillId) => ({ skillId })) },
       },
       select: JOB_OFFER_SELECT,
     });

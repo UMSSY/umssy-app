@@ -58,6 +58,7 @@ function createRepository() {
     findPublished: vi.fn().mockResolvedValue([RECORD]),
     findByCompany: vi.fn().mockResolvedValue([RECORD]),
     findByCompanyAndId: vi.fn().mockResolvedValue(RECORD),
+    update: vi.fn().mockResolvedValue(RECORD),
   };
 }
 
@@ -223,5 +224,66 @@ describe('JobOffersService', () => {
 
   it('devuelve el catálogo de tecnologías', async () => {
     expect(await service.listSkillCatalog()).toEqual([{ id: 'skill-1', name: 'Docker' }]);
+  });
+
+  describe('update', () => {
+    it('actualiza la vacante de la empresa con los catálogos y habilidades validados', async () => {
+      const response = await service.update('company-1', 'offer-1', REQUEST);
+
+      expect(repository.findByCompanyAndId).toHaveBeenCalledWith('company-1', 'offer-1');
+      expect(skillsService.validateSkillIds).toHaveBeenCalledWith(['skill-1']);
+      expect(repository.update).toHaveBeenCalledWith('offer-1', {
+        modalityId: 'modality-1',
+        contractTypeId: 'contract-1',
+        title: 'DevOps Senior',
+        description: 'Descripción',
+        category: 'Tecnología',
+        positionsAvailable: 2,
+        salaryRange: 'Bs 6.500 - 8.000',
+        languages: 'Español',
+        locationUrl: 'https://maps.google.com/?q=x',
+        skillIds: ['skill-1'],
+      });
+      expect(response.id).toBe('offer-1');
+    });
+
+    it('rechaza una empresa inexistente sin tocar la vacante', async () => {
+      repository.companyExists.mockResolvedValue(false);
+
+      await expect(service.update('company-1', 'offer-1', REQUEST)).rejects.toBeInstanceOf(
+        CompanyNotFoundException,
+      );
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+
+    it('rechaza una vacante inexistente, eliminada o de otra empresa', async () => {
+      repository.findByCompanyAndId.mockResolvedValue(null);
+
+      await expect(service.update('company-1', 'offer-1', REQUEST)).rejects.toBeInstanceOf(
+        JobOfferNotFoundException,
+      );
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+
+    it('rechaza una modalidad o un tipo de contrato que no están en el catálogo', async () => {
+      repository.findCatalogIds.mockResolvedValue({
+        modalityId: null,
+        contractTypeId: 'contract-1',
+        statusId: 'status-1',
+      });
+      await expect(service.update('company-1', 'offer-1', REQUEST)).rejects.toBeInstanceOf(
+        JobOfferCatalogNotFoundException,
+      );
+
+      repository.findCatalogIds.mockResolvedValue({
+        modalityId: 'modality-1',
+        contractTypeId: null,
+        statusId: 'status-1',
+      });
+      await expect(service.update('company-1', 'offer-1', REQUEST)).rejects.toBeInstanceOf(
+        JobOfferCatalogNotFoundException,
+      );
+      expect(repository.update).not.toHaveBeenCalled();
+    });
   });
 });

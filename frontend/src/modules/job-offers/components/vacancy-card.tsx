@@ -1,5 +1,6 @@
 import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Button, buttonVariants } from "@/components/ui/button";
 import type { JobOffer } from "../types/job-offer.types";
 
 const dateFormatter = new Intl.DateTimeFormat("es-BO", {
@@ -37,9 +38,12 @@ export function VacancyCard({ offer, onDetails }: VacancyCardProps) {
           <Button variant="outline" size="sm" disabled>
             Ver postulantes
           </Button>
-          <Button variant="outline" size="sm" disabled>
+          <Link
+            href={`/recruiters/job-offers/${offer.id}/edit`}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
             Editar
-          </Button>
+          </Link>
         </div>
       </div>
       <Button

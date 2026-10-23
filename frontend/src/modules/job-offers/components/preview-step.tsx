@@ -21,6 +21,7 @@ interface PreviewStepProps {
   isSubmitting: boolean;
   isPublished: boolean;
   error: PublishError | null;
+  isEditMode?: boolean;
   onPrevious: () => void;
   onConfirm: () => void;
   onFinish: () => void;
@@ -38,6 +39,7 @@ export function PreviewStep({
   isSubmitting,
   isPublished,
   error,
+  isEditMode,
   onPrevious,
   onConfirm,
   onFinish,
@@ -155,7 +157,7 @@ export function PreviewStep({
       <StepActions
         secondaryLabel="Anterior"
         primaryVariant="brand"
-        primaryLabel={isSubmitting ? "Publicando..." : "Confirmar publicación"}
+        primaryLabel={isSubmitting ? (isEditMode ? "Guardando..." : "Publicando...") : (isEditMode ? "Confirmar edición" : "Confirmar publicación")}
         onSecondary={onPrevious}
         onPrimary={onConfirm}
         isBusy={isSubmitting}

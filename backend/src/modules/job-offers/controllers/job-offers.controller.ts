@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
   StandardSchemaValidationPipe,
   UseGuards,
@@ -154,5 +155,20 @@ export class JobOffersController {
     @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
   ): Promise<JobOfferResponse> {
     return this.jobOffersService.getByCompanyAndId(companyId, jobOfferId);
+  }
+
+  @Put('companies/:companyId/job-offers/:jobOfferId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('empresa')
+  @ApiOperation({ summary: 'Edita una vacante de la empresa' })
+  @ApiBody(toApiBody(createJobOfferSchema))
+  @ApiOkResponse({ description: 'Vacante actualizada' })
+  @ApiNotFoundResponse({ description: 'La vacante no existe o no pertenece a la empresa' })
+  update(
+    @Param('companyId', companyIdPipe) companyId: string,
+    @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
+    @Body({ schema: createJobOfferSchema }) request: CreateJobOfferRequest,
+  ): Promise<JobOfferResponse> {
+    return this.jobOffersService.update(companyId, jobOfferId, request);
   }
 }
