@@ -9,7 +9,17 @@
 * 🟢 You can import this file directly.
 */
 
+export const SurveyStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED'
+} as const
+
+export type SurveyStatus = (typeof SurveyStatus)[keyof typeof SurveyStatus]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const SurveyQuestionType = {
+  SINGLE_CHOICE: 'SINGLE_CHOICE',
+  MULTIPLE_CHOICE: 'MULTIPLE_CHOICE'
+} as const
+
+export type SurveyQuestionType = (typeof SurveyQuestionType)[keyof typeof SurveyQuestionType]
