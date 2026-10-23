@@ -4,13 +4,16 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { JOB_OFFER_VALIDATION_MESSAGES as MESSAGES } from '../constants/job-offer.constants.js';
 import { JobOffersController } from '../controllers/job-offers.controller.js';
-import { CompanyNotFoundException } from '../exceptions/index.js';
+import { CompanyNotFoundException, JobOfferNotFoundException } from '../exceptions/index.js';
 import { JobOffersService } from '../services/job-offers.service.js';
 
 const COMPANY_ID = 'a0000000-0000-4000-8000-000000000001';
 const URL = `/companies/${COMPANY_ID}/job-offers`;
+const JOB_OFFER_ID = 'b0000000-0000-4000-8000-000000000001';
 
 describe('GET /companies/:companyId/job-offers', () => {
   let app: INestApplication;
@@ -25,7 +28,12 @@ describe('GET /companies/:companyId/job-offers', () => {
         { provide: JobOffersService, useValue: service },
         { provide: APP_FILTER, useClass: DomainExceptionFilter },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     app = moduleRef.createNestApplication();
     await app.init();
@@ -117,5 +125,63 @@ describe('GET /companies/:companyId/job-offers', () => {
     service.listByCompany.mockRejectedValue(new CompanyNotFoundException());
 
     await request(app.getHttpServer()).get(URL).expect(404);
+  });
+});
+
+describe('GET /companies/:companyId/job-offers/:jobOfferId', () => {
+  let app: INestApplication;
+  let service: { getByCompanyAndId: ReturnType<typeof vi.fn> };
+
+  beforeEach(async () => {
+    service = {
+      getByCompanyAndId: vi.fn().mockResolvedValue({
+        id: JOB_OFFER_ID,
+        skills: [{ id: 'skill-1', name: 'Docker' }],
+      }),
+    };
+
+    const moduleRef = await Test.createTestingModule({
+      controllers: [JobOffersController],
+      providers: [
+        { provide: JobOffersService, useValue: service },
+        { provide: APP_FILTER, useClass: DomainExceptionFilter },
+      ],
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('devuelve los detalles de una vacante dentro del alcance de la empresa', async () => {
+    await request(app.getHttpServer())
+      .get(`${URL}/${JOB_OFFER_ID}`)
+      .expect(200)
+      .expect({ id: JOB_OFFER_ID, skills: [{ id: 'skill-1', name: 'Docker' }] });
+
+    expect(service.getByCompanyAndId).toHaveBeenCalledWith(COMPANY_ID, JOB_OFFER_ID);
+  });
+
+  it('rechaza un id de vacante que no es UUID', async () => {
+    const response = await request(app.getHttpServer()).get(`${URL}/no-es-uuid`).expect(400);
+
+    expect(response.body.errors).toEqual([
+      { field: 'jobOfferId', message: MESSAGES.INVALID_JOB_OFFER_ID },
+    ]);
+    expect(service.getByCompanyAndId).not.toHaveBeenCalled();
+  });
+
+  it('responde 404 cuando la vacante no existe o no pertenece a la empresa', async () => {
+    service.getByCompanyAndId.mockRejectedValue(new JobOfferNotFoundException());
+
+    await request(app.getHttpServer()).get(`${URL}/${JOB_OFFER_ID}`).expect(404);
   });
 });

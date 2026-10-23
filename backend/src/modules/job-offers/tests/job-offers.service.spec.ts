@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CompanyNotFoundException, JobOfferCatalogNotFoundException } from '../exceptions/index.js';
+import {
+  CompanyNotFoundException,
+  JobOfferCatalogNotFoundException,
+  JobOfferNotFoundException,
+} from '../exceptions/index.js';
 import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
 import type { JobOffersRepository } from '../repositories/job-offers.repository.js';
 import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
@@ -53,6 +57,7 @@ function createRepository() {
     create: vi.fn().mockResolvedValue({ id: 'offer-1', createdAt: CREATED_AT }),
     findPublished: vi.fn().mockResolvedValue([RECORD]),
     findByCompany: vi.fn().mockResolvedValue([RECORD]),
+    findByCompanyAndId: vi.fn().mockResolvedValue(RECORD),
   };
 }
 
@@ -178,6 +183,42 @@ describe('JobOffersService', () => {
 
     await expect(service.listByCompany('missing')).rejects.toBeInstanceOf(CompanyNotFoundException);
     expect(repository.findByCompany).not.toHaveBeenCalled();
+  });
+
+  it('obtiene los detalles de una vacante perteneciente a la empresa', async () => {
+    const result = await service.getByCompanyAndId('company-1', 'offer-1');
+
+    expect(repository.findByCompanyAndId).toHaveBeenCalledWith('company-1', 'offer-1');
+    expect(result).toMatchObject({
+      id: 'offer-1',
+      languages: 'Español',
+      skills: [{ id: 'skill-1', name: 'Docker' }],
+    });
+  });
+
+  it('responde 404 si la vacante no existe o no pertenece a la empresa', async () => {
+    repository.findByCompanyAndId.mockResolvedValue(null);
+
+    await expect(service.getByCompanyAndId('company-1', 'missing')).rejects.toBeInstanceOf(
+      JobOfferNotFoundException,
+    );
+  });
+
+  it('propaga los errores del repositorio al consultar los detalles', async () => {
+    repository.findByCompanyAndId.mockRejectedValue(new Error('Error de base de datos'));
+
+    await expect(service.getByCompanyAndId('company-1', 'offer-1')).rejects.toThrow(
+      'Error de base de datos',
+    );
+  });
+
+  it('no busca vacantes cuando la empresa no existe', async () => {
+    repository.companyExists.mockResolvedValue(false);
+
+    await expect(service.getByCompanyAndId('missing', 'offer-1')).rejects.toBeInstanceOf(
+      CompanyNotFoundException,
+    );
+    expect(repository.findByCompanyAndId).not.toHaveBeenCalled();
   });
 
   it('devuelve el catálogo de tecnologías', async () => {

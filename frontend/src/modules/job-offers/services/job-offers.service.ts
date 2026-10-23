@@ -4,6 +4,7 @@ import type {
   CreateJobOfferPayload,
   JobOffer,
   JobOfferCreatedResponse,
+  JobOfferDetailsResponse,
 } from "../types/job-offer.types";
 import type { SkillOption } from "../types/vacancy-conditions.types";
 import type { JobOfferListParams } from "../utils/filter-job-offers";
@@ -33,16 +34,21 @@ export const jobOffersService = {
 
   getByCompany: async (companyId: string, params?: JobOfferListParams): Promise<JobOffer[]> => {
     const response = await apiClient.get<
-      ApiResponse<Array<Omit<JobOffer, "applicantsCount"> & { applicantsCount?: number }>>
+      ApiResponse<Array<JobOfferDetailsResponse & { applicantsCount?: number }>>
     >(buildCompanyJobOffersEndpoint(companyId), { params });
     return (response.data.data ?? []).map((offer) => ({
-      id: offer.id,
-      title: offer.title,
-      modality: offer.modality,
-      contractType: offer.contractType,
-      status: offer.status,
-      createdAt: offer.createdAt,
+      ...offer,
       applicantsCount: offer.applicantsCount ?? 0,
     }));
+  },
+
+  getByCompanyAndId: async (
+    companyId: string,
+    jobOfferId: string,
+  ): Promise<JobOfferDetailsResponse> => {
+    const response = await apiClient.get<ApiResponse<JobOfferDetailsResponse>>(
+      `${buildCompanyJobOffersEndpoint(companyId)}/${jobOfferId}`,
+    );
+    return response.data.data;
   },
 };

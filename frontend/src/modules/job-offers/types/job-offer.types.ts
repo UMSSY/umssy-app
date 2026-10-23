@@ -32,12 +32,30 @@ export interface CurrentCompany {
   name: string;
   initials: string;
 }
-export interface JobOffer {
+export interface JobOfferDetailsResponse {
   id: string;
   title: string;
+  description: string;
+  category: string;
   modality: Modality;
   contractType: ContractType;
   status: string;
+  positionsAvailable: number;
+  salaryRange: string;
+  languages: string;
+  locationUrl: string;
+  expiresAt: string | null;
   createdAt: string;
+  company: {
+    id: string;
+    name: string;
+  };
+  skills: Array<{
+    id: string;
+    name: string;
+  }>;
+}
+
+export interface JobOffer extends JobOfferDetailsResponse {
   applicantsCount: number;
 }

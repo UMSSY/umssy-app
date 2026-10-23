@@ -12,7 +12,7 @@ function createPrisma() {
     jobOfferModality: { findUnique: vi.fn() },
     jobOfferContractType: { findUnique: vi.fn() },
     jobOfferStatus: { findUnique: vi.fn() },
-    jobOffer: { create: vi.fn(), findMany: vi.fn() },
+    jobOffer: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn() },
   };
 }
 
@@ -144,6 +144,22 @@ describe('JobOffersRepository', () => {
         title: { contains: 'react', mode: 'insensitive' },
       },
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('consulta una vacante por empresa e id con sus relaciones detalladas', async () => {
+    const record = { id: 'offer-1' };
+    prisma.jobOffer.findFirst.mockResolvedValue(record);
+
+    await expect(repository.findByCompanyAndId('company-1', 'offer-1')).resolves.toBe(record);
+
+    expect(prisma.jobOffer.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'offer-1',
+        companyId: 'company-1',
+        status: { title: { not: JobOfferStatus.DELETED } },
+      },
       select: JOB_OFFER_SELECT,
     });
   });

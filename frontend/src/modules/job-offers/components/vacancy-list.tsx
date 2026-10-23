@@ -4,13 +4,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCompanyJobOffers } from "../hooks/use-company-job-offers";
+import { JobOfferDetailsDialog } from "./job-offer-details-dialog";
 import { DEFAULT_JOB_OFFER_FILTERS, type JobOfferFilters } from "../utils/filter-job-offers";
 import { VacancyCard } from "./vacancy-card";
 import { VacancyFiltersDialog } from "./vacancy-filters-dialog";
 
 export function VacancyList() {
   const [filters, setFilters] = useState<JobOfferFilters>(DEFAULT_JOB_OFFER_FILTERS);
-  const { offers, status, reload } = useCompanyJobOffers(filters);
+  const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+  const { companyId, offers, status, reload } = useCompanyJobOffers(filters);
 
   const hasFilters =
     filters.search !== "" ||
@@ -63,10 +65,17 @@ export function VacancyList() {
       ) : (
         <ul className="space-y-4">
           {offers.map((offer) => (
-            <VacancyCard key={offer.id} offer={offer} />
+            <VacancyCard key={offer.id} offer={offer} onDetails={setSelectedOfferId} />
           ))}
         </ul>
       )}
+      {companyId && selectedOfferId ? (
+        <JobOfferDetailsDialog
+          companyId={companyId}
+          jobOfferId={selectedOfferId}
+          onClose={() => setSelectedOfferId(null)}
+        />
+      ) : null}
     </section>
   );
 }
