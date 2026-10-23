@@ -1,9 +1,9 @@
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { EmailSearchInputProps } from "../types/email-search-input-props.types";
+import type { ReportSearchInputProps } from "../types/report-search-input-props.types";
 
-export function EmailSearchInput({ value, onChange }: EmailSearchInputProps) {
+export function ReportSearchInput({ value, onChange, label }: ReportSearchInputProps) {
   return (
     <div className="relative w-full sm:w-96">
       <Search
@@ -14,8 +14,8 @@ export function EmailSearchInput({ value, onChange }: EmailSearchInputProps) {
         type="text"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        placeholder="Buscar por correo electrónico"
-        aria-label="Buscar por correo electrónico"
+        placeholder={label}
+        aria-label={label}
         maxLength={100}
         className="h-auto rounded-md border-border bg-surface px-10 py-2.5 text-sm text-ink placeholder:text-text-secondary focus-visible:border-accent focus-visible:ring-3 focus-visible:ring-interaction"
       />
