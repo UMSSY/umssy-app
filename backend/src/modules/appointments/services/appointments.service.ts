@@ -11,10 +11,13 @@ import {
   MentorUnavailableException,
   OwnBlockException,
 } from '../exceptions/index.js';
+import { AppointmentNotFoundException } from '../exceptions/appointment-not-found.exception.js';
+import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owned.exception.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
+import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
 
 @Injectable()
 export class AppointmentsService {
@@ -90,5 +93,29 @@ export class AppointmentsService {
         return this.appointmentMapper.toResponse(appointment, user.id);
       },
     );
+  }
+
+  async findMine(
+    userId: string,
+    query: MyAppointmentsQuery,
+  ): Promise<MyAppointmentResponse[]> {
+    const now = new Date();
+    const appointments = await this.appointmentsRepository.findMine(
+      userId,
+      query.scope,
+      now,
+    );
+    return this.appointmentMapper.toResponseList(appointments, userId);
+  }
+
+  async findOne(userId: string, id: string): Promise<MyAppointmentResponse> {
+    const appointment = await this.appointmentsRepository.findById(id);
+    if (!appointment) {
+      throw new AppointmentNotFoundException();
+    }
+    if (appointment.mentorId !== userId && appointment.studentId !== userId) {
+      throw new AppointmentNotOwnedException();
+    }
+    return this.appointmentMapper.toResponse(appointment, userId);
   }
 }

@@ -29,8 +29,8 @@ describe("Role navigation", () => {
     const paths = getPaths(["empresa"]);
     expect(paths).toContain("/chat");
     expect(paths).toContain("/recruiters");
-    expect(paths).not.toContain("/matching");
-    expect(paths).not.toContain("/profile");
+    expect(paths).toContain("/matching");
+    expect(paths).toContain("/profile");
     expect(paths).not.toContain("/profile/radar");
     expect(paths).not.toContain("/mentor/availability");
     expect(paths).not.toContain("/backoffice/solicitudes");

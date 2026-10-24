@@ -41,7 +41,7 @@ describe("RadarProfileView", () => {
   it("renders the header, the KPI cards, the radar and the breakdown", () => {
     render(<RadarProfileView />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Carlos Mendoza Ríos" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 2, name: "Carlos Mendoza Ríos" })).toBeDefined();
     expect(screen.getByRole("list", { name: "Resumen del perfil" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Desglose vectorial de afinidad" })).toBeDefined();
 
@@ -58,7 +58,8 @@ describe("RadarProfileView", () => {
     render(<AppLayout><RadarProfileView /></AppLayout>);
 
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
-    expect(screen.getByRole("button", { name: "Secciones de Perfil profesional" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Mi perfil" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("link", { name: "Radar de afinidad" })).toHaveAttribute("aria-current", "page");
     expect(screen.queryByRole("navigation", { name: "Ruta de navegación" })).not.toBeInTheDocument();
 
   });

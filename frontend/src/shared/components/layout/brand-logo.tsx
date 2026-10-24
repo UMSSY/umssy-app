@@ -3,10 +3,10 @@ import { cn } from "cn";
 
 import type { BrandLogoProps } from "@/shared/types/brand-logo-props.types";
 
-export function BrandLogo({ className, priority = false }: BrandLogoProps) {
+export function BrandLogo({ className, priority = false, variant = "default" }: BrandLogoProps) {
   return (
     <Image
-      src="/icons/umssy-logo-web.svg"
+      src={variant === "on-dark" ? "/icons/umssy-logo-on-dark.svg" : "/icons/umssy-logo-web.svg"}
       alt="UMSSY, Acreditación y comunidad"
       width={1450}
       height={440}

@@ -26,24 +26,24 @@ describe("MatchingPage", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "Buscar candidatos por afinidad",
+        name: "Buscar candidatos",
       }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", {
+      screen.getByRole("option", {
         name: "Tech Lead",
       }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", {
+      screen.getByRole("option", {
         name: "Data Scientist Sr.",
       }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", {
+      screen.getByRole("option", {
         name: "DevOps Engineer",
       }),
     ).toBeInTheDocument();
@@ -116,11 +116,9 @@ describe("MatchingPage", () => {
       screen.getByText(/Compatibilidad vs\. Tech Lead/i),
     ).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Data Scientist Sr.",
-      }),
-    );
+    fireEvent.change(screen.getByRole("combobox", { name: "Vacante activa" }), {
+      target: { value: screen.getByRole("option", { name: "Data Scientist Sr." }).getAttribute("value") },
+    });
 
     expect(
       screen.getByText(
@@ -128,11 +126,9 @@ describe("MatchingPage", () => {
       ),
     ).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "DevOps Engineer",
-      }),
-    );
+    fireEvent.change(screen.getByRole("combobox", { name: "Vacante activa" }), {
+      target: { value: screen.getByRole("option", { name: "DevOps Engineer" }).getAttribute("value") },
+    });
 
     expect(
       screen.getByText(

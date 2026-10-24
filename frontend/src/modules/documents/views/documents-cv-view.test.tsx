@@ -79,8 +79,8 @@ describe("DocumentsCvView", () => {
   it("renders the cv title once in the main heading", async () => {
     await renderView();
 
-    expect(screen.getByRole("heading", { level: 1, name: "Currículum Vitae" })).toBeInTheDocument();
-    expect(screen.getAllByText("Currículum Vitae")).toHaveLength(1);
+    expect(screen.getByRole("heading", { level: 1, name: "Documentos y CV" })).toBeInTheDocument();
+    expect(screen.getAllByText("Documentos y CV")).toHaveLength(1);
     expect(screen.queryByText("Currículum PDF")).not.toBeInTheDocument();
     expect(
       screen.getByText("Sube tu CV para tenerlo disponible en el perfil y mantenerlo actualizado"),

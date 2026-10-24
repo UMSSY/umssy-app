@@ -44,7 +44,7 @@ export function IdCardField() {
               aria-required="true"
               aria-invalid={fieldErrors.idCardIssuedIn ? true : undefined}
               aria-describedby={fieldErrors.idCardIssuedIn ? "idCardIssuedIn-error" : undefined}
-              className="w-full rounded-md border-border bg-surface px-3 text-[15px] text-ink focus-visible:border-accent focus-visible:ring-interaction data-[size=default]:h-[42px] 2xl:text-base 2xl:data-[size=default]:h-12"
+              className="w-full rounded-md border-border bg-surface px-3 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction data-[size=default]:h-10 2xl:text-base 2xl:data-[size=default]:h-12"
             >
               <SelectValue placeholder="Elegir" />
             </SelectTrigger>

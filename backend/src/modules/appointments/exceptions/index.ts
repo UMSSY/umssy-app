@@ -1,3 +1,5 @@
+export * from './appointment-not-found.exception.js';
+export * from './appointment-not-owned.exception.js';
 export * from './block-already-booked.exception.js';
 export * from './block-in-past.exception.js';
 export * from './mentor-unavailable.exception.js';
