@@ -11,9 +11,11 @@ import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js'
 import { ValidationException } from '../../../common/exceptions/validation.exception.js';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import { RegistrationResponses } from '../decorators/registration-responses.decorator.js';
-import { EVENT_REGISTRATION_PARAMS_SCHEMA, REGISTRATION_PARAMS_SCHEMA } from '../requests/registration-params.schema.js';
-import type { EventRegistrationParams, RegistrationParams } from '../requests/registration-params.schema.js';
+import { EVENT_REGISTRATION_PARAMS_SCHEMA, REGISTRATION_ID_SCHEMA, REGISTRATION_PARAMS_SCHEMA } from '../requests/registration-params.schema.js';
+import type { EventRegistrationParams, RegistrationIdParam, RegistrationParams } from '../requests/registration-params.schema.js';
 import { REGISTRATION_BODY_SCHEMA } from '../requests/registration-body.schema.js';
+import { CREATE_EVENT_REGISTRATION_BODY_SCHEMA } from '../requests/create-event-registration-body.schema.js';
+import type { CreateEventRegistrationBody } from '../requests/create-event-registration-body.schema.js';
 
 @ApiTags('Registrations')
 @ApiBearerAuth()
@@ -56,6 +58,29 @@ export class EventRegistrationsController {
     @CurrentUserId() userId: string,
   ) {
     return this.registrationsService.cancel(params.registrationId, userId);
+  }
+
+  @Post('event-registrations')
+  @HttpCode(201)
+  @ApiOperation({ summary: 'Inscribir al usuario autenticado en un evento mediante su identificador en el cuerpo' })
+  @RegistrationResponses(201)
+  createWithBody(
+    @Body(new ZodValidationPipe(CREATE_EVENT_REGISTRATION_BODY_SCHEMA, () => new ValidationException())) body: CreateEventRegistrationBody,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.registrationsService.create(body.eventId, userId);
+  }
+
+  @Delete('event-registrations/:id')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Cancelar una inscripción propia mediante baja lógica usando su identificador' })
+  @ApiParam({ name: 'id', format: 'uuid' })
+  @RegistrationResponses(200)
+  cancelById(
+    @Param(new ZodValidationPipe(REGISTRATION_ID_SCHEMA, () => new ValidationException())) params: RegistrationIdParam,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.registrationsService.cancel(params.id, userId);
   }
   @Get('event-registrations/me')
   @ApiOperation({ summary: 'Consultar los pases activos del usuario' })
