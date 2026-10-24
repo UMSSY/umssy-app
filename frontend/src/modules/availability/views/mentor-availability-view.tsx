@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import { addWeeks, getWeekRange } from "@/shared/utils/date-time";
 import { cn } from "cn";
+import { BLOCKED_DATE_TEXT } from "../constants/blocked-date.constants";
 import {
   MY_AVAILABILITY_EYEBROW,
   MY_AVAILABILITY_TEXT,
@@ -94,7 +95,7 @@ export function MentorAvailabilityView({
       <header>
         <PageHeading
           title={MY_AVAILABILITY_TEXT.title}
-          description={`${MY_AVAILABILITY_EYEBROW}. Selecciona el encabezado de un día para bloquear o desbloquear la fecha.`}
+          description={`${MY_AVAILABILITY_EYEBROW}. ${BLOCKED_DATE_TEXT.viewHint}`}
           actions={<ReceiveRequestsSwitch />}
         />
       </header>

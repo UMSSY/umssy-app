@@ -5,7 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toBoliviaTime } from "@/shared/utils/date-time";
-import { BLOCKED_DATE_PAST_ERROR, BLOCKED_DATE_REASON_ERROR, BLOCKED_DATE_REASON_MAX_LENGTH } from "../constants/blocked-date.constants";
+import {
+  BLOCKED_DATE_PAST_ERROR,
+  BLOCKED_DATE_REASON_ERROR,
+  BLOCKED_DATE_REASON_MAX_LENGTH,
+  BLOCKED_DATE_TEXT,
+} from "../constants/blocked-date.constants";
 import { useBlockDate } from "../hooks/use-block-date";
 import { useUnblockDate } from "../hooks/use-unblock-date";
 import type { BlockedDatePanelProps } from "../types/blocked-date-panel-props.types";
@@ -47,14 +52,14 @@ export function BlockedDatePanel({ date, blockedDate, onClose }: BlockedDatePane
     }
   }
 
-    return (
+  return (
     <aside
       aria-labelledby={`${reasonId}-title`}
       className="space-y-4 rounded-lg border border-border bg-surface p-4"
     >
       <header className="space-y-1">
         <h2 id={`${reasonId}-title`} className="text-lg font-semibold">
-          {blockedDate ? "Desbloquear fecha" : "Bloquear fecha"}
+          {blockedDate ? BLOCKED_DATE_TEXT.unblockTitle : BLOCKED_DATE_TEXT.blockTitle}
         </h2>
         <p className="text-sm text-muted-foreground">
           {formatLongDate(date)}
@@ -68,29 +73,23 @@ export function BlockedDatePanel({ date, blockedDate, onClose }: BlockedDatePane
       >
         {blockedDate ? (
           <>
-            <p className="text-sm">
-              Esta fecha está bloqueada. Al desbloquearla, sus horarios
-              originales volverán a estar disponibles.
-            </p>
+            <p className="text-sm">{BLOCKED_DATE_TEXT.blockedNotice}</p>
             {blockedDate.reason && (
               <p className="text-sm wrap-anywhere">
-                Motivo: {blockedDate.reason}
+                {BLOCKED_DATE_TEXT.reasonPrefix} {blockedDate.reason}
               </p>
             )}
           </>
         ) : (
           <>
-            <p className="text-sm">
-              Los horarios de este día dejarán de ofrecerse sin eliminar tus
-              bloques.
-            </p>
+            <p className="text-sm">{BLOCKED_DATE_TEXT.blockHint}</p>
             {isPast && (
               <p role="alert" className="text-sm text-destructive">
                 {BLOCKED_DATE_PAST_ERROR}
               </p>
             )}
             <div className="space-y-2">
-              <Label htmlFor={reasonId}>Motivo (opcional)</Label>
+              <Label htmlFor={reasonId}>{BLOCKED_DATE_TEXT.reasonLabel}</Label>
               <Textarea
                 id={reasonId}
                 value={reason}
@@ -106,7 +105,7 @@ export function BlockedDatePanel({ date, blockedDate, onClose }: BlockedDatePane
                 id={`${reasonId}-count`}
                 className="text-sm text-muted-foreground"
               >
-                {reason.length}/{BLOCKED_DATE_REASON_MAX_LENGTH} caracteres
+                {reason.length}/{BLOCKED_DATE_REASON_MAX_LENGTH} {BLOCKED_DATE_TEXT.charactersUnit}
               </p>
               {error && (
                 <p
@@ -128,17 +127,17 @@ export function BlockedDatePanel({ date, blockedDate, onClose }: BlockedDatePane
             onClick={onClose}
             disabled={isBusy}
           >
-            Cancelar
+            {BLOCKED_DATE_TEXT.cancel}
           </Button>
           <Button
             type="submit"
             disabled={isBusy || (!blockedDate && (isPast || reasonTooLong))}
           >
             {isBusy
-              ? "Guardando..."
+              ? BLOCKED_DATE_TEXT.saving
               : blockedDate
-                ? "Desbloquear fecha"
-                : "Bloquear fecha"}
+                ? BLOCKED_DATE_TEXT.unblockTitle
+                : BLOCKED_DATE_TEXT.blockTitle}
           </Button>
         </div>
       </form>

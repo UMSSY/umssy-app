@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { toBoliviaTime } from "@/shared/utils/date-time";
 import { cn } from "cn";
+import { BLOCKED_DATE_TEXT } from "../../constants/blocked-date.constants";
 import {
   EMPTY_DAY_LABEL,
   SELECTED_BLOCK_CLASSES,
@@ -35,14 +36,14 @@ export function WeekDayList({
         return (
           <li key={dayDates[dayIndex]} className={cn("rounded-lg border border-border p-3", blockedDate && "bg-muted")}>
             <h3 aria-label={dayLabel} className="text-sm font-semibold">
-              {variant === "owner" && onSelectDate ? <Button type="button" variant="ghost" className="h-auto max-w-full px-0 whitespace-normal" onClick={() => onSelectDate(dayDates[dayIndex])} aria-label={`Seleccionar fecha: ${dayLabel}`}>{dayLabel}</Button> : dayLabel}
+              {variant === "owner" && onSelectDate ? <Button type="button" variant="ghost" className="h-auto max-w-full px-0 whitespace-normal" onClick={() => onSelectDate(dayDates[dayIndex])} aria-label={`${BLOCKED_DATE_TEXT.selectDate}: ${dayLabel}`}>{dayLabel}</Button> : dayLabel}
             </h3>
 
             {blockedDate ? (
               <div className="mt-2 space-y-2 text-sm">
-                <p className="font-semibold">Fecha bloqueada</p>
+                <p className="font-semibold">{BLOCKED_DATE_TEXT.blockedDay}</p>
                 {blockedDate.reason && <p className="wrap-anywhere">{blockedDate.reason}</p>}
-                {variant === "owner" && onSelectDate && <Button type="button" variant="outline" onClick={() => onSelectDate(dayDates[dayIndex])}>Desbloquear fecha</Button>}
+                {variant === "owner" && onSelectDate && <Button type="button" variant="outline" onClick={() => onSelectDate(dayDates[dayIndex])}>{BLOCKED_DATE_TEXT.unblockTitle}</Button>}
               </div>
             ) : sortedBlocks.length === 0 ? (
               <p className="mt-1 text-xs text-muted-foreground">{EMPTY_DAY_LABEL}</p>
