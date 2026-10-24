@@ -1,3 +1,16 @@
+export const APPOINTMENT_MESSAGE_MAX_LENGTH = 300;
+
+export const APPOINTMENT_MESSAGES = {
+  invalidId: 'El id de la cita no es válido',
+  invalidScope: 'El alcance debe ser upcoming o past',
+  invalidBlockId: 'El bloque de disponibilidad no es válido',
+  missingTopic: 'Selecciona el tema de la sesión',
+  invalidTopic: 'El tema de la sesión no es válido',
+  messageTooLong: `El mensaje no puede superar los ${APPOINTMENT_MESSAGE_MAX_LENGTH} caracteres`,
+  unauthorizedSession: 'La sesión es requerida o no es válida',
+  forbiddenAccess: 'El usuario no tiene acceso a las citas solicitadas',
+} as const;
+
 export const APPOINTMENT_RESPONSE_SCHEMA = {
   type: 'object' as const,
   required: [
@@ -35,11 +48,17 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
   },
 };
 
-export const APPOINTMENT_MESSAGES = {
-  invalidId: 'El id de la cita no es válido',
-  invalidScope: 'El alcance debe ser upcoming o past',
-  unauthorizedSession: 'La sesión es requerida o no es válida',
-  forbiddenAccess: 'El usuario no tiene acceso a las citas solicitadas',
+export const CREATE_APPOINTMENT_DOCS = {
+  summary: 'Solicita una cita en un horario libre y la devuelve confirmada',
+  description:
+    'Valida el bloque, la disponibilidad del mentor y la fecha, y crea la cita con estado CONFIRMED (201, horarios en UTC)',
+  blockDescription: 'Identificador (UUID) del bloque de disponibilidad a reservar',
+  topicDescription: 'Identificador (UUID) del tema de la sesión que ofrece el mentor',
+  messageDescription: `Mensaje opcional para el mentor (máximo ${APPOINTMENT_MESSAGE_MAX_LENGTH} caracteres)`,
+  createdDescription: 'Cita creada con estado CONFIRMED',
+  badRequestDescription: `El cuerpo no es válido: tema ausente o mensaje mayor a ${APPOINTMENT_MESSAGE_MAX_LENGTH} caracteres`,
+  notFoundDescription: 'El bloque de disponibilidad o el mentor no existen',
+  conflictDescription: 'El horario ya fue reservado o el día está bloqueado',
 } as const;
 
 export const FIND_MY_APPOINTMENTS_DOCS = {
