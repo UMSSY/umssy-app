@@ -22,7 +22,7 @@ export function WorkExperienceListCard({
       {/* Cabecera de la sección con el botón de añadir experiencia */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900 wrap-anywhere">Experiencia laboral</h3>
+          <h3 className="wrap-anywhere text-lg font-semibold text-slate-900">Experiencia laboral</h3>
           <p className="text-sm text-slate-600">Añade tu trayectoria y proyectos profesionales.</p>
         </div>
         {onAdd && (
