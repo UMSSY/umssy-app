@@ -9,6 +9,9 @@ import {
   MentorAvailabilityNotOwnedException,
 } from '../exceptions/index.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
+import { toBoliviaTime } from '../../../common/utils/date-time.js';
+import type { TransactionClient } from '../../../common/types/transaction-client.types.js';
+import { BlockedDatesService } from './blocked-dates.service.js';
 import { hasOverlapErrorCode } from '../utils/overlap-error.js';
 import type { AvailabilityBlockResponse } from '../types/availability-block-response.types.js';
 import type { CreateBlockDto } from '../requests/create-block.request.js';
@@ -23,6 +26,7 @@ export class AvailabilityService {
     private readonly availabilityRepository: AvailabilityRepository,
     private readonly availabilityMapper: AvailabilityMapper,
     private readonly mentorsService: MentorsService,
+    private readonly blockedDatesService: BlockedDatesService,
   ) {}
 
   async remove(mentorId: string, blockId: string): Promise<DeletedBlockResponse> {
@@ -70,11 +74,18 @@ export class AvailabilityService {
       throw new BlockHasAppointmentException();
     }
 
+    const save = (tx?: TransactionClient) =>
+      this.availabilityRepository.update(
+        blockId,
+        { startAt: payload.startAt, endAt: payload.endAt },
+        tx,
+      );
+    const movesToAnotherDay = toBoliviaTime(block.startAt).date !== toBoliviaTime(payload.startAt).date;
+
     try {
-      const updated = await this.availabilityRepository.update(blockId, {
-        startAt: payload.startAt,
-        endAt: payload.endAt,
-      });
+      const updated = movesToAnotherDay
+        ? await this.blockedDatesService.runOnUnblockedDay(mentorId, payload.startAt, save)
+        : await save();
       return this.availabilityMapper.toResponse(updated);
     } catch (error) {
       if (hasOverlapErrorCode(error)) {
@@ -86,10 +97,8 @@ export class AvailabilityService {
 
   async create(mentorId: string, payload: CreateBlockDto): Promise<AvailabilityBlockResponse> {
     try {
-      const block = await this.availabilityRepository.create(
-        mentorId,
-        payload.startAt,
-        payload.endAt,
+      const block = await this.blockedDatesService.runOnUnblockedDay(mentorId, payload.startAt, (tx) =>
+        this.availabilityRepository.create(mentorId, payload.startAt, payload.endAt, tx),
       );
       return this.availabilityMapper.toResponse({ ...block, appointments: [] });
     } catch (error) {
@@ -111,8 +120,12 @@ export class AvailabilityService {
       return [];
     }
 
-    const blocks = await this.availabilityRepository.findMentorFreeBlocksInRange(mentorId, from, to);
-    return this.availabilityMapper.toResponseList(blocks);
+    const [blocks, blockedDays] = await Promise.all([
+      this.availabilityRepository.findMentorFreeBlocksInRange(mentorId, from, to),
+      this.blockedDatesService.findBlockedDays(mentorId, from, to),
+    ]);
+    const offeredBlocks = blocks.filter((block) => !blockedDays.has(toBoliviaTime(block.startAt).date));
+    return this.availabilityMapper.toResponseList(offeredBlocks);
   }
 
   async findMyAvailabilityStatus(mentorId: string): Promise<MentorAvailabilityStatusResponse> {
