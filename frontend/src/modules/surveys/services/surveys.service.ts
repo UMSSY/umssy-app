@@ -1,7 +1,14 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import { getFileNameFromDisposition } from "@/shared/utils/download-file";
-import type { Career, CreateSurveyPayload, CreatedSurvey, SurveyStatistics, SurveySummary } from "../types/survey.types";
+import type {
+  Career,
+  CreateSurveyPayload,
+  CreatedSurvey,
+  SurveyDetail,
+  SurveyStatistics,
+  SurveySummary,
+} from "../types/survey.types";
 
 export const surveysService = {
   createSurvey: async (payload: CreateSurveyPayload): Promise<ApiResponse<CreatedSurvey>> => {
@@ -16,6 +23,16 @@ export const surveysService = {
 
   listCareers: async (): Promise<ApiResponse<Career[]>> => {
     const { data } = await apiClient.get<ApiResponse<Career[]>>("/careers");
+    return data;
+  },
+
+  getSurvey: async (id: string): Promise<ApiResponse<SurveyDetail>> => {
+    const { data } = await apiClient.get<ApiResponse<SurveyDetail>>(`/surveys/${id}`);
+    return data;
+  },
+
+  updateSurvey: async (id: string, payload: CreateSurveyPayload): Promise<ApiResponse<CreatedSurvey>> => {
+    const { data } = await apiClient.patch<ApiResponse<CreatedSurvey>>(`/surveys/${id}`, payload);
     return data;
   },
 
