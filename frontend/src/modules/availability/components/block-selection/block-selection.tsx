@@ -5,7 +5,7 @@ import type { BlockSelectionProps } from "../../types/block-selection-props.type
 import { WeekGrid } from "../week-grid/week-grid";
 import { BlockSelectionPanel } from "./block-selection-panel";
 
-export function BlockSelection({ blocks, weekRange, fetchFreeBlocks }: BlockSelectionProps) {
+export function BlockSelection({ blocks, weekRange, fetchFreeBlocks, stickyOffset }: BlockSelectionProps) {
   const { selectedBlock, unavailableBlock, unavailableBlockIds, isChecking, error, selectBlock } =
     useBlockSelection(fetchFreeBlocks);
 
@@ -19,6 +19,7 @@ export function BlockSelection({ blocks, weekRange, fetchFreeBlocks }: BlockSele
         variant="selectable"
         selectedBlockId={selectedBlock?.id}
         onSelectBlock={selectBlock}
+        stickyOffset={stickyOffset}
       />
       <BlockSelectionPanel
         selectedBlock={selectedBlock}

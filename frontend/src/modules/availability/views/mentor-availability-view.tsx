@@ -19,6 +19,7 @@ import { EditBlockPanel } from "../components/edit-block-panel";
 import { ReceiveRequestsSwitch } from "../components/receive-requests-switch";
 import { WeekGrid } from "../components/week-grid/week-grid";
 import { useCreateAvailabilityBlock } from "../hooks/use-create-availability-block";
+import { useElementHeight } from "../hooks/use-element-height";
 import { useBlockedDates } from "../hooks/use-blocked-dates";
 import { useMyBlocks } from "../hooks/use-my-blocks";
 import type { AvailabilityBlock } from "../types/availability-block.types";
@@ -35,6 +36,7 @@ export function MentorAvailabilityView({
   const [editBlockId, setEditBlockId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
+  const { ref: weekNavRef, height: weekNavHeight } = useElementHeight<HTMLElement>();
 
   const {
     blocks,
@@ -106,7 +108,8 @@ export function MentorAvailabilityView({
         <div className="min-w-0 space-y-4">
           <nav
             aria-label={MY_AVAILABILITY_TEXT.weekNavigation}
-            className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-3"
+            ref={weekNavRef}
+          className="sticky top-[calc(var(--spacing-app-header)+1rem)] z-20 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-4 before:h-4 before:bg-background"
           >
             <Button
               variant="outline"
@@ -160,6 +163,7 @@ export function MentorAvailabilityView({
                 blocks={blocks}
                 weekRange={weekRange}
                 variant="owner"
+                stickyOffset={weekNavHeight}
                 onEditBlock={handleEditBlock}
                 blockedDates={blockedDates}
                 onSelectDate={handleSelectDate}
