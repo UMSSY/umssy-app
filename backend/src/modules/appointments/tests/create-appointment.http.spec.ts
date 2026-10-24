@@ -22,7 +22,7 @@ import { AvailabilityRepository } from '../../availability/repositories/availabi
 import { BlockedDatesService } from '../../availability/services/blocked-dates.service.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { AppointmentsModule } from '../appointments.module.js';
-import { APPOINTMENT_MESSAGES } from '../constants/appointment-docs.constants.js';
+import { APPOINTMENT_MESSAGES, APPOINTMENT_MESSAGE_MAX_LENGTH } from '../constants/appointment-docs.constants.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import {
   APPOINTMENT_ID,
@@ -34,11 +34,15 @@ import {
 const BLOCK_ID = '55555555-5555-4555-8555-555555555555';
 const TOPIC_ID = '66666666-6666-4666-8666-666666666666';
 const STATUS_ID = '77777777-7777-4777-8777-777777777777';
+const OTHER_MENTOR_ID = '99999999-9999-4999-8999-999999999999';
+const COMPANY_ID = '88888888-8888-4888-8888-888888888888';
 const TX = { kind: 'tx' };
 
 const SESSION_USERS: Record<string, string> = {
   [STUDENT_ID]: 'estudiante',
   [MENTOR_ID]: 'mentor',
+  [OTHER_MENTOR_ID]: 'mentor',
+  [COMPANY_ID]: 'empresa',
 };
 
 const block = (
@@ -63,6 +67,8 @@ describe('POST /appointments (integración HTTP)', () => {
   const jwt = new JwtService({ secret: 'create-appointment-http-secret' });
   const token = jwt.sign({ sub: STUDENT_ID, roleTag: 'estudiante' });
   const mentorToken = jwt.sign({ sub: MENTOR_ID, roleTag: 'mentor' });
+  const otherMentorToken = jwt.sign({ sub: OTHER_MENTOR_ID, roleTag: 'mentor' });
+  const companyToken = jwt.sign({ sub: COMPANY_ID, roleTag: 'empresa' });
   const findById = vi.fn();
   const findStatusIdByTitle = vi.fn();
   const createAppointment = vi.fn();
@@ -152,12 +158,28 @@ describe('POST /appointments (integración HTTP)', () => {
   it('responde 403 cuando el rol no puede reservar citas', async () => {
     const response = await post(
       { blockId: BLOCK_ID, orientationTypeId: TOPIC_ID },
-      mentorToken,
+      companyToken,
     );
 
     expect(response.status).toBe(403);
     expect(response.body).toMatchObject({ statusCode: 403, ok: false });
     expect(createAppointment).not.toHaveBeenCalled();
+  });
+
+  it('responde 201 cuando un mentor reserva el bloque de otro mentor', async () => {
+    const response = await post(
+      { blockId: BLOCK_ID, orientationTypeId: TOPIC_ID },
+      otherMentorToken,
+    );
+
+    expect(response.status).toBe(201);
+    expect(createAppointment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mentorId: MENTOR_ID,
+        studentId: OTHER_MENTOR_ID,
+      }),
+      TX,
+    );
   });
 
   it('responde 400 con el detalle cuando falta el tema', async () => {
@@ -175,11 +197,11 @@ describe('POST /appointments (integración HTTP)', () => {
     expect(createAppointment).not.toHaveBeenCalled();
   });
 
-  it('responde 400 con el detalle cuando el mensaje supera los 300 caracteres', async () => {
+  it('responde 400 con el detalle cuando el mensaje supera el límite', async () => {
     const response = await post({
       blockId: BLOCK_ID,
       orientationTypeId: TOPIC_ID,
-      message: 'x'.repeat(301),
+      message: 'x'.repeat(APPOINTMENT_MESSAGE_MAX_LENGTH + 1),
     });
 
     expect(response.status).toBe(400);
@@ -255,13 +277,11 @@ describe('POST /appointments (integración HTTP)', () => {
     expect(createAppointment).not.toHaveBeenCalled();
   });
 
-  it('responde 403 cuando el usuario intenta reservar su propio bloque', async () => {
-    findById.mockResolvedValue(block({ mentorId: STUDENT_ID }));
-
-    const response = await post({
-      blockId: BLOCK_ID,
-      orientationTypeId: TOPIC_ID,
-    });
+  it('responde 403 cuando el mentor intenta reservar su propio bloque', async () => {
+    const response = await post(
+      { blockId: BLOCK_ID, orientationTypeId: TOPIC_ID },
+      mentorToken,
+    );
 
     expect(response.status).toBe(403);
     expect(response.body.detail).toBe(
