@@ -10,6 +10,7 @@ import { MentorsController } from '../controllers/mentors.controller.js';
 import { MentorsService } from '../services/mentors.service.js';
 import { MentorNotFoundException } from '../exceptions/mentor-not-found.exception.js';
 import { AlreadyMentorException } from '../exceptions/already-mentor.exception.js';
+import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { TechnicalAreasController } from '../../technical-areas/controllers/technical-areas.controller.js';
 import { TechnicalAreasService } from '../../technical-areas/services/technical-areas.service.js';
 import { OrientationTypesController } from '../../orientation-types/controllers/orientation-types.controller.js';
@@ -32,6 +33,14 @@ describe('Mentorship Standard Response HTTP', () => {
   const activationPayload = { ...technicalPayload, ...orientationPayload };
   const mentorsService = {
     findAll: vi.fn().mockResolvedValue(directory),
+    findDirectory: vi.fn().mockResolvedValue({
+      items: directory,
+      page: 1,
+      pageSize: 6,
+      totalItems: 1,
+      totalPages: 1,
+      effectiveSort: 'name_asc',
+    }),
     findOne: vi.fn().mockResolvedValue(profile),
     activate: vi.fn().mockResolvedValue({ id: userId }),
     findMyTechnicalAreas: vi.fn().mockResolvedValue(areas),
@@ -100,6 +109,73 @@ describe('Mentorship Standard Response HTTP', () => {
       detail: 'Operación exitosa',
       data,
     });
+  });
+
+  it('GET /api/mentors/directory valida y envuelve una sola vez la página', async () => {
+    const response = await request(server)
+      .get(
+        '/api/mentors/directory?page=2&search=%20Ana%20&area=Backend&available=true',
+      )
+      .expect(200);
+    expect(response.body.data).toEqual({
+      items: directory,
+      page: 1,
+      pageSize: 6,
+      totalItems: 1,
+      totalPages: 1,
+      effectiveSort: 'name_asc',
+    });
+    expect(mentorsService.findDirectory).toHaveBeenCalledWith({
+      page: 2,
+      search: 'Ana',
+      area: 'Backend',
+      available: true,
+      sort: 'name_asc',
+    });
+  });
+
+  it('GET /api/mentors/directory aplica los valores predeterminados', async () => {
+    await request(server).get('/api/mentors/directory').expect(200);
+    expect(mentorsService.findDirectory).toHaveBeenLastCalledWith({
+      page: 1,
+      search: '',
+      available: false,
+      sort: 'name_asc',
+    });
+  });
+
+  it('devuelve un error controlado para un orden reservado', async () => {
+    mentorsService.findDirectory.mockRejectedValueOnce(
+      new RequestValidationException([
+        { field: 'sort', message: 'El orden affinity aún no está disponible' },
+      ]),
+    );
+    await request(server)
+      .get('/api/mentors/directory?sort=affinity')
+      .expect(400)
+      .expect({
+        statusCode: 400,
+        data: [
+          { field: 'sort', message: 'El orden affinity aún no está disponible' },
+        ],
+        detail: 'sort: El orden affinity aún no está disponible',
+        ok: false,
+        errors: [
+          { field: 'sort', message: 'El orden affinity aún no está disponible' },
+        ],
+      });
+  });
+
+  it.each([
+    'page=0',
+    'page=abc',
+    'available=yes',
+    'sort=invalid',
+    'pageSize=100',
+  ])('rechaza %s antes del servicio', async (query) => {
+    const previousCalls = mentorsService.findDirectory.mock.calls.length;
+    await request(server).get(`/api/mentors/directory?${query}`).expect(400);
+    expect(mentorsService.findDirectory).toHaveBeenCalledTimes(previousCalls);
   });
 
   it('POST /api/mentors/activate conserva HTTP 201', async () => {
