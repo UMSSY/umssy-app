@@ -43,42 +43,42 @@ export function PreviewStep({
 
   return (
     <div className="mt-8 w-full">
-      <h3 className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-500">
-        VISTA PREVIA DE LA PUBLICACIÓN
+      <h3 className="mb-4 text-lg font-semibold text-ink">
+        Revisa tu publicación
       </h3>
 
-      <div className="mx-auto max-w-3xl rounded-lg border border-border bg-white p-8 shadow-[0_2px_10px_rgb(0,0,0,0.06)]">
+      <div className="mx-auto max-w-3xl rounded-lg border border-border bg-white p-8 shadow-none">
         <div className="mb-6 flex items-center gap-4">
-          <div className="flex h-[50px] w-[50px] items-center justify-center rounded-lg bg-ink text-lg font-bold tracking-wider text-white">
+          <div className="flex size-[50px] items-center justify-center rounded-lg bg-ink text-lg font-bold tracking-wider text-white">
             {company.initials}
           </div>
           <div>
-            <h4 className="text-[15px] font-extrabold leading-tight text-gray-900">{company.name}</h4>
-            <p className="text-[13px] text-gray-500">Empresa verificada</p>
+            <h4 className="text-base leading-tight font-extrabold text-ink">{company.name}</h4>
+            <p className="text-sm text-text-secondary">Empresa de la publicación</p>
           </div>
         </div>
 
         <div className="mb-6">
-          <h2 className="text-[22px] font-extrabold text-gray-900">{conditions.title}</h2>
-          <p className="mt-1 text-[13px] font-bold text-ink-soft">{conditions.category}</p>
+          <h2 className="text-2xl font-extrabold text-ink">{conditions.title}</h2>
+          <p className="mt-1 text-sm font-bold text-ink-soft">{conditions.category}</p>
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-md bg-gray-50 px-4 py-2.5 text-[13px] font-medium text-gray-700">
+          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
             {conditions.modality}
           </div>
-          <div className="rounded-md bg-gray-50 px-4 py-2.5 text-[13px] font-medium text-gray-700">
+          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
             {conditions.contractType}
           </div>
-          <div className="rounded-md bg-gray-50 px-4 py-2.5 text-[13px] font-medium text-gray-700">
+          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
             {conditions.vacancyCount} {conditions.vacancyCount === "1" ? "vacante" : "vacantes"}
           </div>
-          <div className="rounded-md bg-gray-50 px-4 py-2.5 text-[13px] font-medium text-gray-700">
+          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
             {conditions.salary}
           </div>
         </div>
 
-        <p className="mb-6 whitespace-pre-line break-words text-[14px] leading-relaxed text-gray-600">
+        <p className="mb-6 text-sm leading-relaxed break-words whitespace-pre-line text-text-secondary">
           {formatDescription(conditions.description, isExpanded)}
           {canExpand && (
             <>
@@ -99,19 +99,19 @@ export function PreviewStep({
         <Separator className="mb-5" />
 
         <div className="mb-5">
-          <h4 className="mb-1 text-[14px] font-semibold text-gray-900">Idiomas</h4>
-          <p className="text-[14px] text-gray-600">{conditions.languages}</p>
+          <h4 className="mb-1 text-sm font-semibold text-ink">Idiomas</h4>
+          <p className="text-sm text-text-secondary">{conditions.languages}</p>
         </div>
 
         <Separator className="mb-5" />
 
         <div className="mb-6">
-          <h4 className="mb-1 text-[14px] font-semibold text-gray-900">Ubicación</h4>
+          <h4 className="mb-1 text-sm font-semibold text-ink">Ubicación</h4>
           <a
             href={mapsLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="break-all text-[14px] text-accent underline-offset-2 hover:underline"
+            className="text-sm break-all text-accent underline-offset-2 hover:underline"
           >
             {mapsLink}
           </a>
@@ -119,7 +119,7 @@ export function PreviewStep({
 
         <ul className="flex flex-wrap gap-2" aria-label="Habilidades requeridas">
           {conditions.skills.map((skill) => (
-            <li key={skill.id} className="rounded-full bg-gray-100 px-4 py-1.5 text-[13px] font-semibold text-gray-700">
+            <li key={skill.id} className="rounded-full bg-interaction px-4 py-1.5 text-sm font-semibold text-ink-soft">
               {skill.name}
             </li>
           ))}
@@ -143,6 +143,7 @@ export function PreviewStep({
 
       <StepActions
         secondaryLabel="Anterior"
+        primaryVariant="brand"
         primaryLabel={isSubmitting ? "Publicando..." : "Confirmar publicación"}
         onSecondary={onPrevious}
         onPrimary={onConfirm}

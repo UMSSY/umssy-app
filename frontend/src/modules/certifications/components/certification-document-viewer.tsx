@@ -43,7 +43,7 @@ function DocumentPreviewContent({ preview }: { preview: CertificationDocumentPre
   }
 
   return (
-    <p className="py-6 text-center text-[14px] text-text-secondary">
+    <p className="py-6 text-center text-sm text-text-secondary">
       {CERTIFICATION_DOCUMENT_MESSAGES.previewUnavailable}
     </p>
   );
@@ -69,25 +69,25 @@ function CertificationDocumentViewerBody({
 
   return (
     <Dialog open onOpenChange={(isOpen) => (isOpen ? undefined : onClose())}>
-      <DialogContent className="max-w-3xl gap-4 rounded-2xl border border-border bg-surface p-6 text-ink ring-0 sm:max-w-3xl">
+      <DialogContent className="max-w-3xl gap-4 rounded-lg border border-border bg-surface p-6 text-ink ring-0 sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle className="font-tight text-[20px] font-bold text-ink">
+          <DialogTitle className="font-tight text-xl font-bold text-ink">
             Documento de respaldo
           </DialogTitle>
-          <DialogDescription className="text-[14px] break-all text-text-secondary">
+          <DialogDescription className="text-sm break-all text-text-secondary">
             {preview.certificationName} · {preview.fileName}
           </DialogDescription>
         </DialogHeader>
         <DocumentPreviewContent preview={preview} />
         {downloadError ? (
-          <p role="alert" className="text-[13px] text-danger">
+          <p role="alert" className="text-sm text-danger">
             {downloadError}
           </p>
         ) : null}
         <DialogFooter className="mx-0 mb-0 rounded-b-2xl border-t-0 bg-transparent p-0">
           <Button
             type="button"
-            className="h-11 bg-accent px-5 text-[14px] font-semibold text-white hover:bg-brand-hover"
+            className="h-11 bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
             onClick={handleDownload}
           >
             <Download aria-hidden="true" className="size-4" />

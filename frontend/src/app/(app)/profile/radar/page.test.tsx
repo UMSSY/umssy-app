@@ -31,7 +31,7 @@ describe("RadarProfilePage", () => {
   it("renders the affinity radar view of the profile", () => {
     render(<RadarProfilePage />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Carlos Mendoza Ríos" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 2, name: "Carlos Mendoza Ríos" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Desglose vectorial de afinidad" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Desglose por área" })).toBeDefined();
   });

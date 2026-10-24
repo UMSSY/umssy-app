@@ -7,7 +7,7 @@ import { AreaLevelBadge } from "./area-level-badge";
 import { AreaScoreBar } from "./area-score-bar";
 
 const METRIC_CLASS = "min-w-0 px-6 py-4";
-const METRIC_LABEL_CLASS = "text-[11px] font-medium tracking-wider text-text-secondary uppercase";
+const METRIC_LABEL_CLASS = "text-xs font-medium tracking-wider text-text-secondary uppercase";
 const METRIC_VALUE_ROW_CLASS = "flex min-h-10 items-center";
 const METRIC_VALUE_CLASS = "font-heading text-3xl leading-none font-semibold tabular-nums";
 

@@ -15,7 +15,7 @@ import { HOME_SECTION_INNER_CLASS, HOME_WORKSHOPS } from "../constants/home.cons
 export function HomeView() {
   return (
     <div className="min-h-screen bg-ink text-ink">
-      <PublicHeader />
+      <PublicHeader showInstitutionalSeal />
       <main>
         <HomeHero />
         <HomeFeatures />

@@ -15,12 +15,12 @@ export const SkillsDetectedList: React.FC<SkillsDetectedProps> = ({
   if (!skills || skills.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2 mt-4 font-sans">
+    <div className="mt-4 flex flex-col gap-2 font-sans">
       <h3 className="text-[17px] font-bold text-ink">
         Habilidades detectadas automáticamente
       </h3>
 
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex flex-wrap items-center gap-2">
         {skills.map((skill, index) => {
           return (
             <Badge key={index} className="border-border bg-surface-soft text-ink-soft">
