@@ -29,6 +29,12 @@ function contextFor(roles: string[], handler: () => unknown, controller: object)
   } as unknown as ExecutionContext;
 }
 
+const TITULADO_SESSION = {
+  id: 'titulado-1',
+  email: 'titulado@umss.edu.bo',
+  roles: ['titulado'],
+};
+
 describe('SurveysController', () => {
   let surveysController: SurveysController;
   let careersController: CareersController;
@@ -137,8 +143,8 @@ describe('SurveysController', () => {
       questions: [],
     };
     const spy = vi.spyOn(surveysService, 'getSurveyForAnswering').mockResolvedValue(detail);
-    await expect(surveysController.getById('survey-1', 'titulado-1')).resolves.toBe(detail);
-    expect(spy).toHaveBeenCalledWith('survey-1', 'titulado-1');
+    await expect(surveysController.getById('survey-1', 'titulado-1', TITULADO_SESSION)).resolves.toBe(detail);
+    expect(spy).toHaveBeenCalledWith('survey-1', 'titulado-1', ['titulado']);
   });
 
   it('permite a un titulado enviar sus respuestas', async () => {
@@ -154,9 +160,9 @@ describe('SurveysController', () => {
     const spy = vi.spyOn(surveysService, 'submitResponse').mockResolvedValue(result);
 
     await expect(
-      surveysController.submitResponse('survey-1', 'titulado-1', payload),
+      surveysController.submitResponse('survey-1', 'titulado-1', payload, TITULADO_SESSION),
     ).resolves.toBe(result);
-    expect(spy).toHaveBeenCalledWith('survey-1', 'titulado-1', payload);
+    expect(spy).toHaveBeenCalledWith('survey-1', 'titulado-1', payload, ['titulado']);
   });
 });
 

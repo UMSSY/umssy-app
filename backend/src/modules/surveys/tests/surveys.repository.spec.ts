@@ -173,9 +173,6 @@ describe('SurveysRepository', () => {
   });
 
   it('clasifica automáticamente notificaciones en pending, expired y answered según estado y fecha', async () => {
-    prisma.user.findUnique.mockResolvedValue({ id: 'user-1', email: 'titulado@umss.edu.bo' });
-    prisma.accessRequest.findFirst.mockResolvedValue({ careerId: 'career-sistemas' });
-
     const pastDate = new Date('2020-01-01T00:00:00.000Z');
     const futureDate = new Date('2030-01-01T00:00:00.000Z');
 
@@ -206,7 +203,10 @@ describe('SurveysRepository', () => {
       },
     ]);
 
-    const notifications = await repository.findNotificationsForUser('user-1');
+    const notifications = await repository.findNotificationsForUser('user-1', {
+      careerId: 'career-sistemas',
+      graduationYear: 2024,
+    });
 
     expect(notifications).toEqual([
       {

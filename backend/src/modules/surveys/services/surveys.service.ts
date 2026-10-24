@@ -4,6 +4,7 @@ import {
   InvalidSurveyScheduleException,
   SurveyAlreadyAnsweredException,
   SurveyExpiredException,
+  SurveyNotAvailableException,
   SurveyNotEditableException,
   SurveyNotFoundException,
   SurveyTitleAlreadyExistsException,
@@ -18,8 +19,10 @@ import type { SurveyDetailResponse } from '../responses/survey-detail.response.j
 import type { SurveyNotificationResponse } from '../responses/survey-notification.response.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
+import { SURVEYS_ROLE } from '../constants/surveys-access.constants.js';
 import type { UpdateSurveyData } from '../types/create-survey-data.type.js';
 import { SurveyStatus } from '../types/survey.enum.js';
+import { isSurveyForGraduate } from '../utils/is-survey-for-graduate.js';
 import { getScheduleError } from '../utils/survey-schedule.js';
 
 import { ReportHistoryService } from '../../reports/services/report-history.service.js';
@@ -107,12 +110,22 @@ export class SurveysService {
   }
 
   async getNotificationsForUser(userId: string): Promise<SurveyNotificationResponse[]> {
-    return this.surveysRepository.findNotificationsForUser(userId);
+    const graduate = await this.surveysRepository.findGraduateProfile(userId);
+    if (!graduate) return [];
+    return this.surveysRepository.findNotificationsForUser(userId, graduate);
   }
 
-  async getSurveyForAnswering(id: string, userId: string): Promise<SurveyDetailResponse> {
+  async getSurveyForAnswering(
+    id: string,
+    userId: string,
+    sessionRoles: readonly string[] = [],
+  ): Promise<SurveyDetailResponse> {
     const survey = await this.surveysRepository.findByIdWithQuestions(id, userId);
     if (!survey) throw new SurveyNotFoundException();
+    if (!sessionRoles.includes(SURVEYS_ROLE)) {
+      if (survey.status !== 'published') throw new SurveyNotFoundException();
+      await this.ensureSurveyIsForGraduate(survey, userId);
+    }
     return survey;
   }
 
@@ -120,10 +133,15 @@ export class SurveysService {
     id: string,
     userId: string,
     request: SubmitSurveyResponseRequest,
+    sessionRoles: readonly string[] = [],
   ): Promise<{ success: boolean; message: string }> {
     const survey = await this.surveysRepository.findByIdWithQuestions(id, userId);
     if (!survey || survey.status !== 'published') {
       throw new SurveyNotFoundException();
+    }
+
+    if (!sessionRoles.includes(SURVEYS_ROLE)) {
+      await this.ensureSurveyIsForGraduate(survey, userId);
     }
 
     if (survey.isExpired) {
@@ -176,6 +194,16 @@ export class SurveysService {
       excludedId,
     });
     if (titleTaken) throw new SurveyTitleAlreadyExistsException();
+  }
+
+  private async ensureSurveyIsForGraduate(
+    survey: SurveyDetailResponse,
+    userId: string,
+  ): Promise<void> {
+    const graduate = await this.surveysRepository.findGraduateProfile(userId);
+    if (!graduate || !isSurveyForGraduate(survey, graduate)) {
+      throw new SurveyNotAvailableException();
+    }
   }
 
   private async ensureCareerExists(careerId: string): Promise<void> {
