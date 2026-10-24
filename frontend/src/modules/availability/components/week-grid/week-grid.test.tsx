@@ -49,14 +49,14 @@ describe("WeekGrid", () => {
     const { container } = render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
     const day = screen.getByRole("heading", { name: "LUN 5" });
     expect(day).toHaveClass("sticky", "z-10", "bg-app-header", "text-app-header-foreground");
-    expect(day).toHaveStyle({ top: "calc(var(--spacing-app-header) + 0px)" });
+    expect(day).toHaveStyle({ top: "calc(var(--spacing-app-header) + 16px)" });
     expect(container.querySelector(".overflow-hidden.rounded-lg")).toBeNull();
     expect(container.querySelector(".overflow-clip.rounded-lg")).not.toBeNull();
   });
 
   it("ubica la fila de días debajo de la navegación de la semana cuando se le pasa su altura", () => {
     render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" stickyOffset={66} />);
-    expect(screen.getByRole("heading", { name: "LUN 5" })).toHaveStyle({ top: "calc(var(--spacing-app-header) + 66px)" });
+    expect(screen.getByRole("heading", { name: "LUN 5" })).toHaveStyle({ top: "calc(var(--spacing-app-header) + 82px)" });
   });
 
   it("muestra el número del día en la cabecera de cada columna", () => {
