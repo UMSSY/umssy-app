@@ -1,3 +1,4 @@
+
 "use client";
 
 import { MentorProfileHeader } from "../components/mentor/mentor-profile-header";
@@ -13,12 +14,22 @@ import { useCurrentUserId } from "../hooks/use-current-user-id";
 
 type MentorProfileViewProps = {
   mentorId: string;
+  returnTo?: string;
 };
 
-export function MentorProfileView({ mentorId }: MentorProfileViewProps) {
+export function MentorProfileView({
+  mentorId,
+  returnTo = "/mentorship/mentors",
+}: MentorProfileViewProps) {
   const { currentUserId, canVerifyIdentity } = useCurrentUserId();
-  const { data: mentor, isPending, isError, isFetching, refetch } =
-    useMentorProfile(mentorId);
+
+  const {
+    data: mentor,
+    isPending,
+    isError,
+    isFetching,
+    refetch,
+  } = useMentorProfile(mentorId);
 
   if (isPending || (isError && isFetching)) {
     return (
@@ -58,15 +69,23 @@ export function MentorProfileView({ mentorId }: MentorProfileViewProps) {
   return (
     <main className="bg-background">
       <div className="mx-auto w-full max-w-7xl min-w-0">
-        <MentorProfileNavigation mentorName={mentor.fullName} />
+        <MentorProfileNavigation
+          mentorName={mentor.fullName}
+          returnTo={returnTo}
+        />
+
         <MentorProfileHeader
           mentor={mentor}
-          showRequestAction={canVerifyIdentity && currentUserId !== mentor.id}
+          showRequestAction={
+            canVerifyIdentity && currentUserId !== mentor.id
+          }
         />
 
         <div className="mt-6 grid min-w-0 grid-cols-12 gap-6">
           <div className="col-span-8 flex min-w-0 flex-col gap-6">
-            {mentor.aboutMe && <MentorAbout description={mentor.aboutMe} />}
+            {mentor.aboutMe && (
+              <MentorAbout description={mentor.aboutMe} />
+            )}
 
             <MentorGuidanceTypes
               key={mentor.id}
