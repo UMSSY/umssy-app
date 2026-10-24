@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ConfirmDeleteDialog } from "@/modules/profile";
-import { FeedbackMessage } from "@/modules/profile";
-import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
-import { WorkExperienceForm } from "../components/work-experience-form";
-import { WorkExperienceListCard } from "../components/work-experience-list-card";
-import { useDeleteWorkExperience } from "../hooks/use-delete-work-experience";
-import { useSaveWorkExperience } from "../hooks/use-save-work-experience";
-import { useWorkExperiences } from "../hooks/use-work-experiences";
-import type { Feedback } from "@/modules/profile";
-import type { WorkExperienceFormValues } from "../types/work-experience-form-values.types";
-import type { WorkExperienceItem } from "../types/work-experience-item.types";
-import { toWorkExperienceFormValues } from "../utils/to-work-experience-form-values";
-import { toWorkExperiencePayload } from "../utils/to-work-experience-payload";
+import { useState } from 'react';
+import { ConfirmDeleteDialog } from '@/modules/profile';
+import { FeedbackMessage } from '@/modules/profile';
+import { RecordEditorDialog } from '@/shared/components/layout/record-editor-dialog';
+import { WorkExperienceForm } from '../components/work-experience-form';
+import { WorkExperienceListCard } from '../components/work-experience-list-card';
+import { useDeleteWorkExperience } from '../hooks/use-delete-work-experience';
+import { useSaveWorkExperience } from '../hooks/use-save-work-experience';
+import { useWorkExperiences } from '../hooks/use-work-experiences';
+import type { Feedback } from '@/modules/profile';
+import type { WorkExperienceFormValues } from '../types/work-experience-form-values.types';
+import type { WorkExperienceItem } from '../types/work-experience-item.types';
+import { toWorkExperienceFormValues } from '../utils/to-work-experience-form-values';
+import { toWorkExperiencePayload } from '../utils/to-work-experience-payload';
 
 export function WorkExperienceProfileSection() {
   const { experiences, isLoading, error, reload } = useWorkExperiences();
@@ -45,7 +45,7 @@ export function WorkExperienceProfileSection() {
   const isBusy = saveMutation.isSaving || deleteMutation.isDeleting;
 
   const listFeedback: Feedback | null =
-    deleteMutation.feedback ?? (!isFormOpen ? saveMutation.feedback : null) ?? (error ? { type: "error", message: error } : null);
+    deleteMutation.feedback ?? (!isFormOpen ? saveMutation.feedback : null) ?? (error ? { type: 'error', message: error } : null);
 
   const handleEdit = (experience: WorkExperienceItem) => {
     if (isBusy) {
@@ -96,14 +96,14 @@ export function WorkExperienceProfileSection() {
     <section id="experience" className="scroll-mt-24 space-y-4" aria-label="Experiencia laboral">
       <FeedbackMessage feedback={listFeedback} />
 
-        <WorkExperienceListCard
-          onAdd={handleCreate}
-          experiences={experiences}
-          isLoading={isLoading}
-          isBusy={isBusy}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+      <WorkExperienceListCard
+        onAdd={handleCreate}
+        experiences={experiences}
+        isLoading={isLoading}
+        isBusy={isBusy}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
       {isFormOpen ? (
         <RecordEditorDialog
           key={formVersion}
@@ -114,17 +114,17 @@ export function WorkExperienceProfileSection() {
           onClose={resetForm}
         >
           {(requestClose) => (
-        <WorkExperienceForm
-          key={editingExperience ? editingExperience.id : `new-${formVersion}`}
-          initialValues={
-            editingExperience ? toWorkExperienceFormValues(editingExperience) : undefined
-          }
-          isPending={saveMutation.isSaving}
-          feedback={saveMutation.feedback}
-          onValuesChange={() => setHasChanges(true)}
-          onSubmit={handleSubmit}
-          onCancel={requestClose}
-        />
+            <WorkExperienceForm
+              key={editingExperience ? editingExperience.id : `new-${formVersion}`}
+              initialValues={
+                editingExperience ? toWorkExperienceFormValues(editingExperience) : undefined
+              }
+              isPending={saveMutation.isSaving}
+              feedback={saveMutation.feedback}
+              onValuesChange={() => setHasChanges(true)}
+              onSubmit={handleSubmit}
+              onCancel={requestClose}
+            />
           )}
         </RecordEditorDialog>
       ) : null}
