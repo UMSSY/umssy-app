@@ -19,6 +19,7 @@ import { EditBlockPanel } from "../components/edit-block-panel";
 import { ReceiveRequestsSwitch } from "../components/receive-requests-switch";
 import { WeekGrid } from "../components/week-grid/week-grid";
 import { useCreateAvailabilityBlock } from "../hooks/use-create-availability-block";
+import { useElementHeight } from "../hooks/use-element-height";
 import { useBlockedDates } from "../hooks/use-blocked-dates";
 import { useMyBlocks } from "../hooks/use-my-blocks";
 import type { AvailabilityBlock } from "../types/availability-block.types";
@@ -35,6 +36,7 @@ export function MentorAvailabilityView({
   const [editBlockId, setEditBlockId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
+  const { ref: weekNavRef, height: weekNavHeight } = useElementHeight<HTMLElement>();
 
   const {
     blocks,
@@ -89,6 +91,8 @@ export function MentorAvailabilityView({
     ? blocks.find((item) => item.id === editBlockId) ?? null
     : null;
   const isEditing = Boolean(editBlockId) && !error;
+  const showBlockedPanel = selectedDate !== null && !isLoading && !error;
+  const showEditPanel = !showBlockedPanel && isEditing;
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6">
@@ -100,11 +104,12 @@ export function MentorAvailabilityView({
         />
       </header>
 
-      <div className="grid gap-6 min-[1200px]:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-6 min-[1200px]:grid-cols-[minmax(0,1fr)_22rem] min-[1200px]:items-start">
         <div className="min-w-0 space-y-4">
           <nav
             aria-label={MY_AVAILABILITY_TEXT.weekNavigation}
-            className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-3"
+            ref={weekNavRef}
+          className="sticky top-[calc(var(--spacing-app-header)+1rem)] z-20 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-4 before:h-4 before:bg-background"
           >
             <Button
               variant="outline"
@@ -158,6 +163,7 @@ export function MentorAvailabilityView({
                 blocks={blocks}
                 weekRange={weekRange}
                 variant="owner"
+                stickyOffset={weekNavHeight}
                 onEditBlock={handleEditBlock}
                 blockedDates={blockedDates}
                 onSelectDate={handleSelectDate}
@@ -166,8 +172,10 @@ export function MentorAvailabilityView({
           )}
         </div>
 
-        {selectedDate && !isLoading && !error ? (
-          <div className="min-w-0">
+        <div
+          className="min-w-0 min-[1200px]:sticky min-[1200px]:top-[calc(var(--spacing-app-header)+1rem)] min-[1200px]:max-h-[calc(100dvh-var(--spacing-app-header)-2rem)] min-[1200px]:overflow-y-auto"
+        >
+          {showBlockedPanel && (
             <BlockedDatePanel
               key={selectedDate}
               date={selectedDate}
@@ -176,21 +184,21 @@ export function MentorAvailabilityView({
               )}
               onClose={() => setSelectedDate(null)}
             />
-          </div>
-        ) : isEditing ? (
-          <div className="min-w-0 animate-in duration-200 fade-in slide-in-from-right">
-            {isLoading ? (
-              <AvailabilityLoading />
-            ) : (
-              <EditBlockPanel
-                key={editBlockId}
-                block={editBlock}
-                onClose={handleClosePanel}
-              />
-            )}
-          </div>
-        ) : (
-          <div className="min-w-0">
+          )}
+          {showEditPanel && (
+            <div className="animate-in duration-200 fade-in slide-in-from-right">
+              {isLoading ? (
+                <AvailabilityLoading />
+              ) : (
+                <EditBlockPanel
+                  key={editBlockId}
+                  block={editBlock}
+                  onClose={handleClosePanel}
+                />
+              )}
+            </div>
+          )}
+          <div hidden={showBlockedPanel || showEditPanel}>
             <BlockForm
               key={formKey}
               mode="create"
@@ -199,7 +207,7 @@ export function MentorAvailabilityView({
               onCancel={handleCancelCreate}
             />
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -6,4 +6,5 @@ export interface BlockSelectionProps {
   blocks: AvailabilityBlock[];
   weekRange: WeekRange;
   fetchFreeBlocks: () => Promise<AvailabilityBlock[]>;
+  stickyOffset?: number;
 }

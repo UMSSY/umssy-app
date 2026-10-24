@@ -13,7 +13,13 @@ import { BlockSelectionPanel } from "./block-selection-panel";
 import { LeaveRequestDialog } from "./leave-request-dialog";
 import { RequestAppointmentForm } from "./request-appointment-form";
 
-export function BlockSelection({ mentorId, blocks, weekRange, fetchFreeBlocks }: BlockSelectionProps) {
+export function BlockSelection({
+  mentorId,
+  blocks,
+  weekRange,
+  fetchFreeBlocks,
+  stickyOffset,
+}: BlockSelectionProps) {
   const {
     selectedBlock,
     unavailableBlock,
@@ -57,6 +63,7 @@ export function BlockSelection({ mentorId, blocks, weekRange, fetchFreeBlocks }:
           variant="selectable"
           selectedBlockId={selectedBlock?.id}
           onSelectBlock={handleSelectBlock}
+          stickyOffset={stickyOffset}
         />
         <BlockSelectionPanel
           selectedBlock={selectedBlock}
