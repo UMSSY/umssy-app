@@ -21,7 +21,7 @@ export function readArray(value: unknown): unknown[] {
 
 export function parseRegistration(value: unknown): Registration {
   const registration = readRecord(value);
-  return {
+  const parsed: Registration = {
     id: readString(registration.id),
     eventName: readString(registration.eventName),
     date: readString(registration.date),
@@ -30,4 +30,11 @@ export function parseRegistration(value: unknown): Registration {
     location: readString(registration.location),
     status: readString(registration.status),
   };
+  if (typeof registration.registeredAt === "string") {
+    parsed.registeredAt = registration.registeredAt;
+  }
+  if (typeof registration.cancelledAt === "string" || registration.cancelledAt === null) {
+    parsed.cancelledAt = registration.cancelledAt as string | null;
+  }
+  return parsed;
 }
