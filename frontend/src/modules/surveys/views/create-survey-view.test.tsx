@@ -39,7 +39,7 @@ async function pickDate(user: ReturnType<typeof userEvent.setup>, fieldLabel: Re
 async function fillValidSurvey(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText("Título"), "Encuesta de Empleabilidad");
   await selectOption(user, "Carrera dirigida", CAREERS[0].title);
-  await selectOption(user, "Gestión", "II-2026");
+  await selectOption(user, "Gestión", "2026");
   await pickDate(user, /^Apertura/, /24 de octubre/i);
   await pickDate(user, /^Cierre/, /27 de octubre/i);
   await user.type(screen.getByLabelText("Enunciado de la pregunta 1"), "¿Trabajas actualmente?");
@@ -313,7 +313,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
       title: "Encuesta de Empleabilidad",
       description: undefined,
       careerId: CAREERS[0].id,
-      academicPeriod: "II-2026",
+      academicPeriod: "2026",
       opensAt: "2026-10-24T04:00:00.000Z",
       closesAt: "2026-10-28T03:59:59.999Z",
       status: "published",

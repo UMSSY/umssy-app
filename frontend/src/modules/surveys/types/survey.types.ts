@@ -1,4 +1,3 @@
-import type { AcademicPeriod } from "@/modules/reports";
 
 export type SurveyStatus = "draft" | "published";
 
@@ -26,7 +25,7 @@ export interface CreateSurveyPayload {
   title: string;
   description?: string;
   careerId?: string;
-  academicPeriod?: AcademicPeriod;
+  academicPeriod?: string;
   opensAt?: string;
   closesAt?: string;
   status: SurveyStatus;
