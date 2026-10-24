@@ -8,6 +8,7 @@ import { MentorsService } from '../../mentors/services/mentors.service.js';
 import {
   BlockAlreadyBookedException,
   BlockInPastException,
+  InvalidOrientationTypeException,
   MentorUnavailableException,
   OwnBlockException,
 } from '../exceptions/index.js';
@@ -54,6 +55,14 @@ export class AppointmentsService {
       throw new MentorUnavailableException();
     }
 
+    const offersTopic = mentor.orientationTypes.some(
+      (orientation) => orientation.id === payload.orientationTypeId,
+    );
+
+    if (!offersTopic) {
+      throw new InvalidOrientationTypeException();
+    }
+
     return this.blockedDatesService.runOnUnblockedDay(
       block.mentorId,
       block.startAt,
@@ -89,6 +98,16 @@ export class AppointmentsService {
             },
             tx,
           );
+
+        await this.appointmentsRepository.createAppointmentHistory(
+          {
+            appointmentId: appointment.id,
+            previousStatusId: null,
+            newStatusId: statusId,
+            changedById: user.id,
+          },
+          tx,
+        );
 
         return this.appointmentMapper.toResponse(appointment, user.id);
       },
