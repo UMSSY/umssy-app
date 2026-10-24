@@ -37,3 +37,7 @@ export function toClosesAtIso(value: string): string {
   const lastMinute = new Date(toUtcIso(value, "23:59")).getTime();
   return new Date(lastMinute + END_OF_MINUTE_MS).toISOString();
 }
+
+export function toDateValueFromIso(iso: string | null): string {
+  return iso ? toBoliviaTime(iso).date : "";
+}

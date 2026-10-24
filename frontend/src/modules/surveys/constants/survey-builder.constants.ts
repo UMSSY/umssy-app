@@ -33,6 +33,8 @@ export const SURVEY_STATUS_LABELS: Readonly<Record<SurveyStatus, string>> = {
 
 export const SURVEY_TEXT = {
   pageTitle: "Crear encuesta",
+  editPageTitle: "Editar encuesta",
+  backToSurveys: "Volver a encuestas",
   draftBadge: "Borrador",
   titlePlaceholder: "Título de la encuesta",
   descriptionPlaceholder: "Descripción del formulario",

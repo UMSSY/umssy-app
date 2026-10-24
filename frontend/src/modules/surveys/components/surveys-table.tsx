@@ -1,8 +1,9 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SURVEY_STATUS_LABELS } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
-import { SURVEYS_TABLE_COLUMNS } from "../constants/survey-routes.constants";
+import { SURVEYS_TABLE_COLUMNS, getSurveyDetailPath } from "../constants/survey-routes.constants";
 import type { SurveysTableProps } from "../types/survey-component-props.types";
 import { formatIsoDisplayDate } from "../utils/survey-dates";
 
@@ -37,8 +38,15 @@ export function SurveysTable({ surveys, isLoading, hasError }: SurveysTableProps
             </TableRow>
           ) : (
             rows.map((survey) => (
-              <TableRow key={survey.id}>
-                <TableCell className="font-medium text-ink">{survey.title}</TableCell>
+              <TableRow key={survey.id} className="relative cursor-pointer focus-within:bg-surface-soft hover:bg-surface-soft">
+                <TableCell className="font-medium text-ink">
+                  <Link
+                    href={getSurveyDetailPath(survey.id)}
+                    className="outline-none after:absolute after:inset-0 after:rounded-sm focus-visible:after:ring-2 focus-visible:after:ring-ring"
+                  >
+                    {survey.title}
+                  </Link>
+                </TableCell>
                 <TableCell>{survey.career?.title ?? "-"}</TableCell>
                 <TableCell>{survey.academicPeriod ?? "-"}</TableCell>
                 <TableCell>
