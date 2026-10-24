@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { APPOINTMENT_MESSAGES } from '../constants/appointment-docs.constants.js';
+import {
+  APPOINTMENT_MESSAGES,
+  APPOINTMENT_MESSAGE_MAX_LENGTH,
+} from '../constants/appointment-docs.constants.js';
 import { createAppointmentSchema } from '../requests/create-appointment.request.js';
 
 const BLOCK_ID = '55555555-5555-4555-8555-555555555555';
@@ -9,6 +12,9 @@ const getMessages = (payload: unknown): string[] => {
   const result = createAppointmentSchema.safeParse(payload);
   return result.success ? [] : result.error.issues.map((issue) => issue.message);
 };
+
+const getMessage = (payload: unknown): string | null | undefined =>
+  createAppointmentSchema.parse(payload).message;
 
 describe('createAppointmentSchema', () => {
   it('acepta un bloque y un tema válidos con mensaje opcional', () => {
@@ -39,14 +45,42 @@ describe('createAppointmentSchema', () => {
     ).toEqual([APPOINTMENT_MESSAGES.invalidBlockId]);
   });
 
-  it('rechaza un mensaje de más de 300 caracteres', () => {
+  it('rechaza un mensaje que supera el límite de caracteres', () => {
     expect(
       getMessages({
         blockId: BLOCK_ID,
         orientationTypeId: TOPIC_ID,
-        message: 'x'.repeat(301),
+        message: 'x'.repeat(APPOINTMENT_MESSAGE_MAX_LENGTH + 1),
       }),
     ).toEqual([APPOINTMENT_MESSAGES.messageTooLong]);
+  });
+
+  it('acepta un mensaje con la longitud exacta del límite', () => {
+    expect(
+      getMessages({
+        blockId: BLOCK_ID,
+        orientationTypeId: TOPIC_ID,
+        message: 'x'.repeat(APPOINTMENT_MESSAGE_MAX_LENGTH),
+      }),
+    ).toEqual([]);
+  });
+
+  it('convierte el mensaje vacío en null', () => {
+    expect(
+      getMessage({ blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, message: '' }),
+    ).toBeNull();
+  });
+
+  it('convierte el mensaje en blanco en null', () => {
+    expect(
+      getMessage({ blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, message: '   ' }),
+    ).toBeNull();
+  });
+
+  it('recorta los espacios del mensaje', () => {
+    expect(
+      getMessage({ blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, message: '  hola  ' }),
+    ).toBe('hola');
   });
 
   it('rechaza campos desconocidos', () => {
