@@ -25,11 +25,9 @@ export function WorkExperienceListCard({
           <h3 className="wrap-anywhere text-lg font-semibold text-slate-900">Experiencia laboral</h3>
           <p className="text-sm text-slate-600">Añade tu trayectoria y proyectos profesionales.</p>
         </div>
-        {onAdd && (
-          <Button variant="outline" size="sm" onClick={onAdd} className="gap-2">
-            <span>+</span> Añadir experiencia
-          </Button>
-        )}
+        <Button variant="outline" size="sm" onClick={onAdd} className="gap-2">
+          <span>+</span> Añadir experiencia
+        </Button>
       </div>
 
       {safeExperiences.length === 0 ? (
