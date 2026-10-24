@@ -7,6 +7,8 @@ import type { CreateAvailabilityBlockInput } from "../types/create-availability-
 import type { AvailabilityFilters } from "../types/availability-filters.types";
 import type { MentorAvailabilityStatus } from "../types/mentor-availability-status.types";
 import type { WeekRange } from "@/shared/types/week-range.types";
+import type { Appointment } from "@/modules/appointments";
+import type { CreateAppointmentInput } from "../types/create-appointment-input.types";
 
 function toISOString(value: string): string {
   return new Date(value).toISOString();
@@ -88,6 +90,11 @@ export const availabilityApi = {
       `/mentors/${encodeURIComponent(mentorId)}/availability`,
       { isAvailable },
     );
+    return response.data.data;
+  },
+
+  createAppointment: async (input: CreateAppointmentInput): Promise<Appointment> => {
+    const response = await apiClient.post<ApiResponse<Appointment>>("/appointments", input);
     return response.data.data;
   },
 };
