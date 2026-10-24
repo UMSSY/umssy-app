@@ -41,3 +41,9 @@ export function toClosesAtIso(value: string): string {
 export function toDateValueFromIso(iso: string | null): string {
   return iso ? toBoliviaTime(iso).date : "";
 }
+
+export function formatIsoDateTime(iso: string | null): string {
+  if (!iso) return "";
+  const { date, time } = toBoliviaTime(iso);
+  return `${date} ${time}`;
+}

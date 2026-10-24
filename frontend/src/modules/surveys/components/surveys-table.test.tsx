@@ -9,12 +9,12 @@ describe("SurveysTable", () => {
     cleanup();
   });
 
-  it("lista las encuestas con su vigencia y estado", () => {
+  it("lista las encuestas con su creador, fecha de creación y estado", () => {
     render(<SurveysTable surveys={SURVEY_SUMMARIES} isLoading={false} hasError={false} />);
     const [, published, draft] = screen.getAllByRole("row");
 
-    expect(published).toHaveTextContent("Encuesta de EmpleabilidadIngeniería de SistemasII-202603/11/2026 - 15/12/20264Publicada");
-    expect(draft).toHaveTextContent("Borrador sin carrera---0Borrador");
+    expect(published).toHaveTextContent("Encuesta de EmpleabilidadAdmin Unoadmin.1@umssy.testII-20262026-10-22 11:00Publicada");
+    expect(draft).toHaveTextContent("Borrador sin carreraCarla Arcecarla.arce@umssy.edu-2026-10-22 11:00Borrador");
   });
 
   it.each([

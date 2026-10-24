@@ -70,6 +70,7 @@ describe('SurveyMapper', () => {
         closesAt: null,
         createdAt: CREATED_AT,
         career: null,
+        createdBy: { firstName: 'Admin', lastName: 'Uno', email: 'admin.1@umssy.test' },
         _count: { questions: 0, responses: 0 },
       }),
     ).toEqual({
@@ -77,6 +78,7 @@ describe('SurveyMapper', () => {
       title: 'Borrador',
       status: 'draft',
       career: null,
+      createdBy: { fullName: 'Admin Uno', email: 'admin.1@umssy.test' },
       academicPeriod: null,
       opensAt: null,
       closesAt: null,

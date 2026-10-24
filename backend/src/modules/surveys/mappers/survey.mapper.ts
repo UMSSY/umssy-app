@@ -95,6 +95,10 @@ export class SurveyMapper {
       title: record.title,
       status: STATUS_TO_RESPONSE[record.status],
       career: record.career ? this.toCareerResponse(record.career) : null,
+      createdBy: {
+        fullName: `${record.createdBy.firstName} ${record.createdBy.lastName}`.trim(),
+        email: record.createdBy.email,
+      },
       academicPeriod: record.academicPeriod,
       opensAt: record.opensAt?.toISOString() ?? null,
       closesAt: record.closesAt?.toISOString() ?? null,

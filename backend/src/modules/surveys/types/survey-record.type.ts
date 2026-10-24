@@ -18,6 +18,7 @@ export interface SurveySummaryRecord extends SurveyCreatedRecord {
   opensAt: Date | null;
   closesAt: Date | null;
   career: { id: string; title: string } | null;
+  createdBy: { firstName: string; lastName: string; email: string };
   _count: { questions: number; responses: number };
 }
 
