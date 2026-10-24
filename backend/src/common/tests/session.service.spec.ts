@@ -1,46 +1,54 @@
 import { describe, expect, it, vi } from 'vitest';
-import { SessionRepository } from '../repositories/session.repository.js';
+import type { PrismaService } from '../prisma/prisma.service.js';
 import { SessionService } from '../services/session.service.js';
 
 function createService() {
-  const findActiveUserById = vi.fn();
-  const repository = { findActiveUserById } as unknown as SessionRepository;
-  return { service: new SessionService(repository), findActiveUserById };
+  const findFirst = vi.fn();
+  const repository = { user: { findFirst } } as unknown as PrismaService;
+  return { service: new SessionService(repository), findFirst };
 }
 
 describe('SessionService', () => {
   it('returns the current database identity and deduplicates assigned roles', async () => {
-    const { service, findActiveUserById } = createService();
-    findActiveUserById.mockResolvedValue({
+    const { service, findFirst } = createService();
+    findFirst.mockResolvedValue({
       id: 'user-1', email: 'user@test.com',
       roles: ['titulado', 'mentor', 'mentor'].map((name) => ({ role: { name } })),
     });
     await expect(service.getAuthenticatedUser('user-1')).resolves.toEqual({
       id: 'user-1', email: 'user@test.com', roles: ['titulado', 'mentor'],
     });
-    expect(findActiveUserById).toHaveBeenCalledExactlyOnceWith('user-1');
+    expect(findFirst).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ where: { id: 'user-1' } }));
   });
 
-  it('rejects users that do not exist or are inactive', async () => {
-    const { service, findActiveUserById } = createService();
-    findActiveUserById.mockResolvedValue(null);
+  it('rejects users that do not exist', async () => {
+    const { service, findFirst } = createService();
+    findFirst.mockResolvedValue(null);
     await expect(service.getAuthenticatedUser('user-1')).rejects.toMatchObject({
-      statusCode: 401, message: 'Usuario no encontrado o inactivo',
+      statusCode: 401, message: 'Se requiere una sesión válida.',
     });
   });
 
   it('rejects users without current roles', async () => {
-    const { service, findActiveUserById } = createService();
-    findActiveUserById.mockResolvedValue({ id: 'user-1', email: 'user@test.com', roles: [] });
+    const { service, findFirst } = createService();
+    findFirst.mockResolvedValue({ id: 'user-1', email: 'user@test.com', roles: [] });
     await expect(service.getAuthenticatedUser('user-1')).rejects.toMatchObject({
-      statusCode: 401, message: 'El rol de la sesión ya no está vigente',
+      statusCode: 401, message: 'Se requiere una sesión válida.',
     });
   });
 
   it('propagates infrastructure errors without misreporting invalid credentials', async () => {
-    const { service, findActiveUserById } = createService();
+    const { service, findFirst } = createService();
     const error = new Error('Database unavailable');
-    findActiveUserById.mockRejectedValue(error);
+    findFirst.mockRejectedValue(error);
     await expect(service.getAuthenticatedUser('user-1')).rejects.toBe(error);
+  });
+});
+
+it('rejects an inactive account with 403 instead of 401', async () => {
+  const { service, findFirst } = createService();
+  findFirst.mockResolvedValue({ id: 'user-1', isActive: false, roles: [] });
+  await expect(service.getAuthenticatedUser('user-1')).rejects.toMatchObject({
+    statusCode: 403, code: 'USER_INACTIVE',
   });
 });
