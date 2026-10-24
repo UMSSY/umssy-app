@@ -125,12 +125,13 @@ model User {
 
   city City? @relation(fields: [cityId], references: [id], onDelete: SetNull)
 
-  roles           UserRole[]
-  educations      Education[]
-  workExperiences WorkExperience[]
-  userSkills      UserSkill[]
-  certifications  Certification[]
-  cvFile          UserCvFile?
+  roles                UserRole[]
+  educations           Education[]
+  workExperiences      WorkExperience[]
+  userSkills           UserSkill[]
+  certifications       Certification[]
+  cvFiles              UserCvFile[]
+  skillProcessingState ProfileSkillProcessingState?
 
   mentorTechnicalAreas   MentorTechnicalArea[]
   mentorOrientationTypes MentorOrientationType[]
@@ -307,14 +308,29 @@ model Certification {
 
 model UserCvFile {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId       String    @unique @map("user_id") @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
   cvFileName   String?   @map("cv_file_name") @db.VarChar
   cvUploadedAt DateTime? @map("cv_uploaded_at") @db.Timestamptz(6)
   cvPdfData    String?   @map("cv_pdf_data")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("user_cv_file")
+}
+
+model ProfileSkillProcessingState {
+  userId            String   @id @map("user_id") @db.Uuid
+  status            String   @default("pending") @db.VarChar(20)
+  inputRevision     Int      @default(0) @map("input_revision")
+  processedRevision Int?     @map("processed_revision")
+  resultVersion     Int      @default(0) @map("result_version")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  dictionaryVersion String?  @map("dictionary_version") @db.VarChar(64)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profile_skill_processing_states")
 }
 
 model TechnicalArea {

@@ -83,6 +83,11 @@ export type Education = Prisma.EducationModel
  */
 export type WorkExperience = Prisma.WorkExperienceModel
 /**
+ * Model RadarArea
+ * 
+ */
+export type RadarArea = Prisma.RadarAreaModel
+/**
  * Model Skill
  * 
  */
@@ -107,6 +112,11 @@ export type Certification = Prisma.CertificationModel
  * 
  */
 export type UserCvFile = Prisma.UserCvFileModel
+/**
+ * Model ProfileSkillProcessingState
+ * 
+ */
+export type ProfileSkillProcessingState = Prisma.ProfileSkillProcessingStateModel
 /**
  * Model TechnicalArea
  * 

@@ -27,6 +27,7 @@ import { AccessRequestsModule } from './modules/access-requests/access-requests.
 import { ChatModule } from './modules/chat/chat.module.js';
 import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
+import { NlpModule } from './modules/nlp/nlp.module.js';
 
 
 @Module({
@@ -53,6 +54,7 @@ import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
     ChatModule,
     MatchingModule,
     JobOffersModule,
+    NlpModule,
 
   ],
   controllers: [AppController],

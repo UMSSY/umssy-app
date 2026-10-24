@@ -655,14 +655,6 @@ export type JobOfferUpdateOneRequiredWithoutSkillsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.JobOfferUpdateToOneWithWhereWithoutSkillsInput, Prisma.JobOfferUpdateWithoutSkillsInput>, Prisma.JobOfferUncheckedUpdateWithoutSkillsInput>
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type JobOfferCreateNestedManyWithoutModalityInput = {
   create?: Prisma.XOR<Prisma.JobOfferCreateWithoutModalityInput, Prisma.JobOfferUncheckedCreateWithoutModalityInput> | Prisma.JobOfferCreateWithoutModalityInput[] | Prisma.JobOfferUncheckedCreateWithoutModalityInput[]
   connectOrCreate?: Prisma.JobOfferCreateOrConnectWithoutModalityInput | Prisma.JobOfferCreateOrConnectWithoutModalityInput[]

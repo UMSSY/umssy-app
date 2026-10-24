@@ -268,7 +268,8 @@ export type UserWhereInput = {
   workExperiences?: Prisma.WorkExperienceListRelationFilter
   userSkills?: Prisma.UserSkillListRelationFilter
   certifications?: Prisma.CertificationListRelationFilter
-  cvFile?: Prisma.XOR<Prisma.UserCvFileNullableScalarRelationFilter, Prisma.UserCvFileWhereInput> | null
+  cvFiles?: Prisma.UserCvFileListRelationFilter
+  skillProcessingState?: Prisma.XOR<Prisma.ProfileSkillProcessingStateNullableScalarRelationFilter, Prisma.ProfileSkillProcessingStateWhereInput> | null
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaListRelationFilter
   mentorOrientationTypes?: Prisma.MentorOrientationTypeListRelationFilter
   availabilityBlocks?: Prisma.AvailabilityBlockListRelationFilter
@@ -313,7 +314,8 @@ export type UserOrderByWithRelationInput = {
   workExperiences?: Prisma.WorkExperienceOrderByRelationAggregateInput
   userSkills?: Prisma.UserSkillOrderByRelationAggregateInput
   certifications?: Prisma.CertificationOrderByRelationAggregateInput
-  cvFile?: Prisma.UserCvFileOrderByWithRelationInput
+  cvFiles?: Prisma.UserCvFileOrderByRelationAggregateInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateOrderByWithRelationInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaOrderByRelationAggregateInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeOrderByRelationAggregateInput
   availabilityBlocks?: Prisma.AvailabilityBlockOrderByRelationAggregateInput
@@ -361,7 +363,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   workExperiences?: Prisma.WorkExperienceListRelationFilter
   userSkills?: Prisma.UserSkillListRelationFilter
   certifications?: Prisma.CertificationListRelationFilter
-  cvFile?: Prisma.XOR<Prisma.UserCvFileNullableScalarRelationFilter, Prisma.UserCvFileWhereInput> | null
+  cvFiles?: Prisma.UserCvFileListRelationFilter
+  skillProcessingState?: Prisma.XOR<Prisma.ProfileSkillProcessingStateNullableScalarRelationFilter, Prisma.ProfileSkillProcessingStateWhereInput> | null
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaListRelationFilter
   mentorOrientationTypes?: Prisma.MentorOrientationTypeListRelationFilter
   availabilityBlocks?: Prisma.AvailabilityBlockListRelationFilter
@@ -447,7 +450,8 @@ export type UserCreateInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -491,7 +495,8 @@ export type UserUncheckedCreateInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -535,7 +540,8 @@ export type UserUpdateInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -579,7 +585,8 @@ export type UserUncheckedUpdateInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -849,18 +856,32 @@ export type UserUpdateOneRequiredWithoutCertificationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCertificationsInput, Prisma.UserUpdateWithoutCertificationsInput>, Prisma.UserUncheckedUpdateWithoutCertificationsInput>
 }
 
-export type UserCreateNestedOneWithoutCvFileInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutCvFileInput, Prisma.UserUncheckedCreateWithoutCvFileInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCvFileInput
+export type UserCreateNestedOneWithoutCvFilesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCvFilesInput, Prisma.UserUncheckedCreateWithoutCvFilesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCvFilesInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutCvFileNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutCvFileInput, Prisma.UserUncheckedCreateWithoutCvFileInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCvFileInput
-  upsert?: Prisma.UserUpsertWithoutCvFileInput
+export type UserUpdateOneRequiredWithoutCvFilesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCvFilesInput, Prisma.UserUncheckedCreateWithoutCvFilesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCvFilesInput
+  upsert?: Prisma.UserUpsertWithoutCvFilesInput
   connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCvFileInput, Prisma.UserUpdateWithoutCvFileInput>, Prisma.UserUncheckedUpdateWithoutCvFileInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCvFilesInput, Prisma.UserUpdateWithoutCvFilesInput>, Prisma.UserUncheckedUpdateWithoutCvFilesInput>
+}
+
+export type UserCreateNestedOneWithoutSkillProcessingStateInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSkillProcessingStateInput, Prisma.UserUncheckedCreateWithoutSkillProcessingStateInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSkillProcessingStateInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSkillProcessingStateNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSkillProcessingStateInput, Prisma.UserUncheckedCreateWithoutSkillProcessingStateInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSkillProcessingStateInput
+  upsert?: Prisma.UserUpsertWithoutSkillProcessingStateInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSkillProcessingStateInput, Prisma.UserUpdateWithoutSkillProcessingStateInput>, Prisma.UserUncheckedUpdateWithoutSkillProcessingStateInput>
 }
 
 export type UserCreateNestedOneWithoutMentorTechnicalAreasInput = {
@@ -1175,7 +1196,8 @@ export type UserCreateWithoutCityInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -1218,7 +1240,8 @@ export type UserUncheckedCreateWithoutCityInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -1308,7 +1331,8 @@ export type UserCreateWithoutRolesInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -1351,7 +1375,8 @@ export type UserUncheckedCreateWithoutRolesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -1410,7 +1435,8 @@ export type UserUpdateWithoutRolesInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -1453,7 +1479,8 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -1496,7 +1523,8 @@ export type UserCreateWithoutEducationsInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -1539,7 +1567,8 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -1598,7 +1627,8 @@ export type UserUpdateWithoutEducationsInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -1641,7 +1671,8 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -1684,7 +1715,8 @@ export type UserCreateWithoutWorkExperiencesInput = {
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -1727,7 +1759,8 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -1786,7 +1819,8 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -1829,7 +1863,8 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -1872,7 +1907,8 @@ export type UserCreateWithoutUserSkillsInput = {
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -1915,7 +1951,8 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -1974,7 +2011,8 @@ export type UserUpdateWithoutUserSkillsInput = {
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -2017,7 +2055,8 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -2060,7 +2099,8 @@ export type UserCreateWithoutCertificationsInput = {
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -2103,7 +2143,8 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -2162,7 +2203,8 @@ export type UserUpdateWithoutCertificationsInput = {
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -2205,7 +2247,8 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -2228,7 +2271,7 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
 }
 
-export type UserCreateWithoutCvFileInput = {
+export type UserCreateWithoutCvFilesInput = {
   id?: string
   firstName: string
   lastName: string
@@ -2249,6 +2292,7 @@ export type UserCreateWithoutCvFileInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -2271,7 +2315,7 @@ export type UserCreateWithoutCvFileInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
 }
 
-export type UserUncheckedCreateWithoutCvFileInput = {
+export type UserUncheckedCreateWithoutCvFilesInput = {
   id?: string
   firstName: string
   lastName: string
@@ -2292,6 +2336,7 @@ export type UserUncheckedCreateWithoutCvFileInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -2314,23 +2359,23 @@ export type UserUncheckedCreateWithoutCvFileInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
 }
 
-export type UserCreateOrConnectWithoutCvFileInput = {
+export type UserCreateOrConnectWithoutCvFilesInput = {
   where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutCvFileInput, Prisma.UserUncheckedCreateWithoutCvFileInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCvFilesInput, Prisma.UserUncheckedCreateWithoutCvFilesInput>
 }
 
-export type UserUpsertWithoutCvFileInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutCvFileInput, Prisma.UserUncheckedUpdateWithoutCvFileInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutCvFileInput, Prisma.UserUncheckedCreateWithoutCvFileInput>
+export type UserUpsertWithoutCvFilesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCvFilesInput, Prisma.UserUncheckedUpdateWithoutCvFilesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCvFilesInput, Prisma.UserUncheckedCreateWithoutCvFilesInput>
   where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateToOneWithWhereWithoutCvFileInput = {
+export type UserUpdateToOneWithWhereWithoutCvFilesInput = {
   where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutCvFileInput, Prisma.UserUncheckedUpdateWithoutCvFileInput>
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCvFilesInput, Prisma.UserUncheckedUpdateWithoutCvFilesInput>
 }
 
-export type UserUpdateWithoutCvFileInput = {
+export type UserUpdateWithoutCvFilesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2351,6 +2396,7 @@ export type UserUpdateWithoutCvFileInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -2373,7 +2419,7 @@ export type UserUpdateWithoutCvFileInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
 }
 
-export type UserUncheckedUpdateWithoutCvFileInput = {
+export type UserUncheckedUpdateWithoutCvFilesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2394,6 +2440,199 @@ export type UserUncheckedUpdateWithoutCvFileInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSkillProcessingStateInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSkillProcessingStateInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSkillProcessingStateInput, Prisma.UserUncheckedCreateWithoutSkillProcessingStateInput>
+}
+
+export type UserUpsertWithoutSkillProcessingStateInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSkillProcessingStateInput, Prisma.UserUncheckedUpdateWithoutSkillProcessingStateInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSkillProcessingStateInput, Prisma.UserUncheckedCreateWithoutSkillProcessingStateInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSkillProcessingStateInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSkillProcessingStateInput, Prisma.UserUncheckedUpdateWithoutSkillProcessingStateInput>
+}
+
+export type UserUpdateWithoutSkillProcessingStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -2437,7 +2676,8 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
@@ -2480,7 +2720,8 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
@@ -2539,7 +2780,8 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
@@ -2582,7 +2824,8 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
@@ -2625,7 +2868,8 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
@@ -2668,7 +2912,8 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
@@ -2727,7 +2972,8 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
@@ -2770,7 +3016,8 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
@@ -2813,7 +3060,8 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
@@ -2856,7 +3104,8 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
@@ -2915,7 +3164,8 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
@@ -2958,7 +3208,8 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
@@ -3001,7 +3252,8 @@ export type UserCreateWithoutBlockedDatesInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -3044,7 +3296,8 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -3103,7 +3356,8 @@ export type UserUpdateWithoutBlockedDatesInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -3146,7 +3400,8 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -3189,7 +3444,8 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -3232,7 +3488,8 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -3280,7 +3537,8 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -3323,7 +3581,8 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -3371,7 +3630,8 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -3414,7 +3674,8 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -3473,7 +3734,8 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -3516,7 +3778,8 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -3570,7 +3833,8 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -3613,7 +3877,8 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -3667,7 +3932,8 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -3710,7 +3976,8 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -3753,7 +4020,8 @@ export type UserCreateWithoutAppointmentChangesInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -3796,7 +4064,8 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -3855,7 +4124,8 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -3898,7 +4168,8 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -3941,7 +4212,8 @@ export type UserCreateWithoutCreatedEventsInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -3984,7 +4256,8 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -4032,7 +4305,8 @@ export type UserCreateWithoutModeratedEventsInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -4075,7 +4349,8 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -4134,7 +4409,8 @@ export type UserUpdateWithoutCreatedEventsInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -4177,7 +4453,8 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -4231,7 +4508,8 @@ export type UserUpdateWithoutModeratedEventsInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -4274,7 +4552,8 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -4317,7 +4596,8 @@ export type UserCreateWithoutEventRegistrationsInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -4360,7 +4640,8 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -4419,7 +4700,8 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -4462,7 +4744,8 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -4505,7 +4788,8 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -4548,7 +4832,8 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -4607,7 +4892,8 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -4650,7 +4936,8 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -4693,7 +4980,8 @@ export type UserCreateWithoutExportHistoriesInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -4736,7 +5024,8 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -4795,7 +5084,8 @@ export type UserUpdateWithoutExportHistoriesInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -4838,7 +5128,8 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -4881,7 +5172,8 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -4924,7 +5216,8 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -4972,7 +5265,8 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5015,7 +5309,8 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5074,7 +5369,8 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5117,7 +5413,8 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -5171,7 +5468,8 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5214,7 +5512,8 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -5257,7 +5556,8 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5300,7 +5600,8 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5348,7 +5649,8 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5391,7 +5693,8 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5450,7 +5753,8 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5493,7 +5797,8 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -5547,7 +5852,8 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5590,7 +5896,8 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -5633,7 +5940,8 @@ export type UserCreateWithoutChatParticipantsInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5676,7 +5984,8 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5735,7 +6044,8 @@ export type UserUpdateWithoutChatParticipantsInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5778,7 +6088,8 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -5821,7 +6132,8 @@ export type UserCreateWithoutChatMessagesInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5864,7 +6176,8 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5923,7 +6236,8 @@ export type UserUpdateWithoutChatMessagesInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5966,7 +6280,8 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -6009,7 +6324,8 @@ export type UserCreateWithoutPresenceInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -6052,7 +6368,8 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -6111,7 +6428,8 @@ export type UserUpdateWithoutPresenceInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -6154,7 +6472,8 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -6213,7 +6532,8 @@ export type UserUpdateWithoutCityInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -6256,7 +6576,8 @@ export type UserUncheckedUpdateWithoutCityInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -6307,6 +6628,7 @@ export type UserCountOutputType = {
   workExperiences: number
   userSkills: number
   certifications: number
+  cvFiles: number
   mentorTechnicalAreas: number
   mentorOrientationTypes: number
   availabilityBlocks: number
@@ -6334,6 +6656,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   workExperiences?: boolean | UserCountOutputTypeCountWorkExperiencesArgs
   userSkills?: boolean | UserCountOutputTypeCountUserSkillsArgs
   certifications?: boolean | UserCountOutputTypeCountCertificationsArgs
+  cvFiles?: boolean | UserCountOutputTypeCountCvFilesArgs
   mentorTechnicalAreas?: boolean | UserCountOutputTypeCountMentorTechnicalAreasArgs
   mentorOrientationTypes?: boolean | UserCountOutputTypeCountMentorOrientationTypesArgs
   availabilityBlocks?: boolean | UserCountOutputTypeCountAvailabilityBlocksArgs
@@ -6398,6 +6721,13 @@ export type UserCountOutputTypeCountUserSkillsArgs<ExtArgs extends runtime.Types
  */
 export type UserCountOutputTypeCountCertificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.CertificationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCvFilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserCvFileWhereInput
 }
 
 /**
@@ -6556,7 +6886,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   workExperiences?: boolean | Prisma.User$workExperiencesArgs<ExtArgs>
   userSkills?: boolean | Prisma.User$userSkillsArgs<ExtArgs>
   certifications?: boolean | Prisma.User$certificationsArgs<ExtArgs>
-  cvFile?: boolean | Prisma.User$cvFileArgs<ExtArgs>
+  cvFiles?: boolean | Prisma.User$cvFilesArgs<ExtArgs>
+  skillProcessingState?: boolean | Prisma.User$skillProcessingStateArgs<ExtArgs>
   mentorTechnicalAreas?: boolean | Prisma.User$mentorTechnicalAreasArgs<ExtArgs>
   mentorOrientationTypes?: boolean | Prisma.User$mentorOrientationTypesArgs<ExtArgs>
   availabilityBlocks?: boolean | Prisma.User$availabilityBlocksArgs<ExtArgs>
@@ -6644,7 +6975,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   workExperiences?: boolean | Prisma.User$workExperiencesArgs<ExtArgs>
   userSkills?: boolean | Prisma.User$userSkillsArgs<ExtArgs>
   certifications?: boolean | Prisma.User$certificationsArgs<ExtArgs>
-  cvFile?: boolean | Prisma.User$cvFileArgs<ExtArgs>
+  cvFiles?: boolean | Prisma.User$cvFilesArgs<ExtArgs>
+  skillProcessingState?: boolean | Prisma.User$skillProcessingStateArgs<ExtArgs>
   mentorTechnicalAreas?: boolean | Prisma.User$mentorTechnicalAreasArgs<ExtArgs>
   mentorOrientationTypes?: boolean | Prisma.User$mentorOrientationTypesArgs<ExtArgs>
   availabilityBlocks?: boolean | Prisma.User$availabilityBlocksArgs<ExtArgs>
@@ -6683,7 +7015,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     workExperiences: Prisma.$WorkExperiencePayload<ExtArgs>[]
     userSkills: Prisma.$UserSkillPayload<ExtArgs>[]
     certifications: Prisma.$CertificationPayload<ExtArgs>[]
-    cvFile: Prisma.$UserCvFilePayload<ExtArgs> | null
+    cvFiles: Prisma.$UserCvFilePayload<ExtArgs>[]
+    skillProcessingState: Prisma.$ProfileSkillProcessingStatePayload<ExtArgs> | null
     mentorTechnicalAreas: Prisma.$MentorTechnicalAreaPayload<ExtArgs>[]
     mentorOrientationTypes: Prisma.$MentorOrientationTypePayload<ExtArgs>[]
     availabilityBlocks: Prisma.$AvailabilityBlockPayload<ExtArgs>[]
@@ -7121,7 +7454,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   workExperiences<T extends Prisma.User$workExperiencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$workExperiencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   userSkills<T extends Prisma.User$userSkillsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userSkillsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserSkillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   certifications<T extends Prisma.User$certificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$certificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CertificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  cvFile<T extends Prisma.User$cvFileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cvFileArgs<ExtArgs>>): Prisma.Prisma__UserCvFileClient<runtime.Types.Result.GetResult<Prisma.$UserCvFilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  cvFiles<T extends Prisma.User$cvFilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cvFilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserCvFilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  skillProcessingState<T extends Prisma.User$skillProcessingStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$skillProcessingStateArgs<ExtArgs>>): Prisma.Prisma__ProfileSkillProcessingStateClient<runtime.Types.Result.GetResult<Prisma.$ProfileSkillProcessingStatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   mentorTechnicalAreas<T extends Prisma.User$mentorTechnicalAreasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorTechnicalAreasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorTechnicalAreaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mentorOrientationTypes<T extends Prisma.User$mentorOrientationTypesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorOrientationTypesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorOrientationTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   availabilityBlocks<T extends Prisma.User$availabilityBlocksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$availabilityBlocksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AvailabilityBlockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -7726,9 +8060,9 @@ export type User$certificationsArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
- * User.cvFile
+ * User.cvFiles
  */
-export type User$cvFileArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$cvFilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the UserCvFile
    */
@@ -7742,6 +8076,30 @@ export type User$cvFileArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   include?: Prisma.UserCvFileInclude<ExtArgs> | null
   where?: Prisma.UserCvFileWhereInput
+  orderBy?: Prisma.UserCvFileOrderByWithRelationInput | Prisma.UserCvFileOrderByWithRelationInput[]
+  cursor?: Prisma.UserCvFileWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserCvFileScalarFieldEnum | Prisma.UserCvFileScalarFieldEnum[]
+}
+
+/**
+ * User.skillProcessingState
+ */
+export type User$skillProcessingStateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProfileSkillProcessingState
+   */
+  select?: Prisma.ProfileSkillProcessingStateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProfileSkillProcessingState
+   */
+  omit?: Prisma.ProfileSkillProcessingStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProfileSkillProcessingStateInclude<ExtArgs> | null
+  where?: Prisma.ProfileSkillProcessingStateWhereInput
 }
 
 /**
