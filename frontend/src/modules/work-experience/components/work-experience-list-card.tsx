@@ -12,7 +12,7 @@ export function WorkExperienceListCard({
   isLoading,
 }: WorkExperienceListCardProps) {
   if (isLoading) {
-    return <section className="text-slate-700 font-medium">Cargando experiencia laboral...</section>;
+    return <section className="font-medium text-slate-700">Cargando experiencia laboral...</section>;
   }
 
   return (
@@ -20,8 +20,8 @@ export function WorkExperienceListCard({
       {/* Cabecera de la sección con el botón de añadir experiencia */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-semibold text-lg text-slate-900">Experiencia laboral</h3>
-          <p className="text-slate-600 text-sm">Añade tu trayectoria y proyectos profesionales.</p>
+          <h3 className="text-lg font-semibold text-slate-900">Experiencia laboral</h3>
+          <p className="text-sm text-slate-600">Añade tu trayectoria y proyectos profesionales.</p>
         </div>
         {onAdd && (
           <Button variant="outline" size="sm" onClick={onAdd} className="gap-2">
@@ -31,7 +31,7 @@ export function WorkExperienceListCard({
       </div>
 
       {experiences.length === 0 ? (
-        <section className="text-slate-600 text-sm italic">Aún no has registrado experiencia laboral.</section>
+        <section className="text-sm text-slate-600 italic">Aún no has registrado experiencia laboral.</section>
       ) : (
         <div className="relative ml-2 space-y-8 border-l border-slate-300 pl-6">
           {experiences.map((experience, index) => {
@@ -56,14 +56,14 @@ export function WorkExperienceListCard({
 
             return (
               <div key={experience.id ?? index} className="group relative">
-                <span className="absolute -left-[31px] top-1.5 size-3 rounded-full border-2 border-slate-400 bg-white" />
+                <span className="absolute top-1.5 -left-[31px] size-3 rounded-full border-2 border-slate-400 bg-white" />
 
                 <div className="flex items-start justify-between">
                   <div>
-                    <h4 className="font-semibold text-base text-slate-900">
+                    <h4 className="text-base font-semibold text-slate-900">
                       {experience.position}
                     </h4>
-                    <p className="font-medium text-sm text-slate-700">
+                    <p className="text-sm font-medium text-slate-700">
                       {experience.company}
                     </p>
                     <p className="mt-0.5 text-xs font-medium text-slate-600">
@@ -97,7 +97,7 @@ export function WorkExperienceListCard({
                 </div>
 
                 {experience.description && (
-                  <p className="mt-3 text-slate-900 text-sm whitespace-pre-line">
+                  <p className="mt-3 text-sm whitespace-pre-line text-slate-900">
                     {experience.description}
                   </p>
                 )}
@@ -105,7 +105,7 @@ export function WorkExperienceListCard({
                 {/* Chips de Habilidades Detectadas */}
                 {skillsList.length > 0 && (
                   <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-slate-700 text-xs">Habilidades:</span>
+                    <span className="text-xs font-semibold text-slate-700">Habilidades:</span>
                     {skillsList.map((skill, sIdx) => (
                       <span
                         key={sIdx}
