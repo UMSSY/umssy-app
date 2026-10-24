@@ -79,4 +79,38 @@ describe('AppointmentsRepository', () => {
       select: APPOINTMENT_SELECT,
     });
   });
+
+  it('crea el historial de la cita en la transacción indicada', async () => {
+    const tx = { appointmentHistory: { create: vi.fn() } };
+    const repository = new AppointmentsRepository({} as never);
+    const historyData = {
+      appointmentId: APPOINTMENT_ID,
+      previousStatusId: null,
+      newStatusId: STATUS_ID,
+      changedById: '22222222-2222-4222-8222-222222222222',
+    };
+
+    await repository.createAppointmentHistory(historyData, tx as never);
+
+    expect(tx.appointmentHistory.create).toHaveBeenCalledWith({
+      data: historyData,
+    });
+  });
+
+  it('crea el historial en prisma cuando no recibe una transacción', async () => {
+    const prisma = { appointmentHistory: { create: vi.fn() } };
+    const repository = new AppointmentsRepository(prisma as never);
+    const historyData = {
+      appointmentId: APPOINTMENT_ID,
+      previousStatusId: null,
+      newStatusId: STATUS_ID,
+      changedById: '22222222-2222-4222-8222-222222222222',
+    };
+
+    await repository.createAppointmentHistory(historyData);
+
+    expect(prisma.appointmentHistory.create).toHaveBeenCalledWith({
+      data: historyData,
+    });
+  });
 });
