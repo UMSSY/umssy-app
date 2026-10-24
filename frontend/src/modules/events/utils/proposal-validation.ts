@@ -26,7 +26,7 @@ export function validateProposal(values: ProposalValues, cover: File | null, cat
   if (!/^\d{4}-\d{2}-\d{2}$/.test(values.eventDate)) {
     errors.eventDate = 'Selecciona una fecha válida.';
   } else {
-    const date = new Date(`${values.eventDate}T12:00:00`);
+    const date = new Date(`${values.eventDate}T00:00:00`);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -36,7 +36,7 @@ export function validateProposal(values: ProposalValues, cover: File | null, cat
     const maxDate = new Date(today);
     maxDate.setMonth(today.getMonth() + 6);
 
-    if (Number.isNaN(date.getTime())) {
+    if (Number.isNaN(date.getTime()) || [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-') !== values.eventDate) {
       errors.eventDate = 'Selecciona una fecha válida.';
     } else if (date < minDate) {
       errors.eventDate = 'La fecha debe ser al menos 10 días después de hoy.';
