@@ -61,7 +61,7 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
     expect(inputBar).toBeDefined();
     expect(inputBar.className).toContain('shrink-0');
     expect(inputBar.className).toContain('border-t');
-    expect(inputBar.className).toContain('bg-white');
+    expect(inputBar.className).toContain('bg-surface');
 
     const textarea = screen.getByTestId('message-textarea');
     expect(textarea).toBeDefined();

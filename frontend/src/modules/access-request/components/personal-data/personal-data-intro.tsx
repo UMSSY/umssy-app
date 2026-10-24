@@ -5,7 +5,7 @@ export function PersonalDataIntro() {
     <h1 className="text-3xl font-extrabold tracking-tight text-ink 2xl:text-4xl">
       Solicita tu acceso a la comunidad
     </h1>
-    <p className="max-w-155 text-[15px] text-text-secondary 2xl:text-lg">
+    <p className="max-w-155 text-base text-text-secondary 2xl:text-lg">
       La carrera verifica cada solicitud con tu documento académico. Así la comunidad reúne
       solo a titulados reales de Ingeniería de Sistemas e Informática.
     </p>

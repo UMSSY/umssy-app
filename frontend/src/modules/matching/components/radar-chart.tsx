@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { AffinityRadarAxisTick } from "@/modules/radar-chart";
 import { AffinityRadarDot } from "@/modules/radar-chart";
+import { cn } from "@/lib/utils";
 import type { AffinityAxisId } from "../types/matching-types";
 
 /**
@@ -127,7 +128,7 @@ export function RadarChart({
                 stroke={item.color}
                 fill={item.color}
                 fillOpacity={item.id === "candidate" ? 0.15 : 0}
-                strokeWidth={2}
+                strokeWidth={item.id === "target" ? 3 : 2.5}
                 strokeDasharray={item.id === "target" ? "4 3" : undefined}
                 dot={
                   item.id === "candidate"
@@ -141,6 +142,7 @@ export function RadarChart({
                             cx={cx}
                             cy={cy}
                             onAreaClick={onAxisSelect}
+                            className="fill-radar-candidate"
                           />
                         );
                       }
@@ -167,8 +169,8 @@ export function RadarChart({
       >
         {legendSeries.map((item) => (
           <div key={item.id} role="listitem" className="inline-flex items-center gap-1.5">
-            <span className="size-3 shrink-0" style={{ backgroundColor: item.color }} aria-hidden="true" />
-            <span>{item.name}</span>
+            <span className={cn("w-8 shrink-0 border-t-3", item.id === "target" ? "border-dashed" : "border-solid")} style={{ borderColor: item.color }} aria-hidden="true" />
+            <span>{item.name}<span className="sr-only">{item.id === "target" ? ", línea discontinua" : ", línea continua"}</span></span>
           </div>
         ))}
       </div>

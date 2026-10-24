@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
 import { cn } from "cn";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -9,6 +10,7 @@ import type { NavigationItem } from "@/shared/types/navigation-item.types";
 import { AppSidebar } from "./app-sidebar";
 import { SessionUserCard } from "@/modules/auth";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
+import { ChatDock, MessagingUiProvider } from "@/modules/chat";
 import { AppHeader } from "./app-header";
 
 export function AppShell({
@@ -24,8 +26,12 @@ export function AppShell({
   header,
   contentClassName,
 }: AppShellProps) {
+  const pathname = usePathname();
   return (
+    <MessagingUiProvider>
     <SidebarProvider
+      data-app-shell="true"
+      className={cn("flex-col bg-background", contentClassName && "h-dvh min-h-0 overflow-hidden")}
       style={
         sidebarWidth
           ? ({
@@ -35,7 +41,10 @@ export function AppShell({
           : SIDEBAR_STYLE
       }
     >
+      {header ?? <AppHeader brand={brand} />}
+      <div className="flex min-h-0 min-w-0 flex-1">
       <AppSidebar
+        showBrand={Boolean(header)}
         items={items as NavigationItem[] | undefined}
         user={user}
         brand={brand}
@@ -48,21 +57,24 @@ export function AppShell({
       />
       <SidebarInset
         className={cn(
-          "min-w-0 bg-surface-soft",
-          contentClassName && "h-dvh min-h-0 overflow-hidden",
+          "min-h-0 min-w-0 bg-background",
+          contentClassName && "overflow-hidden",
         )}
       >
-        {header ?? <AppHeader />}
         <div
+          key={pathname}
           className={cn(
-            "flex-1",
+            "flex-1 animate-in duration-200 ease-out fade-in",
             contentClassName ??
-              (fullBleed ? "flex min-w-0 flex-col" : "px-8 py-8"),
+              (fullBleed ? "flex min-w-0 flex-col" : "px-12 py-10"),
           )}
         >
           {children}
         </div>
       </SidebarInset>
+      <ChatDock />
+      </div>
     </SidebarProvider>
+    </MessagingUiProvider>
   );
 }

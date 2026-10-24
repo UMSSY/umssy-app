@@ -15,7 +15,7 @@ describe("marca, cabeceras y pie del backoffice", () => {
     const icon = container.querySelector("img");
     expect(icon).toBeInTheDocument();
     const iconUrl = new URL(icon?.getAttribute("src") ?? "", "http://localhost");
-    expect(iconUrl.searchParams.get("url") ?? iconUrl.pathname).toBe("/icons/umssy-logo-web.svg");
+    expect(iconUrl.searchParams.get("url") ?? iconUrl.pathname).toBe("/icons/umssy-logo-on-dark.svg");
     expect(container.querySelector("svg")).toBeNull();
     expect(document.body.textContent).not.toContain("Universidad para el futuro");
   });

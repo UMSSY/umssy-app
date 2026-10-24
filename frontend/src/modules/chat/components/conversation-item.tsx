@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
+import { Button } from "@/components/ui/button";
 import { Conversation } from '../types/conversation.types';
 import { formatConversationDate, getInitials } from '../utils/date-formatter';
 
@@ -31,7 +32,7 @@ export function ConversationItem({
           ? 'Audio'
           : 'Archivo';
       return (
-        <span className="text-ink-soft font-medium">
+        <span className="font-medium text-ink-soft">
           [{label}] {lastMessage.content}
         </span>
       );
@@ -41,13 +42,13 @@ export function ConversationItem({
   };
 
   return (
-    <button
+    <Button variant="ghost"
       type="button"
       onClick={() => onSelect(conversation)}
       aria-pressed={isSelected}
-      className={`w-full text-left p-3.5 flex items-center gap-3 transition-all border-b border-border hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent ${
+      className={`flex h-auto w-full items-center justify-start gap-3 rounded-none border-0 border-b border-border p-3.5 text-left transition-all hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent ${
         isSelected
-          ? 'bg-interaction ring-1 ring-inset ring-border-strong'
+          ? 'bg-interaction ring-1 ring-border-strong ring-inset'
           : 'bg-surface'
       }`}
     >
@@ -56,34 +57,34 @@ export function ConversationItem({
           <img
             src={contact.avatarUrl}
             alt={contact.fullName}
-            className="w-12 h-12 rounded-full object-cover border border-border"
+            className="size-12 rounded-full border border-border object-cover"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-border text-ink-soft flex items-center justify-center font-bold text-sm border border-border-strong">
+          <div className="flex size-12 items-center justify-center rounded-full border border-border-strong bg-border text-sm font-bold text-ink-soft">
             {getInitials(contact.fullName)}
           </div>
         )}
 
         {contact.isOnline && (
           <span
-            className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-ink-soft border-2 border-white rounded-full shadow-xs"
+            className="absolute right-0 bottom-0 size-3.5 rounded-full border-2 border-surface bg-ink-soft shadow-xs"
             title="En línea"
           />
         )}
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-1 mb-1">
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 flex items-center justify-between gap-1">
           <h4
-            className={`text-sm truncate ${
+            className={`truncate text-sm ${
               hasUnread ? 'font-bold text-ink' : 'font-semibold text-ink'
             }`}
           >
             {contact.fullName}
           </h4>
           <span
-            className={`text-xs whitespace-nowrap shrink-0 ${
-              hasUnread ? 'text-accent font-semibold' : 'text-text-secondary'
+            className={`shrink-0 text-xs whitespace-nowrap ${
+              hasUnread ? 'font-semibold text-accent' : 'text-text-secondary'
             }`}
           >
             {formatConversationDate(lastMessage?.createdAt || conversation.updatedAt)}
@@ -92,20 +93,20 @@ export function ConversationItem({
 
         <div className="flex items-center justify-between gap-2">
           <p
-            className={`text-xs truncate flex-1 ${
-              hasUnread ? 'text-ink font-medium' : 'text-text-secondary'
+            className={`flex-1 truncate text-xs ${
+              hasUnread ? 'font-medium text-ink' : 'text-text-secondary'
             }`}
           >
             {renderMessagePreview()}
           </p>
 
               {hasUnread && (
-            <span className="shrink-0 bg-accent text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center shadow-xs">
+            <span className="min-w-4 shrink-0 rounded-full bg-accent px-1.5 py-0.5 text-center text-[10px] font-bold text-surface shadow-xs">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
         </div>
       </div>
-    </button>
+    </Button>
   );
 }
