@@ -5,6 +5,7 @@ export const SURVEY_STATEMENT_MAX_LENGTH = 250;
 export const SURVEY_OPTION_MAX_LENGTH = 100;
 export const SURVEY_MIN_OPTIONS_TO_PUBLISH = 2;
 export const SURVEY_MIN_QUESTIONS_TO_PUBLISH = 1;
+export const SURVEY_ACADEMIC_PERIOD_PATTERN = /^(\d{4}|Todas)$/;
 
 export const SURVEY_VALIDATION_MESSAGES = {
   TITLE_REQUIRED: 'El título de la encuesta es obligatorio',
@@ -15,7 +16,7 @@ export const SURVEY_VALIDATION_MESSAGES = {
   INVALID_CAREER_ID: 'El identificador de la carrera no es válido',
   INVALID_SURVEY_ID: 'El identificador de la encuesta no es válido',
   CAREER_REQUIRED: 'La carrera dirigida es obligatoria',
-  INVALID_ACADEMIC_PERIOD: 'La gestión debe tener el formato I-2026 o II-2026',
+  INVALID_ACADEMIC_PERIOD: 'La gestión debe ser un año, por ejemplo 2026, o Todas',
   ACADEMIC_PERIOD_REQUIRED: 'La gestión es obligatoria',
   INVALID_DATE: 'La fecha no es válida',
   OPENS_AT_REQUIRED: 'La fecha de apertura es obligatoria',

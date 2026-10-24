@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { CONNECTION_ERROR_MESSAGE, getAcademicPeriods } from "@/modules/reports";
+import { CONNECTION_ERROR_MESSAGE } from "@/modules/reports";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { isConnectionError } from "@/shared/utils/is-connection-error";
 import { AddQuestionButton } from "./add-question-button";
@@ -26,6 +26,7 @@ import type { SurveyValidationError } from "../types/survey-validation.types";
 import type { SurveyStatus } from "../types/survey.types";
 import { getErrorQuestionId, getErrorTargetId, revealElement } from "../utils/get-error-target-id";
 import { mapApiErrors } from "../utils/map-api-errors";
+import { getSurveyYears } from "../utils/survey-academic-periods";
 import { getBoliviaTodayValue, toCalendarDate } from "../utils/survey-dates";
 import { toCreateSurveyPayload } from "../utils/to-create-survey-payload";
 import { toErrorMap, validateDraft, validateSurvey } from "../utils/validate-survey";
@@ -35,7 +36,7 @@ export function SurveyEditor({ title, initialState, isSaving, pendingStatus, dra
   const builder = useSurveyBuilder(initialState);
   const { state } = builder;
   const { careers, isLoading: isLoadingCareers, hasError: hasCareersError } = useCareers();
-  const [academicPeriods] = useState(() => getAcademicPeriods());
+  const [academicPeriods] = useState(() => getSurveyYears());
   const [today] = useState(() => getBoliviaTodayValue());
   const [hasAttemptedPublish, setHasAttemptedPublish] = useState(false);
   const [submitErrors, setSubmitErrors] = useState<SurveyValidationError[]>([]);
