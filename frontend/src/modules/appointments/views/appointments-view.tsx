@@ -25,7 +25,7 @@ export function AppointmentsView() {
         <ul className="space-y-2">
           {appointments.map((appointment) => (
             <li key={appointment.id} className="rounded-lg border border-border p-3 text-sm">
-              {appointment.startAt} – {appointment.endAt}
+              {appointment.counterpart.fullName} · {appointment.startAt} – {appointment.endAt}
             </li>
           ))}
         </ul>
