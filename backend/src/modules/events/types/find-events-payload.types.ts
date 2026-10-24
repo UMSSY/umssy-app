@@ -1,4 +1,5 @@
 export interface FindEventsPayload {
+  includeProposals?: boolean;
   categoryId?: string;
   statusId?: string;
   isPublishedOnly?: boolean;
