@@ -82,3 +82,30 @@ export interface SurveyStatistics {
   questions: SurveyQuestionStatistic[];
 }
 
+
+export interface SurveyDetailOption {
+  id: string;
+  position: number;
+  label: string;
+}
+
+export interface SurveyDetailQuestion {
+  id: string;
+  position: number;
+  statement: string;
+  type: QuestionType;
+  isRequired: boolean;
+  options: SurveyDetailOption[];
+}
+
+export interface SurveyDetail {
+  id: string;
+  title: string;
+  description: string | null;
+  status: SurveyStatus;
+  career: Career | null;
+  academicPeriod: string | null;
+  opensAt: string | null;
+  closesAt: string | null;
+  questions: SurveyDetailQuestion[];
+}

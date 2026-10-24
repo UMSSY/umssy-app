@@ -2,11 +2,11 @@
 
 import { useReducer } from "react";
 import type { QuestionType } from "../types/survey.types";
-import type { SurveyFieldName } from "../types/survey-builder.types";
+import type { SurveyBuilderState, SurveyFieldName } from "../types/survey-builder.types";
 import { createInitialSurveyState, surveyBuilderReducer } from "../utils/survey-builder-reducer";
 
-export function useSurveyBuilder() {
-  const [state, dispatch] = useReducer(surveyBuilderReducer, undefined, createInitialSurveyState);
+export function useSurveyBuilder(initialState?: SurveyBuilderState) {
+  const [state, dispatch] = useReducer(surveyBuilderReducer, initialState, (initial) => initial ?? createInitialSurveyState());
 
   return {
     state,

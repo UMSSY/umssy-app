@@ -39,6 +39,7 @@ export const SURVEY_ERROR_MESSAGES = {
     'La fecha de apertura no puede ser anterior a la fecha actual',
   CAREER_NOT_FOUND: 'La carrera seleccionada no existe',
   SURVEY_NOT_FOUND: 'La encuesta solicitada no existe',
+  SURVEY_NOT_EDITABLE: 'Solo se pueden editar las encuestas en borrador',
   STORAGE_UNAVAILABLE:
     'El registro de encuestas todavía no está disponible. Intente más tarde',
 } as const;
@@ -63,6 +64,14 @@ export const SURVEY_SUMMARY_SELECT = {
 } as const;
 
 export const CAREER_SELECT = { id: true, title: true } as const;
+
+export const SURVEY_DETAIL_INCLUDE = {
+  career: { select: CAREER_SELECT },
+  questions: {
+    orderBy: { position: 'asc' },
+    include: { options: { orderBy: { position: 'asc' } } },
+  },
+} as const;
 
 export const SURVEY_STATISTICS_INCLUDE = {
   career: { select: CAREER_SELECT },
