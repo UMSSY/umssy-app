@@ -2,6 +2,8 @@ import type { AcademicPeriod } from "@/modules/reports";
 
 export type SurveyStatus = "draft" | "published";
 
+export type SurveyDisplayStatus = SurveyStatus | "closed";
+
 export type QuestionType = "single_choice" | "multiple_choice";
 
 export interface Career {
@@ -46,7 +48,7 @@ export interface SurveyCreator {
 export interface SurveySummary {
   id: string;
   title: string;
-  status: SurveyStatus;
+  status: SurveyDisplayStatus;
   career: Career | null;
   createdBy: SurveyCreator;
   academicPeriod: string | null;
@@ -79,7 +81,7 @@ export interface SurveyStatistics {
   id: string;
   title: string;
   description: string | null;
-  status: SurveyStatus;
+  status: SurveyDisplayStatus;
   academicPeriod: string | null;
   career: Career | null;
   opensAt: string | null;
@@ -108,7 +110,7 @@ export interface SurveyDetail {
   id: string;
   title: string;
   description: string | null;
-  status: SurveyStatus;
+  status: SurveyDisplayStatus;
   career: Career | null;
   academicPeriod: string | null;
   opensAt: string | null;

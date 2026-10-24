@@ -14,7 +14,7 @@ export function SurveyRowActions({ survey }: SurveyRowActionsProps) {
   const openLabel = isDraft ? SURVEY_ROW_ACTION_LABELS.edit(survey.title) : SURVEY_ROW_ACTION_LABELS.view(survey.title);
 
   return (
-    <div className="relative z-10 flex items-center gap-2">
+    <div className="flex items-center gap-2">
       <Link href={getSurveyDetailPath(survey.id)} aria-label={openLabel} title={openLabel} className={ACTION_CLASSES}>
         <OpenIcon aria-hidden="true" />
       </Link>

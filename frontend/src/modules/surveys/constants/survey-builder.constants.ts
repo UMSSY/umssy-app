@@ -1,6 +1,6 @@
 import { CircleDot, SquareCheck } from "lucide-react";
 import type { QuestionTypeOption } from "../types/question-type-option.types";
-import type { QuestionType, SurveyStatus } from "../types/survey.types";
+import type { QuestionType, SurveyDisplayStatus } from "../types/survey.types";
 
 export const SURVEY_LIMITS = {
   titleMin: 5,
@@ -26,9 +26,16 @@ export const QUESTION_TYPE_LABELS: Readonly<Record<QuestionType, string>> = {
   multiple_choice: "Opción múltiple",
 };
 
-export const SURVEY_STATUS_LABELS: Readonly<Record<SurveyStatus, string>> = {
+export const SURVEY_STATUS_LABELS: Readonly<Record<SurveyDisplayStatus, string>> = {
   draft: "Borrador",
   published: "Publicada",
+  closed: "Cerrada",
+};
+
+export const SURVEY_STATUS_BADGE_CLASSES: Readonly<Record<SurveyDisplayStatus, string>> = {
+  draft: "border-gold/50 bg-gold/15 text-ink",
+  published: "border-accent/30 bg-interaction text-accent",
+  closed: "border-border bg-surface-soft text-text-secondary",
 };
 
 export const SURVEY_TEXT = {
