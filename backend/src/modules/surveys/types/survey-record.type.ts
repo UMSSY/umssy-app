@@ -1,5 +1,8 @@
 import type { Prisma } from '../../../prisma/client.js';
-import type { CAREER_SELECT } from '../constants/survey.constants.js';
+import type {
+  CAREER_SELECT,
+  SURVEY_STATISTICS_INCLUDE,
+} from '../constants/survey.constants.js';
 import type { SurveyStatus } from './survey.enum.js';
 
 export interface SurveyCreatedRecord {
@@ -19,6 +22,10 @@ export interface SurveySummaryRecord extends SurveyCreatedRecord {
 
 export type CareerRecord = Prisma.CareerGetPayload<{
   select: typeof CAREER_SELECT;
+}>;
+
+export type SurveyStatisticsRecord = Prisma.SurveyGetPayload<{
+  include: typeof SURVEY_STATISTICS_INCLUDE;
 }>;
 
 export interface SurveyTitleScope {

@@ -5,13 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeading } from "@/shared/components/layout/page-heading";
-import { SURVEY_NOTIFICATIONS_DESCRIPTION, SURVEY_NOTIFICATIONS_LABEL } from "../constants/survey-notifications.constants";
+import {
+  SURVEY_NOTIFICATIONS_DESCRIPTION,
+  SURVEY_NOTIFICATIONS_LABEL,
+  SURVEY_NOTIFICATIONS_SKELETON_ROWS,
+} from "../constants/survey-notifications.constants";
 import { SurveyNotificationItem } from "../components/survey-notification-item";
 import { SurveyNotificationsEmpty } from "../components/survey-notifications-empty";
 import { useSurveyNotifications } from "../hooks/use-survey-notifications";
 import { formatPendingSurveysLabel } from "../utils/format-pending-surveys-label";
-
-const SKELETON_ROWS = 3;
 
 export function SurveyNotificationsView() {
   const { notifications, pendingCount, isLoading, errorMessage } = useSurveyNotifications();
@@ -20,7 +22,7 @@ export function SurveyNotificationsView() {
     if (isLoading) {
       return (
         <div aria-busy="true" className="space-y-4 p-6">
-          {Array.from({ length: SKELETON_ROWS }, (_, index) => (
+          {Array.from({ length: SURVEY_NOTIFICATIONS_SKELETON_ROWS }, (_, index) => (
             <Skeleton key={index} className="h-20 w-full" />
           ))}
         </div>
@@ -49,7 +51,7 @@ export function SurveyNotificationsView() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl min-w-0 space-y-6">
+    <main className="-mx-8 -my-4 w-auto min-w-0 space-y-6 sm:-mx-6 sm:-my-2 lg:mx-auto lg:my-0 lg:w-full lg:max-w-7xl">
       <PageHeading
         title={SURVEY_NOTIFICATIONS_LABEL}
         description={SURVEY_NOTIFICATIONS_DESCRIPTION}
