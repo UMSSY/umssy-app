@@ -60,9 +60,9 @@ export class SurveysService {
   }
 
   async getStatistics(id: string): Promise<SurveyStatisticsResponse> {
-    const stats = await this.surveysRepository.findStatistics(id);
-    if (!stats) throw new SurveyNotFoundException();
-    return stats;
+    const record = await this.surveysRepository.findStatistics(id);
+    if (!record) throw new SurveyNotFoundException();
+    return this.surveyMapper.toStatisticsResponse(record);
   }
 
   async exportSurveyPdf(

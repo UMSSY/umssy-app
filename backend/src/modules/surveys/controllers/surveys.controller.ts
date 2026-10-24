@@ -28,6 +28,7 @@ import {
   createSurveySchema,
   type CreateSurveyRequest,
 } from '../requests/create-survey.schema.js';
+import { surveyIdSchema } from '../requests/survey-id.schema.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
@@ -62,7 +63,9 @@ export class SurveysController {
   @Get(':id/statistics')
   @ApiOperation({ summary: 'Obtiene las estadísticas y resultados de una encuesta' })
   @ApiOkResponse({ description: 'Estadísticas de la encuesta con desglose de respuestas por opción' })
-  statistics(@Param('id') id: string): Promise<SurveyStatisticsResponse> {
+  statistics(
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+  ): Promise<SurveyStatisticsResponse> {
     return this.surveysService.getStatistics(id);
   }
 
@@ -70,7 +73,7 @@ export class SurveysController {
   @ApiOperation({ summary: 'Exporta el informe estadístico de una encuesta en formato PDF' })
   @ApiProduces('application/pdf')
   async exportPdf(
-    @Param('id') id: string,
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
     @CurrentUserId() userId: string,
   ): Promise<StreamableFile> {
     const { fileName, buffer } = await this.surveysService.exportSurveyPdf(id, userId);

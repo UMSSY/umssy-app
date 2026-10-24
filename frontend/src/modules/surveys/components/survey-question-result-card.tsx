@@ -1,10 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import type { SurveyQuestionStatistic } from "../types/survey.types";
+import type { SurveyQuestionResultCardProps } from "../types/survey-component-props.types";
 import { SurveyHorizontalBars } from "./survey-horizontal-bars";
-
-interface SurveyQuestionResultCardProps {
-  question: SurveyQuestionStatistic;
-}
 
 export function SurveyQuestionResultCard({ question }: SurveyQuestionResultCardProps) {
   const maxVotes = Math.max(...question.options.map((o) => o.count), 0);
