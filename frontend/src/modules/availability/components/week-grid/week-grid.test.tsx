@@ -45,6 +45,20 @@ describe("WeekGrid", () => {
     expect(legend.querySelector(".border-dashed")).toBeNull();
   });
 
+  it("deja fija la fila de días debajo del header de la app al bajar por la grilla (#1455)", () => {
+    const { container } = render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
+    const day = screen.getByRole("heading", { name: "LUN 5" });
+    expect(day).toHaveClass("sticky", "z-10", "bg-app-header", "text-app-header-foreground");
+    expect(day).toHaveStyle({ top: "calc(var(--spacing-app-header) + 16px)" });
+    expect(container.querySelector(".overflow-hidden.rounded-lg")).toBeNull();
+    expect(container.querySelector(".overflow-clip.rounded-lg")).not.toBeNull();
+  });
+
+  it("ubica la fila de días debajo de la navegación de la semana cuando se le pasa su altura", () => {
+    render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" stickyOffset={66} />);
+    expect(screen.getByRole("heading", { name: "LUN 5" })).toHaveStyle({ top: "calc(var(--spacing-app-header) + 82px)" });
+  });
+
   it("muestra el número del día en la cabecera de cada columna", () => {
     render(<WeekGrid blocks={[]} weekRange={WEEK_RANGE} variant="owner" />);
     expect(screen.getByRole("heading", { name: "LUN 5" })).toBeInTheDocument();

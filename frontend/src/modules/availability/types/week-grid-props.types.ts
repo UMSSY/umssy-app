@@ -14,4 +14,5 @@ export interface WeekGridProps {
   selectedBlockId?: string;
   onSelectBlock?: (block: AvailabilityBlock) => void;
   onEditBlock?: (block: AvailabilityBlock) => void;
+  stickyOffset?: number;
 }
