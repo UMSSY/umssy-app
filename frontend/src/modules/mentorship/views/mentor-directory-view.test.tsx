@@ -1,9 +1,10 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { profileService } from "@/modules/profile/services/profile.service";
 import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
 import * as directoryService from "../services/mentor-directory.service";
+import type { MentorDirectoryItem } from "../types/mentor-directory.types";
 import { MentorDirectoryView } from "./mentor-directory-view";
 
 afterEach(() => {
@@ -14,7 +15,7 @@ afterEach(() => {
 
 const ownId = "0424f370-00f0-43cf-9b8a-997af81840b9";
 const otherId = "0fa5e6de-63a4-430e-87fb-22f5eb700ecd";
-const mentors = [
+const mentors: MentorDirectoryItem[] = [
   {
     id: ownId,
     fullName: "María Fernanda Rodríguez",
@@ -125,44 +126,98 @@ describe("MentorDirectoryView", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Limpiar filtros" })[0]);
     expect(screen.getByRole("link", { name: /Ver perfil de Carlos/ })).toBeInTheDocument();
   });
-  it("ordena por afinidad y cambia el encabezado a Preferencias", async () => {
-    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue([
-      {
-        ...mentors[0],
-        commonInterestsCount: 1,
-      },
-      {
-        ...mentors[1],
-        commonInterestsCount: 3,
-      },
-    ]);
-
+  it("inicia en A–Z, permite Z–A y regresa al orden general", async () => {
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(mentors);
     render(<MentorDirectoryView />);
+    await screen.findByRole("link", { name: /Ver perfil de Carlos/ });
 
-    await screen.findByRole("link", {
-      name: /Ver perfil de Carlos/,
-    });
+    const selector = screen.getByRole("combobox", { name: "Ordenar mentores" });
+    const names = () => within(screen.getByRole("region", { name: "Listado de mentores" }))
+      .getAllByRole("heading").map((heading) => heading.textContent);
+    expect(selector).toHaveValue("name_asc");
+    expect(within(selector).getAllByRole("option").map((option) => option.getAttribute("value")))
+      .toEqual(["name_asc", "name_desc", "affinity"]);
+    expect(screen.getByRole("heading", { name: "Sugerencias" })).toBeVisible();
+    expect(names()).toEqual(["Carlos Vargas", "María Fernanda Rodríguez"]);
 
-    expect(
-      screen.getByRole("heading", { name: "Sugerencias" }),
-    ).toBeInTheDocument();
+    fireEvent.change(selector, { target: { value: "name_desc" } });
+    expect(selector).toHaveValue("name_desc");
+    expect(names()).toEqual(["María Fernanda Rodríguez", "Carlos Vargas"]);
 
-    fireEvent.change(
-      screen.getByRole("combobox", { name: "Ordenar mentores" }),
-      { target: { value: "affinity" } },
-    );
-    expect(
-      screen.getByRole("heading", { name: "Preferencias" }),
-    ).toBeInTheDocument();
+    fireEvent.change(selector, { target: { value: "affinity" } });
+    expect(selector).toHaveValue("affinity");
+    expect(selector.parentElement).toHaveClass("ring-accent");
+    expect(screen.getByRole("heading", { name: "Preferencias" })).toBeVisible();
+    expect(screen.getByRole("note")).toHaveTextContent("todavía no está disponible");
+    expect(names()).toEqual(["Carlos Vargas", "María Fernanda Rodríguez"]);
+    expect(screen.queryByText(/intereses? en común/)).not.toBeInTheDocument();
 
-   const mentorNames = screen.getAllByRole("heading", {
-  level: 2,
-});
+    fireEvent.change(selector, { target: { value: "name_asc" } });
+    expect(selector).toHaveValue("name_asc");
+    expect(selector.parentElement).not.toHaveClass("ring-accent");
+    expect(screen.getByRole("heading", { name: "Sugerencias" })).toBeVisible();
+    expect(screen.queryByRole("note")).not.toBeInTheDocument();
+  });
 
-expect(mentorNames).toHaveLength(3);
-expect(mentorNames[1]).toHaveTextContent("Carlos Vargas");
-expect(mentorNames[2]).toHaveTextContent("María Fernanda Rodríguez");
-expect(screen.getByText("3 intereses en común")).toBeInTheDocument();
-expect(screen.getByText("1 intereses en común")).toBeInTheDocument();
+  it("conserva búsqueda, área y disponibilidad al cambiar de orden", async () => {
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(mentors);
+    render(<MentorDirectoryView />);
+    await screen.findByRole("link", { name: /Ver perfil de Carlos/ });
+    fireEvent.change(screen.getByRole("searchbox", { name: "Buscar mentor" }), { target: { value: "maria" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Área" }), { target: { value: "Backend" } });
+    fireEvent.click(screen.getByRole("checkbox", { name: "Con disponibilidad" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Ordenar mentores" }), { target: { value: "affinity" } });
+    expect(screen.getByRole("searchbox", { name: "Buscar mentor" })).toHaveValue("maria");
+    expect(screen.getByRole("combobox", { name: "Área" })).toHaveValue("Backend");
+    expect(screen.getByRole("checkbox", { name: "Con disponibilidad" })).toBeChecked();
+    expect(screen.getByRole("link", { name: /Ver perfil de María/ })).toBeVisible();
+    expect(screen.queryByRole("link", { name: /Ver perfil de Carlos/ })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["no_skills", "Agrega habilidades profesionales"],
+    ["unmapped_skills", "aún no tienen correspondencia"],
+    ["ready", "El orden por afinidad no se aplicó. Se muestran los mentores por nombre."],
+  ] as const)("mantiene el directorio en A–Z con estado %s", async (affinityStatus, message) => {
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(mentors);
+    render(<MentorDirectoryView directoryState={{ effectiveSort: "name_asc", affinityStatus }} />);
+    await screen.findByRole("link", { name: /Ver perfil de Carlos/ });
+    fireEvent.change(screen.getByRole("combobox", { name: "Ordenar mentores" }), { target: { value: "affinity" } });
+    expect(screen.getByRole("note")).toHaveTextContent(message);
+    expect(screen.getByRole("note")).not.toHaveTextContent(/no hay coincidencias/i);
+    expect(within(screen.getByRole("region", { name: "Listado de mentores" }))
+      .getAllByRole("heading").map((heading) => heading.textContent))
+      .toEqual(["Carlos Vargas", "María Fernanda Rodríguez"]);
+    expect(screen.getAllByRole("link", { name: /Ver perfil de/ })).toHaveLength(2);
+    expect(screen.queryByText("0 intereses en común")).not.toBeInTheDocument();
+  });
+
+  it("presenta el orden y los contadores entregados cuando la afinidad está lista", async () => {
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue([
+      { ...mentors[0], sharedInterestsCount: 2 },
+      { ...mentors[1], sharedInterestsCount: 0 },
+    ]);
+    render(<MentorDirectoryView directoryState={{ effectiveSort: "affinity", affinityStatus: "ready" }} />);
+    await screen.findByRole("link", { name: /Ver perfil de Carlos/ });
+    fireEvent.change(screen.getByRole("combobox", { name: "Ordenar mentores" }), { target: { value: "affinity" } });
+    expect(screen.queryByRole("note")).not.toBeInTheDocument();
+    expect(within(screen.getByRole("region", { name: "Listado de mentores" }))
+      .getAllByRole("heading").map((heading) => heading.textContent))
+      .toEqual(["María Fernanda Rodríguez", "Carlos Vargas"]);
+    expect(screen.getByText("2 intereses en común")).toBeVisible();
+    expect(screen.getByText("0 intereses en común")).toBeVisible();
+    expect(screen.getAllByRole("link", { name: /Ver perfil de/ })).toHaveLength(2);
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Ordenar mentores" }), { target: { value: "name_asc" } });
+    expect(screen.queryByText("2 intereses en común")).not.toBeInTheDocument();
+    expect(screen.queryByText("0 intereses en común")).not.toBeInTheDocument();
+  });
+
+  it("no inventa contadores ausentes aunque el orden efectivo sea afinidad", async () => {
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(mentors);
+    render(<MentorDirectoryView directoryState={{ effectiveSort: "affinity", affinityStatus: "ready" }} />);
+    await screen.findByRole("link", { name: /Ver perfil de Carlos/ });
+    fireEvent.change(screen.getByRole("combobox", { name: "Ordenar mentores" }), { target: { value: "affinity" } });
+    expect(screen.queryByText(/intereses? en común/)).not.toBeInTheDocument();
   });
 });

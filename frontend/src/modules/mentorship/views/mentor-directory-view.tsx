@@ -13,30 +13,44 @@ import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback"
 import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
 import { useCurrentUserId } from "../hooks/use-current-user-id";
 import { useMentorDirectory } from "../hooks/use-mentor-directory";
-type MentorSortOption = "name-asc" | "name-desc" | "affinity";
+import type { DirectoryPage, MentorSort } from "../types/mentor-directory.types";
 
-export function MentorDirectoryView() {
+type MentorDirectoryViewProps = {
+  directoryState?: Pick<DirectoryPage, "effectiveSort" | "affinityStatus">;
+};
+
+export function MentorDirectoryView({ directoryState }: MentorDirectoryViewProps) {
   const [search, setSearch] = useState("");
   const [area, setArea] = useState("");
   const [isAvailableOnly, setIsAvailableOnly] = useState(false);
-  const [sortBy, setSortBy] = useState<MentorSortOption>("name-asc");
+  const [sortBy, setSortBy] = useState<MentorSort>("name_asc");
   const { currentUserId } = useCurrentUserId();
   const { data: mentors, isPending, isError, isFetching, refetch } =
     useMentorDirectory();
 
   const areas = [...new Set((mentors ?? []).flatMap((mentor) => mentor.technicalAreas))].sort((a, b) => a.localeCompare(b, "es"));
   const filteredMentors = (mentors ?? []).filter((mentor) => normalizeSearch([mentor.fullName, mentor.headline, ...mentor.technicalAreas].join(" ")).includes(normalizeSearch(search)) && (!area || mentor.technicalAreas.includes(area)) && (!isAvailableOnly || mentor.isAvailable));
-  const sortedMentors = [...filteredMentors].sort((a, b) => {
-    if (sortBy === "affinity") {
-      return (b.commonInterestsCount ?? 0) - (a.commonInterestsCount ?? 0);
-    }
-
+  const effectiveSort = sortBy === "affinity"
+    ? directoryState?.effectiveSort === "affinity" && directoryState.affinityStatus === "ready"
+      ? "affinity"
+      : "name_asc"
+    : sortBy;
+  const sortedMentors = effectiveSort === "affinity" ? filteredMentors : [...filteredMentors].sort((a, b) => {
     const comparison = a.fullName.localeCompare(b.fullName, "es", {
       sensitivity: "base",
     });
 
-    return sortBy === "name-asc" ? comparison : -comparison;
+    return effectiveSort === "name_asc" ? comparison : -comparison;
   });
+  const affinityMessage = sortBy !== "affinity" || effectiveSort === "affinity"
+    ? null
+    : directoryState?.affinityStatus === "no_skills"
+      ? "Agrega habilidades profesionales a tu perfil para encontrar mentores con mayor afinidad. Se muestran los mentores por nombre."
+      : directoryState?.affinityStatus === "unmapped_skills"
+        ? "Tus habilidades profesionales aún no tienen correspondencia con las áreas técnicas. Se muestran los mentores por nombre."
+        : directoryState?.affinityStatus === "ready"
+          ? "El orden por afinidad no se aplicó. Se muestran los mentores por nombre."
+          : "La afinidad todavía no está disponible. Se muestran los mentores por nombre.";
 
   function handleClearFilters() {
     setSearch("");
@@ -60,15 +74,16 @@ export function MentorDirectoryView() {
             <NativeSelect
               id="mentor-sort"
               aria-label="Ordenar mentores"
+              className={sortBy === "affinity" ? "rounded-lg ring-2 ring-accent" : undefined}
               value={sortBy}
               onChange={(event) =>
-                setSortBy(event.target.value as MentorSortOption)
+                setSortBy(event.target.value as MentorSort)
               }
             >
-              <NativeSelectOption value="name-asc">
+              <NativeSelectOption value="name_asc">
                 Nombre (A–Z)
               </NativeSelectOption>
-              <NativeSelectOption value="name-desc">
+              <NativeSelectOption value="name_desc">
                 Nombre (Z–A)
               </NativeSelectOption>
               <NativeSelectOption value="affinity">
@@ -98,6 +113,11 @@ export function MentorDirectoryView() {
             <h2 className="text-xl font-semibold text-ink">
               {sortBy === "affinity" ? "Preferencias" : "Sugerencias"}
             </h2>
+            {affinityMessage ? (
+              <p role="note" className="rounded-lg border border-border bg-surface p-4 text-sm text-text-secondary">
+                {affinityMessage}
+              </p>
+            ) : null}
             <p role="status" className="text-sm text-text-secondary">
               {filteredMentors.length} mentores encontrados
             </p>
@@ -105,7 +125,7 @@ export function MentorDirectoryView() {
               <MentorDirectoryGrid
                 mentors={sortedMentors}
                 currentUserId={currentUserId}
-                showAffinityBadge={sortBy === "affinity"}
+                showAffinityBadge={effectiveSort === "affinity"}
               />
             ) : (
               <div className="rounded-lg border border-border bg-surface p-8 text-center">
