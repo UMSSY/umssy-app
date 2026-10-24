@@ -36,7 +36,7 @@ describe("WeekGrid", () => {
   it("muestra la leyenda con los 3 estados", () => {
     render(<WeekGrid blocks={[]} weekRange={WEEK_RANGE} variant="public" />);
     expect(screen.getByText("Libre")).toBeInTheDocument();
-    expect(screen.getByText("Solicitud pendiente")).toBeInTheDocument();
+    expect(screen.queryByText("Solicitud pendiente")).not.toBeInTheDocument();
     expect(screen.getByText("Cita confirmada")).toBeInTheDocument();
   });
 
