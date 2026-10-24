@@ -2,6 +2,7 @@
 
 import { WorkspacePage } from "@/shared/components/layout";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatBlockRange, toBoliviaTime } from "@/shared/utils/date-time";
 import { APPOINTMENTS_EYEBROW, APPOINTMENTS_TEXT } from "../constants/appointments.constants";
 import { useAppointments } from "../hooks/use-appointments";
 
@@ -25,7 +26,8 @@ export function AppointmentsView() {
         <ul className="space-y-2">
           {appointments.map((appointment) => (
             <li key={appointment.id} className="rounded-lg border border-border p-3 text-sm">
-              {appointment.counterpart.fullName} · {appointment.startAt} – {appointment.endAt}
+              {appointment.counterpart.fullName} · {toBoliviaTime(appointment.startAt).date} ·{" "}
+              {formatBlockRange(appointment.startAt, appointment.endAt)}
             </li>
           ))}
         </ul>
