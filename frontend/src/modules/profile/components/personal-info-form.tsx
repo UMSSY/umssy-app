@@ -66,7 +66,7 @@ export function PersonalInfoForm({
 
   return (
     <div className="rounded-lg border border-border bg-surface">
-      <div className="border-b border-border px-6 py-6 lg:px-8">
+      <div className="border-b border-border p-6 lg:px-8">
       <ProfilePhotoField {...photo} />
 
       </div>
@@ -122,7 +122,7 @@ export function PersonalInfoForm({
               </SelectTrigger>
               <SelectContent>
                 {cities.map((city) => (
-                  <SelectItem key={city.id} value={city.id} className="text-[15px]">
+                  <SelectItem key={city.id} value={city.id} className="text-base">
                     {city.title}
                   </SelectItem>
                 ))}
@@ -145,7 +145,7 @@ export function PersonalInfoForm({
                 .filter(Boolean)
                 .join(" ")}
             />
-            <p id={PHONE_HINT_ID} className="text-[13px] text-text-secondary">
+            <p id={PHONE_HINT_ID} className="text-sm text-text-secondary">
               {PHONE_HINT}
             </p>
           </FormField>
@@ -170,8 +170,8 @@ export function PersonalInfoForm({
           </FormField>
           </div>
         </FormSection>
-        <div className="sticky bottom-0 z-10 -mx-6 flex flex-wrap items-center justify-between gap-4 rounded-b-lg border-t border-border bg-surface px-6 py-5 lg:-mx-8 lg:px-8">
-          <p className="text-[13px] text-text-secondary">* Campos obligatorios</p>
+        <div className="-mx-6 flex flex-wrap items-center justify-between gap-4 rounded-b-lg border-t border-border bg-surface px-6 py-5 lg:-mx-8 lg:px-8">
+          <p className="text-sm text-text-secondary">* Campos obligatorios</p>
           <div className="flex gap-3">
             <Button
               type="button"
@@ -182,7 +182,7 @@ export function PersonalInfoForm({
             >
               Cancelar
             </Button>
-            <Button type="submit" className={cn("h-10 bg-accent px-4 text-sm text-white hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
+            <Button type="submit" className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
               {isSaving ? "Guardando..." : "Guardar perfil"}
             </Button>
           </div>

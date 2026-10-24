@@ -17,7 +17,7 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
   const pendingSkills = job.skills.filter((skill) => !job.matchedSkills.includes(skill));
 
   return (
-    <Card className="h-full gap-3 px-4 py-4">
+    <Card className="h-full gap-3 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="font-tight text-lg font-bold text-ink">{job.title}</h2>
@@ -30,7 +30,7 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
         </p>
       </div>
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+        <p className="text-xs font-semibold tracking-wide text-text-secondary uppercase">
           {JOB_MATCHING_MESSAGES.matchedLabel}
         </p>
         <ul className="flex flex-wrap gap-2">

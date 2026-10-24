@@ -104,7 +104,7 @@ export function InformationStep({
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-x-8 gap-y-5 px-6 py-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-8 gap-y-5 p-6 md:grid-cols-2">
         <div className="md:col-span-2">
           <div className="flex justify-between">
             <Label htmlFor="title" className="text-[12.5px] font-semibold">
