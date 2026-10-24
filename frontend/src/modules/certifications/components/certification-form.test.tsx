@@ -65,7 +65,7 @@ describe("CertificationForm", () => {
     expect(screen.getByRole("form", { name: "Agregar certificación" })).toBeInTheDocument();
     expect(getNameInput()).toHaveValue("");
     expect(getOrganizationInput()).toHaveValue("");
-    expect(getIssueDateInput()).toHaveAttribute("type", "date");
+    expect(getIssueDateInput()).toHaveAttribute("type", "text");
     expect(screen.getByText("* Campos obligatorios")).toBeInTheDocument();
     expect(saveButton()).toBeEnabled();
     expect(screen.getByRole("button", { name: "Cancelar" })).toHaveAttribute("type", "button");
@@ -107,7 +107,7 @@ describe("CertificationForm", () => {
     expect(screen.getByRole("form", { name: "Editar certificación" })).toBeInTheDocument();
     expect(getNameInput()).toHaveValue(SAVED_VALUES.name);
     expect(getOrganizationInput()).toHaveValue(SAVED_VALUES.issuingOrganization);
-    expect(getIssueDateInput()).toHaveValue("2025-03-10");
+    expect(getIssueDateInput()).toHaveValue("10/03/2025");
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument();
   });
 
@@ -269,36 +269,25 @@ describe("CertificationForm", () => {
     expect(cancel.querySelector("svg")).toBeNull();
   });
 
-  it("discards the typed values, the selected file and the errors on cancel without calling the api", async () => {
+  it("requests cancellation without clearing data before discard is confirmed", async () => {
     const { onCancel, onSubmit, user } = renderForm();
-
     await user.type(getNameInput(), "CCNA");
-    await user.upload(
-      screen.getByLabelText(/Archivo de respaldo/),
-      new File(["certificate"], "certificate.pdf", { type: "application/pdf" }),
-    );
-    expect(await screen.findByText(/certificate\.pdf/)).toBeInTheDocument();
-    await user.click(saveButton());
-    expect(screen.getAllByText(CERTIFICATION_VALIDATION_MESSAGES.required).length).toBeGreaterThan(0);
-
+    await user.upload(screen.getByLabelText(/Archivo de respaldo/), new File(["certificate"], "certificate.pdf", { type: "application/pdf" }));
+    await screen.findByText(/certificate\.pdf/);
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
-
     expect(onCancel).toHaveBeenCalledTimes(1);
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(getNameInput()).toHaveValue("");
-    expect(screen.queryByText(/certificate\.pdf/)).not.toBeInTheDocument();
-    expect(screen.queryByText(CERTIFICATION_VALIDATION_MESSAGES.required)).not.toBeInTheDocument();
-    expect(screen.getByLabelText(/Archivo de respaldo/)).toHaveValue("");
+    expect(getNameInput()).toHaveValue("CCNA");
+    expect(screen.getByText(/certificate\.pdf/)).toBeInTheDocument();
   });
 
-  it("restores the initial data on cancel when editing", async () => {
-    const { user } = renderForm({ initialData: SAVED_VALUES });
-
+  it("preserves an edited value until the parent confirms closing", async () => {
+    const { onCancel, user } = renderForm({ initialData: SAVED_VALUES });
     await user.clear(getNameInput());
     await user.type(getNameInput(), "Changed name");
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
-
-    expect(getNameInput()).toHaveValue(SAVED_VALUES.name);
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(getNameInput()).toHaveValue("Changed name");
   });
 
   it("notifies when editing is cancelled", async () => {
@@ -390,19 +379,13 @@ describe("CertificationForm", () => {
       expect(onSubmit).not.toHaveBeenCalled();
     });
 
-    it("discards the new file and the removal mark on cancel", async () => {
-      const { onSubmit, onCancel, user } = renderForm({
-        initialData: SAVED_VALUES,
-        currentDocumentName: "titulo.pdf",
-      });
-
+    it("preserves pending removal until closing is confirmed", async () => {
+      const { onSubmit, onCancel, user } = renderForm({ initialData: SAVED_VALUES, currentDocumentName: "titulo.pdf" });
       await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
       await user.click(screen.getByRole("button", { name: "Cancelar" }));
-
       expect(onCancel).toHaveBeenCalledTimes(1);
       expect(onSubmit).not.toHaveBeenCalled();
-      expect(screen.queryByText("El documento actual se eliminará al guardar.")).not.toBeInTheDocument();
-      expect(screen.getByText("titulo.pdf")).toBeInTheDocument();
+      expect(screen.getByText("El documento actual se eliminará al guardar.")).toBeInTheDocument();
     });
 
     it("shows the failure inline, keeps the data and lets the user retry", async () => {
@@ -483,18 +466,14 @@ describe("CertificationForm", () => {
       expect(saveButton()).toBeEnabled();
     });
 
-    it("ignores a file that finishes reading after the form was cancelled", async () => {
+    it("allows the pending file read to finish while discard remains unconfirmed", async () => {
       const read = deferFileRead();
-      const { user } = renderForm();
-
+      const { onCancel, user } = renderForm();
       await user.upload(screen.getByLabelText(/Archivo de respaldo/), PDF);
       await user.click(screen.getByRole("button", { name: "Cancelar" }));
-      await act(async () => {
-        read.finish();
-      });
-
-      expect(screen.queryByRole("status")).not.toBeInTheDocument();
-      expect(screen.queryByText(/nuevo\.pdf/)).not.toBeInTheDocument();
+      await act(async () => { read.finish(); });
+      expect(onCancel).toHaveBeenCalledTimes(1);
+      expect(screen.getByText(/nuevo\.pdf/)).toBeInTheDocument();
     });
 
     it("removes the selected file before submitting", async () => {

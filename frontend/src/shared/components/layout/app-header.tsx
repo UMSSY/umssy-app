@@ -1,24 +1,27 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { SidebarToggleButton } from "./sidebar-toggle-button";
 import { NavigationSearch } from "./navigation-search";
 import { AccountMenu } from "./account-menu";
-import { WorkspaceSectionMenu } from "./workspace-section-menu";
+import { ChatPanel } from "@/modules/chat";
+import { BrandLogo } from "./brand-logo";
+import type { AppHeaderProps } from "@/shared/types/app-header-props.types";
 
-export function AppHeader() {
-  const pathname = usePathname() ?? "";
+export function AppHeader({ brand }: AppHeaderProps) {
   const { roles } = useAuth();
+  const { open } = useSidebar();
   return (
-    <header className="flex min-h-16 shrink-0 items-center justify-between gap-6 border-b border-border bg-surface px-6">
-      <nav aria-label="Navegación del área" className="flex min-w-0 items-center gap-3">
+    <header className="sticky top-0 z-30 flex h-app-header shrink-0 items-center gap-6 border-b border-app-header-foreground/15 bg-app-header px-6 text-app-header-foreground">
+      <div inert={open} aria-hidden={open || undefined} className="flex w-64 shrink-0 items-center gap-3">
         <SidebarToggleButton />
-        <span aria-hidden="true" className="h-5 w-px bg-border" />
-        <WorkspaceSectionMenu pathname={pathname} roles={roles} />
-      </nav>
+        {brand ?? <Link href="/dashboard" aria-label="UMSSY, ir al inicio" className="block shrink-0 outline-offset-4"><BrandLogo variant="on-dark" className="w-40" priority /></Link>}
+      </div>
+      <div className="min-w-0 flex-1"><NavigationSearch /></div>
       <div className="flex shrink-0 items-center gap-4">
-        <NavigationSearch />
+        <ChatPanel roles={roles} />
         <AccountMenu roles={roles} />
       </div>
     </header>

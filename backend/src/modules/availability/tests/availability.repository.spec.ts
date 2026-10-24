@@ -116,6 +116,30 @@ describe('AvailabilityRepository', () => {
     });
   });
 
+  describe('con el cliente de una transacción', () => {
+    const tx = { availabilityBlock: { create: vi.fn(), update: vi.fn() } };
+    const data = { startAt: new Date('2026-10-10T14:00:00Z'), endAt: new Date('2026-10-10T14:30:00Z') };
+
+    it('crea el bloque con la transacción que recibe', async () => {
+      await repository.create('mentor-1', data.startAt, data.endAt, tx as never);
+
+      expect(tx.availabilityBlock.create).toHaveBeenCalledWith({
+        data: { mentorId: 'mentor-1', startAt: data.startAt, endAt: data.endAt },
+      });
+    });
+
+    it('edita el bloque con la transacción que recibe', async () => {
+      await repository.update('block-1', data, tx as never);
+
+      expect(tx.availabilityBlock.update).toHaveBeenCalledWith({
+        where: { id: 'block-1' },
+        data,
+        include: BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE,
+      });
+      expect(update).not.toHaveBeenCalled();
+    });
+  });
+
   describe('delete', () => {
     it('borra el bloque por id', async () => {
       const row = { id: 'block-1' };

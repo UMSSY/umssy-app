@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DateField } from "@/shared/components/date-field";
 import { Input } from "@/components/ui/input";
 import { getInitials } from "@/shared/utils/get-initials";
 import { RadarChart } from "./radar-chart";
@@ -46,6 +47,7 @@ export function CandidateDetailPanel({
   const [inlineAction, setInlineAction] = useState<InlineAction>(null);
   const [scheduleDate, setScheduleDate] = useState("");
   const [scheduleTime, setScheduleTime] = useState("");
+  const hasValidScheduleDate = /^\d{4}-\d{2}-\d{2}$/.test(scheduleDate);
   const [selectedAreaId, setSelectedAreaId] = useState<AreaId | null>(null);
 
   if (!candidate || !vacancy) {
@@ -62,7 +64,7 @@ export function CandidateDetailPanel({
   const isPendingDiscard = pendingDiscardId === candidate.id;
 
   function handleSubmitSchedule() {
-    if (!candidate || !scheduleDate || !scheduleTime) return;
+    if (!candidate || !hasValidScheduleDate || !scheduleTime) return;
 
     onConfirmSchedule(candidate.name, scheduleDate, scheduleTime);
     setInlineAction(null);
@@ -75,7 +77,7 @@ export function CandidateDetailPanel({
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
               {getInitials(candidate.name)}
             </span>
             <div>
@@ -84,7 +86,7 @@ export function CandidateDetailPanel({
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            <p className="text-xs tracking-wide text-muted-foreground uppercase">
               Compatibilidad vs. {vacancy.title}
             </p>
             <p className="text-2xl font-semibold text-foreground">{candidate.matchPercent}%</p>
@@ -98,14 +100,14 @@ export function CandidateDetailPanel({
           series={[
             {
               id: "candidate",
-              name: candidate.name,
-              color: "var(--color-accent)",
+              name: `Postulante: ${candidate.name}`,
+              color: "var(--color-radar-candidate)",
               values: candidate.scores,
             },
             {
               id: "target",
-              name: "Perfil objetivo",
-              color: "var(--color-ink-soft)",
+              name: "Objetivo de la vacante",
+              color: "var(--color-radar-target)",
               values: vacancy.targetProfile,
             },
           ]}
@@ -138,29 +140,33 @@ export function CandidateDetailPanel({
               Este perfil fue descartado.
             </p>
           ) : (
-            <>
+            <div className="grid grid-cols-3 items-stretch gap-3" aria-label="Acciones del candidato">
               <Button
                 type="button"
-                className="w-full"
+                className="h-auto min-h-10 w-full whitespace-normal"
+                aria-expanded={inlineAction === "contact"}
                 onClick={() => setInlineAction(inlineAction === "contact" ? null : "contact")}
               >
                 Contactar candidato
               </Button>
               <Button
                 type="button"
-                className="w-full"
+                variant="outline"
+                className="h-auto min-h-10 w-full border-accent whitespace-normal text-accent hover:bg-interaction hover:text-accent"
+                aria-expanded={inlineAction === "schedule"}
                 onClick={() => setInlineAction(inlineAction === "schedule" ? null : "schedule")}
               >
                 Agendar entrevista
               </Button>
               <Button
                 type="button"
-                className="w-full"
+                variant="outline"
+                className="h-auto min-h-10 w-full border-brand-red/40 whitespace-normal text-danger hover:bg-brand-red/5 hover:text-danger"
                 onClick={() => onRequestDiscard(candidate.id)}
               >
                 Descartar perfil
               </Button>
-            </>
+            </div>
           )}
 
           <ConfirmDiscardDialog
@@ -187,10 +193,9 @@ export function CandidateDetailPanel({
             <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/50 p-3">
               <p className="text-sm font-medium text-foreground">Proponer entrevista</p>
               <div className="flex gap-2">
-                <Input
-                  type="date"
+                <DateField
                   value={scheduleDate}
-                  onChange={(event) => setScheduleDate(event.target.value)}
+                  onValueChange={setScheduleDate}
                   aria-label="Fecha de entrevista"
                 />
                 <Input
@@ -203,7 +208,7 @@ export function CandidateDetailPanel({
               <Button
                 type="button"
                 size="sm"
-                disabled={!scheduleDate || !scheduleTime}
+                disabled={!hasValidScheduleDate || !scheduleTime}
                 onClick={handleSubmitSchedule}
               >
                 Confirmar propuesta

@@ -67,7 +67,7 @@ export function SkillsSelector({
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+    <div className="grid grid-cols-1 gap-6">
       <SectionCard title={SKILLS_UI_TEXTS.searchCardTitle}>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-5">
@@ -89,7 +89,7 @@ export function SkillsSelector({
               </h4>
               <ul className="max-h-96 divide-y divide-border overflow-y-auto">
                 {(filteredCatalog ?? []).length === 0 ? (
-                  <li className="py-3 text-[13px] text-text-secondary">{SKILLS_UI_TEXTS.emptyCatalog}</li>
+                  <li className="py-3 text-sm text-text-secondary">{SKILLS_UI_TEXTS.emptyCatalog}</li>
                 ) : (
                   (filteredCatalog ?? []).map((skill) => {
                     const isSelected = selectedIds.has(skill.id);
@@ -97,9 +97,9 @@ export function SkillsSelector({
                     return (
                       <li key={skill.id} className="flex items-center justify-between gap-4 py-3">
                         <div className="flex flex-col">
-                          <span className="text-[15px] font-semibold text-ink">{skill.name}</span>
+                          <span className="text-base font-semibold text-ink">{skill.name}</span>
                           {skill.category ? (
-                            <span className="text-[13px] text-text-secondary">{skill.category}</span>
+                            <span className="text-sm text-text-secondary">{skill.category}</span>
                           ) : null}
                         </div>
                         <Button
@@ -108,7 +108,7 @@ export function SkillsSelector({
                           size="sm"
                           disabled={isSelected || isMutateDisabled}
                           onClick={() => onAddSkill(skill)}
-                          className="gap-1 text-[13px] font-semibold text-ink hover:bg-transparent hover:text-accent disabled:text-text-secondary"
+                          className="gap-1 text-sm font-semibold text-ink hover:bg-transparent hover:text-accent disabled:text-text-secondary"
                         >
                           <Plus aria-hidden="true" className="size-3.5" />
                           {isSelected ? SKILLS_UI_TEXTS.addedCatalogButton : SKILLS_UI_TEXTS.addCatalogButton}
@@ -127,7 +127,7 @@ export function SkillsSelector({
               label={SKILLS_UI_TEXTS.customSkillLabel}
               error={customSkillError}
             >
-              <p className="text-[13px] text-text-secondary">{SKILLS_UI_TEXTS.customSkillDescription}</p>
+              <p className="text-sm text-text-secondary">{SKILLS_UI_TEXTS.customSkillDescription}</p>
               <div className="flex gap-3">
                 <Input
                   id="custom-skill"
@@ -149,13 +149,13 @@ export function SkillsSelector({
                   type="submit"
                   variant="outline"
                   disabled={isMutateDisabled}
-                  className="h-12 gap-1 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft disabled:opacity-60"
+                  className="h-12 gap-1 border-border-strong bg-surface px-6 text-sm font-semibold text-ink hover:bg-surface-soft disabled:opacity-60"
                 >
                   <Plus aria-hidden="true" className="size-4" />
                   {SKILLS_UI_TEXTS.addButton}
                 </Button>
               </div>
-              <p id={CUSTOM_SKILL_HINT_ID} className="text-[13px] text-text-secondary">
+              <p id={CUSTOM_SKILL_HINT_ID} className="text-sm text-text-secondary">
                 {CUSTOM_SKILL_HINT}
               </p>
             </FormField>
@@ -169,7 +169,7 @@ export function SkillsSelector({
         contentClassName="flex flex-1 flex-col gap-6"
       >
         {(selectedSkills ?? []).length === 0 ? (
-          <p className="text-[13px] text-text-secondary">{SKILLS_UI_TEXTS.emptySelected}</p>
+          <p className="text-sm text-text-secondary">{SKILLS_UI_TEXTS.emptySelected}</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {(selectedSkills ?? []).map((skill) => (
@@ -183,7 +183,7 @@ export function SkillsSelector({
           </div>
         )}
 
-        <p className="text-[13px] text-text-secondary">{SKILLS_UI_TEXTS.mySkillsNote}</p>
+        <p className="text-sm text-text-secondary">{SKILLS_UI_TEXTS.mySkillsNote}</p>
 
         <div className="mt-auto flex flex-col gap-4">
           {feedback ? <FeedbackMessage feedback={feedback} /> : null}
@@ -192,7 +192,7 @@ export function SkillsSelector({
               type="button"
               variant="outline"
               onClick={onRetry}
-              className="h-10 w-full border-border-strong bg-surface text-[14px] font-semibold text-ink hover:bg-surface-soft"
+              className="h-10 w-full border-border-strong bg-surface text-sm font-semibold text-ink hover:bg-surface-soft"
             >
               {SKILLS_UI_TEXTS.retryButton}
             </Button>
@@ -201,7 +201,7 @@ export function SkillsSelector({
             type="button"
             onClick={onSave}
             disabled={isSaving || hasLoadError}
-            className={cn("h-10 bg-accent px-4 text-sm text-white hover:bg-brand-hover", "w-full")}
+            className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "w-full")}
           >
             {isSaving ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null}
             {isSaving ? SKILLS_UI_TEXTS.savingButton : SKILLS_UI_TEXTS.saveButton}

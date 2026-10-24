@@ -28,7 +28,7 @@ const FIELD_ORDER: readonly PersonalDataFieldName[] = [
 ];
 
 export function PersonalDataForm() {
-  const { fieldErrors, submit } = useAccessRequestForm();
+  const { fieldErrors, submit, values, setValue } = useAccessRequestForm();
   const bind = usePersonalDataBind();
   const [submitCount, setSubmitCount] = useState(0);
   const handledCount = useRef(0);
@@ -120,7 +120,9 @@ export function PersonalDataForm() {
         <FormFieldset title="Datos complementarios"><div className="grid gap-5 md:grid-cols-2">
         <PersonalDataField
           id="birthDate"
-          {...bind("birthDate")}
+          value={values.birthDate}
+          error={fieldErrors.birthDate}
+          onValueChange={(value) => setValue("birthDate", value)}
           label="Fecha de nacimiento"
           isRequired
           type="date"

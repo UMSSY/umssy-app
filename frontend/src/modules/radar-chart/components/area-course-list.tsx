@@ -22,7 +22,7 @@ export function AreaCourseList({ courses }: AreaCourseListProps) {
                 <p className="text-sm font-medium text-ink">{course.name}</p>
                 <p className="text-xs text-text-secondary">{course.institution}</p>
               </div>
-              <span className="shrink-0 rounded-full bg-surface-soft px-2 py-0.5 text-[11px] font-medium text-ink-soft tabular-nums">
+              <span className="shrink-0 rounded-full bg-surface-soft px-2 py-0.5 text-xs font-medium text-ink-soft tabular-nums">
                 {course.year}
               </span>
             </li>
