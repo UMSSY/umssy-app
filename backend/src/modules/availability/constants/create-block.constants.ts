@@ -2,6 +2,7 @@
 export const BLOCK_MIN_HOUR = 7;
 export const BLOCK_MAX_HOUR = 22;
 export const BLOCK_STEP_MINUTES = 30;
+export const MAX_REPEAT_WEEKS = 12;
 
 export const CREATE_BLOCK_MESSAGES = {
   invalidDate: 'La fecha y hora no tienen un formato válido',
@@ -10,6 +11,10 @@ export const CREATE_BLOCK_MESSAGES = {
   outOfRange: `El horario debe estar entre las ${String(BLOCK_MIN_HOUR).padStart(2, '0')}:00 y las ${String(BLOCK_MAX_HOUR).padStart(2, '0')}:00`,
   invalidStep: `Las horas deben ir en intervalos de ${BLOCK_STEP_MINUTES} minutos`,
   differentDays: 'El bloque debe empezar y terminar el mismo día',
+  invalidRepeatUntil: 'La fecha de fin de repetición debe tener formato YYYY-MM-DD',
+  repeatUntilRequired: 'La fecha de fin es obligatoria para repetir semanalmente',
+  repeatNotEnabled: 'La fecha de fin requiere activar la repetición semanal',
+  repeatUntilOutOfRange: 'La fecha de fin debe estar entre la fecha del bloque y 12 semanas después',
 } as const;
 
 export const OVERLAP_ERROR_CODE = '23P01';

@@ -22,6 +22,7 @@ import { AvailabilityRepository } from '../repositories/availability.repository.
 import { BlockedDatesRepository } from '../repositories/blocked-dates.repository.js';
 import { buildBlockPlan, getWeeks } from '../seeds/availability.seed.js';
 import type { SeedBlock } from '../types/seed-block.types.js';
+import type { BlockSeriesData } from '../types/block-series-data.types.js';
 
 const NOW = new Date('2026-10-22T15:00:00.000Z');
 const MENTOR_A = '11111111-1111-4111-8111-111111111111';
@@ -185,16 +186,24 @@ function createRepositories(store: ReturnType<typeof createStore>) {
       Object.assign(block, data, { updatedAt: NOW });
       return Promise.resolve(block);
     },
-    create: (mentorId: string, startAt: Date, endAt: Date, tx: unknown) => {
+    delete: (id: string) => {
+      const index = store.blocks.findIndex((block) => block.id === id);
+      const [deleted] = store.blocks.splice(index, 1);
+      return Promise.resolve(deleted);
+    },
+    create: (mentorId: string, startAt: Date, endAt: Date, tx: unknown, series?: BlockSeriesData) => {
       assertInDayLock(tx, mentorId, dayOf(startAt));
+      if (store.blocks.some((block) => block.mentorId === mentorId && block.startAt < endAt && block.endAt > startAt)) {
+        return Promise.reject({ code: '23P01' });
+      }
       sequence += 1;
       const created: StoredBlock = {
         id: `00000000-0000-4000-9000-${String(sequence).padStart(12, '0')}`,
         mentorId,
         startAt,
         endAt,
-        seriesId: null,
-        repeatUntil: null,
+        seriesId: series?.seriesId ?? null,
+        repeatUntil: series?.repeatUntil ?? null,
         createdAt: NOW,
         updatedAt: NOW,
         appointments: [],
@@ -271,6 +280,63 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
   });
 
   const http = () => request(app.getHttpServer());
+  const weeklyPayload = {
+    startAt: '2026-11-02T09:00:00-04:00',
+    endAt: '2026-11-02T10:00:00-04:00',
+    repeatWeekly: true,
+    repeatUntil: '2026-11-23',
+  };
+  const createWeekly = (body: Record<string, unknown> = weeklyPayload) =>
+    http().post('/api/availability-blocks').set('Authorization', `Bearer ${tokens.mentorB}`).send(body);
+
+  it('HU-07: crea cuatro bloques de una serie y editar/eliminar solo afecta al seleccionado', async () => {
+    const response = await createWeekly().expect(201);
+    expect(response.body).toMatchObject({ statusCode: 201, ok: true, data: { created: 4, skipped: [] } });
+    const series = store.blocks.filter((block) => block.mentorId === MENTOR_B);
+    expect(series).toHaveLength(4);
+    expect(series[0].seriesId).toMatch(/^[\da-f-]{36}$/);
+    expect(new Set(series.map((block) => block.seriesId)).size).toBe(1);
+    expect(series.every((block) => block.repeatUntil?.toISOString().slice(0, 10) === '2026-11-23')).toBe(true);
+    const siblings = structuredClone(series.slice(1));
+
+    await http().patch(`/api/availability-blocks/${series[0].id}`)
+      .set('Authorization', `Bearer ${tokens.mentorB}`)
+      .send({ startAt: '2026-11-02T10:00:00-04:00', endAt: '2026-11-02T11:00:00-04:00' }).expect(200);
+    expect(store.blocks.filter((block) => block.mentorId === MENTOR_B).slice(1)).toEqual(siblings);
+    await http().delete(`/api/availability-blocks/${series[0].id}`)
+      .set('Authorization', `Bearer ${tokens.mentorB}`).expect(200);
+    expect(store.blocks.filter((block) => block.mentorId === MENTOR_B)).toEqual(siblings);
+  });
+
+  it('HU-07: omite una fecha bloqueada, conserva el bloqueo e informa todos los solapamientos al reintentar', async () => {
+    const blocked = await blockDate(tokens.mentorB, { blockedOn: '2026-11-09', reason: 'Ausencia' }).expect(201);
+    const response = await createWeekly().expect(201);
+    expect(response.body.data).toEqual({ created: 3, skipped: ['2026-11-09'] });
+    expect(store.blockedDates.find((item) => item.id === blocked.body.data.id)?.reason).toBe('Ausencia');
+    const retry = await createWeekly().expect(201);
+    expect(retry.body.data).toEqual({ created: 0, skipped: ['2026-11-02', '2026-11-09', '2026-11-16', '2026-11-23'] });
+    expect(store.blocks.filter((block) => block.mentorId === MENTOR_B)).toHaveLength(3);
+  });
+
+  it.each(['2026-11-01', '2027-01-26', 'invalid', undefined])('HU-07: responde 400 sin crear bloques para repeatUntil=%s', async (repeatUntil) => {
+    const original = structuredClone(store.blocks);
+    await createWeekly({ ...weeklyPayload, repeatUntil }).expect(400);
+    expect(store.blocks).toEqual(original);
+  });
+
+  it('HU-07: sin repetición conserva la creación individual y permite bloques contiguos', async () => {
+    const response = await createWeekly({ startAt: weeklyPayload.startAt, endAt: weeklyPayload.endAt }).expect(201);
+    expect(response.body.data).toMatchObject({ mentorId: MENTOR_B, state: 'free' });
+    expect(store.blocks.filter((block) => block.mentorId === MENTOR_B)).toHaveLength(1);
+    const repeated = await createWeekly({ ...weeklyPayload, startAt: '2026-11-02T10:00:00-04:00', endAt: '2026-11-02T11:00:00-04:00' }).expect(201);
+    expect(repeated.body.data).toEqual({ created: 4, skipped: [] });
+  });
+
+  it('HU-07: exige autenticación y rol mentor', async () => {
+    await http().post('/api/availability-blocks').send(weeklyPayload).expect(401);
+    await http().post('/api/availability-blocks').set('Authorization', `Bearer ${tokens.graduate}`).send(weeklyPayload).expect(403);
+  });
+
   const blockDate = (token: string, body: Record<string, unknown>) =>
     http().post('/api/blocked-dates').set('Authorization', `Bearer ${token}`).send(body);
   const listBlockedDates = async (token = tokens.mentorA) =>
