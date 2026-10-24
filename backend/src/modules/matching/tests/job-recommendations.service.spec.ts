@@ -1,41 +1,46 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
-import type { JobOfferResponse } from '../../job-offers/responses/job-offer.response.js';
-import type { JobOffersService } from '../../job-offers/services/job-offers.service.js';
+import type { JobMatchRepository } from '../repositories/job-match.repository.js';
 import { JobRecommendationsService } from '../services/job-recommendations.service.js';
 import { VacancyRankingService } from '../services/vacancy-ranking.service.js';
 import { WeightedScoreService } from '../services/weighted-score.service.js';
+import type { JobMatchRecord } from '../types/job-match.types.js';
 
-function offer(id: string, skills: string[]): JobOfferResponse {
+interface OfferOptions {
+  careers?: string[];
+  minExperienceYears?: number | null;
+}
+
+function offer(
+  id: string,
+  skills: string[],
+  options: OfferOptions = {},
+): JobMatchRecord {
   return {
     id,
     title: id,
-    company: { id: 'company', name: 'Empresa' },
-    modality: 'Remoto',
     description: 'Descripción',
-    category: 'Tecnología',
-    contractType: 'Tiempo completo',
-    status: 'Publicada',
-    positionsAvailable: 1,
-    salaryRange: '',
-    languages: '',
-    locationUrl: '',
-    expiresAt: null,
-    createdAt: '2026-10-23T00:00:00.000Z',
-    skills: skills.map((name) => ({ id: name, name })),
-  };
+    locationUrl: 'https://maps.google.com/?q=x',
+    requiredCareers: options.careers ?? [],
+    minExperienceYears: options.minExperienceYears ?? null,
+    otherRequirements: [],
+    company: { title: 'Empresa' },
+    modality: { title: 'Remoto' },
+    skills: skills.map((name) => ({ skill: { name } })),
+  } as JobMatchRecord;
 }
 
 describe('HU-06 recommendations contract', () => {
   const findUnique = vi.fn();
-  const listPublished = vi.fn();
+  const findPublished = vi.fn();
+  const findCandidateProfile = vi.fn();
   let service: JobRecommendationsService;
 
   beforeEach(() => {
     findUnique
       .mockReset()
       .mockResolvedValue({ userSkills: [{ skill: { name: 'Python' } }] });
-    listPublished
+    findPublished
       .mockReset()
       .mockResolvedValue([
         offer('partial', ['Python', 'SQL']),
@@ -43,9 +48,12 @@ describe('HU-06 recommendations contract', () => {
         offer('perfect', ['python']),
         offer('unrestricted', []),
       ]);
+    findCandidateProfile
+      .mockReset()
+      .mockResolvedValue({ career: null, experienceYears: 0 });
     service = new JobRecommendationsService(
       { user: { findUnique } } as unknown as PrismaService,
-      { listPublished } as unknown as JobOffersService,
+      { findPublished, findCandidateProfile } as unknown as JobMatchRepository,
       new VacancyRankingService(),
       new WeightedScoreService(),
     );
@@ -62,6 +70,23 @@ describe('HU-06 recommendations contract', () => {
     expect(findUnique).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: 'user' } }),
     );
+    expect(findCandidateProfile).toHaveBeenCalledWith('user');
+  });
+
+  it('returns the location link and the skills of every offer', async () => {
+    const result = await service.recommendations('user');
+    const partial = result.items.find((item) => item.jobOfferId === 'partial');
+
+    expect(partial).toEqual({
+      jobOfferId: 'partial',
+      title: 'partial',
+      companyName: 'Empresa',
+      modality: 'Remoto',
+      locationUrl: 'https://maps.google.com/?q=x',
+      score: 50,
+      skills: ['Python', 'SQL'],
+      matchedSkills: ['Python'],
+    });
   });
 
   it('recalculates on every request after profile skills change', async () => {
@@ -76,6 +101,44 @@ describe('HU-06 recommendations contract', () => {
     expect(await scoreOf()).toBe(100);
   });
 
+  it('uses the career and the experience of the profile in the score and in the tie break', async () => {
+    findCandidateProfile.mockResolvedValue({
+      career: 'Ingeniería de Sistemas',
+      experienceYears: 1,
+    });
+    findPublished.mockResolvedValue([
+      offer('other-career', ['Python'], { careers: ['Ingeniería Comercial'] }),
+      offer('needs-experience', ['Python'], { minExperienceYears: 5 }),
+      offer('match', ['Python'], { careers: ['Ingeniería de Sistemas'] }),
+    ]);
+
+    const result = await service.recommendations('user');
+
+    expect(result.items.map((item) => [item.jobOfferId, item.score])).toEqual([
+      ['match', 100],
+      ['needs-experience', 86],
+      ['other-career', 71],
+    ]);
+  });
+
+  it('breaks a tie by career first and by experience second', async () => {
+    findCandidateProfile.mockResolvedValue({
+      career: 'Ingeniería de Sistemas',
+      experienceYears: 0,
+    });
+    findPublished.mockResolvedValue([
+      offer('other-career', ['Python'], { careers: ['Ingeniería Comercial'] }),
+      offer('same-career', ['Python'], { careers: ['Ingeniería de Sistemas'] }),
+    ]);
+
+    const result = await service.recommendations('user');
+
+    expect(result.items.map((item) => item.jobOfferId)).toEqual([
+      'same-career',
+      'other-career',
+    ]);
+  });
+
   it.each([null, { userSkills: [] }])(
     'returns an incomplete profile without listing offers: %j',
     async (user) => {
@@ -84,12 +147,12 @@ describe('HU-06 recommendations contract', () => {
         isProfileComplete: false,
         items: [],
       });
-      expect(listPublished).not.toHaveBeenCalled();
+      expect(findPublished).not.toHaveBeenCalled();
     },
   );
 
   it('returns an empty feed when there are no published offers', async () => {
-    listPublished.mockResolvedValue([]);
+    findPublished.mockResolvedValue([]);
     await expect(service.recommendations('user')).resolves.toEqual({
       isProfileComplete: true,
       items: [],

@@ -19,9 +19,12 @@ export class UserSkillRepository {
 
   async replaceForUser(userId: string, skillIds: string[]): Promise<UserSkillRecord[]> {
     await this.prisma.$transaction([
-      this.prisma.userSkill.deleteMany({ where: { userId } }),
+      this.prisma.userSkill.deleteMany({
+        where: { userId, skillId: { notIn: skillIds } },
+      }),
       this.prisma.userSkill.createMany({
         data: skillIds.map((skillId) => ({ userId, skillId })),
+        skipDuplicates: true,
       }),
     ]);
 
