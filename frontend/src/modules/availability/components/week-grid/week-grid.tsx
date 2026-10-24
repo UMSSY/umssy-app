@@ -8,6 +8,7 @@ import {
   BLOCK_STATE_TEXT,
   DAY_LABELS,
   HOUR_HEIGHT_PX,
+  STICKY_GAP_PX,
   SELECTED_BLOCK_CLASSES,
   SELECTED_LEGEND_LABEL,
   STATE_BUTTON_CLASSES,
@@ -43,7 +44,7 @@ export function WeekGrid({
 }: WeekGridProps) {
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
   const gridHeightPx = hours.length * HOUR_HEIGHT_PX;
-  const stickyTop = { top: `calc(var(--spacing-app-header) + ${stickyOffset}px)` };
+  const stickyTop = { top: `calc(var(--spacing-app-header) + ${STICKY_GAP_PX + stickyOffset}px)` };
 
   const dayDates = getWeekDayDates(weekRange);
   const blocksByDay: AvailabilityBlock[][] = Array.from({ length: 7 }, () => []);
@@ -86,8 +87,8 @@ export function WeekGrid({
         {blocksByDay.map((dayBlocks, dayIndex) => {
           const blockedDate = blockedDates.find((item) => item.blockedOn === dayDates[dayIndex]);
           return (
-            <section key={dayIndex} className={cn("min-w-0 border-l border-border", blockedDate && "bg-muted")}>
-              <h3 aria-label={`${DAY_LABELS[dayIndex]} ${Number(dayDates[dayIndex].slice(8))}`} className="sticky z-10 flex h-10 items-center gap-1.5 border-b border-app-header-foreground/15 bg-app-header px-2 text-app-header-foreground" style={stickyTop}>
+            <section key={dayIndex} className={cn("min-w-0", blockedDate && "bg-muted")}>
+              <h3 aria-label={`${DAY_LABELS[dayIndex]} ${Number(dayDates[dayIndex].slice(8))}`} className="sticky z-10 flex h-10 items-center gap-1.5 border-b border-l border-app-header-foreground/15 bg-app-header px-2 text-app-header-foreground" style={stickyTop}>
                 {variant === "owner" && onSelectDate ? (
                   <Button type="button" variant="ghost" className="h-auto w-full px-0 text-xs text-app-header-foreground hover:bg-app-header-foreground/15 hover:text-app-header-foreground" onClick={() => onSelectDate(dayDates[dayIndex])} aria-label={`${BLOCKED_DATE_TEXT.selectDate}: ${formatDayAndMonth(dayDates[dayIndex])}`}>
                     {DAY_LABELS[dayIndex]} {Number(dayDates[dayIndex].slice(8))}
@@ -98,7 +99,7 @@ export function WeekGrid({
                 <span className="text-base font-bold">{Number(dayDates[dayIndex].slice(8))}</span></>}
               </h3>
 
-              <div className="relative" style={{ height: gridHeightPx }}>
+              <div className="relative border-l border-border" style={{ height: gridHeightPx }}>
                 {hours.map((h) => (
                   <div
                     key={h}
