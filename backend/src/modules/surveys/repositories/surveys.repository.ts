@@ -2,12 +2,15 @@ import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import {
+  CAREER_SELECT,
   SURVEY_CREATED_SELECT,
   SURVEY_DETAIL_INCLUDE,
   SURVEY_STATISTICS_INCLUDE,
   SURVEY_SUMMARY_SELECT,
 } from '../constants/survey.constants.js';
 import { SurveysStorageUnavailableException } from '../exceptions/surveys-storage-unavailable.exception.js';
+import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
+import type { SurveyNotificationResponse } from '../responses/survey-notification.response.js';
 import type {
   CreateSurveyData,
   UpdateSurveyData,
@@ -133,6 +136,145 @@ export class SurveysRepository {
     });
   }
 
+  async findNotificationsForUser(userId: string): Promise<SurveyNotificationResponse[]> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true },
+    });
+
+    if (!user) return [];
+
+    const accessRequest = await this.prisma.accessRequest.findFirst({
+      where: {
+        email: user.email,
+        status: { title: { equals: 'approved', mode: 'insensitive' } },
+      },
+      select: { careerId: true },
+    });
+    const userCareerId = accessRequest?.careerId ?? null;
+
+    const surveys = await this.prisma.survey.findMany({
+      where: {
+        status: 'PUBLISHED',
+        ...(userCareerId
+          ? {
+              OR: [{ careerId: null }, { careerId: userCareerId }],
+            }
+          : {}),
+      },
+      include: {
+        responses: {
+          where: { respondentId: userId },
+          select: { id: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const now = new Date();
+    return surveys.map((s) => {
+      const hasAnswered = s.responses.length > 0;
+      let status: 'pending' | 'expired' | 'answered';
+
+      if (hasAnswered) {
+        status = 'answered';
+      } else if (s.closesAt && new Date(s.closesAt) < now) {
+        status = 'expired';
+      } else {
+        status = 'pending';
+      }
+
+      const publishedDate = s.opensAt ?? s.createdAt;
+
+      return {
+        id: s.id,
+        title: s.title,
+        publishedAt: publishedDate.toISOString(),
+        status,
+      };
+    });
+  }
+
+  async findByIdWithQuestions(id: string, userId: string): Promise<SurveyDetailResponse | null> {
+    const survey = await this.prisma.survey.findUnique({
+      where: { id },
+      include: {
+        career: { select: CAREER_SELECT },
+        questions: {
+          orderBy: { position: 'asc' },
+          include: {
+            options: {
+              orderBy: { position: 'asc' },
+            },
+          },
+        },
+        responses: {
+          where: { respondentId: userId },
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!survey) return null;
+
+    const hasAnswered = survey.responses.length > 0;
+    const isExpired = survey.closesAt ? new Date(survey.closesAt) < new Date() : false;
+
+    return {
+      id: survey.id,
+      title: survey.title,
+      description: survey.description,
+      status: (survey.status === 'PUBLISHED' ? 'published' : 'draft') as 'published' | 'draft',
+      career: survey.career ? { id: survey.career.id, title: survey.career.title } : null,
+      academicPeriod: survey.academicPeriod,
+      opensAt: survey.opensAt?.toISOString() ?? null,
+      closesAt: survey.closesAt?.toISOString() ?? null,
+      hasAnswered,
+      isExpired,
+      questions: survey.questions.map((q) => ({
+        id: q.id,
+        position: q.position,
+        statement: q.statement,
+        type: (q.type === 'MULTIPLE_CHOICE' ? 'multiple_choice' : 'single_choice') as 'single_choice' | 'multiple_choice',
+        isRequired: q.isRequired,
+        options: q.options.map((opt) => ({
+          id: opt.id,
+          position: opt.position,
+          label: opt.label,
+        })),
+      })),
+    };
+  }
+
+  async submitResponse(
+    surveyId: string,
+    userId: string,
+    answers: { questionId: string; optionIds: string[] }[],
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const createdResponse = await tx.surveyResponse.create({
+        data: {
+          surveyId,
+          respondentId: userId,
+        },
+      });
+
+      const answerRows = answers.flatMap((ans) =>
+        ans.optionIds.map((optId) => ({
+          responseId: createdResponse.id,
+          questionId: ans.questionId,
+          optionId: optId,
+        })),
+      );
+
+      if (answerRows.length > 0) {
+        await tx.surveyAnswer.createMany({
+          data: answerRows,
+        });
+      }
+    });
+  }
+
   private toQuestionRows(questions: CreateSurveyData['questions']) {
     const questionRows = questions.map((question, index) => ({
       id: randomUUID(),
@@ -151,4 +293,5 @@ export class SurveysRepository {
     return { questionRows, optionRows };
   }
 }
+
 

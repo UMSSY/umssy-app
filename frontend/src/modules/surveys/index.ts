@@ -8,6 +8,7 @@ export type { Career, CreateSurveyPayload, CreatedSurvey, QuestionType, SurveyDi
 export type { SurveyStatisticsPageProps } from "./types/survey-statistics-page-props.types";
 export type { SurveyDetailPageProps } from "./types/survey-detail-page-props.types";
 export { SurveyNotificationsView } from "./views/survey-notifications-view";
+export { AnswerSurveyView } from "./views/answer-survey-view";
 export { PendingSurveysBadge } from "./components/pending-surveys-badge";
 export { useSurveyNotifications } from "./hooks/use-survey-notifications";
 export { SURVEY_NOTIFICATIONS_LABEL, SURVEY_NOTIFICATIONS_PATH } from "./constants/survey-notifications.constants";

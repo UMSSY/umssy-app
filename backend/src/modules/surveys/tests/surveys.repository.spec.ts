@@ -22,6 +22,8 @@ function createPrisma() {
     tx,
     survey: { findFirst: vi.fn(), findMany: vi.fn() },
     career: { findMany: vi.fn(), findUnique: vi.fn() },
+    user: { findUnique: vi.fn() },
+    accessRequest: { findFirst: vi.fn() },
     $transaction: vi.fn((operation: (client: typeof tx) => unknown) =>
       operation(tx),
     ),
@@ -169,6 +171,64 @@ describe('SurveysRepository', () => {
       orderBy: { createdAt: 'desc' },
     });
   });
+
+  it('clasifica automáticamente notificaciones en pending, expired y answered según estado y fecha', async () => {
+    prisma.user.findUnique.mockResolvedValue({ id: 'user-1', email: 'titulado@umss.edu.bo' });
+    prisma.accessRequest.findFirst.mockResolvedValue({ careerId: 'career-sistemas' });
+
+    const pastDate = new Date('2020-01-01T00:00:00.000Z');
+    const futureDate = new Date('2030-01-01T00:00:00.000Z');
+
+    prisma.survey.findMany.mockResolvedValue([
+      {
+        id: 's-pending',
+        title: 'Encuesta Activa',
+        opensAt: new Date('2026-10-01T00:00:00.000Z'),
+        closesAt: futureDate,
+        createdAt: new Date('2026-10-01T00:00:00.000Z'),
+        responses: [],
+      },
+      {
+        id: 's-expired',
+        title: 'Encuesta Vencida',
+        opensAt: new Date('2020-01-01T00:00:00.000Z'),
+        closesAt: pastDate,
+        createdAt: new Date('2020-01-01T00:00:00.000Z'),
+        responses: [],
+      },
+      {
+        id: 's-answered',
+        title: 'Encuesta Completada',
+        opensAt: new Date('2026-10-01T00:00:00.000Z'),
+        closesAt: futureDate,
+        createdAt: new Date('2026-10-01T00:00:00.000Z'),
+        responses: [{ id: 'resp-1' }],
+      },
+    ]);
+
+    const notifications = await repository.findNotificationsForUser('user-1');
+
+    expect(notifications).toEqual([
+      {
+        id: 's-pending',
+        title: 'Encuesta Activa',
+        publishedAt: '2026-10-01T00:00:00.000Z',
+        status: 'pending',
+      },
+      {
+        id: 's-expired',
+        title: 'Encuesta Vencida',
+        publishedAt: '2020-01-01T00:00:00.000Z',
+        status: 'expired',
+      },
+      {
+        id: 's-answered',
+        title: 'Encuesta Completada',
+        publishedAt: '2026-10-01T00:00:00.000Z',
+        status: 'answered',
+      },
+    ]);
+  });
 });
 
 describe('CareersRepository', () => {
@@ -207,6 +267,7 @@ describe('CareersRepository', () => {
     });
   });
 });
+
 
 describe('SurveysRepository sin modelos de encuestas en Prisma', () => {
   it('responde que el registro de encuestas no está disponible', async () => {

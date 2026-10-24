@@ -4,3 +4,5 @@ export { SurveyTitleAlreadyExistsException } from './survey-title-already-exists
 export { SurveyNotFoundException } from './survey-not-found.exception.js';
 export { SurveyNotEditableException } from './survey-not-editable.exception.js';
 export { SurveysStorageUnavailableException } from './surveys-storage-unavailable.exception.js';
+export { SurveyAlreadyAnsweredException } from './survey-already-answered.exception.js';
+export { SurveyExpiredException } from './survey-expired.exception.js';

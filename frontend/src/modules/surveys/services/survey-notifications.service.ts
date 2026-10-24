@@ -1,6 +1,10 @@
+import { apiClient } from "@/shared/services/api-client";
+import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { SurveyNotification } from "../types/survey-notification.types";
 
-// TODO: conectar con el endpoint de encuestas del titulado cuando esté disponible en el backend.
 export const surveyNotificationsService = {
-  getNotifications: async (): Promise<SurveyNotification[]> => [],
+  getNotifications: async (): Promise<SurveyNotification[]> => {
+    const { data } = await apiClient.get<ApiResponse<SurveyNotification[]>>("/surveys/notifications");
+    return data.data;
+  },
 };
