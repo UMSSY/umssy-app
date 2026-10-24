@@ -48,6 +48,9 @@ export class JobOffersService {
       salaryRange: formatSalaryRange(request.salaryMin, request.salaryMax),
       languages: request.languages,
       locationUrl: request.locationUrl,
+      requiredCareers: request.requiredCareers,
+      minExperienceYears: request.minExperienceYears ?? null,
+      otherRequirements: request.otherRequirements,
       skillIds: request.skillIds,
     });
 

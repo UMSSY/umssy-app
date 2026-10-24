@@ -6,6 +6,11 @@ export type JobMatchRecord = Prisma.JobOfferGetPayload<{
   select: typeof JOB_MATCH_SELECT;
 }>;
 
+export interface CandidateProfileRecord {
+  career: string | null;
+  experienceYears: number;
+}
+
 export interface JobMatchResponse {
   jobOfferId: string;
   title: string;

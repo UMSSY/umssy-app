@@ -31,11 +31,11 @@ describe("MissingRequirements", () => {
     expect(container.querySelectorAll("svg[aria-hidden='true']")).toHaveLength(MIXED.length);
   });
 
-  it("groups the requirements as Habilidades, Académicos and Otros requisitos", () => {
+  it("groups the requirements as Habilidades, Académicos y experiencia and Otros requisitos", () => {
     render(<MissingRequirements requirements={MIXED} />);
 
     const headings = screen.getAllByRole("heading", { level: 4 }).map((heading) => heading.textContent);
-    expect(headings).toEqual(["Habilidades", "Académicos", "Otros requisitos"]);
+    expect(headings).toEqual(["Habilidades", "Académicos y experiencia", "Otros requisitos"]);
 
     const lists = screen.getAllByRole("list");
     expect(lists).toHaveLength(3);
