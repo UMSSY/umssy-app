@@ -19,7 +19,10 @@ import type {
   CreateEventRegistrationPayload,
   MyRegistrationResponse,
 } from '../types/event-registrations.types.js';
-import type { SupportResponse } from '../types/support-response.types.js';
+import {
+  PassAccessDeniedException,
+  PassNotFoundException,
+} from '../exceptions/pass-access-denied.exception.js';
 
 @Injectable()
 export class EventRegistrationsService {
@@ -41,54 +44,16 @@ export class EventRegistrationsService {
     return EventRegistrationsMapper.toMyRegistrationList(registrations);
   }
 
-  async support(eventId: string, userId: string): Promise<SupportResponse> {
-    const event = await this.registrationsRepository.findEventForSupport(eventId);
-
-    if (!event) {
-      throw new EventNotFoundException(eventId);
-    }
-
-    if (event.statusTitle === EXPIRED_STATUS_TITLE) {
-      throw new ProposalExpiredException();
-    }
-
-    if (
-      event.originTitle !== COMMUNITY_ORIGIN_TITLE ||
-      !VOTING_STATUS_TITLES.includes(event.statusTitle)
-    ) {
-      throw new EventNotSupportableException();
-    }
-
-    if (event.votingDeadline && event.votingDeadline.getTime() <= Date.now()) {
-      throw new ProposalExpiredException();
-    }
-
-    const { created } = await this.registrationsRepository.createSupport(
-      eventId,
+  async getPassById(passId: string, userId: string) {
+    const pass = await this.registrationsRepository.findPassByIdAndUserId(
+      passId,
       userId,
     );
 
-    if (!created) {
-      throw new AlreadySupportedException();
+    if (!pass) {
+      throw new PassNotFoundException();
     }
 
-    const updated =
-      await this.registrationsRepository.findEventForSupport(eventId);
-    const supportCount = updated?.supportCount ?? event.supportCount + 1;
-
-    return {
-      eventId,
-      supportCount,
-      supportThreshold: event.supportThreshold,
-      supportsRemaining: calculateSupportsRemaining(
-        supportCount,
-        event.supportThreshold,
-      ),
-      progressPercent: calculateProgressPercent(
-        supportCount,
-        event.supportThreshold,
-      ),
-      hasSupported: true,
-    };
+    return pass;
   }
 }
