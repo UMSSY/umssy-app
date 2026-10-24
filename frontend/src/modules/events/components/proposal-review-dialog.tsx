@@ -18,7 +18,18 @@ export function ProposalReviewDialog({ open, values, cover, tutor, category, pen
           <DialogDescription>Comprueba la información antes de enviarla.</DialogDescription></DialogHeader>
         <div className="space-y-4">
           <article className="overflow-hidden rounded-lg border border-border bg-surface">
-            {cover && <div className="relative h-36 bg-surface-soft"><Image src={cover.previewUrl} alt="Portada de la propuesta a confirmar" fill unoptimized sizes="448px" className="object-cover" /></div>}
+            {cover && (
+              <div className="relative h-48 w-full bg-surface-soft">
+                <Image 
+                  src={cover.previewUrl} 
+                  alt="Portada de la propuesta a confirmar" 
+                  fill 
+                  unoptimized 
+                  sizes="448px" 
+                  className="object-cover object-center" 
+                />
+              </div>
+            )}
             <div className="space-y-3 p-4">
               <span className="inline-block rounded-full bg-interaction px-3 py-1 text-xs text-ink">{category}</span>
               <h3 className="text-lg font-semibold wrap-anywhere text-ink">{values.title}</h3>
