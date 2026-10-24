@@ -12,7 +12,7 @@ export function BlockSelection({ blocks, weekRange, fetchFreeBlocks }: BlockSele
   const selectableBlocks = blocks.filter((block) => !unavailableBlockIds.includes(block.id));
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+    <div className="grid gap-4 min-[1200px]:grid-cols-[minmax(0,1fr)_18rem]">
       <WeekGrid
         blocks={selectableBlocks}
         weekRange={weekRange}

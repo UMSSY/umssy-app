@@ -2,7 +2,7 @@ import type { AvailabilityBlockState } from "../types/availability-block-state.t
 
 export const WEEK_GRID_START_HOUR = 7;
 export const WEEK_GRID_END_HOUR = 22;
-export const HOUR_HEIGHT_PX = 48;
+export const HOUR_HEIGHT_PX = 72;
 export const DAY_LABELS = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"] as const;
 
 export const STATE_BUTTON_VARIANT: Record<AvailabilityBlockState, "outline" | "default"> = {
@@ -26,7 +26,7 @@ export const SELECTED_LEGEND_LABEL = "Tu selección";
 
 export const BLOCK_STATE_TEXT: Record<AvailabilityBlockState, string> = {
   free: "Libre",
-  confirmed: "Confirmada",
+  confirmed: "Cita",
 };
 
 export const WEEK_GRID_LEGEND = {
