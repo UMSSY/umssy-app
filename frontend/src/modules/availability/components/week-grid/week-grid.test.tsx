@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup, within } from "@testing-library/react";
 import { WeekGrid } from "./week-grid";
+import { HOUR_HEIGHT_PX } from "../../constants/week-grid.constants";
 import type { AvailabilityBlock } from "../../types/availability-block.types";
 import type { WeekRange } from "@/shared/types/week-range.types";
 
@@ -50,15 +51,56 @@ describe("WeekGrid", () => {
     expect(screen.getByRole("heading", { name: "DOM 11" })).toBeInTheDocument();
   });
 
-  it("muestra Confirmada en los bloques con cita", () => {
+  it("muestra Cita y la hora de inicio en los bloques con cita", () => {
     render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
-    expect(screen.getByRole("button", { name: /^confirmada, 17:00/ })).toHaveTextContent("Confirmada");
-    expect(screen.getByRole("button", { name: /^confirmada, 19:00/ })).toHaveTextContent("Confirmada");
+    expect(screen.getByRole("button", { name: /^confirmada, 17:00/ })).toHaveTextContent("Cita17:00");
+    expect(screen.getByRole("button", { name: /^confirmada, 19:00/ })).toHaveTextContent("Cita19:00");
+  });
+
+  it("muestra en dos líneas el estado y la hora de inicio, a la izquierda y sin salirse del bloque (#1445)", () => {
+    const shortBlock = makeBlock({
+      id: "4",
+      startAt: "2026-10-09T14:00:00.000Z",
+      endAt: "2026-10-09T14:30:00.000Z",
+      state: "free",
+    });
+    render(<WeekGrid blocks={[shortBlock]} weekRange={WEEK_RANGE} variant="owner" />);
+
+    const button = screen.getByRole("button", { name: "libre, 10:00 a 10:30" });
+    const [state, time] = Array.from(button.querySelectorAll("span"));
+    expect(state).toHaveTextContent("Libre");
+    expect(time).toHaveTextContent("10:00");
+    expect(state).toHaveClass("truncate");
+    expect(time).toHaveClass("truncate");
+    expect(button).toHaveClass("overflow-hidden", "items-start", "text-left");
+  });
+
+  it("muestra el horario completo al pasar el mouse sobre el bloque", () => {
+    render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
+    expect(screen.getByRole("button", { name: "libre, 18:00 a 19:00" })).toHaveAttribute("title", "Libre · 18:00 - 19:00");
+    expect(screen.getByRole("button", { name: /^confirmada, 17:00/ })).toHaveAttribute("title", "Cita · 17:00 - 18:30");
+  });
+
+  it("reparte el ancho en 7 columnas iguales aunque un día tenga contenido más ancho", () => {
+    const { container } = render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
+    expect(container.querySelector(".md\\:grid-cols-\\[3\\.5rem_repeat\\(7\\,minmax\\(0\\,1fr\\)\\)\\]")).not.toBeNull();
+  });
+
+  it("da a un bloque de 30 minutos la mitad del alto de una hora", () => {
+    const shortBlock = makeBlock({
+      id: "5",
+      startAt: "2026-10-09T14:00:00.000Z",
+      endAt: "2026-10-09T14:30:00.000Z",
+      state: "free",
+    });
+    render(<WeekGrid blocks={[shortBlock]} weekRange={WEEK_RANGE} variant="owner" />);
+    const item = screen.getByRole("button", { name: "libre, 10:00 a 10:30" }).closest("li");
+    expect(item).toHaveStyle({ height: `${HOUR_HEIGHT_PX / 2}px` });
   });
 
   it("en variant selectable, muestra la hora en los bloques libres y solo la leyenda del titulado", () => {
     render(<WeekGrid blocks={[blocks[0]]} weekRange={WEEK_RANGE} variant="selectable" />);
-    expect(screen.getByRole("button", { name: "libre, 18:00 a 19:00" })).toHaveTextContent("18:00");
+    expect(screen.getByRole("button", { name: "libre, 18:00 a 19:00" })).toHaveTextContent("Libre18:00");
     expect(screen.getByText("Horario libre")).toBeInTheDocument();
     expect(screen.queryByText("Solicitud pendiente")).not.toBeInTheDocument();
     expect(screen.queryByText("Cita confirmada")).not.toBeInTheDocument();
