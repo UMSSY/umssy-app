@@ -4,6 +4,7 @@ export interface WorkExperienceListCardProps {
   experiences?: WorkExperienceItem[];
   isLoading?: boolean;
   isBusy?: boolean;
+  onAdd?: () => void;
   onEdit?: (experience: WorkExperienceItem) => void;
   onDelete?: (experience: WorkExperienceItem) => void;
 }

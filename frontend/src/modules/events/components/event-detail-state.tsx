@@ -37,7 +37,7 @@ export function EventDetailState({
             inscripción.
           </p>
         )}
-        <div className="mt-2 flex size-12 items-center justify-center rounded-2xl border border-border bg-surface-soft text-text-secondary">
+        <div className="mt-2 flex size-12 items-center justify-center rounded-lg border border-border bg-surface-soft text-text-secondary">
           <Info aria-hidden="true" className="size-5" />
         </div>
       </div>

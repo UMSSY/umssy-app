@@ -26,7 +26,7 @@ export function SkillsView() {
       description={SKILLS_UI_TEXTS.pageDescription}
     >
       {isLoading ? (
-        <p role="status" className="text-[13px] text-text-secondary">
+        <p role="status" className="text-sm text-text-secondary">
           {SKILLS_UI_TEXTS.loadingText}
         </p>
       ) : (

@@ -26,7 +26,7 @@ export function MatchScoreBar({ score, showLabel = true, size = "md", className 
       <Progress
         value={normalizedScore}
         aria-label="Compatibilidad"
-        className={cn("w-full", SIZE_CLASSES[size])}
+        className={cn("w-full [&_[data-slot=progress-indicator]]:border [&_[data-slot=progress-indicator]]:border-notice-border [&_[data-slot=progress-indicator]]:bg-gold", SIZE_CLASSES[size])}
       />
     </div>
   );

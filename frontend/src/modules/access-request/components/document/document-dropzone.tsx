@@ -67,7 +67,7 @@ export function DocumentDropzone() {
           <FileUp className="size-6" />
         </span>
         <div className="flex flex-col gap-1">
-          <p className="text-[15px] font-semibold text-ink 2xl:text-lg">Arrastra tu documento aquí o elige un archivo.</p>
+          <p className="text-base font-semibold text-ink 2xl:text-lg">Arrastra tu documento aquí o elige un archivo.</p>
           <p className="text-[12.5px] text-text-secondary 2xl:text-base">JPG, PNG o PDF. Máximo 10 MB.</p>
         </div>
 
@@ -89,7 +89,7 @@ export function DocumentDropzone() {
           variant="secondary"
           disabled={isDisabled}
           onClick={() => inputRef.current?.click()}
-          className="h-[42px] rounded-md px-5 text-[14.5px] font-semibold text-ink 2xl:h-12"
+          className="h-10 rounded-md px-5 text-sm font-semibold text-ink 2xl:h-12"
         >
           Elegir archivo
         </Button>

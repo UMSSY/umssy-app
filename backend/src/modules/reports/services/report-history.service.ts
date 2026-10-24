@@ -15,13 +15,13 @@ export class ReportHistoryService {
 
   async getReportHistory(
     userId: string,
-    { page, limit, reportType }: ReportHistoryQuery,
+    { page, limit, reportType, search }: ReportHistoryQuery,
   ): Promise<PaginatedResult<GeneratedReport>> {
     const { reports, total } = await this.generatedReportsRepository.findPage(
       userId,
       (page - 1) * limit,
       limit,
-      reportType,
+      { reportType, search },
     );
 
     return {
