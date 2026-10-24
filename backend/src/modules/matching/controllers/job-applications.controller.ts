@@ -19,7 +19,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
+import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { JobOfferUnavailableException } from '../exceptions/job-offer-unavailable.exception.js';
 import { JobApplicationsService } from '../services/job-applications.service.js';
 import type {
@@ -34,7 +36,8 @@ const jobOfferIdPipe = new ParseUUIDPipe({
 @ApiTags('job-applications')
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({ description: 'A valid access token is required' })
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('titulado', 'estudiante')
 @Controller('job-offers/:id/applications')
 export class JobApplicationsController {
   constructor(

@@ -22,6 +22,9 @@ const REQUEST: CreateJobOfferRequest = {
   languages: 'Español',
   locationUrl: 'https://maps.google.com/?q=x',
   skillIds: ['skill-1'],
+  requiredCareers: ['Ingeniería de Sistemas'],
+  minExperienceYears: 2,
+  otherRequirements: ['Carta de motivación'],
 };
 
 const RECORD: JobOfferRecord = {
@@ -91,9 +94,29 @@ describe('JobOffersService', () => {
         salaryRange: 'Bs 6.500 - 8.000',
         languages: 'Español',
         locationUrl: 'https://maps.google.com/?q=x',
+        requiredCareers: ['Ingeniería de Sistemas'],
+        minExperienceYears: 2,
+        otherRequirements: ['Carta de motivación'],
         skillIds: ['skill-1'],
       });
       expect(result).toEqual({ id: 'offer-1', createdAt: CREATED_AT.toISOString() });
+    });
+
+    it('guarda los requisitos vacíos y sin años mínimos cuando la vacante no los pide', async () => {
+      await service.create('company-1', {
+        ...REQUEST,
+        requiredCareers: [],
+        minExperienceYears: undefined,
+        otherRequirements: [],
+      });
+
+      expect(repository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requiredCareers: [],
+          minExperienceYears: null,
+          otherRequirements: [],
+        }),
+      );
     });
 
     it('valida las tecnologías antes de guardar', async () => {

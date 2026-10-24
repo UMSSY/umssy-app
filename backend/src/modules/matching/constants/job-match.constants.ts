@@ -5,6 +5,10 @@ export const JOB_MATCH_SELECT = {
   id: true,
   title: true,
   description: true,
+  locationUrl: true,
+  requiredCareers: true,
+  minExperienceYears: true,
+  otherRequirements: true,
   company: { select: { title: true } },
   modality: { select: { title: true } },
   skills: {

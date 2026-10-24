@@ -82,7 +82,7 @@ describe("JobMatchDetailView: faltantes (T4.3)", () => {
     expect(await screen.findByText("Kubernetes")).toBeInTheDocument();
     expect(screen.queryByText(NO_PENDING)).not.toBeInTheDocument();
 
-    const academic = getGroup("Académicos");
+    const academic = getGroup("Académicos y experiencia");
     expect(academic.getByText("Ingeniería de Sistemas")).toBeInTheDocument();
     expect(academic.getByText("Falta")).toBeInTheDocument();
 

@@ -74,6 +74,9 @@ describe('JobOffersRepository', () => {
       salaryRange: 'Bs 5.000',
       languages: 'Español',
       locationUrl: 'https://goo.gl/maps/a',
+      requiredCareers: [],
+      minExperienceYears: null,
+      otherRequirements: [],
       skillIds: ['skill-1', 'skill-2'],
     });
 
