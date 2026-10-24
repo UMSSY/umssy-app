@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, within } from "@testing-library/react";
 import { WeekGrid } from "./week-grid";
 import type { AvailabilityBlock } from "../../types/availability-block.types";
 import type { WeekRange } from "@/shared/types/week-range.types";
@@ -24,7 +24,7 @@ function makeBlock(overrides: Partial<AvailabilityBlock>): AvailabilityBlock {
 
 const blocks: AvailabilityBlock[] = [
   makeBlock({ id: "1", startAt: "2026-10-06T22:00:00.000Z", endAt: "2026-10-06T23:00:00.000Z", state: "free" }), // martes 18:00 Bolivia
-  makeBlock({ id: "2", startAt: "2026-10-07T23:00:00.000Z", endAt: "2026-10-08T00:00:00.000Z", state: "pending" }), // miércoles 19:00 Bolivia
+  makeBlock({ id: "2", startAt: "2026-10-07T23:00:00.000Z", endAt: "2026-10-08T00:00:00.000Z", state: "confirmed" }), // miércoles 19:00 Bolivia
   makeBlock({ id: "3", startAt: "2026-10-05T21:00:00.000Z", endAt: "2026-10-05T22:30:00.000Z", state: "confirmed" }), // lunes 17:00 Bolivia
 ];
 
@@ -33,11 +33,15 @@ describe("WeekGrid", () => {
     cleanup();
   });
 
-  it("muestra la leyenda con los 3 estados", () => {
+  it("muestra la leyenda solo con los estados libre y cita confirmada", () => {
     render(<WeekGrid blocks={[]} weekRange={WEEK_RANGE} variant="public" />);
-    expect(screen.getByText("Libre")).toBeInTheDocument();
+    const legend = screen.getByRole("list", { name: "Leyenda" });
+    expect(within(legend).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "Libre",
+      "Cita confirmada",
+    ]);
     expect(screen.queryByText("Solicitud pendiente")).not.toBeInTheDocument();
-    expect(screen.getByText("Cita confirmada")).toBeInTheDocument();
+    expect(legend.querySelector(".border-dashed")).toBeNull();
   });
 
   it("muestra el número del día en la cabecera de cada columna", () => {
@@ -46,10 +50,10 @@ describe("WeekGrid", () => {
     expect(screen.getByRole("heading", { name: "DOM 11" })).toBeInTheDocument();
   });
 
-  it("muestra Pendiente y Confirmada en los bloques con cita", () => {
+  it("muestra Confirmada en los bloques con cita", () => {
     render(<WeekGrid blocks={blocks} weekRange={WEEK_RANGE} variant="owner" />);
-    expect(screen.getByRole("button", { name: /^pendiente,/ })).toHaveTextContent("Pendiente");
-    expect(screen.getByRole("button", { name: /^confirmada,/ })).toHaveTextContent("Confirmada");
+    expect(screen.getByRole("button", { name: /^confirmada, 17:00/ })).toHaveTextContent("Confirmada");
+    expect(screen.getByRole("button", { name: /^confirmada, 19:00/ })).toHaveTextContent("Confirmada");
   });
 
   it("en variant selectable, muestra la hora en los bloques libres y solo la leyenda del titulado", () => {
@@ -107,7 +111,7 @@ describe("WeekGrid", () => {
     expect(other).not.toHaveClass("ring-accent");
   });
 
-  it("en variant selectable, un bloque pendiente o confirmado está deshabilitado y no dispara el callback", () => {
+  it("en variant selectable, un bloque confirmado está deshabilitado y no dispara el callback", () => {
     const onSelectBlock = vi.fn();
     render(
       <WeekGrid
@@ -118,11 +122,11 @@ describe("WeekGrid", () => {
       />
     );
 
-    const pendingButton = screen.getByRole("button", {
-      name: /pendiente, 19:00 a 20:00/,
+    const confirmedButton = screen.getByRole("button", {
+      name: /confirmada, 19:00 a 20:00/,
     });
-    expect(pendingButton).toBeDisabled();
-    fireEvent.click(pendingButton);
+    expect(confirmedButton).toBeDisabled();
+    fireEvent.click(confirmedButton);
     expect(onSelectBlock).not.toHaveBeenCalled();
   });
 

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { toBoliviaTime } from "@/shared/utils/date-time";
 import { cn } from "cn";
+import { BLOCKED_DATE_TEXT } from "../../constants/blocked-date.constants";
 import {
   BLOCK_STATE_TEXT,
   DAY_LABELS,
@@ -93,7 +94,7 @@ export function WeekGrid({
             <section key={dayIndex} className={cn("border-l border-border", blockedDate && "bg-muted")}>
               <h3 aria-label={`${DAY_LABELS[dayIndex]} ${Number(dayDates[dayIndex].slice(8))}`} className="flex h-10 items-center gap-1.5 border-b border-border px-2">
                 {variant === "owner" && onSelectDate ? (
-                  <Button type="button" variant="ghost" className="h-auto w-full px-0 text-xs" onClick={() => onSelectDate(dayDates[dayIndex])} aria-label={`Seleccionar fecha: ${formatDayAndMonth(dayDates[dayIndex])}`}>
+                  <Button type="button" variant="ghost" className="h-auto w-full px-0 text-xs" onClick={() => onSelectDate(dayDates[dayIndex])} aria-label={`${BLOCKED_DATE_TEXT.selectDate}: ${formatDayAndMonth(dayDates[dayIndex])}`}>
                     {DAY_LABELS[dayIndex]} {Number(dayDates[dayIndex].slice(8))}
                   </Button>
                 ) : <><span className="text-xs font-semibold text-muted-foreground">
@@ -114,9 +115,9 @@ export function WeekGrid({
 
                 {blockedDate ? (
                   <div className="relative space-y-2 p-2 text-xs">
-                    <p className="font-semibold">Fecha bloqueada</p>
+                    <p className="font-semibold">{BLOCKED_DATE_TEXT.blockedDay}</p>
                     {blockedDate.reason && <p className="wrap-anywhere">{blockedDate.reason}</p>}
-                    {variant === "owner" && onSelectDate && <Button type="button" variant="outline" size="sm" className="h-auto w-full whitespace-normal" onClick={() => onSelectDate(dayDates[dayIndex])}>Desbloquear fecha</Button>}
+                    {variant === "owner" && onSelectDate && <Button type="button" variant="outline" size="sm" className="h-auto w-full whitespace-normal" onClick={() => onSelectDate(dayDates[dayIndex])}>{BLOCKED_DATE_TEXT.unblockTitle}</Button>}
                   </div>
                 ) : <ul>
                   {dayBlocks.map((block) => {
@@ -186,23 +187,22 @@ export function WeekGrid({
           />
           {variant === "selectable" ? WEEK_GRID_LEGEND.freeSlot : WEEK_GRID_LEGEND.free}
         </li>
-        {variant !== "selectable" && (
-          <>
-            <li className="flex items-center gap-2">
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "inline-block h-3 w-4 rounded-sm",
-                  STATE_BUTTON_CLASSES.pending,
-                )}
-              />
-              {WEEK_GRID_LEGEND.pending}
-            </li>
-            <li className="flex items-center gap-2">
-              <span aria-hidden="true" className={cn("inline-block h-3 w-4 rounded-sm border", STATE_BUTTON_CLASSES.confirmed)} />
-              {WEEK_GRID_LEGEND.confirmed}
-            </li>
-          </>
+        {variant === "selectable" ? (
+          <li className="flex items-center gap-2">
+            <span
+              aria-hidden="true"
+              className={cn("inline-block h-3 w-4 rounded-sm", SELECTED_BLOCK_CLASSES)}
+            />
+            {SELECTED_LEGEND_LABEL}
+          </li>
+        ) : (
+          <li className="flex items-center gap-2">
+            <span
+              aria-hidden="true"
+              className={cn("inline-block h-3 w-4 rounded-sm border", STATE_BUTTON_CLASSES.confirmed)}
+            />
+            {WEEK_GRID_LEGEND.confirmed}
+          </li>
         )}
         {variant === "owner" && onSelectDate && (
           <li className="flex items-center gap-2">
@@ -210,16 +210,7 @@ export function WeekGrid({
               aria-hidden="true"
               className="inline-block h-3 w-4 rounded-sm border border-border bg-muted"
             />
-            Fecha bloqueada
-          </li>
-        )}
-        {variant === "selectable" && (
-          <li className="flex items-center gap-2">
-            <span
-              aria-hidden="true"
-              className={cn("inline-block h-3 w-4 rounded-sm", SELECTED_BLOCK_CLASSES)}
-            />
-            {SELECTED_LEGEND_LABEL}
+            {BLOCKED_DATE_TEXT.blockedDay}
           </li>
         )}
       </ul>

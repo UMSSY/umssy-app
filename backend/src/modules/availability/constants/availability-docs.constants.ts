@@ -6,7 +6,7 @@ export const FIND_MY_BLOCKS_DOCS = {
 
 export const FIND_MENTOR_FREE_BLOCKS_DOCS = {
   summary:
-    'Lista los bloques libres de un mentor dentro de un rango de hasta 7 días: sin bloques pasados ni con cita pendiente o confirmada',
+    'Lista los bloques libres de un mentor dentro de un rango de hasta 7 días: sin bloques pasados ni con cita confirmada',
   idDescription: 'Identificador (UUID) del mentor',
   fromDescription: FIND_MY_BLOCKS_DOCS.fromDescription,
   toDescription: FIND_MY_BLOCKS_DOCS.toDescription,
@@ -20,7 +20,7 @@ export const DELETE_BLOCK_DOCS = {
 } as const;
 
 export const UPDATE_BLOCK_DOCS = {
-  summary: 'Edita un bloque de disponibilidad propio que no tenga citas pendientes o confirmadas',
+  summary: 'Edita un bloque de disponibilidad propio que no tenga citas confirmadas',
   idDescription: 'ID del bloque de disponibilidad a editar',
 } as const;
 
