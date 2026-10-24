@@ -1,3 +1,13 @@
+import { MAX_REPEAT_WEEKS } from './create-block.constants.js';
+
+export const CREATE_BLOCK_DOCS = {
+  summary: 'Crea un bloque de disponibilidad o una serie semanal del mentor en sesión',
+  description: `repeatWeekly=true requiere repeatUntil (YYYY-MM-DD), inclusivo entre la fecha del bloque en Bolivia y ${MAX_REPEAT_WEEKS} semanas después (hasta ${MAX_REPEAT_WEEKS + 1} ocurrencias). Conserva horario y duración; omite solapamientos y fechas bloqueadas. Sin repetición conserva la respuesta individual. Editar o eliminar afecta solo al bloque seleccionado.`,
+  createdResponse:
+    'Bloque individual o resultado de repetición { created: number, skipped: string[] } dentro de data. Las fechas omitidas usan YYYY-MM-DD en Bolivia; incluso si todas se omiten responde 201.',
+  badRequestResponse: `Horario inválido, repeatUntil inválido, ausente al repetir o fuera del rango de ${MAX_REPEAT_WEEKS} semanas, o repeatUntil sin repeatWeekly=true.`,
+} as const;
+
 export const FIND_MY_BLOCKS_DOCS = {
   summary: 'Lista los bloques de disponibilidad del mentor en sesión dentro de un rango de hasta 7 días',
   fromDescription: 'Inicio del rango en ISO 8601 UTC (por ejemplo, lunes 00:00 de Bolivia = 04:00Z)',

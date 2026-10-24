@@ -17,6 +17,7 @@ import type { AuthenticatedUser } from '../../../common/types/authenticated-user
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import {
+  CREATE_BLOCK_DOCS,
   DELETE_BLOCK_DOCS,
   FIND_MY_BLOCKS_DOCS,
   UPDATE_BLOCK_DOCS,
@@ -38,12 +39,9 @@ export class AvailabilityController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
-  @ApiOperation({
-    summary: 'Crea un bloque de disponibilidad o una serie semanal del mentor en sesión',
-    description: 'repeatWeekly=true requiere repeatUntil (YYYY-MM-DD), inclusivo entre la fecha del bloque en Bolivia y 12 semanas después (hasta 13 ocurrencias). Conserva horario y duración; omite solapamientos y fechas bloqueadas. Sin repetición conserva la respuesta individual. Editar o eliminar afecta solo al bloque seleccionado.',
-  })
-  @ApiCreatedResponse({ description: 'Bloque individual o resultado de repetición { created: number, skipped: string[] } dentro de data. Las fechas omitidas usan YYYY-MM-DD en Bolivia; incluso si todas se omiten responde 201.' })
-  @ApiBadRequestResponse({ description: 'Horario inválido, repeatUntil inválido, ausente al repetir o fuera del rango de 12 semanas, o repeatUntil sin repeatWeekly=true.' })
+  @ApiOperation({ summary: CREATE_BLOCK_DOCS.summary, description: CREATE_BLOCK_DOCS.description })
+  @ApiCreatedResponse({ description: CREATE_BLOCK_DOCS.createdResponse })
+  @ApiBadRequestResponse({ description: CREATE_BLOCK_DOCS.badRequestResponse })
   create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() body: CreateBlockDto,
