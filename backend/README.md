@@ -136,4 +136,3 @@ Seeds are idempotent and run in dependency order, with one transaction per modul
 - [NestJS Documentation](https://docs.nestjs.com?utm_source=gemini) — Learn more about the framework.
 - [NestJS Courses](https://courses.nestjs.com/?utm_source=gemini) — Official video courses for hands-on experience.
 - [Prisma v7 Documentation](https://www.prisma.io/docs/orm/v7?utm_source=gemini) — Official ORM documentation.
-
