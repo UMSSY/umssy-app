@@ -19,10 +19,9 @@ export function WorkExperienceListCard({
 
   return (
     <div className="space-y-6">
-      {/* Cabecera de la sección con el botón de añadir experiencia */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold wrap-anywhere text-slate-900">Experiencia laboral</h3>
+          <h3 className="text-lg font-semibold text-slate-900 wrap-anywhere">Experiencia laboral</h3>
           <p className="text-sm text-slate-600">Añade tu trayectoria y proyectos profesionales.</p>
         </div>
         {onAdd && (
@@ -33,7 +32,7 @@ export function WorkExperienceListCard({
       </div>
 
       {safeExperiences.length === 0 ? (
-        <section className="text-sm text-slate-600 italic">Aún no registraste experiencia laboral.</section>
+        <section className="text-sm italic text-slate-600">Aún no registraste experiencia laboral.</section>
       ) : (
         <div className="relative ml-2 space-y-8 border-l border-slate-300 pl-6">
           {safeExperiences.map((experience, index) => {
@@ -58,7 +57,7 @@ export function WorkExperienceListCard({
 
             return (
               <div key={experience.id ?? index} className="group relative">
-                <span className="absolute top-1.5 -left-[31px] size-3 rounded-full border-2 border-slate-400 bg-white" />
+                <span className="absolute -left-[31px] top-1.5 size-3 rounded-full border-2 border-slate-400 bg-white" />
 
                 <div className="flex items-start justify-between">
                   <div>
@@ -72,19 +71,16 @@ export function WorkExperienceListCard({
                       variant="outline"
                       size="sm"
                       onClick={() => onEdit(experience)}
-                      aria-label="Editar experiencia"
+                      aria-label={`Editar ${experience.position}`}
                       className="gap-1.5"
                     >
-                      <svg className="size-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                      </svg>
                       Editar
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onDelete(experience.id)}
-                      aria-label="Eliminar experiencia"
+                      aria-label={`Eliminar ${experience.position}`}
                       className="text-red-600 hover:bg-red-50 hover:text-red-700"
                     >
                       Eliminar
@@ -93,10 +89,9 @@ export function WorkExperienceListCard({
                 </div>
 
                 {experience.description && (
-                  <p className="mt-3 text-sm whitespace-pre-line text-slate-900">{experience.description}</p>
+                  <p className="mt-3 text-sm text-slate-900 whitespace-pre-line">{experience.description}</p>
                 )}
 
-                {/* Chips de Habilidades Detectadas */}
                 {skillsList.length > 0 && (
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <span className="text-xs font-semibold text-slate-700">Habilidades:</span>
