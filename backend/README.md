@@ -136,3 +136,15 @@ Seeds are idempotent and run in dependency order, with one transaction per modul
 - [NestJS Documentation](https://docs.nestjs.com?utm_source=gemini) — Learn more about the framework.
 - [NestJS Courses](https://courses.nestjs.com/?utm_source=gemini) — Official video courses for hands-on experience.
 - [Prisma v7 Documentation](https://www.prisma.io/docs/orm/v7?utm_source=gemini) — Official ORM documentation.
+
+## Registration concurrency tests
+
+The registration endpoints live in `src/modules/event-registrations`. Their HTTP contract tests cover every registration error code. The PostgreSQL e2e suite additionally verifies the last seat, duplicate creation, concurrent cancellation and reactivation of the same row with a new QR token.
+
+Use a disposable local database with a name ending in `_test`. Apply the schema to that database, configure the `DB_*` variables in `.env.test` for it, and set `REGISTRATIONS_E2E_DATABASE` to the same database name before running `pnpm test:e2e`. The persistence suite rejects a nonlocal host or mismatched database name, creates its own fixtures and removes its own event and user records afterwards. Without `REGISTRATIONS_E2E_DATABASE`, only this opt-in persistence suite is skipped; the regular registration HTTP tests still run with `pnpm test`.
+
+Example, with `.env.test` already pointing to `registrations_test`:
+
+```bash
+REGISTRATIONS_E2E_DATABASE=registrations_test pnpm test:e2e
+```
