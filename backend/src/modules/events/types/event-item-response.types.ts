@@ -2,9 +2,6 @@ import type { EventCategoryResponse } from '../../event-categories/types/event-c
 
 export interface EventItemResponse {
   coverUrl?: string | null;
-  status?: string;
-  supportThreshold?: number | null;
-  votingDeadline?: string | null;
   id: string;
   title: string;
   description: string | null;
@@ -19,4 +16,12 @@ export interface EventItemResponse {
   modalityId: string | null;
   category: EventCategoryResponse;
   statusId: string;
+  status: string;
+  origin: string;
+  supportCount: number;
+  supportThreshold: number | null;
+  supportsRemaining: number | null;
+  progressPercent: number | null;
+  votingDeadline: string | null;
+  hasSupported: boolean;
 }
