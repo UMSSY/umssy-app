@@ -8,5 +8,6 @@ export interface CertificationFormProps {
     values: CreateCertificationDto,
     documentChange: CertificationDocumentChange,
   ) => Promise<string | null>;
+  onValuesChange?: () => void;
   onCancel: () => void;
 }

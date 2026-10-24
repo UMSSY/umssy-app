@@ -52,7 +52,7 @@ function ParticipationPreferencesCard({
         </div>
       </CardHeader>
 
-      <CardContent className="px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
+      <CardContent className="px-5 pt-4 pb-5 sm:px-6 sm:pb-6">
         <div className="flex flex-wrap gap-2">
           {items.map((item) => (
             <span
@@ -73,10 +73,10 @@ export function ParticipationOverview({
   orientations,
 }: ParticipationOverviewProps) {
   return (
-    <main className="min-h-full bg-surface-soft">
+    <main className="min-h-full bg-background">
       <div className="mx-auto max-w-7xl space-y-6">
         <div>
-          <PageHeading title="Mi participación como mentor" description="Gestiona tus áreas técnicas y tipos de orientación." />
+          <PageHeading title="Mi participación como mentor" description="Gestiona tus áreas técnicas y tipos de orientación." actions={<Link href="/mentor/availability" className={buttonVariants()}>Gestionar disponibilidad</Link>} />
         </div>
 
         <Card className="gap-0 overflow-visible rounded-lg border border-border bg-surface py-0 text-base shadow-none ring-0">
@@ -93,8 +93,8 @@ export function ParticipationOverview({
             </p>
           </CardHeader>
 
-          <CardContent className="px-5 pb-5 pt-3 sm:px-6 sm:pb-6">
-            <span className="inline-flex items-center gap-1 bg-transparent px-0 py-0 text-sm font-semibold text-ink-soft">
+          <CardContent className="px-5 pt-3 pb-5 sm:px-6 sm:pb-6">
+            <span className="inline-flex items-center gap-1 bg-transparent p-0 text-sm font-semibold text-ink-soft">
               <Check size={13} /> Activo
             </span>
           </CardContent>

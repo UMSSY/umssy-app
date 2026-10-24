@@ -9,7 +9,7 @@ export function ExportCsvButton({ onClick, isExporting = false }: ExportCsvButto
       onClick={onClick}
       disabled={isExporting}
       aria-busy={isExporting}
-      className="h-10 gap-2 rounded-md bg-accent px-4 text-sm font-semibold text-surface hover:bg-brand-hover"
+      className="h-10 gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
     >
       <FileText className="size-5" strokeWidth={1.5} aria-hidden="true" />
       {isExporting ? "Exportando..." : "Exportar CSV"}

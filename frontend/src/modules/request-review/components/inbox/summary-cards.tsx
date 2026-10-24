@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { InboxSummary } from "../../types/inbox-summary.types";
 import type { SummaryCardsProps } from "../../types/summary-cards-props.types";
 
-const CONTAINER_CLASS = "grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-border bg-border lg:grid-cols-4";
+const CONTAINER_CLASS = "grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border lg:grid-cols-4";
 const CELL_CLASS = "flex flex-col gap-1 bg-surface px-5 py-4";
 const TITLE_CLASS = "text-sm text-text-secondary";
 const VALUE_CLASS = "font-tight text-2xl font-bold leading-tight text-ink";
@@ -56,9 +56,9 @@ export function SummaryCards({ summary, isLoading, error, onRetry }: SummaryCard
 
   if (error || !summary) {
     return (
-      <div role="alert" className="flex flex-col gap-3 rounded-[10px] border border-border bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div role="alert" className="flex flex-col gap-3 rounded-lg border border-border bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-ink">{error ?? "No se pudo cargar el resumen de la bandeja."}</p>
-        <Button type="button" variant="outline" onClick={onRetry} className="h-[34px] rounded-lg border-border bg-surface px-4 text-[14px] font-semibold text-ink">
+        <Button type="button" variant="outline" onClick={onRetry} className="h-[34px] rounded-lg border-border bg-surface px-4 text-sm font-semibold text-ink">
           Reintentar
         </Button>
       </div>

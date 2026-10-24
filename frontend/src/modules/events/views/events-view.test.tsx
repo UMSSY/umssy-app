@@ -100,7 +100,7 @@ describe("EventsView", () => {
     } else if (method === "escape") {
       fireEvent.keyDown(document, { key: "Escape" });
     } else if (method === "heading") {
-      fireEvent.click(screen.getByRole("heading", { name: "Talleres disponibles" }));
+      fireEvent.click(screen.getByRole("heading", { name: "Talleres y eventos" }));
     } else if (method === "outside view") {
       fireEvent.click(document.body);
     } else if (method === "search click") {
@@ -139,9 +139,9 @@ describe("EventsView", () => {
     render(<EventsView />);
 
     expect(
-      screen.getByRole("heading", { name: /talleres disponibles/i }),
+      screen.getByRole("heading", { name: /talleres y eventos/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/1 talleres cargados/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 talleres disponibles/i)).toBeInTheDocument();
     expect(
       screen.getByRole("search", { name: /filtros de talleres/i }),
     ).toBeInTheDocument();

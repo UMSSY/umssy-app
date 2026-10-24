@@ -51,7 +51,7 @@ export function MentorProfileHeader({
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <h1 className="min-w-0 flex-1 basis-48 [overflow-wrap:anywhere] text-3xl font-extrabold text-ink">
+              <h1 className="min-w-0 flex-1 basis-48 text-3xl font-extrabold [overflow-wrap:anywhere] text-ink">
                 {mentor.fullName}
               </h1>
               <Badge
@@ -67,7 +67,7 @@ export function MentorProfileHeader({
             </div>
 
             {mentor.headline && (
-              <p className="mt-1 [overflow-wrap:anywhere] text-lg font-semibold text-text-secondary">
+              <p className="mt-1 text-lg font-semibold [overflow-wrap:anywhere] text-text-secondary">
                 {mentor.headline}
               </p>
             )}
@@ -102,7 +102,7 @@ export function MentorProfileHeader({
           <Button
             type="button"
             disabled
-            className="h-auto w-full shrink-0 gap-2 rounded-lg border-0 bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:brightness-90 active:translate-y-0 sm:px-6 sm:text-base xl:w-auto"
+            className="h-auto w-full shrink-0 gap-2 rounded-lg border-0 bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-90 active:translate-y-0 sm:px-6 sm:text-base xl:w-auto"
           >
             <UserPlus className="size-5" />
             Solicitar mentoría
