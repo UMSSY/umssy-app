@@ -7,17 +7,19 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExportSuccessToast } from "@/modules/reports/components/export-success-toast";
+import { ExportSuccessToast } from "@/modules/reports";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { downloadFile } from "@/shared/utils/download-file";
 import { SurveyQuestionResultCard } from "../components/survey-question-result-card";
+import {
+  SURVEY_PDF_FEEDBACK_DURATION_MS,
+  SURVEY_STATISTICS_QUESTION_SKELETONS,
+  SURVEY_STATISTICS_SUMMARY_SKELETONS,
+} from "../constants/survey-statistics.constants";
 import { useSurveyStatistics } from "../hooks/use-survey-statistics";
 import { surveysService } from "../services/surveys.service";
+import type { SurveyAnalyticsViewProps } from "../types/survey-component-props.types";
 import { formatIsoDisplayDate } from "../utils/survey-dates";
-
-interface SurveyAnalyticsViewProps {
-  id: string;
-}
 
 export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
   const { statistics, isLoading, hasError, refetch } = useSurveyStatistics(id);
@@ -26,7 +28,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
 
   useEffect(() => {
     if (!successMessage) return;
-    const timer = setTimeout(() => setSuccessMessage(undefined), 4000);
+    const timer = setTimeout(() => setSuccessMessage(undefined), SURVEY_PDF_FEEDBACK_DURATION_MS);
     return () => clearTimeout(timer);
   }, [successMessage]);
 
@@ -39,7 +41,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
       setSuccessMessage("PDF generado correctamente");
     } catch {
       toast.error("No se pudo generar el reporte en PDF. Inténtalo de nuevo.", {
-        duration: 4000,
+        duration: SURVEY_PDF_FEEDBACK_DURATION_MS,
         closeButton: true,
         richColors: true,
       });
@@ -53,13 +55,14 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
       <WorkspacePage title="Cargando métricas..." description="Obteniendo resultados de la encuesta...">
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
+            {Array.from({ length: SURVEY_STATISTICS_SUMMARY_SKELETONS }).map((_, i) => (
               <Skeleton key={i} className="h-24 rounded-xl" />
             ))}
           </div>
           <div className="flex flex-col gap-4">
-            <Skeleton className="h-48 rounded-xl" />
-            <Skeleton className="h-48 rounded-xl" />
+            {Array.from({ length: SURVEY_STATISTICS_QUESTION_SKELETONS }).map((_, i) => (
+              <Skeleton key={i} className="h-48 rounded-xl" />
+            ))}
           </div>
         </div>
       </WorkspacePage>
@@ -75,7 +78,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
             href="/backoffice/surveys/statistics"
             className={buttonVariants({ variant: "outline", className: "mt-4 gap-2 text-xs" })}
           >
-            <ArrowLeft className="size-4" />
+            <ArrowLeft className="size-4" aria-hidden="true" />
             Volver a estadísticas
           </Link>
         </div>
@@ -101,12 +104,12 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
           >
             {isGeneratingPdf ? (
               <>
-                <Loader2 className="size-3.5 animate-spin" />
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
                 Generando PDF...
               </>
             ) : (
               <>
-                <Download className="size-3.5" />
+                <Download className="size-3.5" aria-hidden="true" />
                 Generar PDF
               </>
             )}
@@ -118,7 +121,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
             onClick={() => void refetch()}
             className="cursor-pointer gap-1.5 text-xs text-ink-soft hover:text-ink"
           >
-            <RefreshCw className="size-3.5" />
+            <RefreshCw className="size-3.5" aria-hidden="true" />
             Actualizar
           </Button>
         </div>
@@ -140,11 +143,10 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
           </Link>
         </div>
 
-        {/* Resumen de métricas superiores */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 shadow-xs">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-interaction text-accent">
-              <Users className="size-5" />
+              <Users className="size-5" aria-hidden="true" />
             </div>
             <div>
               <p className="text-xs font-medium text-text-secondary">Respuestas Recibidas</p>
@@ -154,7 +156,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
 
           <div className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 shadow-xs">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-surface-soft text-text-secondary">
-              <FileText className="size-5" />
+              <FileText className="size-5" aria-hidden="true" />
             </div>
             <div>
               <p className="text-xs font-medium text-text-secondary">Preguntas Formuladas</p>
@@ -164,7 +166,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
 
           <div className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 shadow-xs">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-surface-soft text-text-secondary">
-              <CheckCircle2 className="size-5 text-accent" />
+              <CheckCircle2 className="size-5 text-accent" aria-hidden="true" />
             </div>
             <div>
               <p className="text-xs font-medium text-text-secondary">Estado de Encuesta</p>
@@ -178,7 +180,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
 
           <div className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 shadow-xs">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-surface-soft text-text-secondary">
-              <Clock className="size-5" />
+              <Clock className="size-5" aria-hidden="true" />
             </div>
             <div>
               <p className="text-xs font-medium text-text-secondary">Vigencia</p>
@@ -191,11 +193,10 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
           </div>
         </div>
 
-        {/* Sección de desglose por pregunta */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
-              <BarChart3 className="size-5 text-primary" />
+              <BarChart3 className="size-5 text-primary" aria-hidden="true" />
               Resultados por pregunta
             </h2>
             <span className="text-xs text-text-secondary">
@@ -205,7 +206,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
 
           {statistics.totalResponses === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-surface p-12 text-center text-text-secondary">
-              <BarChart3 className="mb-2 size-10 stroke-[1.5] text-text-secondary/60" />
+              <BarChart3 className="mb-2 size-10 stroke-[1.5] text-text-secondary/60" aria-hidden="true" />
               <p className="font-medium text-ink">Esta encuesta aún no ha recibido respuestas</p>
               <p className="mt-1 text-xs text-text-secondary">
                 Cuando los titulados completen la encuesta, aquí se graficarán los porcentajes de cada opción.

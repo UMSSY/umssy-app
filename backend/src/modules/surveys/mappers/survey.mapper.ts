@@ -2,13 +2,19 @@ import { Injectable } from '@nestjs/common';
 import type { CreateSurveyRequest } from '../requests/create-survey.schema.js';
 import type { CareerResponse } from '../responses/career.response.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
+import type {
+  SurveyQuestionStatisticResponse,
+  SurveyStatisticsResponse,
+} from '../responses/survey-statistics.response.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
 import type { CreateSurveyData } from '../types/create-survey-data.type.js';
 import type {
   CareerRecord,
   SurveyCreatedRecord,
+  SurveyStatisticsRecord,
   SurveySummaryRecord,
 } from '../types/survey-record.type.js';
+import { calculatePercentage } from '../utils/calculate-percentage.js';
 import {
   SurveyQuestionType,
   SurveyStatus,
@@ -32,6 +38,14 @@ const QUESTION_TYPE_TO_RECORD: Record<
 > = {
   single_choice: SurveyQuestionType.SINGLE_CHOICE,
   multiple_choice: SurveyQuestionType.MULTIPLE_CHOICE,
+};
+
+const QUESTION_TYPE_TO_RESPONSE: Record<
+  SurveyQuestionType,
+  SurveyQuestionTypeValue
+> = {
+  [SurveyQuestionType.SINGLE_CHOICE]: 'single_choice',
+  [SurveyQuestionType.MULTIPLE_CHOICE]: 'multiple_choice',
 };
 
 @Injectable()
@@ -84,5 +98,47 @@ export class SurveyMapper {
 
   toCareerResponse(record: CareerRecord): CareerResponse {
     return { id: record.id, title: record.title };
+  }
+
+  toStatisticsResponse(record: SurveyStatisticsRecord): SurveyStatisticsResponse {
+    const totalResponses = record._count.responses;
+
+    return {
+      id: record.id,
+      title: record.title,
+      description: record.description,
+      status: STATUS_TO_RESPONSE[record.status],
+      academicPeriod: record.academicPeriod,
+      career: record.career ? this.toCareerResponse(record.career) : null,
+      opensAt: record.opensAt?.toISOString() ?? null,
+      closesAt: record.closesAt?.toISOString() ?? null,
+      totalResponses,
+      questions: record.questions.map((question) =>
+        this.toQuestionStatisticResponse(question, totalResponses),
+      ),
+    };
+  }
+
+  private toQuestionStatisticResponse(
+    question: SurveyStatisticsRecord['questions'][number],
+    totalResponses: number,
+  ): SurveyQuestionStatisticResponse {
+    const options = question.options.map((option) => ({
+      id: option.id,
+      label: option.label,
+      count: option._count.answers,
+      percentage: calculatePercentage(option._count.answers, totalResponses),
+    }));
+
+    return {
+      id: question.id,
+      position: question.position,
+      statement: question.statement,
+      type: QUESTION_TYPE_TO_RESPONSE[question.type],
+      isRequired: question.isRequired,
+      answeredCount: question._count.answers,
+      totalSelections: options.reduce((total, option) => total + option.count, 0),
+      options,
+    };
   }
 }

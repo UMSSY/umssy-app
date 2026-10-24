@@ -5,23 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
-import type { SurveySummary } from "../types/survey.types";
+import { SURVEY_STATISTICS_TABLE_COLUMNS as STATISTICS_TABLE_COLUMNS } from "../constants/survey-statistics.constants";
+import type { SurveyStatisticsTableProps } from "../types/survey-component-props.types";
 import { formatIsoDisplayDate } from "../utils/survey-dates";
-
-interface SurveyStatisticsTableProps {
-  surveys: SurveySummary[];
-  isLoading?: boolean;
-  hasError?: boolean;
-}
-
-const STATISTICS_TABLE_COLUMNS = [
-  "Encuesta",
-  "Carrera",
-  "Gestión",
-  "Vigencia",
-  "Respuestas",
-  "Acciones",
-] as const;
 
 export function SurveyStatisticsTable({ surveys, isLoading, hasError }: SurveyStatisticsTableProps) {
   const rows = surveys ?? [];

@@ -13,6 +13,7 @@ export const SURVEY_VALIDATION_MESSAGES = {
   DESCRIPTION_TOO_LONG: `La descripción no debe exceder los ${SURVEY_DESCRIPTION_MAX_LENGTH} caracteres`,
   INVALID_STATUS: 'El estado de la encuesta no es válido',
   INVALID_CAREER_ID: 'El identificador de la carrera no es válido',
+  INVALID_SURVEY_ID: 'El identificador de la encuesta no es válido',
   CAREER_REQUIRED: 'La carrera dirigida es obligatoria',
   INVALID_ACADEMIC_PERIOD: 'La gestión debe tener el formato I-2026 o II-2026',
   ACADEMIC_PERIOD_REQUIRED: 'La gestión es obligatoria',
@@ -62,3 +63,18 @@ export const SURVEY_SUMMARY_SELECT = {
 } as const;
 
 export const CAREER_SELECT = { id: true, title: true } as const;
+
+export const SURVEY_STATISTICS_INCLUDE = {
+  career: { select: CAREER_SELECT },
+  questions: {
+    orderBy: { position: 'asc' },
+    include: {
+      options: {
+        orderBy: { position: 'asc' },
+        include: { _count: { select: { answers: true } } },
+      },
+      _count: { select: { answers: true } },
+    },
+  },
+  _count: { select: { responses: true } },
+} as const;
