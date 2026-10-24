@@ -1,3 +1,4 @@
+import type { BlockedDate } from "./blocked-date.types";
 import type { WeekRange } from "@/shared/types/week-range.types";
 import type { AvailabilityBlock } from "./availability-block.types";
 import type { WeekGridVariant } from "./week-grid-variant.types";
@@ -8,6 +9,8 @@ export interface WeekGridProps {
   variant: WeekGridVariant;
   startHour?: number;
   endHour?: number;
+  blockedDates?: BlockedDate[];
+  onSelectDate?: (date: string) => void;
   selectedBlockId?: string;
   onSelectBlock?: (block: AvailabilityBlock) => void;
   onEditBlock?: (block: AvailabilityBlock) => void;
