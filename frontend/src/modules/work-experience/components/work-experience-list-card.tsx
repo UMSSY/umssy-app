@@ -72,19 +72,19 @@ export function WorkExperienceListCard({
                       variant="outline"
                       size="sm"
                       onClick={() => onEdit(experience)}
-                      aria-label={`Editar ${experience.position}`}
+                      aria-label="Editar experiencia"
                       className="gap-1.5"
                     >
-                      Editar {experience.position}
+                      Editar
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onDelete(experience.id)}
-                      aria-label={`Eliminar ${experience.position}`}
+                      aria-label="Eliminar experiencia"
                       className="text-red-600 hover:bg-red-50 hover:text-red-700"
                     >
-                      Eliminar {experience.position}
+                      Eliminar
                     </Button>
                   </div>
                 </div>
