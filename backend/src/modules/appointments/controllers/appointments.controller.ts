@@ -49,7 +49,7 @@ export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Post()
-  @Roles('titulado', 'estudiante')
+  @Roles('mentor', 'titulado', 'estudiante')
   @ApiOperation({
     summary: CREATE_APPOINTMENT_DOCS.summary,
     description: CREATE_APPOINTMENT_DOCS.description,
