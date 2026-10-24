@@ -1,5 +1,6 @@
 import { notifyManager } from "@tanstack/react-query";
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
 import type { ApiResponse, PaginatedData } from "@/shared/types/api-response.types";
@@ -80,6 +81,38 @@ describe("RejectedUsersReportView", () => {
     expect(screen.getByText("Título en provisión nacional")).toBeDefined();
     expect(screen.getByText("Mostrando 1-10 de 24 usuarios")).toBeDefined();
     expect(reportsService.getRejectedUsers).toHaveBeenCalledWith({ page: 1, limit: 10, search: "" }, expect.any(AbortSignal));
+  });
+
+  it("filtra por gestión, vuelve a la primera página y permite quitar el filtro", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-08T12:00:00-04:00"));
+    const user = userEvent.setup();
+    renderWithQuery(<RejectedUsersReportView />);
+    await waitFor(() => {
+      expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Página 2" }));
+    await waitFor(() => {
+      expect(screen.getByText("Mostrando 11-20 de 24 usuarios")).toBeDefined();
+    });
+
+    await user.click(screen.getByRole("button", { name: "Gestión" }));
+    await user.click(await screen.findByRole("menuitemradio", { name: "I-2026" }));
+
+    expect(await screen.findByRole("button", { name: "Gestión I-2026" })).toBeDefined();
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith(
+      { page: 1, limit: 10, period: "I-2026", search: "" },
+      expect.any(AbortSignal),
+    );
+
+    await user.click(screen.getByRole("button", { name: "Gestión I-2026" }));
+    await user.click(await screen.findByRole("menuitemradio", { name: "Todas" }));
+
+    expect(await screen.findByRole("button", { name: "Gestión" })).toBeDefined();
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith(
+      { page: 1, limit: 10, period: undefined, search: "" },
+      expect.any(AbortSignal),
+    );
   });
 
   it("navega a la última página", async () => {

@@ -13,15 +13,15 @@ export function ProfilePreviewCard({ fullName, photoUrl, presentation }: Profile
       <div className="flex items-center gap-3 border-b border-border pb-4">
         <ProfileAvatar label={getInitials(name)} size="sm" photoUrl={photoUrl} />
         <div className="min-w-0">
-          <p className="truncate text-[13px] font-semibold text-ink">{name}</p>
-          <p className="truncate text-[12px] text-text-secondary">
+          <p className="truncate text-sm font-semibold text-ink">{name}</p>
+          <p className="truncate text-xs text-text-secondary">
             {headline || "Tu titular profesional"}
           </p>
         </div>
       </div>
 
-      <p className="mt-5 text-[11px] font-semibold tracking-wide text-text-secondary uppercase">Acerca de</p>
-      <p className="mt-1 text-[13px] break-words whitespace-pre-line text-ink-soft">
+      <p className="mt-5 text-xs font-semibold tracking-wide text-text-secondary uppercase">Acerca de</p>
+      <p className="mt-1 text-sm break-words whitespace-pre-line text-ink-soft">
         {aboutMe || "Aquí se mostrará tu presentación una vez que la guardes."}
       </p>
     </SectionCard>

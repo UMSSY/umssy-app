@@ -133,3 +133,30 @@ describe("availabilityApi", () => {
     expect(patchSpy).toHaveBeenCalledWith("/mentors/a%2Fb/availability", { isAvailable: false })
   })
 })
+
+
+describe("blocked dates API", () => {
+  beforeEach(() => vi.restoreAllMocks())
+
+  it("consulta las fechas bloqueadas por rango", async () => {
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue(envelope([]))
+    expect(await availabilityApi.getBlockedDates({
+      startAt: "2026-10-26T04:00:00.000Z", endAt: "2026-11-02T03:59:59.999Z",
+    })).toEqual([])
+    expect(get).toHaveBeenCalledWith("/blocked-dates?from=2026-10-26T04%3A00%3A00.000Z&to=2026-11-02T03%3A59%3A59.999Z")
+  })
+
+  it.each([undefined, null, "", "Compromiso personal"])("conserva el día de Bolivia y admite motivo %s", async (reason) => {
+    const date = { id: "d1", mentorId: "m1", blockedOn: "2026-10-26", reason: reason || null, createdAt: "" }
+    const post = vi.spyOn(apiClient, "post").mockResolvedValue(envelope(date))
+    const input = reason === undefined ? { blockedOn: date.blockedOn } : { blockedOn: date.blockedOn, reason }
+    expect(await availabilityApi.blockDate(input)).toEqual(date)
+    expect(post).toHaveBeenCalledWith("/blocked-dates", input)
+  })
+
+  it("desbloquea por id y lo codifica", async () => {
+    const remove = vi.spyOn(apiClient, "delete").mockResolvedValue({})
+    await availabilityApi.unblockDate("a/b&c")
+    expect(remove).toHaveBeenCalledWith("/blocked-dates/a%2Fb%26c")
+  })
+})

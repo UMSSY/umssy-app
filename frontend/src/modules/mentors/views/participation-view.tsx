@@ -12,7 +12,7 @@ export function ParticipationView() {
 
   if (hasLoadError) {
     return (
-      <main className="min-h-full bg-surface-soft px-4 py-6 sm:py-8">
+      <main className="mx-auto w-full max-w-7xl">
         <Alert variant="destructive" className="mx-auto max-w-5xl">
           <p>No se pudo cargar tu participación como mentor.</p>
           <Button

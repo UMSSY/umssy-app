@@ -59,7 +59,6 @@ describe("capitalize", () => {
 describe("isBlockClickable", () => {
   it("el mentor puede tocar cualquier bloque y el titulado solo los libres", () => {
     expect(isBlockClickable("owner", "free")).toBe(true);
-    expect(isBlockClickable("owner", "pending")).toBe(true);
     expect(isBlockClickable("owner", "confirmed")).toBe(true);
     expect(isBlockClickable("selectable", "free")).toBe(true);
     expect(isBlockClickable("selectable", "confirmed")).toBe(false);

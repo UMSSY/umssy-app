@@ -26,6 +26,7 @@ const lastRequestedRange = () => vi.mocked(availabilityApi.getAvailabilityBlocks
 describe("MentorAvailabilityView", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    vi.spyOn(availabilityApi, "getBlockedDates").mockResolvedValue([])
     vi.mocked(toast.success).mockClear()
     vi.mocked(toast.error).mockClear()
     vi.useFakeTimers({ toFake: ["Date"], now: NOW })
@@ -61,7 +62,9 @@ describe("MentorAvailabilityView", () => {
 
     renderWithQuery(<MentorAvailabilityView />)
 
-    expect(screen.getByText("Mentorías")).toBeInTheDocument()
+    expect(
+      screen.getByText("Mentorías. Selecciona el encabezado de un día para bloquear o desbloquear la fecha."),
+    ).toBeInTheDocument()
     expect(screen.getByText("Hora de Bolivia (GMT-4)")).toBeInTheDocument()
     await waitFor(() => expect(availabilityApi.getAvailabilityBlocks).toHaveBeenCalled())
   })
@@ -186,13 +189,13 @@ describe("MentorAvailabilityView", () => {
 
   it("al tocar un bloque con cita abre el panel con las acciones deshabilitadas y el aviso", async () => {
     vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([
-      { ...blockAt("p", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z"), state: "pending" },
+      { ...blockAt("c", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z"), state: "confirmed" },
     ])
     const user = userEvent.setup()
 
     renderWithQuery(<MentorAvailabilityView />)
 
-    await user.click(await screen.findByRole("button", { name: "pendiente, 10:00 a 11:00" }))
+    await user.click(await screen.findByRole("button", { name: "confirmada, 10:00 a 11:00" }))
 
     expect(await screen.findByText("Editar bloque")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled()
@@ -331,10 +334,10 @@ describe("MentorAvailabilityView", () => {
       )
     })
 
-    it("muestra el detalle del backend en un toast cuando el guardado falla (409)", async () => {
+    it.each(["Ya tienes un bloque en ese horario", "Ese día está bloqueado"])("muestra el detail del backend al crear un bloque: %s", async (detail) => {
       vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
       vi.spyOn(availabilityApi, "createAvailabilityBlock").mockRejectedValue({
-        response: { data: { statusCode: 409, detail: "Ya tienes un bloque en ese horario", ok: false } },
+        response: { data: { statusCode: 409, detail, ok: false } },
       })
       const user = userEvent.setup()
 
@@ -342,7 +345,7 @@ describe("MentorAvailabilityView", () => {
       await fillAndSave(user)
 
       await waitFor(() =>
-        expect(toast.error).toHaveBeenCalledWith("Ya tienes un bloque en ese horario"),
+        expect(toast.error).toHaveBeenCalledWith(detail),
       )
     })
   })

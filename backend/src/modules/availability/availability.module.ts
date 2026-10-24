@@ -22,6 +22,6 @@ import { BlockedDatesService } from './services/blocked-dates.service.js';
     BlockedDatesRepository,
     BlockedDateMapper,
   ],
-  exports: [AvailabilityService, BlockedDatesService],
+  exports: [AvailabilityService, AvailabilityRepository, BlockedDatesService],
 })
 export class AvailabilityModule {}
