@@ -1,6 +1,6 @@
-import type { AcademicPeriod } from "@/modules/reports";
 import type { SurveyBuilderState } from "../types/survey-builder.types";
 import type { SurveyDetail } from "../types/survey.types";
+import { toSurveyAcademicPeriod } from "./survey-academic-periods";
 import { toDateValueFromIso } from "./survey-dates";
 
 export function toSurveyBuilderState(survey: SurveyDetail): SurveyBuilderState {
@@ -16,7 +16,7 @@ export function toSurveyBuilderState(survey: SurveyDetail): SurveyBuilderState {
     title: survey.title ?? "",
     description: survey.description ?? "",
     careerId: survey.career?.id ?? "",
-    academicPeriod: (survey.academicPeriod ?? "") as AcademicPeriod | "",
+    academicPeriod: toSurveyAcademicPeriod(survey.academicPeriod),
     opensAt: toDateValueFromIso(survey.opensAt),
     closesAt: toDateValueFromIso(survey.closesAt),
     questions,

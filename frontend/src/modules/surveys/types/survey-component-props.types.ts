@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import type { AcademicPeriod } from "@/modules/reports";
 import type { BuilderOption, BuilderQuestion, SurveyBuilderState, SurveyFieldName, SurveyHeaderValues } from "./survey-builder.types";
 import type { SurveyErrorMap, SurveyValidationError } from "./survey-validation.types";
 import type {
@@ -18,7 +17,7 @@ export interface SurveyHeaderCardProps {
   careers: Career[];
   isLoadingCareers: boolean;
   careersErrorMessage?: string;
-  academicPeriods: AcademicPeriod[];
+  academicPeriods: string[];
   minDate: Date;
   errors: SurveyErrorMap;
   onFieldChange: (field: SurveyFieldName, value: string) => void;
