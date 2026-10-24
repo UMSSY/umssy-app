@@ -26,6 +26,7 @@ const lastRequestedRange = () => vi.mocked(availabilityApi.getAvailabilityBlocks
 describe("MentorAvailabilityView", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    vi.spyOn(availabilityApi, "getBlockedDates").mockResolvedValue([])
     vi.mocked(toast.success).mockClear()
     vi.mocked(toast.error).mockClear()
     vi.useFakeTimers({ toFake: ["Date"], now: NOW })
@@ -61,7 +62,9 @@ describe("MentorAvailabilityView", () => {
 
     renderWithQuery(<MentorAvailabilityView />)
 
-    expect(screen.getByText("Mentorías")).toBeInTheDocument()
+    expect(
+      screen.getByText("Mentorías. Selecciona el encabezado de un día para bloquear o desbloquear la fecha."),
+    ).toBeInTheDocument()
     expect(screen.getByText("Hora de Bolivia (GMT-4)")).toBeInTheDocument()
     await waitFor(() => expect(availabilityApi.getAvailabilityBlocks).toHaveBeenCalled())
   })
@@ -331,10 +334,10 @@ describe("MentorAvailabilityView", () => {
       )
     })
 
-    it("muestra el detalle del backend en un toast cuando el guardado falla (409)", async () => {
+    it.each(["Ya tienes un bloque en ese horario", "Ese día está bloqueado"])("muestra el detail del backend al crear un bloque: %s", async (detail) => {
       vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
       vi.spyOn(availabilityApi, "createAvailabilityBlock").mockRejectedValue({
-        response: { data: { statusCode: 409, detail: "Ya tienes un bloque en ese horario", ok: false } },
+        response: { data: { statusCode: 409, detail, ok: false } },
       })
       const user = userEvent.setup()
 
@@ -342,7 +345,7 @@ describe("MentorAvailabilityView", () => {
       await fillAndSave(user)
 
       await waitFor(() =>
-        expect(toast.error).toHaveBeenCalledWith("Ya tienes un bloque en ese horario"),
+        expect(toast.error).toHaveBeenCalledWith(detail),
       )
     })
   })

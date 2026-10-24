@@ -1,3 +1,5 @@
+import type { BlockedDate } from "../types/blocked-date.types";
+import type { BlockDateInput } from "../types/block-date-input.types";
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { AvailabilityBlock } from "../types/availability-block.types";
@@ -11,6 +13,23 @@ function toISOString(value: string): string {
 }
 
 export const availabilityApi = {
+  getBlockedDates: async (range: WeekRange): Promise<BlockedDate[]> => {
+    const params = new URLSearchParams({ from: range.startAt, to: range.endAt });
+    const response = await apiClient.get<ApiResponse<BlockedDate[]>>(
+      `/blocked-dates?${params.toString()}`,
+    );
+    return response.data.data;
+  },
+
+  blockDate: async (input: BlockDateInput): Promise<BlockedDate> => {
+    const response = await apiClient.post<ApiResponse<BlockedDate>>("/blocked-dates", input);
+    return response.data.data;
+  },
+
+  unblockDate: async (id: string): Promise<void> => {
+    await apiClient.delete(`/blocked-dates/${encodeURIComponent(id)}`);
+  },
+
   getAvailabilityBlocks: async (filters?: AvailabilityFilters): Promise<AvailabilityBlock[]> => {
     const params = new URLSearchParams();
     if (filters?.from) params.append("from", toISOString(filters.from));

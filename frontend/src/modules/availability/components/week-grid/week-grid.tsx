@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { toBoliviaTime } from "@/shared/utils/date-time";
 import { cn } from "cn";
+import { BLOCKED_DATE_TEXT } from "../../constants/blocked-date.constants";
 import {
   BLOCK_STATE_TEXT,
   DAY_LABELS,
@@ -24,6 +25,7 @@ import {
   getWeekDayIndex,
   isBlockClickable,
 } from "../../utils/week-grid.utils";
+import { formatDayAndMonth } from "../../utils/calendar-date";
 import { WeekDayList } from "./week-day-list";
 
 export function WeekGrid({
@@ -32,6 +34,8 @@ export function WeekGrid({
   variant,
   startHour = WEEK_GRID_START_HOUR,
   endHour = WEEK_GRID_END_HOUR,
+  blockedDates = [],
+  onSelectDate,
   selectedBlockId,
   onSelectBlock,
   onEditBlock,
@@ -84,69 +88,82 @@ export function WeekGrid({
           </ol>
         </div>
 
-        {blocksByDay.map((dayBlocks, dayIndex) => (
-          <section key={dayIndex} className="border-l border-border">
-            <h3 className="flex h-10 items-center gap-1.5 border-b border-border px-2">
-              <span className="text-xs font-semibold text-muted-foreground">
-                {DAY_LABELS[dayIndex]}
-              </span>{" "}
-              <span className="text-base font-bold">{Number(dayDates[dayIndex].slice(8))}</span>
-            </h3>
+        {blocksByDay.map((dayBlocks, dayIndex) => {
+          const blockedDate = blockedDates.find((item) => item.blockedOn === dayDates[dayIndex]);
+          return (
+            <section key={dayIndex} className={cn("border-l border-border", blockedDate && "bg-muted")}>
+              <h3 aria-label={`${DAY_LABELS[dayIndex]} ${Number(dayDates[dayIndex].slice(8))}`} className="flex h-10 items-center gap-1.5 border-b border-border px-2">
+                {variant === "owner" && onSelectDate ? (
+                  <Button type="button" variant="ghost" className="h-auto w-full px-0 text-xs" onClick={() => onSelectDate(dayDates[dayIndex])} aria-label={`${BLOCKED_DATE_TEXT.selectDate}: ${formatDayAndMonth(dayDates[dayIndex])}`}>
+                    {DAY_LABELS[dayIndex]} {Number(dayDates[dayIndex].slice(8))}
+                  </Button>
+                ) : <><span className="text-xs font-semibold text-muted-foreground">
+                  {DAY_LABELS[dayIndex]}
+                </span>{" "}
+                <span className="text-base font-bold">{Number(dayDates[dayIndex].slice(8))}</span></>}
+              </h3>
 
-            <div className="relative" style={{ height: gridHeightPx }}>
-              {hours.map((h) => (
-                <div
-                  key={h}
-                  aria-hidden="true"
-                  className="absolute w-full border-t border-border"
-                  style={{ top: (h - startHour) * HOUR_HEIGHT_PX }}
-                />
-              ))}
+              <div className="relative" style={{ height: gridHeightPx }}>
+                {hours.map((h) => (
+                  <div
+                    key={h}
+                    aria-hidden="true"
+                    className="absolute w-full border-t border-border"
+                    style={{ top: (h - startHour) * HOUR_HEIGHT_PX }}
+                  />
+                ))}
 
-              <ul>
-                {dayBlocks.map((block) => {
-                  const { topPx, heightPx } = getBlockVerticalPosition(
-                    block.startAt,
-                    block.endAt,
-                    startHour,
-                    endHour
-                  );
-                  if (heightPx <= 0) return null;
+                {blockedDate ? (
+                  <div className="relative space-y-2 p-2 text-xs">
+                    <p className="font-semibold">{BLOCKED_DATE_TEXT.blockedDay}</p>
+                    {blockedDate.reason && <p className="wrap-anywhere">{blockedDate.reason}</p>}
+                    {variant === "owner" && onSelectDate && <Button type="button" variant="outline" size="sm" className="h-auto w-full whitespace-normal" onClick={() => onSelectDate(dayDates[dayIndex])}>{BLOCKED_DATE_TEXT.unblockTitle}</Button>}
+                  </div>
+                ) : <ul>
+                  {dayBlocks.map((block) => {
+                    const { topPx, heightPx } = getBlockVerticalPosition(
+                      block.startAt,
+                      block.endAt,
+                      startHour,
+                      endHour
+                    );
+                    if (heightPx <= 0) return null;
 
-                  const isSelected = block.id === selectedBlockId;
-                  const stateLabel = STATE_LABELS_ES[block.state];
-                  const startTime = toBoliviaTime(block.startAt).time;
-                  const timeRange = `${startTime} a ${toBoliviaTime(block.endAt).time}`;
+                    const isSelected = block.id === selectedBlockId;
+                    const stateLabel = STATE_LABELS_ES[block.state];
+                    const startTime = toBoliviaTime(block.startAt).time;
+                    const timeRange = `${startTime} a ${toBoliviaTime(block.endAt).time}`;
 
-                  return (
-                    <li
-                      key={block.id}
-                      className="absolute inset-x-1 py-0.5"
-                      style={{ top: topPx, height: heightPx }}
-                    >
-                      <Button
-                        type="button"
-                        variant={STATE_BUTTON_VARIANT[block.state]}
-                        disabled={!isBlockClickable(variant, block.state)}
-                        onClick={() => handleBlockClick(block)}
-                        className={cn(
-                          "size-full flex-col items-start justify-start gap-0.5 rounded-md px-2 py-1 text-xs font-semibold whitespace-normal",
-                          STATE_BUTTON_CLASSES[block.state],
-                          isSelected && SELECTED_BLOCK_CLASSES
-                        )}
-                        aria-pressed={isSelected || undefined}
-                        aria-label={`${stateLabel}, ${timeRange}`}
+                    return (
+                      <li
+                        key={block.id}
+                        className="absolute inset-x-1 py-0.5"
+                        style={{ top: topPx, height: heightPx }}
                       >
-                        {getBlockText(block)}
-                        <span className="text-xs font-normal">{variant === "selectable" ? "Disponible" : timeRange}</span>
-                      </Button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </section>
-        ))}
+                        <Button
+                          type="button"
+                          variant={STATE_BUTTON_VARIANT[block.state]}
+                          disabled={!isBlockClickable(variant, block.state)}
+                          onClick={() => handleBlockClick(block)}
+                          className={cn(
+                            "size-full flex-col items-start justify-start gap-0.5 rounded-md px-2 py-1 text-xs font-semibold whitespace-normal",
+                            STATE_BUTTON_CLASSES[block.state],
+                            isSelected && SELECTED_BLOCK_CLASSES
+                          )}
+                          aria-pressed={isSelected || undefined}
+                          aria-label={`${stateLabel}, ${timeRange}`}
+                        >
+                          {getBlockText(block)}
+                          <span className="text-xs font-normal">{variant === "selectable" ? "Disponible" : timeRange}</span>
+                        </Button>
+                      </li>
+                    );
+                  })}
+                </ul>}
+              </div>
+            </section>
+          );
+        })}
       </div>
 
       <WeekDayList
@@ -155,6 +172,8 @@ export function WeekGrid({
         variant={variant}
         selectedBlockId={selectedBlockId}
         onBlockClick={handleBlockClick}
+        blockedDates={blockedDates}
+        onSelectDate={onSelectDate}
       />
 
       <ul
@@ -183,6 +202,15 @@ export function WeekGrid({
               className={cn("inline-block h-3 w-4 rounded-sm border", STATE_BUTTON_CLASSES.confirmed)}
             />
             {WEEK_GRID_LEGEND.confirmed}
+          </li>
+        )}
+        {variant === "owner" && onSelectDate && (
+          <li className="flex items-center gap-2">
+            <span
+              aria-hidden="true"
+              className="inline-block h-3 w-4 rounded-sm border border-border bg-muted"
+            />
+            {BLOCKED_DATE_TEXT.blockedDay}
           </li>
         )}
       </ul>
