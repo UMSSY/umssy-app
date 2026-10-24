@@ -233,6 +233,13 @@ describe("LoginView", () => {
     expect(screen.getByRole("link", { name: "Solicitar acceso" })).toHaveAttribute("href", "/request-access");
   });
 
+  it("enlaza a la recuperación de contraseña", () => {
+    vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
+    render(<LoginView />);
+
+    expect(screen.getByRole("link", { name: "¿Olvidaste tu contraseña?" })).toHaveAttribute("href", "/forgot-password");
+  });
+
   it("muestra el error en una alerta accesible", () => {
     vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: "Correo o contraseña incorrectos" });
     render(<LoginView />);

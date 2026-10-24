@@ -410,6 +410,7 @@ export const ModelName = {
   UserRole: 'UserRole',
   Education: 'Education',
   WorkExperience: 'WorkExperience',
+  RadarArea: 'RadarArea',
   Skill: 'Skill',
   JobOfferSkill: 'JobOfferSkill',
   UserSkill: 'UserSkill',
@@ -443,7 +444,8 @@ export const ModelName = {
   Conversation: 'Conversation',
   ConversationParticipant: 'ConversationParticipant',
   Message: 'Message',
-  UserPresence: 'UserPresence'
+  UserPresence: 'UserPresence',
+  PasswordResetOtp: 'PasswordResetOtp'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -459,7 +461,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence" | "passwordResetOtp"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1422,6 +1424,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.WorkExperienceCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.WorkExperienceCountAggregateOutputType> | number
+        }
+      }
+    }
+    RadarArea: {
+      payload: Prisma.$RadarAreaPayload<ExtArgs>
+      fields: Prisma.RadarAreaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RadarAreaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAreaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RadarAreaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAreaPayload>
+        }
+        findFirst: {
+          args: Prisma.RadarAreaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAreaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RadarAreaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAreaPayload>
+        }
+        findMany: {
+          args: Prisma.RadarAreaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAreaPayload>[]
+        }
+        create: {
+          args: Prisma.RadarAreaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAreaPayload>
+        }
+        createMany: {
+          args: Prisma.RadarAreaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RadarAreaCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAreaPayload>[]
+        }
+        delete: {
+          args: Prisma.RadarAreaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAreaPayload>
+        }
+        update: {
+          args: Prisma.RadarAreaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAreaPayload>
+        }
+        deleteMany: {
+          args: Prisma.RadarAreaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RadarAreaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RadarAreaUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAreaPayload>[]
+        }
+        upsert: {
+          args: Prisma.RadarAreaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAreaPayload>
+        }
+        aggregate: {
+          args: Prisma.RadarAreaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRadarArea>
+        }
+        groupBy: {
+          args: Prisma.RadarAreaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarAreaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RadarAreaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarAreaCountAggregateOutputType> | number
         }
       }
     }
@@ -3941,6 +4017,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PasswordResetOtp: {
+      payload: Prisma.$PasswordResetOtpPayload<ExtArgs>
+      fields: Prisma.PasswordResetOtpFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PasswordResetOtpFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOtpPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PasswordResetOtpFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOtpPayload>
+        }
+        findFirst: {
+          args: Prisma.PasswordResetOtpFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOtpPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PasswordResetOtpFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOtpPayload>
+        }
+        findMany: {
+          args: Prisma.PasswordResetOtpFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOtpPayload>[]
+        }
+        create: {
+          args: Prisma.PasswordResetOtpCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOtpPayload>
+        }
+        createMany: {
+          args: Prisma.PasswordResetOtpCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PasswordResetOtpCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOtpPayload>[]
+        }
+        delete: {
+          args: Prisma.PasswordResetOtpDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOtpPayload>
+        }
+        update: {
+          args: Prisma.PasswordResetOtpUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOtpPayload>
+        }
+        deleteMany: {
+          args: Prisma.PasswordResetOtpDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PasswordResetOtpUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PasswordResetOtpUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOtpPayload>[]
+        }
+        upsert: {
+          args: Prisma.PasswordResetOtpUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PasswordResetOtpPayload>
+        }
+        aggregate: {
+          args: Prisma.PasswordResetOtpAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePasswordResetOtp>
+        }
+        groupBy: {
+          args: Prisma.PasswordResetOtpGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PasswordResetOtpGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PasswordResetOtpCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PasswordResetOtpCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -4143,10 +4293,22 @@ export const WorkExperienceScalarFieldEnum = {
 export type WorkExperienceScalarFieldEnum = (typeof WorkExperienceScalarFieldEnum)[keyof typeof WorkExperienceScalarFieldEnum]
 
 
+export const RadarAreaScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarAreaScalarFieldEnum = (typeof RadarAreaScalarFieldEnum)[keyof typeof RadarAreaScalarFieldEnum]
+
+
 export const SkillScalarFieldEnum = {
   id: 'id',
   name: 'name',
   isCustom: 'isCustom',
+  areaId: 'areaId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -4169,6 +4331,10 @@ export const UserSkillScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   skillId: 'skillId',
+  source: 'source',
+  verificationStatus: 'verificationStatus',
+  isHighRelevance: 'isHighRelevance',
+  evidenceRefs: 'evidenceRefs',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -4603,12 +4769,34 @@ export const UserPresenceScalarFieldEnum = {
 export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
 
 
+export const PasswordResetOtpScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  attempts: 'attempts',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PasswordResetOtpScalarFieldEnum = (typeof PasswordResetOtpScalarFieldEnum)[keyof typeof PasswordResetOtpScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -4625,6 +4813,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -4679,6 +4876,20 @@ export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Bytes[]'
  */
 export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -4873,6 +5084,7 @@ export type GlobalOmitConfig = {
   userRole?: Prisma.UserRoleOmit
   education?: Prisma.EducationOmit
   workExperience?: Prisma.WorkExperienceOmit
+  radarArea?: Prisma.RadarAreaOmit
   skill?: Prisma.SkillOmit
   jobOfferSkill?: Prisma.JobOfferSkillOmit
   userSkill?: Prisma.UserSkillOmit
@@ -4907,6 +5119,7 @@ export type GlobalOmitConfig = {
   conversationParticipant?: Prisma.ConversationParticipantOmit
   message?: Prisma.MessageOmit
   userPresence?: Prisma.UserPresenceOmit
+  passwordResetOtp?: Prisma.PasswordResetOtpOmit
 }
 
 /* Types for Logging */
