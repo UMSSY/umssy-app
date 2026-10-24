@@ -16,6 +16,10 @@ function buildRecord(): EventWithRelations {
     statusId: 'status-1',
     instructorName: null,
     modalityId: 'modality-1',
+    supportThreshold: null,
+    votingDeadline: null,
+    status: { title: 'Publicado' },
+    origin: { title: 'Institucional' },
     category: { id: 'cat-1', name: 'Tecnologia' },
     _count: { registrations: 3 },
   };
@@ -79,6 +83,7 @@ describe('EventsService', () => {
       statusId: 'status-uuid',
       isPublishedOnly: false,
       search: 'workshop',
+      userId: undefined,
       skip: 10,
       take: 5,
     });
@@ -106,6 +111,7 @@ describe('EventsService', () => {
       statusId: undefined,
       isPublishedOnly: true,
       search: 'Node',
+      userId: undefined,
       skip: 10,
       take: 10,
     });
@@ -134,6 +140,16 @@ describe('EventsService', () => {
     repositoryMock.findById.mockResolvedValue(null);
     await expect(service.findOne('missing')).rejects.toBeInstanceOf(
       EventNotFoundException,
+    );
+  });
+
+  it('passes the authenticated userId to the repository on list', async () => {
+    repositoryMock.findAndCount.mockResolvedValue({ items: [], total: 0 });
+
+    await service.findAll({ page: 1, limit: 10 }, 'user-1');
+
+    expect(repositoryMock.findAndCount).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'user-1' }),
     );
   });
 });
