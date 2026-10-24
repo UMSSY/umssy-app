@@ -3,6 +3,7 @@ import type { AvailabilityBlockState } from "../types/availability-block-state.t
 export const WEEK_GRID_START_HOUR = 7;
 export const WEEK_GRID_END_HOUR = 22;
 export const HOUR_HEIGHT_PX = 72;
+export const STICKY_GAP_PX = 16;
 export const DAY_LABELS = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"] as const;
 
 export const STATE_BUTTON_VARIANT: Record<AvailabilityBlockState, "outline" | "default"> = {

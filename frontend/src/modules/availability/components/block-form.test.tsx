@@ -64,17 +64,23 @@ describe("BlockForm", () => {
     expect(screen.getByRole("button", { name: /jueves, 8 de octubre de 2026/ })).toBeEnabled()
   })
 
-  it("ofrece horas de 07:00 a 22:00 cada 30 minutos en una lista compacta", async () => {
+  it("ofrece inicios de 07:00 a 21:30 y fines de 07:30 a 22:00 cada 30 minutos en una lista compacta", async () => {
     const { user } = renderForm()
 
     await user.click(screen.getByLabelText(/Hora de inicio/))
-    const options = (await screen.findAllByRole("option")).map((option) => option.textContent)
-
-    expect(options).toHaveLength(31)
-    expect(options[0]).toBe("07:00")
-    expect(options[1]).toBe("07:30")
-    expect(options.at(-1)).toBe("22:00")
+    const starts = (await screen.findAllByRole("option")).map((option) => option.textContent)
+    expect(starts).toHaveLength(30)
+    expect(starts[0]).toBe("07:00")
+    expect(starts[1]).toBe("07:30")
+    expect(starts.at(-1)).toBe("21:30")
     expect(screen.getByRole("listbox").closest('[data-slot="select-content"]')).toHaveClass("max-h-[min(200px,var(--available-height))]")
+    await user.keyboard("{Escape}")
+
+    await user.click(screen.getByLabelText(/Hora de fin/))
+    const ends = (await screen.findAllByRole("option")).map((option) => option.textContent)
+    expect(ends).toHaveLength(30)
+    expect(ends[0]).toBe("07:30")
+    expect(ends.at(-1)).toBe("22:00")
   })
 
   it("muestra los campos obligatorios sin llamar a onSubmit", async () => {
@@ -88,53 +94,57 @@ describe("BlockForm", () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
-  it("deshabilita las horas de fin iguales o anteriores a la de inicio", async () => {
+  it("no muestra las horas de fin iguales o anteriores a la de inicio", async () => {
     const { user } = renderForm()
 
     await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
     await selectTime(user, /Hora de inicio/, "20:00")
     await user.click(screen.getByLabelText(/Hora de fin/))
 
-    expect(await screen.findByRole("option", { name: "18:00" })).toHaveAttribute("aria-disabled", "true")
-    expect(screen.getByRole("option", { name: "20:00" })).toHaveAttribute("aria-disabled", "true")
-    expect(screen.getByRole("option", { name: "20:30" })).not.toHaveAttribute("aria-disabled", "true")
+    await screen.findAllByRole("option")
+    expect(screen.queryByRole("option", { name: "18:00" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: "20:00" })).not.toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "20:30" })).toBeInTheDocument()
   })
 
-  it("deshabilita las horas de inicio iguales o posteriores a la de fin", async () => {
+  it("no muestra las horas de inicio iguales o posteriores a la de fin", async () => {
     const { user } = renderForm()
 
     await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
     await selectTime(user, /Hora de fin/, "12:00")
     await user.click(screen.getByLabelText(/Hora de inicio/))
 
-    expect(await screen.findByRole("option", { name: "12:00" })).toHaveAttribute("aria-disabled", "true")
-    expect(screen.getByRole("option", { name: "15:00" })).toHaveAttribute("aria-disabled", "true")
-    expect(screen.getByRole("option", { name: "11:30" })).not.toHaveAttribute("aria-disabled", "true")
+    await screen.findAllByRole("option")
+    expect(screen.queryByRole("option", { name: "12:00" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: "15:00" })).not.toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "11:30" })).toBeInTheDocument()
   })
 
-  it("con la fecha de hoy deshabilita las horas de inicio y fin que ya pasaron", async () => {
+  it("con la fecha de hoy no muestra las horas de inicio y fin que ya pasaron", async () => {
     const { user } = renderForm()
 
     await user.click(screen.getByRole("button", { name: "Hoy, jueves, 8 de octubre de 2026" }))
     await user.click(screen.getByLabelText(/Hora de inicio/))
-    expect(await screen.findByRole("option", { name: "08:00" })).toHaveAttribute("aria-disabled", "true")
-    expect(screen.getByRole("option", { name: "10:00" })).toHaveAttribute("aria-disabled", "true")
-    expect(screen.getByRole("option", { name: "10:30" })).not.toHaveAttribute("aria-disabled", "true")
+    await screen.findAllByRole("option")
+    expect(screen.queryByRole("option", { name: "08:00" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: "10:00" })).not.toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "10:30" })).toBeInTheDocument()
     await user.keyboard("{Escape}")
 
     await user.click(screen.getByLabelText(/Hora de fin/))
-    expect(await screen.findByRole("option", { name: "09:30" })).toHaveAttribute("aria-disabled", "true")
-    expect(screen.getByRole("option", { name: "10:30" })).not.toHaveAttribute("aria-disabled", "true")
+    await screen.findAllByRole("option")
+    expect(screen.queryByRole("option", { name: "09:30" })).not.toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "10:30" })).toBeInTheDocument()
   })
 
-  it("en otra fecha no deshabilita las horas de la mañana", async () => {
+  it("en otra fecha muestra las horas de la mañana", async () => {
     const { user } = renderForm()
 
     await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
     await user.click(screen.getByLabelText(/Hora de inicio/))
 
-    expect(await screen.findByRole("option", { name: "07:00" })).not.toHaveAttribute("aria-disabled", "true")
-    expect(screen.getByRole("option", { name: "22:00" })).toHaveAttribute("aria-disabled", "true")
+    expect(await screen.findByRole("option", { name: "07:00" })).toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: "22:00" })).not.toBeInTheDocument()
   })
 
   it("limpia las horas elegidas si al cambiar a hoy ya pasaron", async () => {
@@ -179,6 +189,16 @@ describe("BlockForm", () => {
     await selectTime(user, /Hora de inicio/, "11:00")
 
     expect(screen.queryByText("La hora de inicio ya pasó")).not.toBeInTheDocument()
+  })
+
+  it("no deselecciona la fecha al volver a hacer clic sobre ella", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "15:00", "16:00")
+    await user.click(screen.getByRole("button", { name: /martes, 13 de octubre de 2026/ }))
+
+    expect(screen.getByLabelText(/Fecha/)).toHaveValue("Martes 13 de octubre de 2026")
+    expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("15:00")
   })
 
   it("muestra la fecha elegida en el campo Fecha", async () => {
