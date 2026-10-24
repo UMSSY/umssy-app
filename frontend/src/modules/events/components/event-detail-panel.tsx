@@ -30,7 +30,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
       aria-label={`Detalle de ${event.title}`}
       className="w-full min-w-0 self-start rounded-lg border border-border bg-surface "
     >
-      <WorkshopCover eventId={event.id} className="h-32 rounded-t-lg" />
+      <WorkshopCover eventId={event.id} coverUrl={event.coverUrl} className="h-32 rounded-t-lg" />
       <Card className="gap-0 space-y-5 rounded-none border-0 bg-transparent px-6 py-7 shadow-none lg:px-7">
         <header className="space-y-3">
           {onClose && (
@@ -47,6 +47,8 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
             {event.title}
           </h2>
         </header>
+
+        {event.status === 'voting' && <div className="space-y-1 rounded-lg border border-availability-border bg-availability p-3 text-sm"><p className="font-semibold text-availability-foreground">Propuesta en votación</p><p>Necesita {event.supportThreshold} apoyos.</p>{event.votingDeadline && <p className="text-xs text-text-secondary">Plazo: {new Date(event.votingDeadline).toLocaleString('es-BO')}</p>}</div>}
 
         <Button
           aria-describedby="event-registration-description"

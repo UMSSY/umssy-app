@@ -1,5 +1,5 @@
 import { EventRegistrationsMapper } from '../mappers/event-registrations.mapper.js';
-import type { MyRegistrationResponse } from '../types/event-registrations.types.js';
+import type { CreateEventRegistrationPayload, MyRegistrationResponse } from '../types/event-registrations.types.js';
 import { Injectable } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -24,6 +24,14 @@ export class EventRegistrationsService {
     private readonly prisma: PrismaService,
     private readonly eventsService: EventsService,
   ) {}
+
+  async createWithQrToken(payload: CreateEventRegistrationPayload) {
+    // Shared token persistence; callers enforce the rules of their registration flow.
+    return this.prisma.eventRegistration.create({
+      data: { ...payload, qrToken: randomBytes(32).toString('hex') },
+      select: { id: true, eventId: true, userId: true, statusId: true, qrToken: true },
+    });
+  }
 
   async create(eventId: string, userId: string): Promise<RegistrationResponse> {
     return this.transact(async (tx) => {

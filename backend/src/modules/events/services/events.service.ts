@@ -28,6 +28,7 @@ export class EventsService {
       categoryId,
       statusId,
       isPublishedOnly,
+      ...(payload.includeProposals && { includeProposals: true }),
       search,
       skip: offset,
       take: limit,
@@ -61,7 +62,7 @@ export class EventsService {
       ...(statusId !== undefined
         ? { statusId }
         : isPublishedOnly
-          ? { status: { title: PUBLISHED_STATUS_TITLE } }
+          ? { status: { title: payload.includeProposals ? { in: [PUBLISHED_STATUS_TITLE, 'En votación'] } : PUBLISHED_STATUS_TITLE } }
           : {}),
       ...(search !== undefined && {
         title: {
@@ -72,6 +73,10 @@ export class EventsService {
     };
 
     const select = {
+      coverMimeType: true,
+      status: { select: { title: true } },
+      supportThreshold: true,
+      votingDeadline: true,
       id: true,
       title: true,
       description: true,
@@ -126,6 +131,10 @@ export class EventsService {
     const event = await this.prisma.event.findUnique({
       where: { id },
       select: {
+        coverMimeType: true,
+        status: { select: { title: true } },
+        supportThreshold: true,
+        votingDeadline: true,
         id: true,
         title: true,
         description: true,
