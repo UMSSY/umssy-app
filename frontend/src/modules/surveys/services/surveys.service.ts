@@ -1,7 +1,14 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import { getFileNameFromDisposition } from "@/shared/utils/download-file";
-import type { Career, CreateSurveyPayload, CreatedSurvey, SurveyStatistics, SurveySummary } from "../types/survey.types";
+import type {
+  Career,
+  CreateSurveyPayload,
+  CreatedSurvey,
+  SurveyStatistics,
+  SurveySummary,
+} from "../types/survey.types";
+import type { SubmitSurveyPayload, SurveyToAnswer } from "../types/survey-answer.types";
 
 export const surveysService = {
   createSurvey: async (payload: CreateSurveyPayload): Promise<ApiResponse<CreatedSurvey>> => {
@@ -24,6 +31,22 @@ export const surveysService = {
     return data;
   },
 
+  getSurveyToAnswer: async (id: string): Promise<ApiResponse<SurveyToAnswer>> => {
+    const { data } = await apiClient.get<ApiResponse<SurveyToAnswer>>(`/surveys/${id}`);
+    return data;
+  },
+
+  submitAnswers: async (
+    id: string,
+    payload: SubmitSurveyPayload,
+  ): Promise<ApiResponse<{ success: boolean; message: string }>> => {
+    const { data } = await apiClient.post<ApiResponse<{ success: boolean; message: string }>>(
+      `/surveys/${id}/responses`,
+      payload,
+    );
+    return data;
+  },
+
   exportSurveyPdf: async (id: string): Promise<{ file: Blob; fileName: string }> => {
     const response = await apiClient.get<Blob>(`/surveys/${id}/export-pdf`, {
       responseType: "blob",
@@ -37,4 +60,5 @@ export const surveysService = {
     };
   },
 };
+
 

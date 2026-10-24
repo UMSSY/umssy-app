@@ -97,6 +97,7 @@ describe("SurveyNotificationsView", () => {
   });
 
   it("muestra el estado vacío cuando el servicio no devuelve encuestas", async () => {
+    mockSurveys([]);
     renderView();
 
     expect(await screen.findByRole("heading", { name: "No hay encuestas disponibles" })).toBeInTheDocument();

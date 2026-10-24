@@ -3,6 +3,7 @@ import { SURVEY_ERROR_MESSAGES } from '../constants/survey.constants.js';
 import {
   CareerNotFoundException,
   InvalidSurveyScheduleException,
+  SurveyNotFoundException,
   SurveyTitleAlreadyExistsException,
 } from '../exceptions/index.js';
 import { SurveyMapper } from '../mappers/survey.mapper.js';
@@ -43,10 +44,14 @@ function createRepositories() {
         createdAt: NOW,
       }),
       findAll: vi.fn(),
+      findNotificationsForUser: vi.fn().mockResolvedValue([]),
+      findByIdWithQuestions: vi.fn(),
+      submitResponse: vi.fn(),
     },
     careers: { exists: vi.fn().mockResolvedValue(true), findAll: vi.fn() },
   };
 }
+
 
 describe('SurveysService', () => {
   let repositories: ReturnType<typeof createRepositories>;
@@ -255,4 +260,68 @@ describe('SurveysService', () => {
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.fileName).toContain('reporte-encuesta-encuesta-ia');
   });
+
+  it('obtiene las notificaciones de encuestas delegando en el repositorio', async () => {
+    const mockNotifications = [
+      {
+        id: 's1',
+        title: 'Encuesta 1',
+        publishedAt: '2026-10-15T00:00:00.000Z',
+        status: 'pending' as const,
+      },
+    ];
+    const spy = repositories.surveys.findNotificationsForUser.mockResolvedValue(mockNotifications);
+
+    const result = await service.getNotificationsForUser('user-1');
+
+    expect(spy).toHaveBeenCalledWith('user-1');
+    expect(result).toBe(mockNotifications);
+  });
+
+  it('obtiene encuesta para responderla o lanza SurveyNotFoundException si no existe', async () => {
+    repositories.surveys.findByIdWithQuestions.mockResolvedValue(null);
+    await expect(service.getSurveyForAnswering('unknown', 'user-1')).rejects.toThrow(
+      SurveyNotFoundException,
+    );
+
+    const mockDetail = { id: 's1', title: 'Test', questions: [] };
+    repositories.surveys.findByIdWithQuestions.mockResolvedValue(mockDetail);
+    await expect(service.getSurveyForAnswering('s1', 'user-1')).resolves.toBe(mockDetail);
+  });
+
+  it('permite guardar respuestas válidas para una encuesta publicada', async () => {
+    const mockSurvey = {
+      id: 's1',
+      title: 'Test',
+      status: 'published',
+      isExpired: false,
+      hasAnswered: false,
+      questions: [
+        {
+          id: 'q1',
+          position: 1,
+          statement: 'P1',
+          type: 'single_choice',
+          isRequired: true,
+          options: [],
+        },
+      ],
+    };
+    repositories.surveys.findByIdWithQuestions.mockResolvedValue(mockSurvey);
+    repositories.surveys.submitResponse.mockResolvedValue(undefined);
+
+    const payload = {
+      answers: [{ questionId: 'q1', optionIds: ['opt1'] }],
+    };
+
+    const res = await service.submitResponse('s1', 'user-1', payload);
+    expect(res.success).toBe(true);
+    expect(repositories.surveys.submitResponse).toHaveBeenCalledWith(
+      's1',
+      'user-1',
+      payload.answers,
+    );
+  });
 });
+
+

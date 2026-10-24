@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   CareerNotFoundException,
   InvalidSurveyScheduleException,
+  SurveyAlreadyAnsweredException,
+  SurveyExpiredException,
   SurveyNotFoundException,
   SurveyTitleAlreadyExistsException,
 } from '../exceptions/index.js';
@@ -9,7 +11,10 @@ import { SurveyMapper } from '../mappers/survey.mapper.js';
 import { CareersRepository } from '../repositories/careers.repository.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import type { CreateSurveyRequest } from '../requests/create-survey.schema.js';
+import type { SubmitSurveyResponseRequest } from '../requests/submit-survey-response.schema.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
+import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
+import type { SurveyNotificationResponse } from '../responses/survey-notification.response.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
 import { getScheduleError } from '../utils/survey-schedule.js';
@@ -91,8 +96,57 @@ export class SurveysService {
     return { fileName, buffer };
   }
 
+  async getNotificationsForUser(userId: string): Promise<SurveyNotificationResponse[]> {
+    return this.surveysRepository.findNotificationsForUser(userId);
+  }
+
+  async getSurveyForAnswering(id: string, userId: string): Promise<SurveyDetailResponse> {
+    const survey = await this.surveysRepository.findByIdWithQuestions(id, userId);
+    if (!survey) throw new SurveyNotFoundException();
+    return survey;
+  }
+
+  async submitResponse(
+    id: string,
+    userId: string,
+    request: SubmitSurveyResponseRequest,
+  ): Promise<{ success: boolean; message: string }> {
+    const survey = await this.surveysRepository.findByIdWithQuestions(id, userId);
+    if (!survey || survey.status !== 'published') {
+      throw new SurveyNotFoundException();
+    }
+
+    if (survey.isExpired) {
+      throw new SurveyExpiredException();
+    }
+
+    if (survey.hasAnswered) {
+      throw new SurveyAlreadyAnsweredException();
+    }
+
+    for (const q of survey.questions) {
+      if (q.isRequired) {
+        const answer = request.answers.find((a) => a.questionId === q.id);
+        if (!answer || answer.optionIds.length === 0) {
+          throw new BadRequestException(`La pregunta "${q.statement}" es obligatoria`);
+        }
+      }
+    }
+
+    for (const ans of request.answers) {
+      const q = survey.questions.find((question) => question.id === ans.questionId);
+      if (q && q.type === 'single_choice' && ans.optionIds.length > 1) {
+        throw new BadRequestException(`La pregunta "${q.statement}" solo permite una respuesta`);
+      }
+    }
+
+    await this.surveysRepository.submitResponse(id, userId, request.answers);
+    return { success: true, message: 'Respuestas guardadas con éxito' };
+  }
+
   private async ensureCareerExists(careerId: string): Promise<void> {
     const exists = await this.careersRepository.exists(careerId);
     if (!exists) throw new CareerNotFoundException();
   }
 }
+

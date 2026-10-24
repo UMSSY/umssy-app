@@ -28,7 +28,12 @@ import {
   createSurveySchema,
   type CreateSurveyRequest,
 } from '../requests/create-survey.schema.js';
+import {
+  submitSurveyResponseSchema,
+  type SubmitSurveyResponseRequest,
+} from '../requests/submit-survey-response.schema.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
+import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
 import { SurveysService } from '../services/surveys.service.js';
@@ -59,6 +64,31 @@ export class SurveysController {
     return this.surveysService.listSurveys();
   }
 
+  @Get(':id')
+  @Roles('titulado', 'administrativo')
+  @ApiOperation({ summary: 'Obtiene las preguntas y opciones de una encuesta para responderla' })
+  @ApiOkResponse({ description: 'Detalle de la encuesta para ser respondida' })
+  getById(
+    @Param('id') id: string,
+    @CurrentUserId() userId: string,
+  ): Promise<SurveyDetailResponse> {
+    return this.surveysService.getSurveyForAnswering(id, userId);
+  }
+
+  @Post(':id/responses')
+  @Roles('titulado', 'administrativo')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Registra las respuestas del usuario a una encuesta' })
+  @ApiBody(toApiBody(submitSurveyResponseSchema))
+  @ApiCreatedResponse({ description: 'Respuestas guardadas' })
+  submitResponse(
+    @Param('id') id: string,
+    @CurrentUserId() userId: string,
+    @Body(new ZodValidationPipe(submitSurveyResponseSchema)) request: SubmitSurveyResponseRequest,
+  ): Promise<{ success: boolean; message: string }> {
+    return this.surveysService.submitResponse(id, userId, request);
+  }
+
   @Get(':id/statistics')
   @ApiOperation({ summary: 'Obtiene las estadísticas y resultados de una encuesta' })
   @ApiOkResponse({ description: 'Estadísticas de la encuesta con desglose de respuestas por opción' })
@@ -80,3 +110,4 @@ export class SurveysController {
     });
   }
 }
+
