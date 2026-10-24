@@ -38,11 +38,17 @@ export interface CreatedSurvey {
   createdAt: string;
 }
 
+export interface SurveyCreator {
+  fullName: string;
+  email: string;
+}
+
 export interface SurveySummary {
   id: string;
   title: string;
   status: SurveyStatus;
   career: Career | null;
+  createdBy: SurveyCreator;
   academicPeriod: string | null;
   opensAt: string | null;
   closesAt: string | null;
@@ -82,3 +88,30 @@ export interface SurveyStatistics {
   questions: SurveyQuestionStatistic[];
 }
 
+
+export interface SurveyDetailOption {
+  id: string;
+  position: number;
+  label: string;
+}
+
+export interface SurveyDetailQuestion {
+  id: string;
+  position: number;
+  statement: string;
+  type: QuestionType;
+  isRequired: boolean;
+  options: SurveyDetailOption[];
+}
+
+export interface SurveyDetail {
+  id: string;
+  title: string;
+  description: string | null;
+  status: SurveyStatus;
+  career: Career | null;
+  academicPeriod: string | null;
+  opensAt: string | null;
+  closesAt: string | null;
+  questions: SurveyDetailQuestion[];
+}

@@ -2,7 +2,16 @@ import type { ReactNode } from "react";
 import type { AcademicPeriod } from "@/modules/reports";
 import type { BuilderOption, BuilderQuestion, SurveyBuilderState, SurveyFieldName, SurveyHeaderValues } from "./survey-builder.types";
 import type { SurveyErrorMap, SurveyValidationError } from "./survey-validation.types";
-import type { Career, QuestionType, SurveyOptionStatistic, SurveyQuestionStatistic, SurveySummary } from "./survey.types";
+import type {
+  Career,
+  CreateSurveyPayload,
+  QuestionType,
+  SurveyDetail,
+  SurveyOptionStatistic,
+  SurveyQuestionStatistic,
+  SurveyStatus,
+  SurveySummary,
+} from "./survey.types";
 
 export interface SurveyHeaderCardProps {
   values: SurveyHeaderValues;
@@ -103,6 +112,7 @@ export interface SurveyValidationAlertProps {
 }
 
 export interface SurveyBuilderTopbarProps {
+  title: string;
   isSaving: boolean;
   onCancel: () => void;
   onPreview: () => void;
@@ -135,12 +145,18 @@ export interface SurveyPreviewDialogProps {
 export interface PreviewQuestionProps {
   question: BuilderQuestion;
   index: number;
+  isReadOnly?: boolean;
 }
 
 export interface SurveysTableProps {
   surveys: SurveySummary[];
   isLoading: boolean;
   hasError: boolean;
+  emptyMessage?: string;
+}
+
+export interface SurveyRowActionsProps {
+  survey: SurveySummary;
 }
 
 export interface SurveySummaryRowProps {
@@ -161,12 +177,24 @@ export interface SurveyQuestionResultCardProps {
   question: SurveyQuestionStatistic;
 }
 
-export interface SurveyStatisticsTableProps {
-  surveys: SurveySummary[];
-  isLoading?: boolean;
-  hasError?: boolean;
-}
 
 export interface SurveyAnalyticsViewProps {
   id: string;
+}
+
+export interface SurveyEditorProps {
+  title: string;
+  initialState?: SurveyBuilderState;
+  isSaving: boolean;
+  pendingStatus?: SurveyStatus;
+  draftSavedMessage: string;
+  onSave: (payload: CreateSurveyPayload) => Promise<unknown>;
+}
+
+export interface SurveyDetailViewProps {
+  id: string;
+}
+
+export interface SurveyReadOnlyViewProps {
+  survey: SurveyDetail;
 }
