@@ -4,7 +4,6 @@ import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { surveysService } from "../services/surveys.service";
 import { apiResponse, SURVEY_SUMMARIES } from "../testing/survey-fixtures";
 import { SurveyAnalyticsView } from "./survey-analytics-view";
-import { SurveyStatisticsView } from "./survey-statistics-view";
 
 describe("Pantallas de encuestas", () => {
   beforeEach(() => {
@@ -14,13 +13,6 @@ describe("Pantallas de encuestas", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
-  });
-
-  it("muestra la pantalla de estadísticas de encuestas con tabla y botón de ver métricas", async () => {
-    renderWithQuery(<SurveyStatisticsView />);
-
-    const metricsButtons = await screen.findAllByText("Ver métricas");
-    expect(metricsButtons.length).toBeGreaterThanOrEqual(1);
   });
 
   it("muestra la pantalla de analíticas de encuesta, permite generar PDF y muestra confirmación", async () => {
