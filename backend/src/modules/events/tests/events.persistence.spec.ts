@@ -1,8 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { EventsRepository } from '../repositories/events.repository.js';
+import { EventsService } from '../services/events.service.js';
 
-describe('EventsRepository', () => {
-  let repository: EventsRepository;
+describe('EventsService', () => {
+  let repository: EventsService;
   let prismaMock: {
     event: { findMany: ReturnType<typeof vi.fn>; count: ReturnType<typeof vi.fn> };
     $transaction: ReturnType<typeof vi.fn>;
@@ -16,7 +16,7 @@ describe('EventsRepository', () => {
       },
       $transaction: vi.fn().mockImplementation((promises) => Promise.all(promises)),
     };
-    repository = new EventsRepository(prismaMock as never);
+    repository = new EventsService(prismaMock as never);
   });
 
   it('calls findMany and count with empty where when no filters are provided', async () => {

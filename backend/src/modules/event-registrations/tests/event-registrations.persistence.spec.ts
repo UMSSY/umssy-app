@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
+import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 
-describe('EventRegistrationsRepository', () => {
+describe('EventRegistrationsService', () => {
   const findMany = vi.fn();
-  let repository: EventRegistrationsRepository;
+  let repository: EventRegistrationsService;
 
   beforeEach(() => {
     findMany.mockReset();
-    repository = new EventRegistrationsRepository({
+    repository = new EventRegistrationsService({
       eventRegistration: { findMany },
-    } as unknown as PrismaService);
+    } as unknown as PrismaService, {} as never);
   });
 
   it('consulta por userId con el select y orden esperados', async () => {
