@@ -156,6 +156,34 @@ describe('registration HTTP contract', () => {
     expect(response.body).toEqual({ statusCode: 401, ok: false, code: 'UNAUTHENTICATED', detail: 'Se requiere una sesión válida.', data: null });
   });
 
+  it('registers to an event via POST /api/event-registrations with JSON body', async () => {
+    const response = await request(app.getHttpServer()).post('/api/event-registrations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ eventId: EVENT_ID })
+      .expect(201);
+    expect(response.body).toMatchObject({
+      statusCode: 201,
+      ok: true,
+      data: { id: REGISTRATION_ID, eventId: EVENT_ID, status: 'confirmed' },
+    });
+  });
+
+  it('rejects POST /api/event-registrations with invalid eventId', async () => {
+    const response = await request(app.getHttpServer()).post('/api/event-registrations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ eventId: 'not-a-uuid' })
+      .expect(400);
+    expect(response.body).toMatchObject({ code: 'VALIDATION_ERROR', data: null });
+  });
+
+  it('cancels registration via DELETE /api/event-registrations/:id', async () => {
+    fixture.tx.eventRegistration.findUnique.mockResolvedValue(registrationRecord());
+    const response = await request(app.getHttpServer()).delete(`/api/event-registrations/${REGISTRATION_ID}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(response.body).toMatchObject({ statusCode: 200, ok: true, data: { status: 'cancelled' } });
+  });
+
   it('documents all routes, security, response fields and error codes', () => {
     const document = SwaggerModule.createDocument(app, new DocumentBuilder().addBearerAuth().build());
     const operation = document.paths['/api/events/{eventId}/registrations'].post!;
@@ -165,5 +193,7 @@ describe('registration HTTP contract', () => {
     for (const [code] of ERROR_CASES) expect(JSON.stringify(operation.responses)).toContain(code);
     expect(document.paths['/api/events/{eventId}/registrations/me'].get).toBeDefined();
     expect(document.paths['/api/registrations/{registrationId}'].delete).toBeDefined();
+    expect(document.paths['/api/event-registrations'].post).toBeDefined();
+    expect(document.paths['/api/event-registrations/{id}'].delete).toBeDefined();
   });
 });
