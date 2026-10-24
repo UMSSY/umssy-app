@@ -39,9 +39,11 @@ export function WeekGrid({
   selectedBlockId,
   onSelectBlock,
   onEditBlock,
+  stickyOffset = 0,
 }: WeekGridProps) {
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
   const gridHeightPx = hours.length * HOUR_HEIGHT_PX;
+  const stickyTop = { top: `calc(var(--spacing-app-header) + ${stickyOffset}px)` };
 
   const dayDates = getWeekDayDates(weekRange);
   const blocksByDay: AvailabilityBlock[][] = Array.from({ length: 7 }, () => []);
@@ -65,7 +67,7 @@ export function WeekGrid({
         )}
       >
         <div aria-hidden="true">
-          <div className="sticky top-app-header z-10 h-10 border-b border-border bg-background" />
+          <div className="sticky z-10 h-10 border-b border-app-header-foreground/15 bg-app-header" style={stickyTop} />
           <ol className="relative" style={{ height: gridHeightPx }}>
             {hours.map((h) => (
               <li
@@ -85,12 +87,12 @@ export function WeekGrid({
           const blockedDate = blockedDates.find((item) => item.blockedOn === dayDates[dayIndex]);
           return (
             <section key={dayIndex} className={cn("min-w-0 border-l border-border", blockedDate && "bg-muted")}>
-              <h3 aria-label={`${DAY_LABELS[dayIndex]} ${Number(dayDates[dayIndex].slice(8))}`} className={cn("sticky top-app-header z-10 flex h-10 items-center gap-1.5 border-b border-border px-2", blockedDate ? "bg-muted" : "bg-background")}>
+              <h3 aria-label={`${DAY_LABELS[dayIndex]} ${Number(dayDates[dayIndex].slice(8))}`} className="sticky z-10 flex h-10 items-center gap-1.5 border-b border-app-header-foreground/15 bg-app-header px-2 text-app-header-foreground" style={stickyTop}>
                 {variant === "owner" && onSelectDate ? (
-                  <Button type="button" variant="ghost" className="h-auto w-full px-0 text-xs" onClick={() => onSelectDate(dayDates[dayIndex])} aria-label={`${BLOCKED_DATE_TEXT.selectDate}: ${formatDayAndMonth(dayDates[dayIndex])}`}>
+                  <Button type="button" variant="ghost" className="h-auto w-full px-0 text-xs text-app-header-foreground hover:bg-app-header-foreground/15 hover:text-app-header-foreground" onClick={() => onSelectDate(dayDates[dayIndex])} aria-label={`${BLOCKED_DATE_TEXT.selectDate}: ${formatDayAndMonth(dayDates[dayIndex])}`}>
                     {DAY_LABELS[dayIndex]} {Number(dayDates[dayIndex].slice(8))}
                   </Button>
-                ) : <><span className="text-xs font-semibold text-muted-foreground">
+                ) : <><span className="text-xs font-semibold text-app-header-foreground/80">
                   {DAY_LABELS[dayIndex]}
                 </span>{" "}
                 <span className="text-base font-bold">{Number(dayDates[dayIndex].slice(8))}</span></>}
