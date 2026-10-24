@@ -6,6 +6,10 @@ import type {
   CreateEventRegistrationPayload,
   MyRegistrationResponse,
 } from '../types/event-registrations.types.js';
+import {
+  PassAccessDeniedException,
+  PassNotFoundException,
+} from '../exceptions/pass-access-denied.exception.js';
 
 @Injectable()
 export class EventRegistrationsService {
@@ -25,5 +29,18 @@ export class EventRegistrationsService {
     const registrations =
       await this.registrationsRepository.findByUserId(userId);
     return EventRegistrationsMapper.toMyRegistrationList(registrations);
+  }
+
+  async getPassById(passId: string, userId: string) {
+    const pass = await this.registrationsRepository.findPassByIdAndUserId(
+      passId,
+      userId,
+    );
+
+    if (!pass) {
+      throw new PassNotFoundException();
+    }
+
+    return pass;
   }
 }

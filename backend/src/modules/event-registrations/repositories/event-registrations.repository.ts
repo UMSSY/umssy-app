@@ -43,4 +43,39 @@ export class EventRegistrationsRepository {
       orderBy: { event: { eventDate: 'asc' } },
     });
   }
+  findPassByIdAndUserId(id: string, userId: string) {
+    return this.prisma.eventRegistration.findFirst({
+      where: {
+        id,
+        userId,
+        cancelledAt: null,
+        status: { title: CONFIRMED_REGISTRATION_TITLE },
+      },
+      select: {
+        id: true,
+        qrToken: true,
+        createdAt: true,
+        status: { select: { title: true } },
+        event: {
+          select: {
+            id: true,
+            title: true,
+            eventDate: true,
+            startTime: true,
+            endTime: true,
+            location: true,
+            description: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
 }
