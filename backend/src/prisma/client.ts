@@ -107,6 +107,11 @@ export type Education = Prisma.EducationModel
  */
 export type WorkExperience = Prisma.WorkExperienceModel
 /**
+ * Model RadarArea
+ * 
+ */
+export type RadarArea = Prisma.RadarAreaModel
+/**
  * Model Skill
  * 
  */
@@ -276,3 +281,28 @@ export type Message = Prisma.MessageModel
  * 
  */
 export type UserPresence = Prisma.UserPresenceModel
+/**
+ * Model Survey
+ * 
+ */
+export type Survey = Prisma.SurveyModel
+/**
+ * Model SurveyQuestion
+ * 
+ */
+export type SurveyQuestion = Prisma.SurveyQuestionModel
+/**
+ * Model SurveyQuestionOption
+ * 
+ */
+export type SurveyQuestionOption = Prisma.SurveyQuestionOptionModel
+/**
+ * Model SurveyResponse
+ * 
+ */
+export type SurveyResponse = Prisma.SurveyResponseModel
+/**
+ * Model SurveyAnswer
+ * 
+ */
+export type SurveyAnswer = Prisma.SurveyAnswerModel

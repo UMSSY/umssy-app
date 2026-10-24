@@ -10,5 +10,6 @@ export interface SurveySummaryResponse {
   opensAt: string | null;
   closesAt: string | null;
   questionCount: number;
+  responseCount: number;
   createdAt: string;
 }

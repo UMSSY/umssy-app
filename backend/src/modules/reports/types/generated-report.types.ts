@@ -8,6 +8,7 @@ export const REPORT_TYPES = [
   'COMPANIES',
   'ADMINS',
   'REJECTED_USERS',
+  'SURVEY_STATISTICS',
 ] as const;
 
 export type ReportType = (typeof REPORT_TYPES)[number];

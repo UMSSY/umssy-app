@@ -47,5 +47,38 @@ export interface SurveySummary {
   opensAt: string | null;
   closesAt: string | null;
   questionCount: number;
+  responseCount?: number;
   createdAt: string;
 }
+
+export interface SurveyOptionStatistic {
+  id: string;
+  label: string;
+  count: number;
+  percentage: number;
+}
+
+export interface SurveyQuestionStatistic {
+  id: string;
+  position: number;
+  statement: string;
+  type: QuestionType;
+  isRequired: boolean;
+  answeredCount: number;
+  totalSelections: number;
+  options: SurveyOptionStatistic[];
+}
+
+export interface SurveyStatistics {
+  id: string;
+  title: string;
+  description: string | null;
+  status: SurveyStatus;
+  academicPeriod: string | null;
+  career: Career | null;
+  opensAt: string | null;
+  closesAt: string | null;
+  totalResponses: number;
+  questions: SurveyQuestionStatistic[];
+}
+

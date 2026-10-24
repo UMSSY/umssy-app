@@ -64,6 +64,7 @@ export const ModelName = {
   UserRole: 'UserRole',
   Education: 'Education',
   WorkExperience: 'WorkExperience',
+  RadarArea: 'RadarArea',
   Skill: 'Skill',
   JobOfferSkill: 'JobOfferSkill',
   UserSkill: 'UserSkill',
@@ -97,7 +98,12 @@ export const ModelName = {
   Conversation: 'Conversation',
   ConversationParticipant: 'ConversationParticipant',
   Message: 'Message',
-  UserPresence: 'UserPresence'
+  UserPresence: 'UserPresence',
+  Survey: 'Survey',
+  SurveyQuestion: 'SurveyQuestion',
+  SurveyQuestionOption: 'SurveyQuestionOption',
+  SurveyResponse: 'SurveyResponse',
+  SurveyAnswer: 'SurveyAnswer'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -279,10 +285,22 @@ export const WorkExperienceScalarFieldEnum = {
 export type WorkExperienceScalarFieldEnum = (typeof WorkExperienceScalarFieldEnum)[keyof typeof WorkExperienceScalarFieldEnum]
 
 
+export const RadarAreaScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarAreaScalarFieldEnum = (typeof RadarAreaScalarFieldEnum)[keyof typeof RadarAreaScalarFieldEnum]
+
+
 export const SkillScalarFieldEnum = {
   id: 'id',
   name: 'name',
   isCustom: 'isCustom',
+  areaId: 'areaId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -305,6 +323,10 @@ export const UserSkillScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   skillId: 'skillId',
+  source: 'source',
+  verificationStatus: 'verificationStatus',
+  isHighRelevance: 'isHighRelevance',
+  evidenceRefs: 'evidenceRefs',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -739,12 +761,87 @@ export const UserPresenceScalarFieldEnum = {
 export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
 
 
+export const SurveyScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  careerId: 'careerId',
+  academicPeriod: 'academicPeriod',
+  opensAt: 'opensAt',
+  closesAt: 'closesAt',
+  status: 'status',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyScalarFieldEnum = (typeof SurveyScalarFieldEnum)[keyof typeof SurveyScalarFieldEnum]
+
+
+export const SurveyQuestionScalarFieldEnum = {
+  id: 'id',
+  surveyId: 'surveyId',
+  position: 'position',
+  statement: 'statement',
+  type: 'type',
+  isRequired: 'isRequired',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyQuestionScalarFieldEnum = (typeof SurveyQuestionScalarFieldEnum)[keyof typeof SurveyQuestionScalarFieldEnum]
+
+
+export const SurveyQuestionOptionScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  position: 'position',
+  label: 'label',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyQuestionOptionScalarFieldEnum = (typeof SurveyQuestionOptionScalarFieldEnum)[keyof typeof SurveyQuestionOptionScalarFieldEnum]
+
+
+export const SurveyResponseScalarFieldEnum = {
+  id: 'id',
+  surveyId: 'surveyId',
+  respondentId: 'respondentId',
+  submittedAt: 'submittedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyResponseScalarFieldEnum = (typeof SurveyResponseScalarFieldEnum)[keyof typeof SurveyResponseScalarFieldEnum]
+
+
+export const SurveyAnswerScalarFieldEnum = {
+  id: 'id',
+  responseId: 'responseId',
+  questionId: 'questionId',
+  optionId: 'optionId',
+  textValue: 'textValue',
+  createdAt: 'createdAt'
+} as const
+
+export type SurveyAnswerScalarFieldEnum = (typeof SurveyAnswerScalarFieldEnum)[keyof typeof SurveyAnswerScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -761,4 +858,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

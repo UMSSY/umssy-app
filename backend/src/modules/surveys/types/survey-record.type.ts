@@ -14,7 +14,7 @@ export interface SurveySummaryRecord extends SurveyCreatedRecord {
   opensAt: Date | null;
   closesAt: Date | null;
   career: { id: string; title: string } | null;
-  _count: { questions: number };
+  _count: { questions: number; responses: number };
 }
 
 export type CareerRecord = Prisma.CareerGetPayload<{

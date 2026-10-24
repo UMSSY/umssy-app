@@ -37,6 +37,7 @@ export const SURVEY_ERROR_MESSAGES = {
   OPENS_IN_THE_PAST:
     'La fecha de apertura no puede ser anterior a la fecha actual',
   CAREER_NOT_FOUND: 'La carrera seleccionada no existe',
+  SURVEY_NOT_FOUND: 'La encuesta solicitada no existe',
   STORAGE_UNAVAILABLE:
     'El registro de encuestas todavía no está disponible. Intente más tarde',
 } as const;
@@ -57,7 +58,7 @@ export const SURVEY_SUMMARY_SELECT = {
   closesAt: true,
   createdAt: true,
   career: { select: { id: true, title: true } },
-  _count: { select: { questions: true } },
+  _count: { select: { questions: true, responses: true } },
 } as const;
 
 export const CAREER_SELECT = { id: true, title: true } as const;
