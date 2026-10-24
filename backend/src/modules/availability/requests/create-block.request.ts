@@ -1,8 +1,7 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
-import { toBoliviaTime } from '../../../common/utils/date-time.js';
+import { addWeeks, toBoliviaTime } from '../../../common/utils/date-time.js';
 import { CREATE_BLOCK_MESSAGES, MAX_REPEAT_WEEKS } from '../constants/create-block.constants.js';
-import { addWeeks } from '../utils/weekly-occurrences.js';
 import { buildBlockTimeSchema } from './block-time.schema.js';
 
 export const buildCreateBlockSchema = (getNow: () => Date = () => new Date()) =>
