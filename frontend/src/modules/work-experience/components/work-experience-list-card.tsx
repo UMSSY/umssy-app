@@ -7,7 +7,6 @@ import { formatWorkPeriod } from '../utils/format-work-period';
 export function WorkExperienceListCard({
   experiences = [],
   isLoading = false,
-  isBusy = false,
   onAdd,
   onEdit,
   onDelete,
@@ -23,7 +22,7 @@ export function WorkExperienceListCard({
       {/* Cabecera de la sección con el botón de añadir experiencia */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="wrap-anywhere text-lg font-semibold text-slate-900">Experiencia laboral</h3>
+          <h3 className="text-lg font-semibold text-slate-900 wrap-anywhere">Experiencia laboral</h3>
           <p className="text-sm text-slate-600">Añade tu trayectoria y proyectos profesionales.</p>
         </div>
         {onAdd && (
@@ -63,8 +62,8 @@ export function WorkExperienceListCard({
 
                 <div className="flex items-start justify-between">
                   <div>
-                    <h4 className="font-semibold text-slate-900 text-base">{experience.position}</h4>
-                    <p className="font-medium text-slate-700 text-sm">{experience.company}</p>
+                    <h4 className="text-base font-semibold text-slate-900">{experience.position}</h4>
+                    <p className="text-sm font-medium text-slate-700">{experience.company}</p>
                     <p className="mt-0.5 text-xs font-medium text-slate-600">{periodText}</p>
                   </div>
 
@@ -94,7 +93,7 @@ export function WorkExperienceListCard({
                 </div>
 
                 {experience.description && (
-                  <p className="mt-3 text-slate-900 text-sm whitespace-pre-line">{experience.description}</p>
+                  <p className="mt-3 text-sm text-slate-900 whitespace-pre-line">{experience.description}</p>
                 )}
 
                 {/* Chips de Habilidades Detectadas */}
