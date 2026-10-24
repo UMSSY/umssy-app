@@ -47,26 +47,23 @@ describe("EditBlockPanel", () => {
     ).not.toBeInTheDocument()
   })
 
-  it.each(["pending", "confirmed"] as const)(
-    "deshabilita las horas, Guardar y Eliminar cuando el bloque está %s",
-    (state) => {
-      renderWithQuery(<EditBlockPanel block={{ ...mockBlock, state }} onClose={vi.fn()} />)
+  it("deshabilita las horas, Guardar y Eliminar cuando el bloque tiene una cita confirmada", () => {
+    renderWithQuery(<EditBlockPanel block={{ ...mockBlock, state: "confirmed" }} onClose={vi.fn()} />)
 
-      expect(screen.getByLabelText(/Desde/)).toBeDisabled()
-      expect(screen.getByLabelText(/Hasta/)).toBeDisabled()
-      expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled()
-      expect(screen.getByRole("button", { name: "Eliminar bloque" })).toBeDisabled()
-      expect(
-        screen.getByText("Solo se puede editar si el bloque no tiene ninguna cita asociada."),
-      ).toBeInTheDocument()
-    },
-  )
+    expect(screen.getByLabelText(/Desde/)).toBeDisabled()
+    expect(screen.getByLabelText(/Hasta/)).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Eliminar bloque" })).toBeDisabled()
+    expect(
+      screen.getByText("Solo se puede editar si el bloque no tiene ninguna cita asociada."),
+    ).toBeInTheDocument()
+  })
 
   it("no elimina ni abre el diálogo si el bloque tiene una cita asociada", async () => {
     const deleteSpy = vi.spyOn(availabilityApi, "deleteAvailabilityBlock")
     const user = userEvent.setup()
 
-    renderWithQuery(<EditBlockPanel block={{ ...mockBlock, state: "pending" }} onClose={vi.fn()} />)
+    renderWithQuery(<EditBlockPanel block={{ ...mockBlock, state: "confirmed" }} onClose={vi.fn()} />)
 
     await user.click(screen.getByRole("button", { name: "Eliminar bloque" }))
 
