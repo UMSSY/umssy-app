@@ -73,4 +73,45 @@ describe("useCreateAvailabilityBlock", () => {
 
     expect(toast.error).toHaveBeenCalledWith("Error al crear el bloque de disponibilidad")
   })
+
+  it("avisa con un toast cuántos bloques se crearon en una serie semanal", async () => {
+    vi.spyOn(availabilityApi, "createAvailabilityBlock").mockResolvedValue({ created: 3, skipped: [] })
+    const repeatInput = { ...input, repeatWeekly: true, repeatUntil: "2024-02-05" }
+
+    const { result } = renderHook(() => useCreateAvailabilityBlock(), createQueryWrapper())
+    await act(async () => result.current.createBlock(repeatInput))
+
+    expect(toast.success).toHaveBeenCalledWith("Se crearon 3 bloques.", { description: undefined })
+  })
+
+  it("avisa los bloques creados y las fechas omitidas", async () => {
+    vi.spyOn(availabilityApi, "createAvailabilityBlock").mockResolvedValue({
+      created: 2,
+      skipped: ["2024-01-22", "2024-01-29"],
+    })
+    const repeatInput = { ...input, repeatWeekly: true, repeatUntil: "2024-02-05" }
+
+    const { result } = renderHook(() => useCreateAvailabilityBlock(), createQueryWrapper())
+    await act(async () => result.current.createBlock(repeatInput))
+
+    expect(toast.success).toHaveBeenCalledWith("Se crearon 2 bloques.", {
+      description: "Fechas omitidas: 2024-01-22, 2024-01-29",
+    })
+  })
+
+  it("avisa con un toast de error si no se creó ningún bloque y lista las fechas omitidas", async () => {
+    vi.spyOn(availabilityApi, "createAvailabilityBlock").mockResolvedValue({
+      created: 0,
+      skipped: ["2024-01-22"],
+    })
+    const repeatInput = { ...input, repeatWeekly: true, repeatUntil: "2024-02-05" }
+
+    const { result } = renderHook(() => useCreateAvailabilityBlock(), createQueryWrapper())
+    await act(async () => result.current.createBlock(repeatInput))
+
+    expect(toast.error).toHaveBeenCalledWith("No se creó ningún bloque.", {
+      description: "Fechas omitidas: 2024-01-22",
+    })
+    expect(toast.success).not.toHaveBeenCalled()
+  })
 })
