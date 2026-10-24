@@ -173,6 +173,7 @@ export function BlockForm({
                 <>
                   <Calendar
                     mode="single"
+                    required
                     locale={es}
                     selected={selectedDate}
                     onSelect={handleDateSelect}
@@ -203,7 +204,7 @@ export function BlockForm({
                   invalid={Boolean(errors.startAt)}
                   describedBy={errors.startAt ? "startAt-error" : undefined}
                   disabled={disabled}
-                  isOptionDisabled={(time) => isStartTimeDisabled(time, timeLimits)}
+                  isOptionHidden={(time) => isStartTimeDisabled(time, timeLimits)}
                 />
                 {errors.startAt && <FieldError id="startAt-error">{errors.startAt}</FieldError>}
               </Field>
@@ -220,7 +221,7 @@ export function BlockForm({
                   invalid={Boolean(errors.endAt)}
                   describedBy={errors.endAt ? "endAt-error" : undefined}
                   disabled={disabled}
-                  isOptionDisabled={(time) => isEndTimeDisabled(time, timeLimits)}
+                  isOptionHidden={(time) => isEndTimeDisabled(time, timeLimits)}
                 />
                 {errors.endAt && <FieldError id="endAt-error">{errors.endAt}</FieldError>}
               </Field>
