@@ -42,10 +42,10 @@ describe('AvailabilityService', () => {
     create: vi.fn(),
   };
   const mentorId = 'ed9934b9-1a4e-4b8d-bbed-b8772154cba8';
-  const payload: CreateBlockDto = {
+  const payload = {
     startAt: new Date('2026-11-03T22:00:00.000Z'),
     endAt: new Date('2026-11-04T00:00:00.000Z'),
-  };
+  } satisfies CreateBlockDto;
   const savedBlock = {
     id: 'a3f1c2d4-0000-4000-8000-000000000001',
     mentorId,
@@ -264,6 +264,53 @@ describe('AvailabilityService', () => {
   });
 
   describe('create', () => {
+    it('crea cuatro bloques con el mismo UUID de serie y fin de repetición', async () => {
+      const result = await service.create(mentorId, { ...payload, repeatWeekly: true, repeatUntil: '2026-11-24' });
+      expect(result).toEqual({ created: 4, skipped: [] });
+      const calls = availabilityRepository.create.mock.calls;
+      expect(calls).toHaveLength(4);
+      const series = calls[0][4];
+      expect(series).toEqual({ seriesId: expect.stringMatching(/^[\da-f-]{36}$/), repeatUntil: new Date('2026-11-24') });
+      expect(new Set(calls.map((call) => call[4].seriesId)).size).toBe(1);
+      expect(calls.map((call) => toBoliviaTime(call[1]).date)).toEqual([
+        '2026-11-03', '2026-11-10', '2026-11-17', '2026-11-24',
+      ]);
+      for (const call of calls) {
+        expect(call[0]).toBe(mentorId);
+        expect(call[3]).toBe(TX);
+        expect(call[2].getTime() - call[1].getTime()).toBe(2 * 60 * 60_000);
+      }
+    });
+
+    it('omite conflictos sin interrumpir las siguientes semanas', async () => {
+      availabilityRepository.create.mockRejectedValueOnce({ code: '23P01' });
+      blockedDatesService.assertDayNotBlocked.mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(new DayBlockedException());
+      await expect(service.create(mentorId, {
+        ...payload, repeatWeekly: true, repeatUntil: '2026-11-24',
+      })).resolves.toEqual({ created: 2, skipped: ['2026-11-03', '2026-11-10'] });
+    });
+
+    it('informa todas las fechas si todas se omiten', async () => {
+      availabilityRepository.create.mockRejectedValue({ code: '23P01' });
+      await expect(service.create(mentorId, {
+        ...payload, repeatWeekly: true, repeatUntil: '2026-11-10',
+      })).resolves.toEqual({ created: 0, skipped: ['2026-11-03', '2026-11-10'] });
+    });
+
+    it('no convierte errores inesperados en omisiones', async () => {
+      const error = new Error('database unavailable');
+      availabilityRepository.create.mockRejectedValue(error);
+      await expect(service.create(mentorId, {
+        ...payload, repeatWeekly: true, repeatUntil: '2026-11-10',
+      })).rejects.toBe(error);
+    });
+
+    it('mantiene la respuesta individual si repeatWeekly es false', async () => {
+      await expect(service.create(mentorId, { ...payload, repeatWeekly: false })).resolves.toMatchObject({ id: savedBlock.id });
+      expect(availabilityRepository.create).toHaveBeenCalledTimes(1);
+    });
+
     it('responde 409 sin guardar el bloque si el día está bloqueado', async () => {
       blockedDatesService.assertDayNotBlocked.mockRejectedValue(new DayBlockedException());
 

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { AvailabilityRepository } from '../repositories/availability.repository.js';
 import { AvailabilityMapper } from '../mappers/availability.mapper.js';
 import {
@@ -6,6 +7,7 @@ import {
   BlockNotFoundException,
   BlockNotOwnedException,
   BlockOverlapException,
+  DayBlockedException,
   MentorAvailabilityNotOwnedException,
 } from '../exceptions/index.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
@@ -19,6 +21,9 @@ import type { WeekQueryDto } from '../requests/week-query.request.js';
 import type { DeletedBlockResponse } from '../types/deleted-block-response.types.js';
 import type { UpdateBlockDto } from '../requests/update-block.request.js';
 import type { MentorAvailabilityStatusResponse } from '../types/mentor-availability-status-response.types.js';
+import type { WeeklyRepeatResponse } from '../types/weekly-repeat-response.types.js';
+import { weeklyOccurrences } from '../utils/weekly-occurrences.js';
+import { toCalendarDate } from '../utils/bolivia-day.js';
 import type { OwnerAvailabilityBlockResponse } from '../types/owner-availability-block-response.types.js';
 
 @Injectable()
@@ -96,7 +101,13 @@ export class AvailabilityService {
     }
   }
 
-  async create(mentorId: string, payload: CreateBlockDto): Promise<AvailabilityBlockResponse> {
+  async create(
+    mentorId: string,
+    payload: CreateBlockDto,
+  ): Promise<AvailabilityBlockResponse | WeeklyRepeatResponse> {
+    if (payload.repeatWeekly && payload.repeatUntil !== undefined) {
+      return this.createWeeklySeries(mentorId, payload, payload.repeatUntil);
+    }
     try {
       const block = await this.blockedDatesService.runOnUnblockedDay(mentorId, payload.startAt, (tx) =>
         this.availabilityRepository.create(mentorId, payload.startAt, payload.endAt, tx),
@@ -108,6 +119,31 @@ export class AvailabilityService {
       }
       throw error;
     }
+  }
+
+  private async createWeeklySeries(
+    mentorId: string,
+    payload: CreateBlockDto,
+    repeatUntil: string,
+  ): Promise<WeeklyRepeatResponse> {
+    const series = { seriesId: randomUUID(), repeatUntil: toCalendarDate(repeatUntil) };
+    const result: WeeklyRepeatResponse = { created: 0, skipped: [] };
+
+    for (const occurrence of weeklyOccurrences(payload.startAt, payload.endAt, repeatUntil)) {
+      try {
+        await this.blockedDatesService.runOnUnblockedDay(mentorId, occurrence.startAt, (tx) =>
+          this.availabilityRepository.create(mentorId, occurrence.startAt, occurrence.endAt, tx, series),
+        );
+        result.created++;
+      } catch (error) {
+        if (error instanceof DayBlockedException || hasOverlapErrorCode(error)) {
+          result.skipped.push(occurrence.day);
+          continue;
+        }
+        throw error;
+      }
+    }
+    return result;
   }
 
   async findMentorFreeBlocks(mentorId: string, query: WeekQueryDto): Promise<AvailabilityBlockResponse[]> {
