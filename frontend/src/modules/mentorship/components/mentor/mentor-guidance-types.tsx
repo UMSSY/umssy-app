@@ -39,7 +39,7 @@ export function MentorGuidanceTypes({
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="px-6 pb-6 pt-4">
+        <CardContent className="px-6 pt-4 pb-6">
           <p className="text-text-secondary">
             Este mentor todavía no registró tipos de orientación.
           </p>
@@ -68,7 +68,7 @@ export function MentorGuidanceTypes({
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="px-6 pb-6 pt-4">
+      <CardContent className="px-6 pt-4 pb-6">
         <ToggleGroup
           multiple={false}
           value={[String(selectedGuidance.id)]}
@@ -89,7 +89,7 @@ export function MentorGuidanceTypes({
             <ToggleGroupItem
               key={guidance.id}
               value={String(guidance.id)}
-              className="h-auto min-w-0 max-w-full cursor-pointer whitespace-normal [overflow-wrap:anywhere] rounded-lg border-border bg-white px-4 py-2 text-sm font-semibold text-text-secondary shadow-sm hover:border-accent hover:bg-surface-soft focus-visible:border-accent focus-visible:ring-accent/30 aria-pressed:border-accent aria-pressed:bg-interaction aria-pressed:text-ink"
+              className="h-auto max-w-full min-w-0 cursor-pointer rounded-lg border-border bg-white px-4 py-2 text-sm font-semibold [overflow-wrap:anywhere] whitespace-normal text-text-secondary shadow-sm hover:border-accent hover:bg-surface-soft focus-visible:border-accent focus-visible:ring-accent/30 aria-pressed:border-accent aria-pressed:bg-interaction aria-pressed:text-ink"
             >
               {guidance.name}
             </ToggleGroupItem>
@@ -98,7 +98,7 @@ export function MentorGuidanceTypes({
 
         {selectedGuidance.description && (
           <div className="mt-5 rounded-lg bg-surface-soft p-4">
-            <p className="whitespace-pre-line [overflow-wrap:anywhere] text-sm leading-6 text-ink">
+            <p className="text-sm leading-6 [overflow-wrap:anywhere] whitespace-pre-line text-ink">
               {selectedGuidance.description}
             </p>
           </div>

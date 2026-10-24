@@ -32,6 +32,11 @@ export type RegisterGeneratedReportInput = Pick<
   'fileName' | 'reportType'
 >;
 
+export interface ReportHistoryFilters {
+  readonly reportType?: ReportType;
+  readonly search?: string;
+}
+
 export interface GeneratedReportsPage {
   readonly reports: GeneratedReport[];
   readonly total: number;

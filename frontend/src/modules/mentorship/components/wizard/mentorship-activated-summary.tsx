@@ -82,12 +82,14 @@ export function MentorshipActivatedSummary({
           </Card>
         </CardContent>
 
-        <CardFooter className="border-0 bg-transparent px-4 pb-4 pt-0 sm:px-6 sm:pb-6">
+        <CardFooter className="flex gap-3 border-t border-border bg-transparent px-6 py-5">
+          <Link href="/mentor/availability" className={buttonVariants()}>Configurar mi disponibilidad</Link>
           <Link
             href="/mentorship/mentors"
             className={buttonVariants({
               className:
-                "h-auto w-full rounded-md bg-accent px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-accent active:translate-y-0",
+                "h-auto rounded-md px-5 py-2.5 text-center text-sm font-semibold",
+              variant: "outline",
             })}
           >
             Ir al directorio

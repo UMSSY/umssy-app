@@ -121,7 +121,7 @@ export function WeekGrid({
                   return (
                     <li
                       key={block.id}
-                      className="absolute left-1 right-1 py-0.5"
+                      className="absolute inset-x-1 py-0.5"
                       style={{ top: topPx, height: heightPx }}
                     >
                       <Button
@@ -130,7 +130,7 @@ export function WeekGrid({
                         disabled={!isBlockClickable(variant, block.state)}
                         onClick={() => handleBlockClick(block)}
                         className={cn(
-                          "h-full w-full justify-start rounded-md px-2 text-xs font-semibold",
+                          "size-full flex-col items-start justify-start gap-0.5 rounded-md px-2 py-1 text-xs font-semibold whitespace-normal",
                           STATE_BUTTON_CLASSES[block.state],
                           isSelected && SELECTED_BLOCK_CLASSES
                         )}
@@ -138,6 +138,7 @@ export function WeekGrid({
                         aria-label={`${stateLabel}, ${timeRange}`}
                       >
                         {getBlockText(block)}
+                        <span className="text-xs font-normal">{variant === "selectable" ? "Disponible" : timeRange}</span>
                       </Button>
                     </li>
                   );
@@ -163,35 +164,25 @@ export function WeekGrid({
         <li className="flex items-center gap-2">
           <span
             aria-hidden="true"
-            className="inline-block h-3 w-4 rounded-sm border border-border"
+            className={cn("inline-block h-3 w-4 rounded-sm border", STATE_BUTTON_CLASSES.free)}
           />
           {variant === "selectable" ? WEEK_GRID_LEGEND.freeSlot : WEEK_GRID_LEGEND.free}
         </li>
-        {variant !== "selectable" && (
-          <>
-            <li className="flex items-center gap-2">
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "inline-block h-3 w-4 rounded-sm",
-                  STATE_BUTTON_CLASSES.pending,
-                )}
-              />
-              {WEEK_GRID_LEGEND.pending}
-            </li>
-            <li className="flex items-center gap-2">
-              <span aria-hidden="true" className="inline-block h-3 w-4 rounded-sm bg-ink" />
-              {WEEK_GRID_LEGEND.confirmed}
-            </li>
-          </>
-        )}
-        {variant === "selectable" && (
+        {variant === "selectable" ? (
           <li className="flex items-center gap-2">
             <span
               aria-hidden="true"
               className={cn("inline-block h-3 w-4 rounded-sm", SELECTED_BLOCK_CLASSES)}
             />
             {SELECTED_LEGEND_LABEL}
+          </li>
+        ) : (
+          <li className="flex items-center gap-2">
+            <span
+              aria-hidden="true"
+              className={cn("inline-block h-3 w-4 rounded-sm border", STATE_BUTTON_CLASSES.confirmed)}
+            />
+            {WEEK_GRID_LEGEND.confirmed}
           </li>
         )}
       </ul>

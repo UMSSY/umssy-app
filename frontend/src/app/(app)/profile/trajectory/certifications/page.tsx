@@ -1,5 +1,5 @@
-import { CertificationsView } from "@/modules/certifications";
+import { redirect } from "next/navigation";
 
-export default function CertificationsPage() {
-  return <CertificationsView />;
+export default function ProfileSectionPage() {
+  return redirect("/profile#certifications");
 }
