@@ -62,7 +62,9 @@ describe("MentorAvailabilityView", () => {
 
     renderWithQuery(<MentorAvailabilityView />)
 
-    expect(screen.getByText("Mentorías")).toBeInTheDocument()
+    expect(
+      screen.getByText("Mentorías. Selecciona el encabezado de un día para bloquear o desbloquear la fecha."),
+    ).toBeInTheDocument()
     expect(screen.getByText("Hora de Bolivia (GMT-4)")).toBeInTheDocument()
     await waitFor(() => expect(availabilityApi.getAvailabilityBlocks).toHaveBeenCalled())
   })
