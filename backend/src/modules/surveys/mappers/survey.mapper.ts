@@ -77,6 +77,7 @@ export class SurveyMapper {
       opensAt: record.opensAt?.toISOString() ?? null,
       closesAt: record.closesAt?.toISOString() ?? null,
       questionCount: record._count.questions,
+      responseCount: record._count.responses ?? 0,
       createdAt: record.createdAt.toISOString(),
     };
   }

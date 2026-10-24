@@ -15,8 +15,10 @@ import { SurveysController } from '../controllers/surveys.controller.js';
 import { SurveyMapper } from '../mappers/survey.mapper.js';
 import { CareersRepository } from '../repositories/careers.repository.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
+import { ReportHistoryService } from '../../reports/services/report-history.service.js';
 import { createSurveySchema } from '../requests/create-survey.schema.js';
 import { CareersService } from '../services/careers.service.js';
+import { SurveyPdfService } from '../services/survey-pdf.service.js';
 import { SurveysService } from '../services/surveys.service.js';
 
 function contextFor(roles: string[], handler: () => unknown, controller: object): ExecutionContext {
@@ -42,6 +44,8 @@ describe('SurveysController', () => {
         SurveysRepository,
         CareersRepository,
         SurveyMapper,
+        { provide: SurveyPdfService, useValue: { generatePdf: vi.fn() } },
+        { provide: ReportHistoryService, useValue: { registerGeneratedReport: vi.fn() } },
         { provide: PrismaService, useValue: {} },
       ],
     })
@@ -107,5 +111,15 @@ describe('SurveysController', () => {
     vi.spyOn(careersService, 'listCareers').mockResolvedValue(careers);
 
     await expect(careersController.list()).resolves.toBe(careers);
+  });
+
+  it('delega la exportación del PDF al service con el id y usuario autenticado', async () => {
+    const fileData = { fileName: 'reporte.pdf', buffer: Buffer.from('pdf') };
+    const spy = vi.spyOn(surveysService, 'exportSurveyPdf').mockResolvedValue(fileData);
+
+    const streamable = await surveysController.exportPdf('survey-1', 'admin-1');
+
+    expect(spy).toHaveBeenCalledWith('survey-1', 'admin-1');
+    expect(streamable.getHeaders().disposition).toBe('attachment; filename="reporte.pdf"');
   });
 });
