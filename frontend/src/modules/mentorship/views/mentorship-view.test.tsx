@@ -14,11 +14,14 @@ import { MentorshipView } from "./mentorship-view";
 
 const integrationMocks = vi.hoisted(() => ({
   activateMentor: vi.fn(),
+  push: vi.fn(),
   retryTechnicalAreas: vi.fn(),
   retryOrientationTypes: vi.fn(),
   isTechnicalAreasError: false,
   isOrientationTypesError: false,
 }));
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: integrationMocks.push }) }));
 
 vi.mock("../services/mentor-activation.service", () => ({
   activateMentor: integrationMocks.activateMentor,
@@ -71,6 +74,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   clearMentorshipWizardDraft();
+  vi.unstubAllEnvs();
 });
 
 function advanceToConfirmation() {
@@ -98,6 +102,61 @@ async function openActivationDialog() {
 }
 
 describe("MentorshipView", () => {
+  it("con cupos ocupados abre el modal después de confirmar sin activar ni perder selecciones", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    renderWithQuery(<MentorshipView />);
+    advanceToConfirmation();
+    const confirmation = await openActivationDialog();
+    fireEvent.click(within(confirmation).getByRole("button", { name: "Aceptar" }));
+    const unavailable = await screen.findByRole("dialog", { name: "No hay cupos disponibles" });
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
+    expect(integrationMocks.push).not.toHaveBeenCalled();
+    fireEvent.click(within(unavailable).getByRole("button", { name: "Solicitar cupo" }));
+    expect(within(unavailable).getByRole("status")).toHaveTextContent("No se ha enviado ninguna solicitud");
+    fireEvent.click(within(unavailable).getByRole("button", { name: "Cancelar" }));
+    expect(screen.getByText("Backend")).toBeInTheDocument();
+    expect(screen.getByText("Orientación profesional")).toBeInTheDocument();
+    expect(localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).not.toBeNull();
+    expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
+  });
+
+  it("con cupos disponibles muestra Activo sin activar ni persistir y permite repetir con los mismos datos", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    renderWithQuery(<MentorshipView />);
+    advanceToConfirmation();
+    fireEvent.click(screen.getByRole("button", { name: "Simular cupos disponibles" }));
+    const confirmation = await openActivationDialog();
+    fireEvent.click(within(confirmation).getByRole("button", { name: "Aceptar" }));
+    expect(await screen.findByRole("heading", { name: "Mi participación como mentor" })).toBeInTheDocument();
+    expect(screen.getByText("Activo")).toBeInTheDocument();
+    expect(screen.getByText("Backend")).toBeInTheDocument();
+    expect(screen.getByText("Orientación profesional")).toBeInTheDocument();
+    expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
+    expect(integrationMocks.push).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog", { name: "No hay cupos disponibles" })).not.toBeInTheDocument();
+    expect(localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Volver al formulario y probar otro escenario" }));
+    expect(screen.getByText("Confirma tu participación")).toBeInTheDocument();
+    expect(screen.getByText("Backend")).toBeInTheDocument();
+    expect(screen.getByText("Orientación profesional")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Simular cupos ocupados" }));
+    const nextConfirmation = await openActivationDialog();
+    fireEvent.click(within(nextConfirmation).getByRole("button", { name: "Aceptar" }));
+    expect(await screen.findByRole("dialog", { name: "No hay cupos disponibles" })).toBeInTheDocument();
+    expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
+  });
+
+  it("en producción no utiliza la simulación ni bloquea la activación existente", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    renderWithQuery(<MentorshipView />);
+    advanceToConfirmation();
+    expect(screen.queryByRole("region", { name: "Simulación de disponibilidad" })).not.toBeInTheDocument();
+    const confirmation = await openActivationDialog();
+    fireEvent.click(within(confirmation).getByRole("button", { name: "Aceptar" }));
+    await waitFor(() => expect(integrationMocks.activateMentor).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(integrationMocks.push).toHaveBeenCalledWith("/mentors/participation"));
+  });
   it("renderiza inicialmente el paso 1 con participación desmarcada", () => {
     renderWithQuery(<MentorshipView />);
 

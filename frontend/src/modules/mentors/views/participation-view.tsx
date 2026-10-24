@@ -6,8 +6,20 @@ import { useParticipation } from "../hooks/use-participation";
 import { ParticipationEmptyState } from "../components/participation/participation-empty-state";
 import { ParticipationLoading } from "../components/participation/participation-loading";
 import { ParticipationOverview } from "../components/participation/participation-overview";
+import { SlotAvailabilityPreview } from "../components/participation/slot-availability-preview";
 
 export function ParticipationView() {
+  const showAvailabilityPreview = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_APP_ENV !== "prod";
+
+  return (
+    <>
+      {showAvailabilityPreview && <SlotAvailabilityPreview />}
+      <ParticipationContent />
+    </>
+  );
+}
+
+function ParticipationContent() {
   const { state, hasLoadError, retry } = useParticipation();
 
   if (hasLoadError) {
