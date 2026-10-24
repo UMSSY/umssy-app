@@ -20,6 +20,7 @@ import type { BlockFormProps } from "../types/block-form-props.types";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
 import { validateBlock } from "../utils/block-validation";
 import { formatDayAndMonth, formatLongDate, getBoliviaToday, toCalendarDate, toDateString } from "../utils/calendar-date";
+import { getPastTimeLimit, isEndTimeDisabled, isStartTimeDisabled } from "../utils/time-options";
 
 function RequiredMark() {
   return (
@@ -53,6 +54,7 @@ export function BlockForm({
 
   const text = FORM_TEXT[mode];
   const selectedDate = date ? toCalendarDate(date) : undefined;
+  const timeLimits = { pastLimit: getPastTimeLimit(date), startTime, endTime };
 
   const clearErrors = (...fields: BlockFormField[]) => {
     setErrors((prev) => {
@@ -64,7 +66,11 @@ export function BlockForm({
 
   const handleDateSelect = (day?: Date) => {
     onValuesChange?.();
-    setDate(day ? toDateString(day) : "");
+    const nextDate = day ? toDateString(day) : "";
+    const pastLimit = getPastTimeLimit(nextDate);
+    setDate(nextDate);
+    if (startTime && isStartTimeDisabled(startTime, { pastLimit, startTime: "", endTime: "" })) setStartTime("");
+    if (endTime && isEndTimeDisabled(endTime, { pastLimit, startTime: "", endTime: "" })) setEndTime("");
     clearErrors("date", "startAt");
   };
 
@@ -197,6 +203,7 @@ export function BlockForm({
                   invalid={Boolean(errors.startAt)}
                   describedBy={errors.startAt ? "startAt-error" : undefined}
                   disabled={disabled}
+                  isOptionDisabled={(time) => isStartTimeDisabled(time, timeLimits)}
                 />
                 {errors.startAt && <FieldError id="startAt-error">{errors.startAt}</FieldError>}
               </Field>
@@ -213,6 +220,7 @@ export function BlockForm({
                   invalid={Boolean(errors.endAt)}
                   describedBy={errors.endAt ? "endAt-error" : undefined}
                   disabled={disabled}
+                  isOptionDisabled={(time) => isEndTimeDisabled(time, timeLimits)}
                 />
                 {errors.endAt && <FieldError id="endAt-error">{errors.endAt}</FieldError>}
               </Field>
