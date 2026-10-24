@@ -8,14 +8,35 @@ describe('AvailabilityRepository', () => {
   const findUnique = vi.fn();
   const update = vi.fn();
   const deleteBlock = vi.fn();
+  const create = vi.fn();
   const prisma = {
-    availabilityBlock: { findMany, findUnique, update, delete: deleteBlock },
+    availabilityBlock: { findMany, findUnique, update, delete: deleteBlock, create },
   };
   let repository: AvailabilityRepository;
 
   beforeEach(() => {
     vi.clearAllMocks();
     repository = new AvailabilityRepository(prisma as any);
+  });
+
+  describe('create', () => {
+    const startAt = new Date('2026-11-02T13:00:00Z');
+    const endAt = new Date('2026-11-02T14:00:00Z');
+
+    it('guarda un bloque individual sin datos de serie', async () => {
+      await repository.create('mentor-1', startAt, endAt);
+      expect(create).toHaveBeenCalledWith({ data: { mentorId: 'mentor-1', startAt, endAt } });
+    });
+
+    it('persiste los metadatos de serie dentro del cliente transaccional', async () => {
+      const txCreate = vi.fn().mockResolvedValue({ id: 'block-1' });
+      const series = { seriesId: '11111111-1111-4111-8111-111111111111', repeatUntil: new Date('2026-11-23') };
+      await expect(repository.create('mentor-1', startAt, endAt, {
+        availabilityBlock: { create: txCreate },
+      } as never, series)).resolves.toEqual({ id: 'block-1' });
+      expect(txCreate).toHaveBeenCalledWith({ data: { mentorId: 'mentor-1', startAt, endAt, ...series } });
+      expect(create).not.toHaveBeenCalled();
+    });
   });
 
   describe('findMentorBlocksInRange', () => {
