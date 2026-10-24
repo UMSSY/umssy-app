@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { AtSign, CalendarDays, CheckCircle, Clock, Info, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { PageHeading } from "@/shared/components/layout/page-heading";
 import { useSlotRequestPreview } from "../../hooks/use-slot-request-preview";
+import { CancelSlotRequestDialog } from "./cancel-slot-request-dialog";
 
 export function PendingParticipation() {
+  const router = useRouter();
   const preview = useSlotRequestPreview();
+  const [cancelOpen, setCancelOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [openedAt, setOpenedAt] = useState(() => Date.now());
   const request = preview.request;
@@ -29,13 +33,20 @@ export function PendingParticipation() {
     <section className="divide-y divide-border rounded-lg border border-border bg-surface px-6">
       <div className="flex flex-wrap items-center justify-between gap-4 py-6">
         <div className="flex items-start gap-4"><span className="rounded-full bg-notice p-3 text-notice-foreground"><Users aria-hidden="true" /></span><div><h2 className="font-semibold text-ink">Estado de participación <span className="ml-2 rounded bg-notice px-2 py-1 text-xs text-notice-foreground">Pendiente</span></h2><p className="mt-2 text-sm text-text-secondary">Tu solicitud está en espera de disponibilidad de cupos.</p></div></div>
-        <Button variant="secondary" onClick={() => { setOpenedAt(Date.now()); setDetailsOpen(true); }}>Ver detalle</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={() => { setOpenedAt(Date.now()); setDetailsOpen(true); }}>Ver detalle</Button>
+          <Button variant="secondary" onClick={() => { preview.clearCancellationError(); setCancelOpen(true); }}>Cancelar solicitud</Button>
+        </div>
       </div>
       {[{ title: "Áreas técnicas", items: request.areas }, { title: "Tipos de orientación", items: request.orientations }].map(({ title, items }) => <section key={title} className="space-y-3 py-5"><h2 className="font-semibold text-ink">{title}</h2><div className="flex flex-wrap gap-2">{items.map((name) => <span key={name} className="rounded bg-surface-soft px-3 py-2 text-sm text-ink">{name}</span>)}{items.length === 0 && <p className="text-sm text-text-secondary">Sin selección en esta prueba.</p>}</div></section>)}
     </section>
     <p className="flex items-start gap-2 text-sm text-text-secondary"><Info aria-hidden="true" className="size-5 shrink-0" />Ya tienes una solicitud activa. {duplicateMessage}</p>
 
-    <Dialog open={preview.notice !== null} onOpenChange={(open) => { if (!open) preview.dismissNotice(); }}>
+    <CancelSlotRequestDialog open={cancelOpen} isCancelling={preview.isCancelling} error={preview.cancellationError} onOpenChange={setCancelOpen} onConfirm={async (scenario) => {
+      if (await preview.cancel(scenario)) router.push("/mentors/participation");
+    }} />
+
+    <Dialog open={preview.notice === "registered" || preview.notice === "duplicate"} onOpenChange={(open) => { if (!open) preview.dismissNotice(); }}>
       <DialogContent className="sm:max-w-lg">
         <CheckCircle aria-hidden="true" className="size-8 text-accent" />
         <DialogTitle className="text-xl font-bold text-ink">{preview.notice === "registered" ? "Solicitud registrada correctamente" : "Ya tienes una solicitud pendiente"}</DialogTitle>

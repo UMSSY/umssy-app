@@ -9,6 +9,7 @@ import { SlotUnavailableDialog } from "@/modules/mentors/components/participatio
 import { ParticipationOverview } from "@/modules/mentors/components/participation/participation-overview";
 import { PendingParticipation } from "@/modules/mentors/components/participation/pending-participation";
 import { useSlotRequestPreview } from "@/modules/mentors/hooks/use-slot-request-preview";
+import { SlotCancellationFeedback } from "@/modules/mentors/components/participation/slot-cancellation-feedback";
 import { isApiError } from "@/shared/services/api-client";
 
 import { Button } from "@/components/ui/button";
@@ -151,6 +152,7 @@ export function MentorshipView() {
   };
 
   if (slotRequestPreview.request) return <PendingParticipation />;
+  if (slotRequestPreview.notice === "cancelled") return <SlotCancellationFeedback />;
 
   if (isAvailabilitySimulation && isSimulatedActive) {
     return (

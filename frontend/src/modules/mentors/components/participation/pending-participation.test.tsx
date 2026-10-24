@@ -8,6 +8,8 @@ import { SlotUnavailableDialog } from "./slot-availability-preview";
 import { PendingParticipation } from "./pending-participation";
 import { ParticipationView } from "../../views/participation-view";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
 function TestFlow() {
   const preview = useSlotRequestPreview();
   const [open, setOpen] = useState(true);

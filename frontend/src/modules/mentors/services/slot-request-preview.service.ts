@@ -1,4 +1,5 @@
 export type SlotRequestScenario = "success" | "error" | "duplicate";
+export type SlotCancellationScenario = "success" | "error";
 export type PendingSlotRequest = {
   id: string;
   registeredAt: string;
@@ -24,4 +25,12 @@ export async function simulateSlotRequest(scenario: SlotRequestScenario, areas: 
     },
     duplicate: scenario === "duplicate",
   };
+}
+
+/** Simulates a cancellation response; never writes to the backend. */
+export async function simulateSlotCancellation(scenario: SlotCancellationScenario, requestId: string) {
+  if (!isSlotRequestPreviewEnabled()) throw new Error("Simulación no disponible.");
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  if (scenario === "error") throw new Error("No se pudo cancelar tu solicitud. Intenta nuevamente.");
+  return { id: requestId };
 }
