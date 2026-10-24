@@ -60,12 +60,12 @@ export function WeekGrid({
     <section aria-label="Disponibilidad semanal">
       <div
         className={cn(
-          "hidden overflow-hidden rounded-lg border border-border",
+          "hidden overflow-clip rounded-lg border border-border",
           "md:grid md:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]",
         )}
       >
         <div aria-hidden="true">
-          <div className="h-10 border-b border-border" />
+          <div className="sticky top-app-header z-10 h-10 border-b border-border bg-background" />
           <ol className="relative" style={{ height: gridHeightPx }}>
             {hours.map((h) => (
               <li
@@ -85,7 +85,7 @@ export function WeekGrid({
           const blockedDate = blockedDates.find((item) => item.blockedOn === dayDates[dayIndex]);
           return (
             <section key={dayIndex} className={cn("min-w-0 border-l border-border", blockedDate && "bg-muted")}>
-              <h3 aria-label={`${DAY_LABELS[dayIndex]} ${Number(dayDates[dayIndex].slice(8))}`} className="flex h-10 items-center gap-1.5 border-b border-border px-2">
+              <h3 aria-label={`${DAY_LABELS[dayIndex]} ${Number(dayDates[dayIndex].slice(8))}`} className={cn("sticky top-app-header z-10 flex h-10 items-center gap-1.5 border-b border-border px-2", blockedDate ? "bg-muted" : "bg-background")}>
                 {variant === "owner" && onSelectDate ? (
                   <Button type="button" variant="ghost" className="h-auto w-full px-0 text-xs" onClick={() => onSelectDate(dayDates[dayIndex])} aria-label={`${BLOCKED_DATE_TEXT.selectDate}: ${formatDayAndMonth(dayDates[dayIndex])}`}>
                     {DAY_LABELS[dayIndex]} {Number(dayDates[dayIndex].slice(8))}
