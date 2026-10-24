@@ -1,1 +1,1 @@
-export type AppointmentStatus = string;
+export type AppointmentStatus = "CONFIRMED" | "CANCELLED" | "COMPLETED";
