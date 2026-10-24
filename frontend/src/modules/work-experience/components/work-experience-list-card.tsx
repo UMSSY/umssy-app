@@ -21,7 +21,7 @@ export function WorkExperienceListCard({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900 wrap-anywhere">Experiencia laboral</h3>
+          <h3 className="wrap-anywhere text-lg font-semibold text-slate-900">Experiencia laboral</h3>
           <p className="text-sm text-slate-600">Añade tu trayectoria y proyectos profesionales.</p>
         </div>
         {onAdd && (
@@ -89,7 +89,7 @@ export function WorkExperienceListCard({
                 </div>
 
                 {experience.description && (
-                  <p className="mt-3 text-sm text-slate-900 whitespace-pre-line">{experience.description}</p>
+                  <p className="mt-3 text-sm whitespace-pre-line text-slate-900">{experience.description}</p>
                 )}
 
                 {skillsList.length > 0 && (
