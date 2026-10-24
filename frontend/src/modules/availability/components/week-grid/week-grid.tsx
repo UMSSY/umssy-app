@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { toBoliviaTime } from "@/shared/utils/date-time";
+import { formatBlockRange, toBoliviaTime } from "@/shared/utils/date-time";
 import { cn } from "cn";
 import { BLOCKED_DATE_TEXT } from "../../constants/blocked-date.constants";
 import {
@@ -50,13 +50,6 @@ export function WeekGrid({
     if (dayIndex !== null) blocksByDay[dayIndex].push(block);
   }
 
-  function getBlockText(block: AvailabilityBlock): string {
-    if (variant === "selectable" && block.state === "free") {
-      return toBoliviaTime(block.startAt).time;
-    }
-    return BLOCK_STATE_TEXT[block.state];
-  }
-
   function handleBlockClick(block: AvailabilityBlock) {
     if (!isBlockClickable(variant, block.state)) return;
     if (variant === "selectable") onSelectBlock?.(block);
@@ -68,7 +61,7 @@ export function WeekGrid({
       <div
         className={cn(
           "hidden overflow-hidden rounded-lg border border-border",
-          "md:grid md:grid-cols-[3.5rem_repeat(7,1fr)]",
+          "md:grid md:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]",
         )}
       >
         <div aria-hidden="true">
@@ -91,7 +84,7 @@ export function WeekGrid({
         {blocksByDay.map((dayBlocks, dayIndex) => {
           const blockedDate = blockedDates.find((item) => item.blockedOn === dayDates[dayIndex]);
           return (
-            <section key={dayIndex} className={cn("border-l border-border", blockedDate && "bg-muted")}>
+            <section key={dayIndex} className={cn("min-w-0 border-l border-border", blockedDate && "bg-muted")}>
               <h3 aria-label={`${DAY_LABELS[dayIndex]} ${Number(dayDates[dayIndex].slice(8))}`} className="flex h-10 items-center gap-1.5 border-b border-border px-2">
                 {variant === "owner" && onSelectDate ? (
                   <Button type="button" variant="ghost" className="h-auto w-full px-0 text-xs" onClick={() => onSelectDate(dayDates[dayIndex])} aria-label={`${BLOCKED_DATE_TEXT.selectDate}: ${formatDayAndMonth(dayDates[dayIndex])}`}>
@@ -114,10 +107,10 @@ export function WeekGrid({
                 ))}
 
                 {blockedDate ? (
-                  <div className="relative space-y-2 p-2 text-xs">
+                  <div className="relative space-y-2 p-1.5 text-xs hyphens-auto">
                     <p className="font-semibold">{BLOCKED_DATE_TEXT.blockedDay}</p>
-                    {blockedDate.reason && <p className="wrap-anywhere">{blockedDate.reason}</p>}
-                    {variant === "owner" && onSelectDate && <Button type="button" variant="outline" size="sm" className="h-auto w-full whitespace-normal" onClick={() => onSelectDate(dayDates[dayIndex])}>{BLOCKED_DATE_TEXT.unblockTitle}</Button>}
+                    {blockedDate.reason && <p className="break-words">{blockedDate.reason}</p>}
+                    {variant === "owner" && onSelectDate && <Button type="button" variant="outline" size="sm" className="h-auto w-full px-1 text-xs hyphens-auto whitespace-normal" onClick={() => onSelectDate(dayDates[dayIndex])}>{BLOCKED_DATE_TEXT.unblockTitle}</Button>}
                   </div>
                 ) : <ul>
                   {dayBlocks.map((block) => {
@@ -137,7 +130,7 @@ export function WeekGrid({
                     return (
                       <li
                         key={block.id}
-                        className="absolute inset-x-1 py-0.5"
+                        className="absolute inset-x-1 py-px"
                         style={{ top: topPx, height: heightPx }}
                       >
                         <Button
@@ -146,15 +139,16 @@ export function WeekGrid({
                           disabled={!isBlockClickable(variant, block.state)}
                           onClick={() => handleBlockClick(block)}
                           className={cn(
-                            "size-full flex-col items-start justify-start gap-0.5 rounded-md px-2 py-1 text-xs font-semibold whitespace-normal",
+                            "size-full flex-col items-start justify-start gap-0 overflow-hidden rounded-md px-1.5 py-0.5 text-left text-xs leading-[15px] font-semibold",
                             STATE_BUTTON_CLASSES[block.state],
                             isSelected && SELECTED_BLOCK_CLASSES
                           )}
                           aria-pressed={isSelected || undefined}
                           aria-label={`${stateLabel}, ${timeRange}`}
+                          title={`${BLOCK_STATE_TEXT[block.state]} · ${formatBlockRange(block.startAt, block.endAt)}`}
                         >
-                          {getBlockText(block)}
-                          <span className="text-xs font-normal">{variant === "selectable" ? "Disponible" : timeRange}</span>
+                          <span className="w-full truncate">{BLOCK_STATE_TEXT[block.state]}</span>
+                          <span className="w-full truncate font-normal">{startTime}</span>
                         </Button>
                       </li>
                     );
