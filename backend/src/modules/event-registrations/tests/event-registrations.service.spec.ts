@@ -4,13 +4,51 @@ import type { EventRegistrationsRepository } from '../repositories/event-registr
 
 describe('EventRegistrationsService', () => {
   let service: EventRegistrationsService;
+  const create = vi.fn();
   const findByUserId = vi.fn();
 
   beforeEach(() => {
+    create.mockReset();
     findByUserId.mockReset();
     service = new EventRegistrationsService({
+      create,
       findByUserId,
     } as unknown as EventRegistrationsRepository);
+  });
+
+  it('genera y persiste un token QR hexadecimal de 64 caracteres', async () => {
+    create.mockImplementation(async (payload) => ({ id: 'reg-1', ...payload }));
+
+    const result = await service.createWithQrToken({
+      eventId: 'event-1',
+      userId: 'user-1',
+      statusId: 'status-1',
+    });
+
+    expect(create).toHaveBeenCalledWith({
+      eventId: 'event-1',
+      userId: 'user-1',
+      statusId: 'status-1',
+      qrToken: expect.stringMatching(/^[a-f0-9]{64}$/),
+    });
+    expect(result.qrToken).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it('genera tokens distintos para inscripciones diferentes', async () => {
+    create.mockImplementation(async (payload) => ({ id: 'reg-1', ...payload }));
+
+    const first = await service.createWithQrToken({
+      eventId: 'event-1',
+      userId: 'user-1',
+      statusId: 'status-1',
+    });
+    const second = await service.createWithQrToken({
+      eventId: 'event-2',
+      userId: 'user-1',
+      statusId: 'status-1',
+    });
+
+    expect(first.qrToken).not.toBe(second.qrToken);
   });
 
   it('devuelve las inscripciones del usuario mapeadas', async () => {
