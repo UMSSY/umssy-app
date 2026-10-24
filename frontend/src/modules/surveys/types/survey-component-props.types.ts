@@ -152,6 +152,11 @@ export interface SurveysTableProps {
   surveys: SurveySummary[];
   isLoading: boolean;
   hasError: boolean;
+  emptyMessage?: string;
+}
+
+export interface SurveyRowActionsProps {
+  survey: SurveySummary;
 }
 
 export interface SurveySummaryRowProps {
@@ -172,11 +177,6 @@ export interface SurveyQuestionResultCardProps {
   question: SurveyQuestionStatistic;
 }
 
-export interface SurveyStatisticsTableProps {
-  surveys: SurveySummary[];
-  isLoading?: boolean;
-  hasError?: boolean;
-}
 
 export interface SurveyAnalyticsViewProps {
   id: string;

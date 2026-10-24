@@ -16,10 +16,10 @@ describe("SurveysView", () => {
     vi.restoreAllMocks();
   });
 
-  it("CA1: muestra la página Encuesta de empleabilidad con el botón Crear encuesta", async () => {
+  it("CA1: muestra la página Historial de Encuestas con el botón Crear encuesta", async () => {
     renderWithQuery(<SurveysView />);
 
-    expect(screen.getByRole("heading", { name: "Encuesta de empleabilidad" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Historial de Encuestas" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Crear encuesta" })).toHaveAttribute("href", "/backoffice/surveys/create");
     expect(await screen.findByText("Encuesta de Empleabilidad")).toBeInTheDocument();
   });

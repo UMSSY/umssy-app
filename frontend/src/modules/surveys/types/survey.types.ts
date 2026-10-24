@@ -38,11 +38,17 @@ export interface CreatedSurvey {
   createdAt: string;
 }
 
+export interface SurveyCreator {
+  fullName: string;
+  email: string;
+}
+
 export interface SurveySummary {
   id: string;
   title: string;
   status: SurveyStatus;
   career: Career | null;
+  createdBy: SurveyCreator;
   academicPeriod: string | null;
   opensAt: string | null;
   closesAt: string | null;
