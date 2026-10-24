@@ -66,7 +66,7 @@ describe("profile components with missing data", () => {
       </>,
     );
 
-    expect(screen.getByText("Formación registrada")).toBeInTheDocument();
+    expect(screen.getByText("Formación académica")).toBeInTheDocument();
     expect(screen.getByText("Aún no registraste experiencia laboral.")).toBeInTheDocument();
   });
 });

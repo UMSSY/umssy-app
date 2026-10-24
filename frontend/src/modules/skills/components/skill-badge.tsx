@@ -4,7 +4,7 @@ import type { SkillBadgeProps } from "../types/skill-badge-props.types";
 
 export function SkillBadge({ skill, onRemove, disabled = false }: SkillBadgeProps) {
   return (
-    <span className="inline-flex max-w-full min-w-0 items-center gap-2 rounded-md border border-border-strong bg-surface px-3 py-1.5 text-[13px] font-semibold text-ink">
+    <span className="inline-flex max-w-full min-w-0 items-center gap-2 rounded-md border border-border-strong bg-surface px-3 py-1.5 text-sm font-semibold text-ink">
       <span title={skill.name} className="min-w-0 truncate">
         {skill.name}
       </span>

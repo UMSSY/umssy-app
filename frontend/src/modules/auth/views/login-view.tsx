@@ -42,17 +42,17 @@ export function LoginView() {
   }
 
   return (
-    <main className="grid min-h-dvh bg-surface lg:grid-cols-2">
+    <main className="grid min-h-dvh bg-surface lg:grid-cols-(--grid-template-columns-login)">
       <aside className="relative hidden lg:block">
-        <Image src="/images/campus-fcyt.webp" alt="" fill priority sizes="50vw" className="object-cover" />
+        <Image src="/images/campus-fcyt.webp" alt="" fill priority sizes="60vw" className="object-cover" />
       </aside>
-      <div className="flex min-h-dvh flex-col px-8 py-9 lg:px-12 xl:px-16">
+      <div className="flex min-h-dvh flex-col px-8 py-9 lg:px-10 xl:px-12">
         <Link href="/" className="flex items-center gap-2 self-start text-sm font-medium text-accent"><ArrowLeft className="size-4" aria-hidden="true" />Volver al inicio</Link>
         <div className="flex flex-1 items-center justify-center py-12">
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="w-full max-w-[440px]"
+        className="w-full max-w-login-form animate-in duration-300 ease-out fade-in slide-in-from-right-2"
       >
         <Link href="/" aria-label="UMSSY, volver al inicio" className="mb-8 inline-block"><BrandLogo priority className="w-56" /></Link>
         <h1 className="font-tight text-4xl font-extrabold text-ink">Iniciar sesión</h1>
@@ -117,8 +117,9 @@ export function LoginView() {
 
         <Button
           type="submit"
+          variant="institutional"
           disabled={isLoading}
-          className="h-12 w-full rounded-lg bg-accent text-base font-semibold text-surface hover:bg-brand-hover"
+          className="h-12 w-full text-base font-extrabold"
         >
           {isLoading ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
           {isLoading ? "Ingresando..." : "Iniciar sesión"}

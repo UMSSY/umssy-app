@@ -152,7 +152,7 @@ describe("PresentationView", () => {
     expect(await screen.findByLabelText(/Titular profesional/)).toHaveValue(
       "Desarrolladora web junior",
     );
-    expect(screen.getByText("Valeria Quispe")).toBeInTheDocument();
+    expect(screen.queryByText("Así se verá en tu perfil")).not.toBeInTheDocument();
   });
 
   it("saves the headline and about me and shows a confirmation", async () => {

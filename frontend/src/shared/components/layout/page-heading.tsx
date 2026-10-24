@@ -3,13 +3,13 @@ import type { PageHeadingProps } from "@/shared/types/page-heading-props.types";
 
 export function PageHeading({ title, description, actions, className }: PageHeadingProps) {
   return (
-    <div className={cn("flex flex-wrap items-start justify-between gap-4", className)}>
-      <div className="min-w-0 max-w-3xl">
-        <h1 className="font-tight text-3xl font-bold leading-tight tracking-tight text-ink">
+    <div className={cn("flex flex-wrap items-start justify-between gap-4 border-b border-accent/20 pb-5", className)}>
+      <div className="max-w-3xl min-w-0">
+        <h1 className="font-tight text-3xl leading-tight font-bold tracking-tight text-accent">
           {title}
         </h1>
         {description ? (
-          <p className="mt-2 max-w-[70ch] text-sm leading-relaxed text-text-secondary">
+          <p className="mt-2 max-w-prose text-sm leading-relaxed text-text-secondary">
             {description}
           </p>
         ) : null}

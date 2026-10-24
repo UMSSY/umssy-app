@@ -55,7 +55,7 @@ const expectOrientationStyle = (
   expect(input).toBeChecked();
   if (state === "saved") {
     expect(card).toHaveClass("border-border", "bg-surface-soft/50");
-    expect(input).toHaveClass("data-checked:bg-ink-soft");
+    expect(input).toHaveClass("data-checked:bg-accent");
   } else {
     expect(card).toHaveClass("border-accent", "bg-interaction/50");
     expect(input).toHaveClass("data-checked:bg-accent");
@@ -151,13 +151,7 @@ describe("OrientationConfigView", () => {
     fireEvent.click(checkbox("Orientación técnica"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
 
-    expect(
-      screen.getByRole("heading", { name: "¿Guardar cambios?" }),
-    ).toBeInTheDocument();
-    expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Sí, guardar cambios" }),
-    );
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
 
     expect(
       await screen.findByText(
@@ -185,9 +179,6 @@ describe("OrientationConfigView", () => {
 
     fireEvent.click(checkbox("Orientación profesional"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
-    fireEvent.click(
-      screen.getByRole("button", { name: "Sí, guardar cambios" }),
-    );
 
     expect(await screen.findByRole("button", { name: "Guardando..." })).toBeDisabled();
     expect(checkbox("Orientación profesional")).toHaveAttribute(
@@ -208,9 +199,6 @@ describe("OrientationConfigView", () => {
     await screen.findByRole("checkbox", { name: "Orientación profesional" });
     fireEvent.click(checkbox("Orientación profesional"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
-    fireEvent.click(
-      screen.getByRole("button", { name: "Sí, guardar cambios" }),
-    );
     await screen.findByText("Tipos de orientación actualizados correctamente");
 
     unmount();
@@ -232,9 +220,6 @@ describe("OrientationConfigView", () => {
     fireEvent.click(checkbox("Orientación profesional"));
     fireEvent.click(checkbox("Orientación técnica"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
-    fireEvent.click(
-      screen.getByRole("button", { name: "Sí, guardar cambios" }),
-    );
 
     expect(
       await screen.findByText(
@@ -249,9 +234,6 @@ describe("OrientationConfigView", () => {
     ).toBeEnabled();
 
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
-    fireEvent.click(
-      screen.getByRole("button", { name: "Sí, guardar cambios" }),
-    );
     await screen.findByText("Tipos de orientación actualizados correctamente");
     expect(updateMentorOrientationTypes).toHaveBeenNthCalledWith(2, [
       catalog[0].id,
@@ -307,10 +289,8 @@ describe("OrientationConfigView", () => {
 
     render(<OrientationConfigView />);
     await screen.findByRole("checkbox", { name: "Orientación técnica" });
+    fireEvent.click(checkbox("Orientación profesional"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
-    fireEvent.click(
-      screen.getByRole("button", { name: "Sí, guardar cambios" }),
-    );
 
     await screen.findByText("Tipos de orientación actualizados correctamente");
     expect(readStorage).not.toHaveBeenCalled();
@@ -327,4 +307,18 @@ describe("OrientationConfigView", () => {
       "/mentors/participation",
     );
   });
+  it("confirms leaving only when there are unsaved changes", async () => {
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+    expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled();
+    fireEvent.click(checkbox("Orientación profesional"));
+    fireEvent.click(screen.getByRole("link", { name: "Volver" }));
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "¿Descartar cambios?" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Seguir editando" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(checkbox("Orientación profesional")).toBeChecked();
+    expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
+  });
+
 });

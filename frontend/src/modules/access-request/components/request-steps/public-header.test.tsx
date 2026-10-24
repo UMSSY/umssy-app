@@ -79,7 +79,7 @@ describe("PublicHeader", () => {
     expect(within(header).getByText(/¿Ya tienes cuenta\?/)).toBeInTheDocument();
     const link = within(header).getByRole("link", { name: "Iniciar sesión" });
     expect(link).toHaveAttribute("href", "/login");
-    expect(header).toHaveClass("justify-end");
+    expect(header).toHaveClass("justify-between");
   });
 
   it("sin datos el clic no abre el diálogo ni llama a push (navega el Link)", async () => {
@@ -107,7 +107,7 @@ describe("PublicHeader", () => {
     expect(within(dialog).getByText("¿Salir del formulario?")).toBeInTheDocument();
     expect(within(dialog).getByText("Si sales, se perderán los datos ingresados")).toBeInTheDocument();
     expect(within(dialog).getByRole("button", { name: "Cancelar" })).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: "Salir" })).toHaveClass("bg-ink", "text-surface", "hover:bg-ink/90");
+    expect(within(dialog).getByRole("button", { name: "Salir" })).toHaveClass("bg-primary", "text-primary-foreground", "hover:bg-brand-hover");
     expect(push).not.toHaveBeenCalled();
   });
 

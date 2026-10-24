@@ -110,7 +110,7 @@ export class ReportsService {
       fileName: buildExportFileName(
         REJECTED_USERS_CSV_PREFIX,
         [filters.search],
-        todayIsoDate(),
+        filters.period ?? todayIsoDate(),
         CSV_EXTENSION,
       ),
       content: buildCsv(REJECTED_USERS_CSV_HEADERS, rows),
@@ -141,6 +141,11 @@ export class ReportsService {
   ): Promise<RejectedUserResponse[]> {
     const users = (await this.reportUsersRepository.findAll())
       .filter((user) => user.registrationStatus === 'REJECTED')
+      .filter(
+        (user) =>
+          filters.period === undefined ||
+          getAcademicPeriod(user.registeredAt) === filters.period,
+      )
       .filter((user) => containsSearch([user.email], filters.search));
 
     return sortByNewest(users).map(toRejectedUserResponse);

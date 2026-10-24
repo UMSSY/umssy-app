@@ -79,7 +79,7 @@ export function EducationDegreeCombobox({ id, value, degrees = [], error, disabl
           setOpen(true);
         }}
         onKeyDown={handleKeyDown}
-        className="h-12 w-full rounded-lg border-border bg-surface px-4 text-[15px] text-ink md:text-[15px]"
+        className="h-12 w-full rounded-lg border-border bg-surface px-4 text-base text-ink md:text-base"
       />
       {isOpen ? (
         <div className="absolute inset-x-0 top-full z-20 mt-1 overflow-hidden rounded-lg border border-border bg-surface shadow-md">
@@ -95,7 +95,7 @@ export function EducationDegreeCombobox({ id, value, degrees = [], error, disabl
                 variant="ghost"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => select(degree.name)}
-                className="h-auto min-h-10 w-full justify-start whitespace-normal break-words px-3 py-2 text-left font-normal aria-selected:bg-surface-soft"
+                className="h-auto min-h-10 w-full justify-start px-3 py-2 text-left font-normal break-words whitespace-normal aria-selected:bg-surface-soft"
               >
                 {degree.name}
               </Button>

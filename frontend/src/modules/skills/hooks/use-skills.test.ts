@@ -175,7 +175,7 @@ describe("useSkills", () => {
     const { result } = await renderLoadedHook();
     expect(result.current.selectedSkills).toEqual([PYTHON]);
 
-    let saveActionPromise: Promise<void> | undefined;
+    let saveActionPromise: Promise<boolean> | undefined;
     act(() => {
       saveActionPromise = result.current.saveSkills();
     });
