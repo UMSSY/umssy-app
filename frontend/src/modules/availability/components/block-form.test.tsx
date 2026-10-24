@@ -88,23 +88,80 @@ describe("BlockForm", () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
-  it("muestra el error de fin anterior al inicio junto al campo de fin", async () => {
-    const { onSubmit, user } = renderForm()
+  it("deshabilita las horas de fin iguales o anteriores a la de inicio", async () => {
+    const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "20:00", "18:00")
-    await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
+    await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
+    await selectTime(user, /Hora de inicio/, "20:00")
+    await user.click(screen.getByLabelText(/Hora de fin/))
 
-    const endSelect = screen.getByLabelText(/Hora de fin/)
-    const error = screen.getByText("La hora de fin debe ser posterior a la hora de inicio")
-    expect(endSelect).toHaveAttribute("aria-invalid", "true")
-    expect(endSelect).toHaveAttribute("aria-describedby", error.id)
-    expect(onSubmit).not.toHaveBeenCalled()
+    expect(await screen.findByRole("option", { name: "18:00" })).toHaveAttribute("aria-disabled", "true")
+    expect(screen.getByRole("option", { name: "20:00" })).toHaveAttribute("aria-disabled", "true")
+    expect(screen.getByRole("option", { name: "20:30" })).not.toHaveAttribute("aria-disabled", "true")
   })
 
-  it("muestra el error de inicio pasado junto al campo de inicio", async () => {
+  it("deshabilita las horas de inicio iguales o posteriores a la de fin", async () => {
+    const { user } = renderForm()
+
+    await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
+    await selectTime(user, /Hora de fin/, "12:00")
+    await user.click(screen.getByLabelText(/Hora de inicio/))
+
+    expect(await screen.findByRole("option", { name: "12:00" })).toHaveAttribute("aria-disabled", "true")
+    expect(screen.getByRole("option", { name: "15:00" })).toHaveAttribute("aria-disabled", "true")
+    expect(screen.getByRole("option", { name: "11:30" })).not.toHaveAttribute("aria-disabled", "true")
+  })
+
+  it("con la fecha de hoy deshabilita las horas de inicio y fin que ya pasaron", async () => {
+    const { user } = renderForm()
+
+    await user.click(screen.getByRole("button", { name: "Hoy, jueves, 8 de octubre de 2026" }))
+    await user.click(screen.getByLabelText(/Hora de inicio/))
+    expect(await screen.findByRole("option", { name: "08:00" })).toHaveAttribute("aria-disabled", "true")
+    expect(screen.getByRole("option", { name: "10:00" })).toHaveAttribute("aria-disabled", "true")
+    expect(screen.getByRole("option", { name: "10:30" })).not.toHaveAttribute("aria-disabled", "true")
+    await user.keyboard("{Escape}")
+
+    await user.click(screen.getByLabelText(/Hora de fin/))
+    expect(await screen.findByRole("option", { name: "09:30" })).toHaveAttribute("aria-disabled", "true")
+    expect(screen.getByRole("option", { name: "10:30" })).not.toHaveAttribute("aria-disabled", "true")
+  })
+
+  it("en otra fecha no deshabilita las horas de la mañana", async () => {
+    const { user } = renderForm()
+
+    await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
+    await user.click(screen.getByLabelText(/Hora de inicio/))
+
+    expect(await screen.findByRole("option", { name: "07:00" })).not.toHaveAttribute("aria-disabled", "true")
+    expect(screen.getByRole("option", { name: "22:00" })).toHaveAttribute("aria-disabled", "true")
+  })
+
+  it("limpia las horas elegidas si al cambiar a hoy ya pasaron", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "08:00", "09:00")
+    await user.click(screen.getByRole("button", { name: "Hoy, jueves, 8 de octubre de 2026" }))
+
+    expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("--:--")
+    expect(screen.getByLabelText(/Hora de fin/)).toHaveTextContent("--:--")
+  })
+
+  it("mantiene las horas elegidas si al cambiar de fecha siguen siendo válidas", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "15:00", "16:00")
+    await user.click(screen.getByRole("button", { name: "Hoy, jueves, 8 de octubre de 2026" }))
+
+    expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("15:00")
+    expect(screen.getByLabelText(/Hora de fin/)).toHaveTextContent("16:00")
+  })
+
+  it("muestra el error de inicio pasado si la hora pasa con el formulario abierto", async () => {
     const { onSubmit, user } = renderForm()
 
-    await fillForm(user, "Hoy, jueves, 8 de octubre de 2026", "08:00", "09:00")
+    await fillForm(user, "Hoy, jueves, 8 de octubre de 2026", "10:30", "11:00")
+    vi.setSystemTime(new Date("2026-10-08T14:45:00Z"))
     await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
 
     const error = screen.getByText("La hora de inicio ya pasó")
@@ -115,11 +172,13 @@ describe("BlockForm", () => {
   it("limpia el error del campo cuando el usuario lo corrige", async () => {
     const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "20:00", "18:00")
+    await fillForm(user, "Hoy, jueves, 8 de octubre de 2026", "10:30", "11:00")
+    vi.setSystemTime(new Date("2026-10-08T14:45:00Z"))
     await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
-    await selectTime(user, /Hora de fin/, "21:00")
+    await selectTime(user, /Hora de fin/, "12:00")
+    await selectTime(user, /Hora de inicio/, "11:00")
 
-    expect(screen.queryByText("La hora de fin debe ser posterior a la hora de inicio")).not.toBeInTheDocument()
+    expect(screen.queryByText("La hora de inicio ya pasó")).not.toBeInTheDocument()
   })
 
   it("muestra la fecha elegida en el campo Fecha", async () => {
