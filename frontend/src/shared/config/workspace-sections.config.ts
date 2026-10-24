@@ -50,7 +50,6 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     items: [
       { label: "Encuestas", href: "/backoffice/surveys" },
       { label: "Crear encuesta", href: "/backoffice/surveys/create" },
-      { label: "Estadísticas de encuestas", href: "/backoffice/surveys/statistics" },
     ],
   },
   { id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [] },

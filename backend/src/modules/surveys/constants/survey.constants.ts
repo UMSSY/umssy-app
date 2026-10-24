@@ -60,6 +60,7 @@ export const SURVEY_SUMMARY_SELECT = {
   closesAt: true,
   createdAt: true,
   career: { select: { id: true, title: true } },
+  createdBy: { select: { firstName: true, lastName: true, email: true } },
   _count: { select: { questions: true, responses: true } },
 } as const;
 
