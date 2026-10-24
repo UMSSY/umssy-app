@@ -28,9 +28,9 @@ export function MatchingView() {
   } = useMatching();
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-6">
+    <main className="mx-auto flex size-full max-w-7xl flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <PageHeading title="Buscar candidatos por afinidad" description="Compara candidatos para cada vacante." />
+        <PageHeading title="Buscar candidatos" description="Selecciona una vacante y compara la afinidad de cada candidato. Vista de demostración." />
       </div>
 
       <VacancyTabs vacancies={vacancies} activeVacancyId={vacancyId} onChange={selectVacancy} />
@@ -68,6 +68,6 @@ export function MatchingView() {
           />
         </div>
       </div>
-    </div>
+    </main>
   );
 }

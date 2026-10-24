@@ -28,7 +28,7 @@ export function ManagementMenu({ value, onChange }: ManagementMenuProps) {
         render={
           <Button
             type="button"
-            className="group h-auto gap-2 rounded-md bg-ink px-4 py-2.5 text-sm font-semibold text-surface hover:bg-ink-soft aria-expanded:bg-ink-soft aria-expanded:text-surface"
+            className="group h-auto gap-2 rounded-md bg-secondary px-4 py-2.5 text-sm font-semibold text-secondary-foreground hover:bg-muted aria-expanded:bg-muted aria-expanded:text-secondary-foreground"
           />
         }
       >

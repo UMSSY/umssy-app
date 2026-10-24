@@ -25,7 +25,7 @@ export function WorkspaceSectionMenu({ pathname, roles }: WorkspaceSectionMenuPr
       <DropdownMenuContent align="start" sideOffset={12} className="w-72 p-2">
         {groups.map((group) => (
           <DropdownMenuGroup key={group}>
-            <DropdownMenuLabel className="px-3 pb-1 pt-3 text-xs">{group}</DropdownMenuLabel>
+            <DropdownMenuLabel className="px-3 pt-3 pb-1 text-xs">{group}</DropdownMenuLabel>
             {section.items.filter((item) => (item.group ?? "Secciones") === group).map((item) => (
               <DropdownMenuItem key={item.href} render={<Link href={item.href} />} aria-current={pathname === item.href ? "page" : undefined} className="min-h-10 gap-3 px-3 py-2 text-sm aria-[current=page]:bg-interaction aria-[current=page]:font-semibold aria-[current=page]:text-accent">
                 <span className="flex-1">{item.label}</span>
