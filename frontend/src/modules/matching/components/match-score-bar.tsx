@@ -2,7 +2,9 @@
 
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
+import { MATCH_SCORE_LABEL } from "../constants/match-score.constants";
 import type { MatchScoreProps } from "../types/match-score.types";
+import { normalizeMatchScore } from "../utils/normalize-match-score";
 
 const SIZE_CLASSES = {
   sm: "[&_[data-slot=progress-track]]:h-2",
@@ -11,21 +13,19 @@ const SIZE_CLASSES = {
 } as const;
 
 export function MatchScoreBar({ score, showLabel = true, size = "md", className }: MatchScoreProps) {
-  const normalizedScore = Number.isFinite(score)
-    ? Math.round(Math.min(Math.max(score, 0), 100))
-    : 0;
+  const normalizedScore = normalizeMatchScore(score);
 
   return (
     <div className={cn("flex w-full flex-col gap-1.5", className)}>
       {showLabel && (
         <div className="flex items-center justify-between text-sm font-medium text-foreground">
-          <span>Compatibilidad</span>
+          <span>{MATCH_SCORE_LABEL}</span>
           <span className="font-semibold">{normalizedScore}%</span>
         </div>
       )}
       <Progress
         value={normalizedScore}
-        aria-label="Compatibilidad"
+        aria-label={MATCH_SCORE_LABEL}
         className={cn("w-full [&_[data-slot=progress-indicator]]:border [&_[data-slot=progress-indicator]]:border-notice-border [&_[data-slot=progress-indicator]]:bg-gold", SIZE_CLASSES[size])}
       />
     </div>
