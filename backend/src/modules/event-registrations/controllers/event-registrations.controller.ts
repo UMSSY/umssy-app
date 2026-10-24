@@ -1,3 +1,6 @@
+import { Roles } from '../../../common/decorators/roles.decorator.js';
+import { RolesGuard } from '../../../common/guards/roles.guard.js';
+import { SupportEventIdSchema } from '../requests/support-event-id.request.js';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
@@ -59,4 +62,17 @@ export class EventRegistrationsController {
   findMine(@CurrentUser() user: AuthenticatedUser) {
     return this.registrationsService.findMine(user.id);
   }
+  @Post('event-registrations/support/:eventId')
+  @UseGuards(RolesGuard)
+  @Roles('titulado')
+  @ApiOperation({ summary: 'Apoyar una propuesta de taller con el usuario de la sesión' })
+  @ApiParam({ name: 'eventId', format: 'uuid' })
+  @HttpCode(201)
+  support(
+    @Param('eventId', new ZodValidationPipe(SupportEventIdSchema, () => new ValidationException())) eventId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.registrationsService.support(eventId, userId);
+  }
+
 }

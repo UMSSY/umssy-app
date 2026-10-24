@@ -1,3 +1,11 @@
+import { calculateProgressPercent, calculateSupportsRemaining } from '../../../common/utils/support-progress.js';
+import { COMMUNITY_ORIGIN_TITLE, EXPIRED_STATUS_TITLE, VOTING_STATUS_TITLES } from '../../events/constants/events.constants.js';
+import { EventNotFoundException } from '../../events/exceptions/event-not-found.exception.js';
+import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
+import { EventNotSupportableException } from '../exceptions/event-not-supportable.exception.js';
+import { ProposalExpiredException } from '../exceptions/proposal-expired.exception.js';
+import type { EventSupportContext } from '../types/event-support-context.types.js';
+import type { SupportResponse } from '../types/support-response.types.js';
 import { EventRegistrationsMapper } from '../mappers/event-registrations.mapper.js';
 import type { CreateEventRegistrationPayload, MyRegistrationResponse } from '../types/event-registrations.types.js';
 import { Injectable } from '@nestjs/common';
@@ -142,5 +150,113 @@ export class EventRegistrationsService {
       },
       orderBy: { event: { eventDate: 'asc' } },
     });
+  }
+  async support(eventId: string, userId: string): Promise<SupportResponse> {
+    const event = await this.findEventForSupport(eventId);
+
+    if (!event) {
+      throw new EventNotFoundException(eventId);
+    }
+
+    if (event.statusTitle === EXPIRED_STATUS_TITLE) {
+      throw new ProposalExpiredException();
+    }
+
+    if (
+      event.originTitle !== COMMUNITY_ORIGIN_TITLE ||
+      !VOTING_STATUS_TITLES.includes(event.statusTitle)
+    ) {
+      throw new EventNotSupportableException();
+    }
+
+    if (event.votingDeadline && event.votingDeadline.getTime() <= Date.now()) {
+      throw new ProposalExpiredException();
+    }
+
+    const { created } = await this.createSupport(
+      eventId,
+      userId,
+    );
+
+    if (!created) {
+      throw new AlreadySupportedException();
+    }
+
+    const updated =
+      await this.findEventForSupport(eventId);
+    const supportCount = updated?.supportCount ?? event.supportCount + 1;
+
+    return {
+      eventId,
+      supportCount,
+      supportThreshold: event.supportThreshold,
+      supportsRemaining: calculateSupportsRemaining(
+        supportCount,
+        event.supportThreshold,
+      ),
+      progressPercent: calculateProgressPercent(
+        supportCount,
+        event.supportThreshold,
+      ),
+      hasSupported: true,
+    };
+  }
+  async findEventForSupport(
+    eventId: string,
+  ): Promise<EventSupportContext | null> {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      select: {
+        id: true,
+        votingDeadline: true,
+        supportThreshold: true,
+        status: { select: { title: true } },
+        origin: { select: { title: true } },
+        _count: {
+          select: {
+            registrations: {
+              where: {
+                cancelledAt: null,
+                status: { title: REGISTRATION_STATUS_TITLES.confirmed },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!event) return null;
+
+    return {
+      id: event.id,
+      statusTitle: event.status.title,
+      originTitle: event.origin.title,
+      votingDeadline: event.votingDeadline,
+      supportThreshold: event.supportThreshold,
+      supportCount: event._count.registrations,
+    };
+  }
+
+  async createSupport(
+    eventId: string,
+    userId: string,
+  ): Promise<{ created: boolean }> {
+    try {
+      await this.prisma.eventRegistration.create({
+        data: {
+          event: { connect: { id: eventId } },
+          user: { connect: { id: userId } },
+          status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
+          qrToken: randomBytes(32).toString('hex'),
+        },
+        select: { id: true },
+      });
+      return { created: true };
+    } catch (error) {
+      if ((error as { code?: string }).code === 'P2002') {
+        return { created: false };
+      }
+      throw error;
+    }
   }
 }

@@ -4,7 +4,7 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { escapePgWildcards } from '../../../common/utils/escape-pg-wildcards.js';
 import type { Prisma } from '../../../prisma/client.js';
 import type { FindEventsPayload, FindEventsResponse, EventWithRelations } from '../types/events.types.js';
-import { PUBLISHED_STATUS_TITLE, CONFIRMED_REGISTRATION_TITLE } from '../constants/events.constants.js';
+import { CATALOG_STATUS_TITLES, PUBLISHED_STATUS_TITLE, CONFIRMED_REGISTRATION_TITLE } from '../constants/events.constants.js';
 import {
   mapEventToResponse,
   mapEventsToListResponse,
@@ -15,11 +15,54 @@ import type {
   EventsListResponse,
 } from '../types/events.types.js';
 
+function buildSelect(userId?: string): Prisma.EventSelect {
+  return {
+    coverMimeType: true,
+    id: true,
+    title: true,
+    description: true,
+    eventDate: true,
+    startTime: true,
+    endTime: true,
+    location: true,
+    capacity: true,
+    statusId: true,
+    instructorName: true,
+    modalityId: true,
+    supportThreshold: true,
+    votingDeadline: true,
+    status: { select: { title: true } },
+    origin: { select: { title: true } },
+    category: { select: { id: true, name: true } },
+    _count: {
+      select: {
+        registrations: {
+          where: {
+            cancelledAt: null,
+            status: { title: CONFIRMED_REGISTRATION_TITLE },
+          },
+        },
+      },
+    },
+    ...(userId !== undefined && {
+      registrations: {
+        where: {
+          userId,
+          cancelledAt: null,
+          status: { title: CONFIRMED_REGISTRATION_TITLE },
+        },
+        select: { id: true },
+        take: 1,
+      },
+    }),
+  };
+}
+
 @Injectable()
 export class EventsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(payload: GetEventsPayload): Promise<EventsListResponse> {
+  async findAll(payload: GetEventsPayload, userId?: string): Promise<EventsListResponse> {
     const { page, limit, categoryId, statusId, search } = payload;
     const offset = (page - 1) * limit;
     const isPublishedOnly = statusId === undefined;
@@ -30,6 +73,7 @@ export class EventsService {
       isPublishedOnly,
       ...(payload.includeProposals && { includeProposals: true }),
       search,
+      userId,
       skip: offset,
       take: limit,
     });
@@ -37,8 +81,8 @@ export class EventsService {
     return mapEventsToListResponse(items, total, page, limit);
   }
 
-  async findOne(id: string): Promise<EventDetailResponse> {
-    const event = await this.findById(id);
+  async findOne(id: string, userId?: string): Promise<EventDetailResponse> {
+    const event = await this.findById(id, userId);
 
     if (!event) {
       throw new EventNotFoundException(id);
@@ -54,7 +98,7 @@ export class EventsService {
     };
   }
   async findAndCount(payload: FindEventsPayload): Promise<FindEventsResponse> {
-    const { categoryId, statusId, isPublishedOnly, search, skip, take } =
+    const { categoryId, statusId, isPublishedOnly, search, userId, skip, take } =
       payload;
 
     const where: Prisma.EventWhereInput = {
@@ -62,7 +106,7 @@ export class EventsService {
       ...(statusId !== undefined
         ? { statusId }
         : isPublishedOnly
-          ? { status: { title: payload.includeProposals ? { in: [PUBLISHED_STATUS_TITLE, 'En votación'] } : PUBLISHED_STATUS_TITLE } }
+          ? { status: { title: payload.includeProposals ? { in: CATALOG_STATUS_TITLES } : PUBLISHED_STATUS_TITLE } }
           : {}),
       ...(search !== undefined && {
         title: {
@@ -72,43 +116,9 @@ export class EventsService {
       }),
     };
 
-    const select = {
-      coverMimeType: true,
-      status: { select: { title: true } },
-      supportThreshold: true,
-      votingDeadline: true,
-      id: true,
-      title: true,
-      description: true,
-      eventDate: true,
-      startTime: true,
-      endTime: true,
-      location: true,
-      capacity: true,
-      statusId: true,
-      instructorName: true,
-      modalityId: true,
-      category: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      _count: {
-        select: {
-          registrations: {
-            where: {
-              cancelledAt: null,
-              status: { title: CONFIRMED_REGISTRATION_TITLE },
-            },
-          },
-        },
-      },
-    } as const;
-
     const [items, total] = await this.prisma.$transaction([
       this.prisma.event.findMany({
-        select,
+        select: buildSelect(userId),
         where,
         orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }],
         skip,
@@ -125,48 +135,21 @@ export class EventsService {
 
   async findById(
     id: string,
+    userId?: string,
   ): Promise<
     (EventWithRelations & { modality: { id: string; title: string } }) | null
   > {
     const event = await this.prisma.event.findUnique({
       where: { id },
       select: {
-        coverMimeType: true,
-        status: { select: { title: true } },
-        supportThreshold: true,
-        votingDeadline: true,
-        id: true,
-        title: true,
-        description: true,
-        eventDate: true,
-        startTime: true,
-        endTime: true,
-        location: true,
-        capacity: true,
-        statusId: true,
-        instructorName: true,
-        modalityId: true,
+        ...buildSelect(userId),
         modality: { select: { id: true, title: true } },
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            registrations: {
-              where: {
-                cancelledAt: null,
-                status: { title: CONFIRMED_REGISTRATION_TITLE },
-              },
-            },
-          },
-        },
       },
     });
 
-    return event;
+    return event as unknown as
+      | (EventWithRelations & { modality: { id: string; title: string } })
+      | null;
   }
 
   async findForRegistration(id: string, tx: Prisma.TransactionClient = this.prisma) {

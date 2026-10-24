@@ -1,3 +1,4 @@
+import { RolesGuard } from '../../common/guards/roles.guard.js';
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module.js';
 import { EventRegistrationsController } from './controllers/event-registrations.controller.js';
@@ -7,7 +8,7 @@ import { EventsModule } from '../events/index.js';
 @Module({
   imports: [AuthModule, EventsModule],
   controllers: [EventRegistrationsController],
-  providers: [EventRegistrationsService],
+  providers: [EventRegistrationsService, RolesGuard],
   exports: [EventRegistrationsService],
 })
 export class EventRegistrationsModule {}

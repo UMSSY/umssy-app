@@ -8,6 +8,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { EventRegistrationsService } from '../services/event-registrations.service.js';
+import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
+import { ProposalExpiredException } from '../exceptions/proposal-expired.exception.js';
+import { EventNotSupportableException } from '../exceptions/event-not-supportable.exception.js';
 import { EventsService } from '../../events/index.js';
 import { EventNotFoundException } from '../../events/exceptions/event-not-found.exception.js';
 import { EventRegistrationsModule } from '../event-registrations.module.js';
@@ -62,6 +66,30 @@ const ERROR_CASES = [
 ] as const;
 
 describe('registration HTTP contract', () => {
+  it('keeps the support route and uses the authenticated identity', async () => {
+    const support = vi.spyOn(app.get(EventRegistrationsService), 'support').mockResolvedValue({ eventId: EVENT_ID, supportCount: 1, supportThreshold: 8, supportsRemaining: 7, progressPercent: 12.5, hasSupported: true });
+    await request(app.getHttpServer()).post(`/api/event-registrations/support/${EVENT_ID}?userId=forged`)
+      .set('Authorization', `Bearer ${token}`).expect(201);
+    expect(support).toHaveBeenCalledWith(EVENT_ID, USER_ID);
+  });
+  it('protects support with authentication, role and parameter validation', async () => {
+    const support = vi.spyOn(app.get(EventRegistrationsService), 'support');
+    await request(app.getHttpServer()).post(`/api/event-registrations/support/${EVENT_ID}`).expect(401);
+    await request(app.getHttpServer()).post('/api/event-registrations/support/invalid').set('Authorization', `Bearer ${token}`).expect(400);
+    findFirst.mockResolvedValue({ id: USER_ID, email: 'user@example.test', isActive: true, roles: [{ role: { name: 'empresa' } }] });
+    await request(app.getHttpServer()).post(`/api/event-registrations/support/${EVENT_ID}`).set('Authorization', `Bearer ${token}`).expect(403);
+    expect(support).not.toHaveBeenCalled();
+  });
+  it.each([
+    [AlreadySupportedException, 'ALREADY_SUPPORTED'],
+    [ProposalExpiredException, 'PROPOSAL_EXPIRED'],
+    [EventNotSupportableException, 'EVENT_NOT_SUPPORTABLE'],
+  ] as const)('returns the support error contract for %s', async (Exception, code) => {
+    vi.spyOn(app.get(EventRegistrationsService), 'support').mockRejectedValue(new Exception());
+    const response = await request(app.getHttpServer()).post(`/api/event-registrations/support/${EVENT_ID}`).set('Authorization', `Bearer ${token}`).expect(409);
+    expect(response.body).toMatchObject({ statusCode: 409, ok: false, code, data: null });
+  });
+
   it.each(ERROR_CASES)('returns the complete contract for %s', async (code, statusCode, detail) => {
     let method: 'post' | 'get' | 'delete' = 'post';
     let url = `/api/events/${EVENT_ID}/registrations`;
