@@ -16,6 +16,9 @@ const STICKY_MOBILE_WIDTH_CLASSES =
 export const STICKY_HEAD_CLASSES = `sticky left-0 z-10 bg-surface-soft ${STICKY_MOBILE_WIDTH_CLASSES}`;
 export const STICKY_CELL_CLASSES = `sticky left-0 z-10 bg-surface group-hover:bg-surface-soft ${STICKY_MOBILE_WIDTH_CLASSES}`;
 export const TABLE_CONTAINER_CLASSES = "@container overflow-hidden rounded-lg border border-border bg-surface";
+export const REGISTERED_USERS_TABLE_MIN_HEIGHT_CLASSES = "min-h-[31rem]";
+export const REJECTED_USERS_TABLE_MIN_HEIGHT_CLASSES = "min-h-[49rem]";
+export const REPORT_HISTORY_TABLE_MIN_HEIGHT_CLASSES = "min-h-[31rem] md:min-h-[36rem]";
 
 export const REJECTION_REASON_SHORT_LABELS: Record<RejectionReason, string> = {
   "Documento ilegible": "Documento ilegible",
