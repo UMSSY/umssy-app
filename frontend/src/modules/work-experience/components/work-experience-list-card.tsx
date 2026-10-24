@@ -5,22 +5,25 @@ import type { WorkExperienceListCardProps } from './work-experience-list-card.ty
 import { formatWorkPeriod } from '../utils/format-work-period';
 
 export function WorkExperienceListCard({
-  experiences,
+  experiences = [],
+  isLoading = false,
+  isBusy = false,
+  onAdd,
   onEdit,
   onDelete,
-  onAdd,
-  isLoading,
 }: WorkExperienceListCardProps) {
   if (isLoading) {
     return <section className="font-medium text-slate-700">Cargando experiencia laboral...</section>;
   }
+
+  const safeExperiences = experiences ?? [];
 
   return (
     <div className="space-y-6">
       {/* Cabecera de la sección con el botón de añadir experiencia */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900">Experiencia laboral</h3>
+          <h3 className="wrap-anywhere text-lg font-semibold text-slate-900">Experiencia laboral</h3>
           <p className="text-sm text-slate-600">Añade tu trayectoria y proyectos profesionales.</p>
         </div>
         {onAdd && (
@@ -30,16 +33,16 @@ export function WorkExperienceListCard({
         )}
       </div>
 
-      {experiences.length === 0 ? (
-        <section className="text-sm text-slate-600 italic">Aún no has registrado experiencia laboral.</section>
+      {safeExperiences.length === 0 ? (
+        <section className="text-sm italic text-slate-600">Aún no registraste experiencia laboral.</section>
       ) : (
         <div className="relative ml-2 space-y-8 border-l border-slate-300 pl-6">
-          {experiences.map((experience, index) => {
+          {safeExperiences.map((experience, index) => {
             const periodText = formatWorkPeriod(experience.startDate, experience.endDate, experience.isCurrent);
-            
+
             const rawExperience = experience as Record<string, unknown>;
             let skillsList = (rawExperience.skills as Array<string | { name: string }>) || [];
-            
+
             if (skillsList.length === 0 && experience.description) {
               const text = experience.description.toLowerCase();
               const detected: string[] = [];
@@ -56,19 +59,13 @@ export function WorkExperienceListCard({
 
             return (
               <div key={experience.id ?? index} className="group relative">
-                <span className="absolute top-1.5 -left-[31px] size-3 rounded-full border-2 border-slate-400 bg-white" />
+                <span className="absolute -left-[31px] top-1.5 size-3 rounded-full border-2 border-slate-400 bg-white" />
 
                 <div className="flex items-start justify-between">
                   <div>
-                    <h4 className="text-base font-semibold text-slate-900">
-                      {experience.position}
-                    </h4>
-                    <p className="text-sm font-medium text-slate-700">
-                      {experience.company}
-                    </p>
-                    <p className="mt-0.5 text-xs font-medium text-slate-600">
-                      {periodText}
-                    </p>
+                    <h4 className="font-semibold text-slate-900 text-base">{experience.position}</h4>
+                    <p className="font-medium text-slate-700 text-sm">{experience.company}</p>
+                    <p className="mt-0.5 text-xs font-medium text-slate-600">{periodText}</p>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -97,9 +94,7 @@ export function WorkExperienceListCard({
                 </div>
 
                 {experience.description && (
-                  <p className="mt-3 text-sm whitespace-pre-line text-slate-900">
-                    {experience.description}
-                  </p>
+                  <p className="mt-3 text-slate-900 text-sm whitespace-pre-line">{experience.description}</p>
                 )}
 
                 {/* Chips de Habilidades Detectadas */}
