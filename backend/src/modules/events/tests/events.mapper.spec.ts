@@ -135,6 +135,11 @@ describe('mapEventsToListResponse', () => {
 });
 
 describe('mapEventToResponse - apoyos', () => {
+  it.each(['Votacion', 'En votación'])('preserves the HU4 response for status %s and the proposal cover', (title) => {
+    const record = buildRecord({ status: { title }, coverMimeType: 'image/png' });
+    expect(mapEventToResponse(record, 15)).toMatchObject({ status: 'voting', coverUrl: `/events/${record.id}/cover` });
+  });
+
   it('calcula el progreso de una propuesta en votación', () => {
     const record = buildRecord({
       status: { title: 'Votacion' },
@@ -146,7 +151,7 @@ describe('mapEventToResponse - apoyos', () => {
     });
 
     expect(mapEventToResponse(record, 26)).toMatchObject({
-      status: 'Votacion',
+      status: 'voting',
       origin: 'Comunidad',
       supportCount: 14,
       supportThreshold: 20,

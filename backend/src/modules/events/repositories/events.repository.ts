@@ -10,12 +10,14 @@ import type {
 
 import {
   CATALOG_STATUS_TITLES,
+  PUBLISHED_STATUS_TITLE,
   CONFIRMED_REGISTRATION_TITLE,
 } from '../constants/events.constants.js';
 export { PUBLISHED_STATUS_TITLE } from '../constants/events.constants.js';
 
 function buildSelect(userId?: string): Prisma.EventSelect {
   return {
+    coverMimeType: true,
     id: true,
     title: true,
     description: true,
@@ -69,7 +71,7 @@ export class EventsRepository {
       ...(statusId !== undefined
         ? { statusId }
         : isPublishedOnly
-          ? { status: { title: { in: CATALOG_STATUS_TITLES } } }
+          ? { status: { title: payload.includeProposals ? { in: CATALOG_STATUS_TITLES } : PUBLISHED_STATUS_TITLE } }
           : {}),
       ...(search !== undefined && {
         title: {

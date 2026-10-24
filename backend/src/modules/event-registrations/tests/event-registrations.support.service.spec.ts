@@ -57,6 +57,13 @@ describe('EventRegistrationsService.support', () => {
     });
   });
 
+  it('accepts a proposal created by HU4 with its accented voting status', async () => {
+    findEventForSupport.mockResolvedValue(buildContext({ statusTitle: 'En votación' }));
+    createSupport.mockResolvedValue({ created: true });
+    await expect(service.support('event-1', 'user-1')).resolves.toMatchObject({ hasSupported: true });
+    expect(createSupport).toHaveBeenCalledWith('event-1', 'user-1');
+  });
+
   it('suma 1 al contador si no puede releer el evento', async () => {
     findEventForSupport
       .mockResolvedValueOnce(buildContext({ supportCount: 14 }))

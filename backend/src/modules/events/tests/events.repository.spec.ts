@@ -33,20 +33,30 @@ describe('EventsRepository', () => {
     expect(result).toEqual({ items: [], total: 0 });
   });
 
-    it('applies catalog status filter (published, voting, expired) when isPublishedOnly is true and statusId is undefined', async () => {
+    it('includes proposal statuses only when explicitly requested', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
 
-    await repository.findAndCount({ isPublishedOnly: true, skip: 0, take: 10 });
+    await repository.findAndCount({ isPublishedOnly: true, includeProposals: true, skip: 0, take: 10 });
 
     const expectedWhere = {
-      status: { title: { in: ['Publicado', 'Votacion', 'Vencido'] } },
+      status: { title: { in: ['Publicado', 'Votacion', 'En votación', 'Vencido'] } },
     };
 
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expectedWhere }),
     );
     expect(prismaMock.event.count).toHaveBeenCalledWith({ where: expectedWhere });
+  });
+
+  it('keeps the public catalogue published-only and selects proposal covers', async () => {
+    prismaMock.event.findMany.mockResolvedValue([]);
+    prismaMock.event.count.mockResolvedValue(0);
+    await repository.findAndCount({ isPublishedOnly: true, skip: 0, take: 10 });
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { status: { title: 'Publicado' } },
+      select: expect.objectContaining({ coverMimeType: true }),
+    }));
   });
 
   it('applies only search filter with case-insensitive partial match to where', async () => {

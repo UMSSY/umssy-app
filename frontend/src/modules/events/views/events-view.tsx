@@ -19,7 +19,7 @@ import { EventsSearchInput } from '../components/events-search-input';
 import { CategoryFilterChips } from '@/modules/event-categories';
 import type { EventItem } from '../types/event.types';
 
-export function EventsView() {
+export function EventsView({ initialProposalId = null }: { initialProposalId?: string | null }) {
   const { searchInput, setSearchInput, categoryId, setCategoryId, filters } =
     useEventsFilters();
   const {
@@ -30,7 +30,7 @@ export function EventsView() {
   } = useEventCategories();
   const { events, error, hasMore, isLoading, isLoadingMore, loadMore, retry } =
     useEvents(filters);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(initialProposalId);
   const viewRef = useRef<HTMLElement>(null);
 
   const handleSelectEvent = (selectedEvent: EventItem) => {
@@ -38,6 +38,8 @@ export function EventsView() {
   };
 
   const detail = useEvent(selectedEventId);
+  const visibleEvents = initialProposalId && detail.event?.id === initialProposalId && !filters.search.trim() && !filters.categoryId && !events.some((event) => event.id === initialProposalId)
+    ? [detail.event, ...events] : events;
 
   useEffect(() => {
     if (!selectedEventId) return;
@@ -107,7 +109,7 @@ export function EventsView() {
 
         <section aria-label="Listado de talleres">
           <div className="grid grid-cols-(--grid-template-columns-event-cards) gap-5">
-            {events.map((eventItem) => (
+            {visibleEvents.map((eventItem) => (
               <EventCard
                 key={eventItem.id}
                 event={eventItem}
@@ -121,7 +123,7 @@ export function EventsView() {
               Cargando talleres...
             </p>
           )}
-          {!isLoading && !error && events.length === 0 && (
+          {!isLoading && !error && visibleEvents.length === 0 && (
             <p className="py-10 text-center text-text-secondary">
               {filters.search.trim() || filters.categoryId
                 ? 'No se encontraron talleres con esos filtros. Prueba otra búsqueda o categoría.'

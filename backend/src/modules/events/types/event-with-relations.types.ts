@@ -29,4 +29,4 @@ export type EventWithRelations = Prisma.EventGetPayload<{
       };
     };
   };
-}> & { registrations?: { id: string }[] };
+}> & { registrations?: { id: string }[]; coverMimeType?: string | null };

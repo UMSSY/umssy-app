@@ -1,3 +1,4 @@
+import { VOTING_STATUS_TITLES } from '../constants/events.constants.js';
 import {
   calculateProgressPercent,
   calculateSupportsRemaining,
@@ -17,6 +18,7 @@ export function mapEventToResponse(
   const hasThreshold = threshold !== null && threshold > 0;
 
   return {
+    ...(record.coverMimeType && { coverUrl: '/events/' + record.id + '/cover' }),
     id: record.id,
     title: record.title,
     description: record.description,
@@ -34,7 +36,7 @@ export function mapEventToResponse(
       name: record.category.name,
     },
     statusId: record.statusId,
-    status: record.status.title,
+    status: VOTING_STATUS_TITLES.includes(record.status.title) ? 'voting' : record.status.title,
     origin: record.origin.title,
     supportCount,
     supportThreshold: hasThreshold ? threshold : null,
