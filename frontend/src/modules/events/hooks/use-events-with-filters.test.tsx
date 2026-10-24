@@ -48,7 +48,7 @@ describe('useEvents with filters', () => {
       expect(eventsService.getEvents).toHaveBeenCalledWith(
         {
           page: 1,
-          limit: 50,
+          includeProposals: true, limit: 50,
           search: 'React',
           categoryId: 'category-1',
         },
@@ -73,7 +73,7 @@ describe('useEvents with filters', () => {
       expect(eventsService.getEvents).toHaveBeenCalledWith(
         {
           page: 1,
-          limit: 50,
+          includeProposals: true, limit: 50,
         },
         expect.any(AbortSignal),
       );
@@ -112,7 +112,7 @@ describe('useEvents with filters', () => {
       expect(eventsService.getEvents).toHaveBeenCalledWith(
         {
           page: 1,
-          limit: 50,
+          includeProposals: true, limit: 50,
           search: 'Python',
           categoryId: 'category-2',
         },

@@ -7,7 +7,7 @@ import {
 import {
   COMMUNITY_ORIGIN_TITLE,
   EXPIRED_STATUS_TITLE,
-  VOTING_STATUS_TITLE,
+  VOTING_STATUS_TITLES,
 } from '../../events/constants/events.constants.js';
 import { EventNotFoundException } from '../../events/exceptions/event-not-found.exception.js';
 import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
@@ -54,7 +54,7 @@ export class EventRegistrationsService {
 
     if (
       event.originTitle !== COMMUNITY_ORIGIN_TITLE ||
-      event.statusTitle !== VOTING_STATUS_TITLE
+      !VOTING_STATUS_TITLES.includes(event.statusTitle)
     ) {
       throw new EventNotSupportableException();
     }

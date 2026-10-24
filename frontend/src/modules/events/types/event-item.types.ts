@@ -1,6 +1,10 @@
 import type { EventCategoryItem } from '@/modules/event-categories';
 
 export interface EventItem {
+  coverUrl?: string | null;
+  status?: string;
+  supportThreshold?: number | null;
+  votingDeadline?: string | null;
   id: string;
   title: string;
   category: EventCategoryItem;

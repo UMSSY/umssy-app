@@ -3,7 +3,6 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { BEARER_PREFIX } from '../constants/auth.constants.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
-import { EOF } from 'node:dns';
 
 @Injectable()
 export class OptionalJwtAuthGuard implements CanActivate {
