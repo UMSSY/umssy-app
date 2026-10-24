@@ -154,7 +154,20 @@ describe('SurveysService', () => {
     repositories.surveys.existsWithTitle.mockResolvedValue(true);
 
     await expect(
-      service.create('admin-1', { title: 'Borrador', status: 'draft', questions: [] }, NOW),
+      service.create(
+        'admin-1',
+        {
+          title: 'Borrador',
+          description: undefined,
+          careerId: undefined,
+          academicPeriod: undefined,
+          opensAt: undefined,
+          closesAt: undefined,
+          status: 'draft',
+          questions: [],
+        },
+        NOW,
+      ),
     ).rejects.toBeInstanceOf(SurveyTitleAlreadyExistsException);
   });
 
@@ -236,9 +249,9 @@ describe('SurveysService', () => {
       id: 'survey-1',
       title: 'Encuesta IA',
       description: null,
-      status: 'PUBLISHED',
+      status: 'published',
       academicPeriod: '1-2026',
-      career: { id: CAREER_ID, name: 'Informática' },
+      career: { id: CAREER_ID, title: 'Informática' },
       opensAt: NOW.toISOString(),
       closesAt: NOW.toISOString(),
       totalResponses: 10,

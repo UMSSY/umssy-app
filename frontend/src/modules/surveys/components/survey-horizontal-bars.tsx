@@ -1,10 +1,5 @@
 import { cn } from "cn";
-import type { SurveyOptionStatistic } from "../types/survey.types";
-
-interface SurveyHorizontalBarsProps {
-  options: SurveyOptionStatistic[];
-  highlightedId?: string;
-}
+import type { SurveyHorizontalBarsProps } from "../types/survey-component-props.types";
 
 export function SurveyHorizontalBars({ options, highlightedId }: SurveyHorizontalBarsProps) {
   return (
