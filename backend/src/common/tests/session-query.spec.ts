@@ -1,18 +1,19 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../prisma/prisma.service.js';
-import { SessionRepository } from '../repositories/session.repository.js';
+import { SessionService } from '../services/session.service.js';
 
-describe('SessionRepository', () => {
-  it('selects only session fields and filters inactive users and role assignments', async () => {
+describe('SessionService', () => {
+  it('selects only session fields and loads activity and filters role assignments', async () => {
     const findFirst = vi.fn().mockResolvedValue(null);
-    const repository = new SessionRepository({ user: { findFirst } } as unknown as PrismaService);
+    const repository = new SessionService({ user: { findFirst } } as unknown as PrismaService);
 
-    await expect(repository.findActiveUserById('user-1')).resolves.toBeNull();
+    await expect(repository.getAuthenticatedUser('user-1')).rejects.toMatchObject({ code: 'UNAUTHENTICATED' });
     expect(findFirst).toHaveBeenCalledExactlyOnceWith({
-      where: { id: 'user-1', isActive: true },
+      where: { id: 'user-1' },
       select: {
         id: true,
         email: true,
+        isActive: true,
         roles: {
           where: { deletedAt: null, startAt: { lte: expect.any(Date) } },
           select: { role: { select: { name: true } } },
