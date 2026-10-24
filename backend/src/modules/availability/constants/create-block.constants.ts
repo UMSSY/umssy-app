@@ -12,9 +12,9 @@ export const CREATE_BLOCK_MESSAGES = {
   invalidStep: `Las horas deben ir en intervalos de ${BLOCK_STEP_MINUTES} minutos`,
   differentDays: 'El bloque debe empezar y terminar el mismo día',
   invalidRepeatUntil: 'La fecha de fin de repetición debe tener formato YYYY-MM-DD',
-  repeatUntilRequired: 'La fecha de fin es obligatoria para repetir semanalmente',
+  repeatUntilRequired: 'Elige hasta qué fecha se repite el bloque',
   repeatNotEnabled: 'La fecha de fin requiere activar la repetición semanal',
-  repeatUntilOutOfRange: 'La fecha de fin debe estar entre la fecha del bloque y 12 semanas después',
+  repeatUntilOutOfRange: `La fecha límite debe estar dentro de las próximas ${MAX_REPEAT_WEEKS} semanas`,
 } as const;
 
 export const OVERLAP_ERROR_CODE = '23P01';

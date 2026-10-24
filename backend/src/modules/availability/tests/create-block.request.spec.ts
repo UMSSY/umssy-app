@@ -19,7 +19,7 @@ describe('createBlockSchema', () => {
   };
 
   it.each(['2026-10-10', '2026-10-31', '2027-01-02'])(
-    'acepta fin inclusivo hasta 12 semanas: %s',
+    'acepta fin inclusivo hasta las %s (12 semanas desde el bloque)',
     (repeatUntil) => expect(getMessages({ ...weekly, repeatUntil })).toEqual([]),
   );
 
