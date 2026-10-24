@@ -24,6 +24,7 @@ import type { MentorAvailabilityStatusResponse } from '../types/mentor-availabil
 import type { WeeklyRepeatResponse } from '../types/weekly-repeat-response.types.js';
 import { weeklyOccurrences } from '../utils/weekly-occurrences.js';
 import { toCalendarDate } from '../utils/bolivia-day.js';
+import type { OwnerAvailabilityBlockResponse } from '../types/owner-availability-block-response.types.js';
 
 @Injectable()
 export class AvailabilityService {
@@ -53,13 +54,13 @@ export class AvailabilityService {
   async findMyBlocks(
     mentorId: string,
     query: WeekQueryDto,
-  ): Promise<AvailabilityBlockResponse[]> {
+  ): Promise<OwnerAvailabilityBlockResponse[]> {
     const blocks = await this.availabilityRepository.findMentorBlocksInRange(
       mentorId,
       new Date(query.from),
       new Date(query.to),
     );
-    return this.availabilityMapper.toResponseList(blocks);
+    return this.availabilityMapper.toOwnerResponseList(blocks);
   }
 
   async updateBlock(

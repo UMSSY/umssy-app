@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { AppointmentStatusTitle } from '../enums/appointment-status-title.enum.js';
 import { AvailabilityMapper } from '../mappers/availability.mapper.js';
+import type { AvailabilityBlockWithAppointmentDetail } from '../types/availability-block-with-appointment-detail.types.js';
 import type { AvailabilityBlockWithAppointments } from '../types/availability-block-with-appointments.types.js';
 
 const buildBlock = (statuses: string[] = []): AvailabilityBlockWithAppointments =>
@@ -64,6 +65,47 @@ describe('AvailabilityMapper', () => {
       ['block-1', 'free'],
       ['block-2', 'confirmed'],
     ]);
+  });
+
+  describe('toOwnerResponse', () => {
+    const appointment = {
+      id: 'appointment-1',
+      status: { title: AppointmentStatusTitle.CONFIRMED },
+      student: { id: 'student-1', firstName: 'Luis', lastName: 'Flores' },
+      orientationType: { id: 'orientation-1', name: 'Orientación profesional' },
+    };
+    const ownerBlock = (appointments: (typeof appointment)[] = []) =>
+      ({ ...buildBlock(), appointments }) as unknown as AvailabilityBlockWithAppointmentDetail;
+
+    it('agrega quién reservó y el tema a un bloque con cita confirmada', () => {
+      expect(mapper.toOwnerResponse(ownerBlock([appointment]))).toEqual({
+        ...mapper.toResponse(buildBlock([AppointmentStatusTitle.CONFIRMED])),
+        appointment: {
+          id: 'appointment-1',
+          counterpart: { id: 'student-1', fullName: 'Luis Flores' },
+          orientationType: { id: 'orientation-1', name: 'Orientación profesional' },
+        },
+      });
+    });
+
+    it('deja appointment en null en un bloque libre', () => {
+      const result = mapper.toOwnerResponse(ownerBlock());
+      expect(result.state).toBe('free');
+      expect(result.appointment).toBeNull();
+    });
+
+    it('acepta una cita sin tema registrado', () => {
+      const result = mapper.toOwnerResponse(ownerBlock([{ ...appointment, orientationType: null as never }]));
+      expect(result.appointment?.orientationType).toBeNull();
+    });
+
+    it('mapea una lista manteniendo el orden', () => {
+      const result = mapper.toOwnerResponseList([ownerBlock(), { ...ownerBlock([appointment]), id: 'block-2' }]);
+      expect(result.map((block) => [block.id, block.appointment?.counterpart.fullName ?? null])).toEqual([
+        ['block-1', null],
+        ['block-2', 'Luis Flores'],
+      ]);
+    });
   });
 
   it('arma la respuesta de borrado solo con el id del bloque', () => {

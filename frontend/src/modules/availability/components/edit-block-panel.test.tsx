@@ -47,6 +47,35 @@ describe("EditBlockPanel", () => {
     ).not.toBeInTheDocument()
   })
 
+  it("muestra quién reservó y el tema arriba del formulario cuando el bloque tiene cita", () => {
+    renderWithQuery(
+      <EditBlockPanel
+        block={{
+          ...mockBlock,
+          state: "confirmed",
+          appointment: {
+            id: "a1",
+            counterpart: { id: "s1", fullName: "Luis Flores" },
+            orientationType: { id: "o1", name: "Orientación profesional" },
+          },
+        }}
+        onClose={vi.fn()}
+      />,
+    )
+
+    const detail = screen.getByLabelText("Cita confirmada")
+    expect(within(detail).getByText("Luis Flores")).toBeInTheDocument()
+    expect(within(detail).getByText("Orientación profesional")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Eliminar bloque" })).toBeDisabled()
+  })
+
+  it("no muestra el detalle de la cita en un bloque libre", () => {
+    renderWithQuery(<EditBlockPanel block={{ ...mockBlock, appointment: null }} onClose={vi.fn()} />)
+
+    expect(screen.queryByLabelText("Cita confirmada")).not.toBeInTheDocument()
+  })
+
   it("deshabilita las horas, Guardar y Eliminar cuando el bloque tiene una cita confirmada", () => {
     renderWithQuery(<EditBlockPanel block={{ ...mockBlock, state: "confirmed" }} onClose={vi.fn()} />)
 

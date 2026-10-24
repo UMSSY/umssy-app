@@ -97,7 +97,17 @@ describe('AvailabilityService', () => {
     it('devuelve los bloques mapeados con su estado', async () => {
       availabilityRepository.findMentorBlocksInRange.mockResolvedValue([
         block('block-1'),
-        block('block-2', [AppointmentStatusTitle.CONFIRMED]),
+        {
+          ...block('block-2'),
+          appointments: [
+            {
+              id: 'appointment-1',
+              status: { title: AppointmentStatusTitle.CONFIRMED },
+              student: { id: 'student-1', firstName: 'Luis', lastName: 'Flores' },
+              orientationType: null,
+            },
+          ],
+        },
       ]);
 
       const result = await service.findMyBlocks('mentor-1', QUERY);
@@ -105,6 +115,34 @@ describe('AvailabilityService', () => {
       expect(result.map((item) => [item.id, item.state])).toEqual([
         ['block-1', 'free'],
         ['block-2', 'confirmed'],
+      ]);
+    });
+
+    it('incluye quién reservó y el tema en los bloques con cita', async () => {
+      availabilityRepository.findMentorBlocksInRange.mockResolvedValue([
+        block('block-1'),
+        {
+          ...block('block-2'),
+          appointments: [
+            {
+              id: 'appointment-1',
+              status: { title: AppointmentStatusTitle.CONFIRMED },
+              student: { id: 'student-1', firstName: 'Luis', lastName: 'Flores' },
+              orientationType: { id: 'orientation-1', name: 'Orientación profesional' },
+            },
+          ],
+        },
+      ]);
+
+      const result = await service.findMyBlocks('mentor-1', QUERY);
+
+      expect(result.map((item) => item.appointment)).toEqual([
+        null,
+        {
+          id: 'appointment-1',
+          counterpart: { id: 'student-1', fullName: 'Luis Flores' },
+          orientationType: { id: 'orientation-1', name: 'Orientación profesional' },
+        },
       ]);
     });
 
