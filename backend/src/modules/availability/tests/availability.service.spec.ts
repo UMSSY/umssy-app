@@ -97,14 +97,14 @@ describe('AvailabilityService', () => {
     it('devuelve los bloques mapeados con su estado', async () => {
       availabilityRepository.findMentorBlocksInRange.mockResolvedValue([
         block('block-1'),
-        block('block-2', [AppointmentStatusTitle.PENDING]),
+        block('block-2', [AppointmentStatusTitle.CONFIRMED]),
       ]);
 
       const result = await service.findMyBlocks('mentor-1', QUERY);
 
       expect(result.map((item) => [item.id, item.state])).toEqual([
         ['block-1', 'free'],
-        ['block-2', 'pending'],
+        ['block-2', 'confirmed'],
       ]);
     });
 
@@ -132,8 +132,8 @@ describe('AvailabilityService', () => {
       expect(availabilityRepository.update).not.toHaveBeenCalled();
     });
 
-    it('responde 409 si el bloque tiene una cita pendiente o confirmada', async () => {
-      availabilityRepository.findById.mockResolvedValue(block('block-1', [AppointmentStatusTitle.PENDING]));
+    it('responde 409 si el bloque tiene una cita confirmada', async () => {
+      availabilityRepository.findById.mockResolvedValue(block('block-1', [AppointmentStatusTitle.CONFIRMED]));
 
       await expect(service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD)).rejects.toThrow(
         BlockHasAppointmentException,
@@ -369,7 +369,7 @@ describe('AvailabilityService', () => {
     });
 
     it('lanza 409 si el bloque tiene citas activas', async () => {
-      repository.findById.mockResolvedValue(block('block-x', [AppointmentStatusTitle.PENDING]));
+      repository.findById.mockResolvedValue(block('block-x', [AppointmentStatusTitle.CONFIRMED]));
 
       await expect(removeService.remove('mentor-1', 'block-x')).rejects.toThrow(BlockHasAppointmentException);
       expect(repository.delete).not.toHaveBeenCalled();

@@ -44,7 +44,7 @@ describe("BlockSelectionPanel", () => {
 
     expect(screen.getByText("Martes 6 de octubre de 2026")).toBeInTheDocument()
     expect(screen.getByText("18:00 - 19:00 · 60 min")).toBeInTheDocument()
-    expect(screen.getByText(BOLIVIA_TIME_LABEL)).toBeInTheDocument()
+    expect(screen.queryByText(BOLIVIA_TIME_LABEL)).not.toBeInTheDocument()
     expect(screen.queryByText(BLOCK_SELECTION_TEXT.empty)).not.toBeInTheDocument()
     expect(screen.getByRole("button", { name: BLOCK_SELECTION_TEXT.requestAppointment })).toBeDisabled()
   })

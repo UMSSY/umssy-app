@@ -48,8 +48,11 @@ export class AvailabilityRepository {
     });
   }
 
-  findById(id: string): Promise<AvailabilityBlockWithAppointments | null> {
-    return this.prisma.availabilityBlock.findUnique({
+  findById(
+    id: string,
+    client: TransactionClient = this.prisma,
+  ): Promise<AvailabilityBlockWithAppointments | null> {
+    return client.availabilityBlock.findUnique({
       where: { id },
       include: BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE,
     });

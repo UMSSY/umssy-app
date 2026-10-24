@@ -12,11 +12,11 @@ function RequestAccessLayout() {
   const { currentStep } = useAccessRequestForm();
 
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
-      <RequestStepsSidebar currentStep={currentStep} />
-      <div className="flex flex-1 flex-col">
-        <PublicHeader />
-        <section className="flex flex-1 flex-col px-6 py-8 lg:px-10">
+    <div className="flex min-h-screen flex-col">
+      <PublicHeader />
+      <div className="flex flex-1">
+        <RequestStepsSidebar currentStep={currentStep} />
+        <section className="flex min-w-0 flex-1 flex-col p-8">
           <div className="mx-auto flex w-full max-w-5xl justify-center">
             {currentStep === 1 ? <PersonalDataForm /> : currentStep === 2 ? <DocumentStep /> : <ReviewStep />}
           </div>
@@ -28,7 +28,7 @@ function RequestAccessLayout() {
 
 export function RequestAccessView() {
   return (
-    <main className="min-h-screen bg-surface-soft">
+    <main data-app-shell="true" className="min-h-screen bg-background">
       <AccessRequestProvider>
         <RequestAccessLayout />
       </AccessRequestProvider>

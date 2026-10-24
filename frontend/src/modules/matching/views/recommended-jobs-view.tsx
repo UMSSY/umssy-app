@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHeading } from "@/shared/components/layout";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { JobRecommendationCard } from "../components/job-recommendation-card";
@@ -15,15 +16,8 @@ export function RecommendedJobsView() {
   const { data, isPending, isError, refetch } = useRecommendedJobs();
 
   return (
-    <section className="mx-auto flex w-full max-w-7xl flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="font-tight text-3xl font-bold text-ink">
-          {JOB_MATCHING_MESSAGES.pageTitle}
-        </h1>
-        <p className="text-base text-text-secondary">
-          {JOB_MATCHING_MESSAGES.pageDescription}
-        </p>
-      </header>
+    <main className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+      <PageHeading title={JOB_MATCHING_MESSAGES.pageTitle} description={JOB_MATCHING_MESSAGES.pageDescription} />
 
       {isPending && (
         <div aria-busy="true" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -71,6 +65,6 @@ export function RecommendedJobsView() {
           </ul>
         </>
       )}
-    </section>
+    </main>
   );
 }

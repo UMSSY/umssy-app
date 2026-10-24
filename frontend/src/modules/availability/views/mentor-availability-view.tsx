@@ -7,40 +7,66 @@ import { Button } from "@/components/ui/button";
 import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import { addWeeks, getWeekRange } from "@/shared/utils/date-time";
 import { cn } from "cn";
+import { BLOCKED_DATE_TEXT } from "../constants/blocked-date.constants";
 import {
   MY_AVAILABILITY_EYEBROW,
   MY_AVAILABILITY_TEXT,
 } from "../constants/my-availability.constants";
 import { AvailabilityLoading } from "../components/availability-loading";
 import { BlockForm } from "../components/block-form";
+import { BlockedDatePanel } from "../components/blocked-date-panel";
 import { EditBlockPanel } from "../components/edit-block-panel";
 import { ReceiveRequestsSwitch } from "../components/receive-requests-switch";
 import { WeekGrid } from "../components/week-grid/week-grid";
 import { useCreateAvailabilityBlock } from "../hooks/use-create-availability-block";
+import { useBlockedDates } from "../hooks/use-blocked-dates";
 import { useMyBlocks } from "../hooks/use-my-blocks";
 import type { AvailabilityBlock } from "../types/availability-block.types";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
 import type { MentorAvailabilityViewProps } from "../types/mentor-availability-view-props.types";
 import { formatWeekLabel } from "../utils/format-week-label";
 
-export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityViewProps) {
+export function MentorAvailabilityView({
+  initialWeekStart,
+}: MentorAvailabilityViewProps) {
   const [weekStart, setWeekStart] = useState(
     () => initialWeekStart ?? getWeekRange(new Date()).startAt,
   );
   const [editBlockId, setEditBlockId] = useState<string | null>(null);
-  const { blocks, isLoading, error } = useMyBlocks(weekStart);
-  const { createBlock, isSubmitting } = useCreateAvailabilityBlock();
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
+
+  const {
+    blocks,
+    isLoading: blocksLoading,
+    error: blocksError,
+  } = useMyBlocks(weekStart);
+  const {
+    blockedDates,
+    isLoading: datesLoading,
+    error: datesError,
+  } = useBlockedDates(weekStart);
+  const { createBlock, isSubmitting } = useCreateAvailabilityBlock();
+
+  const isLoading = blocksLoading || datesLoading;
+  const error = blocksError ?? datesError;
   const weekRange = getWeekRange(weekStart);
   const currentWeekStart = getWeekRange(new Date()).startAt;
 
   const handleWeekChange = (nextWeekStart: string) => {
     setEditBlockId(null);
+    setSelectedDate(null);
     setWeekStart(nextWeekStart);
   };
 
   const handleEditBlock = (block: AvailabilityBlock) => {
+    setSelectedDate(null);
     setEditBlockId(block.id);
+  };
+
+  const handleSelectDate = (date: string) => {
+    setEditBlockId(null);
+    setSelectedDate(date);
   };
 
   const handleClosePanel = () => {
@@ -69,12 +95,12 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
       <header>
         <PageHeading
           title={MY_AVAILABILITY_TEXT.title}
-          description={MY_AVAILABILITY_EYEBROW}
+          description={`${MY_AVAILABILITY_EYEBROW}. ${BLOCKED_DATE_TEXT.viewHint}`}
           actions={<ReceiveRequestsSwitch />}
         />
       </header>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-4">
           <nav
             aria-label={MY_AVAILABILITY_TEXT.weekNavigation}
@@ -106,7 +132,9 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
             >
               {MY_AVAILABILITY_TEXT.today}
             </Button>
-            <p className="ml-auto text-sm text-muted-foreground">{BOLIVIA_TIME_LABEL}</p>
+            <p className="ml-auto text-sm text-muted-foreground">
+              {BOLIVIA_TIME_LABEL}
+            </p>
           </nav>
 
           {isLoading ? (
@@ -131,17 +159,34 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
                 weekRange={weekRange}
                 variant="owner"
                 onEditBlock={handleEditBlock}
+                blockedDates={blockedDates}
+                onSelectDate={handleSelectDate}
               />
             </>
           )}
         </div>
 
-        {isEditing ? (
+        {selectedDate && !isLoading && !error ? (
+          <div className="min-w-0">
+            <BlockedDatePanel
+              key={selectedDate}
+              date={selectedDate}
+              blockedDate={blockedDates.find(
+                (item) => item.blockedOn === selectedDate,
+              )}
+              onClose={() => setSelectedDate(null)}
+            />
+          </div>
+        ) : isEditing ? (
           <div className="min-w-0 animate-in duration-200 fade-in slide-in-from-right">
             {isLoading ? (
               <AvailabilityLoading />
             ) : (
-              <EditBlockPanel key={editBlockId} block={editBlock} onClose={handleClosePanel} />
+              <EditBlockPanel
+                key={editBlockId}
+                block={editBlock}
+                onClose={handleClosePanel}
+              />
             )}
           </div>
         ) : (

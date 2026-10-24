@@ -12,15 +12,11 @@ import { getFieldErrorProps } from "../utils/get-field-error-props";
 import { trimFormValues } from "../utils/trim-form-values";
 import { validatePresentation } from "../utils/validate-presentation";
 import { FormField } from "./form-field";
-import { ProfilePreviewCard } from "./profile-preview-card";
 import { SectionCard } from "./section-card";
 import { FormFieldset } from "@/shared/components/layout/form-fieldset";
-import { WritingTipsCard } from "./writing-tips-card";
 
 export function PresentationForm({
   initialValues,
-  fullName,
-  photoUrl,
   isSaving = false,
   serverErrors = {},
   onEdit,
@@ -57,7 +53,7 @@ export function PresentationForm({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] items-start gap-6">
+    <div>
       <SectionCard
         title="Escribe tu presentación"
       >
@@ -87,14 +83,14 @@ export function PresentationForm({
               value={values.aboutMe}
               disabled={isSaving}
               onChange={handleChange}
-              className="min-h-36 resize-y field-sizing-fixed text-sm"
+              className="field-sizing-fixed min-h-36 resize-y text-sm"
               {...getFieldErrorProps("aboutMe", errors.aboutMe)}
             />
           </FormField>
 
           </FormFieldset>
           <div className="flex flex-wrap items-center justify-end gap-4 border-t border-border pt-5">
-            <p className="text-[13px] text-text-secondary">
+            <p className="text-sm text-text-secondary">
               Los cambios se muestran al guardar.
             </p>
             <div className="flex gap-3">
@@ -107,7 +103,7 @@ export function PresentationForm({
               >
                 Cancelar
               </Button>
-              <Button type="submit" className={cn("h-10 bg-accent px-4 text-sm text-white hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
+              <Button type="submit" className={cn("h-10 bg-primary px-4 text-sm text-primary-foreground hover:bg-brand-hover", "min-w-44")} disabled={isSaving}>
                 {isSaving ? "Guardando..." : "Guardar presentación"}
               </Button>
             </div>
@@ -115,10 +111,6 @@ export function PresentationForm({
         </form>
       </SectionCard>
 
-      <div className="flex flex-col gap-6">
-        <ProfilePreviewCard fullName={fullName} photoUrl={photoUrl} presentation={values} />
-        <WritingTipsCard />
-      </div>
     </div>
   );
 }
