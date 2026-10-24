@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module.js';
 import { AvailabilityModule } from '../availability/availability.module.js';
 import { MentorsModule } from '../mentors/mentors.module.js';
 import { AppointmentsController } from './controllers/appointments.controller.js';
@@ -7,7 +8,7 @@ import { AppointmentsRepository } from './repositories/appointments.repository.j
 import { AppointmentsService } from './services/appointments.service.js';
 
 @Module({
-  imports: [AvailabilityModule, MentorsModule],
+  imports: [AuthModule, AvailabilityModule, MentorsModule],
   controllers: [AppointmentsController],
   providers: [AppointmentsService, AppointmentsRepository, AppointmentMapper],
   exports: [AppointmentsService],
