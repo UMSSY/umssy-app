@@ -70,7 +70,7 @@ export function WorkExperienceListCard({
                       variant="outline"
                       size="sm"
                       onClick={() => onEdit(experience)}
-                      aria-label="Editar experiencia"
+                      aria-label={`Editar ${experience.position}`}
                       className="gap-1.5"
                     >
                       Editar
@@ -79,7 +79,7 @@ export function WorkExperienceListCard({
                       variant="ghost"
                       size="sm"
                       onClick={() => onDelete(experience.id)}
-                      aria-label="Eliminar experiencia"
+                      aria-label={`Eliminar ${experience.position}`}
                       className="text-red-600 hover:bg-red-50 hover:text-red-700"
                     >
                       Eliminar
