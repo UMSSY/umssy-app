@@ -7,9 +7,13 @@ import { ParticipationEmptyState } from "../components/participation/participati
 import { ParticipationLoading } from "../components/participation/participation-loading";
 import { ParticipationOverview } from "../components/participation/participation-overview";
 import { SlotAvailabilityPreview } from "../components/participation/slot-availability-preview";
+import { PendingParticipation } from "../components/participation/pending-participation";
+import { useSlotRequestPreview } from "../hooks/use-slot-request-preview";
 
 export function ParticipationView() {
+  const preview = useSlotRequestPreview();
   const showAvailabilityPreview = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_APP_ENV !== "prod";
+  if (preview.request) return <PendingParticipation />;
 
   return (
     <>
