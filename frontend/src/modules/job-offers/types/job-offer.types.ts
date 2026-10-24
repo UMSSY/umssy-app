@@ -59,3 +59,5 @@ export interface JobOfferDetailsResponse {
 export interface JobOffer extends JobOfferDetailsResponse {
   applicantsCount: number;
 }
+
+export type JobOfferListScope = "published" | "history";
