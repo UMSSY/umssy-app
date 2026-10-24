@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ACTIVE_APPOINTMENT_STATUSES } from '../constants/appointment-status.constants.js';
-import { BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE } from '../constants/block-query.constants.js';
+import {
+  BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE,
+  BLOCK_WITH_APPOINTMENT_DETAIL_INCLUDE,
+} from '../constants/block-query.constants.js';
 import { AvailabilityRepository } from '../repositories/availability.repository.js';
 
 describe('AvailabilityRepository', () => {
@@ -19,7 +22,7 @@ describe('AvailabilityRepository', () => {
   });
 
   describe('findMentorBlocksInRange', () => {
-    it('busca los bloques del mentor dentro del rango, ordenados e incluyendo solo citas activas', async () => {
+    it('busca los bloques del mentor dentro del rango, ordenados y con el detalle de sus citas activas', async () => {
       const from = new Date('2026-10-05T04:00:00.000Z');
       const to = new Date('2026-10-12T04:00:00.000Z');
       findMany.mockResolvedValue([]);
@@ -29,7 +32,19 @@ describe('AvailabilityRepository', () => {
       expect(findMany).toHaveBeenCalledWith({
         where: { mentorId: 'mentor-1', startAt: { gte: from, lt: to } },
         orderBy: { startAt: 'asc' },
-        include: BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE,
+        include: BLOCK_WITH_APPOINTMENT_DETAIL_INCLUDE,
+      });
+    });
+
+    it('trae de cada cita activa solo quién reservó y el tema, sin otros datos personales', () => {
+      expect(BLOCK_WITH_APPOINTMENT_DETAIL_INCLUDE.appointments).toEqual({
+        where: { status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } } },
+        select: {
+          id: true,
+          status: { select: { title: true } },
+          student: { select: { id: true, firstName: true, lastName: true } },
+          orientationType: { select: { id: true, name: true } },
+        },
       });
     });
 
