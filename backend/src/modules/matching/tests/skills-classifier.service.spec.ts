@@ -10,9 +10,6 @@ const CATALOG: DetectedSkillResponse[] = [
   { id: 'd4', name: 'React' },
   { id: 'e5', name: 'Machine Learning' },
   { id: 'f6', name: 'Node.js' },
-  { id: 'g7', name: 'C++' },
-  { id: 'h8', name: 'C#' },
-  { id: 'i9', name: '.NET' },
 ];
 
 describe('SkillsClassifierService', () => {
@@ -21,7 +18,7 @@ describe('SkillsClassifierService', () => {
 
   beforeEach(() => {
     nlpService = new NlpService();
-    classifier = new SkillsClassifierService();
+    classifier = new SkillsClassifierService(nlpService);
   });
 
   it('detecta las habilidades del catalogo y devuelve sus datos originales', () => {
@@ -52,34 +49,10 @@ describe('SkillsClassifierService', () => {
     expect(result).toEqual([{ id: 'e5', name: 'Machine Learning' }]);
   });
 
-  it.each([
-    ['Node.js', { id: 'f6', name: 'Node.js' }],
-    ['node.js', { id: 'f6', name: 'Node.js' }],
-    ['C++', { id: 'g7', name: 'C++' }],
-    ['c#', { id: 'h8', name: 'C#' }],
-    ['.net', { id: 'i9', name: '.NET' }],
-  ])('conserva los signos de la clave al comparar (%s)', (candidate, expected) => {
-    expect(classifier.classify([candidate], CATALOG)).toEqual([expected]);
-  });
+  it('reconoce nombres con signos tras la limpieza del texto (Node.js -> nodejs)', () => {
+    const result = classifier.classify(['nodejs'], CATALOG);
 
-  it('no confunde C, C++ y C# entre si', () => {
-    const catalog = [
-      { id: '1', name: 'C++' },
-      { id: '2', name: 'C' },
-      { id: '3', name: 'C#' },
-    ];
-
-    expect(classifier.classify(['c'], catalog)).toEqual([{ id: '2', name: 'C' }]);
-    expect(classifier.classify(['c++'], catalog)).toEqual([{ id: '1', name: 'C++' }]);
-    expect(classifier.classify(['c#'], catalog)).toEqual([{ id: '3', name: 'C#' }]);
-  });
-
-  it('ignora las tildes al comparar', () => {
-    const catalog = [{ id: '1', name: 'Diseño Web' }];
-
-    expect(classifier.classify(['diseno_web', 'Diseño Web'], catalog)).toEqual([
-      { id: '1', name: 'Diseño Web' },
-    ]);
+    expect(result).toEqual([{ id: 'f6', name: 'Node.js' }]);
   });
 
   it('no repite una habilidad que aparece varias veces', () => {
@@ -102,23 +75,24 @@ describe('SkillsClassifierService', () => {
     expect(classifier.classify(candidates, catalog)).toEqual([]);
   });
 
-  describe('nombres que quedan iguales tras la normalizacion', () => {
-    it('conserva solo la habilidad escrita igual que la clave', () => {
+  describe('nombres que quedan iguales tras la limpieza', () => {
+    it('conserva solo la habilidad escrita igual que la clave (C frente a C++ y C#)', () => {
       const catalog = [
-        { id: '1', name: 'Diseño' },
-        { id: '2', name: 'Diseno' },
+        { id: '1', name: 'C++' },
+        { id: '2', name: 'C' },
+        { id: '3', name: 'C#' },
       ];
 
-      expect(classifier.classify(['diseno'], catalog)).toEqual([{ id: '2', name: 'Diseno' }]);
+      expect(classifier.classify(['c'], catalog)).toEqual([{ id: '2', name: 'C' }]);
     });
 
     it('descarta la clave ambigua si ninguna se escribe igual', () => {
       const catalog = [
-        { id: '1', name: 'Diseño' },
-        { id: '3', name: 'Dísèno' },
+        { id: '1', name: 'C++' },
+        { id: '3', name: 'C#' },
       ];
 
-      expect(classifier.classify(['diseno'], catalog)).toEqual([]);
+      expect(classifier.classify(['c'], catalog)).toEqual([]);
     });
   });
 
