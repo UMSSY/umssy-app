@@ -34,6 +34,7 @@ import {
 const BLOCK_ID = '55555555-5555-4555-8555-555555555555';
 const TOPIC_ID = '66666666-6666-4666-8666-666666666666';
 const STATUS_ID = '77777777-7777-4777-8777-777777777777';
+const OTHER_TOPIC_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const OTHER_MENTOR_ID = '99999999-9999-4999-8999-999999999999';
 const COMPANY_ID = '88888888-8888-4888-8888-888888888888';
 const TX = { kind: 'tx' };
@@ -72,6 +73,7 @@ describe('POST /appointments (integración HTTP)', () => {
   const findById = vi.fn();
   const findStatusIdByTitle = vi.fn();
   const createAppointment = vi.fn();
+  const createAppointmentHistory = vi.fn();
   const findOne = vi.fn();
   let app: INestApplication;
 
@@ -88,7 +90,13 @@ describe('POST /appointments (integración HTTP)', () => {
     findById.mockResolvedValue(block());
     findStatusIdByTitle.mockResolvedValue(STATUS_ID);
     createAppointment.mockResolvedValue(createAppointmentRecord());
-    findOne.mockResolvedValue({ id: MENTOR_ID, isAvailable: true });
+    findOne.mockResolvedValue({
+      id: MENTOR_ID,
+      isAvailable: true,
+      orientationTypes: [
+        { id: TOPIC_ID, name: 'Orientación profesional', description: null },
+      ],
+    });
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppointmentsModule],
@@ -118,7 +126,11 @@ describe('POST /appointments (integración HTTP)', () => {
       .overrideProvider(AvailabilityRepository)
       .useValue({ findById })
       .overrideProvider(AppointmentsRepository)
-      .useValue({ findStatusIdByTitle, createAppointment })
+      .useValue({
+        findStatusIdByTitle,
+        createAppointment,
+        createAppointmentHistory,
+      })
       .overrideProvider(BlockedDatesService)
       .useValue({
         runOnUnblockedDay: (
@@ -243,6 +255,15 @@ describe('POST /appointments (integración HTTP)', () => {
       }),
       TX,
     );
+    expect(createAppointmentHistory).toHaveBeenCalledWith(
+      {
+        appointmentId: APPOINTMENT_ID,
+        previousStatusId: null,
+        newStatusId: STATUS_ID,
+        changedById: STUDENT_ID,
+      },
+      TX,
+    );
   });
 
   it('responde 404 cuando el bloque no existe', async () => {
@@ -302,6 +323,26 @@ describe('POST /appointments (integración HTTP)', () => {
       'El mentor no está disponible para recibir citas',
     );
     expect(createAppointment).not.toHaveBeenCalled();
+  });
+
+  it('responde 400 cuando el mentor no ofrece el tema', async () => {
+    findOne.mockResolvedValue({
+      id: MENTOR_ID,
+      isAvailable: true,
+      orientationTypes: [
+        { id: OTHER_TOPIC_ID, name: 'Otro tema', description: null },
+      ],
+    });
+
+    const response = await post({
+      blockId: BLOCK_ID,
+      orientationTypeId: TOPIC_ID,
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.detail).toBe('El tema de la sesión no es válido');
+    expect(createAppointment).not.toHaveBeenCalled();
+    expect(createAppointmentHistory).not.toHaveBeenCalled();
   });
 
   it('responde 400 cuando el bloque ya pasó', async () => {
