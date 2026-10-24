@@ -1,5 +1,6 @@
 export const SURVEYS_PATH = "/backoffice/surveys";
 export const CREATE_SURVEY_PATH = "/backoffice/surveys/create";
+export const getSurveyDetailPath = (id: string) => `${SURVEYS_PATH}/${id}`;
 
 export const SURVEYS_PAGE_TITLE = "Encuesta de empleabilidad";
 export const SURVEYS_PAGE_DESCRIPTION =

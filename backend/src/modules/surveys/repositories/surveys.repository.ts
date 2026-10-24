@@ -3,21 +3,27 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import {
   SURVEY_CREATED_SELECT,
+  SURVEY_DETAIL_INCLUDE,
   SURVEY_STATISTICS_INCLUDE,
   SURVEY_SUMMARY_SELECT,
 } from '../constants/survey.constants.js';
 import { SurveysStorageUnavailableException } from '../exceptions/surveys-storage-unavailable.exception.js';
-import type { CreateSurveyData } from '../types/create-survey-data.type.js';
+import type {
+  CreateSurveyData,
+  UpdateSurveyData,
+} from '../types/create-survey-data.type.js';
 import type {
   SurveysDatabaseClient,
   SurveysTransactionClient,
 } from '../types/surveys-database-client.type.js';
 import type {
   SurveyCreatedRecord,
+  SurveyDetailRecord,
   SurveyStatisticsRecord,
   SurveySummaryRecord,
   SurveyTitleScope,
 } from '../types/survey-record.type.js';
+import type { SurveyStatus } from '../types/survey.enum.js';
 
 @Injectable()
 export class SurveysRepository {
@@ -34,12 +40,14 @@ export class SurveysRepository {
     title,
     careerId,
     academicPeriod,
+    excludedId,
   }: SurveyTitleScope): Promise<boolean> {
     const survey = await this.database.survey.findFirst({
       where: {
         title: { equals: title, mode: 'insensitive' },
         careerId,
         academicPeriod,
+        ...(excludedId ? { id: { not: excludedId } } : {}),
       },
       select: { id: true },
     });
@@ -48,20 +56,7 @@ export class SurveysRepository {
 
   async create(data: CreateSurveyData): Promise<SurveyCreatedRecord> {
     const { questions, ...survey } = data;
-    const questionRows = questions.map((question, index) => ({
-      id: randomUUID(),
-      position: index + 1,
-      statement: question.statement,
-      type: question.type,
-      isRequired: question.isRequired,
-    }));
-    const optionRows = questions.flatMap((question, questionIndex) =>
-      question.options.map((option, optionIndex) => ({
-        questionId: questionRows[questionIndex].id,
-        position: optionIndex + 1,
-        label: option.label,
-      })),
-    );
+    const { questionRows, optionRows } = this.toQuestionRows(questions);
 
     return this.database.$transaction(async (tx: SurveysTransactionClient) => {
       const created = await tx.survey.create({
@@ -90,11 +85,70 @@ export class SurveysRepository {
     });
   }
 
+  findDetail(surveyId: string): Promise<SurveyDetailRecord | null> {
+    return this.prisma.survey.findUnique({
+      where: { id: surveyId },
+      include: SURVEY_DETAIL_INCLUDE,
+    });
+  }
+
+  findStatus(surveyId: string): Promise<{ status: SurveyStatus } | null> {
+    return this.prisma.survey.findUnique({
+      where: { id: surveyId },
+      select: { status: true },
+    });
+  }
+
+  update(surveyId: string, data: UpdateSurveyData): Promise<SurveyCreatedRecord> {
+    const { questions, ...survey } = data;
+    const { questionRows, optionRows } = this.toQuestionRows(questions);
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.surveyQuestion.deleteMany({ where: { surveyId } });
+
+      const updated = await tx.survey.update({
+        where: { id: surveyId },
+        data: survey,
+        select: SURVEY_CREATED_SELECT,
+      });
+
+      if (questionRows.length > 0) {
+        await tx.surveyQuestion.createMany({
+          data: questionRows.map((row) => ({ ...row, surveyId })),
+        });
+      }
+
+      if (optionRows.length > 0) {
+        await tx.surveyQuestionOption.createMany({ data: optionRows });
+      }
+
+      return updated;
+    });
+  }
+
   findStatistics(surveyId: string): Promise<SurveyStatisticsRecord | null> {
     return this.prisma.survey.findUnique({
       where: { id: surveyId },
       include: SURVEY_STATISTICS_INCLUDE,
     });
+  }
+
+  private toQuestionRows(questions: CreateSurveyData['questions']) {
+    const questionRows = questions.map((question, index) => ({
+      id: randomUUID(),
+      position: index + 1,
+      statement: question.statement,
+      type: question.type,
+      isRequired: question.isRequired,
+    }));
+    const optionRows = questions.flatMap((question, questionIndex) =>
+      question.options.map((option, optionIndex) => ({
+        questionId: questionRows[questionIndex].id,
+        position: optionIndex + 1,
+        label: option.label,
+      })),
+    );
+    return { questionRows, optionRows };
   }
 }
 

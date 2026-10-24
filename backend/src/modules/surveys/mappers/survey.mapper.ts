@@ -2,15 +2,20 @@ import { Injectable } from '@nestjs/common';
 import type { CreateSurveyRequest } from '../requests/create-survey.schema.js';
 import type { CareerResponse } from '../responses/career.response.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
+import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
 import type {
   SurveyQuestionStatisticResponse,
   SurveyStatisticsResponse,
 } from '../responses/survey-statistics.response.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
-import type { CreateSurveyData } from '../types/create-survey-data.type.js';
+import type {
+  CreateSurveyData,
+  UpdateSurveyData,
+} from '../types/create-survey-data.type.js';
 import type {
   CareerRecord,
   SurveyCreatedRecord,
+  SurveyDetailRecord,
   SurveyStatisticsRecord,
   SurveySummaryRecord,
 } from '../types/survey-record.type.js';
@@ -54,6 +59,10 @@ export class SurveyMapper {
     request: CreateSurveyRequest,
     createdById: string,
   ): CreateSurveyData {
+    return { ...this.toUpdateData(request), createdById };
+  }
+
+  toUpdateData(request: CreateSurveyRequest): UpdateSurveyData {
     return {
       title: request.title,
       description: request.description ?? null,
@@ -62,7 +71,6 @@ export class SurveyMapper {
       opensAt: request.opensAt ? new Date(request.opensAt) : null,
       closesAt: request.closesAt ? new Date(request.closesAt) : null,
       status: STATUS_TO_RECORD[request.status],
-      createdById,
       questions: (request.questions ?? []).map((question) => ({
         statement: question.statement,
         type: QUESTION_TYPE_TO_RECORD[question.type],
@@ -98,6 +106,27 @@ export class SurveyMapper {
 
   toCareerResponse(record: CareerRecord): CareerResponse {
     return { id: record.id, title: record.title };
+  }
+
+  toDetailResponse(record: SurveyDetailRecord): SurveyDetailResponse {
+    return {
+      id: record.id,
+      title: record.title,
+      description: record.description,
+      status: STATUS_TO_RESPONSE[record.status],
+      career: record.career ? this.toCareerResponse(record.career) : null,
+      academicPeriod: record.academicPeriod,
+      opensAt: record.opensAt?.toISOString() ?? null,
+      closesAt: record.closesAt?.toISOString() ?? null,
+      questions: record.questions.map((question) => ({
+        id: question.id,
+        position: question.position,
+        statement: question.statement,
+        type: QUESTION_TYPE_TO_RESPONSE[question.type],
+        isRequired: question.isRequired,
+        options: question.options.map(({ id, position, label }) => ({ id, position, label })),
+      })),
+    };
   }
 
   toStatisticsResponse(record: SurveyStatisticsRecord): SurveyStatisticsResponse {

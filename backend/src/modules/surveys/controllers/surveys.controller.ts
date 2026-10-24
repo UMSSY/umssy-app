@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   StreamableFile,
   UseGuards,
@@ -30,6 +31,7 @@ import {
 } from '../requests/create-survey.schema.js';
 import { surveyIdSchema } from '../requests/survey-id.schema.js';
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
+import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
 import { SurveysService } from '../services/surveys.service.js';
@@ -58,6 +60,26 @@ export class SurveysController {
   @ApiOkResponse({ description: 'Encuestas, de la más reciente a la más antigua' })
   list(): Promise<SurveySummaryResponse[]> {
     return this.surveysService.listSurveys();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtiene una encuesta con sus preguntas y opciones' })
+  @ApiOkResponse({ description: 'Encuesta con sus preguntas y opciones ordenadas' })
+  detail(
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+  ): Promise<SurveyDetailResponse> {
+    return this.surveysService.getDetail(id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Actualiza una encuesta en borrador y permite publicarla' })
+  @ApiBody(toApiBody(createSurveySchema))
+  @ApiOkResponse({ description: 'Encuesta actualizada' })
+  update(
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+    @Body(new ZodValidationPipe(createSurveySchema)) request: CreateSurveyRequest,
+  ): Promise<SurveyCreatedResponse> {
+    return this.surveysService.update(id, request);
   }
 
   @Get(':id/statistics')

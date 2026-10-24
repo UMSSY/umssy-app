@@ -1,6 +1,7 @@
 import type { Prisma } from '../../../prisma/client.js';
 import type {
   CAREER_SELECT,
+  SURVEY_DETAIL_INCLUDE,
   SURVEY_STATISTICS_INCLUDE,
 } from '../constants/survey.constants.js';
 import type { SurveyStatus } from './survey.enum.js';
@@ -24,6 +25,10 @@ export type CareerRecord = Prisma.CareerGetPayload<{
   select: typeof CAREER_SELECT;
 }>;
 
+export type SurveyDetailRecord = Prisma.SurveyGetPayload<{
+  include: typeof SURVEY_DETAIL_INCLUDE;
+}>;
+
 export type SurveyStatisticsRecord = Prisma.SurveyGetPayload<{
   include: typeof SURVEY_STATISTICS_INCLUDE;
 }>;
@@ -32,4 +37,5 @@ export interface SurveyTitleScope {
   title: string;
   careerId: string | null;
   academicPeriod: string | null;
+  excludedId?: string;
 }

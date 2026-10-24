@@ -24,6 +24,9 @@ export const SURVEY_MESSAGES = {
   surveysLoadError: "No se pudieron cargar las encuestas.",
   surveysEmpty: "Todavía no se creó ninguna encuesta.",
   surveysLoading: "Cargando encuestas...",
+  surveyLoadError: "No se pudo cargar la encuesta.",
+  draftUpdated: "Borrador actualizado",
+  readOnlyNotice: "Esta encuesta ya fue publicada. Solo se puede consultar, no editar.",
   previewNotice: "Vista previa: así verá la encuesta el titulado. Las respuestas no se registran.",
   publishDialogTitle: "¿Publicar encuesta?",
   publishDialogDescription:
