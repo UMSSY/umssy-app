@@ -78,7 +78,8 @@ export function EventCard({
             : 'border-border hover:border-border-strong',
         )}
       >
-        <WorkshopCover eventId={event.id} className="-mx-5 -mt-5 shrink-0 rounded-t-lg" />
+        <WorkshopCover eventId={event.id} coverUrl={event.coverUrl} className="-mx-5 -mt-5 shrink-0 rounded-t-lg" />
+        {event.status === 'voting' && <span className="text-xs font-semibold text-availability-foreground">En votación</span>}
         <div className="flex items-center justify-between gap-2">
           <span className={cn(categoryBadge({ category }))}>
             {categoryName}

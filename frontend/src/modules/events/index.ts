@@ -1,4 +1,5 @@
 export { EventsView } from './views/events-view';
+export { ProposeWorkshopView } from './views/propose-workshop-view';
 export { EventCard } from './components/event-card';
 export { EventDetailPanel } from './components/event-detail-panel';
 export { useEvents } from './hooks/use-events';

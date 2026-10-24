@@ -476,6 +476,10 @@ model EventCategory {
 }
 
 model Event {
+  coverData        Bytes?    @map("cover_data")
+  coverMimeType    String?   @map("cover_mime_type") @db.VarChar(30)
+  proposalKey      String?   @map("proposal_key") @db.VarChar(36)
+  proposalHash     String?   @map("proposal_hash") @db.VarChar(64)
   id               String    @id @default(uuid()) @db.Uuid
   title            String    @db.VarChar(150)
   description      String?
@@ -506,6 +510,7 @@ model Event {
 
   registrations EventRegistration[]
 
+  @@unique([createdById, proposalKey])
   @@index([categoryId])
   @@index([modalityId])
   @@index([originId])

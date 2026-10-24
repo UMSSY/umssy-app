@@ -9,17 +9,61 @@ import type {
 } from '../types/events.types.js';
 
 import {
+  CATALOG_STATUS_TITLES,
   PUBLISHED_STATUS_TITLE,
   CONFIRMED_REGISTRATION_TITLE,
 } from '../constants/events.constants.js';
 export { PUBLISHED_STATUS_TITLE } from '../constants/events.constants.js';
+
+function buildSelect(userId?: string): Prisma.EventSelect {
+  return {
+    coverMimeType: true,
+    id: true,
+    title: true,
+    description: true,
+    eventDate: true,
+    startTime: true,
+    endTime: true,
+    location: true,
+    capacity: true,
+    statusId: true,
+    instructorName: true,
+    modalityId: true,
+    supportThreshold: true,
+    votingDeadline: true,
+    status: { select: { title: true } },
+    origin: { select: { title: true } },
+    category: { select: { id: true, name: true } },
+    _count: {
+      select: {
+        registrations: {
+          where: {
+            cancelledAt: null,
+            status: { title: CONFIRMED_REGISTRATION_TITLE },
+          },
+        },
+      },
+    },
+    ...(userId !== undefined && {
+      registrations: {
+        where: {
+          userId,
+          cancelledAt: null,
+          status: { title: CONFIRMED_REGISTRATION_TITLE },
+        },
+        select: { id: true },
+        take: 1,
+      },
+    }),
+  };
+}
 
 @Injectable()
 export class EventsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAndCount(payload: FindEventsPayload): Promise<FindEventsResponse> {
-    const { categoryId, statusId, isPublishedOnly, search, skip, take } =
+    const { categoryId, statusId, isPublishedOnly, search, userId, skip, take } =
       payload;
 
     const where: Prisma.EventWhereInput = {
@@ -27,7 +71,7 @@ export class EventsRepository {
       ...(statusId !== undefined
         ? { statusId }
         : isPublishedOnly
-          ? { status: { title: PUBLISHED_STATUS_TITLE } }
+          ? { status: { title: payload.includeProposals ? { in: CATALOG_STATUS_TITLES } : PUBLISHED_STATUS_TITLE } }
           : {}),
       ...(search !== undefined && {
         title: {
@@ -37,39 +81,9 @@ export class EventsRepository {
       }),
     };
 
-    const select = {
-      id: true,
-      title: true,
-      description: true,
-      eventDate: true,
-      startTime: true,
-      endTime: true,
-      location: true,
-      capacity: true,
-      statusId: true,
-      instructorName: true,
-      modalityId: true,
-      category: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      _count: {
-        select: {
-          registrations: {
-            where: {
-              cancelledAt: null,
-              status: { title: CONFIRMED_REGISTRATION_TITLE },
-            },
-          },
-        },
-      },
-    } as const;
-
     const [items, total] = await this.prisma.$transaction([
       this.prisma.event.findMany({
-        select,
+        select: buildSelect(userId),
         where,
         orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }],
         skip,
@@ -86,43 +100,20 @@ export class EventsRepository {
 
   async findById(
     id: string,
+    userId?: string,
   ): Promise<
     (EventWithRelations & { modality: { id: string; title: string } }) | null
   > {
     const event = await this.prisma.event.findUnique({
       where: { id },
       select: {
-        id: true,
-        title: true,
-        description: true,
-        eventDate: true,
-        startTime: true,
-        endTime: true,
-        location: true,
-        capacity: true,
-        statusId: true,
-        instructorName: true,
-        modalityId: true,
+        ...buildSelect(userId),
         modality: { select: { id: true, title: true } },
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            registrations: {
-              where: {
-                cancelledAt: null,
-                status: { title: CONFIRMED_REGISTRATION_TITLE },
-              },
-            },
-          },
-        },
       },
     });
 
-    return event;
+    return event as unknown as
+      | (EventWithRelations & { modality: { id: string; title: string } })
+      | null;
   }
 }
