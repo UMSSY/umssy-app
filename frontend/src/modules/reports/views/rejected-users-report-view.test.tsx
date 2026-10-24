@@ -296,13 +296,11 @@ describe("RejectedUsersReportView", () => {
     expect(screen.queryByRole("navigation", { name: "Paginación" })).toBeNull();
   });
 
-  it("muestra solo la página 1 cuando los resultados caben en una página", async () => {
+  it("oculta la paginación cuando los resultados caben en una página", async () => {
     renderWithQuery(<RejectedUsersReportView />);
     await searchFor("juan.perez@", "Mostrando 1-1 de 1 usuarios");
 
-    const pageButtons = screen.getAllByRole("button", { name: /^Página \d+$/ });
-    expect(pageButtons.map((button) => button.textContent)).toEqual(["1"]);
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Página siguiente" }).disabled).toBe(true);
+    expect(screen.queryByRole("navigation", { name: "Paginación" })).not.toBeInTheDocument();
   });
 
   it("al volver a entrar muestra la barra vacía y la lista completa", async () => {

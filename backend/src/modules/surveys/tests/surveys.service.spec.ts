@@ -227,7 +227,7 @@ describe('SurveysService', () => {
       },
     ]);
 
-    const result = await service.listSurveys();
+    const result = await service.listSurveys(NOW);
 
     expect(result).toEqual([
       {

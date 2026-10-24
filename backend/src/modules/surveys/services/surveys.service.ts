@@ -43,10 +43,10 @@ export class SurveysService {
     return this.surveyMapper.toCreatedResponse(record);
   }
 
-  async getDetail(id: string): Promise<SurveyDetailResponse> {
+  async getDetail(id: string, now: Date = new Date()): Promise<SurveyDetailResponse> {
     const record = await this.surveysRepository.findDetail(id);
     if (!record) throw new SurveyNotFoundException();
-    return this.surveyMapper.toDetailResponse(record);
+    return this.surveyMapper.toDetailResponse(record, now);
   }
 
   async update(
@@ -65,15 +65,15 @@ export class SurveysService {
     return this.surveyMapper.toCreatedResponse(record);
   }
 
-  async listSurveys(): Promise<SurveySummaryResponse[]> {
+  async listSurveys(now: Date = new Date()): Promise<SurveySummaryResponse[]> {
     const records = await this.surveysRepository.findAll();
-    return records.map((record) => this.surveyMapper.toSummaryResponse(record));
+    return records.map((record) => this.surveyMapper.toSummaryResponse(record, now));
   }
 
-  async getStatistics(id: string): Promise<SurveyStatisticsResponse> {
+  async getStatistics(id: string, now: Date = new Date()): Promise<SurveyStatisticsResponse> {
     const record = await this.surveysRepository.findStatistics(id);
     if (!record) throw new SurveyNotFoundException();
-    return this.surveyMapper.toStatisticsResponse(record);
+    return this.surveyMapper.toStatisticsResponse(record, now);
   }
 
   async exportSurveyPdf(
