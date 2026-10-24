@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { SURVEY_STATUS_LABELS } from "../constants/survey-builder.constants";
+import { SURVEY_STATUS_BADGE_CLASSES, SURVEY_STATUS_LABELS } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
-import { SURVEYS_TABLE_COLUMNS, getSurveyDetailPath } from "../constants/survey-routes.constants";
+import { SURVEYS_TABLE_COLUMNS } from "../constants/survey-routes.constants";
 import type { SurveysTableProps } from "../types/survey-component-props.types";
 import { formatIsoDateTime } from "../utils/survey-dates";
 import { SurveyRowActions } from "./survey-row-actions";
@@ -39,15 +38,8 @@ export function SurveysTable({ surveys, isLoading, hasError, emptyMessage }: Sur
             </TableRow>
           ) : (
             rows.map((survey) => (
-              <TableRow key={survey.id} className="relative cursor-pointer focus-within:bg-surface-soft hover:bg-surface-soft">
-                <TableCell className="text-ink">
-                  <Link
-                    href={getSurveyDetailPath(survey.id)}
-                    className="outline-none after:absolute after:inset-0 after:rounded-sm focus-visible:after:ring-2 focus-visible:after:ring-ring"
-                  >
-                    {survey.title}
-                  </Link>
-                </TableCell>
+              <TableRow key={survey.id} className="hover:bg-surface-soft">
+                <TableCell className="text-ink">{survey.title}</TableCell>
                 <TableCell>
                   <p className="text-sm text-ink">{survey.createdBy?.fullName ?? "-"}</p>
                   <p className="text-xs text-text-secondary">{survey.createdBy?.email ?? ""}</p>
@@ -55,15 +47,7 @@ export function SurveysTable({ surveys, isLoading, hasError, emptyMessage }: Sur
                 <TableCell className="text-ink-soft">{survey.academicPeriod ?? "-"}</TableCell>
                 <TableCell className="text-ink-soft tabular-nums">{formatIsoDateTime(survey.createdAt) || "-"}</TableCell>
                 <TableCell>
-                  <Badge
-                    className={
-                      survey.status === "published"
-                        ? "border-accent/30 bg-interaction text-accent"
-                        : "border-gold/50 bg-gold/15 text-ink"
-                    }
-                  >
-                    {SURVEY_STATUS_LABELS[survey.status]}
-                  </Badge>
+                  <Badge className={SURVEY_STATUS_BADGE_CLASSES[survey.status]}>{SURVEY_STATUS_LABELS[survey.status]}</Badge>
                 </TableCell>
                 <TableCell>
                   <SurveyRowActions survey={survey} />

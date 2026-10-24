@@ -2,6 +2,10 @@ export const SURVEY_STATUSES = ['draft', 'published'] as const;
 
 export type SurveyStatusValue = (typeof SURVEY_STATUSES)[number];
 
+export const SURVEY_DISPLAY_STATUSES = ['draft', 'published', 'closed'] as const;
+
+export type SurveyDisplayStatusValue = (typeof SURVEY_DISPLAY_STATUSES)[number];
+
 export const SURVEY_QUESTION_TYPES = [
   'single_choice',
   'multiple_choice',

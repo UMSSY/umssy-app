@@ -20,6 +20,7 @@ import type {
   SurveySummaryRecord,
 } from '../types/survey-record.type.js';
 import { calculatePercentage } from '../utils/calculate-percentage.js';
+import { resolveSurveyStatus } from '../utils/resolve-survey-status.js';
 import {
   SurveyQuestionType,
   SurveyStatus,
@@ -89,11 +90,11 @@ export class SurveyMapper {
     };
   }
 
-  toSummaryResponse(record: SurveySummaryRecord): SurveySummaryResponse {
+  toSummaryResponse(record: SurveySummaryRecord, now: Date = new Date()): SurveySummaryResponse {
     return {
       id: record.id,
       title: record.title,
-      status: STATUS_TO_RESPONSE[record.status],
+      status: resolveSurveyStatus(record.status, record.closesAt, now),
       career: record.career ? this.toCareerResponse(record.career) : null,
       createdBy: {
         fullName: `${record.createdBy.firstName} ${record.createdBy.lastName}`.trim(),
@@ -112,12 +113,12 @@ export class SurveyMapper {
     return { id: record.id, title: record.title };
   }
 
-  toDetailResponse(record: SurveyDetailRecord): SurveyDetailResponse {
+  toDetailResponse(record: SurveyDetailRecord, now: Date = new Date()): SurveyDetailResponse {
     return {
       id: record.id,
       title: record.title,
       description: record.description,
-      status: STATUS_TO_RESPONSE[record.status],
+      status: resolveSurveyStatus(record.status, record.closesAt, now),
       career: record.career ? this.toCareerResponse(record.career) : null,
       academicPeriod: record.academicPeriod,
       opensAt: record.opensAt?.toISOString() ?? null,
@@ -133,14 +134,14 @@ export class SurveyMapper {
     };
   }
 
-  toStatisticsResponse(record: SurveyStatisticsRecord): SurveyStatisticsResponse {
+  toStatisticsResponse(record: SurveyStatisticsRecord, now: Date = new Date()): SurveyStatisticsResponse {
     const totalResponses = record._count.responses;
 
     return {
       id: record.id,
       title: record.title,
       description: record.description,
-      status: STATUS_TO_RESPONSE[record.status],
+      status: resolveSurveyStatus(record.status, record.closesAt, now),
       academicPeriod: record.academicPeriod,
       career: record.career ? this.toCareerResponse(record.career) : null,
       opensAt: record.opensAt?.toISOString() ?? null,

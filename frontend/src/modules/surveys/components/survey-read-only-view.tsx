@@ -3,7 +3,7 @@ import { ArrowLeft, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
-import { SURVEY_STATUS_LABELS, SURVEY_TEXT } from "../constants/survey-builder.constants";
+import { SURVEY_STATUS_BADGE_CLASSES, SURVEY_STATUS_LABELS, SURVEY_TEXT } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import { SURVEYS_PATH } from "../constants/survey-routes.constants";
 import type { SurveyReadOnlyViewProps } from "../types/survey-component-props.types";
@@ -34,7 +34,7 @@ export function SurveyReadOnlyView({ survey }: SurveyReadOnlyViewProps) {
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <Badge className="border-accent/30 bg-interaction text-accent">{SURVEY_STATUS_LABELS[survey.status]}</Badge>
+          <Badge className={SURVEY_STATUS_BADGE_CLASSES[survey.status]}>{SURVEY_STATUS_LABELS[survey.status]}</Badge>
           <p className="flex items-center gap-2 text-xs text-text-secondary">
             <Info aria-hidden="true" className="size-4 shrink-0" />
             {SURVEY_MESSAGES.readOnlyNotice}

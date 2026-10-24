@@ -3,6 +3,7 @@ import {
   SURVEY_PDF_COLORS as COLORS,
   SURVEY_PDF_LAYOUT,
 } from '../constants/survey-pdf.constants.js';
+import { SURVEY_DISPLAY_STATUS_LABELS } from '../constants/survey.constants.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 import { SimplePdfDocument } from '../utils/simple-pdf-document.js';
 
@@ -63,7 +64,7 @@ export class SurveyPdfService {
 
     const careerLabel = statistics.career?.title ?? 'Todas las carreras';
     const periodLabel = statistics.academicPeriod ?? 'General';
-    const statusLabel = statistics.status === 'published' ? 'Publicada' : 'Borrador';
+    const statusLabel = SURVEY_DISPLAY_STATUS_LABELS[statistics.status];
     const opensStr = statistics.opensAt ? new Date(statistics.opensAt).toLocaleDateString('es-BO') : 'N/D';
     const closesStr = statistics.closesAt ? new Date(statistics.closesAt).toLocaleDateString('es-BO') : 'N/D';
 
