@@ -13,18 +13,37 @@ import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback"
 import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
 import { useCurrentUserId } from "../hooks/use-current-user-id";
 import { useMentorDirectory } from "../hooks/use-mentor-directory";
+type MentorSortOption = "name-asc" | "name-desc" | "affinity";
 
 export function MentorDirectoryView() {
   const [search, setSearch] = useState("");
   const [area, setArea] = useState("");
   const [isAvailableOnly, setIsAvailableOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<MentorSortOption>("name-asc");
   const { currentUserId } = useCurrentUserId();
   const { data: mentors, isPending, isError, isFetching, refetch } =
     useMentorDirectory();
 
-  const areas = [...new Set((mentors ?? []).flatMap((mentor) => mentor.technicalAreas))].sort((a,b) => a.localeCompare(b,"es"));
-  const filteredMentors = (mentors ?? []).filter((mentor) => normalizeSearch([mentor.fullName,mentor.headline,...mentor.technicalAreas].join(" ")).includes(normalizeSearch(search)) && (!area || mentor.technicalAreas.includes(area)) && (!isAvailableOnly || mentor.isAvailable));
-  function handleClearFilters() { setSearch(""); setArea(""); setIsAvailableOnly(false); }
+  const areas = [...new Set((mentors ?? []).flatMap((mentor) => mentor.technicalAreas))].sort((a, b) => a.localeCompare(b, "es"));
+  const filteredMentors = (mentors ?? []).filter((mentor) => normalizeSearch([mentor.fullName, mentor.headline, ...mentor.technicalAreas].join(" ")).includes(normalizeSearch(search)) && (!area || mentor.technicalAreas.includes(area)) && (!isAvailableOnly || mentor.isAvailable));
+  const sortedMentors = [...filteredMentors].sort((a, b) => {
+    if (sortBy === "affinity") {
+      return (b.commonInterestsCount ?? 0) - (a.commonInterestsCount ?? 0);
+    }
+
+    const comparison = a.fullName.localeCompare(b.fullName, "es", {
+      sensitivity: "base",
+    });
+
+    return sortBy === "name-asc" ? comparison : -comparison;
+  });
+
+  function handleClearFilters() {
+    setSearch("");
+    setArea("");
+    setIsAvailableOnly(false);
+  }
+
   return (
     <main className="min-h-full bg-background">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
@@ -36,6 +55,27 @@ export function MentorDirectoryView() {
           <Input type="search" className="min-w-56 flex-1" aria-label="Buscar mentor" placeholder="Nombre o especialidad" value={search} onChange={(event) => setSearch(event.target.value)} />
           <div className="flex items-center gap-2"><Label htmlFor="mentor-area">Área</Label><NativeSelect id="mentor-area" className="max-w-64" value={area} onChange={(event) => setArea(event.target.value)}><NativeSelectOption value="">Todas las áreas</NativeSelectOption>{areas.map((name) => <NativeSelectOption key={name} value={name}>{name}</NativeSelectOption>)}</NativeSelect></div>
           <Label className="flex items-center gap-2"><Checkbox checked={isAvailableOnly} onCheckedChange={setIsAvailableOnly} />Con disponibilidad</Label>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="mentor-sort">Ordenar por</Label>
+            <NativeSelect
+              id="mentor-sort"
+              aria-label="Ordenar mentores"
+              value={sortBy}
+              onChange={(event) =>
+                setSortBy(event.target.value as MentorSortOption)
+              }
+            >
+              <NativeSelectOption value="name-asc">
+                Nombre (A–Z)
+              </NativeSelectOption>
+              <NativeSelectOption value="name-desc">
+                Nombre (Z–A)
+              </NativeSelectOption>
+              <NativeSelectOption value="affinity">
+                Mayor afinidad
+              </NativeSelectOption>
+            </NativeSelect>
+          </div>
           {search || area || isAvailableOnly ? <Button variant="ghost" onClick={handleClearFilters}>Limpiar filtros</Button> : null}
         </div>
         {isPending || (isError && isFetching) ? (
@@ -54,7 +94,30 @@ export function MentorDirectoryView() {
             description="Por el momento no hay mentores activos para mostrar. Vuelve a consultar más adelante."
           />
         ) : (
-          <><p role="status" className="text-sm text-text-secondary">{filteredMentors.length} mentores encontrados</p>{filteredMentors.length ? <MentorDirectoryGrid mentors={filteredMentors} currentUserId={currentUserId} /> : <div className="rounded-lg border border-border bg-surface p-8 text-center"><h2 className="mb-4 text-lg font-semibold">No hay mentores con estos filtros</h2><Button variant="outline" onClick={handleClearFilters}>Limpiar filtros</Button></div>}</>
+          <>
+            <h2 className="text-xl font-semibold text-ink">
+              {sortBy === "affinity" ? "Preferencias" : "Sugerencias"}
+            </h2>
+            <p role="status" className="text-sm text-text-secondary">
+              {filteredMentors.length} mentores encontrados
+            </p>
+            {filteredMentors.length ? (
+              <MentorDirectoryGrid
+                mentors={sortedMentors}
+                currentUserId={currentUserId}
+                showAffinityBadge={sortBy === "affinity"}
+              />
+            ) : (
+              <div className="rounded-lg border border-border bg-surface p-8 text-center">
+                <h2 className="mb-4 text-lg font-semibold">
+                  No hay mentores con estos filtros
+                </h2>
+                <Button variant="outline" onClick={handleClearFilters}>
+                  Limpiar filtros
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </main>
