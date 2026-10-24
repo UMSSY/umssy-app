@@ -33,7 +33,7 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
       <nav
         aria-label={MENTOR_FREE_BLOCKS_TEXT.weekNavigation}
         ref={weekNavRef}
-        className="sticky top-app-header z-20 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface-soft p-3"
+        className="sticky top-[calc(var(--spacing-app-header)+1rem)] z-20 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface-soft p-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-4 before:h-4 before:bg-background"
       >
         <Button
           variant="outline"
