@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   StreamableFile,
   UseGuards,
@@ -68,13 +69,28 @@ export class SurveysController {
 
   @Get(':id')
   @Roles('titulado', 'administrativo')
-  @ApiOperation({ summary: 'Obtiene las preguntas y opciones de una encuesta para responderla' })
-  @ApiOkResponse({ description: 'Detalle de la encuesta para ser respondida' })
+  @ApiOperation({ summary: 'Obtiene una encuesta con sus preguntas y opciones' })
+  @ApiOkResponse({ description: 'Detalle de la encuesta para ser respondida o editada' })
   getById(
-    @Param('id') id: string,
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
     @CurrentUserId() userId: string,
   ): Promise<SurveyDetailResponse> {
     return this.surveysService.getSurveyForAnswering(id, userId);
+  }
+
+  detail(id: string): Promise<SurveyDetailResponse> {
+    return this.surveysService.getDetail(id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Actualiza una encuesta en borrador y permite publicarla' })
+  @ApiBody(toApiBody(createSurveySchema))
+  @ApiOkResponse({ description: 'Encuesta actualizada' })
+  update(
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+    @Body(new ZodValidationPipe(createSurveySchema)) request: CreateSurveyRequest,
+  ): Promise<SurveyCreatedResponse> {
+    return this.surveysService.update(id, request);
   }
 
   @Post(':id/responses')
@@ -84,7 +100,7 @@ export class SurveysController {
   @ApiBody(toApiBody(submitSurveyResponseSchema))
   @ApiCreatedResponse({ description: 'Respuestas guardadas' })
   submitResponse(
-    @Param('id') id: string,
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
     @CurrentUserId() userId: string,
     @Body(new ZodValidationPipe(submitSurveyResponseSchema)) request: SubmitSurveyResponseRequest,
   ): Promise<{ success: boolean; message: string }> {

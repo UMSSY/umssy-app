@@ -7,7 +7,7 @@ import { SURVEY_TEXT } from "../constants/survey-builder.constants";
 import type { PreviewQuestionProps } from "../types/survey-component-props.types";
 import { RequiredMark } from "./required-mark";
 
-export function PreviewQuestion({ question, index }: PreviewQuestionProps) {
+export function PreviewQuestion({ question, index, isReadOnly = false }: PreviewQuestionProps) {
   const baseId = `preview-${question.id}`;
   const statement = (question.statement ?? "").trim() || SURVEY_TEXT.untitledQuestion;
   const options = (question.options ?? []).map((option, optionIndex) => ({
@@ -24,7 +24,7 @@ export function PreviewQuestion({ question, index }: PreviewQuestionProps) {
       </legend>
 
       {question.type === "single_choice" && (
-        <RadioGroup aria-labelledby={`${baseId}-legend`} className="clear-both gap-3">
+        <RadioGroup aria-labelledby={`${baseId}-legend`} disabled={isReadOnly} className="clear-both gap-3">
           {options.map((option) => (
             <div key={option.id} className="flex items-center gap-3">
               <RadioGroupItem id={`${baseId}-${option.id}`} value={option.value} />
@@ -40,7 +40,7 @@ export function PreviewQuestion({ question, index }: PreviewQuestionProps) {
         <div className="clear-both flex flex-col gap-3">
           {options.map((option) => (
             <div key={option.id} className="flex items-center gap-3">
-              <Checkbox id={`${baseId}-${option.id}`} />
+              <Checkbox id={`${baseId}-${option.id}`} disabled={isReadOnly} />
               <Label htmlFor={`${baseId}-${option.id}`} className="font-normal text-ink">
                 {option.label}
               </Label>

@@ -1,3 +1,9 @@
+import type {
+  SurveyQuestionTypeValue,
+  SurveyStatusValue,
+} from '../types/survey.enum.js';
+import type { CareerResponse } from './career.response.js';
+
 export interface SurveyDetailOptionResponse {
   id: string;
   position: number;
@@ -8,7 +14,7 @@ export interface SurveyDetailQuestionResponse {
   id: string;
   position: number;
   statement: string;
-  type: 'single_choice' | 'multiple_choice';
+  type: SurveyQuestionTypeValue;
   isRequired: boolean;
   options: SurveyDetailOptionResponse[];
 }
@@ -17,11 +23,12 @@ export interface SurveyDetailResponse {
   id: string;
   title: string;
   description: string | null;
-  status: 'published' | 'draft';
+  status: SurveyStatusValue;
+  career?: CareerResponse | null;
   academicPeriod: string | null;
   opensAt: string | null;
   closesAt: string | null;
-  hasAnswered: boolean;
-  isExpired: boolean;
+  hasAnswered?: boolean;
+  isExpired?: boolean;
   questions: SurveyDetailQuestionResponse[];
 }

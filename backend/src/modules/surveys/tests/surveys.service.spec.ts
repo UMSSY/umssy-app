@@ -227,6 +227,7 @@ describe('SurveysService', () => {
         closesAt: NOW,
         createdAt: NOW,
         career: { id: CAREER_ID, title: 'Ingeniería de Sistemas' },
+        createdBy: { firstName: 'Admin', lastName: 'Uno', email: 'admin.1@umssy.test' },
         _count: { questions: 4, responses: 0 },
       },
     ]);
@@ -239,6 +240,7 @@ describe('SurveysService', () => {
         title: 'Encuesta',
         status: 'published',
         career: { id: CAREER_ID, title: 'Ingeniería de Sistemas' },
+        createdBy: { fullName: 'Admin Uno', email: 'admin.1@umssy.test' },
         academicPeriod: 'II-2026',
         opensAt: NOW.toISOString(),
         closesAt: NOW.toISOString(),

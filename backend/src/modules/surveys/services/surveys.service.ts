@@ -4,6 +4,7 @@ import {
   InvalidSurveyScheduleException,
   SurveyAlreadyAnsweredException,
   SurveyExpiredException,
+  SurveyNotEditableException,
   SurveyNotFoundException,
   SurveyTitleAlreadyExistsException,
 } from '../exceptions/index.js';
@@ -17,6 +18,8 @@ import type { SurveyDetailResponse } from '../responses/survey-detail.response.j
 import type { SurveyNotificationResponse } from '../responses/survey-notification.response.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
+import type { UpdateSurveyData } from '../types/create-survey-data.type.js';
+import { SurveyStatus } from '../types/survey.enum.js';
 import { getScheduleError } from '../utils/survey-schedule.js';
 
 import { ReportHistoryService } from '../../reports/services/report-history.service.js';
@@ -38,24 +41,31 @@ export class SurveysService {
     now: Date = new Date(),
   ): Promise<SurveyCreatedResponse> {
     const data = this.surveyMapper.toCreateData(request, createdById);
-
-    if (data.careerId) {
-      await this.ensureCareerExists(data.careerId);
-    }
-
-    if (request.status === 'published' && data.opensAt && data.closesAt) {
-      const scheduleError = getScheduleError(data.opensAt, data.closesAt, now);
-      if (scheduleError) throw new InvalidSurveyScheduleException(scheduleError);
-    }
-
-    const titleTaken = await this.surveysRepository.existsWithTitle({
-      title: data.title,
-      careerId: data.careerId,
-      academicPeriod: data.academicPeriod,
-    });
-    if (titleTaken) throw new SurveyTitleAlreadyExistsException();
+    await this.ensureSurveyIsValid(data, request, now);
 
     const record = await this.surveysRepository.create(data);
+    return this.surveyMapper.toCreatedResponse(record);
+  }
+
+  async getDetail(id: string): Promise<SurveyDetailResponse> {
+    const record = await this.surveysRepository.findDetail(id);
+    if (!record) throw new SurveyNotFoundException();
+    return this.surveyMapper.toDetailResponse(record);
+  }
+
+  async update(
+    id: string,
+    request: CreateSurveyRequest,
+    now: Date = new Date(),
+  ): Promise<SurveyCreatedResponse> {
+    const current = await this.surveysRepository.findStatus(id);
+    if (!current) throw new SurveyNotFoundException();
+    if (current.status !== SurveyStatus.DRAFT) throw new SurveyNotEditableException();
+
+    const data = this.surveyMapper.toUpdateData(request);
+    await this.ensureSurveyIsValid(data, request, now, id);
+
+    const record = await this.surveysRepository.update(id, data);
     return this.surveyMapper.toCreatedResponse(record);
   }
 
@@ -142,6 +152,30 @@ export class SurveysService {
 
     await this.surveysRepository.submitResponse(id, userId, request.answers);
     return { success: true, message: 'Respuestas guardadas con éxito' };
+  }
+
+  private async ensureSurveyIsValid(
+    data: UpdateSurveyData,
+    request: CreateSurveyRequest,
+    now: Date,
+    excludedId?: string,
+  ): Promise<void> {
+    if (data.careerId) {
+      await this.ensureCareerExists(data.careerId);
+    }
+
+    if (request.status === 'published' && data.opensAt && data.closesAt) {
+      const scheduleError = getScheduleError(data.opensAt, data.closesAt, now);
+      if (scheduleError) throw new InvalidSurveyScheduleException(scheduleError);
+    }
+
+    const titleTaken = await this.surveysRepository.existsWithTitle({
+      title: data.title,
+      careerId: data.careerId,
+      academicPeriod: data.academicPeriod,
+      excludedId,
+    });
+    if (titleTaken) throw new SurveyTitleAlreadyExistsException();
   }
 
   private async ensureCareerExists(careerId: string): Promise<void> {

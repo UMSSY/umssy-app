@@ -1,28 +1,30 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SURVEY_STATUS_LABELS } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
-import { SURVEYS_TABLE_COLUMNS } from "../constants/survey-routes.constants";
+import { SURVEYS_TABLE_COLUMNS, getSurveyDetailPath } from "../constants/survey-routes.constants";
 import type { SurveysTableProps } from "../types/survey-component-props.types";
-import { formatIsoDisplayDate } from "../utils/survey-dates";
+import { formatIsoDateTime } from "../utils/survey-dates";
+import { SurveyRowActions } from "./survey-row-actions";
 
-export function SurveysTable({ surveys, isLoading, hasError }: SurveysTableProps) {
+export function SurveysTable({ surveys, isLoading, hasError, emptyMessage }: SurveysTableProps) {
   const rows = surveys ?? [];
   const stateMessage = isLoading
     ? SURVEY_MESSAGES.surveysLoading
     : hasError
       ? SURVEY_MESSAGES.surveysLoadError
       : rows.length === 0
-        ? SURVEY_MESSAGES.surveysEmpty
+        ? (emptyMessage ?? SURVEY_MESSAGES.surveysEmpty)
         : null;
 
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-surface">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-surface-soft">
           <TableRow>
             {SURVEYS_TABLE_COLUMNS.map((column) => (
-              <TableHead key={column} className="text-text-secondary">
+              <TableHead key={column} className="text-xs font-semibold tracking-wide text-ink uppercase">
                 {column}
               </TableHead>
             ))}
@@ -37,16 +39,21 @@ export function SurveysTable({ surveys, isLoading, hasError }: SurveysTableProps
             </TableRow>
           ) : (
             rows.map((survey) => (
-              <TableRow key={survey.id}>
-                <TableCell className="font-medium text-ink">{survey.title}</TableCell>
-                <TableCell>{survey.career?.title ?? "-"}</TableCell>
-                <TableCell>{survey.academicPeriod ?? "-"}</TableCell>
-                <TableCell>
-                  {survey.opensAt && survey.closesAt
-                    ? `${formatIsoDisplayDate(survey.opensAt)} - ${formatIsoDisplayDate(survey.closesAt)}`
-                    : "-"}
+              <TableRow key={survey.id} className="relative cursor-pointer focus-within:bg-surface-soft hover:bg-surface-soft">
+                <TableCell className="text-ink">
+                  <Link
+                    href={getSurveyDetailPath(survey.id)}
+                    className="outline-none after:absolute after:inset-0 after:rounded-sm focus-visible:after:ring-2 focus-visible:after:ring-ring"
+                  >
+                    {survey.title}
+                  </Link>
                 </TableCell>
-                <TableCell>{survey.questionCount}</TableCell>
+                <TableCell>
+                  <p className="text-sm text-ink">{survey.createdBy?.fullName ?? "-"}</p>
+                  <p className="text-xs text-text-secondary">{survey.createdBy?.email ?? ""}</p>
+                </TableCell>
+                <TableCell className="text-ink-soft">{survey.academicPeriod ?? "-"}</TableCell>
+                <TableCell className="text-ink-soft tabular-nums">{formatIsoDateTime(survey.createdAt) || "-"}</TableCell>
                 <TableCell>
                   <Badge
                     className={
@@ -57,6 +64,9 @@ export function SurveysTable({ surveys, isLoading, hasError }: SurveysTableProps
                   >
                     {SURVEY_STATUS_LABELS[survey.status]}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  <SurveyRowActions survey={survey} />
                 </TableCell>
               </TableRow>
             ))

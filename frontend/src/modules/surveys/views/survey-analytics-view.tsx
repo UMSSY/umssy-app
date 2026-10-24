@@ -16,6 +16,7 @@ import {
   SURVEY_STATISTICS_QUESTION_SKELETONS,
   SURVEY_STATISTICS_SUMMARY_SKELETONS,
 } from "../constants/survey-statistics.constants";
+import { SURVEYS_PATH } from "../constants/survey-routes.constants";
 import { useSurveyStatistics } from "../hooks/use-survey-statistics";
 import { surveysService } from "../services/surveys.service";
 import type { SurveyAnalyticsViewProps } from "../types/survey-component-props.types";
@@ -75,11 +76,11 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
         <div className="flex flex-col items-center justify-center rounded-xl border border-destructive/20 bg-destructive/5 p-12 text-center">
           <p className="text-sm font-medium text-destructive">No se pudo encontrar la encuesta o cargar sus métricas.</p>
           <Link
-            href="/backoffice/surveys/statistics"
+            href={SURVEYS_PATH}
             className={buttonVariants({ variant: "outline", className: "mt-4 gap-2 text-xs" })}
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
-            Volver a estadísticas
+            Volver a encuestas
           </Link>
         </div>
       </WorkspacePage>
@@ -131,7 +132,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
 
         <div>
           <Link
-            href="/backoffice/surveys/statistics"
+            href={SURVEYS_PATH}
             className={buttonVariants({
               variant: "ghost",
               size: "sm",
@@ -139,7 +140,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
             })}
           >
             <ArrowLeft className="size-3.5" aria-hidden="true" />
-            Volver al listado de encuestas
+            Volver a encuestas
           </Link>
         </div>
 

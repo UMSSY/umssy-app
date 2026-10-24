@@ -22,3 +22,5 @@ export interface CreateSurveyData {
   createdById: string;
   questions: CreateSurveyQuestionData[];
 }
+
+export type UpdateSurveyData = Omit<CreateSurveyData, 'createdById'>;

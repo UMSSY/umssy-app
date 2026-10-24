@@ -37,7 +37,6 @@ describe("AppSidebar", () => {
     ["/backoffice/reports/history", "Reportes", "Historial de reportes"],
     ["/profile/settings", "Mi perfil", "Configuración del perfil"],
     ["/backoffice/surveys/create", "Encuestas", "Crear encuesta"],
-    ["/backoffice/surveys/statistics", "Encuestas", "Estadísticas de encuestas"],
   ])("opens the current group and marks only the current destination for %s", (pathname, group, destination) => {
     route.pathname = pathname; renderSidebar();
     expect(screen.getByRole("button", { name: group })).toHaveAttribute("aria-expanded", "true");

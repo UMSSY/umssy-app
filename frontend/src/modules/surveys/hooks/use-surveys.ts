@@ -13,6 +13,8 @@ export function useSurveys() {
   return {
     surveys: query.data?.data ?? [],
     isLoading: query.isPending,
+    isRefreshing: query.isFetching && !query.isPending,
     hasError: query.isError,
+    refresh: () => void query.refetch(),
   };
 }
