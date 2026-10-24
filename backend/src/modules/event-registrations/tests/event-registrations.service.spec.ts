@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
-import type { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
 
 describe('EventRegistrationsService', () => {
   let service: EventRegistrationsService;
@@ -8,9 +7,8 @@ describe('EventRegistrationsService', () => {
 
   beforeEach(() => {
     findByUserId.mockReset();
-    service = new EventRegistrationsService({
-      findByUserId,
-    } as unknown as EventRegistrationsRepository);
+    service = new EventRegistrationsService({} as never, {} as never);
+    vi.spyOn(service, 'findByUserId').mockImplementation(findByUserId);
   });
 
   it('devuelve las inscripciones del usuario mapeadas', async () => {

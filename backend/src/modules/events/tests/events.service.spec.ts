@@ -30,7 +30,9 @@ describe('EventsService', () => {
 
   beforeEach(() => {
     repositoryMock = { findAndCount: vi.fn(), findById: vi.fn() };
-    service = new EventsService(repositoryMock as never);
+    service = new EventsService({} as never);
+    vi.spyOn(service, 'findAndCount').mockImplementation(repositoryMock.findAndCount);
+    vi.spyOn(service, 'findById').mockImplementation(repositoryMock.findById);
   });
 
   it('returns formatted list with offset, totalPages and items', async () => {
