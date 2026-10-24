@@ -9,6 +9,7 @@ import { MentorNotFoundException } from '../../mentors/exceptions/mentor-not-fou
 import {
   BlockAlreadyBookedException,
   BlockInPastException,
+  InvalidOrientationTypeException,
   MentorUnavailableException,
   OwnBlockException,
 } from '../exceptions/index.js';
@@ -46,6 +47,7 @@ describe('AppointmentsService', () => {
   const appointmentsRepository = {
     findStatusIdByTitle: vi.fn(),
     createAppointment: vi.fn(),
+    createAppointmentHistory: vi.fn(),
   };
   const availabilityRepository = { findById: vi.fn() };
   const blockedDatesService = { runOnUnblockedDay: vi.fn() };
@@ -65,7 +67,13 @@ describe('AppointmentsService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     availabilityRepository.findById.mockResolvedValue(block());
-    mentorsService.findOne.mockResolvedValue({ id: MENTOR_ID, isAvailable: true });
+    mentorsService.findOne.mockResolvedValue({
+      id: MENTOR_ID,
+      isAvailable: true,
+      orientationTypes: [
+        { id: TOPIC_ID, name: 'Orientación profesional', description: null },
+      ],
+    });
     blockedDatesService.runOnUnblockedDay.mockImplementation(
       async (_mentorId: string, _startAt: Date, work: (tx: unknown) => Promise<unknown>) =>
         work(TX),
@@ -120,6 +128,41 @@ describe('AppointmentsService', () => {
       counterpart: { id: MENTOR_ID, fullName: 'Ana Pérez' },
       orientationType: { id: TOPIC_ID, name: 'Orientación profesional' },
     });
+  });
+
+  it('crea el historial de la cita con el estado CONFIRMED y quién la creó', async () => {
+    await service.create(user, payload);
+
+    expect(appointmentsRepository.createAppointmentHistory).toHaveBeenCalledWith(
+      {
+        appointmentId: APPOINTMENT_ID,
+        previousStatusId: null,
+        newStatusId: STATUS_ID,
+        changedById: STUDENT_ID,
+      },
+      TX,
+    );
+  });
+
+  it('responde 400 cuando el mentor no ofrece el tema', async () => {
+    mentorsService.findOne.mockResolvedValue({
+      id: MENTOR_ID,
+      isAvailable: true,
+      orientationTypes: [
+        {
+          id: '88888888-8888-4888-8888-888888888888',
+          name: 'Otro tema',
+          description: null,
+        },
+      ],
+    });
+
+    await expect(service.create(user, payload)).rejects.toThrow(
+      InvalidOrientationTypeException,
+    );
+    expect(blockedDatesService.runOnUnblockedDay).not.toHaveBeenCalled();
+    expect(appointmentsRepository.createAppointment).not.toHaveBeenCalled();
+    expect(appointmentsRepository.createAppointmentHistory).not.toHaveBeenCalled();
   });
 
   it('normaliza la confirmación heredada a CONFIRMED en la respuesta', async () => {
