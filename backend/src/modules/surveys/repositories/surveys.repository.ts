@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import {
   SURVEY_CREATED_SELECT,
+  SURVEY_STATISTICS_INCLUDE,
   SURVEY_SUMMARY_SELECT,
 } from '../constants/survey.constants.js';
 import { SurveysStorageUnavailableException } from '../exceptions/surveys-storage-unavailable.exception.js';
@@ -13,6 +14,7 @@ import type {
 } from '../types/surveys-database-client.type.js';
 import type {
   SurveyCreatedRecord,
+  SurveyStatisticsRecord,
   SurveySummaryRecord,
   SurveyTitleScope,
 } from '../types/survey-record.type.js';
@@ -88,69 +90,11 @@ export class SurveysRepository {
     });
   }
 
-  async findStatistics(surveyId: string) {
-    const survey = await this.prisma.survey.findUnique({
+  findStatistics(surveyId: string): Promise<SurveyStatisticsRecord | null> {
+    return this.prisma.survey.findUnique({
       where: { id: surveyId },
-      include: {
-        career: { select: { id: true, title: true } },
-        questions: {
-          orderBy: { position: 'asc' },
-          include: {
-            options: {
-              orderBy: { position: 'asc' },
-              include: {
-                _count: { select: { answers: true } },
-              },
-            },
-            _count: { select: { answers: true } },
-          },
-        },
-        _count: { select: { responses: true } },
-      },
+      include: SURVEY_STATISTICS_INCLUDE,
     });
-
-    if (!survey) return null;
-
-    const totalResponses = survey._count.responses;
-
-    const questions = survey.questions.map((q) => {
-      let totalSelections = 0;
-      const options = q.options.map((opt) => {
-        const count = opt._count.answers;
-        totalSelections += count;
-        const percentage = totalResponses > 0 ? Math.round((count / totalResponses) * 1000) / 10 : 0;
-        return {
-          id: opt.id,
-          label: opt.label,
-          count,
-          percentage,
-        };
-      });
-
-      return {
-        id: q.id,
-        position: q.position,
-        statement: q.statement,
-        type: q.type.toLowerCase(),
-        isRequired: q.isRequired,
-        answeredCount: q._count.answers,
-        totalSelections,
-        options,
-      };
-    });
-
-    return {
-      id: survey.id,
-      title: survey.title,
-      description: survey.description,
-      status: (survey.status === 'PUBLISHED' ? 'published' : 'draft') as 'published' | 'draft',
-      academicPeriod: survey.academicPeriod,
-      career: survey.career ? { id: survey.career.id, title: survey.career.title } : null,
-      opensAt: survey.opensAt?.toISOString() ?? null,
-      closesAt: survey.closesAt?.toISOString() ?? null,
-      totalResponses,
-      questions,
-    };
   }
 }
 

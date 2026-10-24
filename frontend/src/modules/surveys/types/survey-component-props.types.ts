@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { AcademicPeriod } from "@/modules/reports";
 import type { BuilderOption, BuilderQuestion, SurveyBuilderState, SurveyFieldName, SurveyHeaderValues } from "./survey-builder.types";
 import type { SurveyErrorMap, SurveyValidationError } from "./survey-validation.types";
-import type { Career, QuestionType, SurveySummary } from "./survey.types";
+import type { Career, QuestionType, SurveyOptionStatistic, SurveyQuestionStatistic, SurveySummary } from "./survey.types";
 
 export interface SurveyHeaderCardProps {
   values: SurveyHeaderValues;
@@ -150,4 +150,23 @@ export interface SurveySummaryRowProps {
 
 export interface RequiredMarkProps {
   className?: string;
+}
+
+export interface SurveyHorizontalBarsProps {
+  options: SurveyOptionStatistic[];
+  highlightedId?: string;
+}
+
+export interface SurveyQuestionResultCardProps {
+  question: SurveyQuestionStatistic;
+}
+
+export interface SurveyStatisticsTableProps {
+  surveys: SurveySummary[];
+  isLoading?: boolean;
+  hasError?: boolean;
+}
+
+export interface SurveyAnalyticsViewProps {
+  id: string;
 }
