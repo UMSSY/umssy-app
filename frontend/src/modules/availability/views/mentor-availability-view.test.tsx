@@ -205,6 +205,30 @@ describe("MentorAvailabilityView", () => {
     ).toBeInTheDocument()
   })
 
+  it("al tocar un bloque con cita muestra quién reservó y el tema (HU-06 CA5)", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([
+      {
+        ...blockAt("c", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z"),
+        state: "confirmed",
+        appointment: {
+          id: "a1",
+          counterpart: { id: "s1", fullName: "Titulado Uno" },
+          orientationType: { id: "o1", name: "Orientación profesional" },
+        },
+      },
+    ])
+    const user = userEvent.setup()
+
+    renderWithQuery(<MentorAvailabilityView />)
+
+    await user.click(await screen.findByRole("button", { name: "confirmada, 10:00 a 11:00" }))
+
+    const detail = await screen.findByLabelText("Cita confirmada")
+    expect(within(detail).getByText("Titulado Uno")).toBeInTheDocument()
+    expect(within(detail).getByText("Orientación profesional")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Eliminar bloque" })).toBeDisabled()
+  })
+
   it("arranca en la semana de la URL si viene indicada", async () => {
     vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
 
