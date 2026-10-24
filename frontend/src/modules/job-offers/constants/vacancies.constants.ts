@@ -81,6 +81,51 @@ export const PUBLISHED_DIALOG_TEXT = {
 
 export const PUBLISHED_STATUS = "Publicada";
 
+export const CLOSED_STATUS = "Cerrada";
+export const DELETED_STATUS = "Eliminada";
+
+export const NEW_JOB_OFFER_ROUTE = "/recruiters/job-offers/new";
+
+export const STATUS_LABELS: Record<string, string> = {
+  [PUBLISHED_STATUS]: "Activa",
+  [CLOSED_STATUS]: "Cerrada",
+  [DELETED_STATUS]: "Eliminada",
+};
+
+export const STATUS_BADGE_CLASSES: Record<string, string> = {
+  [PUBLISHED_STATUS]: "bg-green-100 text-green-800",
+  [CLOSED_STATUS]: "bg-muted text-text-secondary",
+  [DELETED_STATUS]: "bg-destructive/10 text-destructive",
+};
+
+export const STATUS_FILTER_OPTIONS = [
+  { value: "", label: "Todas" },
+  { value: PUBLISHED_STATUS, label: "Activas" },
+  { value: CLOSED_STATUS, label: "Cerradas" },
+  { value: DELETED_STATUS, label: "Eliminadas" },
+] as const;
+
+export const HISTORY_SKELETON_ROWS = 3;
+
+export const VACANCY_LIST_TEXT = {
+  published: {
+    ariaLabel: "Mis vacantes publicadas",
+    loading: "Cargando vacantes...",
+    loadError: "No se pudieron cargar tus vacantes.",
+    empty: "Aún no has publicado vacantes.",
+    noMatches: "Ninguna vacante coincide con los filtros.",
+    noSearchMatches: "Ninguna vacante coincide con los filtros.",
+  },
+  history: {
+    ariaLabel: "Historial de vacantes",
+    loading: "Cargando historial de vacantes...",
+    loadError: "Error al cargar el historial. Inténtelo más tarde.",
+    empty: "Aún no tienes vacantes en tu historial",
+    noMatches: "Ninguna vacante coincide con los filtros.",
+    noSearchMatches: "No se encontraron vacantes que coincidan con la búsqueda",
+  },
+} as const;
+
 export const JOB_OFFERS_QUERY_KEYS = {
   skillCatalog: ["job-offers", "skill-catalog"] as const,
   company: (companyId: string | null) => ["job-offers", "company", companyId] as const,

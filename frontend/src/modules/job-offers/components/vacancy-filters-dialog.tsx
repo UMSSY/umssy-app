@@ -13,7 +13,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CONTRACT_TYPES, MODALITIES } from "../constants/vacancies.constants";
+import {
+  CONTRACT_TYPES,
+  MODALITIES,
+  STATUS_FILTER_OPTIONS,
+} from "../constants/vacancies.constants";
 import {
   DEFAULT_JOB_OFFER_FILTERS,
   type ApplicantsOrder,
@@ -74,14 +78,21 @@ interface VacancyFiltersDialogProps {
   filters: JobOfferFilters;
   onChange: <K extends keyof JobOfferFilters>(key: K, value: JobOfferFilters[K]) => void;
   onReset: () => void;
+  showStatusFilter?: boolean;
 }
 
-export function VacancyFiltersDialog({ filters, onChange, onReset }: VacancyFiltersDialogProps) {
+export function VacancyFiltersDialog({
+  filters,
+  onChange,
+  onReset,
+  showStatusFilter = false,
+}: VacancyFiltersDialogProps) {
   const activeCount = [
     filters.dateFrom !== "" || filters.dateTo !== "",
     filters.modality !== "",
     filters.contractType !== "",
     filters.applicants !== DEFAULT_JOB_OFFER_FILTERS.applicants,
+    showStatusFilter && filters.status !== DEFAULT_JOB_OFFER_FILTERS.status,
   ].filter(Boolean).length;
 
   const range: DateRange | undefined = filters.dateFrom
@@ -98,7 +109,7 @@ export function VacancyFiltersDialog({ filters, onChange, onReset }: VacancyFilt
 
   return (
     <Dialog>
-      <DialogTrigger render={<Button type="button" variant="outline" />}>
+      <DialogTrigger render={<Button type="button" variant="outline" className="max-md:min-h-11" />}>
         <ListFilter aria-hidden="true" />
         Filtrar por{activeCount > 0 ? ` (${activeCount})` : ""}
       </DialogTrigger>
@@ -106,7 +117,13 @@ export function VacancyFiltersDialog({ filters, onChange, onReset }: VacancyFilt
         <DialogHeader>
           <DialogTitle>Filtros de búsqueda</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-6 sm:grid-cols-[auto_repeat(3,minmax(0,1fr))]">
+        <div
+          className={
+            showStatusFilter
+              ? "grid gap-6 sm:grid-cols-[auto_repeat(4,minmax(0,1fr))]"
+              : "grid gap-6 sm:grid-cols-[auto_repeat(3,minmax(0,1fr))]"
+          }
+        >
           <div className="space-y-2">
             <h3 className="border-b border-border pb-2 text-xs font-bold text-text-secondary uppercase">
               Fecha
@@ -146,6 +163,17 @@ export function VacancyFiltersDialog({ filters, onChange, onReset }: VacancyFilt
               )
             }
           />
+          {showStatusFilter ? (
+            <FilterColumn
+              title="Estado"
+              options={STATUS_FILTER_OPTIONS.map((item) => ({
+                value: item.value as string,
+                label: item.label,
+              }))}
+              selected={filters.status}
+              onSelect={(value) => onChange("status", value)}
+            />
+          ) : null}
         </div>
         <div className="flex justify-end">
           <Button type="button" variant="ghost" onClick={onReset}>
