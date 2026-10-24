@@ -6,5 +6,5 @@ export interface CreateAppointmentData {
   endAt: Date;
   statusId: string;
   orientationTypeId: string;
-  message?: string;
+  message?: string | null;
 }
