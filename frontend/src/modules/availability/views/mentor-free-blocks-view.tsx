@@ -78,6 +78,7 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
         </section>
       ) : (
         <BlockSelection
+          mentorId={mentorId}
           blocks={blocks}
           weekRange={weekRange}
           fetchFreeBlocks={() => availabilityApi.getMentorFreeBlocks(mentorId, weekRange)}
