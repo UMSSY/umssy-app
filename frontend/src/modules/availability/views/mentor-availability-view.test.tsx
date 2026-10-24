@@ -249,12 +249,44 @@ describe("MentorAvailabilityView", () => {
 
     await user.click(await screen.findByRole("button", { name: "libre, 10:00 a 11:00" }))
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
-    expect(screen.queryByText("Nuevo bloque de disponibilidad")).not.toBeInTheDocument()
+    expect(screen.getByText("Nuevo bloque de disponibilidad")).not.toBeVisible()
 
     await user.click(screen.getByRole("button", { name: "Cancelar" }))
 
     expect(screen.queryByText("Editar bloque")).not.toBeInTheDocument()
-    expect(screen.getByText("Nuevo bloque de disponibilidad")).toBeInTheDocument()
+    expect(screen.getByText("Nuevo bloque de disponibilidad")).toBeVisible()
+  })
+
+  it("deja fijo el panel lateral al bajar desde 1200 px, con su propio scroll (#1456)", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+
+    renderWithQuery(<MentorAvailabilityView />)
+
+    const panel = (await screen.findByText("Nuevo bloque de disponibilidad")).closest(".min-w-0.min-\\[1200px\\]\\:sticky")
+    expect(panel).not.toBeNull()
+    expect(panel).toHaveClass("min-[1200px]:overflow-y-auto")
+    expect(panel?.parentElement).toHaveClass("min-[1200px]:items-start")
+  })
+
+  it("conserva lo que se llenó en Nuevo bloque al abrir otro panel y volver", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([
+      blockAt("a", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z"),
+    ])
+    const user = userEvent.setup()
+
+    renderWithQuery(<MentorAvailabilityView />)
+
+    const block = await screen.findByRole("button", { name: "libre, 10:00 a 11:00" })
+    await user.click(screen.getByRole("button", { name: "viernes, 9 de octubre de 2026" }))
+    await user.click(screen.getByLabelText(/Hora de inicio/))
+    await user.click(await screen.findByRole("option", { name: "15:00" }))
+
+    await user.click(block)
+    expect(screen.getByText("Editar bloque")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Cancelar" }))
+
+    expect(screen.getByLabelText(/Fecha/)).toHaveValue("Viernes 9 de octubre de 2026")
+    expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("15:00")
   })
 
   it("cambiar de semana cierra el panel de edición", async () => {
