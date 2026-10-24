@@ -1,7 +1,9 @@
+
 import { randomBytes } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { CONFIRMED_REGISTRATION_TITLE } from '../constants/event-registrations.constants.js';
+import type { PersistEventRegistrationPayload } from '../types/event-registrations.types.js';
 import type { EventSupportContext } from '../types/event-support-context.types.js';
 
 const PRISMA_UNIQUE_VIOLATION = 'P2002';
@@ -9,6 +11,19 @@ const PRISMA_UNIQUE_VIOLATION = 'P2002';
 @Injectable()
 export class EventRegistrationsRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  create(payload: PersistEventRegistrationPayload) {
+    return this.prisma.eventRegistration.create({
+      data: payload,
+      select: {
+        id: true,
+        eventId: true,
+        userId: true,
+        statusId: true,
+        qrToken: true,
+      },
+    });
+  }
 
   findByUserId(userId: string) {
     return this.prisma.eventRegistration.findMany({
