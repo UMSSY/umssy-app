@@ -11,6 +11,7 @@ export { REPORTS_NAVIGATION_ITEM } from "./constants/reports-navigation.constant
 export { reportsService } from "./services/reports.service";
 export { getAcademicPeriods } from "./utils/academic-periods";
 export { CONNECTION_ERROR_MESSAGE } from "./constants/reports.constants";
+export { ExportSuccessToast } from "./components/export-success-toast";
 export type { GeneratedReport, ReportType } from "./types/generated-report.types";
 export type { AcademicPeriod, RegisteredUser } from "./types/registered-user.types";
 export type { RejectedUser } from "./types/rejected-user.types";
