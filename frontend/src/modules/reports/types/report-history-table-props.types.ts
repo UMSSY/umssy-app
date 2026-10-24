@@ -5,4 +5,5 @@ export interface ReportHistoryTableProps {
   isLoading: boolean;
   errorMessage?: string;
   emptyMessage?: string;
+  searchTerm?: string;
 }

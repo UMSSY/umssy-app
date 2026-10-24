@@ -26,7 +26,7 @@ export function PersonalDataFormActions() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="h-[42px] 2xl:h-12 rounded-md bg-ink px-5 text-[14.5px] font-semibold text-surface hover:bg-ink/90"
+          className="h-10 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover 2xl:h-12"
         >
           {isSubmitting ? (
             "Guardando..."

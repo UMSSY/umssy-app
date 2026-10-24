@@ -1,6 +1,7 @@
 export { PersonalInfoView } from "./views/personal-info-view";
 export { PresentationView } from "./views/presentation-view";
 export { ProfileOverviewView } from "./views/profile-overview-view";
+export { ProfileSettingsView } from "./views/profile-settings-view";
 
 export { ConfirmDeleteDialog } from "./components/confirm-delete-dialog";
 export { FeedbackMessage } from "./components/feedback-message";
