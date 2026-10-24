@@ -169,7 +169,7 @@ export function MentorAvailabilityView({
         </div>
 
         <div
-          className="min-w-0 min-[1200px]:sticky min-[1200px]:top-[calc(var(--spacing-app-header)+1.5rem)] min-[1200px]:max-h-[calc(100dvh-var(--spacing-app-header)-3rem)] min-[1200px]:overflow-y-auto"
+          className="min-w-0 min-[1200px]:sticky min-[1200px]:top-[calc(var(--spacing-app-header)+1rem)] min-[1200px]:max-h-[calc(100dvh-var(--spacing-app-header)-2rem)] min-[1200px]:overflow-y-auto"
         >
           {showBlockedPanel && (
             <BlockedDatePanel
