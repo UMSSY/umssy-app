@@ -47,7 +47,6 @@ export class EventRegistrationsRepository {
       orderBy: { event: { eventDate: 'asc' } },
     });
   }
-
   findPassByIdAndUserId(id: string, userId: string) {
     return this.prisma.eventRegistration.findFirst({
       where: {
