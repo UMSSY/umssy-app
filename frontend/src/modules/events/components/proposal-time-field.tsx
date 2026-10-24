@@ -32,7 +32,6 @@ export function ProposalTimeField({ id, label, value, onChange, error, disabled 
         <Clock aria-hidden="true" />
         </Button>
       </div>
-      <p id={`${id}-help`} className="text-xs text-text-secondary">Escribe en formato de 24 horas o usa el reloj.</p>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>{label}</DialogTitle><DialogDescription>Selecciona la hora en formato de 24 horas.</DialogDescription></DialogHeader>
