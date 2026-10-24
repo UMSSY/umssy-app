@@ -2,6 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { surveysService } from "../services/surveys.service";
+import { apiResponse } from "../testing/survey-fixtures";
 import type { SurveyToAnswer } from "../types/survey-answer.types";
 import { AnswerSurveyView } from "./answer-survey-view";
 
@@ -59,11 +60,9 @@ describe("AnswerSurveyView", () => {
   });
 
   it("muestra el título, descripción y preguntas de la encuesta", async () => {
-    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue({
-      status: "success",
-      message: "ok",
-      data: MOCK_SURVEY,
-    });
+    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue(
+      apiResponse(MOCK_SURVEY),
+    );
 
     render(<AnswerSurveyView id="survey-123" />);
 
@@ -99,11 +98,9 @@ describe("AnswerSurveyView", () => {
   });
 
   it("muestra aviso de encuesta completada si el titulado ya respondió", async () => {
-    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue({
-      status: "success",
-      message: "ok",
-      data: { ...MOCK_SURVEY, hasAnswered: true },
-    });
+    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue(
+      apiResponse({ ...MOCK_SURVEY, hasAnswered: true }),
+    );
 
     render(<AnswerSurveyView id="survey-123" />);
 
@@ -113,11 +110,9 @@ describe("AnswerSurveyView", () => {
   });
 
   it("muestra aviso de encuesta caducada si ya expiró", async () => {
-    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue({
-      status: "success",
-      message: "ok",
-      data: { ...MOCK_SURVEY, isExpired: true },
-    });
+    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue(
+      apiResponse({ ...MOCK_SURVEY, isExpired: true }),
+    );
 
     render(<AnswerSurveyView id="survey-123" />);
 
@@ -128,11 +123,9 @@ describe("AnswerSurveyView", () => {
 
   it("valida preguntas obligatorias antes de enviar", async () => {
     const user = userEvent.setup();
-    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue({
-      status: "success",
-      message: "ok",
-      data: MOCK_SURVEY,
-    });
+    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue(
+      apiResponse(MOCK_SURVEY),
+    );
 
     render(<AnswerSurveyView id="survey-123" />);
 
@@ -146,16 +139,12 @@ describe("AnswerSurveyView", () => {
 
   it("permite seleccionar opciones y enviar respuestas exitosamente", async () => {
     const user = userEvent.setup();
-    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue({
-      status: "success",
-      message: "ok",
-      data: MOCK_SURVEY,
-    });
-    const submitSpy = vi.spyOn(surveysService, "submitAnswers").mockResolvedValue({
-      status: "success",
-      message: "ok",
-      data: { success: true, message: "Guardado" },
-    });
+    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue(
+      apiResponse(MOCK_SURVEY),
+    );
+    const submitSpy = vi.spyOn(surveysService, "submitAnswers").mockResolvedValue(
+      apiResponse({ success: true, message: "Guardado" }),
+    );
 
     render(<AnswerSurveyView id="survey-123" />);
 
