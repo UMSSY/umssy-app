@@ -15,7 +15,10 @@ import type {
 export class EventsService {
   constructor(private readonly eventsRepository: EventsRepository) {}
 
-  async findAll(payload: GetEventsPayload): Promise<EventsListResponse> {
+  async findAll(
+    payload: GetEventsPayload,
+    userId?: string,
+  ): Promise<EventsListResponse> {
     const { page, limit, categoryId, statusId, search } = payload;
     const offset = (page - 1) * limit;
     const isPublishedOnly = statusId === undefined;
@@ -24,7 +27,9 @@ export class EventsService {
       categoryId,
       statusId,
       isPublishedOnly,
+      ...(payload.includeProposals && { includeProposals: true }),
       search,
+      userId,
       skip: offset,
       take: limit,
     });
@@ -32,8 +37,8 @@ export class EventsService {
     return mapEventsToListResponse(items, total, page, limit);
   }
 
-  async findOne(id: string): Promise<EventDetailResponse> {
-    const event = await this.eventsRepository.findById(id);
+  async findOne(id: string, userId?: string): Promise<EventDetailResponse> {
+    const event = await this.eventsRepository.findById(id, userId);
 
     if (!event) {
       throw new EventNotFoundException(id);
