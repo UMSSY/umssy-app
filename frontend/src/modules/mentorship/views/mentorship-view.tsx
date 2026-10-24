@@ -3,6 +3,10 @@
 import { useAuth } from "@/shared/contexts/auth-context";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { SlotUnavailableDialog } from "@/modules/mentors/components/participation/slot-availability-preview";
+import { ParticipationOverview } from "@/modules/mentors/components/participation/participation-overview";
 import { isApiError } from "@/shared/services/api-client";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +22,12 @@ import { useMentorshipWizard } from "../hooks/use-mentorship-wizard";
 import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
 
 export function MentorshipView() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const isAvailabilitySimulation = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_APP_ENV !== "prod";
+  const [simulatedSlotsAvailable, setSimulatedSlotsAvailable] = useState(false);
+  const [isUnavailableOpen, setIsUnavailableOpen] = useState(false);
+  const [isSimulatedActive, setIsSimulatedActive] = useState(false);
   const { refreshRoles } = useAuth();
   const {
     currentStep,
@@ -78,6 +88,16 @@ export function MentorshipView() {
       return;
     }
 
+    // Both development scenarios are local previews; never persist activation.
+    if (isAvailabilitySimulation) {
+      if (simulatedSlotsAvailable) {
+        setIsSimulatedActive(true);
+      } else {
+        setIsUnavailableOpen(true);
+      }
+      return;
+    }
+
     setIsActivating(true);
     setActivationError(null);
 
@@ -90,6 +110,8 @@ export function MentorshipView() {
 
       clearMentorshipWizardDraft();
       setIsActivated(true);
+      void queryClient.invalidateQueries({ queryKey: ["mentors", "participation"] });
+      router.push("/mentors/participation");
     } catch (error) {
       if (isApiError(error)) {
         const status = error.response?.status;
@@ -124,6 +146,19 @@ export function MentorshipView() {
       setIsActivating(false);
     }
   };
+
+  if (isAvailabilitySimulation && isSimulatedActive) {
+    return (
+      <div className="space-y-6">
+        <section aria-label="Activación simulada" className="space-y-3 rounded-lg border border-border bg-surface-soft p-4">
+          <p role="status" className="text-sm font-semibold text-ink">Participación activa (simulación de desarrollo)</p>
+          <p className="text-sm text-text-secondary">Esta vista es temporal. No se ha activado tu cuenta ni guardado la participación en el servidor. Al recargar se vuelve al formulario.</p>
+          <Button variant="outline" onClick={() => setIsSimulatedActive(false)}>Volver al formulario y probar otro escenario</Button>
+        </section>
+        <ParticipationOverview areas={selectedTechnicalAreas.map((area) => area.name)} orientations={selectedOrientationTypes.map((orientation) => orientation.name)} />
+      </div>
+    );
+  }
 
   if (isActivated) {
     return (
@@ -205,6 +240,18 @@ export function MentorshipView() {
     }
 
     return (
+      <>
+      {isAvailabilitySimulation && (
+        <section aria-label="Simulación de disponibilidad" className="mb-6 space-y-3 rounded-lg border border-border bg-surface-soft p-4">
+          <p className="text-sm font-semibold text-ink">Disponibilidad simulada para desarrollo</p>
+          <p className="text-xs text-text-secondary">Elige el escenario antes de confirmar. La disponibilidad y la activación son simuladas: ninguna opción activa tu cuenta ni guarda la participación en el servidor.</p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" aria-pressed={!simulatedSlotsAvailable} onClick={() => setSimulatedSlotsAvailable(false)}>Simular cupos ocupados</Button>
+            <Button variant="outline" size="sm" aria-pressed={simulatedSlotsAvailable} onClick={() => setSimulatedSlotsAvailable(true)}>Simular cupos disponibles</Button>
+          </div>
+          <p role="status" className="text-sm text-accent">{simulatedSlotsAvailable ? "Hay cupos disponibles (simulación)" : "Todos los cupos están ocupados (simulación)"}</p>
+        </section>
+      )}
       <ConfirmationStep
         wantsToParticipate={wantsToParticipate}
         selectedTechnicalAreas={selectedTechnicalAreas}
@@ -215,6 +262,7 @@ export function MentorshipView() {
         onEditOrientationTypes={() => goToStep(3)}
         onActivate={handleActivate}
       />
+      </>
     );
   };
 
@@ -227,6 +275,7 @@ export function MentorshipView() {
       onNext={goNext}
     >
       {renderStepContent()}
+      <SlotUnavailableDialog open={isUnavailableOpen} onOpenChange={setIsUnavailableOpen} />
     </MentorshipWizardShell>
   );
 }
