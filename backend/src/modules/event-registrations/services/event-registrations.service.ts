@@ -137,6 +137,8 @@ export class EventRegistrationsService {
       },
       select: {
         id: true,
+        registeredAt: true,
+        cancelledAt: true,
         status: { select: { title: true } },
         event: {
           select: {
