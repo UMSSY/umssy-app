@@ -5,6 +5,7 @@ import { AppointmentStatusTitle } from '../../availability/enums/appointment-sta
 import { APPOINTMENT_SELECT } from '../constants/appointment-select.constants.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { CreateAppointmentData } from '../types/create-appointment-data.types.js';
+import type { CreateAppointmentHistoryData } from '../types/create-appointment-history-data.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
 
 @Injectable()
@@ -28,6 +29,13 @@ export class AppointmentsRepository {
     client: TransactionClient = this.prisma,
   ): Promise<AppointmentRecord> {
     return client.appointment.create({ data, select: APPOINTMENT_SELECT });
+  }
+
+  async createAppointmentHistory(
+    data: CreateAppointmentHistoryData,
+    client: TransactionClient = this.prisma,
+  ): Promise<void> {
+    await client.appointmentHistory.create({ data });
   }
 
   findMine(
