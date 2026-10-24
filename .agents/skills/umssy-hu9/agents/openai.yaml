@@ -1,0 +1,4 @@
+interface:
+  display_name: "UMSSY HU9 · Mentorías"
+  short_description: "API, afinidad, orden y paginación del directorio"
+  default_prompt: "Usa la skill umssy-hu9 para trabajar en la issue que te asignaré. Primero identifica la rama, lee sus criterios de QA y comprueba los contratos compartidos; no escribas código fuera del alcance de la issue."
