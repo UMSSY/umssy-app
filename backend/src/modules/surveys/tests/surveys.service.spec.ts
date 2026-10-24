@@ -44,6 +44,7 @@ function createRepositories() {
         createdAt: NOW,
       }),
       findAll: vi.fn(),
+      findGraduateProfile: vi.fn().mockResolvedValue({ careerId: CAREER_ID, graduationYear: 2026 }),
       findNotificationsForUser: vi.fn().mockResolvedValue([]),
       findByIdWithQuestions: vi.fn(),
       submitResponse: vi.fn(),
@@ -289,7 +290,7 @@ describe('SurveysService', () => {
 
     const result = await service.getNotificationsForUser('user-1');
 
-    expect(spy).toHaveBeenCalledWith('user-1');
+    expect(spy).toHaveBeenCalledWith('user-1', { careerId: CAREER_ID, graduationYear: 2026 });
     expect(result).toBe(mockNotifications);
   });
 
@@ -299,7 +300,7 @@ describe('SurveysService', () => {
       SurveyNotFoundException,
     );
 
-    const mockDetail = { id: 's1', title: 'Test', questions: [] };
+    const mockDetail = { id: 's1', title: 'Test', status: 'published', questions: [] };
     repositories.surveys.findByIdWithQuestions.mockResolvedValue(mockDetail);
     await expect(service.getSurveyForAnswering('s1', 'user-1')).resolves.toBe(mockDetail);
   });

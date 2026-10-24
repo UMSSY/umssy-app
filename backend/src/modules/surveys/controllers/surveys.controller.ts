@@ -18,7 +18,9 @@ import {
   ApiProduces,
   ApiTags,
 } from '@nestjs/swagger';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
+import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
@@ -74,8 +76,9 @@ export class SurveysController {
   getById(
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
     @CurrentUserId() userId: string,
+    @CurrentUser() user?: AuthenticatedUser,
   ): Promise<SurveyDetailResponse> {
-    return this.surveysService.getSurveyForAnswering(id, userId);
+    return this.surveysService.getSurveyForAnswering(id, userId, user?.roles);
   }
 
   detail(id: string): Promise<SurveyDetailResponse> {
@@ -103,8 +106,9 @@ export class SurveysController {
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
     @CurrentUserId() userId: string,
     @Body(new ZodValidationPipe(submitSurveyResponseSchema)) request: SubmitSurveyResponseRequest,
+    @CurrentUser() user?: AuthenticatedUser,
   ): Promise<{ success: boolean; message: string }> {
-    return this.surveysService.submitResponse(id, userId, request);
+    return this.surveysService.submitResponse(id, userId, request, user?.roles);
   }
 
   @Get(':id/statistics')

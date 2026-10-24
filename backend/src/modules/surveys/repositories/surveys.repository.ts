@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import {
   CAREER_SELECT,
+  SURVEY_ALL_ACADEMIC_PERIODS,
   SURVEY_CREATED_SELECT,
   SURVEY_DETAIL_INCLUDE,
   SURVEY_STATISTICS_INCLUDE,
@@ -26,6 +27,7 @@ import type {
   SurveySummaryRecord,
   SurveyTitleScope,
 } from '../types/survey-record.type.js';
+import type { GraduateProfile } from '../types/graduate-profile.type.js';
 import type { SurveyStatus } from '../types/survey.enum.js';
 
 @Injectable()
@@ -136,31 +138,40 @@ export class SurveysRepository {
     });
   }
 
-  async findNotificationsForUser(userId: string): Promise<SurveyNotificationResponse[]> {
+  async findGraduateProfile(userId: string): Promise<GraduateProfile | null> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true },
+      select: { email: true },
     });
 
-    if (!user) return [];
+    if (!user) return null;
 
-    const accessRequest = await this.prisma.accessRequest.findFirst({
+    return this.prisma.accessRequest.findFirst({
       where: {
         email: user.email,
         status: { title: { equals: 'approved', mode: 'insensitive' } },
       },
-      select: { careerId: true },
+      select: { careerId: true, graduationYear: true },
     });
-    const userCareerId = accessRequest?.careerId ?? null;
+  }
 
+  async findNotificationsForUser(
+    userId: string,
+    graduate: GraduateProfile,
+  ): Promise<SurveyNotificationResponse[]> {
     const surveys = await this.prisma.survey.findMany({
       where: {
         status: 'PUBLISHED',
-        ...(userCareerId
-          ? {
-              OR: [{ careerId: null }, { careerId: userCareerId }],
-            }
-          : {}),
+        AND: [
+          { OR: [{ careerId: null }, { careerId: graduate.careerId }] },
+          {
+            OR: [
+              { academicPeriod: null },
+              { academicPeriod: SURVEY_ALL_ACADEMIC_PERIODS },
+              { academicPeriod: { endsWith: String(graduate.graduationYear) } },
+            ],
+          },
+        ],
       },
       include: {
         responses: {
