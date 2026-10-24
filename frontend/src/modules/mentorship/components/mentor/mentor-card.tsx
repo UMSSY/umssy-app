@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +14,53 @@ import type { MentorDirectoryItem } from "../../types/mentor-directory.types";
 type MentorCardProps = {
   mentor: MentorDirectoryItem;
   isOwnProfile?: boolean;
+  returnTo?: string;
   showAffinityBadge?: boolean;
 };
 
-export function MentorCard({ mentor, isOwnProfile = false, showAffinityBadge = false }: MentorCardProps) {
+function getSafeReturnTo(returnTo?: string): string | null {
+  if (!returnTo) {
+    return null;
+  }
+
+  if (
+    !returnTo.startsWith("/mentorship/mentors") ||
+    returnTo.startsWith("//") ||
+    returnTo.includes("\\") ||
+    returnTo.includes("#")
+  ) {
+    return null;
+  }
+
+  try {
+    const url = new URL(returnTo, "http://localhost");
+
+    if (url.origin !== "http://localhost") {
+      return null;
+    }
+
+    if (url.pathname !== "/mentorship/mentors") {
+      return null;
+    }
+
+    return `${url.pathname}${url.search}`;
+  } catch {
+    return null;
+  }
+}
+
+export function MentorCard({
+  mentor,
+  isOwnProfile = false,
+  returnTo,
+  showAffinityBadge = false,
+}: MentorCardProps) {
   const hasTechnicalAreas = mentor.technicalAreas.length > 0;
+  const safeReturnTo = getSafeReturnTo(returnTo);
+
+  const profileHref = safeReturnTo
+    ? `/mentors/${mentor.id}?returnTo=${encodeURIComponent(safeReturnTo)}`
+    : `/mentors/${mentor.id}`;
 
   return (
     <Card
@@ -37,6 +80,7 @@ export function MentorCard({ mentor, isOwnProfile = false, showAffinityBadge = f
               ) : null}
               <AvatarFallback>{getInitials(mentor.fullName)}</AvatarFallback>
             </Avatar>
+
             <div className="min-w-0 flex-1">
               <h2
                 id={`mentor-${mentor.id}`}
@@ -50,6 +94,7 @@ export function MentorCard({ mentor, isOwnProfile = false, showAffinityBadge = f
                   {mentor.headline}
                 </p>
               ) : null}
+
               {mentor.education ? (
                 <p className="mt-2 text-sm [overflow-wrap:anywhere] text-text-secondary">
                   {mentor.education.degree} · {mentor.education.institution}
@@ -57,13 +102,20 @@ export function MentorCard({ mentor, isOwnProfile = false, showAffinityBadge = f
               ) : null}
             </div>
           </div>
+
           <Badge
             variant="outline"
-            className={`ml-auto gap-1.5 px-2.5 ${mentor.isAvailable ? "border-availability-border bg-availability text-availability-foreground" : "border-border bg-surface-soft text-text-secondary"}`}
+            className={`ml-auto gap-1.5 px-2.5 ${
+              mentor.isAvailable
+                ? "border-availability-border bg-availability text-availability-foreground"
+                : "border-border bg-surface-soft text-text-secondary"
+            }`}
           >
             <span
               aria-hidden="true"
-              className={`size-1.5 shrink-0 rounded-full ${mentor.isAvailable ? "bg-accent" : "bg-text-secondary"}`}
+              className={`size-1.5 shrink-0 rounded-full ${
+                mentor.isAvailable ? "bg-accent" : "bg-text-secondary"
+              }`}
             />
             {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
           </Badge>
@@ -97,10 +149,12 @@ export function MentorCard({ mentor, isOwnProfile = false, showAffinityBadge = f
             </p>
           )}
         </div>
+
         <div>
           <p className="mb-2 text-sm font-semibold text-ink">
             Tipos de orientación
           </p>
+
           {mentor.orientationTypes.length > 0 ? (
             <ul className="flex flex-wrap gap-2">
               {mentor.orientationTypes.map((orientationType) => (
@@ -122,7 +176,7 @@ export function MentorCard({ mentor, isOwnProfile = false, showAffinityBadge = f
 
       <CardFooter className="mt-auto justify-end bg-surface">
         <Link
-          href={`/mentors/${mentor.id}`}
+          href={profileHref}
           className={buttonVariants({
             variant: "outline",
             className: "max-w-full border-border-strong text-ink",
