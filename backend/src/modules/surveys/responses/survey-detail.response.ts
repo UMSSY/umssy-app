@@ -24,9 +24,11 @@ export interface SurveyDetailResponse {
   title: string;
   description: string | null;
   status: SurveyDisplayStatusValue;
-  career: CareerResponse | null;
+  career?: CareerResponse | null;
   academicPeriod: string | null;
   opensAt: string | null;
   closesAt: string | null;
+  hasAnswered?: boolean;
+  isExpired?: boolean;
   questions: SurveyDetailQuestionResponse[];
 }

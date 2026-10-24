@@ -29,7 +29,12 @@ import {
   createSurveySchema,
   type CreateSurveyRequest,
 } from '../requests/create-survey.schema.js';
+import {
+  submitSurveyResponseSchema,
+  type SubmitSurveyResponseRequest,
+} from '../requests/submit-survey-response.schema.js';
 import { surveyIdSchema } from '../requests/survey-id.schema.js';
+
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
 import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
@@ -63,11 +68,17 @@ export class SurveysController {
   }
 
   @Get(':id')
+  @Roles('titulado', 'administrativo')
   @ApiOperation({ summary: 'Obtiene una encuesta con sus preguntas y opciones' })
-  @ApiOkResponse({ description: 'Encuesta con sus preguntas y opciones ordenadas' })
-  detail(
+  @ApiOkResponse({ description: 'Detalle de la encuesta para ser respondida o editada' })
+  getById(
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+    @CurrentUserId() userId: string,
   ): Promise<SurveyDetailResponse> {
+    return this.surveysService.getSurveyForAnswering(id, userId);
+  }
+
+  detail(id: string): Promise<SurveyDetailResponse> {
     return this.surveysService.getDetail(id);
   }
 
@@ -80,6 +91,20 @@ export class SurveysController {
     @Body(new ZodValidationPipe(createSurveySchema)) request: CreateSurveyRequest,
   ): Promise<SurveyCreatedResponse> {
     return this.surveysService.update(id, request);
+  }
+
+  @Post(':id/responses')
+  @Roles('titulado', 'administrativo')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Registra las respuestas del usuario a una encuesta' })
+  @ApiBody(toApiBody(submitSurveyResponseSchema))
+  @ApiCreatedResponse({ description: 'Respuestas guardadas' })
+  submitResponse(
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+    @CurrentUserId() userId: string,
+    @Body(new ZodValidationPipe(submitSurveyResponseSchema)) request: SubmitSurveyResponseRequest,
+  ): Promise<{ success: boolean; message: string }> {
+    return this.surveysService.submitResponse(id, userId, request);
   }
 
   @Get(':id/statistics')
@@ -105,3 +130,4 @@ export class SurveysController {
     });
   }
 }
+

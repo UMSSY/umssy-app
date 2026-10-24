@@ -122,4 +122,41 @@ describe('SurveysController', () => {
     expect(spy).toHaveBeenCalledWith('survey-1', 'admin-1');
     expect(streamable.getHeaders().disposition).toBe('attachment; filename="reporte.pdf"');
   });
+
+  it('permite a un titulado obtener el detalle de una encuesta para responderla', async () => {
+    const detail = {
+      id: 'survey-1',
+      title: 'Encuesta',
+      description: null,
+      status: 'published' as const,
+      academicPeriod: null,
+      opensAt: null,
+      closesAt: null,
+      hasAnswered: false,
+      isExpired: false,
+      questions: [],
+    };
+    const spy = vi.spyOn(surveysService, 'getSurveyForAnswering').mockResolvedValue(detail);
+    await expect(surveysController.getById('survey-1', 'titulado-1')).resolves.toBe(detail);
+    expect(spy).toHaveBeenCalledWith('survey-1', 'titulado-1');
+  });
+
+  it('permite a un titulado enviar sus respuestas', async () => {
+    const payload = {
+      answers: [
+        {
+          questionId: '00000000-0000-0000-0000-000000000001',
+          optionIds: ['00000000-0000-0000-0000-000000000002'],
+        },
+      ],
+    };
+    const result = { success: true, message: 'Respuestas guardadas con éxito' };
+    const spy = vi.spyOn(surveysService, 'submitResponse').mockResolvedValue(result);
+
+    await expect(
+      surveysController.submitResponse('survey-1', 'titulado-1', payload),
+    ).resolves.toBe(result);
+    expect(spy).toHaveBeenCalledWith('survey-1', 'titulado-1', payload);
+  });
 });
+
