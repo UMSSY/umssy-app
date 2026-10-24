@@ -257,6 +257,17 @@ describe("MentorAvailabilityView", () => {
     expect(screen.getByText("Nuevo bloque de disponibilidad")).toBeVisible()
   })
 
+  it("deja fijo el panel lateral al bajar desde 1200 px, con su propio scroll (#1456)", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+
+    renderWithQuery(<MentorAvailabilityView />)
+
+    const panel = (await screen.findByText("Nuevo bloque de disponibilidad")).closest(".min-w-0.min-\\[1200px\\]\\:sticky")
+    expect(panel).not.toBeNull()
+    expect(panel).toHaveClass("min-[1200px]:overflow-y-auto")
+    expect(panel?.parentElement).toHaveClass("min-[1200px]:items-start")
+  })
+
   it("conserva lo que se llenó en Nuevo bloque al abrir otro panel y volver", async () => {
     vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([
       blockAt("a", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z"),

@@ -104,7 +104,7 @@ export function MentorAvailabilityView({
         />
       </header>
 
-      <div className="grid gap-6 min-[1200px]:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-6 min-[1200px]:grid-cols-[minmax(0,1fr)_22rem] min-[1200px]:items-start">
         <div className="min-w-0 space-y-4">
           <nav
             aria-label={MY_AVAILABILITY_TEXT.weekNavigation}
@@ -172,7 +172,9 @@ export function MentorAvailabilityView({
           )}
         </div>
 
-        <div className="min-w-0">
+        <div
+          className="min-w-0 min-[1200px]:sticky min-[1200px]:top-[calc(var(--spacing-app-header)+1rem)] min-[1200px]:max-h-[calc(100dvh-var(--spacing-app-header)-2rem)] min-[1200px]:overflow-y-auto"
+        >
           {showBlockedPanel && (
             <BlockedDatePanel
               key={selectedDate}
