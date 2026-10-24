@@ -98,4 +98,38 @@ describe('createJobOfferSchema', () => {
     expect(firstMessage({ skillIds: Array.from({ length: 11 }, () => randomUUID()) })).toMatch(/10/);
     expect(firstMessage({ skillIds: ['Docker'] })).toBe('El identificador de la habilidad no es valido');
   });
+
+  it('los requisitos de carrera, experiencia y otros son opcionales', () => {
+    const result = createJobOfferSchema.parse(VALID_REQUEST);
+
+    expect(result.requiredCareers).toEqual([]);
+    expect(result.otherRequirements).toEqual([]);
+    expect(result.minExperienceYears).toBeUndefined();
+  });
+
+  it('acepta carreras, años mínimos y otros requisitos y recorta los espacios', () => {
+    const result = createJobOfferSchema.parse({
+      ...VALID_REQUEST,
+      requiredCareers: ['  Ingeniería de Sistemas  '],
+      minExperienceYears: 3,
+      otherRequirements: [' Carta de motivación '],
+    });
+
+    expect(result.requiredCareers).toEqual(['Ingeniería de Sistemas']);
+    expect(result.minExperienceYears).toBe(3);
+    expect(result.otherRequirements).toEqual(['Carta de motivación']);
+  });
+
+  it('valida los años mínimos de experiencia: entero entre 0 y 40', () => {
+    expect(parse({ minExperienceYears: 0 }).success).toBe(true);
+    expect(firstMessage({ minExperienceYears: 1.5 })).toBe('Los años de experiencia deben ser un numero entero');
+    expect(firstMessage({ minExperienceYears: -1 })).toMatch(/entre 0 y 40/);
+    expect(firstMessage({ minExperienceYears: 41 })).toMatch(/entre 0 y 40/);
+  });
+
+  it('limita la cantidad y la longitud de los requisitos', () => {
+    expect(firstMessage({ requiredCareers: Array.from({ length: 11 }, (_, index) => `Carrera ${index}`) })).toMatch(/10/);
+    expect(firstMessage({ otherRequirements: ['a'.repeat(121)] })).toMatch(/120/);
+    expect(parse({ requiredCareers: [''] }).success).toBe(false);
+  });
 });
