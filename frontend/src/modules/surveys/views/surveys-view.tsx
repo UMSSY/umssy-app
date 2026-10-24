@@ -4,8 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { getAcademicPeriods, RefreshButton, ReportFilterSelect, ReportSearchInput } from "@/modules/reports";
-import type { AcademicPeriod } from "@/modules/reports";
+import { RefreshButton, ReportFilterSelect, ReportSearchInput } from "@/modules/reports";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { SurveysTable } from "../components/surveys-table";
 import {
@@ -21,12 +20,13 @@ import {
 } from "../constants/survey-routes.constants";
 import { useSurveys } from "../hooks/use-surveys";
 import { filterSurveys } from "../utils/filter-surveys";
+import { getSurveyYears } from "../utils/survey-academic-periods";
 
 export function SurveysView() {
   const { surveys, isLoading, isRefreshing, hasError, refresh } = useSurveys();
   const [creatorSearch, setCreatorSearch] = useState("");
-  const [academicPeriod, setAcademicPeriod] = useState<AcademicPeriod | undefined>(undefined);
-  const [periodOptions] = useState(() => getAcademicPeriods().map((period) => ({ value: period, label: period })));
+  const [academicPeriod, setAcademicPeriod] = useState<string | undefined>(undefined);
+  const [periodOptions] = useState(() => getSurveyYears().map((year) => ({ value: year, label: year })));
   const hasFilters = Boolean(creatorSearch.trim() || academicPeriod);
   const visibleSurveys = filterSurveys(surveys, creatorSearch, academicPeriod);
 

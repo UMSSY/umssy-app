@@ -5,7 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { SURVEY_LIMITS, SURVEY_TEXT } from "../constants/survey-builder.constants";
+import {
+  ALL_ACADEMIC_PERIODS_OPTION_LABEL,
+  ALL_ACADEMIC_PERIODS_VALUE,
+  SURVEY_LIMITS,
+  SURVEY_TEXT,
+} from "../constants/survey-builder.constants";
 import { SURVEY_FIELD_LABELS } from "../constants/survey-messages.constants";
 import { SURVEY_SELECT_TRIGGER_CLASS } from "../constants/survey-styles.constants";
 import type { SurveyHeaderCardProps } from "../types/survey-component-props.types";
@@ -24,7 +29,10 @@ export function SurveyHeaderCard({
   onFieldChange,
 }: SurveyHeaderCardProps) {
   const careerItems = (careers ?? []).map(({ id, title }) => ({ value: id, label: title }));
-  const periodItems = (academicPeriods ?? []).map((period) => ({ value: period, label: period }));
+  const periodItems = [
+    { value: ALL_ACADEMIC_PERIODS_VALUE, label: ALL_ACADEMIC_PERIODS_OPTION_LABEL },
+    ...(academicPeriods ?? []).map((period) => ({ value: period, label: period })),
+  ];
 
   return (
     <Card className="gap-0 border-t-8 border-t-accent px-6 py-5">

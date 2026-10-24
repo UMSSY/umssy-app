@@ -10,7 +10,7 @@ function renderHeader(overrides: Partial<SurveyHeaderCardProps> = {}) {
     values: buildSurveyState({ careerId: "", academicPeriod: "", opensAt: "", closesAt: "" }),
     careers: CAREERS,
     isLoadingCareers: false,
-    academicPeriods: ["II-2026", "I-2026"],
+    academicPeriods: ["2026", "2025"],
     minDate: new Date(2026, 9, 22),
     errors: {},
     onFieldChange: vi.fn(),
@@ -33,12 +33,29 @@ describe("SurveyHeaderCard", () => {
     await user.click(screen.getByRole("combobox", { name: "Carrera dirigida" }));
     await user.click(await screen.findByRole("option", { name: CAREERS[1].title }));
     await user.click(screen.getByRole("combobox", { name: "Gestión" }));
-    await user.click(await screen.findByRole("option", { name: "I-2026" }));
+    await user.click(await screen.findByRole("option", { name: "2025" }));
 
     expect(props.onFieldChange).toHaveBeenCalledWith("title", "Encuesta de Empleabilidad!");
     expect(props.onFieldChange).toHaveBeenCalledWith("description", "Situación laboral?");
     expect(props.onFieldChange).toHaveBeenCalledWith("careerId", CAREERS[1].id);
-    expect(props.onFieldChange).toHaveBeenCalledWith("academicPeriod", "I-2026");
+    expect(props.onFieldChange).toHaveBeenCalledWith("academicPeriod", "2025");
+  });
+
+  it("ofrece todas las gestiones y los años sin semestre", async () => {
+    const { props, user } = renderHeader();
+
+    await user.click(screen.getByRole("combobox", { name: "Gestión" }));
+    const options = await screen.findAllByRole("option");
+
+    expect(options.map((option) => option.textContent)).toEqual(["Todas", "2026", "2025"]);
+    await user.click(screen.getByRole("option", { name: "Todas" }));
+    expect(props.onFieldChange).toHaveBeenCalledWith("academicPeriod", "Todas");
+  });
+
+  it("muestra la opción Todas cuando está seleccionada", () => {
+    renderHeader({ values: buildSurveyState({ academicPeriod: "Todas" }) });
+
+    expect(screen.getByRole("combobox", { name: "Gestión" })).toHaveTextContent("Todas");
   });
 
   it("muestra los placeholders de los selectores y de las fechas", () => {

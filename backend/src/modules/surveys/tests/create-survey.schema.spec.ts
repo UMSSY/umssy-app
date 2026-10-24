@@ -14,7 +14,7 @@ const VALID_PUBLISHED = {
   title: 'Encuesta de Empleabilidad de Egresados',
   description: 'Esta encuesta nos ayuda a conocer tu situación laboral.',
   careerId: randomUUID(),
-  academicPeriod: 'II-2026',
+  academicPeriod: '2026',
   opensAt: '2026-11-03T04:00:00.000Z',
   closesAt: '2026-12-16T03:59:59.999Z',
   status: 'published',
@@ -116,7 +116,11 @@ describe('createSurveySchema', () => {
     });
   });
 
-  it.each(['2-2026', 'III-2026', 'II-26'])('rechaza la gestión %s', (academicPeriod) => {
+  it.each(['2026', 'Todas'])('acepta la gestión %s', (academicPeriod) => {
+    expect(parse({ academicPeriod }).success).toBe(true);
+  });
+
+  it.each(['II-2026', '2-2026', '26', 'todas', '20266'])('rechaza la gestión %s', (academicPeriod) => {
     expect(issues({ academicPeriod })).toContainEqual({
       path: 'academicPeriod',
       message: MESSAGES.INVALID_ACADEMIC_PERIOD,

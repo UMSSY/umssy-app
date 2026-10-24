@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { ACADEMIC_PERIOD_PATTERN } from '../../reports/utils/academic-period.js';
 import {
+  SURVEY_ACADEMIC_PERIOD_PATTERN,
   SURVEY_DESCRIPTION_MAX_LENGTH,
   SURVEY_MIN_OPTIONS_TO_PUBLISH,
   SURVEY_MIN_QUESTIONS_TO_PUBLISH,
@@ -54,7 +54,7 @@ export const createSurveySchema = z
       .transform((value) => (value ? value : undefined)),
     careerId: optionalText(z.uuid({ message: MESSAGES.INVALID_CAREER_ID })),
     academicPeriod: optionalText(
-      z.string().trim().regex(ACADEMIC_PERIOD_PATTERN, MESSAGES.INVALID_ACADEMIC_PERIOD),
+      z.string().trim().regex(SURVEY_ACADEMIC_PERIOD_PATTERN, MESSAGES.INVALID_ACADEMIC_PERIOD),
     ),
     opensAt: optionalText(dateSchema),
     closesAt: optionalText(dateSchema),

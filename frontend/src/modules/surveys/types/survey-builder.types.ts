@@ -1,4 +1,3 @@
-import type { AcademicPeriod } from "@/modules/reports";
 import type { QuestionType } from "./survey.types";
 
 export interface BuilderOption {
@@ -20,7 +19,7 @@ export interface SurveyHeaderValues {
   title: string;
   description: string;
   careerId: string;
-  academicPeriod: AcademicPeriod | "";
+  academicPeriod: string;
   opensAt: string;
   closesAt: string;
 }

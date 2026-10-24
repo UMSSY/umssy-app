@@ -14,6 +14,10 @@ export const SURVEY_LIMITS = {
 export const DEFAULT_QUESTION_TYPE: QuestionType = "single_choice";
 export const DEFAULT_OPTION_COUNT = 2;
 
+export const FIRST_SURVEY_YEAR = 2020;
+export const ALL_ACADEMIC_PERIODS_VALUE = "Todas";
+export const ALL_ACADEMIC_PERIODS_OPTION_LABEL = "Todas";
+
 export const QUESTION_TYPE_OPTIONS: readonly QuestionTypeOption[] = [
   { value: "single_choice", label: "Opción única", icon: CircleDot },
   { value: "multiple_choice", label: "Opción múltiple", icon: SquareCheck },
