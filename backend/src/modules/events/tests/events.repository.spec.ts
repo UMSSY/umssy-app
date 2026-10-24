@@ -33,14 +33,14 @@ describe('EventsRepository', () => {
     expect(result).toEqual({ items: [], total: 0 });
   });
 
-  it('applies published status filter when isPublishedOnly is true and statusId is undefined', async () => {
+    it('applies catalog status filter (published, voting, expired) when isPublishedOnly is true and statusId is undefined', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
 
     await repository.findAndCount({ isPublishedOnly: true, skip: 0, take: 10 });
 
     const expectedWhere = {
-      status: { title: 'Publicado' },
+      status: { title: { in: ['Publicado', 'Votacion', 'Vencido'] } },
     };
 
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
@@ -182,4 +182,36 @@ describe('EventsRepository', () => {
     }));
   });
 
+    it('selects only the authenticated user registration when userId is provided', async () => {
+    prismaMock.event.findMany.mockResolvedValue([]);
+    prismaMock.event.count.mockResolvedValue(0);
+
+    await repository.findAndCount({ userId: 'user-1', skip: 0, take: 10 });
+
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          registrations: {
+            where: {
+              userId: 'user-1',
+              cancelledAt: null,
+              status: { title: 'Confirmada' },
+            },
+            select: { id: true },
+            take: 1,
+          },
+        }),
+      }),
+    );
+  });
+
+  it('does not select registrations when there is no userId', async () => {
+    prismaMock.event.findMany.mockResolvedValue([]);
+    prismaMock.event.count.mockResolvedValue(0);
+
+    await repository.findAndCount({ skip: 0, take: 10 });
+
+    const args = prismaMock.event.findMany.mock.calls[0][0];
+    expect(args.select).not.toHaveProperty('registrations');
+  });
 });

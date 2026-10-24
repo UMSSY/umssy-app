@@ -15,4 +15,12 @@ export interface EventItemResponse {
   modalityId: string | null;
   category: EventCategoryResponse;
   statusId: string;
+  status: string;
+  origin: string;
+  supportCount: number;
+  supportThreshold: number | null;
+  supportsRemaining: number | null;
+  progressPercent: number | null;
+  votingDeadline: string | null;
+  hasSupported: boolean;
 }
