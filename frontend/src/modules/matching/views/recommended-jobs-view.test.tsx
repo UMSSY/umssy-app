@@ -121,6 +121,6 @@ describe("HU-02A T2.4 - RecommendedJobsView", () => {
 
     expect(
       screen.getByRole("link", { name: /Ver vacante/i }),
-    ).toHaveAttribute("href", "/vacancies/123");
+    ).toHaveAttribute("href", "/vacancies/recommended/123");
   });
 });

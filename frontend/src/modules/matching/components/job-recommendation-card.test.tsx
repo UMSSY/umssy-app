@@ -52,7 +52,7 @@ describe("HU-02A T2.4 - JobRecommendationCard", () => {
 
     expect(
       screen.getByRole("link", { name: /Ver vacante/i }),
-    ).toHaveAttribute("href", "/vacancies/123");
+    ).toHaveAttribute("href", "/vacancies/recommended/123");
   });
 
   it("uses responsive layout classes", () => {
