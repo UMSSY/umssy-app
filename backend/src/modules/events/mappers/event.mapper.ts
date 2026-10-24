@@ -9,6 +9,9 @@ export function mapEventToResponse(
   availableSpots: number | null,
 ): EventItemResponse {
   return {
+    ...(record.status && { status: record.status.title === 'En votación' ? 'voting' : record.status.title }),
+    ...(record.coverMimeType && { coverUrl: '/events/' + record.id + '/cover' }),
+    ...(record.votingDeadline && { votingDeadline: record.votingDeadline.toISOString(), supportThreshold: record.supportThreshold }),
     id: record.id,
     title: record.title,
     description: record.description,

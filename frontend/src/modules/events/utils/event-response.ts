@@ -12,6 +12,10 @@ export function parseEventItem(value: unknown): EventItem {
   const event = readRecord(value);
   const category = readRecord(event.category);
   return {
+    ...(event.coverUrl !== undefined && { coverUrl: readNullableString(event.coverUrl) }),
+    ...(event.status !== undefined && { status: readString(event.status) }),
+    ...(event.supportThreshold !== undefined && { supportThreshold: readNullableCount(event.supportThreshold) }),
+    ...(event.votingDeadline !== undefined && { votingDeadline: readNullableString(event.votingDeadline) }),
     id: readString(event.id),
     title: readString(event.title),
     category: { id: readString(category.id), name: readString(category.name) },
