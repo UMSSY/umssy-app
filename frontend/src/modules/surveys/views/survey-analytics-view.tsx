@@ -11,6 +11,7 @@ import { ExportSuccessToast } from "@/modules/reports";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { downloadFile } from "@/shared/utils/download-file";
 import { SurveyQuestionResultCard } from "../components/survey-question-result-card";
+import { SURVEY_STATUS_BADGE_CLASSES, SURVEY_STATUS_LABELS } from "../constants/survey-builder.constants";
 import {
   SURVEY_PDF_FEEDBACK_DURATION_MS,
   SURVEY_STATISTICS_QUESTION_SKELETONS,
@@ -172,9 +173,7 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
             <div>
               <p className="text-xs font-medium text-text-secondary">Estado de Encuesta</p>
               <div className="mt-1">
-                <Badge className={statistics.status === "published" ? "border-accent/20 bg-interaction text-accent" : "border-gold/30 bg-gold/15 text-ink"}>
-                  {statistics.status === "published" ? "Publicada" : "Borrador"}
-                </Badge>
+                <Badge className={SURVEY_STATUS_BADGE_CLASSES[statistics.status]}>{SURVEY_STATUS_LABELS[statistics.status]}</Badge>
               </div>
             </div>
           </div>
