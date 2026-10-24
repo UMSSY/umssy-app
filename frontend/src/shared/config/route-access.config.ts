@@ -10,6 +10,7 @@ export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
   { pattern: /^\/profile\/radar\/?$/, roles: ["titulado", "mentor"] },
   { pattern: /^\/profile(?:\/|$)/, roles: ["titulado", "estudiante", "mentor", "empresa"] },
   { pattern: /^\/chat(?:\/|$)/, roles: ["titulado", "estudiante", "mentor", "empresa"] },
+  { pattern: /^\/events\/propose\/?$/, roles: ["titulado"] },
   { pattern: /^\/events(?:\/|$)/, roles: ["titulado", "mentor"] },
   { pattern: /^\/vacancies(?:\/|$)/, roles: ["titulado", "estudiante", "mentor"] },
   { pattern: /^\/mentor\/availability\/?$/, roles: ["mentor"] },

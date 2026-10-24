@@ -15,6 +15,7 @@ export function useEvents(filters: EventFiltersPayload = NO_EVENT_FILTERS) {
     initialPageParam: 1,
     queryFn: ({ pageParam, signal }) => eventsService.getEvents({
       page: pageParam, limit: EVENTS_PAGE_SIZE,
+      includeProposals: true,
       ...(search && { search }), ...(categoryId && { categoryId }),
     }, signal),
     getNextPageParam: (lastPage, pages) => lastPage.data.length === EVENTS_PAGE_SIZE ? pages.length + 1 : undefined,

@@ -19,6 +19,16 @@ describe('EventsService', () => {
     repository = new EventsService(prismaMock as never);
   });
 
+  it('keeps voting proposals and cover metadata available after registration integration', async () => {
+    prismaMock.event.findMany.mockResolvedValue([]);
+    prismaMock.event.count.mockResolvedValue(0);
+    await repository.findAndCount({ isPublishedOnly: true, includeProposals: true, skip: 0, take: 10 });
+    expect(prismaMock.event.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { status: { title: { in: ['Publicado', 'En votación'] } } },
+      select: expect.objectContaining({ coverMimeType: true, votingDeadline: true, supportThreshold: true }),
+    }));
+  });
+
   it('calls findMany and count with empty where when no filters are provided', async () => {
     prismaMock.event.findMany.mockResolvedValue([]);
     prismaMock.event.count.mockResolvedValue(0);
