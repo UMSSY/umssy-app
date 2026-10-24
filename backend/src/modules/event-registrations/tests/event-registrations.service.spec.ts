@@ -50,6 +50,8 @@ describe('EventRegistrationsService', () => {
     findByUserId.mockResolvedValue([
       {
         id: 'reg-1',
+        registeredAt: new Date('2026-10-18T10:00:00.000Z'),
+        cancelledAt: null,
         status: { title: 'Confirmada' },
         event: {
           title: 'Taller de NestJS',
@@ -69,6 +71,8 @@ describe('EventRegistrationsService', () => {
         date: new Date('2026-10-20T00:00:00.000Z'),
         location: 'Aula 101',
         status: 'Confirmada',
+        registeredAt: '2026-10-18T10:00:00.000Z',
+        cancelledAt: null,
       },
     ]);
   });
