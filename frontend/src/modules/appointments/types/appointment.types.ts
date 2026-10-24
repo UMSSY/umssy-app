@@ -1,15 +1,13 @@
-export type AppointmentState = "pending" | "confirmed";
+import type { AppointmentCounterpart } from "./appointment-counterpart.types";
+import type { AppointmentOrientationType } from "./appointment-orientation-type.types";
+import type { AppointmentStatus } from "./appointment-status.types";
 
 export interface Appointment {
   id: string;
   blockId: string | null;
-  mentorId: string;
-  studentId: string;
   startAt: string;
   endAt: string;
-  state: AppointmentState;
-  message: string | null;
-  meetingUrl: string | null;
-  createdAt: string;
-  updatedAt: string;
+  orientationType: AppointmentOrientationType | null;
+  counterpart: AppointmentCounterpart;
+  status: AppointmentStatus;
 }
