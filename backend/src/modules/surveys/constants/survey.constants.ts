@@ -5,7 +5,9 @@ export const SURVEY_STATEMENT_MAX_LENGTH = 250;
 export const SURVEY_OPTION_MAX_LENGTH = 100;
 export const SURVEY_MIN_OPTIONS_TO_PUBLISH = 2;
 export const SURVEY_MIN_QUESTIONS_TO_PUBLISH = 1;
+export const SURVEY_ALL_ACADEMIC_PERIODS = 'Todas';
 export const SURVEY_ACADEMIC_PERIOD_PATTERN = /^(\d{4}|Todas)$/;
+export const SURVEY_ACADEMIC_PERIOD_YEAR_PATTERN = /(\d{4})$/;
 
 export const SURVEY_VALIDATION_MESSAGES = {
   TITLE_REQUIRED: 'El título de la encuesta es obligatorio',
@@ -41,6 +43,8 @@ export const SURVEY_ERROR_MESSAGES = {
   CAREER_NOT_FOUND: 'La carrera seleccionada no existe',
   SURVEY_NOT_FOUND: 'La encuesta solicitada no existe',
   SURVEY_NOT_EDITABLE: 'Solo se pueden editar las encuestas en borrador',
+  SURVEY_NOT_AVAILABLE:
+    'Esta encuesta no está dirigida a tu carrera o año de egreso',
   STORAGE_UNAVAILABLE:
     'El registro de encuestas todavía no está disponible. Intente más tarde',
 } as const;

@@ -3,6 +3,7 @@ export { InvalidSurveyScheduleException } from './invalid-survey-schedule.except
 export { SurveyTitleAlreadyExistsException } from './survey-title-already-exists.exception.js';
 export { SurveyNotFoundException } from './survey-not-found.exception.js';
 export { SurveyNotEditableException } from './survey-not-editable.exception.js';
+export { SurveyNotAvailableException } from './survey-not-available.exception.js';
 export { SurveysStorageUnavailableException } from './surveys-storage-unavailable.exception.js';
 export { SurveyAlreadyAnsweredException } from './survey-already-answered.exception.js';
 export { SurveyExpiredException } from './survey-expired.exception.js';
