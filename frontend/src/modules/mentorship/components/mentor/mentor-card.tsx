@@ -15,6 +15,7 @@ type MentorCardProps = {
   mentor: MentorDirectoryItem;
   isOwnProfile?: boolean;
   returnTo?: string;
+  showAffinityBadge?: boolean;
 };
 
 function getSafeReturnTo(returnTo?: string): string | null {
@@ -52,6 +53,7 @@ export function MentorCard({
   mentor,
   isOwnProfile = false,
   returnTo,
+  showAffinityBadge = false,
 }: MentorCardProps) {
   const hasTechnicalAreas = mentor.technicalAreas.length > 0;
   const safeReturnTo = getSafeReturnTo(returnTo);
@@ -117,6 +119,12 @@ export function MentorCard({
             />
             {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
           </Badge>
+          {showAffinityBadge &&
+            mentor.sharedInterestsCount !== undefined && (
+              <Badge variant="secondary">
+                {mentor.sharedInterestsCount} {mentor.sharedInterestsCount === 1 ? "interés" : "intereses"} en común
+              </Badge>
+            )}
         </div>
 
         <div>

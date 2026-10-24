@@ -6,12 +6,14 @@ type MentorDirectoryGridProps = {
   mentors: MentorDirectoryItem[];
   currentUserId?: string | null;
   returnTo?: string;
+  showAffinityBadge?: boolean;
 };
 
 export function MentorDirectoryGrid({
   mentors,
   currentUserId,
   returnTo = "/mentorship/mentors",
+  showAffinityBadge = false,
 }: MentorDirectoryGridProps) {
   return (
     <section
@@ -25,6 +27,7 @@ export function MentorDirectoryGrid({
             mentor={mentor}
             isOwnProfile={currentUserId === mentor.id}
             returnTo={returnTo}
+            showAffinityBadge={showAffinityBadge}
           />
         ))}
       </div>

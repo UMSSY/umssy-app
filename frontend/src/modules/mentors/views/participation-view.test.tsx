@@ -33,6 +33,7 @@ describe("ParticipationView", () => {
     localStorage.clear();
     vi.restoreAllMocks();
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
   });
 
   it("mantiene un estado inicial estable mientras resuelve la participación", () => {
@@ -59,6 +60,25 @@ describe("ParticipationView", () => {
     expect(
       screen.getByRole("link", { name: "Editar tipos de orientación" }),
     ).toHaveAttribute("href", "/mentorship/orientation");
+  });
+
+  it("habilita la simulación únicamente en desarrollo", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    render(<ParticipationView />);
+    expect(screen.getByRole("region", { name: "Disponibilidad de cupos (simulación)" })).toBeInTheDocument();
+    expect(await screen.findByText("Backend")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["production", "local"],
+    ["production", "prod"],
+    ["development", "prod"],
+  ])("oculta disponibilidad simulada con NODE_ENV=%s y APP_ENV=%s", async (nodeEnv, appEnv) => {
+    vi.stubEnv("NODE_ENV", nodeEnv);
+    vi.stubEnv("NEXT_PUBLIC_APP_ENV", appEnv);
+    render(<ParticipationView />);
+    expect(screen.queryByRole("region", { name: "Disponibilidad de cupos (simulación)" })).not.toBeInTheDocument();
+    expect(await screen.findByText("Backend")).toBeInTheDocument();
   });
 
   it("muestra la activación cuando no existe participación", async () => {

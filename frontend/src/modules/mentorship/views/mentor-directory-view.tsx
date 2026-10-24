@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,27 +17,26 @@ import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback"
 import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
 import { useCurrentUserId } from "../hooks/use-current-user-id";
 import { useMentorDirectory } from "../hooks/use-mentor-directory";
-import { updateMentorDirectoryParams } from "../utils/mentor-directory-navigation";
+import type { DirectoryPage, MentorSort } from "../types/mentor-directory.types";
+import {
+  normalizeMentorDirectoryParams,
+  parseMentorDirectoryState,
+  updateMentorDirectoryParams,
+} from "../utils/mentor-directory-navigation";
 
-export function MentorDirectoryView() {
+type MentorDirectoryViewProps = {
+  directoryState?: Pick<DirectoryPage, "effectiveSort" | "affinityStatus"> &
+    Partial<Pick<DirectoryPage, "totalPages">>;
+};
+
+export function MentorDirectoryView({ directoryState }: MentorDirectoryViewProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
 
-  const urlSearch = searchParams.get("search") ?? "";
-  const area = searchParams.get("area") ?? "";
-  const isAvailableOnly = searchParams.get("available") === "true";
-
-  const [searchDraft, setSearchDraft] = useState({
-    queryString,
-    value: urlSearch,
-  });
-
-  const search =
-    searchDraft.queryString === queryString
-      ? searchDraft.value
-      : urlSearch;
+  const { search, area, available: isAvailableOnly, sort: sortBy } =
+    parseMentorDirectoryState(new URLSearchParams(queryString));
 
   const { currentUserId } = useCurrentUserId();
 
@@ -48,6 +47,18 @@ export function MentorDirectoryView() {
     isFetching,
     refetch,
   } = useMentorDirectory();
+
+  useEffect(() => {
+    const normalized = normalizeMentorDirectoryParams(
+      new URLSearchParams(queryString),
+      directoryState?.totalPages,
+    ).toString();
+    if (normalized !== queryString) {
+      router.replace(normalized ? `${pathname}?${normalized}` : pathname, {
+        scroll: false,
+      });
+    }
+  }, [directoryState?.totalPages, pathname, queryString, router]);
 
   const areas = useMemo(
     () =>
@@ -72,11 +83,35 @@ export function MentorDirectoryView() {
     [mentors, search, area, isAvailableOnly],
   );
 
+  const effectiveSort = sortBy === "affinity"
+    ? directoryState?.effectiveSort === "affinity" && directoryState.affinityStatus === "ready"
+      ? "affinity"
+      : "name_asc"
+    : sortBy;
+  const sortedMentors = useMemo(
+    () => effectiveSort === "affinity" ? filteredMentors : [...filteredMentors].sort((a, b) => {
+      const comparison = a.fullName.localeCompare(b.fullName, "es", { sensitivity: "base" });
+      return effectiveSort === "name_asc" ? comparison : -comparison;
+    }),
+    [effectiveSort, filteredMentors],
+  );
+  const affinityMessage = sortBy !== "affinity" || effectiveSort === "affinity"
+    ? null
+    : directoryState?.affinityStatus === "no_skills"
+      ? "Agrega habilidades profesionales a tu perfil para encontrar mentores con mayor afinidad. Se muestran los mentores por nombre."
+      : directoryState?.affinityStatus === "unmapped_skills"
+        ? "Tus habilidades profesionales aún no tienen correspondencia con las áreas técnicas. Se muestran los mentores por nombre."
+        : directoryState?.affinityStatus === "ready"
+          ? "El orden por afinidad no se aplicó. Se muestran los mentores por nombre."
+          : "La afinidad todavía no está disponible. Se muestran los mentores por nombre.";
+
   const navigateWithUpdates = useCallback(
     (updates: {
       search?: string;
       area?: string;
       available?: boolean;
+      sort?: MentorSort;
+      page?: number;
     }) => {
       const next = updateMentorDirectoryParams(
         new URLSearchParams(queryString),
@@ -93,11 +128,6 @@ export function MentorDirectoryView() {
   );
 
   function handleClearFilters() {
-    setSearchDraft({
-      queryString,
-      value: "",
-    });
-
     navigateWithUpdates({
       search: "",
       area: "",
@@ -131,16 +161,7 @@ export function MentorDirectoryView() {
             aria-label="Buscar mentor"
             placeholder="Nombre o especialidad"
             value={search}
-            onChange={(event) => {
-              const value = event.target.value;
-
-              setSearchDraft({
-                queryString,
-                value,
-              });
-
-              navigateWithUpdates({ search: value });
-            }}
+            onChange={(event) => navigateWithUpdates({ search: event.target.value })}
           />
 
           <div className="flex items-center gap-2">
@@ -176,6 +197,21 @@ export function MentorDirectoryView() {
             Con disponibilidad
           </Label>
 
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="mentor-sort">Ordenar por</Label>
+            <NativeSelect
+              id="mentor-sort"
+              aria-label="Ordenar mentores"
+              className={sortBy === "affinity" ? "rounded-lg ring-2 ring-accent" : undefined}
+              value={sortBy}
+              onChange={(event) => navigateWithUpdates({ sort: event.target.value as MentorSort })}
+            >
+              <NativeSelectOption value="name_asc">Nombre (A–Z)</NativeSelectOption>
+              <NativeSelectOption value="name_desc">Nombre (Z–A)</NativeSelectOption>
+              <NativeSelectOption value="affinity">Mayor afinidad</NativeSelectOption>
+            </NativeSelect>
+          </div>
+
           {search || area || isAvailableOnly ? (
             <Button variant="ghost" onClick={handleClearFilters}>
               Limpiar filtros
@@ -200,15 +236,24 @@ export function MentorDirectoryView() {
           />
         ) : (
           <>
+            <h2 className="text-xl font-semibold text-ink">
+              {sortBy === "affinity" ? "Preferencias" : "Sugerencias"}
+            </h2>
+            {affinityMessage ? (
+              <p role="note" className="rounded-lg border border-border bg-surface p-4 text-sm text-text-secondary">
+                {affinityMessage}
+              </p>
+            ) : null}
             <p role="status" className="text-sm text-text-secondary">
               {filteredMentors.length} mentores encontrados
             </p>
 
             {filteredMentors.length > 0 ? (
               <MentorDirectoryGrid
-                mentors={filteredMentors}
+                mentors={sortedMentors}
                 currentUserId={currentUserId}
                 returnTo={returnTo}
+                showAffinityBadge={effectiveSort === "affinity"}
               />
             ) : (
               <div className="rounded-lg border border-border bg-surface p-8 text-center">

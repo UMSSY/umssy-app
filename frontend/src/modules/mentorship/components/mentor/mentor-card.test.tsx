@@ -216,4 +216,35 @@ describe("MentorCard", () => {
 
     expect(screen.getByText("Sin áreas registradas")).toBeDefined();
   });
+  it.each([
+    [0, "0 intereses en común"],
+    [1, "1 interés en común"],
+    [3, "3 intereses en común"],
+  ])("muestra %i coincidencias conocidas con gramática correcta", (count, label) => {
+    render(
+      <MentorCard
+        mentor={{ ...mentor, sharedInterestsCount: count }}
+        showAffinityBadge
+      />,
+    );
+    expect(screen.getByText(label)).toBeVisible();
+    expect(screen.getByText("No disponible")).toBeVisible();
+    expect(screen.getByRole("link", { name: `Ver perfil de ${mentor.fullName}` }))
+      .toHaveAttribute("href", `/mentors/${mentor.id}`);
+  });
+
+  it("no muestra la insignia de afinidad cuando está deshabilitada", () => {
+    render(
+      <MentorCard
+        mentor={{ ...mentor, sharedInterestsCount: 3 }}
+      />,
+    );
+
+    expect(screen.queryByText("3 intereses en común")).not.toBeInTheDocument();
+  });
+
+  it("no convierte un conteo ausente en cero", () => {
+    render(<MentorCard mentor={mentor} showAffinityBadge />);
+    expect(screen.queryByText(/intereses? en común/)).not.toBeInTheDocument();
+  });
 });

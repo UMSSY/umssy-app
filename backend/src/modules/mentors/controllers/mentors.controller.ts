@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator.j
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import {
   activateMentorSchema,
@@ -27,6 +29,10 @@ import {
   type UpdateMentorOrientationTypesDto,
 } from '../requests/update-mentor-orientation-types.schema.js';
 import { MentorsService } from '../services/mentors.service.js';
+import {
+  mentorDirectoryQuerySchema,
+  type MentorDirectoryQuery,
+} from '../requests/mentor-directory-query.schema.js';
 
 @Controller('mentors')
 @UseInterceptors(ResponseInterceptor)
@@ -36,6 +42,15 @@ export class MentorsController {
   @Get()
   findAll() {
     return this.mentorsService.findAll();
+  }
+
+  @Get('directory')
+  @UseGuards(JwtAuthGuard)
+  findDirectory(
+    @Query(new RequestValidationPipe(mentorDirectoryQuerySchema))
+    query: MentorDirectoryQuery,
+  ) {
+    return this.mentorsService.findDirectory(query);
   }
 
   @Get('me/technical-areas')

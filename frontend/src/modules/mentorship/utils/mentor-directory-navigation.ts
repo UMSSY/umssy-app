@@ -1,3 +1,5 @@
+import type { MentorSort } from "../types/mentor-directory.types";
+
 export const MENTOR_DIRECTORY_DEFAULTS = {
   page: 1,
   search: "",
@@ -6,20 +8,15 @@ export const MENTOR_DIRECTORY_DEFAULTS = {
   sort: "name_asc",
 } as const;
 
-export type MentorDirectorySort =
-  | "name_asc"
-  | "name_desc"
-  | "affinity";
-
 export interface MentorDirectoryNavigationState {
   page: number;
   search: string;
   area: string;
   available: boolean;
-  sort: MentorDirectorySort;
+  sort: MentorSort;
 }
 
-const VALID_SORTS: readonly MentorDirectorySort[] = [
+const VALID_SORTS: readonly MentorSort[] = [
   "name_asc",
   "name_desc",
   "affinity",
@@ -29,14 +26,14 @@ export function parseMentorDirectoryState(
   params: URLSearchParams,
 ): MentorDirectoryNavigationState {
   const rawPage = params.get("page");
-  const parsedPage = rawPage === null ? 1 : Number(rawPage);
+  const parsedPage = rawPage !== null && /^[1-9]\d*$/.test(rawPage) ? Number(rawPage) : 1;
 
   const page =
     Number.isSafeInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
   const rawSort = params.get("sort");
-  const sort = VALID_SORTS.includes(rawSort as MentorDirectorySort)
-    ? (rawSort as MentorDirectorySort)
+  const sort = VALID_SORTS.includes(rawSort as MentorSort)
+    ? (rawSort as MentorSort)
     : MENTOR_DIRECTORY_DEFAULTS.sort;
 
   return {
@@ -46,6 +43,29 @@ export function parseMentorDirectoryState(
     available: params.get("available") === "true",
     sort,
   };
+}
+
+export function normalizeMentorDirectoryParams(
+  current: URLSearchParams,
+  totalPages?: number,
+): URLSearchParams {
+  const next = new URLSearchParams(current);
+  const state = parseMentorDirectoryState(current);
+  const page = totalPages === undefined
+    ? state.page
+    : Math.min(state.page, Math.max(1, totalPages));
+
+  if (current.has("page")) {
+    next.set("page", String(page));
+  }
+  if (current.has("sort")) {
+    next.set("sort", state.sort);
+  }
+  if (current.has("available")) {
+    next.set("available", String(state.available));
+  }
+
+  return next;
 }
 
 export function updateMentorDirectoryParams(

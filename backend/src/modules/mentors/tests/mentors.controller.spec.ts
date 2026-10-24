@@ -1,10 +1,20 @@
 import { describe, expect, it, vi } from 'vitest';
-import { INTERCEPTORS_METADATA } from '@nestjs/common/constants.js';
+import { GUARDS_METADATA, INTERCEPTORS_METADATA } from '@nestjs/common/constants.js';
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { MentorsController } from '../controllers/mentors.controller.js';
 import type { MentorsService } from '../services/mentors.service.js';
 
 describe('MentorsController', () => {
+  it('protege la ruta paginada con JWT', () => {
+    const directoryMethod = Object.getOwnPropertyDescriptor(
+      MentorsController.prototype,
+      'findDirectory',
+    )?.value;
+    expect(
+      Reflect.getMetadata(GUARDS_METADATA, directoryMethod),
+    ).toEqual([JwtAuthGuard]);
+  });
   it('aplica Standard Response a todos sus endpoints', () => {
     expect(
       Reflect.getMetadata(INTERCEPTORS_METADATA, MentorsController),

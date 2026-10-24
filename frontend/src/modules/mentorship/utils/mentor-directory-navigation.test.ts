@@ -1,6 +1,7 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  normalizeMentorDirectoryParams,
   parseMentorDirectoryState,
   updateMentorDirectoryParams,
 } from "./mentor-directory-navigation";
@@ -31,9 +32,22 @@ describe("parseMentorDirectoryState", () => {
   });
 
   it("corrige páginas inválidas", () => {
-    const params = new URLSearchParams("page=abc");
+    for (const value of ["abc", "0", "-2", "2.5", "01", "1e2", "9007199254740992"]) {
+      expect(parseMentorDirectoryState(new URLSearchParams(`page=${value}`)).page).toBe(1);
+    }
+  });
 
-    expect(parseMentorDirectoryState(params).page).toBe(1);
+  it("normaliza parámetros propios sin alterar los ajenos", () => {
+    const params = new URLSearchParams("page=02&sort=unknown&available=yes&module=chat");
+    expect(normalizeMentorDirectoryParams(params).toString())
+      .toBe("page=1&sort=name_asc&available=false&module=chat");
+  });
+
+  it("ajusta la página fuera de rango cuando se conoce totalPages", () => {
+    expect(normalizeMentorDirectoryParams(new URLSearchParams("page=9&sort=affinity"), 3).get("page"))
+      .toBe("3");
+    expect(normalizeMentorDirectoryParams(new URLSearchParams("page=9"), 0).get("page"))
+      .toBe("1");
   });
 });
 
