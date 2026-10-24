@@ -1,98 +1,42 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 import { toBoliviaTime } from '../../../common/utils/date-time.js';
-import {
-  BLOCK_MAX_HOUR,
-  BLOCK_MIN_HOUR,
-  BLOCK_STEP_MINUTES,
-  CREATE_BLOCK_MESSAGES,
-} from '../constants/create-block.constants.js';
-
-const getBoliviaParts = (date: Date) => {
-  const { date: day, hours, minutes } = toBoliviaTime(date);
-  return {
-    day,
-    minutesOfDay: hours * 60 + minutes,
-    isOnStep:
-      minutes % BLOCK_STEP_MINUTES === 0 &&
-      date.getUTCSeconds() === 0 &&
-      date.getUTCMilliseconds() === 0,
-  };
-};
-
-const isoDateTime = z.iso.datetime({ offset: true, error: CREATE_BLOCK_MESSAGES.invalidDate });
-
-const blockInstant = isoDateTime.transform((value) => new Date(value));
+import { CREATE_BLOCK_MESSAGES, MAX_REPEAT_WEEKS } from '../constants/create-block.constants.js';
+import { addWeeks } from '../utils/weekly-occurrences.js';
+import { buildBlockTimeSchema } from './block-time.schema.js';
 
 export const buildCreateBlockSchema = (getNow: () => Date = () => new Date()) =>
-  z
-    .strictObject({
-      startAt: blockInstant,
-      endAt: blockInstant,
+  buildBlockTimeSchema(getNow)
+    .safeExtend({
+      repeatWeekly: z.boolean().optional(),
+      repeatUntil: z.iso.date({ error: CREATE_BLOCK_MESSAGES.invalidRepeatUntil }).optional(),
     })
     .superRefine((payload, ctx) => {
-      const { startAt, endAt } = payload;
-
-      if (!(startAt instanceof Date) || !(endAt instanceof Date)) {
+      if (!payload.repeatWeekly) {
+        if (payload.repeatUntil !== undefined) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['repeatUntil'],
+            message: CREATE_BLOCK_MESSAGES.repeatNotEnabled,
+          });
+        }
         return;
       }
-
-      if (endAt.getTime() <= startAt.getTime()) {
+      if (payload.repeatUntil === undefined) {
         ctx.addIssue({
           code: 'custom',
-          path: ['endAt'],
-          message: CREATE_BLOCK_MESSAGES.endBeforeStart,
-        });
-        return;
-      }
-
-      if (startAt.getTime() <= getNow().getTime()) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['startAt'],
-          message: CREATE_BLOCK_MESSAGES.startInPast,
-        });
-      }
-
-      const start = getBoliviaParts(startAt);
-      const end = getBoliviaParts(endAt);
-
-      if (!start.isOnStep) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['startAt'],
-          message: CREATE_BLOCK_MESSAGES.invalidStep,
-        });
-      }
-      if (!end.isOnStep) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['endAt'],
-          message: CREATE_BLOCK_MESSAGES.invalidStep,
-        });
-      }
-
-      if (start.day !== end.day) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['endAt'],
-          message: CREATE_BLOCK_MESSAGES.differentDays,
+          path: ['repeatUntil'],
+          message: CREATE_BLOCK_MESSAGES.repeatUntilRequired,
         });
         return;
       }
-
-      if (start.minutesOfDay < BLOCK_MIN_HOUR * 60) {
+      const firstDay = toBoliviaTime(payload.startAt).date;
+      const lastDay = toBoliviaTime(addWeeks(payload.startAt, MAX_REPEAT_WEEKS)).date;
+      if (payload.repeatUntil < firstDay || payload.repeatUntil > lastDay) {
         ctx.addIssue({
           code: 'custom',
-          path: ['startAt'],
-          message: CREATE_BLOCK_MESSAGES.outOfRange,
-        });
-      }
-      if (end.minutesOfDay > BLOCK_MAX_HOUR * 60) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['endAt'],
-          message: CREATE_BLOCK_MESSAGES.outOfRange,
+          path: ['repeatUntil'],
+          message: CREATE_BLOCK_MESSAGES.repeatUntilOutOfRange,
         });
       }
     });
