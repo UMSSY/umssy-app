@@ -1,7 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
+import {
+  calculateProgressPercent,
+  calculateSupportsRemaining,
+} from '../../../common/utils/support-progress.js';
+import {
+  COMMUNITY_ORIGIN_TITLE,
+  EXPIRED_STATUS_TITLE,
+  VOTING_STATUS_TITLE,
+} from '../../events/constants/events.constants.js';
+import { EventNotFoundException } from '../../events/exceptions/event-not-found.exception.js';
+import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
+import { EventNotSupportableException } from '../exceptions/event-not-supportable.exception.js';
+import { ProposalExpiredException } from '../exceptions/proposal-expired.exception.js';
 import { EventRegistrationsMapper } from '../mappers/event-registrations.mapper.js';
+import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
 import type { MyRegistrationResponse } from '../types/event-registrations.types.js';
+import type { SupportResponse } from '../types/support-response.types.js';
 
 @Injectable()
 export class EventRegistrationsService {
@@ -13,5 +27,56 @@ export class EventRegistrationsService {
     const registrations =
       await this.registrationsRepository.findByUserId(userId);
     return EventRegistrationsMapper.toMyRegistrationList(registrations);
+  }
+
+  async support(eventId: string, userId: string): Promise<SupportResponse> {
+    const event = await this.registrationsRepository.findEventForSupport(eventId);
+
+    if (!event) {
+      throw new EventNotFoundException(eventId);
+    }
+
+    if (event.statusTitle === EXPIRED_STATUS_TITLE) {
+      throw new ProposalExpiredException();
+    }
+
+    if (
+      event.originTitle !== COMMUNITY_ORIGIN_TITLE ||
+      event.statusTitle !== VOTING_STATUS_TITLE
+    ) {
+      throw new EventNotSupportableException();
+    }
+
+    if (event.votingDeadline && event.votingDeadline.getTime() <= Date.now()) {
+      throw new ProposalExpiredException();
+    }
+
+    const { created } = await this.registrationsRepository.createSupport(
+      eventId,
+      userId,
+    );
+
+    if (!created) {
+      throw new AlreadySupportedException();
+    }
+
+    const updated =
+      await this.registrationsRepository.findEventForSupport(eventId);
+    const supportCount = updated?.supportCount ?? event.supportCount + 1;
+
+    return {
+      eventId,
+      supportCount,
+      supportThreshold: event.supportThreshold,
+      supportsRemaining: calculateSupportsRemaining(
+        supportCount,
+        event.supportThreshold,
+      ),
+      progressPercent: calculateProgressPercent(
+        supportCount,
+        event.supportThreshold,
+      ),
+      hasSupported: true,
+    };
   }
 }
