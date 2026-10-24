@@ -19,6 +19,7 @@ import type { WeekQueryDto } from '../requests/week-query.request.js';
 import type { DeletedBlockResponse } from '../types/deleted-block-response.types.js';
 import type { UpdateBlockDto } from '../requests/update-block.request.js';
 import type { MentorAvailabilityStatusResponse } from '../types/mentor-availability-status-response.types.js';
+import type { OwnerAvailabilityBlockResponse } from '../types/owner-availability-block-response.types.js';
 
 @Injectable()
 export class AvailabilityService {
@@ -48,13 +49,13 @@ export class AvailabilityService {
   async findMyBlocks(
     mentorId: string,
     query: WeekQueryDto,
-  ): Promise<AvailabilityBlockResponse[]> {
+  ): Promise<OwnerAvailabilityBlockResponse[]> {
     const blocks = await this.availabilityRepository.findMentorBlocksInRange(
       mentorId,
       new Date(query.from),
       new Date(query.to),
     );
-    return this.availabilityMapper.toResponseList(blocks);
+    return this.availabilityMapper.toOwnerResponseList(blocks);
   }
 
   async updateBlock(

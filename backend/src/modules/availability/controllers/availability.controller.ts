@@ -28,6 +28,7 @@ import { UpdateBlockDto } from '../requests/update-block.request.js';
 import { AvailabilityService } from '../services/availability.service.js';
 import type { AvailabilityBlockResponse } from '../types/availability-block-response.types.js';
 import type { DeletedBlockResponse } from '../types/deleted-block-response.types.js';
+import type { OwnerAvailabilityBlockResponse } from '../types/owner-availability-block-response.types.js';
 
 @Controller('availability-blocks')
 @ApiBearerAuth()
@@ -48,13 +49,13 @@ export class AvailabilityController {
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
-  @ApiOperation({ summary: FIND_MY_BLOCKS_DOCS.summary })
+  @ApiOperation({ summary: FIND_MY_BLOCKS_DOCS.summary, description: FIND_MY_BLOCKS_DOCS.description })
   @ApiQuery({ name: 'from', description: FIND_MY_BLOCKS_DOCS.fromDescription })
   @ApiQuery({ name: 'to', description: FIND_MY_BLOCKS_DOCS.toDescription })
   findMyBlocks(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: WeekQueryDto,
-  ): Promise<AvailabilityBlockResponse[]> {
+  ): Promise<OwnerAvailabilityBlockResponse[]> {
     return this.availabilityService.findMyBlocks(user.id, query);
   }
 
