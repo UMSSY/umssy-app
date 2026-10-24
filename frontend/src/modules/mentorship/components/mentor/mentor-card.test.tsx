@@ -216,4 +216,23 @@ describe("MentorCard", () => {
 
     expect(screen.getByText("Sin áreas registradas")).toBeDefined();
   });
+    it("muestra la insignia de intereses en común cuando está habilitada", () => {
+    render(
+      <MentorCard
+        mentor={{ ...mentor, commonInterestsCount: 3 }}
+        showAffinityBadge
+      />,
+    );
+    expect(screen.getByText("3 intereses en común")).toBeVisible();
+  });
+
+  it("no muestra la insignia de afinidad cuando está deshabilitada", () => {
+    render(
+      <MentorCard
+        mentor={{ ...mentor, commonInterestsCount: 3 }}
+      />,
+    );
+
+    expect(screen.queryByText("3 intereses en común")).not.toBeInTheDocument();
+  });
 });

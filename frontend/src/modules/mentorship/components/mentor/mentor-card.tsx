@@ -13,9 +13,10 @@ import type { MentorDirectoryItem } from "../../types/mentor-directory.types";
 type MentorCardProps = {
   mentor: MentorDirectoryItem;
   isOwnProfile?: boolean;
+  showAffinityBadge?: boolean;
 };
 
-export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
+export function MentorCard({ mentor, isOwnProfile = false, showAffinityBadge = false, }: MentorCardProps) {
   const hasTechnicalAreas = mentor.technicalAreas.length > 0;
 
   return (
@@ -66,6 +67,12 @@ export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
             />
             {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
           </Badge>
+          {showAffinityBadge &&
+            mentor.commonInterestsCount !== undefined && (
+              <Badge variant="secondary">
+                {mentor.commonInterestsCount} intereses en común
+              </Badge>
+            )}
         </div>
 
         <div>

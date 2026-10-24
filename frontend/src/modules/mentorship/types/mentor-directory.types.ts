@@ -7,4 +7,5 @@ export interface MentorDirectoryItem {
   education: { degree: string; institution: string } | null;
   isAvailable: boolean;
   orientationTypes: string[];
+  commonInterestsCount?: number;
 }
