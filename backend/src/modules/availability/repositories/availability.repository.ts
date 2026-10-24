@@ -10,6 +10,7 @@ import { ACTIVE_APPOINTMENT_STATUSES } from '../constants/appointment-status.con
 import type { AvailabilityBlockWithAppointmentDetail } from '../types/availability-block-with-appointment-detail.types.js';
 import type { AvailabilityBlockWithAppointments } from '../types/availability-block-with-appointments.types.js';
 import type { UpdateBlockData } from '../types/update-block-data.types.js';
+import type { BlockSeriesData } from '../types/block-series-data.types.js';
 
 @Injectable()
 export class AvailabilityRepository {
@@ -20,9 +21,10 @@ export class AvailabilityRepository {
     startAt: Date,
     endAt: Date,
     client: TransactionClient = this.prisma,
+    series?: BlockSeriesData,
   ): Promise<AvailabilityBlock> {
     return client.availabilityBlock.create({
-      data: { mentorId, startAt, endAt },
+      data: { mentorId, startAt, endAt, ...series },
     });
   }
 
