@@ -44,6 +44,12 @@ export const SURVEY_ERROR_MESSAGES = {
     'El registro de encuestas todavía no está disponible. Intente más tarde',
 } as const;
 
+export const SURVEY_DISPLAY_STATUS_LABELS = {
+  draft: 'Borrador',
+  published: 'Publicada',
+  closed: 'Cerrada',
+} as const;
+
 export const SURVEY_CREATED_SELECT = {
   id: true,
   title: true,

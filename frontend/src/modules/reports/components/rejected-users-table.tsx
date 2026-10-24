@@ -16,6 +16,7 @@ import {
   STICKY_HEAD_CLASSES,
   TABLE_CELL_CLASSES as CELL_CLASSES,
   TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES,
+  REJECTED_USERS_TABLE_MIN_HEIGHT_CLASSES as MIN_HEIGHT_CLASSES,
   USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES,
 } from "../constants/report-table.constants";
 import type { RejectedUsersTableProps } from "../types/rejected-users-table-props.types";
@@ -71,7 +72,7 @@ export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm 
   return (
     <div className="flex flex-col gap-2">
       <TableScrollHint />
-      <div className={CONTAINER_CLASSES}>
+      <div className={`${CONTAINER_CLASSES} ${MIN_HEIGHT_CLASSES}`}>
         <Table className="min-w-225 text-left text-base">
           <TableHeader className="bg-surface-soft">
             <TableRow className="border-border hover:bg-transparent">

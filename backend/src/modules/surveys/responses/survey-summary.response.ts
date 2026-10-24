@@ -1,4 +1,4 @@
-import type { SurveyStatusValue } from '../types/survey.enum.js';
+import type { SurveyDisplayStatusValue } from '../types/survey.enum.js';
 import type { CareerResponse } from './career.response.js';
 
 export interface SurveyCreatorResponse {
@@ -9,7 +9,7 @@ export interface SurveyCreatorResponse {
 export interface SurveySummaryResponse {
   id: string;
   title: string;
-  status: SurveyStatusValue;
+  status: SurveyDisplayStatusValue;
   career: CareerResponse | null;
   createdBy: SurveyCreatorResponse;
   academicPeriod: string | null;

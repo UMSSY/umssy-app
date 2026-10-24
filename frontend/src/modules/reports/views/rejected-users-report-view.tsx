@@ -60,7 +60,7 @@ export function RejectedUsersReportView() {
   const firstVisibleItem = totalItems === 0 ? 0 : (currentPage - 1) * REJECTED_USERS_PAGE_SIZE + 1;
   const lastVisibleItem = Math.min(currentPage * REJECTED_USERS_PAGE_SIZE, totalItems);
   const hideSummary = Boolean(search) && !errorMessage && !isLoading && totalItems === 0;
-  const showPagination = !errorMessage && totalItems > 0;
+  const showPagination = !errorMessage && totalPages > 1;
 
   return (
     <WorkspacePage title="Usuarios rechazados" description="Consulta los motivos de rechazo y exporta el listado filtrado.">

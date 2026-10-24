@@ -1,6 +1,6 @@
 import type {
   SurveyQuestionTypeValue,
-  SurveyStatusValue,
+  SurveyDisplayStatusValue,
 } from '../types/survey.enum.js';
 import type { CareerResponse } from './career.response.js';
 
@@ -23,7 +23,7 @@ export interface SurveyDetailResponse {
   id: string;
   title: string;
   description: string | null;
-  status: SurveyStatusValue;
+  status: SurveyDisplayStatusValue;
   career: CareerResponse | null;
   academicPeriod: string | null;
   opensAt: string | null;
