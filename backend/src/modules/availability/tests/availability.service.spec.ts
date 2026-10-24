@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { toBoliviaTime } from '../../../common/utils/date-time.js';
 import { AppointmentStatusTitle } from '../enums/appointment-status-title.enum.js';
 import { AvailabilityMapper } from '../mappers/availability.mapper.js';
 import {
@@ -6,6 +7,7 @@ import {
   BlockNotFoundException,
   BlockNotOwnedException,
   BlockOverlapException,
+  DayBlockedException,
   MentorAvailabilityNotOwnedException,
 } from '../exceptions/index.js';
 import { AvailabilityService } from '../services/availability.service.js';
@@ -55,16 +57,29 @@ describe('AvailabilityService', () => {
     updatedAt: new Date('2026-11-01T12:00:00.000Z'),
   };
   const mentorsService = { findOne: vi.fn(), updateAvailability: vi.fn() };
+  const blockedDatesService = {
+    assertDayNotBlocked: vi.fn(),
+    findBlockedDays: vi.fn(),
+    runOnUnblockedDay: vi.fn(),
+  };
+  const TX = { kind: 'tx' };
   let service: AvailabilityService;
 
   beforeEach(() => {
     vi.clearAllMocks();
     availabilityRepository.findMentorBlocksInRange.mockResolvedValue([]);
     availabilityRepository.create.mockResolvedValue(savedBlock);
+    blockedDatesService.assertDayNotBlocked.mockResolvedValue(undefined);
+    blockedDatesService.findBlockedDays.mockResolvedValue(new Set());
+    blockedDatesService.runOnUnblockedDay.mockImplementation(async (mentor, startAt, work) => {
+      await blockedDatesService.assertDayNotBlocked(mentor, startAt, TX);
+      return work(TX);
+    });
     service = new AvailabilityService(
       availabilityRepository as never,
       new AvailabilityMapper(),
       mentorsService as never,
+      blockedDatesService as never,
     );
   });
 
@@ -134,12 +149,62 @@ describe('AvailabilityService', () => {
 
       const result = await service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD);
 
-      expect(availabilityRepository.update).toHaveBeenCalledWith('block-1', {
-        startAt: UPDATE_PAYLOAD.startAt,
-        endAt: UPDATE_PAYLOAD.endAt,
-      });
+      expect(availabilityRepository.update).toHaveBeenCalledWith(
+        'block-1',
+        { startAt: UPDATE_PAYLOAD.startAt, endAt: UPDATE_PAYLOAD.endAt },
+        TX,
+      );
       expect(result.id).toBe('block-1');
       expect(result.state).toBe('free');
+    });
+
+    it('si el bloque cambia de día, lo mueve dentro del lock y revisa el día de destino', async () => {
+      availabilityRepository.findById.mockResolvedValue(block('block-1'));
+      availabilityRepository.update.mockResolvedValue(block('block-1'));
+
+      await service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD);
+
+      expect(toBoliviaTime(block('block-1').startAt).date).not.toBe(toBoliviaTime(UPDATE_PAYLOAD.startAt).date);
+      expect(blockedDatesService.runOnUnblockedDay).toHaveBeenCalledWith(
+        'mentor-1',
+        UPDATE_PAYLOAD.startAt,
+        expect.any(Function),
+      );
+      expect(blockedDatesService.assertDayNotBlocked).toHaveBeenCalledWith(
+        'mentor-1',
+        UPDATE_PAYLOAD.startAt,
+        TX,
+      );
+    });
+
+    it('responde 409 y no mueve el bloque si el día de destino está bloqueado', async () => {
+      availabilityRepository.findById.mockResolvedValue(block('block-1'));
+      blockedDatesService.assertDayNotBlocked.mockRejectedValue(new DayBlockedException());
+
+      await expect(service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD)).rejects.toBeInstanceOf(
+        DayBlockedException,
+      );
+      expect(availabilityRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('edita sin lock si el bloque no cambia de día, aunque ese día esté bloqueado', async () => {
+      const sameDay = {
+        ...block('block-1'),
+        startAt: new Date('2026-10-10T20:00:00.000Z'),
+        endAt: new Date('2026-10-10T20:30:00.000Z'),
+      };
+      availabilityRepository.findById.mockResolvedValue(sameDay);
+      availabilityRepository.update.mockResolvedValue(sameDay);
+      blockedDatesService.assertDayNotBlocked.mockRejectedValue(new DayBlockedException());
+
+      await service.updateBlock('mentor-1', 'block-1', UPDATE_PAYLOAD);
+
+      expect(blockedDatesService.runOnUnblockedDay).not.toHaveBeenCalled();
+      expect(availabilityRepository.update).toHaveBeenCalledWith(
+        'block-1',
+        { startAt: UPDATE_PAYLOAD.startAt, endAt: UPDATE_PAYLOAD.endAt },
+        undefined,
+      );
     });
 
     it('responde 409 si el guardado choca con la constraint de no-solape', async () => {
@@ -161,6 +226,18 @@ describe('AvailabilityService', () => {
   });
 
   describe('create', () => {
+    it('responde 409 sin guardar el bloque si el día está bloqueado', async () => {
+      blockedDatesService.assertDayNotBlocked.mockRejectedValue(new DayBlockedException());
+
+      await expect(service.create(mentorId, payload)).rejects.toMatchObject({
+        statusCode: 409,
+        message: 'Ese día está bloqueado',
+      });
+      expect(blockedDatesService.runOnUnblockedDay).toHaveBeenCalledWith(mentorId, payload.startAt, expect.any(Function));
+      expect(blockedDatesService.assertDayNotBlocked).toHaveBeenCalledWith(mentorId, payload.startAt, TX);
+      expect(availabilityRepository.create).not.toHaveBeenCalled();
+    });
+
     it('crea el bloque y lo devuelve libre', async () => {
       const result = await service.create(mentorId, payload);
 
@@ -182,6 +259,7 @@ describe('AvailabilityService', () => {
         mentorId,
         payload.startAt,
         payload.endAt,
+        TX,
       );
       expect(payload.startAt).toBeInstanceOf(Date);
     });
@@ -225,6 +303,7 @@ describe('AvailabilityService', () => {
         repository as never,
         new AvailabilityMapper(),
         mentorsService as never,
+        blockedDatesService as never,
       );
     });
 
@@ -310,6 +389,33 @@ describe('AvailabilityService', () => {
 
       await expect(service.findMentorFreeBlocks('mentor-1', QUERY)).resolves.toEqual([]);
       expect(availabilityRepository.findMentorFreeBlocksInRange).not.toHaveBeenCalled();
+    });
+
+    it('no ofrece los bloques de los días bloqueados, según el día de Bolivia', async () => {
+      vi.useFakeTimers({ now: new Date('2026-10-01T12:00:00.000Z') });
+      availabilityRepository.findMentorFreeBlocksInRange.mockResolvedValue([
+        block('tuesday'),
+        {
+          ...block('wednesday-night'),
+          startAt: new Date('2026-10-08T00:30:00.000Z'),
+          endAt: new Date('2026-10-08T01:00:00.000Z'),
+        },
+        {
+          ...block('thursday'),
+          startAt: new Date('2026-10-08T14:00:00.000Z'),
+          endAt: new Date('2026-10-08T15:00:00.000Z'),
+        },
+      ]);
+      blockedDatesService.findBlockedDays.mockResolvedValue(new Set(['2026-10-07']));
+
+      const result = await service.findMentorFreeBlocks('mentor-1', QUERY);
+
+      expect(result.map((item) => item.id)).toEqual(['tuesday', 'thursday']);
+      expect(blockedDatesService.findBlockedDays).toHaveBeenCalledWith(
+        'mentor-1',
+        new Date(QUERY.from),
+        new Date(QUERY.to),
+      );
     });
 
     it('devuelve los bloques libres mapeados sin datos de citas', async () => {

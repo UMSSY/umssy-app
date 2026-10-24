@@ -7,6 +7,11 @@
     "sourceMap": false,
     "incremental": false
   },
-  "include": ["src/common/database/seeds.ts"],
+  "include": [
+    "src/common/database/seeds.ts",
+    "src/common/database/development-seeds.ts",
+    "src/common/database/production-seeds.ts",
+    "src/common/database/catalog-seeds.ts"
+  ],
   "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
 }
