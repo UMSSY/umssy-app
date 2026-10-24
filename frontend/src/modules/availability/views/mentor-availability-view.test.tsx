@@ -187,13 +187,13 @@ describe("MentorAvailabilityView", () => {
 
   it("al tocar un bloque con cita abre el panel con las acciones deshabilitadas y el aviso", async () => {
     vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([
-      { ...blockAt("p", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z"), state: "pending" },
+      { ...blockAt("c", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z"), state: "confirmed" },
     ])
     const user = userEvent.setup()
 
     renderWithQuery(<MentorAvailabilityView />)
 
-    await user.click(await screen.findByRole("button", { name: "pendiente, 10:00 a 11:00" }))
+    await user.click(await screen.findByRole("button", { name: "confirmada, 10:00 a 11:00" }))
 
     expect(await screen.findByText("Editar bloque")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled()
