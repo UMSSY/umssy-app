@@ -35,6 +35,7 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
   { label: "Mensajes", href: "/chat", icon: MessageCircle, area: "community", keywords: "chat mensajes conversaciones" },
   { label: "Talleres disponibles", href: "/events", icon: BookOpen, area: "opportunities", keywords: "eventos actividades formación" },
   { label: "Mis inscripciones", href: "/events/my-passes", icon: Ticket, area: "opportunities", keywords: "pases talleres entradas" },
-  { label: "Vacantes", href: "/vacancies/recommended", icon: BriefcaseBusiness, area: "opportunities", keywords: "empleo trabajo ofertas" },
+  { label: "Vacantes", href: "/vacancies", icon: BriefcaseBusiness, area: "opportunities", keywords: "empleo trabajo ofertas" },
+  { label: "Vacantes para ti", href: "/vacancies/recommended", icon: Sparkles, area: "opportunities", keywords: "afinidad recomendaciones postular" },
   { label: "Radar de afinidad", href: "/profile/radar", icon: Radar, area: "opportunities", keywords: "competencias perfil" },
 ];
