@@ -1,5 +1,5 @@
-import { RecommendedJobsView } from "@/modules/matching";
+import { RecommendedJobsView } from "@/modules/matching/views/recommended-jobs-view";
 
-export default function RecommendedVacanciesPage() {
+export default function JobsPage() {
   return <RecommendedJobsView />;
 }

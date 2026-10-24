@@ -16,7 +16,7 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Mi perfil", icon: UserRound, activePathPatterns: [/^\/profile(?:\/|$)/], children: getSectionItems("profile") },
   { label: "Mentorías", icon: Users, activePathPatterns: [/^\/(?:mentorship|mentors|mentor)(?:\/|$)/], children: getSectionItems("mentorship") },
   { label: "Talleres y eventos", icon: CalendarDays, activePathPatterns: [/^\/events(?:\/|$)/], children: getSectionItems("events") },
-  { label: "Vacantes", icon: BriefcaseBusiness, href: "/vacancies", roles: getRouteRoles("/vacancies") },
+  { label: "Vacantes", icon: BriefcaseBusiness, activePathPatterns: [/^\/vacancies(?:\/|$)/], children: getSectionItems("vacancies") },
   { label: "Mensajes", icon: MessageCircle, href: "/chat", roles: getRouteRoles("/chat") },
   { label: "Mi empresa", icon: Building2, activePathPatterns: [/^\/(?:recruiters|matching)(?:\/|$)/, /^\/area-detail(?:-interaction)?-preview\/?$/], children: getSectionItems("company") },
   { label: "Solicitudes", icon: Inbox, href: "/backoffice/solicitudes", roles: getRouteRoles("/backoffice") },
