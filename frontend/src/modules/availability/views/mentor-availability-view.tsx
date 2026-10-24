@@ -89,6 +89,8 @@ export function MentorAvailabilityView({
     ? blocks.find((item) => item.id === editBlockId) ?? null
     : null;
   const isEditing = Boolean(editBlockId) && !error;
+  const showBlockedPanel = selectedDate !== null && !isLoading && !error;
+  const showEditPanel = !showBlockedPanel && isEditing;
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6">
@@ -166,8 +168,8 @@ export function MentorAvailabilityView({
           )}
         </div>
 
-        {selectedDate && !isLoading && !error ? (
-          <div className="min-w-0">
+        <div className="min-w-0">
+          {showBlockedPanel && (
             <BlockedDatePanel
               key={selectedDate}
               date={selectedDate}
@@ -176,21 +178,21 @@ export function MentorAvailabilityView({
               )}
               onClose={() => setSelectedDate(null)}
             />
-          </div>
-        ) : isEditing ? (
-          <div className="min-w-0 animate-in duration-200 fade-in slide-in-from-right">
-            {isLoading ? (
-              <AvailabilityLoading />
-            ) : (
-              <EditBlockPanel
-                key={editBlockId}
-                block={editBlock}
-                onClose={handleClosePanel}
-              />
-            )}
-          </div>
-        ) : (
-          <div className="min-w-0">
+          )}
+          {showEditPanel && (
+            <div className="animate-in duration-200 fade-in slide-in-from-right">
+              {isLoading ? (
+                <AvailabilityLoading />
+              ) : (
+                <EditBlockPanel
+                  key={editBlockId}
+                  block={editBlock}
+                  onClose={handleClosePanel}
+                />
+              )}
+            </div>
+          )}
+          <div hidden={showBlockedPanel || showEditPanel}>
             <BlockForm
               key={formKey}
               mode="create"
@@ -199,7 +201,7 @@ export function MentorAvailabilityView({
               onCancel={handleCancelCreate}
             />
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
