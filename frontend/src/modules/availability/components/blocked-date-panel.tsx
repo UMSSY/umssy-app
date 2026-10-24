@@ -4,7 +4,6 @@ import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
 import { toBoliviaTime } from "@/shared/utils/date-time";
 import { BLOCKED_DATE_PAST_ERROR, BLOCKED_DATE_REASON_ERROR, BLOCKED_DATE_REASON_MAX_LENGTH } from "../constants/blocked-date.constants";
 import { useBlockDate } from "../hooks/use-block-date";
@@ -48,48 +47,101 @@ export function BlockedDatePanel({ date, blockedDate, onClose }: BlockedDatePane
     }
   }
 
-  return (
-    <RecordEditorDialog
-      title={blockedDate ? "Desbloquear fecha" : "Bloquear fecha"}
-      description={formatLongDate(date)}
-      isBusy={isBusy}
-      hasUnsavedChanges={reason.length > 0}
-      onClose={onClose}
+    return (
+    <aside
+      aria-labelledby={`${reasonId}-title`}
+      className="space-y-4 rounded-lg border border-border bg-surface p-4"
     >
-      {(requestClose) => (
-        <form className="space-y-4" onSubmit={(event) => void handleSubmit(event)} noValidate>
-          {blockedDate ? (
-            <>
-              <p className="text-sm">Esta fecha está bloqueada. Al desbloquearla, sus horarios originales volverán a estar disponibles.</p>
-              {blockedDate.reason && <p className="text-sm wrap-anywhere">Motivo: {blockedDate.reason}</p>}
-            </>
-          ) : (
-            <>
-              <p className="text-sm">Los horarios de este día dejarán de ofrecerse sin eliminar tus bloques.</p>
-              {isPast && <p role="alert" className="text-sm text-destructive">{BLOCKED_DATE_PAST_ERROR}</p>}
-              <div className="space-y-2">
-                <Label htmlFor={reasonId}>Motivo (opcional)</Label>
-                <Textarea
-                  id={reasonId}
-                  value={reason}
-                  disabled={isBusy || isPast}
-                  aria-invalid={Boolean(error)}
-                  aria-describedby={`${reasonId}-count${error ? ` ${reasonId}-error` : ""}`}
-                  onChange={(event) => { setReason(event.target.value); setValidationError(null); }}
-                />
-                <p id={`${reasonId}-count`} className="text-sm text-muted-foreground">{reason.length}/{BLOCKED_DATE_REASON_MAX_LENGTH} caracteres</p>
-                {error && <p id={`${reasonId}-error`} role="alert" className="text-sm text-destructive">{error}</p>}
-              </div>
-            </>
-          )}
-          <div className="flex flex-wrap justify-end gap-2">
-            <Button type="button" variant="outline" onClick={requestClose} disabled={isBusy}>Cancelar</Button>
-            <Button type="submit" disabled={isBusy || (!blockedDate && (isPast || reasonTooLong))}>
-              {isBusy ? "Guardando..." : blockedDate ? "Desbloquear fecha" : "Bloquear fecha"}
-            </Button>
-          </div>
-        </form>
-      )}
-    </RecordEditorDialog>
+      <header className="space-y-1">
+        <h2 id={`${reasonId}-title`} className="text-lg font-semibold">
+          {blockedDate ? "Desbloquear fecha" : "Bloquear fecha"}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {formatLongDate(date)}
+        </p>
+      </header>
+
+      <form
+        className="space-y-4"
+        onSubmit={(event) => void handleSubmit(event)}
+        noValidate
+      >
+        {blockedDate ? (
+          <>
+            <p className="text-sm">
+              Esta fecha está bloqueada. Al desbloquearla, sus horarios
+              originales volverán a estar disponibles.
+            </p>
+            {blockedDate.reason && (
+              <p className="text-sm wrap-anywhere">
+                Motivo: {blockedDate.reason}
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            <p className="text-sm">
+              Los horarios de este día dejarán de ofrecerse sin eliminar tus
+              bloques.
+            </p>
+            {isPast && (
+              <p role="alert" className="text-sm text-destructive">
+                {BLOCKED_DATE_PAST_ERROR}
+              </p>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor={reasonId}>Motivo (opcional)</Label>
+              <Textarea
+                id={reasonId}
+                value={reason}
+                disabled={isBusy || isPast}
+                aria-invalid={Boolean(error)}
+                aria-describedby={`${reasonId}-count${error ? ` ${reasonId}-error` : ""}`}
+                onChange={(event) => {
+                  setReason(event.target.value);
+                  setValidationError(null);
+                }}
+              />
+              <p
+                id={`${reasonId}-count`}
+                className="text-sm text-muted-foreground"
+              >
+                {reason.length}/{BLOCKED_DATE_REASON_MAX_LENGTH} caracteres
+              </p>
+              {error && (
+                <p
+                  id={`${reasonId}-error`}
+                  role="alert"
+                  className="text-sm text-destructive"
+                >
+                  {error}
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={isBusy}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            disabled={isBusy || (!blockedDate && (isPast || reasonTooLong))}
+          >
+            {isBusy
+              ? "Guardando..."
+              : blockedDate
+                ? "Desbloquear fecha"
+                : "Bloquear fecha"}
+          </Button>
+        </div>
+      </form>
+    </aside>
   );
 }
