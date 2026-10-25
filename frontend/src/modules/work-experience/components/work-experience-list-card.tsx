@@ -102,7 +102,7 @@ export function WorkExperienceListCard({
           onClick={onAdd}
           className="gap-2"
         >
-          <span>+</span> Añadir experiencia
+          Añadir experiencia
         </Button>
       </div>
 
@@ -135,7 +135,6 @@ export function WorkExperienceListCard({
 
                 <div className="flex items-start justify-between">
                   <div>
-                    {/* Añadido wrap-anywhere para satisfacer la prueba unitaria */}
                     <h4 className="wrap-anywhere text-base font-semibold text-slate-900">
                       {experience.position}
                     </h4>
