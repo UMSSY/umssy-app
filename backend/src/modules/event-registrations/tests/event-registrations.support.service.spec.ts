@@ -5,6 +5,7 @@ import { EventNotSupportableException } from '../exceptions/event-not-supportabl
 import { ProposalExpiredException } from '../exceptions/proposal-expired.exception.js';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import type { EventSupportContext } from '../types/event-support-context.types.js';
+import type { SupportTransactionResult } from '../types/support-transaction-result.types.js';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -22,30 +23,57 @@ function buildContext(
   };
 }
 
+function buildResult(
+  overrides: Partial<SupportTransactionResult> = {},
+): SupportTransactionResult {
+  return {
+    created: true,
+    supportCount: 15,
+    supportThreshold: 20,
+    published: false,
+    ...overrides,
+  };
+}
+
 describe('EventRegistrationsService.support', () => {
   let service: EventRegistrationsService;
-  const findEventForSupport = vi.fn();
-  const createSupport = vi.fn();
+  const registerSupport = vi.fn();
+
+  function mockTransaction(
+    context: EventSupportContext,
+    result: SupportTransactionResult | null,
+  ) {
+    registerSupport.mockImplementation(
+      async (
+        _eventId: string,
+        _userId: string,
+        assertSupportable: (event: EventSupportContext) => void,
+      ) => {
+        assertSupportable(context);
+        return result;
+      },
+    );
+  }
 
   beforeEach(() => {
-    findEventForSupport.mockReset();
-    createSupport.mockReset();
+    registerSupport.mockReset();
     service = new EventRegistrationsService({} as never, {} as never);
-    vi.spyOn(service, 'findEventForSupport').mockImplementation(findEventForSupport);
-    vi.spyOn(service, 'createSupport').mockImplementation(createSupport);
+    vi.spyOn(service, 'registerSupport').mockImplementation(registerSupport);
   });
 
   it('registra el apoyo y devuelve el progreso actualizado', async () => {
-    findEventForSupport
-      .mockResolvedValueOnce(buildContext({ supportCount: 14 }))
-      .mockResolvedValueOnce(buildContext({ supportCount: 15 }));
-    createSupport.mockResolvedValue({ created: true });
+    mockTransaction(buildContext(), buildResult());
 
     const result = await service.support('event-1', 'user-1');
 
-    expect(createSupport).toHaveBeenCalledWith('event-1', 'user-1');
+    expect(registerSupport).toHaveBeenCalledWith(
+      'event-1',
+      'user-1',
+      expect.any(Function),
+    );
     expect(result).toEqual({
       eventId: 'event-1',
+      status: 'voting',
       supportCount: 15,
       supportThreshold: 20,
       supportsRemaining: 5,
@@ -54,82 +82,70 @@ describe('EventRegistrationsService.support', () => {
     });
   });
 
-  it('accepts a proposal created by HU4 with its accented voting status', async () => {
-    findEventForSupport.mockResolvedValue(buildContext({ statusTitle: 'En votación' }));
-    createSupport.mockResolvedValue({ created: true });
-    await expect(service.support('event-1', 'user-1')).resolves.toMatchObject({ hasSupported: true });
-    expect(createSupport).toHaveBeenCalledWith('event-1', 'user-1');
-  });
-
-  it('suma 1 al contador si no puede releer el evento', async () => {
-    findEventForSupport
-      .mockResolvedValueOnce(buildContext({ supportCount: 14 }))
-      .mockResolvedValueOnce(null);
-    createSupport.mockResolvedValue({ created: true });
+  it('devuelve el estado Publicado cuando el apoyo completa el umbral', async () => {
+    mockTransaction(
+      buildContext({ supportCount: 19 }),
+      buildResult({ supportCount: 20, published: true }),
+    );
 
     const result = await service.support('event-1', 'user-1');
 
-    expect(result.supportCount).toBe(15);
+    expect(result.status).toBe('Publicado');
+    expect(result.supportCount).toBe(20);
+    expect(result.supportsRemaining).toBe(0);
+    expect(result.progressPercent).toBe(100);
   });
 
   it('lanza 404 si el evento no existe', async () => {
-    findEventForSupport.mockResolvedValue(null);
+    registerSupport.mockResolvedValue(null);
 
     await expect(service.support('missing', 'user-1')).rejects.toBeInstanceOf(
       EventNotFoundException,
     );
-    expect(createSupport).not.toHaveBeenCalled();
   });
 
   it('rechaza con "La propuesta ya venció" si el estado es Vencido', async () => {
-    findEventForSupport.mockResolvedValue(
-      buildContext({ statusTitle: 'Vencido' }),
-    );
+    mockTransaction(buildContext({ statusTitle: 'Vencido' }), buildResult());
 
     const promise = service.support('event-1', 'user-1');
 
     await expect(promise).rejects.toBeInstanceOf(ProposalExpiredException);
     await expect(promise).rejects.toHaveProperty('statusCode', 409);
     await expect(promise).rejects.toThrow('La propuesta ya venció');
-    expect(createSupport).not.toHaveBeenCalled();
   });
 
   it('rechaza si la fecha límite ya pasó aunque siga en votación', async () => {
-    findEventForSupport.mockResolvedValue(
+    mockTransaction(
       buildContext({ votingDeadline: new Date(Date.now() - 1000) }),
+      buildResult(),
     );
 
     await expect(service.support('event-1', 'user-1')).rejects.toBeInstanceOf(
       ProposalExpiredException,
     );
-    expect(createSupport).not.toHaveBeenCalled();
   });
 
   it('rechaza eventos que no son propuestas de la comunidad', async () => {
-    findEventForSupport.mockResolvedValue(
+    mockTransaction(
       buildContext({ originTitle: 'Institucional' }),
+      buildResult(),
     );
 
     await expect(service.support('event-1', 'user-1')).rejects.toBeInstanceOf(
       EventNotSupportableException,
     );
-    expect(createSupport).not.toHaveBeenCalled();
   });
 
   it('rechaza propuestas que ya están publicadas', async () => {
-    findEventForSupport.mockResolvedValue(
-      buildContext({ statusTitle: 'Publicado' }),
-    );
+    mockTransaction(buildContext({ statusTitle: 'Publicado' }), buildResult());
 
     await expect(service.support('event-1', 'user-1')).rejects.toBeInstanceOf(
       EventNotSupportableException,
     );
-    expect(createSupport).not.toHaveBeenCalled();
   });
 
   it('rechaza el apoyo duplicado con el mensaje del criterio de aceptación', async () => {
-    findEventForSupport.mockResolvedValue(buildContext());
-    createSupport.mockResolvedValue({ created: false });
+    mockTransaction(buildContext(), buildResult({ created: false }));
 
     const promise = service.support('event-1', 'user-1');
 
@@ -138,15 +154,24 @@ describe('EventRegistrationsService.support', () => {
     await expect(promise).rejects.toThrow(
       'Tu apoyo ya fue registrado. No puedes preinscribirte dos veces.',
     );
-    expect(findEventForSupport).toHaveBeenCalledTimes(1);
   });
 
   it('deja pasar los errores inesperados del repository', async () => {
-    findEventForSupport.mockResolvedValue(buildContext());
-    createSupport.mockRejectedValue(new Error('db caída'));
+    registerSupport.mockRejectedValue(new Error('db caída'));
 
     await expect(service.support('event-1', 'user-1')).rejects.toThrow(
       'db caída',
     );
+  });
+
+  it('acepta propuestas cuyo estado es "En votación"', async () => {
+    mockTransaction(
+      buildContext({ statusTitle: 'En votación' }),
+      buildResult(),
+    );
+
+    await expect(service.support('event-1', 'user-1')).resolves.toMatchObject({
+      status: 'voting',
+    });
   });
 });
