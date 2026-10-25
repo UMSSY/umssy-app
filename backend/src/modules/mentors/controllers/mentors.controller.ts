@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Patch,
   Param,
   ParseUUIDPipe,
@@ -27,11 +28,13 @@ import {
   type UpdateMentorOrientationTypesDto,
 } from '../requests/update-mentor-orientation-types.schema.js';
 import { MentorsService } from '../services/mentors.service.js';
+import { MentorParticipationService } from '../../mentor-participation/services/mentor-participation.service.js';
 
 @Controller('mentors')
 @UseInterceptors(ResponseInterceptor)
 export class MentorsController {
-  constructor(private readonly mentorsService: MentorsService) {}
+  constructor(private readonly mentorsService: MentorsService,
+    private readonly participationService?: MentorParticipationService) {}
 
   @Get()
   findAll() {
@@ -81,8 +84,9 @@ export class MentorsController {
   @UseGuards(JwtAuthGuard)
   activate(
     @CurrentUser() user: AuthenticatedUser,
+    @Headers('idempotency-key') key: string | undefined,
     @Body(new ZodValidationPipe(activateMentorSchema)) body: ActivateMentorDto,
   ) {
-    return this.mentorsService.activate(user.id, body);
+    return this.participationService!.activate(user.id, body, MentorParticipationService.requireIdempotencyKey(key));
   }
 }

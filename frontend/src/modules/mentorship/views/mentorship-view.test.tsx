@@ -12,8 +12,11 @@ import { MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY } from "../constants/mentorship-wiz
 import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
 import { MentorshipView } from "./mentorship-view";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
 const integrationMocks = vi.hoisted(() => ({
   activateMentor: vi.fn(),
+  getParticipation: vi.fn(),
   retryTechnicalAreas: vi.fn(),
   retryOrientationTypes: vi.fn(),
   isTechnicalAreasError: false,
@@ -22,6 +25,11 @@ const integrationMocks = vi.hoisted(() => ({
 
 vi.mock("../services/mentor-activation.service", () => ({
   activateMentor: integrationMocks.activateMentor,
+}));
+
+vi.mock("../services/mentor-participation.service", () => ({
+  getParticipation: integrationMocks.getParticipation,
+  requestParticipation: vi.fn(),
 }));
 
 vi.mock("../hooks/use-mentorship-catalogs", () => ({
@@ -66,11 +74,22 @@ beforeEach(() => {
   integrationMocks.activateMentor.mockResolvedValue({
     id: "550e8400-e29b-41d4-a716-446655440005",
   });
+  integrationMocks.getParticipation.mockResolvedValue({ email: "hu7.test@umssy.test", status: "NONE", request: null, sanction: null });
 });
 
 afterEach(() => {
   cleanup();
   clearMentorshipWizardDraft();
+});
+
+it("muestra la sanción vigente y deshabilita el ingreso nuevo", async () => {
+  integrationMocks.getParticipation.mockResolvedValue({ email: "hu7.18@umssy.test", status: "NONE",
+    request: null, sanction: { startsAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 72 * 3_600_000).toISOString() } });
+  renderWithQuery(<MentorshipView />);
+  expect(await screen.findByRole("alert")).toHaveTextContent("Solicitudes suspendidas temporalmente");
+  advanceToConfirmation();
+  expect(screen.getByRole("button", { name: "Solicitudes suspendidas" })).toBeDisabled();
 });
 
 function advanceToConfirmation() {

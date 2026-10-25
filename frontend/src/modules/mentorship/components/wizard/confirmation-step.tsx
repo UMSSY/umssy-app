@@ -16,6 +16,7 @@ type ConfirmationStepProps = {
   selectedTechnicalAreas: TechnicalAreaResponse[];
   selectedOrientationTypes: OrientationTypeResponse[];
   isActivating: boolean;
+  isSuspended?: boolean;
   activationError: string | null;
   onEditTechnicalAreas: () => void;
   onEditOrientationTypes: () => void;
@@ -27,6 +28,7 @@ export function ConfirmationStep({
   selectedTechnicalAreas,
   selectedOrientationTypes,
   isActivating,
+  isSuspended = false,
   activationError,
   onEditTechnicalAreas,
   onEditOrientationTypes,
@@ -152,10 +154,10 @@ export function ConfirmationStep({
       <Button
         type="button"
         onClick={() => setIsConfirmOpen(true)}
-        disabled={isActivating}
+        disabled={isActivating || isSuspended}
         className="h-auto w-full rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isActivating ? "Activando..." : "Activar participación"}
+        {isActivating ? "Activando..." : isSuspended ? "Solicitudes suspendidas" : "Activar participación"}
       </Button>
 
       <ActivationConfirmDialog

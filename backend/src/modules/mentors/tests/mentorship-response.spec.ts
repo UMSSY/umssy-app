@@ -8,6 +8,7 @@ import { DomainExceptionFilter } from '../../../common/filters/domain-exception.
 import type { AuthenticatedRequest } from '../../../common/types/authenticated-request.types.js';
 import { MentorsController } from '../controllers/mentors.controller.js';
 import { MentorsService } from '../services/mentors.service.js';
+import { MentorParticipationService } from '../../mentor-participation/services/mentor-participation.service.js';
 import { MentorNotFoundException } from '../exceptions/mentor-not-found.exception.js';
 import { AlreadyMentorException } from '../exceptions/already-mentor.exception.js';
 import { TechnicalAreasController } from '../../technical-areas/controllers/technical-areas.controller.js';
@@ -30,6 +31,7 @@ describe('Mentorship Standard Response HTTP', () => {
   const technicalPayload = { technicalAreaIds: [areaId] };
   const orientationPayload = { orientationTypeIds: [orientationId] };
   const activationPayload = { ...technicalPayload, ...orientationPayload };
+  const idempotencyKey = '550e8400-e29b-41d4-a716-446655440000';
   const mentorsService = {
     findAll: vi.fn().mockResolvedValue(directory),
     findOne: vi.fn().mockResolvedValue(profile),
@@ -52,6 +54,7 @@ describe('Mentorship Standard Response HTTP', () => {
       ],
       providers: [
         { provide: MentorsService, useValue: mentorsService },
+        { provide: MentorParticipationService, useValue: { activate: mentorsService.activate } },
         {
           provide: TechnicalAreasService,
           useValue: { findAll: vi.fn().mockResolvedValue(areas) },
@@ -105,6 +108,7 @@ describe('Mentorship Standard Response HTTP', () => {
   it('POST /api/mentors/activate conserva HTTP 201', async () => {
     await request(server)
       .post('/api/mentors/activate')
+      .set('Idempotency-Key', idempotencyKey)
       .send(activationPayload)
       .expect(201)
       .expect({
@@ -117,6 +121,7 @@ describe('Mentorship Standard Response HTTP', () => {
     expect(mentorsService.activate).toHaveBeenCalledWith(
       userId,
       activationPayload,
+      idempotencyKey,
     );
   });
 
@@ -150,6 +155,7 @@ describe('Mentorship Standard Response HTTP', () => {
 
     await request(server)
       .post('/api/mentors/activate')
+      .set('Idempotency-Key', idempotencyKey)
       .send(activationPayload)
       .expect(409)
       .expect({

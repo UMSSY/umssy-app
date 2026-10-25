@@ -10,21 +10,19 @@ import { seedEventRegistrations } from '../../modules/event-registrations/seeds/
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
 import { seedJobOffers } from '../../modules/job-offers/seeds/job-offers.seed.js';
+import { seedMentors } from '../../modules/mentors/seeds/mentors.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
-import { seedChat } from '../../modules/chat/seeds/chat.seed.js';
 import { SEED_USERS } from '../../modules/users/constants/seed-users.constants.js';
 import {
   hashSeedPassword,
   seedUsers,
 } from '../../modules/users/seeds/users.seed.js';
-import { PrismaClient, type Prisma } from '../../prisma/client.js';
+import { PrismaClient } from '../../prisma/client.js';
 import { buildDatabaseConnectionString } from '../prisma/build-connection-string.js';
 import type { SeedEnv } from '../types/seed-env.types.js';
 import type { SeedSummary } from '../types/seed-summary.types.js';
 import { SeedEnvSchema } from './seed-env.schema.js';
-import { SeedOptionsSchema } from './seed-options.schema.js';
-import { runSeedStage } from './run-seed-stage.js';
 
 export function loadSeedEnv(source: NodeJS.ProcessEnv = process.env): SeedEnv {
   const parsed = SeedEnvSchema.safeParse(source);
@@ -46,46 +44,23 @@ export function createSeedClient(env: SeedEnv = loadSeedEnv()): PrismaClient {
 }
 
 export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
-  const options = SeedOptionsSchema.safeParse(process.env);
-  if (!options.success) {
-    throw new Error(
-      'SEED_TRANSACTION_TIMEOUT_MS debe ser un entero entre 1 y 600000 milisegundos',
-    );
-  }
   const ownsClient = client === undefined;
   const prisma = client ?? createSeedClient();
 
   try {
     const now = new Date();
-    const password = await runSeedStage(
-      'contraseña de prueba',
-      hashSeedPassword,
-    );
+    const password = await hashSeedPassword();
 
-    const runModule = <T>(
-      name: string,
-      operation: (tx: Prisma.TransactionClient) => Promise<T>,
-    ): Promise<T> =>
-      runSeedStage(name, () =>
-        prisma.$transaction(operation, {
-          maxWait: 5_000,
-          timeout: options.data.SEED_TRANSACTION_TIMEOUT_MS,
-        }),
-      );
-    await runModule('áreas técnicas', seedTechnicalAreas);
-    await runModule('tipos de orientación', seedOrientationTypes);
-    await runModule('catálogos de vacantes', seedJobOffers);
+    return await prisma.$transaction(async (tx) => {
+      await seedTechnicalAreas(tx);
+      await seedOrientationTypes(tx);
+      await seedJobOffers(tx);
 
-    const usersResult = await runModule('usuarios y roles', (tx) =>
-      seedUsers(tx, password),
-    );
-    const { users } = usersResult;
-    await runModule('eventos', (tx) => seedEvents(tx, users.eventGraduate.id));
-    await runModule('inscripciones', (tx) =>
-      seedEventRegistrations(tx, users.eventGraduate.id),
-    );
-    const availabilityResult = await runModule('disponibilidad', (tx) =>
-      seedAvailability(
+      const usersResult = await seedUsers(tx, password);
+      const { users } = usersResult;
+      await seedEvents(tx, users.eventGraduate.id);
+      await seedEventRegistrations(tx, users.eventGraduate.id);
+      const availabilityResult = await seedAvailability(
         tx,
         {
           mentorId: users.mentorA.id,
@@ -93,28 +68,25 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
           ownedUserIds: Object.values(users).map((user) => user.id),
         },
         now,
-      ),
-    );
+      );
+      await seedMentors(tx, users.student);
 
-    const accessRequestsResult = await runModule(
-      'catálogos de solicitudes',
-      seedAccessRequests,
-    );
-    await runModule('chat', seedChat);
+      const accessRequestsResult = await seedAccessRequests(tx);
 
-    return {
-      weeks: availabilityResult.weeks,
-      plan: availabilityResult.plan,
-      roles: usersResult.roles,
-      statuses: availabilityResult.statuses,
-      users: SEED_USERS.length,
-      userRoles: usersResult.userRoles,
-      blocks: availabilityResult.blocks,
-      appointments: availabilityResult.appointments,
-      legacyRoles: usersResult.legacyRoles,
-      warnings: availabilityResult.warnings,
-      accessRequests: accessRequestsResult,
-    };
+      return {
+        weeks: availabilityResult.weeks,
+        plan: availabilityResult.plan,
+        roles: usersResult.roles,
+        statuses: availabilityResult.statuses,
+        users: SEED_USERS.length,
+        userRoles: usersResult.userRoles,
+        blocks: availabilityResult.blocks,
+        appointments: availabilityResult.appointments,
+        legacyRoles: usersResult.legacyRoles,
+        warnings: availabilityResult.warnings,
+        accessRequests: accessRequestsResult,
+      };
+    }, { maxWait: 5_000, timeout: 30_000 });
   } finally {
     if (ownsClient) {
       await prisma.$disconnect();
@@ -133,16 +105,14 @@ async function main(): Promise<void> {
       `Seed completado — roles: ${summary.roles}, estados: ${summary.statuses}, usuarios: ${summary.users}, ` +
         `roles de usuario nuevos: ${summary.userRoles}, bloques: ${summary.blocks}, citas: ${summary.appointments}, ` +
         `solicitudes (estados: ${summary.accessRequests.statuses}, tipos de documento: ${summary.accessRequests.documentTypes}, carreras: ${summary.accessRequests.careers})` +
-        (summary.legacyRoles > 0
-          ? ` (roles en mayúscula eliminados: ${summary.legacyRoles})`
-          : ''),
+        (summary.legacyRoles > 0 ? ` (roles en mayúscula eliminados: ${summary.legacyRoles})` : ''),
     );
     for (const warning of summary.warnings) {
       logger.warn(warning);
     }
   } catch (error) {
     logger.error(
-      'El seed se detuvo; los módulos confirmados anteriormente se conservan',
+      'El seed falló y la transacción se revirtió',
       error instanceof Error ? error.stack : String(error),
     );
     process.exitCode = 1;

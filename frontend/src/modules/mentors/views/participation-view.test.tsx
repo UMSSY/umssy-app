@@ -6,6 +6,7 @@ import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getMentorTechnicalAreas } from "../services/technical-areas.service";
 import { getMentorOrientationTypes } from "@/modules/mentorship/services/orientation-type.service";
+import { getParticipation, getCapacity } from "@/modules/mentorship/services/mentor-participation.service";
 import { ParticipationView } from "./participation-view";
 
 vi.mock("../services/technical-areas.service", () => ({
@@ -14,10 +15,16 @@ vi.mock("../services/technical-areas.service", () => ({
 vi.mock("@/modules/mentorship/services/orientation-type.service", () => ({
   getMentorOrientationTypes: vi.fn(),
 }));
+vi.mock("@/modules/mentorship/services/mentor-participation.service", () => ({
+  getParticipation: vi.fn(),
+  getCapacity: vi.fn(),
+}));
 
 describe("ParticipationView", () => {
   beforeEach(() => {
     localStorage.clear();
+    vi.mocked(getParticipation).mockResolvedValue({ email: "mentor@test.com", status: "ACTIVE", request: null });
+    vi.mocked(getCapacity).mockResolvedValue({ approvedGraduates: 25, percentage: 40, capacity: 10, activeMentors: 9, reservedOffers: 1, occupied: 10, available: 0 });
     vi.mocked(getMentorTechnicalAreas).mockResolvedValue([
       { id: "area-1", name: "Backend", description: null },
       { id: "area-2", name: "QA", description: null },
@@ -62,6 +69,7 @@ describe("ParticipationView", () => {
   });
 
   it("muestra la activación cuando no existe participación", async () => {
+    vi.mocked(getParticipation).mockResolvedValue({ email: "titulado@test.com", status: "NONE", request: null });
     vi.mocked(getMentorTechnicalAreas).mockRejectedValue({
       isAxiosError: true,
       response: { status: 404 },
@@ -69,11 +77,50 @@ describe("ParticipationView", () => {
     render(<ParticipationView />);
 
     expect(
-      await screen.findByRole("heading", { name: "Mi participación" }),
+      await screen.findByRole("heading", { name: "Mi participación como mentor" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Participa como mentor" }),
     ).toHaveAttribute("href", "/mentorship");
+  });
+
+  it("reabre la oferta con el mismo vencimiento recibido del backend", async () => {
+    const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+    vi.mocked(getParticipation).mockResolvedValue({
+      email: "hu7.07@umssy.test", status: "OFFERED",
+      request: {
+        id: "request-1", requestedAt: new Date(Date.now() - 86_400_000).toISOString(), queuedAt: new Date(Date.now() - 86_400_000).toISOString(),
+        technicalAreas: [{ id: "area-1", name: "Backend" }],
+        orientationTypes: [{ id: "orientation-1", name: "Orientación profesional" }],
+        offer: { id: "offer-1", status: "OFFERED", offeredAt: new Date(Date.now() - 22 * 60 * 60 * 1000).toISOString(), expiresAt },
+      },
+    });
+    render(<ParticipationView />);
+    const dialog = await screen.findByRole("alertdialog");
+    expect(dialog).toHaveTextContent("¡Tienes un cupo disponible!");
+    expect(dialog).toHaveTextContent("restantes");
+    fireEvent.click(screen.getByRole("button", { name: "Volver" }));
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Ver oferta" }));
+    expect(await screen.findByRole("alertdialog")).toHaveTextContent("restantes");
+  });
+
+  it("muestra el detalle de la solicitud pendiente sin publicar su posición FIFO", async () => {
+    vi.mocked(getParticipation).mockResolvedValue({
+      email: "hu7.08@umssy.test", status: "PENDING",
+      request: {
+        id: "request-2", requestedAt: new Date(Date.now() - 86_400_000).toISOString(), queuedAt: new Date(Date.now() - 86_400_000).toISOString(),
+        technicalAreas: [{ id: "area-1", name: "Backend" }],
+        orientationTypes: [{ id: "orientation-1", name: "Orientación profesional" }], offer: null,
+      },
+    });
+    render(<ParticipationView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Ver más detalles" }));
+    const dialog = await screen.findByRole("alertdialog");
+    expect(dialog).toHaveTextContent("Estado: Pendiente");
+    expect(dialog).toHaveTextContent("Backend");
+    expect(dialog).toHaveTextContent("hu7.08@umssy.test");
+    expect(dialog).not.toHaveTextContent("lugar 1");
   });
 
   it("muestra loading hasta que ambas peticiones terminan y comparte la cancelación", () => {
@@ -120,6 +167,6 @@ describe("ParticipationView", () => {
     render(<ParticipationView />);
     expect(await screen.findByText("Backend")).toBeInTheDocument();
     expect(screen.queryByText("Datos antiguos")).not.toBeInTheDocument();
-    expect(readStorage).not.toHaveBeenCalled();
+    expect(readStorage).not.toHaveBeenCalledWith("umssy-mentor-participation");
   });
 });

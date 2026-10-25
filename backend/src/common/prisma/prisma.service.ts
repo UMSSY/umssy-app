@@ -15,7 +15,7 @@ export class PrismaService
         max: 3,
         connectionTimeoutMillis: 10_000,
         idleTimeoutMillis: 30_000,
-      }),
+      }, process.env.DB_SCHEMA ? { schema: process.env.DB_SCHEMA } : undefined),
     });
   }
 

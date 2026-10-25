@@ -22,7 +22,8 @@ describe('Availability authentication', () => {
       .overrideProvider(PrismaService)
       .useValue({ user: { findFirst } })
       .compile();
-    vi.spyOn(moduleRef.get(JwtService), 'verifyAsync').mockResolvedValue({
+    const guardJwt = (moduleRef.get(JwtAuthGuard) as unknown as { jwtService: JwtService }).jwtService;
+    vi.spyOn(guardJwt, 'verifyAsync').mockResolvedValue({
       sub: 'user-1', roleTag: 'mentor', roles: ['mentor', 'titulado'],
     });
   });
