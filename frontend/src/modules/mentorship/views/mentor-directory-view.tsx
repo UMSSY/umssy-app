@@ -254,6 +254,7 @@ export function MentorDirectoryView({ directoryState }: MentorDirectoryViewProps
                 currentUserId={currentUserId}
                 returnTo={returnTo}
                 showAffinityBadge={effectiveSort === "affinity"}
+                selectedArea={area}
               />
             ) : (
               <div className="rounded-lg border border-border bg-surface p-8 text-center">

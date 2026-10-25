@@ -16,6 +16,7 @@ type MentorCardProps = {
   isOwnProfile?: boolean;
   returnTo?: string;
   showAffinityBadge?: boolean;
+  selectedArea?: string;
 };
 
 function getSafeReturnTo(returnTo?: string): string | null {
@@ -54,6 +55,7 @@ export function MentorCard({
   isOwnProfile = false,
   returnTo,
   showAffinityBadge = false,
+  selectedArea,
 }: MentorCardProps) {
   const hasTechnicalAreas = mentor.technicalAreas.length > 0;
   const safeReturnTo = getSafeReturnTo(returnTo);
@@ -137,7 +139,12 @@ export function MentorCard({
               {mentor.technicalAreas.map((area) => (
                 <li
                   key={area}
-                  className="max-w-full min-w-0 rounded-md border border-accent/15 bg-interaction px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-accent"
+                  aria-current={area === selectedArea ? "true" : undefined}
+                  className={`max-w-full min-w-0 rounded-md border bg-interaction px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-accent ${
+                    area === selectedArea
+                      ? "border-accent font-semibold ring-1 ring-accent"
+                      : "border-accent/15"
+                  }`}
                 >
                   {area}
                 </li>

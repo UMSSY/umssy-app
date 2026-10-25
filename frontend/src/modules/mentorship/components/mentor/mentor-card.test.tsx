@@ -21,6 +21,30 @@ afterEach(() => {
 });
 
 describe("MentorCard", () => {
+  it("resalta el área técnica seleccionada", () => {
+    render(<MentorCard mentor={mentor} selectedArea="APIs" />);
+    const selected = screen.getByText("APIs");
+    expect(selected).toHaveAttribute("aria-current", "true");
+    expect(selected).toHaveClass("border-accent", "font-semibold", "ring-1", "ring-accent");
+    expect(screen.getByText("Backend")).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("Backend")).toHaveClass("border-accent/15");
+  });
+
+  it("no resalta ninguna área cuando no hay selección", () => {
+    render(<MentorCard mentor={mentor} />);
+    for (const name of mentor.technicalAreas) {
+      expect(screen.getByText(name)).not.toHaveAttribute("aria-current");
+      expect(screen.getByText(name)).not.toHaveClass("ring-1");
+    }
+  });
+
+  it("no resalta nada si el mentor no tiene el área seleccionada", () => {
+    render(<MentorCard mentor={mentor} selectedArea="QA" />);
+    for (const name of mentor.technicalAreas) {
+      expect(screen.getByText(name)).not.toHaveAttribute("aria-current");
+    }
+  });
+
   it("usa iniciales sin intentar cargar una foto inexistente", () => {
     const imageLoader = vi.spyOn(window, "Image");
     render(<MentorCard mentor={mentor} />);
