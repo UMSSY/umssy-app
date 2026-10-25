@@ -9,6 +9,7 @@ import {
   InvalidResetCodeException,
   ExpiredResetCodeException,
   TooManyAttemptsException,
+  ResetCodeCooldownException,
 } from '../exceptions/index.js';
 import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.js';
 import { PasswordResetMailerService } from '../mail/password-reset-mailer.service.js';
@@ -20,7 +21,8 @@ import type { RequestPasswordResetDto } from '../requests/request-password-reset
 import type { VerifyPasswordResetDto } from '../requests/verify-password-reset.schema.js';
 import type { ResetPasswordDto } from '../requests/reset-password.schema.js';
 
-const OTP_EXPIRATION_MINUTES = 10;
+const OTP_EXPIRATION_MINUTES = 5;
+const RESEND_COOLDOWN_SECONDS = 120;
 const MAX_OTP_ATTEMPTS = 5;
 
 @Injectable()
@@ -73,6 +75,14 @@ export class AuthService {
       return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación.' };
     }
 
+    const latestOtp = await this.authRepository.findLatestOtp(user.id);
+    if (latestOtp) {
+      const elapsedSeconds = (Date.now() - latestOtp.createdAt.getTime()) / 1000;
+      if (elapsedSeconds < RESEND_COOLDOWN_SECONDS) {
+        throw new ResetCodeCooldownException();
+      }
+    }
+
     // Generar código aleatorio criptográfico de 6 dígitos
     const code = crypto.randomInt(100000, 1000000).toString();
     const codeHash = await bcrypt.hash(code, 10);
@@ -85,7 +95,7 @@ export class AuthService {
     const fullName = `${user.firstName} ${user.lastName}`.trim();
     await this.mailerService.sendPasswordResetCode(user.email, code, fullName);
 
-    return { ok: true, message: 'Código de verificación enviado correctamente.' };
+    return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación.' };
   }
 
   async verifyPasswordReset(dto: VerifyPasswordResetDto): Promise<{ ok: boolean; message: string }> {

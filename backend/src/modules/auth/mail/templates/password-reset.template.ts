@@ -6,8 +6,18 @@ export interface PasswordResetEmailContext {
   expirationMinutes?: number;
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export function renderPasswordResetEmail(context: PasswordResetEmailContext): string {
-  const { code, recipientName = 'Usuario', expirationMinutes = 10 } = context;
+  const { code, recipientName = 'Usuario', expirationMinutes = 5 } = context;
+  const safeRecipientName = escapeHtml(recipientName);
 
   const mjmlTemplate = `
 <mjml>
@@ -35,7 +45,7 @@ export function renderPasswordResetEmail(context: PasswordResetEmailContext): st
           Recupera tu contraseña
         </mj-text>
         <mj-text>
-          Hola, <strong>${recipientName}</strong>:
+          Hola, <strong>${safeRecipientName}</strong>:
         </mj-text>
         <mj-text>
           Recibimos una solicitud para restablecer la contraseña de tu cuenta institucional en UMSSY. Tu código de verificación es:
