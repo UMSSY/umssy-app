@@ -2,6 +2,6 @@ import { DomainException } from '../../../common/exceptions/domain.exception.js'
 
 export class AccessRequestNotEditableException extends DomainException {
   constructor(message = 'La solicitud ya fue enviada y no se puede modificar') {
-    super(message, 409);
+    super(message, 409, 'ACCESS_REQUEST_NOT_EDITABLE');
   }
 }
