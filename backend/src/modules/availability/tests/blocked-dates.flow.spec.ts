@@ -297,21 +297,72 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
     expect(series[0].seriesId).toMatch(/^[\da-f-]{36}$/);
     expect(new Set(series.map((block) => block.seriesId)).size).toBe(1);
     expect(series.every((block) => block.repeatUntil?.toISOString().slice(0, 10) === '2026-11-23')).toBe(true);
+    expect(series.map((block) => dayOf(block.startAt))).toEqual([
+      '2026-11-02', '2026-11-09', '2026-11-16', '2026-11-23',
+    ]);
+    expect(series.map((block) => toBoliviaTime(block.startAt).time)).toEqual(Array(4).fill('09:00'));
+    expect(series.map((block) => block.endAt.getTime() - block.startAt.getTime())).toEqual(Array(4).fill(3_600_000));
+    const original = structuredClone(series[0]);
     const siblings = structuredClone(series.slice(1));
 
     await http().patch(`/api/availability-blocks/${series[0].id}`)
       .set('Authorization', `Bearer ${tokens.mentorB}`)
       .send({ startAt: '2026-11-02T10:00:00-04:00', endAt: '2026-11-02T11:00:00-04:00' }).expect(200);
+    expect(store.blocks.find((block) => block.id === original.id)).toEqual({
+      ...original,
+      startAt: new Date('2026-11-02T10:00:00-04:00'),
+      endAt: new Date('2026-11-02T11:00:00-04:00'),
+    });
     expect(store.blocks.filter((block) => block.mentorId === MENTOR_B).slice(1)).toEqual(siblings);
     await http().delete(`/api/availability-blocks/${series[0].id}`)
       .set('Authorization', `Bearer ${tokens.mentorB}`).expect(200);
     expect(store.blocks.filter((block) => block.mentorId === MENTOR_B)).toEqual(siblings);
   });
 
+  it('HU-07: omite una sola semana superpuesta y crea las posteriores sin modificar el bloque previo', async () => {
+    const response = await createWeekly({
+      startAt: '2026-11-09T09:30:00-04:00',
+      endAt: '2026-11-09T10:30:00-04:00',
+    }).expect(201);
+    const existing = structuredClone(store.blocks.find((block) => block.id === response.body.data.id));
+    const before = structuredClone(store);
+
+    const repeated = await createWeekly().expect(201);
+
+    expect(repeated.body.data).toEqual({ created: 3, skipped: ['2026-11-09'] });
+    expect(store.blocks.find((block) => block.id === existing!.id)).toEqual(existing);
+    const created = store.blocks.filter((block) => !before.blocks.some((item) => item.id === block.id));
+    expect(created.map((block) => dayOf(block.startAt))).toEqual(['2026-11-02', '2026-11-16', '2026-11-23']);
+    expect(created[0].seriesId).toMatch(/^[\da-f-]{36}$/);
+    expect(new Set(created.map((block) => block.seriesId)).size).toBe(1);
+    expect(store.blockedDates).toEqual(before.blockedDates);
+  });
+
+  it.each(['patch', 'delete'] as const)('HU-07: %s rechaza una repetición con cita confirmada sin cambiar la serie', async (method) => {
+    const selected = store.blocks.find((block) => block.seriesId !== null && block.mentorId === MENTOR_A)!;
+    selected.appointments.push({ status: { title: AppointmentStatusTitle.CONFIRMED } });
+    const before = structuredClone(store);
+    const operation = http()[method](`/api/availability-blocks/${selected.id}`)
+      .set('Authorization', `Bearer ${tokens.mentorA}`);
+    if (method === 'patch') {
+      const day = dayOf(selected.startAt);
+      operation.send({ startAt: `${day}T17:00:00-04:00`, endAt: `${day}T17:30:00-04:00` });
+    }
+
+    const response = await operation.expect(409);
+
+    expect(response.body).toMatchObject({ statusCode: 409, ok: false, data: null, detail: 'El bloque tiene una cita asociada' });
+    expect(store).toEqual(before);
+  });
+
   it('HU-07: omite una fecha bloqueada, conserva el bloqueo e informa todos los solapamientos al reintentar', async () => {
     const blocked = await blockDate(tokens.mentorB, { blockedOn: '2026-11-09', reason: 'Ausencia' }).expect(201);
+    const blockedDates = structuredClone(store.blockedDates);
     const response = await createWeekly().expect(201);
     expect(response.body.data).toEqual({ created: 3, skipped: ['2026-11-09'] });
+    expect(store.blocks.filter((block) => block.mentorId === MENTOR_B).map((block) => dayOf(block.startAt)))
+      .toEqual(['2026-11-02', '2026-11-16', '2026-11-23']);
+    expect(store.blockedDates).toEqual(blockedDates);
     expect(store.blockedDates.find((item) => item.id === blocked.body.data.id)?.reason).toBe('Ausencia');
     const retry = await createWeekly().expect(201);
     expect(retry.body.data).toEqual({ created: 0, skipped: ['2026-11-02', '2026-11-09', '2026-11-16', '2026-11-23'] });
@@ -320,7 +371,10 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
 
   it.each(['2026-11-01', '2027-01-26', 'invalid', undefined])('HU-07: responde 400 sin crear bloques para repeatUntil=%s', async (repeatUntil) => {
     const original = structuredClone(store.blocks);
-    await createWeekly({ ...weeklyPayload, repeatUntil }).expect(400);
+    const response = await createWeekly({ ...weeklyPayload, repeatUntil }).expect(400);
+    if (repeatUntil === '2026-11-01' || repeatUntil === '2027-01-26') {
+      expect(JSON.stringify(response.body)).toContain('La fecha límite debe estar dentro de las próximas 12 semanas');
+    }
     expect(store.blocks).toEqual(original);
   });
 
