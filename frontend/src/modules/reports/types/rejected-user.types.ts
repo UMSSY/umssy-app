@@ -19,6 +19,7 @@ export interface RejectedUsersParams {
   userType?: RoleTag;
   period?: AcademicPeriod;
   search?: string;
+  snapshotAt?: string;
 }
 
 export type RejectedUsersExportParams = Pick<RejectedUsersParams, "userType" | "period" | "search">;
