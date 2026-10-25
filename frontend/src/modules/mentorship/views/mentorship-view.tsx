@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/shared/contexts/auth-context";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { SlotUnavailableDialog } from "@/modules/mentors/components/participation/slot-availability-preview";
@@ -23,6 +23,7 @@ import { StepTechnicalAreas } from "../components/wizard/step-technical-areas";
 import { useMentorshipCatalogs } from "../hooks/use-mentorship-catalogs";
 import { useMentorshipWizard } from "../hooks/use-mentorship-wizard";
 import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
+import { useParticipation } from "@/modules/mentors/hooks/use-participation";
 
 export function MentorshipView() {
   const slotRequestPreview = useSlotRequestPreview();
@@ -33,11 +34,13 @@ export function MentorshipView() {
   const [isUnavailableOpen, setIsUnavailableOpen] = useState(false);
   const [isSimulatedActive, setIsSimulatedActive] = useState(false);
   const { refreshRoles } = useAuth();
+  const participation = useParticipation();
   const {
     currentStep,
     selectedTechnicalAreaIds,
     wantsToParticipate,
     selectedOrientationTypeIds,
+    isDraftHydrated,
     goNext,
     goBack,
     goToStep,
@@ -46,6 +49,25 @@ export function MentorshipView() {
     canGoNext,
     setState,
   } = useMentorshipWizard();
+
+  useEffect(() => {
+    const savedParticipation = participation.state;
+    if (
+      !isDraftHydrated ||
+      !savedParticipation ||
+      savedParticipation.isActive
+    ) {
+      return;
+    }
+
+    setState((previous) => ({
+      ...previous,
+      currentStep: 1,
+      wantsToParticipate: true,
+      selectedTechnicalAreaIds: savedParticipation.technicalAreaIds,
+      selectedOrientationTypeIds: savedParticipation.orientationTypeIds,
+    }));
+  }, [isDraftHydrated, participation.state, setState]);
 
   const {
     technicalAreas,
@@ -162,7 +184,7 @@ export function MentorshipView() {
           <p className="text-sm text-text-secondary">Esta vista es temporal. No se ha activado tu cuenta ni guardado la participación en el servidor. Al recargar se vuelve al formulario.</p>
           <Button variant="outline" onClick={() => setIsSimulatedActive(false)}>Volver al formulario y probar otro escenario</Button>
         </section>
-        <ParticipationOverview areas={selectedTechnicalAreas.map((area) => area.name)} orientations={selectedOrientationTypes.map((orientation) => orientation.name)} />
+        <ParticipationOverview isActive areas={selectedTechnicalAreas.map((area) => area.name)} orientations={selectedOrientationTypes.map((orientation) => orientation.name)} />
       </div>
     );
   }

@@ -168,6 +168,33 @@ export class MentorsService {
     return this.mentorMapper.toTechnicalAreasResponse(relations);
   }
 
+  async findMyParticipation(userId: string) {
+    const participation = await this.mentorsRepository.findMyParticipation(
+      userId,
+      new Date(),
+    );
+
+    if (!participation) {
+      throw new MentorNotFoundException();
+    }
+
+    return {
+      isActive: participation.isAvailableForMentoring,
+      technicalAreaIds: participation.mentorTechnicalAreas.map(
+        ({ technicalArea }) => technicalArea.id,
+      ),
+      orientationTypeIds: participation.mentorOrientationTypes.map(
+        ({ orientationType }) => orientationType.id,
+      ),
+      areas: participation.mentorTechnicalAreas.map(
+        ({ technicalArea }) => technicalArea.name,
+      ),
+      orientations: participation.mentorOrientationTypes.map(
+        ({ orientationType }) => orientationType.name,
+      ),
+    };
+  }
+
   async updateMyTechnicalAreas(
     userId: string,
     data: UpdateMentorTechnicalAreasDto,
@@ -234,10 +261,6 @@ export class MentorsService {
       mentorRole.id,
     );
 
-    if (existingRole) {
-      throw new AlreadyMentorException();
-    }
-
     const technicalAreas = await this.mentorsRepository.findTechnicalAreas(
       data.technicalAreaIds,
     );
@@ -253,6 +276,23 @@ export class MentorsService {
 
     if (orientationTypes.length !== data.orientationTypeIds.length) {
       throw new InvalidOrientationTypesException();
+    }
+
+    if (existingRole) {
+      const mentor = await this.mentorsRepository.findMentorAvailability(
+        userId,
+      );
+      if (mentor?.isAvailableForMentoring !== false) {
+        throw new AlreadyMentorException();
+      }
+
+      const reactivated = await this.mentorsRepository.reactivate(
+        userId,
+        data.technicalAreaIds,
+        data.orientationTypeIds,
+      );
+      if (!reactivated) throw new AlreadyMentorException();
+      return { id: userId };
     }
 
     return this.mentorsRepository.activate(

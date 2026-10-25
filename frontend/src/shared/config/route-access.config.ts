@@ -15,7 +15,7 @@ export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
   { pattern: /^\/mentor\/availability\/?$/, roles: ["mentor"] },
   { pattern: /^\/mentors\/participation\/technical-areas\/?$/, roles: ["mentor"] },
   { pattern: /^\/mentorship\/orientation\/?$/, roles: ["mentor"] },
-  { pattern: /^\/mentors\/participation\/?$/, roles: ["titulado", "mentor"] },
+  { pattern: /^\/mentors\/participation\/?$/, roles: ["mentor"] },
   { pattern: /^\/mentors\/register\/technical-areas\/?$/, roles: ["titulado", "mentor"] },
   { pattern: /^\/mentorship\/?$/, roles: ["titulado", "mentor"] },
   { pattern: /^\/mentorship\/mentors\/?$/, roles: ["titulado", "estudiante", "mentor"] },

@@ -57,6 +57,7 @@ function ParticipationContent() {
 
   return (
     <ParticipationOverview
+      isActive={state.isActive}
       areas={state.areas}
       orientations={state.orientations}
     />

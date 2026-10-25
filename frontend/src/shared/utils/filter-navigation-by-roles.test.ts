@@ -9,9 +9,10 @@ function getPaths(roles: Parameters<typeof filterNavigationByRoles>[1]) {
 }
 
 describe("Role navigation", () => {
-  it("gives graduates the participation entry without mentor-only availability", () => {
+  it("does not show mentor participation to graduates without an active mentor role", () => {
     const paths = getPaths(["titulado"]);
     expect(paths).toContain("/mentorship/mentors");
+    expect(paths).not.toContain("/mentors/participation");
     expect(paths).not.toContain("/mentor/availability");
     expect(paths).not.toContain("/backoffice/solicitudes");
     expect(paths).not.toContain("/recruiters");

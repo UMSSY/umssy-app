@@ -251,6 +251,34 @@ export class MentorsRepository {
     });
   }
 
+  findMyParticipation(userId: string, now: Date) {
+    return this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        isActive: true,
+        roles: {
+          some: {
+            deletedAt: null,
+            startAt: { lte: now },
+            role: { name: MENTOR_ROLE_NAME },
+          },
+        },
+      },
+      select: {
+        isAvailableForMentoring: true,
+        mentorTechnicalAreas: {
+          select: { technicalArea: { select: { id: true, name: true } } },
+          orderBy: { technicalArea: { name: 'asc' } },
+        },
+        mentorOrientationTypes: {
+          where: { orientationType: { isActive: true } },
+          select: { orientationType: { select: { id: true, name: true } } },
+          orderBy: { orientationType: { name: 'asc' } },
+        },
+      },
+    });
+  }
+
   findMentorTechnicalAreas(userId: string) {
     return this.prisma.mentorTechnicalArea.findMany({
       where: {
@@ -456,6 +484,50 @@ export class MentorsRepository {
       });
 
       return { id: userId };
+    });
+  }
+
+  findMentorAvailability(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { isAvailableForMentoring: true },
+    });
+  }
+
+  async reactivate(
+    userId: string,
+    technicalAreaIds: string[],
+    orientationTypeIds: string[],
+  ): Promise<boolean> {
+    return this.prisma.$transaction(async (transaction) => {
+      const updated = await transaction.user.updateMany({
+        where: { id: userId, isAvailableForMentoring: false },
+        data: { isAvailableForMentoring: true },
+      });
+
+      if (updated.count === 0) return false;
+
+      await transaction.mentorTechnicalArea.deleteMany({
+        where: { mentorId: userId },
+      });
+      await transaction.mentorTechnicalArea.createMany({
+        data: technicalAreaIds.map((technicalAreaId) => ({
+          mentorId: userId,
+          technicalAreaId,
+        })),
+      });
+
+      await transaction.mentorOrientationType.deleteMany({
+        where: { mentorId: userId },
+      });
+      await transaction.mentorOrientationType.createMany({
+        data: orientationTypeIds.map((orientationTypeId) => ({
+          mentorId: userId,
+          orientationTypeId,
+        })),
+      });
+
+      return true;
     });
   }
 

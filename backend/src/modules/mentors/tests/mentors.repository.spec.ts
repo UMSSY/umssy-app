@@ -110,6 +110,57 @@ describe('MentorsRepository', () => {
     expect(result).toBe(mentor);
   });
 
+  it('consulta estado y preferencias del mentor autenticado, incluso si esta inactivo', async () => {
+    const now = new Date('2026-10-25T12:00:00.000Z');
+    const participation = {
+      isAvailableForMentoring: false,
+      mentorTechnicalAreas: [
+        { technicalArea: { id: 'area-1', name: 'Backend' } },
+      ],
+      mentorOrientationTypes: [
+        {
+          orientationType: {
+            id: 'orientation-1',
+            name: 'Orientación técnica',
+          },
+        },
+      ],
+    };
+    const findFirst = vi.fn().mockResolvedValue(participation);
+    const repository = new MentorsRepository({
+      user: { findFirst },
+    } as unknown as PrismaService);
+
+    await expect(
+      repository.findMyParticipation('user-1', now),
+    ).resolves.toBe(participation);
+    expect(findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'user-1',
+        isActive: true,
+        roles: {
+          some: {
+            deletedAt: null,
+            startAt: { lte: now },
+            role: { name: MENTOR_ROLE_NAME },
+          },
+        },
+      },
+      select: {
+        isAvailableForMentoring: true,
+        mentorTechnicalAreas: {
+          select: { technicalArea: { select: { id: true, name: true } } },
+          orderBy: { technicalArea: { name: 'asc' } },
+        },
+        mentorOrientationTypes: {
+          where: { orientationType: { isActive: true } },
+          select: { orientationType: { select: { id: true, name: true } } },
+          orderBy: { orientationType: { name: 'asc' } },
+        },
+      },
+    });
+  });
+
   it('consulta las areas tecnicas asociadas al mentor', async () => {
     const relations = [{ technicalArea: { id: 'area-1' } }];
     const findMany = vi.fn().mockResolvedValue(relations);
@@ -426,7 +477,6 @@ describe('MentorsRepository', () => {
       id: 'user-1',
       isAvailableForMentoring: false,
     });
-
     const prisma = { user: { update } } as unknown as PrismaService;
     const repository = new MentorsRepository(prisma);
 
@@ -445,6 +495,69 @@ describe('MentorsRepository', () => {
       id: 'user-1',
       isAvailableForMentoring: false,
     });
+  });
+
+  it('reactiva atomicamente la disponibilidad y reemplaza preferencias', async () => {
+    const updateUser = vi.fn().mockResolvedValue({ count: 1 });
+    const deleteTechnicalAreas = vi.fn().mockResolvedValue({ count: 1 });
+    const createTechnicalAreas = vi.fn().mockResolvedValue({ count: 1 });
+    const deleteOrientationTypes = vi.fn().mockResolvedValue({ count: 1 });
+    const createOrientationTypes = vi.fn().mockResolvedValue({ count: 1 });
+    const transaction = {
+      user: { updateMany: updateUser },
+      mentorTechnicalArea: {
+        deleteMany: deleteTechnicalAreas,
+        createMany: createTechnicalAreas,
+      },
+      mentorOrientationType: {
+        deleteMany: deleteOrientationTypes,
+        createMany: createOrientationTypes,
+      },
+    };
+    const $transaction = vi.fn(async (callback) => callback(transaction));
+    const repository = new MentorsRepository({
+      $transaction,
+    } as unknown as PrismaService);
+
+    await expect(
+      repository.reactivate('user-1', ['area-1'], ['orientation-1']),
+    ).resolves.toBe(true);
+    expect(updateUser).toHaveBeenCalledWith({
+      where: { id: 'user-1', isAvailableForMentoring: false },
+      data: { isAvailableForMentoring: true },
+    });
+    expect(createTechnicalAreas).toHaveBeenCalledWith({
+      data: [{ mentorId: 'user-1', technicalAreaId: 'area-1' }],
+    });
+    expect(createOrientationTypes).toHaveBeenCalledWith({
+      data: [{ mentorId: 'user-1', orientationTypeId: 'orientation-1' }],
+    });
+  });
+
+  it('no reemplaza preferencias si el mentor ya fue reactivado en paralelo', async () => {
+    const updateUser = vi.fn().mockResolvedValue({ count: 0 });
+    const createTechnicalAreas = vi.fn();
+    const createOrientationTypes = vi.fn();
+    const transaction = {
+      user: { updateMany: updateUser },
+      mentorTechnicalArea: {
+        deleteMany: vi.fn(),
+        createMany: createTechnicalAreas,
+      },
+      mentorOrientationType: {
+        deleteMany: vi.fn(),
+        createMany: createOrientationTypes,
+      },
+    };
+    const repository = new MentorsRepository({
+      $transaction: vi.fn(async (callback) => callback(transaction)),
+    } as unknown as PrismaService);
+
+    await expect(
+      repository.reactivate('user-1', ['area-1'], ['orientation-1']),
+    ).resolves.toBe(false);
+    expect(createTechnicalAreas).not.toHaveBeenCalled();
+    expect(createOrientationTypes).not.toHaveBeenCalled();
   });
 
   it('reemplaza atomicamente las areas tecnicas del mentor', async () => {

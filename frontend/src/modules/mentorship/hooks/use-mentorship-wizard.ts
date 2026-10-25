@@ -100,6 +100,7 @@ export function useMentorshipWizard() {
 
   return {
     ...state,
+    isDraftHydrated,
     goToStep,
     goNext,
     goBack,

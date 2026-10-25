@@ -332,6 +332,49 @@ describe('MentorsService', () => {
     });
   });
 
+  it('devuelve el estado y las preferencias de participacion guardadas', async () => {
+    const findMyParticipation = vi.fn().mockResolvedValue({
+      isAvailableForMentoring: false,
+      mentorTechnicalAreas: [
+        { technicalArea: { id: 'area-1', name: 'Backend' } },
+        { technicalArea: { id: 'area-2', name: 'Cloud' } },
+      ],
+      mentorOrientationTypes: [
+        {
+          orientationType: {
+            id: 'orientation-1',
+            name: 'Orientación técnica',
+          },
+        },
+      ],
+    });
+    const service = new MentorsService(
+      { findMyParticipation } as unknown as MentorsRepository,
+      mapper,
+    );
+
+    await expect(service.findMyParticipation(userId)).resolves.toEqual({
+      isActive: false,
+      technicalAreaIds: ['area-1', 'area-2'],
+      orientationTypeIds: ['orientation-1'],
+      areas: ['Backend', 'Cloud'],
+      orientations: ['Orientación técnica'],
+    });
+    expect(findMyParticipation).toHaveBeenCalledWith(userId, expect.any(Date));
+  });
+
+  it('rechaza consultar participacion si el usuario no tiene el rol mentor', async () => {
+    const findMyParticipation = vi.fn().mockResolvedValue(null);
+    const service = new MentorsService(
+      { findMyParticipation } as unknown as MentorsRepository,
+      mapper,
+    );
+
+    await expect(
+      service.findMyParticipation(userId),
+    ).rejects.toBeInstanceOf(MentorNotFoundException);
+  });
+
   it('rechaza actualizar disponibilidad si el usuario no es mentor activo', async () => {
     const updateAvailability = vi.fn();
     const repository = {
@@ -587,11 +630,20 @@ describe('MentorsService', () => {
     expect(activate).not.toHaveBeenCalled();
   });
 
-  it('rechaza la activacion si el usuario ya es mentor', async () => {
+  it('rechaza la activacion si el mentor ya esta disponible', async () => {
     const activate = vi.fn();
     const repository = {
       findMentorRole: vi.fn().mockResolvedValue({ id: roleId }),
       findActiveUserRole: vi.fn().mockResolvedValue({ id: 'user-role-id' }),
+      findTechnicalAreas: vi
+        .fn()
+        .mockResolvedValue([{ id: data.technicalAreaIds[0] }]),
+      findActiveOrientationTypes: vi
+        .fn()
+        .mockResolvedValue([{ id: data.orientationTypeIds[0] }]),
+      findMentorAvailability: vi
+        .fn()
+        .mockResolvedValue({ isAvailableForMentoring: true }),
       activate,
     } as unknown as MentorsRepository;
     const service = new MentorsService(repository, mapper);
@@ -600,6 +652,34 @@ describe('MentorsService', () => {
       AlreadyMentorException,
     );
     expect(activate).not.toHaveBeenCalled();
+  });
+
+  it('reactiva un mentor inactivo con las preferencias confirmadas en el flujo', async () => {
+    const reactivate = vi.fn().mockResolvedValue(true);
+    const repository = {
+      findMentorRole: vi.fn().mockResolvedValue({ id: roleId }),
+      findActiveUserRole: vi.fn().mockResolvedValue({ id: 'user-role-id' }),
+      findTechnicalAreas: vi
+        .fn()
+        .mockResolvedValue([{ id: data.technicalAreaIds[0] }]),
+      findActiveOrientationTypes: vi
+        .fn()
+        .mockResolvedValue([{ id: data.orientationTypeIds[0] }]),
+      findMentorAvailability: vi
+        .fn()
+        .mockResolvedValue({ isAvailableForMentoring: false }),
+      reactivate,
+    } as unknown as MentorsRepository;
+    const service = new MentorsService(repository, mapper);
+
+    await expect(service.activate(userId, data)).resolves.toEqual({
+      id: userId,
+    });
+    expect(reactivate).toHaveBeenCalledWith(
+      userId,
+      data.technicalAreaIds,
+      data.orientationTypeIds,
+    );
   });
 
   it('rechaza la activacion si existen areas tecnicas invalidas', async () => {

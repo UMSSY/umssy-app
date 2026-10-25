@@ -106,6 +106,40 @@ describe('MentorsController', () => {
     expect(result).toBe(updateResult);
   });
 
+  it('consulta la participacion del usuario autenticado', async () => {
+    const participation = {
+      isActive: false,
+      areas: ['Backend'],
+      orientations: ['Revisión de CV'],
+    };
+    const findMyParticipation = vi.fn().mockResolvedValue(participation);
+    const controller = new MentorsController({
+      findMyParticipation,
+    } as unknown as MentorsService);
+    const user = { id: 'user-1', email: 'mentor@test.com', roles: ['mentor'] };
+
+    await expect(controller.findMyParticipation(user)).resolves.toBe(
+      participation,
+    );
+    expect(findMyParticipation).toHaveBeenCalledWith(user.id);
+  });
+
+  it('actualiza el estado de participacion del usuario autenticado', async () => {
+    const body = { isActive: false };
+    const updateAvailability = vi.fn().mockResolvedValue({
+      id: 'user-1',
+      isAvailableForMentoring: false,
+    });
+    const controller = new MentorsController({
+      updateAvailability,
+    } as unknown as MentorsService);
+    const user = { id: 'user-1', email: 'mentor@test.com', roles: ['mentor'] };
+
+    await controller.updateMyParticipation(user, body);
+
+    expect(updateAvailability).toHaveBeenCalledWith(user.id, false);
+  });
+
   it('consulta los tipos de orientacion del usuario autenticado', async () => {
     const orientationTypes = [
       { id: 'orientation-1', name: 'Orientación técnica', description: null },

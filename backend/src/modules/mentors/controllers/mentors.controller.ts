@@ -28,6 +28,10 @@ import {
   updateMentorOrientationTypesSchema,
   type UpdateMentorOrientationTypesDto,
 } from '../requests/update-mentor-orientation-types.schema.js';
+import {
+  updateMentorParticipationSchema,
+  type UpdateMentorParticipationDto,
+} from '../requests/update-mentor-participation.schema.js';
 import { MentorsService } from '../services/mentors.service.js';
 import {
   mentorDirectoryQuerySchema,
@@ -52,6 +56,22 @@ export class MentorsController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.mentorsService.findDirectory(query, user.id);
+  }
+
+  @Get('me/participation')
+  @UseGuards(JwtAuthGuard)
+  findMyParticipation(@CurrentUser() user: AuthenticatedUser) {
+    return this.mentorsService.findMyParticipation(user.id);
+  }
+
+  @Patch('me/participation')
+  @UseGuards(JwtAuthGuard)
+  updateMyParticipation(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body(new ZodValidationPipe(updateMentorParticipationSchema))
+    body: UpdateMentorParticipationDto,
+  ) {
+    return this.mentorsService.updateAvailability(user.id, body.isActive);
   }
 
   @Get('me/technical-areas')

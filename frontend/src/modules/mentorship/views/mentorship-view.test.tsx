@@ -14,6 +14,7 @@ import { MentorshipView } from "./mentorship-view";
 
 const integrationMocks = vi.hoisted(() => ({
   activateMentor: vi.fn(),
+  getMentorParticipation: vi.fn(),
   push: vi.fn(),
   retryTechnicalAreas: vi.fn(),
   retryOrientationTypes: vi.fn(),
@@ -25,6 +26,11 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: integrationMocks.p
 
 vi.mock("../services/mentor-activation.service", () => ({
   activateMentor: integrationMocks.activateMentor,
+}));
+
+vi.mock("@/modules/mentors/services/mentor-participation.service", () => ({
+  getMentorParticipation: integrationMocks.getMentorParticipation,
+  updateMentorParticipation: vi.fn(),
 }));
 
 vi.mock("../hooks/use-mentorship-catalogs", () => ({
@@ -69,6 +75,10 @@ beforeEach(() => {
   integrationMocks.activateMentor.mockResolvedValue({
     id: "550e8400-e29b-41d4-a716-446655440005",
   });
+  integrationMocks.getMentorParticipation.mockRejectedValue({
+    isAxiosError: true,
+    response: { status: 404 },
+  });
 });
 
 afterEach(() => {
@@ -102,6 +112,34 @@ async function openActivationDialog() {
 }
 
 describe("MentorshipView", () => {
+  it("precarga las preferencias guardadas cuando el mentor inactivo entra al flujo de reingreso", async () => {
+    integrationMocks.getMentorParticipation.mockResolvedValueOnce({
+      isActive: false,
+      technicalAreaIds: ["550e8400-e29b-41d4-a716-446655440001"],
+      orientationTypeIds: ["550e8400-e29b-41d4-a716-446655440003"],
+      areas: ["Backend"],
+      orientations: ["Orientación profesional"],
+    });
+    renderWithQuery(<MentorshipView />);
+
+    await screen.findByRole("heading", { name: "Participación" });
+    await waitFor(() =>
+      expect(
+        screen.getByRole("checkbox", { name: "Quiero participar como mentor" }),
+      ).toBeChecked(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Continuar/i }));
+
+    expect(screen.getByRole("button", { name: /Backend/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Continuar/i }));
+    expect(
+      screen.getByRole("button", { name: /Orientación profesional/i }),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
   it("con cupos ocupados abre el modal después de confirmar sin activar ni perder selecciones", async () => {
     vi.stubEnv("NODE_ENV", "development");
     renderWithQuery(<MentorshipView />);
