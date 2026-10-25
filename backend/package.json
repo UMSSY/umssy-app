@@ -55,9 +55,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "typescript-eslint": "^8.70.1",
-    "zod": "^4.6.5",
-    "nodemailer": "^6.9.16",
-    "mjml": "^4.15.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.7",
@@ -84,7 +82,6 @@
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.1.11",
-    "@types/nodemailer": "^6.4.17"
+    "vitest": "^4.1.11"
   }
 }
