@@ -7,11 +7,13 @@ import { PasswordResetMailerService } from './mail/password-reset-mailer.service
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { SessionModule } from '../../common/session/session.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
+import { MailModule } from '../mail/mail.module.js';
 
 @Module({
   imports: [
     PrismaModule,
     SessionModule,
+    MailModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: {
