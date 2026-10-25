@@ -14,6 +14,7 @@ import {
 import { DetailRow } from './detail-row';
 import { hasValidEventCapacity } from '../utils/has-valid-event-capacity';
 import { WorkshopCover } from './workshop-cover';
+import { EventRegistrationAction } from './event-registration-action';
 
 import type { EventDetailPanelProps } from '../types/event-detail-panel-props.types';
 
@@ -50,16 +51,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
 
         {event.status === 'voting' && <div className="space-y-1 rounded-lg border border-availability-border bg-availability p-3 text-sm"><p className="font-semibold text-availability-foreground">Propuesta en votación</p><p>Necesita {event.supportThreshold} apoyos.</p>{event.votingDeadline && <p className="text-xs text-text-secondary">Plazo: {new Date(event.votingDeadline).toLocaleString('es-BO')}</p>}</div>}
 
-        <Button
-          aria-describedby="event-registration-description"
-          className="mt-2 min-h-11 w-full bg-primary text-primary-foreground hover:bg-brand-hover disabled:bg-muted disabled:text-text-secondary disabled:opacity-100"
-          disabled
-          size="lg"
-          type="button"
-        >
-          Inscripción no disponible
-        </Button>
-        <p id="event-registration-description" className="text-xs text-text-secondary">La inscripción desde la plataforma aún no está habilitada.</p>
+        <EventRegistrationAction key={event.id} event={event} onEventNotFound={onClose} />
 
         <p className="text-sm text-text-secondary">
           Modalidad: {event.modality.title}
