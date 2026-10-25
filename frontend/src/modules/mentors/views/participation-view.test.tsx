@@ -4,10 +4,13 @@ import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { waitFor } from "@testing-library/react";
 import { getMentorTechnicalAreas } from "../services/technical-areas.service";
 import { getMentorOrientationTypes } from "@/modules/mentorship/services/orientation-type.service";
 import { getParticipation, getCapacity } from "@/modules/mentorship/services/mentor-participation.service";
 import { ParticipationView } from "./participation-view";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 vi.mock("../services/technical-areas.service", () => ({
   getMentorTechnicalAreas: vi.fn(),
@@ -23,6 +26,7 @@ vi.mock("@/modules/mentorship/services/mentor-participation.service", () => ({
 describe("ParticipationView", () => {
   beforeEach(() => {
     localStorage.clear();
+    vi.stubEnv("NEXT_PUBLIC_HU7_PREVIEW", "false");
     vi.mocked(getParticipation).mockResolvedValue({ email: "mentor@test.com", status: "ACTIVE", request: null });
     vi.mocked(getCapacity).mockResolvedValue({ approvedGraduates: 25, percentage: 40, capacity: 10, activeMentors: 9, reservedOffers: 1, occupied: 10, available: 0 });
     vi.mocked(getMentorTechnicalAreas).mockResolvedValue([
@@ -40,6 +44,7 @@ describe("ParticipationView", () => {
     localStorage.clear();
     vi.restoreAllMocks();
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
   });
 
   it("mantiene un estado inicial estable mientras resuelve la participación", () => {
@@ -66,6 +71,26 @@ describe("ParticipationView", () => {
     expect(
       screen.getByRole("link", { name: "Editar tipos de orientación" }),
     ).toHaveAttribute("href", "/mentorship/orientation");
+  });
+
+  it("habilita la simulación únicamente en desarrollo", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("NEXT_PUBLIC_HU7_PREVIEW", "true");
+    render(<ParticipationView />);
+    expect(screen.getByRole("region", { name: "Disponibilidad de cupos (simulación)" })).toBeInTheDocument();
+    expect(await screen.findByText("Backend")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["production", "local"],
+    ["production", "prod"],
+    ["development", "prod"],
+  ])("oculta disponibilidad simulada con NODE_ENV=%s y APP_ENV=%s", async (nodeEnv, appEnv) => {
+    vi.stubEnv("NODE_ENV", nodeEnv);
+    vi.stubEnv("NEXT_PUBLIC_APP_ENV", appEnv);
+    render(<ParticipationView />);
+    expect(screen.queryByRole("region", { name: "Disponibilidad de cupos (simulación)" })).not.toBeInTheDocument();
+    expect(await screen.findByText("Backend")).toBeInTheDocument();
   });
 
   it("muestra la activación cuando no existe participación", async () => {
@@ -96,13 +121,14 @@ describe("ParticipationView", () => {
       },
     });
     render(<ParticipationView />);
-    const dialog = await screen.findByRole("alertdialog");
+    fireEvent.click(await screen.findByRole("button", { name: "Ver oferta" }));
+    const dialog = await screen.findByRole("dialog");
     expect(dialog).toHaveTextContent("¡Tienes un cupo disponible!");
-    expect(dialog).toHaveTextContent("restantes");
+    expect(dialog).toHaveTextContent("Fecha y hora límite");
     fireEvent.click(screen.getByRole("button", { name: "Volver" }));
-    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Ver oferta" }));
-    expect(await screen.findByRole("alertdialog")).toHaveTextContent("restantes");
+    expect(await screen.findByRole("dialog")).toHaveTextContent("Fecha y hora límite");
   });
 
   it("muestra el detalle de la solicitud pendiente sin publicar su posición FIFO", async () => {
@@ -115,21 +141,21 @@ describe("ParticipationView", () => {
       },
     });
     render(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Ver más detalles" }));
-    const dialog = await screen.findByRole("alertdialog");
+    fireEvent.click(await screen.findByRole("button", { name: "Ver detalle" }));
+    const dialog = await screen.findByRole("dialog");
     expect(dialog).toHaveTextContent("Estado: Pendiente");
     expect(dialog).toHaveTextContent("Backend");
     expect(dialog).toHaveTextContent("hu7.08@umssy.test");
     expect(dialog).not.toHaveTextContent("lugar 1");
   });
 
-  it("muestra loading hasta que ambas peticiones terminan y comparte la cancelación", () => {
-    vi.mocked(getMentorTechnicalAreas).mockReturnValue(new Promise(() => {}));
+  it("muestra loading mientras consulta el estado y cancela la consulta al desmontar", async () => {
+    vi.mocked(getParticipation).mockReturnValue(new Promise(() => {}));
     const { unmount } = render(<ParticipationView />);
     expect(screen.getByText("Cargando participación...")).toBeInTheDocument();
-    const signal = vi.mocked(getMentorTechnicalAreas).mock.calls[0][0];
+    await waitFor(() => expect(getParticipation).toHaveBeenCalled());
+    const signal = vi.mocked(getParticipation).mock.calls[0][0];
     expect(signal).toBeInstanceOf(AbortSignal);
-    expect(getMentorOrientationTypes).toHaveBeenCalledWith(signal);
     unmount();
     expect(signal?.aborted).toBe(true);
   });

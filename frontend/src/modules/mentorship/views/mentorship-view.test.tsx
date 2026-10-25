@@ -68,6 +68,7 @@ vi.mock("../hooks/use-mentorship-catalogs", () => ({
 }));
 
 beforeEach(() => {
+  vi.stubEnv("NEXT_PUBLIC_HU7_PREVIEW", "false");
   vi.clearAllMocks();
   integrationMocks.isTechnicalAreasError = false;
   integrationMocks.isOrientationTypesError = false;
@@ -80,6 +81,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   clearMentorshipWizardDraft();
+  vi.unstubAllEnvs();
 });
 
 it("muestra la sanción vigente y deshabilita el ingreso nuevo", async () => {
@@ -90,6 +92,23 @@ it("muestra la sanción vigente y deshabilita el ingreso nuevo", async () => {
   expect(await screen.findByRole("alert")).toHaveTextContent("Solicitudes suspendidas temporalmente");
   advanceToConfirmation();
   expect(screen.getByRole("button", { name: "Solicitudes suspendidas" })).toBeDisabled();
+});
+
+it("permite volver al formulario cuando la oferta ya venció", async () => {
+  integrationMocks.getParticipation.mockResolvedValue({
+    email: "hu7.test@umssy.test", status: "EXPIRED", sanction: null,
+    request: {
+      id: "request-1", requestedAt: "2026-10-24T10:00:00.000Z", queuedAt: "2026-10-24T10:00:00.000Z",
+      technicalAreas: [{ id: "area-1", name: "Backend" }],
+      orientationTypes: [{ id: "orientation-1", name: "Orientación" }],
+      offer: { id: "offer-1", status: "EXPIRED", offeredAt: "2026-10-24T10:00:00.000Z", expiresAt: "2026-10-25T10:00:00.000Z" },
+    },
+  });
+  renderWithQuery(<MentorshipView />);
+  await waitFor(() => expect(integrationMocks.getParticipation).toHaveBeenCalled());
+  await act(async () => {});
+  expect(screen.getByRole("heading", { name: "Participa como mentor" })).toBeInTheDocument();
+  expect(screen.queryByText("Plazo vencido")).not.toBeInTheDocument();
 });
 
 function advanceToConfirmation() {

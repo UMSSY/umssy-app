@@ -2,10 +2,16 @@
 
 import { useAuth } from "@/shared/contexts/auth-context";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
+import { SlotUnavailableDialog } from "@/modules/mentors/components/participation/slot-availability-preview";
+import { ParticipationOverview } from "@/modules/mentors/components/participation/participation-overview";
+import { PendingParticipation } from "@/modules/mentors/components/participation/pending-participation";
+import { useSlotRequestPreview } from "@/modules/mentors/hooks/use-slot-request-preview";
+import { SlotCancellationFeedback } from "@/modules/mentors/components/participation/slot-cancellation-feedback";
+import { SlotOfferParticipation } from "@/modules/mentors/components/participation/slot-offer-participation";
 import { isApiError } from "@/shared/services/api-client";
 
 import { Button } from "@/components/ui/button";
@@ -19,19 +25,25 @@ import { StepTechnicalAreas } from "../components/wizard/step-technical-areas";
 import { useMentorshipCatalogs } from "../hooks/use-mentorship-catalogs";
 import { useMentorshipWizard } from "../hooks/use-mentorship-wizard";
 import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
-import { getParticipation, requestParticipation } from "../services/mentor-participation.service";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export function MentorshipView() {
+  const slotRequestPreview = useSlotRequestPreview();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const participation = useQuery({ queryKey: ["mentor-participation", "me"],
-    queryFn: ({ signal }) => getParticipation(signal), refetchInterval: 15_000 });
-  const sanction = participation.data?.sanction;
-  const suspended = Boolean(sanction && new Date(sanction.expiresAt).getTime() > Date.now());
+  const isAvailabilitySimulation = slotRequestPreview.enabled;
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
+  const sanction = slotRequestPreview.realState?.sanction;
+  const suspended = Boolean(sanction && new Date(sanction.expiresAt).getTime() > now);
   const sanctionMessage = sanction ? `Las nuevas solicitudes están suspendidas hasta el ${new Intl.DateTimeFormat("es-BO", {
     timeZone: "America/La_Paz", dateStyle: "full", timeStyle: "short",
   }).format(new Date(sanction.expiresAt))} (hora de Bolivia).` : "";
+  const [simulatedSlotsAvailable, setSimulatedSlotsAvailable] = useState(false);
+  const [isUnavailableOpen, setIsUnavailableOpen] = useState(false);
+  const [isSimulatedActive, setIsSimulatedActive] = useState(false);
   const { refreshRoles } = useAuth();
   const {
     currentStep,
@@ -61,9 +73,6 @@ export function MentorshipView() {
   const [isActivating, setIsActivating] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
   const [activationError, setActivationError] = useState<string | null>(null);
-  const [noSlotsOpen, setNoSlotsOpen] = useState(false);
-  const [isRequesting, setIsRequesting] = useState(false);
-  const [requestFeedback, setRequestFeedback] = useState<"created" | "duplicate" | null>(null);
 
   const canAdvance =
     currentStep === 1 ? wantsToParticipate : canGoNext;
@@ -95,6 +104,16 @@ export function MentorshipView() {
       return;
     }
 
+    // Both development scenarios are local previews; never persist activation.
+    if (isAvailabilitySimulation) {
+      if (simulatedSlotsAvailable) {
+        setIsSimulatedActive(true);
+      } else {
+        setIsUnavailableOpen(true);
+      }
+      return;
+    }
+
     setIsActivating(true);
     setActivationError(null);
 
@@ -104,10 +123,12 @@ export function MentorshipView() {
         orientationTypeIds: selectedOrientationTypeIds,
       });
       await refreshRoles();
-      await queryClient.invalidateQueries({ queryKey: ["mentor-participation"] });
 
       clearMentorshipWizardDraft();
       setIsActivated(true);
+      void queryClient.invalidateQueries({ queryKey: ["mentor-participation"] });
+      void queryClient.invalidateQueries({ queryKey: ["mentors", "participation"] });
+      router.push("/mentors/participation");
     } catch (error) {
       if (isApiError(error)) {
         const status = error.response?.status;
@@ -122,15 +143,12 @@ export function MentorshipView() {
           );
         } else if (status === 409) {
           const code = (error.response?.data as { data?: { code?: string } } | undefined)?.data?.code;
-          if (code === "NO_SLOTS") {
-            setRequestFeedback(null);
-            setNoSlotsOpen(true);
-          } else {
-            setActivationError("Tu participación como mentor ya está activa.");
-          }
+          if (code === "NO_SLOTS") setIsUnavailableOpen(true);
+          else if (code === "DUPLICATE_REQUEST") setActivationError("Ya tienes una solicitud vigente. Consulta Mi participación.");
+          else setActivationError("Tu participación como mentor ya está activa.");
         } else if (status === 429) {
-          await queryClient.invalidateQueries({ queryKey: ["mentor-participation", "me"] });
-          setActivationError("Se suspendieron temporalmente las nuevas solicitudes. Consulta la fecha de término en Mi participación.");
+          await queryClient.invalidateQueries({ queryKey: ["mentor-participation"] });
+          setActivationError("Las nuevas solicitudes están suspendidas temporalmente. Consulta Mi participación.");
         } else if (status === 500) {
           setActivationError(
             "Ocurrió un problema en el servidor. Intenta nuevamente más tarde.",
@@ -150,38 +168,22 @@ export function MentorshipView() {
     }
   };
 
-  const handleRequest = async () => {
-    if (isRequesting || suspended) return;
-    setIsRequesting(true);
-    setActivationError(null);
-    try {
-      await requestParticipation({ technicalAreaIds: selectedTechnicalAreaIds, orientationTypeIds: selectedOrientationTypeIds });
-      clearMentorshipWizardDraft();
-      await queryClient.invalidateQueries({ queryKey: ["mentor-participation"] });
-      setRequestFeedback("created");
-    } catch (error) {
-      if (isApiError(error)) {
-        const code = (error.response?.data as { data?: { code?: string } } | undefined)?.data?.code;
-        if (code === "SLOT_AVAILABLE") {
-          setNoSlotsOpen(false);
-          setActivationError("Se liberó un cupo. Confirma tu activación en este formulario.");
-          return;
-        }
-        if (code === "DUPLICATE_REQUEST") {
-          setRequestFeedback("duplicate");
-          return;
-        }
-        if (code === "MENTOR_REQUEST_SUSPENDED") {
-          await queryClient.invalidateQueries({ queryKey: ["mentor-participation", "me"] });
-          setNoSlotsOpen(false);
-          setActivationError("Se suspendieron temporalmente las nuevas solicitudes. Consulta Mi participación.");
-          return;
-        }
-        const detail = (error.response?.data as { detail?: string } | undefined)?.detail;
-        setActivationError(detail ?? "No se pudo registrar la solicitud.");
-      } else setActivationError("No se pudo registrar la solicitud.");
-    } finally { setIsRequesting(false); }
-  };
+  if (slotRequestPreview.active || (slotRequestPreview.offer && slotRequestPreview.realState?.status !== "EXPIRED")) return <SlotOfferParticipation />;
+  if (slotRequestPreview.request) return <PendingParticipation />;
+  if (slotRequestPreview.notice === "cancelled") return <SlotCancellationFeedback />;
+
+  if (isAvailabilitySimulation && isSimulatedActive) {
+    return (
+      <div className="space-y-6">
+        <section aria-label="Activación simulada" className="space-y-3 rounded-lg border border-border bg-surface-soft p-4">
+          <p role="status" className="text-sm font-semibold text-ink">Participación activa (simulación de desarrollo)</p>
+          <p className="text-sm text-text-secondary">Esta vista es temporal. No se ha activado tu cuenta ni guardado la participación en el servidor. Al recargar se vuelve al formulario.</p>
+          <Button variant="outline" onClick={() => setIsSimulatedActive(false)}>Volver al formulario y probar otro escenario</Button>
+        </section>
+        <ParticipationOverview areas={selectedTechnicalAreas.map((area) => area.name)} orientations={selectedOrientationTypes.map((orientation) => orientation.name)} />
+      </div>
+    );
+  }
 
   if (isActivated) {
     return (
@@ -263,6 +265,18 @@ export function MentorshipView() {
     }
 
     return (
+      <>
+      {isAvailabilitySimulation && (
+        <section aria-label="Simulación de disponibilidad" className="mb-6 space-y-3 rounded-lg border border-border bg-surface-soft p-4">
+          <p className="text-sm font-semibold text-ink">Disponibilidad simulada para desarrollo</p>
+          <p className="text-xs text-text-secondary">Elige el escenario antes de confirmar. La disponibilidad y la activación son simuladas: ninguna opción activa tu cuenta ni guarda la participación en el servidor.</p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" aria-pressed={!simulatedSlotsAvailable} onClick={() => setSimulatedSlotsAvailable(false)}>Simular cupos ocupados</Button>
+            <Button variant="outline" size="sm" aria-pressed={simulatedSlotsAvailable} onClick={() => setSimulatedSlotsAvailable(true)}>Simular cupos disponibles</Button>
+          </div>
+          <p role="status" className="text-sm text-accent">{simulatedSlotsAvailable ? "Hay cupos disponibles (simulación)" : "Todos los cupos están ocupados (simulación)"}</p>
+        </section>
+      )}
       <ConfirmationStep
         wantsToParticipate={wantsToParticipate}
         selectedTechnicalAreas={selectedTechnicalAreas}
@@ -274,6 +288,7 @@ export function MentorshipView() {
         onEditOrientationTypes={() => goToStep(3)}
         onActivate={handleActivate}
       />
+      </>
     );
   };
 
@@ -290,28 +305,8 @@ export function MentorshipView() {
       onNext={goNext}
     >
       {renderStepContent()}
+      <SlotUnavailableDialog open={isUnavailableOpen} onOpenChange={setIsUnavailableOpen} areas={selectedTechnicalAreas.map((area) => area.name)} orientations={selectedOrientationTypes.map((orientation) => orientation.name)} ids={{ technicalAreaIds: selectedTechnicalAreaIds, orientationTypeIds: selectedOrientationTypeIds }} />
     </MentorshipWizardShell>
-    <AlertDialog open={noSlotsOpen} onOpenChange={(open) => {
-      if (!open && !isRequesting) {
-        setNoSlotsOpen(false);
-        if (requestFeedback) router.push("/mentors/participation");
-      }
-    }}>
-      <AlertDialogContent className="sm:max-w-lg">
-        <AlertDialogHeader><AlertDialogTitle>No hay cupos disponibles</AlertDialogTitle>
-          <AlertDialogDescription>Actualmente todos los cupos para mentores están ocupados. Puedes solicitar un cupo y te avisaremos cuando se libere uno.</AlertDialogDescription></AlertDialogHeader>
-        <div className="space-y-3 text-sm">
-          <div className="rounded-md bg-muted p-3"><strong>Criterio estricto de asignación institucional (FIFO)</strong><p>Los cupos se asignan por riguroso orden cronológico de solicitud en cuanto se libere uno.</p></div>
-          <p>Por confidencialidad institucional, la lista de espera no exhibe números o posiciones relativas.</p>
-          {requestFeedback === "created" && <div role="status" className="rounded-md bg-emerald-50 p-3 text-emerald-900"><strong>Solicitud registrada correctamente · Estado: Pendiente</strong><p>Tu postulación ha sido guardada en el sistema. Te avisaremos por la plataforma y al correo institucional cuando se libere un cupo.</p></div>}
-          {requestFeedback === "duplicate" && <div role="status" className="rounded-md bg-amber-50 p-3 text-amber-900"><strong>Ya tienes una solicitud pendiente</strong><p>No necesitas solicitar nuevamente. El envío redundante no altera tu posición ni la fecha original.</p></div>}
-        </div>
-        {activationError && <p role="alert" className="text-sm text-destructive">{activationError}</p>}
-        <AlertDialogFooter><AlertDialogCancel disabled={isRequesting}>{requestFeedback ? "Cerrar" : "Cancelar"}</AlertDialogCancel>
-          {!requestFeedback && <AlertDialogAction disabled={isRequesting || suspended} onClick={() => { void handleRequest(); }}>{isRequesting ? "Solicitando..." : "Solicitar cupo"}</AlertDialogAction>}
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
     </>
   );
 }
