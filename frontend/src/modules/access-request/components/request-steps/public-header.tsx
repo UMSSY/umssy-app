@@ -45,7 +45,7 @@ export function PublicHeader() {
   }
 
   return (
-    <header className="flex h-app-header items-center justify-between gap-6 bg-app-header px-6 text-app-header-foreground">
+    <header className="sticky top-0 z-40 flex h-app-header items-center justify-between gap-6 bg-app-header px-6 text-app-header-foreground">
       <div className="rounded-md bg-surface px-3 py-2"><BrandLogo className="w-40" priority /></div>
       <p className="flex items-center gap-1.5 text-sm text-app-header-foreground/85">
         ¿Ya tienes cuenta?
