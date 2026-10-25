@@ -49,8 +49,9 @@ export class MentorsController {
   findDirectory(
     @Query(new RequestValidationPipe(mentorDirectoryQuerySchema))
     query: MentorDirectoryQuery,
+    @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.mentorsService.findDirectory(query);
+    return this.mentorsService.findDirectory(query, user.id);
   }
 
   @Get('me/technical-areas')
