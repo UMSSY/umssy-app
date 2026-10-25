@@ -1,3 +1,5 @@
+import { VOTING_STATUS_RESPONSE } from '../constants/event-registrations.constants.js';
+import type { SupportTransactionResult } from '../types/support-transaction-result.types.js';
 import { calculateProgressPercent, calculateSupportsRemaining } from '../../../common/utils/support-progress.js';
 import { COMMUNITY_ORIGIN_TITLE, EXPIRED_STATUS_TITLE, VOTING_STATUS_TITLES } from '../../events/constants/events.constants.js';
 import { EventNotFoundException } from '../../events/exceptions/event-not-found.exception.js';
@@ -134,6 +136,7 @@ export class EventRegistrationsService {
         userId,
         cancelledAt: null,
         status: { title: REGISTRATION_STATUS_TITLES.confirmed },
+        event: { status: { title: PUBLISHED_STATUS_TITLE } },
       },
       select: {
         id: true,
@@ -154,12 +157,38 @@ export class EventRegistrationsService {
     });
   }
   async support(eventId: string, userId: string): Promise<SupportResponse> {
-    const event = await this.findEventForSupport(eventId);
+    const result = await this.registerSupport(
+      eventId,
+      userId,
+      (event) => this.assertSupportable(event),
+    );
 
-    if (!event) {
+    if (!result) {
       throw new EventNotFoundException(eventId);
     }
 
+    if (!result.created) {
+      throw new AlreadySupportedException();
+    }
+
+    return {
+      eventId,
+      status: result.published ? PUBLISHED_STATUS_TITLE : VOTING_STATUS_RESPONSE,
+      supportCount: result.supportCount,
+      supportThreshold: result.supportThreshold,
+      supportsRemaining: calculateSupportsRemaining(
+        result.supportCount,
+        result.supportThreshold,
+      ),
+      progressPercent: calculateProgressPercent(
+        result.supportCount,
+        result.supportThreshold,
+      ),
+      hasSupported: true,
+    };
+  }
+
+  private assertSupportable(event: EventSupportContext): void {
     if (event.statusTitle === EXPIRED_STATUS_TITLE) {
       throw new ProposalExpiredException();
     }
@@ -174,39 +203,71 @@ export class EventRegistrationsService {
     if (event.votingDeadline && event.votingDeadline.getTime() <= Date.now()) {
       throw new ProposalExpiredException();
     }
-
-    const { created } = await this.createSupport(
-      eventId,
-      userId,
-    );
-
-    if (!created) {
-      throw new AlreadySupportedException();
-    }
-
-    const updated =
-      await this.findEventForSupport(eventId);
-    const supportCount = updated?.supportCount ?? event.supportCount + 1;
-
-    return {
-      eventId,
-      supportCount,
-      supportThreshold: event.supportThreshold,
-      supportsRemaining: calculateSupportsRemaining(
-        supportCount,
-        event.supportThreshold,
-      ),
-      progressPercent: calculateProgressPercent(
-        supportCount,
-        event.supportThreshold,
-      ),
-      hasSupported: true,
-    };
   }
-  async findEventForSupport(
+
+  async registerSupport(
+    eventId: string,
+    userId: string,
+    assertSupportable: (event: EventSupportContext) => void,
+  ): Promise<SupportTransactionResult | null> {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM events WHERE id = ${eventId}::uuid FOR UPDATE`;
+
+      const event = await this.loadSupportContext(tx, eventId);
+      if (!event) return null;
+
+      assertSupportable(event);
+
+      const existing = await tx.eventRegistration.findUnique({
+        where: { eventId_userId: { eventId, userId } },
+        select: { id: true },
+      });
+      if (existing) {
+        return {
+          created: false,
+          supportCount: event.supportCount,
+          supportThreshold: event.supportThreshold,
+          published: false,
+        };
+      }
+
+      await tx.eventRegistration.create({
+        data: {
+          event: { connect: { id: eventId } },
+          user: { connect: { id: userId } },
+          status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
+          qrToken: randomBytes(32).toString('hex'),
+        },
+        select: { id: true },
+      });
+
+      const supportCount = event.supportCount + 1;
+      const threshold = event.supportThreshold;
+      const published =
+        threshold !== null && threshold > 0 && supportCount >= threshold;
+
+      if (published) {
+        await tx.event.update({
+          where: { id: eventId },
+          data: { status: { connect: { title: PUBLISHED_STATUS_TITLE } } },
+          select: { id: true },
+        });
+      }
+
+      return {
+        created: true,
+        supportCount,
+        supportThreshold: threshold,
+        published,
+      };
+    });
+  }
+
+  private async loadSupportContext(
+    tx: Prisma.TransactionClient,
     eventId: string,
   ): Promise<EventSupportContext | null> {
-    const event = await this.prisma.event.findUnique({
+    const event = await tx.event.findUnique({
       where: { id: eventId },
       select: {
         id: true,
@@ -237,28 +298,5 @@ export class EventRegistrationsService {
       supportThreshold: event.supportThreshold,
       supportCount: event._count.registrations,
     };
-  }
-
-  async createSupport(
-    eventId: string,
-    userId: string,
-  ): Promise<{ created: boolean }> {
-    try {
-      await this.prisma.eventRegistration.create({
-        data: {
-          event: { connect: { id: eventId } },
-          user: { connect: { id: userId } },
-          status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
-          qrToken: randomBytes(32).toString('hex'),
-        },
-        select: { id: true },
-      });
-      return { created: true };
-    } catch (error) {
-      if ((error as { code?: string }).code === 'P2002') {
-        return { created: false };
-      }
-      throw error;
-    }
   }
 }

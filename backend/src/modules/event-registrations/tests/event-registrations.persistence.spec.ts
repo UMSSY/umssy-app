@@ -23,6 +23,7 @@ describe('EventRegistrationsService', () => {
         userId: 'user-1',
         cancelledAt: null,
         status: { title: 'Confirmada' },
+        event: { status: { title: 'Publicado' } },
       },
       select: {
         id: true,
@@ -48,5 +49,19 @@ describe('EventRegistrationsService', () => {
     findMany.mockResolvedValue(rows);
 
     await expect(repository.findByUserId('user-1')).resolves.toBe(rows);
+  });
+
+  it('solo lista inscripciones de eventos publicados', async () => {
+    findMany.mockResolvedValue([]);
+
+    await repository.findByUserId('user-1');
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          event: { status: { title: 'Publicado' } },
+        }),
+      }),
+    );
   });
 });
