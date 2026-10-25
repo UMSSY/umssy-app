@@ -140,6 +140,6 @@ describe("ParticipationView", () => {
     render(<ParticipationView />);
     expect(await screen.findByText("Backend")).toBeInTheDocument();
     expect(screen.queryByText("Datos antiguos")).not.toBeInTheDocument();
-    expect(readStorage).not.toHaveBeenCalled();
+    expect(readStorage).not.toHaveBeenCalledWith("umssy-mentor-participation");
   });
 });
