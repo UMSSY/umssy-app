@@ -14,6 +14,7 @@ export interface ReportUser {
   readonly identifier: string;
   readonly documentType: ReportDocumentType | null;
   readonly registeredAt: string;
+  readonly listedAt: string;
   readonly registrationStatus: ReportRegistrationStatus;
   readonly rejectionReason: string | null;
 }
@@ -61,6 +62,7 @@ export interface ReportAccessRequestRecord {
   readonly idCardNumber: string;
   readonly rejectionReason: string | null;
   readonly submittedAt: Date | null;
+  readonly reviewedAt?: Date | null;
   readonly createdAt: Date;
   readonly status: { readonly title: string };
   readonly documentType: { readonly title: string } | null;

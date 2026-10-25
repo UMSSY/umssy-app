@@ -36,6 +36,7 @@ export type RegisterGeneratedReportInput = Pick<
 export interface ReportHistoryFilters {
   readonly reportType?: ReportType;
   readonly search?: string;
+  readonly snapshotAt?: string;
 }
 
 export interface GeneratedReportsPage {
