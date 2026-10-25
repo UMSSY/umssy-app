@@ -66,7 +66,7 @@ export function RejectedUsersReportView() {
     <WorkspacePage title="Usuarios rechazados" description="Consulta los motivos de rechazo y exporta el listado filtrado.">
 
       <div role="search" aria-label="Filtros de usuarios rechazados" className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
           <UserTypeFilter value={userType} onChange={handleUserTypeChange} />
           <ReportSearchInput value={searchInput} onChange={handleSearchChange} label={EMAIL_SEARCH_LABEL} />
         </div>
