@@ -56,10 +56,11 @@ describe('Mis pases', () => {
     expect(getMine).toHaveBeenCalledTimes(2);
   });
   it.each([
-    [{ isAxiosError: true, response: { status: 401 } }, 'La sesión ha expirado'],
-    [{ isAxiosError: true, response: { status: 500 } }, 'No se pudieron cargar'],
-    [{ isAxiosError: true }, 'No se pudieron cargar'],
-    ['unknown', 'No se pudieron cargar'],
+    [{ isAxiosError: true, response: { status: 401, data: { statusCode: 401, ok: false, code: 'UNAUTHENTICATED', detail: 'Sesión inválida', data: null } } }, 'Inicia sesión para continuar'],
+    [{ isAxiosError: true, response: { status: 403, data: { statusCode: 403, ok: false, code: 'USER_INACTIVE', detail: 'Usuario inactivo', data: null } } }, 'Tu cuenta está inactiva'],
+    [{ isAxiosError: true, response: { status: 500 } }, 'No pudimos completar la operación'],
+    [{ isAxiosError: true }, 'No pudimos completar la operación'],
+    ['unknown', 'No pudimos completar la operación'],
   ])('presenta el error apropiado: %s', async (cause, message) => {
     getMine.mockRejectedValue(cause);
     render(<MyPassesView />);
