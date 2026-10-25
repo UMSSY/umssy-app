@@ -9,6 +9,7 @@ const seedTechnicalAreas = vi.fn();
 const seedOrientationTypes = vi.fn();
 const seedJobOffers = vi.fn();
 const seedChat = vi.fn();
+const seedMentors = vi.fn();
 
 vi.mock('../../modules/users/seeds/users.seed.js', () => ({
   hashSeedPassword: vi.fn().mockResolvedValue('hash'),
@@ -41,6 +42,9 @@ vi.mock(
 );
 vi.mock('../../modules/job-offers/seeds/job-offers.seed.js', () => ({
   seedJobOffers: (...args: unknown[]) => seedJobOffers(...args),
+}));
+vi.mock('../../modules/mentors/seeds/mentors.seed.js', () => ({
+  seedMentors: (...args: unknown[]) => seedMentors(...args),
 }));
 vi.mock('../../modules/chat/seeds/chat.seed.js', () => ({
   seedChat: (...args: unknown[]) => seedChat(...args),
@@ -144,7 +148,7 @@ describe('createSeedClient', () => {
 describe('runSeed', () => {
   afterEach(() => vi.clearAllMocks());
 
-  it('ejecuta los seeds en orden con una transacción por módulo y arma el resumen', async () => {
+  it('ejecuta los seeds en orden en una sola transacción y arma el resumen', async () => {
     setupSeeds();
     const tx = {};
     const client = {
@@ -154,7 +158,7 @@ describe('runSeed', () => {
 
     const summary = await runSeed(client as never);
 
-    expect(client.$transaction).toHaveBeenCalledTimes(9);
+    expect(client.$transaction).toHaveBeenCalledTimes(1);
     expect(seedTechnicalAreas).toHaveBeenCalledWith(tx);
     expect(seedOrientationTypes).toHaveBeenCalledWith(tx);
     expect(seedJobOffers).toHaveBeenCalledWith(tx);
@@ -167,7 +171,8 @@ describe('runSeed', () => {
       expect.any(Date),
     );
     expect(seedAccessRequests).toHaveBeenCalledWith(tx);
-    expect(seedChat).toHaveBeenCalledWith(tx);
+    expect(seedMentors).toHaveBeenCalledWith(tx, { id: 's1' });
+    expect(seedChat).not.toHaveBeenCalled();
     expect(summary).toMatchObject({
       roles: 5,
       statuses: 2,

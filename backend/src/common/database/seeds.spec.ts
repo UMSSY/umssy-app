@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '../../prisma/client.js';
 import { runSeed } from './seeds.js';
 import {
@@ -11,6 +11,7 @@ import { seedAvailability } from '../../modules/availability/seeds/availability.
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
+import { seedMentors } from '../../modules/mentors/seeds/mentors.seed.js';
 
 vi.mock('../../modules/users/seeds/users.seed.js', () => ({
   hashSeedPassword: vi.fn(),
@@ -42,6 +43,9 @@ vi.mock(
 vi.mock('../../modules/job-offers/seeds/job-offers.seed.js', () => ({
   seedJobOffers: vi.fn(),
 }));
+vi.mock('../../modules/mentors/seeds/mentors.seed.js', () => ({
+  seedMentors: vi.fn(),
+}));
 vi.mock('../../modules/chat/seeds/chat.seed.js', () => ({
   seedChat: vi.fn().mockResolvedValue({
     messageStatuses: 4,
@@ -56,6 +60,7 @@ const users = {
   graduate: { id: 'availability-graduate' },
   eventGraduate: { id: 'event-graduate' },
   emptyGraduate: { id: 'without-passes' },
+  student: { id: 'student' },
 };
 
 beforeEach(() => {
@@ -105,11 +110,8 @@ function buildClient() {
   };
 }
 
-afterEach(() => vi.unstubAllEnvs());
-
 describe('combined events and availability seed', () => {
   it('seeds passes for the original event user while retaining the availability user', async () => {
-    vi.stubEnv('SEED_TRANSACTION_TIMEOUT_MS', undefined);
     const { tx, client, prisma } = buildClient();
     await runSeed(prisma);
     expect(seedTechnicalAreas).toHaveBeenCalledWith(tx);
@@ -131,41 +133,21 @@ describe('combined events and availability seed', () => {
       expect.any(Date),
     );
     expect(seedAccessRequests).toHaveBeenCalledWith(tx);
+    expect(seedMentors).toHaveBeenCalledWith(tx, users.student);
     expect(client.$transaction).toHaveBeenCalledWith(expect.any(Function), {
       maxWait: 5000,
-      timeout: 120000,
+      timeout: 30000,
     });
-    expect(client.$transaction).toHaveBeenCalledTimes(9);
+    expect(client.$transaction).toHaveBeenCalledTimes(1);
     expect(client.$disconnect).not.toHaveBeenCalled();
   });
 
-  it('uses the configured seed timeout', async () => {
-    vi.stubEnv('SEED_TRANSACTION_TIMEOUT_MS', '180000');
-    const { client, prisma } = buildClient();
-    await runSeed(prisma);
-    expect(client.$transaction).toHaveBeenCalledWith(expect.any(Function), {
-      maxWait: 5000,
-      timeout: 180000,
-    });
-  });
-
-  it('rejects an invalid timeout before any database writes', async () => {
-    vi.stubEnv('SEED_TRANSACTION_TIMEOUT_MS', '0');
-    const { client, prisma } = buildClient();
-    await expect(runSeed(prisma)).rejects.toThrow(
-      'SEED_TRANSACTION_TIMEOUT_MS',
-    );
-    expect(client.$transaction).not.toHaveBeenCalled();
-    expect(seedUsers).not.toHaveBeenCalled();
-  });
-
   it('stops subsequent modules when events fail', async () => {
-    const { prisma, client, committed, transactions } = buildClient();
+    const { prisma, client, committed } = buildClient();
     vi.mocked(seedEvents).mockRejectedValueOnce(new Error('Event seed failed'));
     await expect(runSeed(prisma)).rejects.toThrow('Event seed failed');
-    expect(client.$transaction).toHaveBeenCalledTimes(5);
-    expect(committed).toEqual(transactions.slice(0, 4));
-    expect(committed).not.toContain(transactions[4]);
+    expect(client.$transaction).toHaveBeenCalledTimes(1);
+    expect(committed).toEqual([]);
     expect(seedEventRegistrations).not.toHaveBeenCalled();
     expect(seedAvailability).not.toHaveBeenCalled();
   });

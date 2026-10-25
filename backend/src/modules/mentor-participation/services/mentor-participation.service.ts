@@ -227,8 +227,10 @@ export class MentorParticipationService {
 
   async request(userId: string, data: ParticipationPreferencesDto, key: string = randomUUID()) {
     return this.intake(userId, data, key, 'REQUEST', async (tx, now, email) => {
-      if (await this.current(tx, userId)) return { statusCode: 409, outcome: 'DUPLICATE',
-        detail: 'Ya tienes una solicitud vigente', data: { code: 'DUPLICATE_REQUEST' } };
+      const current = await this.current(tx, userId);
+      if (current) return { statusCode: 409, outcome: 'DUPLICATE',
+        detail: 'Ya tienes una solicitud vigente', data: { code: 'DUPLICATE_REQUEST',
+          id: current.id, status: current.status, requestedAt: current.requestedAt.toISOString() } };
       if ((await this.capacityIn(tx, now)).available > 0) {
         return { statusCode: 409, outcome: 'SLOT_AVAILABLE',
           detail: 'Hay un cupo disponible; confirma tu participación desde el formulario', data: { code: 'SLOT_AVAILABLE' } };
@@ -246,8 +248,10 @@ export class MentorParticipationService {
 
   async activate(userId: string, data: ParticipationPreferencesDto, key: string = randomUUID()) {
     return this.intake(userId, data, key, 'ACTIVATE', async (tx, now, email) => {
-      if (await this.current(tx, userId)) return { statusCode: 409, outcome: 'DUPLICATE',
-        detail: 'Ya tienes una solicitud vigente', data: { code: 'DUPLICATE_REQUEST' } };
+      const current = await this.current(tx, userId);
+      if (current) return { statusCode: 409, outcome: 'DUPLICATE',
+        detail: 'Ya tienes una solicitud vigente', data: { code: 'DUPLICATE_REQUEST',
+          id: current.id, status: current.status, requestedAt: current.requestedAt.toISOString() } };
       if ((await this.capacityIn(tx, now)).available < 1) {
         return { statusCode: 409, outcome: 'NO_SLOTS', detail: 'No hay cupos disponibles', data: { code: 'NO_SLOTS' } };
       }
