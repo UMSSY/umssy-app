@@ -67,8 +67,13 @@ export class JobOffersService {
 
   async getByCompanyAndId(companyId: string, jobOfferId: string): Promise<JobOfferResponse> {
     await this.ensureCompanyExists(companyId);
-    const record = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
-    if (!record) throw new JobOfferNotFoundException();
+    const record = await this.jobOffersRepository.findHistoryByCompanyAndId(
+      companyId,
+      jobOfferId,
+    );
+    if (!record) {
+      throw new JobOfferNotFoundException();
+    }
     return this.jobOfferMapper.toResponse(record);
   }
 
