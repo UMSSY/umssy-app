@@ -10,8 +10,11 @@ import type {
 
 import {
   CATALOG_STATUS_TITLES,
+  COMMUNITY_ORIGIN_TITLE,
+  EXPIRED_STATUS_TITLE,
   PUBLISHED_STATUS_TITLE,
   CONFIRMED_REGISTRATION_TITLE,
+  VOTING_STATUS_TITLE,
 } from '../constants/events.constants.js';
 export { PUBLISHED_STATUS_TITLE } from '../constants/events.constants.js';
 
@@ -115,5 +118,25 @@ export class EventsRepository {
     return event as unknown as
       | (EventWithRelations & { modality: { id: string; title: string } })
       | null;
+  }
+
+  async expireOverdueProposals(now: Date): Promise<number> {
+    const expiredStatus = await this.prisma.eventStatus.findUnique({
+      where: { title: EXPIRED_STATUS_TITLE },
+      select: { id: true },
+    });
+
+    if (!expiredStatus) return 0;
+
+    const { count } = await this.prisma.event.updateMany({
+      where: {
+        status: { title: VOTING_STATUS_TITLE },
+        origin: { title: COMMUNITY_ORIGIN_TITLE },
+        votingDeadline: { lte: now },
+      },
+      data: { statusId: expiredStatus.id },
+    });
+
+    return count;
   }
 }

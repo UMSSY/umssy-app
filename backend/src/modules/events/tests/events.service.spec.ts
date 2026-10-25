@@ -30,10 +30,15 @@ describe('EventsService', () => {
   let repositoryMock: {
     findAndCount: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
+    expireOverdueProposals: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
-    repositoryMock = { findAndCount: vi.fn(), findById: vi.fn() };
+    repositoryMock = {
+      findAndCount: vi.fn(),
+      findById: vi.fn(),
+      expireOverdueProposals: vi.fn().mockResolvedValue(0),
+    };
     service = new EventsService(repositoryMock as never);
   });
 
