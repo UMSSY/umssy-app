@@ -27,7 +27,7 @@ export class PasswordResetMailerService {
   }
 
   async sendPasswordResetCode(to: string, code: string, recipientName?: string): Promise<void> {
-    const html = renderPasswordResetEmail({ code, recipientName, expirationMinutes: 10 });
+    const html = renderPasswordResetEmail({ code, recipientName, expirationMinutes: 5 });
 
     if (this.transporter) {
       try {
@@ -43,7 +43,11 @@ export class PasswordResetMailerService {
         throw err;
       }
     } else {
-      this.logger.log(`[SIMULACIÓN] Código de recuperación para ${to}: ${code}`);
+      if (process.env.NODE_ENV !== 'production') {
+        this.logger.log(`[SIMULACIÓN] Código de recuperación para ${to}: ${code}`);
+      } else {
+        this.logger.warn(`[SIMULACIÓN] No hay transporte SMTP configurado en producción. Correo a: ${to}`);
+      }
     }
   }
 }

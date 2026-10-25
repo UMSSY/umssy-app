@@ -14,7 +14,7 @@ import { OtpInput } from "../components/otp-input";
 import { authService } from "../services/auth.service";
 import type { ForgotPasswordStep } from "../types/forgot-password.types";
 
-const INITIAL_COUNTDOWN_SECONDS = 600; // 10 minutos
+const INITIAL_COUNTDOWN_SECONDS = 300; // 5 minutos
 const RESEND_COOLDOWN_SECONDS = 120; // 2 minutos
 const TRANSITION_DURATION_MS = 200;
 
@@ -44,6 +44,7 @@ export function ForgotPasswordView() {
   const [countdown, setCountdown] = useState(INITIAL_COUNTDOWN_SECONDS);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isResent, setIsResent] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   // Step 3: Reset Password
   const [newPassword, setNewPassword] = useState("");
@@ -54,7 +55,8 @@ export function ForgotPasswordView() {
 
   // Validation criteria for Step 3
   const hasMinLength = newPassword.length >= 8;
-  const hasUpperAndNumber = /[A-Z]/.test(newPassword) && /[0-9]/.test(newPassword);
+  const hasUpperCase = /[A-Z]/.test(newPassword);
+  const hasNumber = /[0-9]/.test(newPassword);
 
   // Smooth transition helper
   function goToStep(nextStep: ForgotPasswordStep, direction: "forward" | "backward" = "forward") {
@@ -154,9 +156,9 @@ export function ForgotPasswordView() {
 
   // Handle resend code in Step 2 with 2-minute cooldown
   async function handleResend() {
-    if (resendCooldown > 0) return;
+    if (resendCooldown > 0 || isResending) return;
 
-    setIsLoading(true);
+    setIsResending(true);
     try {
       await authService.requestPasswordResetCode({ email: email.trim() });
       setCountdown(INITIAL_COUNTDOWN_SECONDS);
@@ -167,14 +169,14 @@ export function ForgotPasswordView() {
     } catch (err) {
       setOtpError(err instanceof Error ? err.message : "No se pudo reenviar el código");
     } finally {
-      setIsLoading(false);
+      setIsResending(false);
     }
   }
 
   // Handle Step 3 submit
   async function handleResetPassword(event: FormEvent) {
     event.preventDefault();
-    if (!hasMinLength || !hasUpperAndNumber) {
+    if (!hasMinLength || !hasUpperCase || !hasNumber) {
       setPasswordError("La contraseña no cumple con los requisitos de seguridad.");
       return;
     }
@@ -324,7 +326,7 @@ export function ForgotPasswordView() {
 
                 <h1 className="font-tight text-3xl font-extrabold text-ink md:text-4xl">Revisa tu correo</h1>
                 <p className="mt-2 mb-8 text-base text-text-secondary">
-                  Enviamos un código de 6 dígitos a <strong className="font-semibold text-ink">{maskEmail(email)}</strong>. Vence en 10 minutos.
+                  Enviamos un código de 6 dígitos a <strong className="font-semibold text-ink">{maskEmail(email)}</strong>. Vence en 5 minutos.
                 </p>
 
                 <form onSubmit={handleVerifyCode} noValidate>
@@ -363,7 +365,7 @@ export function ForgotPasswordView() {
                   <Button
                     type="submit"
                     variant="institutional"
-                    disabled={isLoading || otpCode.length !== 6 || countdown === 0}
+                    disabled={isLoading || isResending || otpCode.length !== 6 || countdown === 0}
                     className="mt-6 h-12 w-full text-base font-extrabold tracking-wide uppercase institutional-button"
                   >
                     {isLoading ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
@@ -375,12 +377,19 @@ export function ForgotPasswordView() {
                       type="button"
                       variant="link"
                       onClick={handleResend}
-                      disabled={isLoading || resendCooldown > 0}
+                      disabled={isLoading || isResending || resendCooldown > 0}
                       className="h-auto p-0 text-sm font-bold text-ink underline-offset-4 hover:underline focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
                     >
-                      {resendCooldown > 0
-                        ? `Reenviar código en ${formatTime(resendCooldown)}`
-                        : "¿No te llegó? Reenviar código"}
+                      {isResending ? (
+                        <span className="flex items-center gap-1.5">
+                          <LoaderCircle aria-hidden="true" className="size-3.5 animate-spin" />
+                          <span>Reenviando código...</span>
+                        </span>
+                      ) : resendCooldown > 0 ? (
+                        `Reenviar código en ${formatTime(resendCooldown)}`
+                      ) : (
+                        "¿No te llegó? Reenviar código"
+                      )}
                     </Button>
                     {isResent ? (
                       <p className="mt-2 text-sm font-semibold text-accent">
@@ -480,13 +489,21 @@ export function ForgotPasswordView() {
                       )}
                       <span>Mínimo 8 caracteres</span>
                     </li>
-                    <li className={cn("flex items-center gap-2", hasUpperAndNumber ? "font-medium text-accent" : "text-text-secondary")}>
-                      {hasUpperAndNumber ? (
+                    <li className={cn("flex items-center gap-2", hasUpperCase ? "font-medium text-accent" : "text-text-secondary")}>
+                      {hasUpperCase ? (
                         <Check className="size-3.5 text-accent" aria-hidden="true" />
                       ) : (
                         <span className="inline-block size-3.5 text-center text-text-secondary" aria-hidden="true">○</span>
                       )}
-                      <span>Una letra mayúscula y un número</span>
+                      <span>Al menos una letra mayúscula</span>
+                    </li>
+                    <li className={cn("flex items-center gap-2", hasNumber ? "font-medium text-accent" : "text-text-secondary")}>
+                      {hasNumber ? (
+                        <Check className="size-3.5 text-accent" aria-hidden="true" />
+                      ) : (
+                        <span className="inline-block size-3.5 text-center text-text-secondary" aria-hidden="true">○</span>
+                      )}
+                      <span>Al menos un número</span>
                     </li>
                   </ul>
 
@@ -499,7 +516,7 @@ export function ForgotPasswordView() {
                   <Button
                     type="submit"
                     variant="institutional"
-                    disabled={isLoading || !hasMinLength || !hasUpperAndNumber || !confirmPassword}
+                    disabled={isLoading || !hasMinLength || !hasUpperCase || !hasNumber || !confirmPassword}
                     className="h-12 w-full text-base font-extrabold tracking-wide uppercase institutional-button"
                   >
                     {isLoading ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}

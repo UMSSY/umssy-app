@@ -57,6 +57,13 @@ export class AuthRepository {
     });
   }
 
+  findLatestOtp(userId: string) {
+    return this.prisma.passwordResetOtp.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   findLatestValidOtp(userId: string) {
     return this.prisma.passwordResetOtp.findFirst({
       where: {
