@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { BlockForm } from "./block-form"
@@ -280,5 +280,122 @@ describe("BlockForm", () => {
 
     expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled()
     expect(screen.getByText("Error al crear el bloque de disponibilidad")).toBeInTheDocument()
+  })
+
+  it("no muestra la casilla de repetición en modo edición", () => {
+    renderForm({
+      mode: "edit",
+      initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-14T00:00:00.000Z" },
+    })
+
+    expect(screen.queryByText("Repetir cada semana")).not.toBeInTheDocument()
+  })
+
+  it("la casilla de repetir cada semana empieza destildada y sin el campo de fecha límite", () => {
+    renderForm()
+
+    expect(screen.getByRole("checkbox", { name: /Repetir cada semana/ })).not.toBeChecked()
+    expect(screen.queryByRole("group", { name: "Repetir hasta" })).not.toBeInTheDocument()
+  })
+
+  it("marcar la casilla muestra el calendario de Repetir hasta", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+
+    expect(screen.getByRole("group", { name: "Repetir hasta" })).toBeInTheDocument()
+  })
+
+  it("exige elegir la fecha límite si la repetición está activa", async () => {
+    const { onSubmit, user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
+
+    expect(screen.getByText("Elige hasta qué fecha se repite el bloque")).toBeInTheDocument()
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it("envía repeatWeekly y repeatUntil cuando se marca la casilla y se elige la fecha límite", async () => {
+    const { onSubmit, user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
+    await user.click(within(repeatGroup).getByRole("button", { name: "martes, 20 de octubre de 2026" }))
+    await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      startAt: "2026-10-13T22:00:00.000Z",
+      endAt: "2026-10-14T00:00:00.000Z",
+      repeatWeekly: true,
+      repeatUntil: "2026-10-20",
+    })
+  })
+
+  it("desmarcar la casilla oculta y limpia la fecha límite elegida", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
+    await user.click(within(repeatGroup).getByRole("button", { name: "martes, 20 de octubre de 2026" }))
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+
+    expect(screen.queryByRole("group", { name: "Repetir hasta" })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    expect(
+      within(screen.getByRole("group", { name: "Repetir hasta" })).getByRole("button", {
+        name: "martes, 20 de octubre de 2026",
+      }),
+    ).not.toHaveAttribute("aria-pressed", "true")
+  })
+
+  it("limpia la fecha límite elegida si la nueva fecha del bloque ya no la admite", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    await user.click(
+      within(screen.getByRole("group", { name: "Repetir hasta" })).getByRole("button", {
+        name: "martes, 20 de octubre de 2026",
+      }),
+    )
+
+    const [mainCalendarDay] = screen.getAllByRole("button", { name: "miércoles, 21 de octubre de 2026" })
+    await user.click(mainCalendarDay)
+
+    expect(
+      within(screen.getByRole("group", { name: "Repetir hasta" })).queryByRole("button", {
+        name: "martes, 20 de octubre de 2026",
+        pressed: true,
+      }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("el calendario de Repetir hasta deshabilita los días anteriores al bloque", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
+
+    expect(within(repeatGroup).getByRole("button", { name: "lunes, 12 de octubre de 2026" })).toBeDisabled()
+  })
+
+  it("el calendario de Repetir hasta solo habilita desde los 7 días del bloque (al menos una repetición real)", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
+
+    expect(within(repeatGroup).getByRole("button", { name: "martes, 13 de octubre de 2026" })).toBeDisabled()
+    expect(within(repeatGroup).getByRole("button", { name: "jueves, 15 de octubre de 2026" })).toBeDisabled()
+    expect(within(repeatGroup).getByRole("button", { name: "lunes, 19 de octubre de 2026" })).toBeDisabled()
+    expect(within(repeatGroup).getByRole("button", { name: "martes, 20 de octubre de 2026" })).toBeEnabled()
   })
 })

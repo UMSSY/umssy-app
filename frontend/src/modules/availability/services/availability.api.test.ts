@@ -82,6 +82,22 @@ describe("availabilityApi", () => {
     expect(payload.endAt).toMatch(ISO_UTC)
   })
 
+  it("createAvailabilityBlock incluye repeatWeekly y repeatUntil cuando se repite", async () => {
+    const postSpy = vi.spyOn(apiClient, "post").mockResolvedValue(envelope({ created: 3, skipped: [] }))
+
+    await availabilityApi.createAvailabilityBlock({
+      startAt: "2024-01-15T10:00",
+      endAt: "2024-01-15T11:00",
+      repeatWeekly: true,
+      repeatUntil: "2024-02-05",
+    })
+
+    const [, payload] = postSpy.mock.calls[0] as [string, Record<string, unknown>]
+    expect(Object.keys(payload).sort()).toEqual(["endAt", "repeatUntil", "repeatWeekly", "startAt"])
+    expect(payload.repeatWeekly).toBe(true)
+    expect(payload.repeatUntil).toBe("2024-02-05")
+  })
+
   it("updateAvailabilityBlock llama a la API con ID y datos correctos", async () => {
     const patchSpy = vi.spyOn(apiClient, "patch").mockResolvedValue(envelope(mockBlock))
 
