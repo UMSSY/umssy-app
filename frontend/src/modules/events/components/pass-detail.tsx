@@ -94,6 +94,8 @@ export function PassDetail({ registration }: PassDetailProps) {
               size={180}
               level="M"
               includeMargin={false}
+              title="Vista ilustrativa de QR"
+              aria-label="Vista ilustrativa de QR"
               className="h-auto max-w-[180px]"
             />
           )}
