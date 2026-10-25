@@ -7,7 +7,8 @@ import {
 import {
   COMMUNITY_ORIGIN_TITLE,
   EXPIRED_STATUS_TITLE,
-  VOTING_STATUS_TITLES,
+  PUBLISHED_STATUS_TITLE,
+  VOTING_STATUS_TITLE,
 } from '../../events/constants/events.constants.js';
 import { EventNotFoundException } from '../../events/exceptions/event-not-found.exception.js';
 import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
@@ -19,6 +20,7 @@ import type {
   CreateEventRegistrationPayload,
   MyRegistrationResponse,
 } from '../types/event-registrations.types.js';
+import type { EventSupportContext } from '../types/event-support-context.types.js';
 import type { SupportResponse } from '../types/support-response.types.js';
 
 @Injectable()
@@ -42,19 +44,45 @@ export class EventRegistrationsService {
   }
 
   async support(eventId: string, userId: string): Promise<SupportResponse> {
-    const event = await this.registrationsRepository.findEventForSupport(eventId);
+    const result = await this.registrationsRepository.registerSupport(
+      eventId,
+      userId,
+      (event) => this.assertSupportable(event),
+    );
 
-    if (!event) {
+    if (!result) {
       throw new EventNotFoundException(eventId);
     }
 
+    if (!result.created) {
+      throw new AlreadySupportedException();
+    }
+
+    return {
+      eventId,
+      status: result.published ? PUBLISHED_STATUS_TITLE : VOTING_STATUS_TITLE,
+      supportCount: result.supportCount,
+      supportThreshold: result.supportThreshold,
+      supportsRemaining: calculateSupportsRemaining(
+        result.supportCount,
+        result.supportThreshold,
+      ),
+      progressPercent: calculateProgressPercent(
+        result.supportCount,
+        result.supportThreshold,
+      ),
+      hasSupported: true,
+    };
+  }
+
+  private assertSupportable(event: EventSupportContext): void {
     if (event.statusTitle === EXPIRED_STATUS_TITLE) {
       throw new ProposalExpiredException();
     }
 
     if (
       event.originTitle !== COMMUNITY_ORIGIN_TITLE ||
-      !VOTING_STATUS_TITLES.includes(event.statusTitle)
+      event.statusTitle !== VOTING_STATUS_TITLE
     ) {
       throw new EventNotSupportableException();
     }
@@ -62,33 +90,5 @@ export class EventRegistrationsService {
     if (event.votingDeadline && event.votingDeadline.getTime() <= Date.now()) {
       throw new ProposalExpiredException();
     }
-
-    const { created } = await this.registrationsRepository.createSupport(
-      eventId,
-      userId,
-    );
-
-    if (!created) {
-      throw new AlreadySupportedException();
-    }
-
-    const updated =
-      await this.registrationsRepository.findEventForSupport(eventId);
-    const supportCount = updated?.supportCount ?? event.supportCount + 1;
-
-    return {
-      eventId,
-      supportCount,
-      supportThreshold: event.supportThreshold,
-      supportsRemaining: calculateSupportsRemaining(
-        supportCount,
-        event.supportThreshold,
-      ),
-      progressPercent: calculateProgressPercent(
-        supportCount,
-        event.supportThreshold,
-      ),
-      hasSupported: true,
-    };
   }
 }
