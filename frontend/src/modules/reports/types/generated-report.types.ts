@@ -22,6 +22,7 @@ export interface ReportHistoryParams {
   limit: number;
   reportType?: ReportType;
   search?: string;
+  snapshotAt?: string;
 }
 
 export interface ReportHistoryState {

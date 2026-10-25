@@ -17,7 +17,7 @@ export class GeneratedReportsRepository {
     userId: string,
     skip: number,
     take: number,
-    { reportType, search }: ReportHistoryFilters = {},
+    { reportType, search, snapshotAt }: ReportHistoryFilters = {},
   ): Promise<GeneratedReportsPage> {
     const where = {
       userId,
@@ -25,11 +25,12 @@ export class GeneratedReportsRepository {
       ...(search && {
         reportName: { contains: search, mode: 'insensitive' as const },
       }),
+      ...(snapshotAt && { createdAt: { lte: new Date(snapshotAt) } }),
     };
     const [records, total] = await Promise.all([
       this.prisma.adminExportHistory.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         skip,
         take,
       }),
