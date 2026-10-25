@@ -176,3 +176,20 @@ describe("blocked dates API", () => {
     expect(remove).toHaveBeenCalledWith("/blocked-dates/a%2Fb%26c")
   })
 })
+
+describe("createAppointment", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("envía el bloque, el tema y el mensaje a /appointments", async () => {
+    const input = { blockId: "b1", orientationTypeId: "t1", message: null }
+    const appointment = { id: "a1" }
+    const post = vi.spyOn(apiClient, "post").mockResolvedValue(envelope(appointment))
+
+    const result = await availabilityApi.createAppointment(input)
+
+    expect(post).toHaveBeenCalledWith("/appointments", input)
+    expect(result).toEqual(appointment)
+  })
+})
