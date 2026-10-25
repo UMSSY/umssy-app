@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type KeyboardEvent, type ClipboardEvent, type ChangeEvent } from "react";
+import { useRef, type KeyboardEvent, type ClipboardEvent, type ChangeEvent, type FocusEvent } from "react";
 import { cn } from "cn";
 
 interface OtpInputProps {
@@ -24,30 +24,73 @@ export function OtpInput({
 
   const digits = Array.from({ length }, (_, index) => value[index] || "");
 
+  function handleFocus(index: number, event: FocusEvent<HTMLInputElement>) {
+    // Si el usuario intenta ir a una casilla superior sin haber completado las anteriores,
+    // se redirige el foco a la primera casilla vacía
+    const firstEmptyIndex = value.length;
+    if (index > firstEmptyIndex && firstEmptyIndex < length) {
+      inputRefs.current[firstEmptyIndex]?.focus();
+      return;
+    }
+    event.target.select();
+  }
+
   function handleDigitChange(index: number, event: ChangeEvent<HTMLInputElement>) {
     const rawVal = event.target.value;
-    const digit = rawVal.replace(/\D/g, "").slice(-1);
+    const cleaned = rawVal.replace(/\D/g, "");
 
+    // Si no hay dígitos (por ejemplo, al limpiar el campo)
+    if (!cleaned) {
+      const newDigits = [...digits];
+      newDigits[index] = "";
+      onChange(newDigits.join(""));
+      return;
+    }
+
+    // Si se pegó o autocompletó más de un dígito
+    if (cleaned.length > 1) {
+      const pasted = cleaned.slice(0, length);
+      onChange(pasted);
+      const nextFocus = Math.min(pasted.length, length - 1);
+      setTimeout(() => {
+        inputRefs.current[nextFocus]?.focus();
+        inputRefs.current[nextFocus]?.select();
+      }, 0);
+      return;
+    }
+
+    // Entrada de un solo dígito
+    const digit = cleaned.slice(-1);
+    const targetIndex = index > value.length ? value.length : index;
     const newDigits = [...digits];
-    newDigits[index] = digit;
+    newDigits[targetIndex] = digit;
     const newValue = newDigits.join("");
     onChange(newValue);
 
-    if (digit && index < length - 1) {
-      inputRefs.current[index + 1]?.focus();
-      inputRefs.current[index + 1]?.select();
+    // Saltar automáticamente a la siguiente casilla
+    if (targetIndex < length - 1) {
+      setTimeout(() => {
+        inputRefs.current[targetIndex + 1]?.focus();
+        inputRefs.current[targetIndex + 1]?.select();
+      }, 0);
     }
   }
 
   function handleKeyDown(index: number, event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Backspace") {
-      if (!digits[index] && index > 0) {
-        event.preventDefault();
-        inputRefs.current[index - 1]?.focus();
-        inputRefs.current[index - 1]?.select();
+      event.preventDefault();
+      if (digits[index]) {
+        const newDigits = [...digits];
+        newDigits[index] = "";
+        onChange(newDigits.join(""));
+      } else if (index > 0) {
         const newDigits = [...digits];
         newDigits[index - 1] = "";
         onChange(newDigits.join(""));
+        setTimeout(() => {
+          inputRefs.current[index - 1]?.focus();
+          inputRefs.current[index - 1]?.select();
+        }, 0);
       }
     } else if (event.key === "ArrowLeft" && index > 0) {
       event.preventDefault();
@@ -67,7 +110,10 @@ export function OtpInput({
 
     onChange(pastedData);
     const focusTarget = Math.min(pastedData.length, length - 1);
-    inputRefs.current[focusTarget]?.focus();
+    setTimeout(() => {
+      inputRefs.current[focusTarget]?.focus();
+      inputRefs.current[focusTarget]?.select();
+    }, 0);
   }
 
   return (
@@ -90,7 +136,13 @@ export function OtpInput({
           onChange={(e) => handleDigitChange(index, e)}
           onKeyDown={(e) => handleKeyDown(index, e)}
           onPaste={handlePaste}
-          onFocus={(e) => e.target.select()}
+          onFocus={(e) => handleFocus(index, e)}
+          onClick={() => {
+            const firstEmptyIndex = value.length;
+            if (index > firstEmptyIndex && firstEmptyIndex < length) {
+              inputRefs.current[firstEmptyIndex]?.focus();
+            }
+          }}
           aria-label={`Dígito ${index + 1} de ${length}`}
           aria-invalid={isInvalid ? true : undefined}
           data-testid={`otp-input-${index}`}

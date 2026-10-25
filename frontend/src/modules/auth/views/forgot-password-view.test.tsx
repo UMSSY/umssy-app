@@ -58,7 +58,7 @@ describe("ForgotPasswordView", () => {
     expect(authService.requestPasswordResetCode).not.toHaveBeenCalled();
   });
 
-  it("avanza al paso 2 al enviar un correo válido, muestra el correo enmascarado y vigencia de 10 minutos", async () => {
+  it("avanza al paso 2 al enviar un correo válido, muestra el correo enmascarado y vigencia de 5 minutos", async () => {
     render(<ForgotPasswordView />);
 
     fireEvent.change(screen.getByLabelText("Correo electrónico"), { target: { value: "estudiante@umss.edu" } });
@@ -70,8 +70,8 @@ describe("ForgotPasswordView", () => {
     });
 
     expect(screen.getByText(/e\*+@umss\.edu/)).toBeInTheDocument();
-    expect(screen.getByText(/Vence en 10 minutos\./)).toBeInTheDocument();
-    expect(screen.getByText(/10:00/)).toBeInTheDocument();
+    expect(screen.getByText(/Vence en 5 minutos\./)).toBeInTheDocument();
+    expect(screen.getByText(/05:00/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cambiar correo" })).toBeInTheDocument();
   });
 
@@ -157,6 +157,10 @@ describe("ForgotPasswordView", () => {
 
     // Step 3
     await waitFor(() => expect(screen.getByRole("heading", { name: "Crea una nueva contraseña" })).toBeInTheDocument());
+
+    expect(screen.getByText("Mínimo 8 caracteres")).toBeInTheDocument();
+    expect(screen.getByText("Al menos una letra mayúscula")).toBeInTheDocument();
+    expect(screen.getByText("Al menos un número")).toBeInTheDocument();
 
     const newPassInput = screen.getByLabelText("Nueva contraseña");
     const confirmPassInput = screen.getByLabelText("Confirmar contraseña");

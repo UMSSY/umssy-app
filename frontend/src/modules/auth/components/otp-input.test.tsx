@@ -21,6 +21,17 @@ describe("OtpInput", () => {
     expect(onChange).toHaveBeenCalledWith("12");
   });
 
+  it("redirects digit to the first empty slot if typed in a later slot with previous slots empty", () => {
+    const onChange = vi.fn();
+    render(<OtpInput value="" onChange={onChange} />);
+
+    const inputs = screen.getAllByRole("textbox");
+    // User tries to type "5" directly into slot 2 (casilla 3)
+    fireEvent.change(inputs[2], { target: { value: "5" } });
+    // It should place it in slot 0, calling onChange with "5"
+    expect(onChange).toHaveBeenCalledWith("5");
+  });
+
   it("handles backspace to delete previous digit", () => {
     const onChange = vi.fn();
     render(<OtpInput value="12" onChange={onChange} />);
