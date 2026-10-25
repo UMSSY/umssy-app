@@ -14,7 +14,7 @@ import {
   EXPIRED_STATUS_TITLE,
   PUBLISHED_STATUS_TITLE,
   CONFIRMED_REGISTRATION_TITLE,
-  VOTING_STATUS_TITLE,
+  VOTING_STATUS_TITLES,
 } from '../constants/events.constants.js';
 export { PUBLISHED_STATUS_TITLE } from '../constants/events.constants.js';
 
@@ -130,7 +130,7 @@ export class EventsRepository {
 
     const { count } = await this.prisma.event.updateMany({
       where: {
-        status: { title: VOTING_STATUS_TITLE },
+        status: { title: { in: VOTING_STATUS_TITLES } },
         origin: { title: COMMUNITY_ORIGIN_TITLE },
         votingDeadline: { lte: now },
       },
