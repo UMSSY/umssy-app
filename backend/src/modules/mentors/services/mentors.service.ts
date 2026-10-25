@@ -1,3 +1,4 @@
+
 import { Injectable } from '@nestjs/common';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 import {
@@ -31,7 +32,7 @@ export class MentorsService {
   }
 
   async findDirectory(query: MentorDirectoryQuery) {
-    if (query.sort !== 'name_asc') {
+    if (query.sort === 'affinity') {
       throw new RequestValidationException([
         {
           field: 'sort',
@@ -41,23 +42,28 @@ export class MentorsService {
     }
 
     const now = new Date();
+
     const filters = {
       search: query.search,
       area: query.area,
       available: query.available,
     };
+
     const totalItems = await this.mentorsRepository.countDirectoryMentors(
       filters,
       now,
     );
+
     const totalPages = Math.ceil(totalItems / DIRECTORY_PAGE_SIZE);
     const page = Math.min(query.page, Math.max(1, totalPages));
+
     const mentors = totalItems
       ? await this.mentorsRepository.findDirectoryPage(
           filters,
           now,
           page,
           DIRECTORY_PAGE_SIZE,
+          query.sort,
         )
       : [];
 
@@ -67,7 +73,7 @@ export class MentorsService {
       pageSize: DIRECTORY_PAGE_SIZE,
       totalItems,
       totalPages,
-      effectiveSort: 'name_asc' as const,
+      effectiveSort: query.sort,
     };
   }
 
@@ -87,6 +93,7 @@ export class MentorsService {
 
   async findMyTechnicalAreas(userId: string) {
     await this.assertActiveMentor(userId);
+
     const relations =
       await this.mentorsRepository.findMentorTechnicalAreas(userId);
 
@@ -98,6 +105,7 @@ export class MentorsService {
     data: UpdateMentorTechnicalAreasDto,
   ) {
     await this.assertActiveMentor(userId);
+
     const technicalAreas = await this.mentorsRepository.findTechnicalAreas(
       data.technicalAreaIds,
     );
@@ -116,6 +124,7 @@ export class MentorsService {
 
   async findMyOrientationTypes(userId: string) {
     await this.assertActiveMentor(userId);
+
     const relations =
       await this.mentorsRepository.findMentorOrientationTypes(userId);
 
@@ -127,6 +136,7 @@ export class MentorsService {
     data: UpdateMentorOrientationTypesDto,
   ) {
     await this.assertActiveMentor(userId);
+
     const orientationTypes =
       await this.mentorsRepository.findActiveOrientationTypes(
         data.orientationTypeIds,

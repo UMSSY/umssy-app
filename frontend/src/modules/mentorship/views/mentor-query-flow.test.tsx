@@ -5,6 +5,7 @@ import { renderWithQuery } from "@/shared/testing/render-with-query";
 import * as directoryService from "../services/mentor-directory.service";
 import * as profileService from "../services/mentor-profile.service";
 import { MENTOR_PROFILE_FIXTURE } from "../testing/mentor-profile.fixture";
+import type { DirectoryPage } from "../types/mentor-directory.types";
 import { MentorDirectoryView } from "./mentor-directory-view";
 import { MentorProfileView } from "./mentor-profile-view";
 
@@ -55,6 +56,24 @@ const mentors = [
   },
 ];
 
+const directoryPage: DirectoryPage = {
+  items: mentors,
+  page: 1,
+  pageSize: 6,
+  totalItems: mentors.length,
+  totalPages: 1,
+  effectiveSort: "name_asc",
+};
+
+const emptyDirectoryPage: DirectoryPage = {
+  items: [],
+  page: 1,
+  pageSize: 6,
+  totalItems: 0,
+  totalPages: 0,
+  effectiveSort: "name_asc",
+};
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -73,7 +92,9 @@ beforeEach(() => {
 
 describe("Directory and profile query flows", () => {
   it("hides profile links during loading and then shows active mentors", async () => {
-    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(mentors);
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
+      directoryPage,
+    );
 
     renderWithQuery(<MentorDirectoryView />);
 
@@ -84,16 +105,20 @@ describe("Directory and profile query flows", () => {
       await screen.findAllByRole("link", { name: /Ver perfil de/ }),
     ).toHaveLength(2);
 
-    expect(screen.getByRole("status")).toHaveTextContent("2 mentores encontrados");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "2 mentores encontrados",
+    );
   });
 
   it("shows an informative empty state without fabricated cards", async () => {
-    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue([]);
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
+      emptyDirectoryPage,
+    );
 
     renderWithQuery(<MentorDirectoryView />);
 
     expect(
-      await screen.findByText("No hay mentores activos"),
+      await screen.findByText("No hay mentores con estos filtros"),
     ).toBeInTheDocument();
 
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
@@ -103,7 +128,7 @@ describe("Directory and profile query flows", () => {
     const request = vi
       .spyOn(directoryService, "getMentorDirectory")
       .mockRejectedValueOnce(new Error("offline"))
-      .mockResolvedValue(mentors);
+      .mockResolvedValue(directoryPage);
 
     renderWithQuery(<MentorDirectoryView />);
 

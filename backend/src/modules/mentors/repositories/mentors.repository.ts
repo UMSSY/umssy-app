@@ -1,3 +1,4 @@
+
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -29,6 +30,8 @@ interface DirectoryFilters {
   area?: string;
   available: boolean;
 }
+
+type MentorDirectorySort = 'name_asc' | 'name_desc';
 
 @Injectable()
 export class MentorsRepository {
@@ -90,12 +93,9 @@ export class MentorsRepository {
       where: this.activeMentorWhere(now),
       select: directorySelect,
       orderBy: [
-        {
-          firstName: 'asc',
-        },
-        {
-          lastName: 'asc',
-        },
+        { firstName: 'asc' },
+        { lastName: 'asc' },
+        { id: 'asc' },
       ],
     });
 
@@ -113,11 +113,18 @@ export class MentorsRepository {
     now: Date,
     page: number,
     pageSize: number,
+    sort: MentorDirectorySort = 'name_asc',
   ) {
+    const direction = sort === 'name_desc' ? 'desc' : 'asc';
+
     const mentors = await this.prisma.user.findMany({
       where: this.directoryWhere(filters, now),
       select: directorySelect,
-      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
+      orderBy: [
+        { firstName: direction },
+        { lastName: direction },
+        { id: 'asc' },
+      ],
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
@@ -143,12 +150,17 @@ export class MentorsRepository {
     now: Date,
   ): Prisma.UserWhereInput {
     const where = this.activeMentorWhere(now);
-    if (filters.available) where.isAvailableForMentoring = true;
+
+    if (filters.available) {
+      where.isAvailableForMentoring = true;
+    }
+
     if (filters.area) {
       where.mentorTechnicalAreas = {
         some: { technicalArea: { name: filters.area } },
       };
     }
+
     if (filters.search) {
       where.AND = filters.search.split(/\s+/).map((word) => ({
         OR: [
@@ -167,10 +179,13 @@ export class MentorsRepository {
         ],
       }));
     }
+
     return where;
   }
 
-  private async withPhotoVersions<T extends { id: string }>(mentors: T[]) {
+  private async withPhotoVersions<T extends { id: string }>(
+    mentors: T[],
+  ) {
     const photos = mentors.length
       ? await this.prisma.user.findMany({
           where: {
@@ -181,6 +196,7 @@ export class MentorsRepository {
           select: { id: true, updatedAt: true },
         })
       : [];
+
     const photoVersions = new Map(
       photos.map((photo) => [photo.id, photo.updatedAt.toISOString()]),
     );
@@ -299,12 +315,8 @@ export class MentorsRepository {
             },
           },
           orderBy: [
-            {
-              isCurrent: 'desc',
-            },
-            {
-              startDate: 'desc',
-            },
+            { isCurrent: 'desc' },
+            { startDate: 'desc' },
           ],
         },
         userSkills: {
@@ -450,7 +462,10 @@ export class MentorsRepository {
     });
   }
 
-  replaceMentorOrientationTypes(userId: string, orientationTypeIds: string[]) {
+  replaceMentorOrientationTypes(
+    userId: string,
+    orientationTypeIds: string[],
+  ) {
     return this.prisma.$transaction(async (transaction) => {
       await transaction.mentorOrientationType.deleteMany({
         where: {

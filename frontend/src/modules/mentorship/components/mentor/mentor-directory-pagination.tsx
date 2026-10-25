@@ -74,7 +74,11 @@ export function MentorDirectoryPagination({
                   type="button"
                   variant={isCurrentPage ? "outline" : "ghost"}
                   size="icon"
-                  onClick={() => onPageChange(pageNumber)}
+                  onClick={() => {
+                    if (!isCurrentPage) {
+                      onPageChange(pageNumber);
+                    }
+                  }}
                   aria-label={`Página ${pageNumber}`}
                   aria-current={isCurrentPage ? "page" : undefined}
                 >
