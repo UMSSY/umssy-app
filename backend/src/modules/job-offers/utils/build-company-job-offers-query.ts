@@ -2,7 +2,6 @@ import { DAY_MS } from '../../../common/constants/date-time.constants.js';
 import { toUtcIso } from '../../../common/utils/date-time.js';
 import type { Prisma } from '../../../prisma/client.js';
 import type { ListCompanyJobOffersRequest } from '../requests/list-company-job-offers.request.js';
-import { JobOfferStatus } from '../types/job-offer.enum.js';
 
 export interface CompanyJobOffersQuery {
   where: Prisma.JobOfferWhereInput;
@@ -31,11 +30,12 @@ export function buildCompanyJobOffersQuery(
 
   const where: Prisma.JobOfferWhereInput = {
     companyId,
-    status: { title: { not: JobOfferStatus.DELETED } },
     ...(filters.modality && { modality: { title: filters.modality } }),
     ...(filters.contractType && { contractType: { title: filters.contractType } }),
     ...(createdAt && { createdAt }),
-    ...(filters.search && { title: { contains: filters.search, mode: 'insensitive' } }),
+    ...(filters.search && {
+    title: { contains: filters.search, mode: 'insensitive' },
+    }),
   };
 
   const orderBy: Prisma.JobOfferOrderByWithRelationInput[] = [

@@ -1,3 +1,7 @@
+import { HISTORY_STATUSES, PUBLISHED_STATUS } from "../constants/vacancies.constants";
+import type { JobOffer, JobOfferListScope } from "../types/job-offer.types";
+import { normalizeSearchText } from "./normalize-search-text";
+
 export type ApplicantsOrder = "none" | "most" | "least";
 
 export interface JobOfferFilters {
@@ -7,6 +11,7 @@ export interface JobOfferFilters {
   applicants: ApplicantsOrder;
   dateFrom: string;
   dateTo: string;
+  status: string;
 }
 
 export const DEFAULT_JOB_OFFER_FILTERS: JobOfferFilters = {
@@ -16,6 +21,7 @@ export const DEFAULT_JOB_OFFER_FILTERS: JobOfferFilters = {
   applicants: "none",
   dateFrom: "",
   dateTo: "",
+  status: "",
 };
 
 export interface JobOfferListParams {
@@ -40,4 +46,23 @@ export function toListParams(filters: JobOfferFilters): JobOfferListParams {
     sortBy: byApplicants ? "applicants" : "createdAt",
     order: filters.applicants === "least" ? "asc" : "desc",
   };
+}
+
+export function selectVisibleOffers(
+  offers: JobOffer[],
+  scope: JobOfferListScope,
+  filters: JobOfferFilters,
+): JobOffer[] {
+  if (scope === "published") {
+    return offers.filter((offer) => offer.status === PUBLISHED_STATUS);
+  }
+
+  const normalizedSearch = normalizeSearchText(filters.search);
+
+  return offers.filter(
+    (offer) =>
+      HISTORY_STATUSES.includes(offer.status) &&
+      (filters.status === "" || offer.status === filters.status) &&
+      normalizeSearchText(offer.title).includes(normalizedSearch),
+  );
 }

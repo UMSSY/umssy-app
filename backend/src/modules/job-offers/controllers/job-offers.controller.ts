@@ -100,6 +100,8 @@ export class JobOffersController {
   }
 
   @Get('companies/:companyId/job-offers')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('empresa')
   @ApiOperation({ summary: 'Lista las vacantes de una empresa, con filtros opcionales' })
   @ApiQuery({ name: 'modality', required: false, enum: JobOfferModality })
   @ApiQuery({ name: 'contractType', required: false, enum: JobOfferContractType })

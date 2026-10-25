@@ -4,8 +4,6 @@ import { JOB_OFFER_CREATED_SELECT, JOB_OFFER_SELECT } from '../constants/job-off
 import { JobOffersRepository } from '../repositories/job-offers.repository.js';
 import { JobOfferContractType, JobOfferModality, JobOfferStatus } from '../types/job-offer.enum.js';
 
-const NOT_DELETED = { title: { not: JobOfferStatus.DELETED } };
-
 function createPrisma() {
   return {
     company: { findUnique: vi.fn() },
@@ -112,7 +110,7 @@ describe('JobOffersRepository', () => {
     await repository.findByCompany('company-1', { sortBy: 'createdAt', order: 'desc' });
 
     expect(prisma.jobOffer.findMany).toHaveBeenCalledWith({
-      where: { companyId: 'company-1', status: NOT_DELETED },
+      where: { companyId: 'company-1'  },
       orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       select: JOB_OFFER_SELECT,
     });
@@ -134,7 +132,6 @@ describe('JobOffersRepository', () => {
     expect(prisma.jobOffer.findMany).toHaveBeenCalledWith({
       where: {
         companyId: 'company-1',
-        status: NOT_DELETED,
         modality: { title: 'Remoto' },
         contractType: { title: 'Medio tiempo' },
         createdAt: {
@@ -193,4 +190,22 @@ describe('JobOffersRepository', () => {
       select: JOB_OFFER_SELECT,
     });
   });
+
+  it('permite consultar los detalles de una vacante eliminada en el historial', async () => {
+    const record = { id: 'offer-1' };
+    prisma.jobOffer.findFirst.mockResolvedValue(record);
+
+    await expect(
+      repository.findHistoryByCompanyAndId('company-1', 'offer-1'),
+    ).resolves.toBe(record);
+
+    expect(prisma.jobOffer.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'offer-1',
+        companyId: 'company-1',
+      },
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
 });

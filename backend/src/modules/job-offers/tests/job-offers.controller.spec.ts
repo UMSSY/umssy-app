@@ -51,6 +51,22 @@ describe('JobOffersController', () => {
     });
   });
 
+  it('exige sesión y rol empresa para consultar el historial de vacantes', () => {
+    const handler = Object.getOwnPropertyDescriptor(
+      JobOffersController.prototype,
+      'listByCompany',
+    )?.value;
+
+    if (!handler) throw new Error('No se encontró el handler del historial');
+
+    expect(Reflect.getMetadata('__guards__', handler)).toEqual([
+      JwtAuthGuard,
+      RolesGuard,
+    ]);
+
+    expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(['empresa']);
+  });
+
   it('rechaza un id de empresa que no es UUID con el formato estándar de validación', async () => {
     const paramTypes = Reflect.getMetadata(
       '__routeArguments__',
@@ -115,7 +131,12 @@ describe('JobOffersController', () => {
   });
 
   it('exige sesión y rol empresa para editar una vacante', () => {
-    const handler = JobOffersController.prototype.update;
+    const handler = Object.getOwnPropertyDescriptor(
+      JobOffersController.prototype,
+      'update',
+    )?.value;
+
+    if (!handler) throw new Error('No se encontró el handler de edición');
 
     expect(Reflect.getMetadata('__guards__', handler)).toEqual([JwtAuthGuard, RolesGuard]);
     expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(['empresa']);
