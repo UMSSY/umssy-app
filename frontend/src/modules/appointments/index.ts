@@ -6,3 +6,4 @@ export type { AppointmentScope } from "./types/appointment-scope.types";
 export type { AppointmentStatus } from "./types/appointment-status.types";
 export type { AppointmentCounterpart } from "./types/appointment-counterpart.types";
 export type { AppointmentOrientationType } from "./types/appointment-orientation-type.types";
+export { APPOINTMENTS_QUERY_KEYS } from "./constants/appointments-query-keys.constants";
