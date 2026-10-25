@@ -45,6 +45,7 @@ describe('file exceptions', () => {
     expect(status).toHaveBeenCalledWith(400);
     expect(json).toHaveBeenCalledWith({
       statusCode: 400,
+      code: 'CORRUPTED_FILE',
       data: { code: 'CORRUPTED_FILE' },
       detail: 'File content is incomplete or corrupted',
       ok: false,
@@ -63,6 +64,7 @@ describe('file exceptions', () => {
     expect(status).toHaveBeenCalledWith(413);
     expect(json).toHaveBeenCalledWith({
       statusCode: 413,
+      code: 'FILE_TOO_LARGE',
       data: null,
       detail: 'File exceeds the maximum allowed size',
       ok: false,

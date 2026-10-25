@@ -279,6 +279,7 @@ describe('EducationsController', () => {
       .expect(404);
     expect(response.body).toEqual({
       statusCode: 404,
+        code: 'EDUCATION_NOT_FOUND',
       data: null,
       detail: 'Education not found',
       ok: false,

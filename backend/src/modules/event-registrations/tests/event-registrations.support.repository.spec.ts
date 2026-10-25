@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
+import { EventRegistrationsService } from '../services/event-registrations.service.js';
 
 function buildEventRow(
   overrides: Partial<{
@@ -21,8 +21,8 @@ function buildEventRow(
   };
 }
 
-describe('EventRegistrationsRepository.registerSupport', () => {
-  let repository: EventRegistrationsRepository;
+describe('EventRegistrationsService.registerSupport', () => {
+  let repository: EventRegistrationsService;
   let tx: {
     $queryRaw: ReturnType<typeof vi.fn>;
     event: {
@@ -51,7 +51,7 @@ describe('EventRegistrationsRepository.registerSupport', () => {
         callback(tx),
       ),
     };
-    repository = new EventRegistrationsRepository(prismaMock as never);
+    repository = new EventRegistrationsService(prismaMock as never, {} as never);
   });
 
   it('bloquea la fila del evento antes de leer su estado', async () => {
