@@ -54,10 +54,14 @@ function createRepository() {
       contractTypeId: 'contract-1',
       statusId: 'status-1',
     }),
-    create: vi.fn().mockResolvedValue({ id: 'offer-1', createdAt: CREATED_AT }),
+    create: vi.fn().mockResolvedValue({
+      id: 'offer-1',
+      createdAt: CREATED_AT,
+    }),
     findPublished: vi.fn().mockResolvedValue([RECORD]),
     findByCompany: vi.fn().mockResolvedValue([RECORD]),
     findByCompanyAndId: vi.fn().mockResolvedValue(RECORD),
+    findHistoryByCompanyAndId: vi.fn().mockResolvedValue(RECORD),
     update: vi.fn().mockResolvedValue(RECORD),
   };
 }
@@ -189,7 +193,7 @@ describe('JobOffersService', () => {
   it('obtiene los detalles de una vacante perteneciente a la empresa', async () => {
     const result = await service.getByCompanyAndId('company-1', 'offer-1');
 
-    expect(repository.findByCompanyAndId).toHaveBeenCalledWith('company-1', 'offer-1');
+    expect(repository.findHistoryByCompanyAndId).toHaveBeenCalledWith('company-1', 'offer-1');
     expect(result).toMatchObject({
       id: 'offer-1',
       languages: 'Español',
@@ -198,7 +202,7 @@ describe('JobOffersService', () => {
   });
 
   it('responde 404 si la vacante no existe o no pertenece a la empresa', async () => {
-    repository.findByCompanyAndId.mockResolvedValue(null);
+    repository.findHistoryByCompanyAndId.mockResolvedValue(null);
 
     await expect(service.getByCompanyAndId('company-1', 'missing')).rejects.toBeInstanceOf(
       JobOfferNotFoundException,
@@ -206,7 +210,7 @@ describe('JobOffersService', () => {
   });
 
   it('propaga los errores del repositorio al consultar los detalles', async () => {
-    repository.findByCompanyAndId.mockRejectedValue(new Error('Error de base de datos'));
+    repository.findHistoryByCompanyAndId.mockRejectedValue(new Error('Error de base de datos'));
 
     await expect(service.getByCompanyAndId('company-1', 'offer-1')).rejects.toThrow(
       'Error de base de datos',
@@ -219,7 +223,7 @@ describe('JobOffersService', () => {
     await expect(service.getByCompanyAndId('missing', 'offer-1')).rejects.toBeInstanceOf(
       CompanyNotFoundException,
     );
-    expect(repository.findByCompanyAndId).not.toHaveBeenCalled();
+    expect(repository.findHistoryByCompanyAndId).not.toHaveBeenCalled();
   });
 
   it('devuelve el catálogo de tecnologías', async () => {
@@ -285,5 +289,24 @@ describe('JobOffersService', () => {
       );
       expect(repository.update).not.toHaveBeenCalled();
     });
+
+    it('permite consultar los detalles de una vacante eliminada en el historial', async () => {
+      const deletedRecord: JobOfferRecord = {
+      ...RECORD,
+      status: { title: 'Eliminada' },
+      };
+
+      repository.findHistoryByCompanyAndId.mockResolvedValue(deletedRecord);
+
+      const result = await service.getByCompanyAndId('company-1', 'offer-1');
+
+      expect(repository.findHistoryByCompanyAndId).toHaveBeenCalledWith(
+        'company-1',
+        'offer-1',
+      );
+      expect(result.status).toBe('Eliminada');
+      expect(repository.update).not.toHaveBeenCalled();
+    });
+
   });
 });

@@ -10,6 +10,7 @@ import { JOB_OFFER_VALIDATION_MESSAGES as MESSAGES } from '../constants/job-offe
 import { JobOffersController } from '../controllers/job-offers.controller.js';
 import { CompanyNotFoundException, JobOfferNotFoundException } from '../exceptions/index.js';
 import { JobOffersService } from '../services/job-offers.service.js';
+import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 
 const COMPANY_ID = 'a0000000-0000-4000-8000-000000000001';
 const URL = `/companies/${COMPANY_ID}/job-offers`;
@@ -183,5 +184,67 @@ describe('GET /companies/:companyId/job-offers/:jobOfferId', () => {
     service.getByCompanyAndId.mockRejectedValue(new JobOfferNotFoundException());
 
     await request(app.getHttpServer()).get(`${URL}/${JOB_OFFER_ID}`).expect(404);
+  });
+});
+
+
+describe('GET /companies/:companyId/job-offers - seguridad', () => {
+  let app: INestApplication;
+  let service: { listByCompany: ReturnType<typeof vi.fn> };
+
+  async function createApp(
+    authenticated: boolean,
+    authorizedRole: boolean,
+  ): Promise<INestApplication> {
+    const moduleRef = await Test.createTestingModule({
+      controllers: [JobOffersController],
+      providers: [
+        { provide: JobOffersService, useValue: service },
+        { provide: APP_FILTER, useClass: DomainExceptionFilter },
+      ],
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: () => {
+          if (!authenticated) throw new UnauthorizedException();
+          return true;
+        },
+      })
+      .overrideGuard(RolesGuard)
+      .useValue({
+        canActivate: () => {
+          if (!authorizedRole) throw new ForbiddenException();
+          return true;
+        },
+      })
+      .compile();
+
+    const application = moduleRef.createNestApplication();
+    await application.init();
+    return application;
+  }
+
+  beforeEach(() => {
+    service = { listByCompany: vi.fn().mockResolvedValue([]) };
+  });
+
+  afterEach(async () => {
+    if (app) await app.close();
+  });
+
+  it('rechaza con 401 una solicitud sin sesión', async () => {
+    app = await createApp(false, false);
+
+    await request(app.getHttpServer()).get(URL).expect(401);
+
+    expect(service.listByCompany).not.toHaveBeenCalled();
+  });
+
+  it('rechaza con 403 una sesión sin rol empresa', async () => {
+    app = await createApp(true, false);
+
+    await request(app.getHttpServer()).get(URL).expect(403);
+
+    expect(service.listByCompany).not.toHaveBeenCalled();
   });
 });
