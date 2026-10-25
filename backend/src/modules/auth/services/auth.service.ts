@@ -73,14 +73,15 @@ export class AuthService {
     // Si el usuario no existe o está inactivo, retornamos éxito genérico para no filtrar existencia de correos
     if (!user || !user.isActive) {
       this.logger.warn(`Solicitud de recuperación de contraseña para correo inexistente o inactivo: ${dto.email}`);
-      return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación.' };
+      return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.' };
     }
 
     const latestOtp = await this.authRepository.findLatestOtp(user.id);
     if (latestOtp) {
       const elapsedSeconds = (Date.now() - latestOtp.createdAt.getTime()) / 1000;
       if (elapsedSeconds < RESEND_COOLDOWN_SECONDS) {
-        throw new ResetCodeCooldownException();
+        this.logger.warn('Cooldown activo para solicitud de código de: ' + dto.email);
+        return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.' };
       }
     }
 
@@ -106,7 +107,7 @@ export class AuthService {
       },
     });
 
-    return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación.' };
+    return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.' };
   }
 
   async verifyPasswordReset(dto: VerifyPasswordResetDto): Promise<{ ok: boolean; message: string }> {

@@ -130,7 +130,7 @@ describe('AuthService', () => {
       const res = await service.requestPasswordReset({ email: 'user@umss.edu' });
 
       expect(res.ok).toBe(true);
-      expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación.');
+      expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.');
       expect(authRepository.createPasswordResetOtp).toHaveBeenCalled();
       expect(mailService.send).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -147,12 +147,12 @@ describe('AuthService', () => {
       const res = await service.requestPasswordReset({ email: 'desconocido@umss.edu' });
 
       expect(res.ok).toBe(true);
-      expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación.');
+      expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.');
       expect(authRepository.createPasswordResetOtp).not.toHaveBeenCalled();
       expect(mailService.send).not.toHaveBeenCalled();
     });
 
-    it('lanza ResetCodeCooldownException si se solicita un nuevo código antes de 2 minutos (120s)', async () => {
+    it('retorna respuesta genérica sin enviar correo si se solicita dentro del cooldown de 2 minutos', async () => {
       authRepository.findUserByEmail.mockResolvedValue({
         id: 'u-123',
         email: 'user@umss.edu',
@@ -166,13 +166,12 @@ describe('AuthService', () => {
         createdAt: new Date(Date.now() - 30 * 1000),
       });
 
-      await expect(service.requestPasswordReset({ email: 'user@umss.edu' })).rejects.toBeInstanceOf(
-        ResetCodeCooldownException,
-      );
+      const res = await service.requestPasswordReset({ email: 'user@umss.edu' });
+      expect(res.ok).toBe(true);
+      expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.');
       expect(authRepository.createPasswordResetOtp).not.toHaveBeenCalled();
       expect(mailService.send).not.toHaveBeenCalled();
     });
-
     it('permite solicitar nuevo código si ya pasaron más de 2 minutos', async () => {
       authRepository.findUserByEmail.mockResolvedValue({
         id: 'u-123',
