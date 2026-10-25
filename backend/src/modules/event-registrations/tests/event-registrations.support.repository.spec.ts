@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
+import { EventRegistrationsService } from '../services/event-registrations.service.js';
 
-describe('EventRegistrationsRepository (apoyo)', () => {
-  let repository: EventRegistrationsRepository;
+describe('EventRegistrationsService (apoyo)', () => {
+  let repository: EventRegistrationsService;
   let prismaMock: {
     event: { findUnique: ReturnType<typeof vi.fn> };
     eventRegistration: { create: ReturnType<typeof vi.fn> };
@@ -13,7 +13,7 @@ describe('EventRegistrationsRepository (apoyo)', () => {
       event: { findUnique: vi.fn() },
       eventRegistration: { create: vi.fn() },
     };
-    repository = new EventRegistrationsRepository(prismaMock as never);
+    repository = new EventRegistrationsService(prismaMock as never, {} as never);
   });
 
   describe('findEventForSupport', () => {

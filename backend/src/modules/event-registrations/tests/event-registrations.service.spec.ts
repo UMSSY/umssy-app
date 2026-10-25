@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
-import type { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
 
 describe('EventRegistrationsService', () => {
   let service: EventRegistrationsService;
@@ -10,14 +9,12 @@ describe('EventRegistrationsService', () => {
   beforeEach(() => {
     create.mockReset();
     findByUserId.mockReset();
-    service = new EventRegistrationsService({
-      create,
-      findByUserId,
-    } as unknown as EventRegistrationsRepository);
+    service = new EventRegistrationsService({ eventRegistration: { create } } as never, {} as never);
+    vi.spyOn(service, 'findByUserId').mockImplementation(findByUserId);
   });
 
   it('genera y persiste un token QR hexadecimal de 64 caracteres', async () => {
-    create.mockImplementation(async (payload) => ({ id: 'reg-1', ...payload }));
+    create.mockImplementation(async ({ data }) => ({ id: 'reg-1', ...data }));
 
     const result = await service.createWithQrToken({
       eventId: 'event-1',
@@ -26,16 +23,14 @@ describe('EventRegistrationsService', () => {
     });
 
     expect(create).toHaveBeenCalledWith({
-      eventId: 'event-1',
-      userId: 'user-1',
-      statusId: 'status-1',
-      qrToken: expect.stringMatching(/^[a-f0-9]{64}$/),
+      data: { eventId: 'event-1', userId: 'user-1', statusId: 'status-1', qrToken: expect.stringMatching(/^[a-f0-9]{64}$/) },
+      select: { id: true, eventId: true, userId: true, statusId: true, qrToken: true },
     });
     expect(result.qrToken).toMatch(/^[a-f0-9]{64}$/);
   });
 
   it('genera tokens distintos para inscripciones diferentes', async () => {
-    create.mockImplementation(async (payload) => ({ id: 'reg-1', ...payload }));
+    create.mockImplementation(async ({ data }) => ({ id: 'reg-1', ...data }));
 
     const first = await service.createWithQrToken({
       eventId: 'event-1',
@@ -55,6 +50,8 @@ describe('EventRegistrationsService', () => {
     findByUserId.mockResolvedValue([
       {
         id: 'reg-1',
+        registeredAt: new Date('2026-10-18T10:00:00.000Z'),
+        cancelledAt: null,
         status: { title: 'Confirmada' },
         event: {
           title: 'Taller de NestJS',
@@ -74,6 +71,8 @@ describe('EventRegistrationsService', () => {
         date: new Date('2026-10-20T00:00:00.000Z'),
         location: 'Aula 101',
         status: 'Confirmada',
+        registeredAt: '2026-10-18T10:00:00.000Z',
+        cancelledAt: null,
       },
     ]);
   });
