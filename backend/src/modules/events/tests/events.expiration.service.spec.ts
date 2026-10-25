@@ -15,11 +15,12 @@ describe('EventsService - vencimiento automático', () => {
     expireOverdueProposals.mockResolvedValue(0);
     findAndCount.mockResolvedValue({ items: [], total: 0 });
     findById.mockResolvedValue(null);
-    service = new EventsService({
+    service = new EventsService({} as never);
+    vi.spyOn(service, 'expireOverdueProposals').mockImplementation(
       expireOverdueProposals,
-      findAndCount,
-      findById,
-    } as never);
+    );
+    vi.spyOn(service, 'findAndCount').mockImplementation(findAndCount);
+    vi.spyOn(service, 'findById').mockImplementation(findById);
   });
 
   it('vence las propuestas con plazo cumplido antes de listar', async () => {

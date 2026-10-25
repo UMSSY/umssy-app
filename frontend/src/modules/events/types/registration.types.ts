@@ -6,4 +6,6 @@ export interface Registration {
   endTime: string;
   location: string;
   status: string;
+  registeredAt?: string;
+  cancelledAt?: string | null;
 }

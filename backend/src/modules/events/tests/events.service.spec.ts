@@ -20,7 +20,7 @@ function buildRecord(): EventWithRelations {
     votingDeadline: null,
     status: { title: 'Publicado' },
     origin: { title: 'Institucional' },
-    category: { id: 'cat-1', name: 'Tecnologia' },
+    category: { id: 'cat-1', namee: 'Tecnologia' },
     _count: { registrations: 3 },
   };
 }
@@ -30,16 +30,14 @@ describe('EventsService', () => {
   let repositoryMock: {
     findAndCount: ReturnType<typeof vi.fn>;
     findById: ReturnType<typeof vi.fn>;
-    expireOverdueProposals: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
-    repositoryMock = {
-      findAndCount: vi.fn(),
-      findById: vi.fn(),
-      expireOverdueProposals: vi.fn().mockResolvedValue(0),
-    };
-    service = new EventsService(repositoryMock as never);
+    repositoryMock = { findAndCount: vi.fn(), findById: vi.fn() };
+    service = new EventsService({} as never);
+    vi.spyOn(service, 'findAndCount').mockImplementation(repositoryMock.findAndCount);
+    vi.spyOn(service, 'findById').mockImplementation(repositoryMock.findById);
+    vi.spyOn(service, 'expireOverdueProposals').mockResolvedValue(0);
   });
 
   it('returns formatted list with offset, totalPages and items', async () => {

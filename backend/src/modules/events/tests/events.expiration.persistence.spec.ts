@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EventsRepository } from '../repositories/events.repository.js';
+import { EventsService } from '../services/events.service.js';
 
-describe('EventsRepository.expireOverdueProposals', () => {
+describe('EventsService.expireOverdueProposals', () => {
   const findStatus = vi.fn();
   const updateMany = vi.fn();
   const now = new Date('2026-10-12T23:59:00.000Z');
-  let repository: EventsRepository;
+  let service: EventsService;
 
   beforeEach(() => {
     findStatus.mockReset();
     updateMany.mockReset();
-    repository = new EventsRepository({
+    service = new EventsService({
       eventStatus: { findUnique: findStatus },
       event: { updateMany },
     } as never);
@@ -20,7 +20,7 @@ describe('EventsRepository.expireOverdueProposals', () => {
     findStatus.mockResolvedValue({ id: 'expired-id' });
     updateMany.mockResolvedValue({ count: 2 });
 
-    await expect(repository.expireOverdueProposals(now)).resolves.toBe(2);
+    await expect(service.expireOverdueProposals(now)).resolves.toBe(2);
 
     expect(findStatus).toHaveBeenCalledWith({
       where: { title: 'Vencido' },
@@ -40,13 +40,13 @@ describe('EventsRepository.expireOverdueProposals', () => {
     findStatus.mockResolvedValue({ id: 'expired-id' });
     updateMany.mockResolvedValue({ count: 0 });
 
-    await expect(repository.expireOverdueProposals(now)).resolves.toBe(0);
+    await expect(service.expireOverdueProposals(now)).resolves.toBe(0);
   });
 
   it('no actualiza nada si el estado Vencido no existe', async () => {
     findStatus.mockResolvedValue(null);
 
-    await expect(repository.expireOverdueProposals(now)).resolves.toBe(0);
+    await expect(service.expireOverdueProposals(now)).resolves.toBe(0);
     expect(updateMany).not.toHaveBeenCalled();
   });
 });
