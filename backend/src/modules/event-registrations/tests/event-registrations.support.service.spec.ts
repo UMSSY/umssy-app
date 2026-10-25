@@ -76,7 +76,7 @@ describe('EventRegistrationsService.support', () => {
     );
     expect(result).toEqual({
       eventId: 'event-1',
-      status: 'Votacion',
+      status: 'voting',
       supportCount: 15,
       supportThreshold: 20,
       supportsRemaining: 5,
@@ -165,5 +165,16 @@ describe('EventRegistrationsService.support', () => {
     await expect(service.support('event-1', 'user-1')).rejects.toThrow(
       'db caída',
     );
+  });
+
+  it('acepta propuestas cuyo estado es "En votación"', async () => {
+    mockTransaction(
+      buildContext({ statusTitle: 'En votación' }),
+      buildResult(),
+    );
+
+    await expect(service.support('event-1', 'user-1')).resolves.toMatchObject({
+      status: 'voting',
+    });
   });
 });

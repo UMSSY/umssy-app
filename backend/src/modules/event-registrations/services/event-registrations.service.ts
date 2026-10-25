@@ -8,7 +8,7 @@ import {
   COMMUNITY_ORIGIN_TITLE,
   EXPIRED_STATUS_TITLE,
   PUBLISHED_STATUS_TITLE,
-  VOTING_STATUS_TITLE,
+  VOTING_STATUS_TITLES,
 } from '../../events/constants/events.constants.js';
 import { EventNotFoundException } from '../../events/exceptions/event-not-found.exception.js';
 import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
@@ -22,6 +22,9 @@ import type {
 } from '../types/event-registrations.types.js';
 import type { EventSupportContext } from '../types/event-support-context.types.js';
 import type { SupportResponse } from '../types/support-response.types.js';
+import {
+  VOTING_STATUS_RESPONSE,
+} from '../../event-registrations/constants/event-registrations.constants.js';
 
 @Injectable()
 export class EventRegistrationsService {
@@ -60,7 +63,7 @@ export class EventRegistrationsService {
 
     return {
       eventId,
-      status: result.published ? PUBLISHED_STATUS_TITLE : VOTING_STATUS_TITLE,
+      status: result.published ? PUBLISHED_STATUS_TITLE : VOTING_STATUS_RESPONSE,
       supportCount: result.supportCount,
       supportThreshold: result.supportThreshold,
       supportsRemaining: calculateSupportsRemaining(
@@ -82,7 +85,7 @@ export class EventRegistrationsService {
 
     if (
       event.originTitle !== COMMUNITY_ORIGIN_TITLE ||
-      event.statusTitle !== VOTING_STATUS_TITLE
+      !VOTING_STATUS_TITLES.includes(event.statusTitle)
     ) {
       throw new EventNotSupportableException();
     }
