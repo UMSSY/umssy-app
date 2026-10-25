@@ -168,7 +168,7 @@ describe("getMentorDirectory", () => {
     });
   });
 
-  it("envía name_asc a la API cuando se solicita afinidad", async () => {
+  it("envía affinity a la API cuando se solicita afinidad", async () => {
     const directory = {
       items: [],
       page: 1,
@@ -204,7 +204,7 @@ describe("getMentorDirectory", () => {
           search: undefined,
           area: undefined,
           available: "false",
-          sort: "name_asc",
+          sort: "affinity",
         },
       }),
     );
