@@ -13,7 +13,7 @@ const prismaMock = {
   $connect: vi.fn(),
   $disconnect: vi.fn(),
   event: { findMany: vi.fn().mockResolvedValue([]) },
-  user: { findUnique: vi.fn() },
+  user: { findUnique: vi.fn(), findFirst: vi.fn() },
   eventRegistration: { findMany: vi.fn().mockResolvedValue([]) },
 };
 
@@ -58,7 +58,8 @@ describe('AppController (e2e)', () => {
   it('returns only the authenticated user passes with the response envelope', async () => {
     const verify = jwtMock.verifyAsync;
     for (const sub of ['user-with-passes', 'user-without-passes']) {
-      verify.mockResolvedValueOnce({ sub });
+      verify.mockResolvedValueOnce({ sub, roleTag: 'titulado' });
+      prismaMock.user.findFirst.mockResolvedValueOnce({ id: sub, email: 'user@example.test', isActive: true, roles: [{ role: { name: 'titulado' } }] });
       const response = await request(app.getHttpServer())
         .get('/event-registrations/me?userId=another-user')
         .set('Authorization', `Bearer ${sub}-token`)

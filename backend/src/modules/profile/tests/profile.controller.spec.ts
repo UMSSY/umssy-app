@@ -102,8 +102,9 @@ describe('ProfileController', () => {
 
     expect(response.body).toEqual({
       statusCode: 401,
+      code: 'UNAUTHENTICATED',
       data: null,
-      detail: 'Authenticated user is required',
+      detail: 'Se requiere una sesión válida.',
       ok: false,
     });
     expect(service.getProfile).not.toHaveBeenCalled();
