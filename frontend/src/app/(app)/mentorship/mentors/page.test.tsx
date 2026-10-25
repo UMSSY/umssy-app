@@ -66,7 +66,15 @@ describe("MentorDirectoryPage", () => {
       orientationTypes: [],
     };
 
-    vi.mocked(getMentorDirectory).mockResolvedValue([mentor]);
+    vi.mocked(getMentorDirectory).mockResolvedValue({
+      items: [mentor],
+      page: 1,
+      pageSize: 6,
+      totalItems: 1,
+      totalPages: 1,
+      effectiveSort: "name_asc",
+      affinityStatus: "ready",
+    });
 
     queryClient = render(<MentorDirectoryPage />).client;
 
@@ -80,6 +88,7 @@ describe("MentorDirectoryPage", () => {
     );
 
     expect(getMentorDirectory).toHaveBeenCalledExactlyOnceWith(
+      expect.any(Object),
       expect.any(AbortSignal),
     );
 
