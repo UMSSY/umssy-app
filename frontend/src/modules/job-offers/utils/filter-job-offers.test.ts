@@ -18,9 +18,19 @@ describe("selectVisibleOffers", () => {
       ...DEFAULT_JOB_OFFER_FILTERS,
       status: "Cerrada",
       search: "analista",
-    });
+    });  
 
     expect(visible.map((offer) => offer.id)).toEqual(["active"]);
+  });
+
+  it.each(["Borrador", "Pausada", "Archivada"])("el historial no muestra vacantes en estado %s",(status) => {
+    const visible = selectVisibleOffers(
+      [...OFFERS, buildJobOffer({ id: "other", title: "Otra vacante", status })],
+        "history",
+        DEFAULT_JOB_OFFER_FILTERS,
+    );
+
+    expect(visible.map((offer) => offer.id)).toEqual(["active", "closed", "deleted"]);
   });
 
   it("en el historial conserva todas las vacantes sin filtros", () => {

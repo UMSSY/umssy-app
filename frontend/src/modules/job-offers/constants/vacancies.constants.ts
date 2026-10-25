@@ -83,6 +83,7 @@ export const PUBLISHED_STATUS = "Publicada";
 
 export const CLOSED_STATUS = "Cerrada";
 export const DELETED_STATUS = "Eliminada";
+export const HISTORY_STATUSES: readonly string[] = [PUBLISHED_STATUS, CLOSED_STATUS, DELETED_STATUS];
 
 export const NEW_JOB_OFFER_ROUTE = "/recruiters/job-offers/new";
 

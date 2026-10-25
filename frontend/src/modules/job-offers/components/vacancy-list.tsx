@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -100,7 +101,7 @@ export function VacancyList({ scope = "published", onReopen }: VacancyListProps)
           showStatusFilter={isHistory}
         />
         {isHistory ? (
-          <Link href={NEW_JOB_OFFER_ROUTE} className={buttonVariants({ variant: "outline" })}>
+          <Link href={NEW_JOB_OFFER_ROUTE} className={cn(buttonVariants({ variant: "outline" }), "max-md:min-h-11")}>
             <Plus aria-hidden="true" />
             Crear nueva vacante
           </Link>
@@ -111,7 +112,7 @@ export function VacancyList({ scope = "published", onReopen }: VacancyListProps)
         <div className="space-y-3">
           <p className="text-sm text-text-secondary">{emptyMessage}</p>
           {isHistory && !hasFilters ? (
-            <Link href={NEW_JOB_OFFER_ROUTE} className={buttonVariants()}>
+            <Link href={NEW_JOB_OFFER_ROUTE} className={cn(buttonVariants(), "max-md:min-h-11")}>
               <Plus aria-hidden="true" />
               Crear nueva vacante
             </Link>

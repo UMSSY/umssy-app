@@ -1,4 +1,4 @@
-import { PUBLISHED_STATUS } from "../constants/vacancies.constants";
+import { HISTORY_STATUSES, PUBLISHED_STATUS } from "../constants/vacancies.constants";
 import type { JobOffer, JobOfferListScope } from "../types/job-offer.types";
 import { normalizeSearchText } from "./normalize-search-text";
 
@@ -61,6 +61,7 @@ export function selectVisibleOffers(
 
   return offers.filter(
     (offer) =>
+      HISTORY_STATUSES.includes(offer.status) &&
       (filters.status === "" || offer.status === filters.status) &&
       normalizeSearchText(offer.title).includes(normalizedSearch),
   );
