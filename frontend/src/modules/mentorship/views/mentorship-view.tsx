@@ -7,6 +7,10 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { SlotUnavailableDialog } from "@/modules/mentors/components/participation/slot-availability-preview";
 import { ParticipationOverview } from "@/modules/mentors/components/participation/participation-overview";
+import { PendingParticipation } from "@/modules/mentors/components/participation/pending-participation";
+import { useSlotRequestPreview } from "@/modules/mentors/hooks/use-slot-request-preview";
+import { SlotCancellationFeedback } from "@/modules/mentors/components/participation/slot-cancellation-feedback";
+import { SlotOfferParticipation } from "@/modules/mentors/components/participation/slot-offer-participation";
 import { isApiError } from "@/shared/services/api-client";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +26,7 @@ import { useMentorshipWizard } from "../hooks/use-mentorship-wizard";
 import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
 
 export function MentorshipView() {
+  const slotRequestPreview = useSlotRequestPreview();
   const router = useRouter();
   const queryClient = useQueryClient();
   const isAvailabilitySimulation = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_APP_ENV !== "prod";
@@ -146,6 +151,10 @@ export function MentorshipView() {
       setIsActivating(false);
     }
   };
+
+  if (slotRequestPreview.offer || slotRequestPreview.active) return <SlotOfferParticipation />;
+  if (slotRequestPreview.request) return <PendingParticipation />;
+  if (slotRequestPreview.notice === "cancelled") return <SlotCancellationFeedback />;
 
   if (isAvailabilitySimulation && isSimulatedActive) {
     return (
@@ -275,7 +284,7 @@ export function MentorshipView() {
       onNext={goNext}
     >
       {renderStepContent()}
-      <SlotUnavailableDialog open={isUnavailableOpen} onOpenChange={setIsUnavailableOpen} />
+      <SlotUnavailableDialog open={isUnavailableOpen} onOpenChange={setIsUnavailableOpen} areas={selectedTechnicalAreas.map((area) => area.name)} orientations={selectedOrientationTypes.map((orientation) => orientation.name)} />
     </MentorshipWizardShell>
   );
 }
