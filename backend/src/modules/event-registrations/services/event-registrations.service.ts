@@ -1,3 +1,4 @@
+import { PassNotFoundException } from '../exceptions/pass-not-found.exception.js';
 import { VOTING_STATUS_RESPONSE } from '../constants/event-registrations.constants.js';
 import type { SupportTransactionResult } from '../types/support-transaction-result.types.js';
 import { calculateProgressPercent, calculateSupportsRemaining } from '../../../common/utils/support-progress.js';
@@ -34,6 +35,28 @@ export class EventRegistrationsService {
     private readonly prisma: PrismaService,
     private readonly eventsService: EventsService,
   ) {}
+
+  async getPassById(id: string, userId: string) {
+    const pass = await this.prisma.eventRegistration.findFirst({
+      where: {
+        id,
+        userId,
+        cancelledAt: null,
+        status: { title: REGISTRATION_STATUS_TITLES.confirmed },
+        event: { status: { title: PUBLISHED_STATUS_TITLE } },
+      },
+      select: {
+        id: true,
+        qrToken: true,
+        createdAt: true,
+        status: { select: { title: true } },
+        event: { select: { id: true, title: true, eventDate: true, startTime: true, endTime: true, location: true, description: true } },
+        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+      },
+    });
+    if (!pass || !pass.qrToken) throw new PassNotFoundException();
+    return pass;
+  }
 
   async createWithQrToken(payload: CreateEventRegistrationPayload) {
     // Shared token persistence; callers enforce the rules of their registration flow.

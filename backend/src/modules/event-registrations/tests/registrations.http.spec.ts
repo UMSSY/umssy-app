@@ -1,3 +1,4 @@
+import { PassNotFoundException } from '../exceptions/pass-not-found.exception.js';
 import { Logger, type INestApplication } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
@@ -66,6 +67,32 @@ const ERROR_CASES = [
 ] as const;
 
 describe('registration HTTP contract', () => {
+  it('serves the private pass route using only the authenticated owner', async () => {
+    const pass = {
+      id: REGISTRATION_ID, qrToken: 'a'.repeat(64), createdAt: NOW, status: { title: 'Confirmada' },
+      event: { id: EVENT_ID, title: 'Python', eventDate: NOW, startTime: NOW, endTime: NOW, location: 'Aula 1', description: null },
+      user: { id: USER_ID, firstName: 'Ana', lastName: 'López', email: 'user@example.test' },
+    };
+    const getPass = vi.spyOn(app.get(EventRegistrationsService), 'getPassById').mockResolvedValue(pass);
+    const response = await request(app.getHttpServer()).get(`/api/event-registrations/passes/${REGISTRATION_ID}?userId=forged`).set('Authorization', `Bearer ${token}`).expect(200);
+    expect(getPass).toHaveBeenCalledWith(REGISTRATION_ID, USER_ID);
+    expect(response.body).toMatchObject({ ok: true, data: { id: REGISTRATION_ID, qrToken: pass.qrToken } });
+  });
+
+  it('protects the private pass route and validates its UUID before calling the service', async () => {
+    const getPass = vi.spyOn(app.get(EventRegistrationsService), 'getPassById');
+    await request(app.getHttpServer()).get(`/api/event-registrations/passes/${REGISTRATION_ID}`).expect(401);
+    const response = await request(app.getHttpServer()).get('/api/event-registrations/passes/invalid').set('Authorization', `Bearer ${token}`).expect(400);
+    expect(response.body.code).toBe('VALIDATION_ERROR');
+    expect(getPass).not.toHaveBeenCalled();
+  });
+
+  it('returns the domain error contract when the private pass is unavailable', async () => {
+    vi.spyOn(app.get(EventRegistrationsService), 'getPassById').mockRejectedValue(new PassNotFoundException());
+    const response = await request(app.getHttpServer()).get(`/api/event-registrations/passes/${REGISTRATION_ID}`).set('Authorization', `Bearer ${token}`).expect(404);
+    expect(response.body).toMatchObject({ statusCode: 404, ok: false, code: 'PASS_NOT_FOUND', data: null });
+  });
+
   it('keeps the support route and uses the authenticated identity', async () => {
     const support = vi.spyOn(app.get(EventRegistrationsService), 'support').mockResolvedValue({ eventId: EVENT_ID, status: 'voting', supportCount: 1, supportThreshold: 8, supportsRemaining: 7, progressPercent: 12.5, hasSupported: true });
     await request(app.getHttpServer()).post(`/api/event-registrations/support/${EVENT_ID}?userId=forged`)
