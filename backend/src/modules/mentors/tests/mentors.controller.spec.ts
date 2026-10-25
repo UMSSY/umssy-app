@@ -118,4 +118,17 @@ describe('MentorsController', () => {
     expect(activate).toHaveBeenCalledWith('user-1', body);
     expect(result).toBe(activationResult);
   });
+
+  it('delega la desactivacion del usuario autenticado', async () => {
+    const deactivationResult = { id: 'user-1' };
+    const deactivate = vi.fn().mockResolvedValue(deactivationResult);
+    const service = { deactivate } as unknown as MentorsService;
+    const controller = new MentorsController(service);
+    const user = { id: 'user-1', email: 'mentor@test.com', roles: ['mentor'] };
+
+    const result = await controller.deactivate(user);
+
+    expect(deactivate).toHaveBeenCalledWith(user.id);
+    expect(result).toBe(deactivationResult);
+  });
 });

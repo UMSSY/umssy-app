@@ -347,6 +347,8 @@ describe('MentorsRepository', () => {
 
   it('crea atomicamente el rol y las relaciones del mentor', async () => {
     const createUserRole = vi.fn().mockResolvedValue({ id: 'user-role-id' });
+    const deleteTechnicalAreas = vi.fn().mockResolvedValue({ count: 0 });
+    const deleteOrientationTypes = vi.fn().mockResolvedValue({ count: 0 });
     const createTechnicalAreas = vi.fn().mockResolvedValue({ count: 2 });
     const createOrientationTypes = vi.fn().mockResolvedValue({ count: 2 });
     const updateUser = vi.fn().mockResolvedValue({
@@ -355,8 +357,14 @@ describe('MentorsRepository', () => {
     });
     const transaction = {
       userRole: { create: createUserRole },
-      mentorTechnicalArea: { createMany: createTechnicalAreas },
-      mentorOrientationType: { createMany: createOrientationTypes },
+      mentorTechnicalArea: {
+        deleteMany: deleteTechnicalAreas,
+        createMany: createTechnicalAreas,
+      },
+      mentorOrientationType: {
+        deleteMany: deleteOrientationTypes,
+        createMany: createOrientationTypes,
+      },
       user: { update: updateUser },
     };
     const $transaction = vi.fn(async (callback) => callback(transaction));
@@ -378,6 +386,9 @@ describe('MentorsRepository', () => {
         deletedAt: null,
       },
     });
+    expect(deleteTechnicalAreas).toHaveBeenCalledWith({
+      where: { mentorId: 'user-1' },
+    });
     expect(createTechnicalAreas).toHaveBeenCalledWith({
       data: [
         { mentorId: 'user-1', technicalAreaId: 'area-1' },
@@ -389,6 +400,9 @@ describe('MentorsRepository', () => {
         { mentorId: 'user-1', orientationTypeId: 'orientation-1' },
         { mentorId: 'user-1', orientationTypeId: 'orientation-2' },
       ],
+    });
+    expect(deleteOrientationTypes).toHaveBeenCalledWith({
+      where: { mentorId: 'user-1' },
     });
     expect(updateUser).toHaveBeenCalledWith({
       where: {
@@ -404,11 +418,15 @@ describe('MentorsRepository', () => {
   it('propaga un fallo de escritura y no ejecuta escrituras posteriores', async () => {
     const writeError = new Error('write failed');
     const createUserRole = vi.fn().mockResolvedValue({ id: 'user-role-id' });
+    const deleteTechnicalAreas = vi.fn().mockResolvedValue({ count: 0 });
     const createTechnicalAreas = vi.fn().mockRejectedValue(writeError);
     const createOrientationTypes = vi.fn();
     const transaction = {
       userRole: { create: createUserRole },
-      mentorTechnicalArea: { createMany: createTechnicalAreas },
+      mentorTechnicalArea: {
+        deleteMany: deleteTechnicalAreas,
+        createMany: createTechnicalAreas,
+      },
       mentorOrientationType: { createMany: createOrientationTypes },
     };
     const $transaction = vi.fn(async (callback) => callback(transaction));
@@ -421,7 +439,58 @@ describe('MentorsRepository', () => {
     expect($transaction).toHaveBeenCalledTimes(1);
     expect(createUserRole).toHaveBeenCalledTimes(1);
     expect(createTechnicalAreas).toHaveBeenCalledTimes(1);
+    expect(deleteTechnicalAreas).toHaveBeenCalledTimes(1);
     expect(createOrientationTypes).not.toHaveBeenCalled();
+  });
+
+  it('desactiva el rol y la disponibilidad sin eliminar la configuracion del mentor', async () => {
+    const updateUserRole = vi.fn().mockResolvedValue({ count: 1 });
+    const updateUser = vi.fn().mockResolvedValue({});
+    const transaction = {
+      userRole: { updateMany: updateUserRole },
+      user: { update: updateUser },
+    };
+    const $transaction = vi.fn(async (callback) => callback(transaction));
+    const prisma = { $transaction } as unknown as PrismaService;
+    const repository = new MentorsRepository(prisma);
+    const now = new Date('2026-10-25T00:00:00.000Z');
+
+    await expect(repository.deactivate('user-1', 'role-1', now)).resolves.toBe(
+      true,
+    );
+    expect(updateUserRole).toHaveBeenCalledWith({
+      where: {
+        userId: 'user-1',
+        roleId: 'role-1',
+        deletedAt: null,
+        startAt: { lte: now },
+      },
+      data: { deletedAt: now },
+    });
+    expect(updateUser).toHaveBeenCalledWith({
+      where: { id: 'user-1' },
+      data: { isAvailableForMentoring: false },
+    });
+    expect(transaction).not.toHaveProperty('mentorTechnicalArea');
+    expect(transaction).not.toHaveProperty('mentorOrientationType');
+  });
+
+  it('no cambia disponibilidad si no encuentra un rol activo', async () => {
+    const updateUserRole = vi.fn().mockResolvedValue({ count: 0 });
+    const updateUser = vi.fn();
+    const transaction = {
+      userRole: { updateMany: updateUserRole },
+      user: { update: updateUser },
+    };
+    const $transaction = vi.fn(async (callback) => callback(transaction));
+    const repository = new MentorsRepository(
+      { $transaction } as unknown as PrismaService,
+    );
+
+    await expect(
+      repository.deactivate('user-1', 'role-1', new Date()),
+    ).resolves.toBe(false);
+    expect(updateUser).not.toHaveBeenCalled();
   });
 
   it('actualiza la disponibilidad del mentor', async () => {

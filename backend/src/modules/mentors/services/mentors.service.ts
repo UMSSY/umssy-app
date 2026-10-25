@@ -140,6 +140,26 @@ export class MentorsService {
     );
   }
 
+  async deactivate(userId: string) {
+    const mentorRole = await this.mentorsRepository.findMentorRole();
+
+    if (!mentorRole) {
+      throw new MentorRoleNotFoundException();
+    }
+
+    const deactivated = await this.mentorsRepository.deactivate(
+      userId,
+      mentorRole.id,
+      new Date(),
+    );
+
+    if (!deactivated) {
+      throw new MentorNotFoundException();
+    }
+
+    return { id: userId };
+  }
+
   async updateAvailability(userId: string, isAvailable: boolean) {
     await this.assertActiveMentor(userId);
 

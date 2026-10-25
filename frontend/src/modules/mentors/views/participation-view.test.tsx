@@ -2,14 +2,24 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient } from "@/shared/services/query-client";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { waitFor, within } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getMentorTechnicalAreas } from "../services/technical-areas.service";
 import { getMentorOrientationTypes } from "@/modules/mentorship/services/orientation-type.service";
+import { deactivateMentorParticipation } from "../services/mentor-participation.service";
 import { ParticipationView } from "./participation-view";
 
+const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace }),
+}));
 vi.mock("../services/technical-areas.service", () => ({
   getMentorTechnicalAreas: vi.fn(),
+}));
+vi.mock("../services/mentor-participation.service", () => ({
+  deactivateMentorParticipation: vi.fn(),
 }));
 vi.mock("@/modules/mentorship/services/orientation-type.service", () => ({
   getMentorOrientationTypes: vi.fn(),
@@ -26,6 +36,7 @@ describe("ParticipationView", () => {
       { id: "orientation-1", name: "Orientación profesional", description: null },
       { id: "orientation-2", name: "Búsqueda de empleo", description: null },
     ]);
+    vi.mocked(deactivateMentorParticipation).mockResolvedValue();
   });
 
   afterEach(() => {
@@ -33,6 +44,7 @@ describe("ParticipationView", () => {
     localStorage.clear();
     vi.restoreAllMocks();
     vi.clearAllMocks();
+    replace.mockReset();
   });
 
   it("mantiene un estado inicial estable mientras resuelve la participación", () => {
@@ -59,6 +71,55 @@ describe("ParticipationView", () => {
     expect(
       screen.getByRole("link", { name: "Editar tipos de orientación" }),
     ).toHaveAttribute("href", "/mentorship/orientation");
+  });
+
+  it("confirma la desactivacion y muestra la configuracion real que se conservara", async () => {
+    render(<ParticipationView />);
+    await screen.findByRole("heading", { name: "Mi participación como mentor" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Desactivar participación" }));
+    const dialog = await screen.findByRole("dialog");
+
+    expect(within(dialog).getByText("Backend")).toBeInTheDocument();
+    expect(within(dialog).getByText("QA")).toBeInTheDocument();
+    expect(
+      within(dialog).getByText("Orientación profesional"),
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByText("Búsqueda de empleo"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      within(dialog).getByRole("button", {
+        name: "Desactivar participación",
+      }),
+    );
+
+    await waitFor(() =>
+      expect(deactivateMentorParticipation).toHaveBeenCalledTimes(1),
+    );
+    expect(replace).toHaveBeenCalledWith("/mentorship");
+  });
+
+  it("muestra un error si el backend no logra desactivar la participacion", async () => {
+    vi.mocked(deactivateMentorParticipation).mockRejectedValueOnce(
+      new Error("Network"),
+    );
+    render(<ParticipationView />);
+    await screen.findByRole("heading", { name: "Mi participación como mentor" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Desactivar participación" }));
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.click(
+      within(dialog).getByRole("button", {
+        name: "Desactivar participación",
+      }),
+    );
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "No se pudo desactivar tu participación",
+    );
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("muestra la activación cuando no existe participación", async () => {
@@ -120,6 +181,6 @@ describe("ParticipationView", () => {
     render(<ParticipationView />);
     expect(await screen.findByText("Backend")).toBeInTheDocument();
     expect(screen.queryByText("Datos antiguos")).not.toBeInTheDocument();
-    expect(readStorage).not.toHaveBeenCalled();
+    expect(readStorage).not.toHaveBeenCalledWith("umssy-mentor-participation");
   });
 });

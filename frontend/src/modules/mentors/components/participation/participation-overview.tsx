@@ -1,6 +1,10 @@
 import Link from "next/link";
-import { Check, Pencil } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Check, Pencil, UserRoundX } from "lucide-react";
+import { useAuth } from "@/shared/contexts/auth-context";
 import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,6 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PageHeading } from "@/shared/components/layout";
+import { DeactivateParticipationModal } from "./deactivate-participation-modal";
+import { deactivateMentorParticipation } from "../../services/mentor-participation.service";
 
 type ParticipationOverviewProps = {
   areas: string[];
@@ -72,6 +78,31 @@ export function ParticipationOverview({
   areas,
   orientations,
 }: ParticipationOverviewProps) {
+  const router = useRouter();
+  const { refreshRoles } = useAuth();
+  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [isDeactivating, setIsDeactivating] = useState(false);
+  const [deactivationError, setDeactivationError] = useState<string | null>(null);
+
+  const handleDeactivate = async () => {
+    if (isDeactivating) return;
+
+    setIsDeactivating(true);
+    setDeactivationError(null);
+    try {
+      await deactivateMentorParticipation();
+      await refreshRoles();
+      setIsDeactivateModalOpen(false);
+      router.replace("/mentorship");
+    } catch {
+      setDeactivationError(
+        "No se pudo desactivar tu participación. Intenta nuevamente.",
+      );
+    } finally {
+      setIsDeactivating(false);
+    }
+  };
+
   return (
     <main className="min-h-full bg-background">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -93,10 +124,22 @@ export function ParticipationOverview({
             </p>
           </CardHeader>
 
-          <CardContent className="px-5 pt-3 pb-5 sm:px-6 sm:pb-6">
+          <CardContent className="flex flex-wrap items-center justify-between gap-4 px-5 pt-3 pb-5 sm:px-6 sm:pb-6">
             <span className="inline-flex items-center gap-1 bg-transparent p-0 text-sm font-semibold text-ink-soft">
               <Check size={13} /> Activo
             </span>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 gap-2 border-critical-action/30 text-critical-action hover:bg-critical-action/5 hover:text-critical-action"
+              onClick={() => {
+                setDeactivationError(null);
+                setIsDeactivateModalOpen(true);
+              }}
+            >
+              <UserRoundX size={15} />
+              Desactivar participación
+            </Button>
           </CardContent>
         </Card>
 
@@ -116,6 +159,17 @@ export function ParticipationOverview({
         />
         </div>
       </div>
+      <DeactivateParticipationModal
+        isOpen={isDeactivateModalOpen}
+        onClose={() => {
+          if (!isDeactivating) setIsDeactivateModalOpen(false);
+        }}
+        onConfirm={() => void handleDeactivate()}
+        isLoading={isDeactivating}
+        errorMessage={deactivationError}
+        areas={areas}
+        orientations={orientations}
+      />
     </main>
   );
 }

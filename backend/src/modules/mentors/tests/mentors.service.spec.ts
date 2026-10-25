@@ -636,4 +636,29 @@ describe('MentorsService', () => {
     );
     expect(activate).not.toHaveBeenCalled();
   });
+
+  it('desactiva la participacion activa del usuario', async () => {
+    const deactivate = vi.fn().mockResolvedValue(true);
+    const repository = {
+      findMentorRole: vi.fn().mockResolvedValue({ id: roleId }),
+      deactivate,
+    } as unknown as MentorsRepository;
+    const service = new MentorsService(repository, mapper);
+
+    await expect(service.deactivate(userId)).resolves.toEqual({ id: userId });
+    expect(deactivate).toHaveBeenCalledWith(userId, roleId, expect.any(Date));
+  });
+
+  it('rechaza la desactivacion cuando no hay una participacion activa', async () => {
+    const deactivate = vi.fn().mockResolvedValue(false);
+    const repository = {
+      findMentorRole: vi.fn().mockResolvedValue({ id: roleId }),
+      deactivate,
+    } as unknown as MentorsRepository;
+    const service = new MentorsService(repository, mapper);
+
+    await expect(service.deactivate(userId)).rejects.toBeInstanceOf(
+      MentorNotFoundException,
+    );
+  });
 });

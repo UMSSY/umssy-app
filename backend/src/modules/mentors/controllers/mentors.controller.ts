@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Patch,
   Param,
@@ -84,5 +85,11 @@ export class MentorsController {
     @Body(new ZodValidationPipe(activateMentorSchema)) body: ActivateMentorDto,
   ) {
     return this.mentorsService.activate(user.id, body);
+  }
+
+  @Delete('me/participation')
+  @UseGuards(JwtAuthGuard)
+  deactivate(@CurrentUser() user: AuthenticatedUser) {
+    return this.mentorsService.deactivate(user.id);
   }
 }

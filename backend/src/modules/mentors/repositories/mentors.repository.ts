@@ -351,6 +351,9 @@ export class MentorsRepository {
         },
       });
 
+      await transaction.mentorTechnicalArea.deleteMany({
+        where: { mentorId: userId },
+      });
       await transaction.mentorTechnicalArea.createMany({
         data: technicalAreaIds.map((technicalAreaId) => ({
           mentorId: userId,
@@ -358,6 +361,9 @@ export class MentorsRepository {
         })),
       });
 
+      await transaction.mentorOrientationType.deleteMany({
+        where: { mentorId: userId },
+      });
       await transaction.mentorOrientationType.createMany({
         data: orientationTypeIds.map((orientationTypeId) => ({
           mentorId: userId,
@@ -375,6 +381,33 @@ export class MentorsRepository {
       });
 
       return { id: userId };
+    });
+  }
+
+  async deactivate(
+    userId: string,
+    roleId: string,
+    now: Date,
+  ): Promise<boolean> {
+    return this.prisma.$transaction(async (transaction) => {
+      const result = await transaction.userRole.updateMany({
+        where: {
+          userId,
+          roleId,
+          deletedAt: null,
+          startAt: { lte: now },
+        },
+        data: { deletedAt: now },
+      });
+
+      if (result.count === 0) return false;
+
+      await transaction.user.update({
+        where: { id: userId },
+        data: { isAvailableForMentoring: false },
+      });
+
+      return true;
     });
   }
 
