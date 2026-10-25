@@ -13,7 +13,7 @@ export function CareerSelect() {
 
   return (
     <div className="md:col-span-2">
-      <Label htmlFor="career" className="mb-1.5 text-[12.5px] font-semibold text-ink 2xl:text-base">
+      <Label htmlFor="career" className="mb-1.5 text-[12.5px] font-semibold text-ink">
         Carrera
         <RequiredMark />
       </Label>
@@ -27,7 +27,7 @@ export function CareerSelect() {
           aria-required="true"
           aria-invalid={fieldErrors.career ? true : undefined}
           aria-describedby={fieldErrors.career ? "career-error" : undefined}
-          className="w-full rounded-md border-border bg-surface px-3 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction data-[size=default]:h-10 2xl:text-base 2xl:data-[size=default]:h-12"
+          className="w-full rounded-md border-border bg-surface px-3 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction data-[size=default]:h-11"
         >
           <SelectValue placeholder="Selecciona tu carrera" />
         </SelectTrigger>

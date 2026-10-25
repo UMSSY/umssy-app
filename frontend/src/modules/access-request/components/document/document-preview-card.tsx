@@ -24,10 +24,10 @@ export function DocumentPreviewCard() {
           <FileText className="size-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-ink 2xl:text-base">{fileName}</p>
-          <p className="text-[12.5px] text-text-secondary 2xl:text-base">{formatFileSize(documentState.fileSize ?? 0)}</p>
+          <p className="truncate text-sm font-semibold text-ink">{fileName}</p>
+          <p className="text-[12.5px] text-text-secondary">{formatFileSize(documentState.fileSize ?? 0)}</p>
         </div>
-        <p className="flex items-center gap-1.5 text-[13.5px] font-semibold text-ink 2xl:text-base">
+        <p className="flex items-center gap-1.5 text-sm font-semibold text-ink">
           <CircleCheck aria-hidden="true" className="size-4" />
           Listo
         </p>
@@ -36,7 +36,7 @@ export function DocumentPreviewCard() {
           href={previewUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={cn(buttonVariants({ variant: "ghost" }), "h-9 rounded-md px-3 text-[13.5px] font-semibold text-ink")}
+          className={cn(buttonVariants({ variant: "ghost" }), "h-9 rounded-md px-3 text-sm font-semibold text-ink")}
         >
           <Eye aria-hidden="true" />
           Ver
@@ -46,7 +46,7 @@ export function DocumentPreviewCard() {
           variant="ghost"
           disabled={status !== "idle"}
           onClick={() => void removeDocument()}
-          className="h-9 rounded-md px-3 text-[13.5px] font-semibold text-ink-soft"
+          className="h-9 rounded-md px-3 text-sm font-semibold text-ink-soft"
         >
           {isRemoving ? (
             "Quitando..."
@@ -62,7 +62,7 @@ export function DocumentPreviewCard() {
       <div className="relative h-72 overflow-hidden rounded-md border border-border bg-surface-soft">
         {isPdf ? (
           <object data={previewUrl} type="application/pdf" aria-label={`Vista previa de ${fileName}`} className="size-full">
-            <p className="p-4 text-[13.5px] text-text-secondary">No se puede mostrar la vista previa de este PDF.</p>
+            <p className="p-4 text-sm text-text-secondary">No se puede mostrar la vista previa de este PDF.</p>
           </object>
         ) : (
           // Next ya omite la optimización con URL blob; unoptimized lo deja explícito

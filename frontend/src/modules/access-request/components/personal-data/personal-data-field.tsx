@@ -22,7 +22,7 @@ export function PersonalDataField({
 
   return (
     <div className={className}>
-      <Label htmlFor={id} className="mb-1.5 text-[12.5px] font-semibold text-ink 2xl:text-base">
+      <Label htmlFor={id} className="mb-1.5 text-[12.5px] font-semibold text-ink">
         {label}
         {isRequired ? <RequiredMark /> : null}
       </Label>
@@ -39,7 +39,7 @@ export function PersonalDataField({
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
           aria-required={isRequired || undefined}
-          className={`h-10 rounded-md border-border bg-surface text-base text-ink focus-visible:border-accent focus-visible:ring-interaction md:text-base 2xl:h-12 2xl:text-base ${
+          className={`h-11 rounded-md border-border bg-surface text-base text-ink focus-visible:border-accent focus-visible:ring-interaction md:text-base ${
             icon ? "pl-10" : "px-3"
           }`}
           {...inputProps}
@@ -53,7 +53,7 @@ export function PersonalDataField({
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
           aria-required={isRequired || undefined}
-          className={`h-10 rounded-md border-border bg-surface text-base text-ink focus-visible:border-accent focus-visible:ring-interaction md:text-base 2xl:h-12 2xl:text-base ${
+          className={`h-11 rounded-md border-border bg-surface text-base text-ink focus-visible:border-accent focus-visible:ring-interaction md:text-base ${
             icon ? "pl-10" : "px-3"
           }`}
           {...inputProps}
@@ -61,7 +61,7 @@ export function PersonalDataField({
         )}
       </div>
       {help ? (
-        <p id={helpId} className="mt-1.5 text-[12.5px] text-text-secondary 2xl:text-base">
+        <p id={helpId} className="mt-1.5 text-[12.5px] text-text-secondary">
           {help}
         </p>
       ) : null}
