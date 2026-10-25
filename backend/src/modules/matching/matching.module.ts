@@ -21,6 +21,7 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
 import { JobMatchService } from './services/job-match.service.js';
 
 import { JobApplicationsRepository } from './repositories/job-applications.repository.js';
+import { ExperienceSkillsRepository } from './repositories/experience-skills.repository.js';
 import { JobMatchRepository } from './repositories/job-match.repository.js';
 
 @Module({
@@ -46,6 +47,7 @@ import { JobMatchRepository } from './repositories/job-match.repository.js';
     WeightedScoreService,
     JobApplicationsService,
     JobApplicationsRepository,
+    ExperienceSkillsRepository,
     JobRecommendationsService,
     JobMatchService,
     JobMatchRepository,
