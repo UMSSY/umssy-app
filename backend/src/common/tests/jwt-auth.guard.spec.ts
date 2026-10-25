@@ -3,8 +3,8 @@ import type { JwtService } from '@nestjs/jwt';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import { UnauthorizedSessionException } from '../exceptions/unauthorized-session.exception.js';
-import { SessionService } from '../services/session.service.js';
 import { SessionRepository } from '../repositories/session.repository.js';
+import { SessionService } from '../services/session.service.js';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';
 import type { LoginJwtPayload } from '../types/login-jwt-payload.types.js';
@@ -36,7 +36,10 @@ function createGuard() {
   const prisma = { user: { findFirst } } as unknown as PrismaService;
 
   return {
-    guard: new JwtAuthGuard(jwtService, new SessionService(new SessionRepository(prisma))),
+    guard: new JwtAuthGuard(
+      jwtService,
+      new SessionService(new SessionRepository(prisma)),
+    ),
     verifyAsync,
     findFirst,
   };
@@ -105,10 +108,11 @@ describe('JwtAuthGuard', () => {
     expect(verifyAsync).toHaveBeenCalledOnce();
     expect(verifyAsync).toHaveBeenCalledWith(VALID_TOKEN);
     expect(findFirst).toHaveBeenCalledExactlyOnceWith({
-      where: { id: USER_ID, isActive: true },
+      where: { id: USER_ID },
       select: {
         id: true,
         email: true,
+        isActive: true,
         roles: {
           where: {
             deletedAt: null,
@@ -153,7 +157,7 @@ describe('JwtAuthGuard', () => {
       guard.canActivate(createContext(request)),
     ).rejects.toMatchObject({
       statusCode: 401,
-      message: 'Usuario no encontrado o inactivo',
+      message: 'Se requiere una sesión válida.',
     });
     expect(request.user).toBeUndefined();
   });
@@ -172,7 +176,7 @@ describe('JwtAuthGuard', () => {
       guard.canActivate(createContext(request)),
     ).rejects.toMatchObject({
       statusCode: 401,
-      message: 'El rol de la sesión ya no está vigente',
+      message: 'Se requiere una sesión válida.',
     });
     expect(request.user).toBeUndefined();
   });

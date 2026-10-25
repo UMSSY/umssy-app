@@ -21,3 +21,14 @@ export { MyPassesView } from "./views/my-passes-view";
 
 export { readRecord, readArray, readString } from "./utils/response-validation";
 export { REQUEST_TIMEOUT_MS } from "./constants/events.constants";
+export {
+  registrationsService,
+  useRegistration,
+  useRegistrationActions,
+  REGISTRATION_ERROR_MESSAGES,
+  getRegistrationErrorMessage,
+} from '@/modules/registrations';
+export type {
+  RegistrationResponse,
+  RegistrationErrorCode,
+} from '@/modules/registrations';

@@ -2,6 +2,6 @@ import { DomainException } from '../../../common/exceptions/domain.exception.js'
 
 export class SkillNotFoundException extends DomainException {
   constructor(message = 'Skill not found') {
-    super(message, 404);
+    super(message, 404, 'SKILL_NOT_FOUND');
   }
 }
