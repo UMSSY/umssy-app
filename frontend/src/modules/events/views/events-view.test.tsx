@@ -7,6 +7,7 @@ import { useEventsFilters } from "../hooks/use-events-filters";
 import { useEventCategories } from "../../event-categories/hooks/use-event-categories";
 import type { EventItem } from "../types/event.types";
 import { EventsView } from "./events-view";
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 vi.mock("../hooks/use-event", () => ({ useEvent: vi.fn() }));
 vi.mock("../hooks/use-events", () => ({
@@ -94,7 +95,7 @@ describe("EventsView", () => {
     const card = within(screen.getByRole("region", { name: /listado de talleres/i }))
       .getByRole("button", { name: /desarrollo web con react/i });
     fireEvent.click(card);
-    expect(screen.getByRole("button", { name: "Inscripción no disponible" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Inscribirme" })).toBeInTheDocument();
     if (method === "button") {
       fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle del taller" }));
     } else if (method === "escape") {
@@ -115,7 +116,7 @@ describe("EventsView", () => {
       fireEvent.click(screen.getByRole("region", { name: /listado de talleres/i }));
     }
     expect(card).toHaveAttribute("aria-pressed", "false");
-    expect(screen.queryByRole("button", { name: "Inscripción no disponible" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Inscribirme" })).not.toBeInTheDocument();
     expect(useEvent).toHaveBeenLastCalledWith(null);
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
   });
@@ -133,7 +134,34 @@ describe("EventsView", () => {
     fireEvent.click(within(card).getByRole("heading"));
     fireEvent.click(screen.getByRole("complementary", { name: "Detalle de Desarrollo Web con React" }));
     expect(card).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Inscripción no disponible" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Inscribirme" })).toBeInTheDocument();
+  });
+
+  it("keeps the selected workshop while its confirmation dialog is open", () => {
+    vi.mocked(useEvent).mockImplementation((id) => ({
+      event: id ? { ...MOCK_EVENTS[0], modality: { id: "m1", title: "Presencial" } } : null,
+      isLoading: false,
+      error: null,
+      notFound: false,
+      retry: vi.fn(),
+    }));
+    render(<EventsView />);
+    const card = within(screen.getByRole("region", { name: /listado de talleres/i }))
+      .getByRole("button", { name: /desarrollo web con react/i });
+    fireEvent.click(card);
+    const dialog = document.createElement("div");
+    dialog.setAttribute("data-registration-dialog", "");
+    document.body.append(dialog);
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    fireEvent.click(dialog);
+    expect(card).toHaveAttribute("aria-pressed", "true");
+    dialog.remove();
+    const overlay = document.createElement("div");
+    overlay.setAttribute("data-slot", "dialog-overlay");
+    document.body.append(overlay);
+    fireEvent.click(overlay);
+    expect(card).toHaveAttribute("aria-pressed", "true");
+    overlay.remove();
   });
   it("renders only the workshop list until a workshop is selected", () => {
     render(<EventsView />);
@@ -321,7 +349,7 @@ describe("EventsView", () => {
     expect(useEvent).toHaveBeenLastCalledWith(MOCK_EVENTS[0].id);
     expect(screen.getByRole("status")).toHaveTextContent("Cargando detalle");
     expect(
-      screen.queryByRole("button", { name: "Inscripción no disponible" }),
+      screen.queryByRole("button", { name: "Inscribirme" }),
     ).not.toBeInTheDocument();
   });
 
