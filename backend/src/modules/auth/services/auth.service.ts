@@ -12,7 +12,8 @@ import {
   ResetCodeCooldownException,
 } from '../exceptions/index.js';
 import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.js';
-import { PasswordResetMailerService } from '../mail/password-reset-mailer.service.js';
+import { MailService } from '../../mail/services/mail.service.js';
+import { PASSWORD_RESET_EMAIL_MJML } from '../templates/password-reset-email.template.js';
 import type { SessionResponse } from '../types/session-response.types.js';
 import type { LoginResponse } from '../types/login-response.types.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
@@ -32,7 +33,7 @@ export class AuthService {
   constructor(
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
-    private readonly mailerService: PasswordResetMailerService,
+    private readonly mailService: MailService,
   ) {}
 
   existsByEmail(email: string) {
@@ -92,8 +93,18 @@ export class AuthService {
     await this.authRepository.createPasswordResetOtp(user.id, codeHash, expiresAt);
 
     // Enviar correo mediante plantilla MJML y Gmail SMTP
-    const fullName = `${user.firstName} ${user.lastName}`.trim();
-    await this.mailerService.sendPasswordResetCode(user.email, code, fullName);
+    const recipientName = `${user.firstName} ${user.lastName}`.trim() || 'Usuario';
+    await this.mailService.send({
+      to: user.email,
+      subject: `${code} es tu código de recuperación de contraseña - UMSSY`,
+      text: `Hola, ${recipientName}: Tu código de recuperación es ${code}. Vence en ${OTP_EXPIRATION_MINUTES} minutos.`,
+      mjml: PASSWORD_RESET_EMAIL_MJML,
+      values: {
+        recipientName,
+        code,
+        expirationMinutes: String(OTP_EXPIRATION_MINUTES),
+      },
+    });
 
     return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación.' };
   }

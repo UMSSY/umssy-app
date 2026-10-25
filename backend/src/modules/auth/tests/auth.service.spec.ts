@@ -23,12 +23,12 @@ describe('AuthService', () => {
     updateUserPasswordAndInvalidateOtp: vi.fn(),
   };
   const jwtService = { sign: vi.fn() };
-  const mailerService = { sendPasswordResetCode: vi.fn() };
+  const mailService = { send: vi.fn().mockResolvedValue(undefined) };
   let service: AuthService;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    service = new AuthService(authRepository as any, jwtService as any, mailerService as any);
+    service = new AuthService(authRepository as any, jwtService as any, mailService as any);
   });
 
   it.each([true, false])('existsByEmail delega en el repository y devuelve %s', async (exists) => {
@@ -132,10 +132,12 @@ describe('AuthService', () => {
       expect(res.ok).toBe(true);
       expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación.');
       expect(authRepository.createPasswordResetOtp).toHaveBeenCalled();
-      expect(mailerService.sendPasswordResetCode).toHaveBeenCalledWith(
-        'user@umss.edu',
-        expect.stringMatching(/^\d{6}$/),
-        'Juan Perez',
+      expect(mailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'user@umss.edu',
+          mjml: expect.any(String),
+          values: expect.objectContaining({recipientName: 'Juan Perez'}),
+        }),
       );
     });
 
@@ -147,7 +149,7 @@ describe('AuthService', () => {
       expect(res.ok).toBe(true);
       expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación.');
       expect(authRepository.createPasswordResetOtp).not.toHaveBeenCalled();
-      expect(mailerService.sendPasswordResetCode).not.toHaveBeenCalled();
+      expect(mailService.send).not.toHaveBeenCalled();
     });
 
     it('lanza ResetCodeCooldownException si se solicita un nuevo código antes de 2 minutos (120s)', async () => {
@@ -168,7 +170,7 @@ describe('AuthService', () => {
         ResetCodeCooldownException,
       );
       expect(authRepository.createPasswordResetOtp).not.toHaveBeenCalled();
-      expect(mailerService.sendPasswordResetCode).not.toHaveBeenCalled();
+      expect(mailService.send).not.toHaveBeenCalled();
     });
 
     it('permite solicitar nuevo código si ya pasaron más de 2 minutos', async () => {
@@ -189,7 +191,7 @@ describe('AuthService', () => {
 
       expect(res.ok).toBe(true);
       expect(authRepository.createPasswordResetOtp).toHaveBeenCalled();
-      expect(mailerService.sendPasswordResetCode).toHaveBeenCalled();
+      expect(mailService.send).toHaveBeenCalled();
     });
   });
 
