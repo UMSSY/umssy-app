@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { MailModule } from './modules/mail/index.js';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
@@ -34,6 +35,7 @@ import { SurveysModule } from './modules/surveys/surveys.module.js';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
+    MailModule,
     AvailabilityModule,
     AuthModule,
     EventsModule,
