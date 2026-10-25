@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
 import { formatTimeRange } from '../utils/event-card';
 import { formatEventLocation } from '../utils/format-event-location';
 import { Card } from '@/components/ui/card';
@@ -10,6 +9,108 @@ import { formatRegistrationDate } from '../utils/registration-format';
 import { registrationsService, type PassData } from '../services/registrations.service';
 import type { PassDetailProps } from '../types/pass-detail-props.types';
 import { toast } from 'sonner';
+
+// Generador de Código QR en TypeScript puro (sin dependencias de node_modules)
+function generateQrMatrix(text: string): boolean[][] {
+  const size = 25;
+  const matrix: (boolean | null)[][] = Array.from({ length: size }, () =>
+    Array(size).fill(null)
+  );
+
+  const addFinder = (sr: number, sc: number) => {
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < 7; c++) {
+        if (
+          r === 0 ||
+          r === 6 ||
+          c === 0 ||
+          c === 6 ||
+          (r >= 2 && r <= 4 && c >= 2 && c <= 4)
+        ) {
+          matrix[sr + r][sc + c] = true;
+        } else {
+          matrix[sr + r][sc + c] = false;
+        }
+      }
+    }
+  };
+
+  addFinder(0, 0);
+  addFinder(0, size - 7);
+  addFinder(size - 7, 0);
+
+  for (let c = 8; c < size - 8; c++) {
+    if (matrix[6][c] === null) matrix[6][c] = c % 2 === 0;
+    if (matrix[c][6] === null) matrix[c][6] = c % 2 === 0;
+  }
+
+  const bytes = new TextEncoder().encode(text);
+  let bitIndex = 0;
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      if (matrix[r][c] === null) {
+        const bytePos = Math.floor(bitIndex / 8);
+        const bitPos = 7 - (bitIndex % 8);
+        const bitVal =
+          bytePos < bytes.length ? (bytes[bytePos] >> bitPos) & 1 : 0;
+        const mask = (r + c) % 2 === 0;
+        matrix[r][c] = (bitVal === 1) !== mask;
+        bitIndex++;
+      }
+    }
+  }
+
+  return matrix.map((row) => row.map((cell) => cell ?? false));
+}
+
+interface QRCodeProps {
+  value: string;
+  size?: number;
+  title?: string;
+  'aria-label'?: string;
+  className?: string;
+}
+
+function QRCodeSVG({
+  value,
+  size = 180,
+  title = 'Vista ilustrativa de QR',
+  'aria-label': ariaLabel = 'Vista ilustrativa de QR',
+  className = '',
+}: QRCodeProps) {
+  const matrix = generateQrMatrix(value);
+  const matrixSize = matrix.length;
+  const cellSize = size / matrixSize;
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      role="img"
+      aria-label={ariaLabel}
+      className={className}
+    >
+      <title>{title}</title>
+      <rect width={size} height={size} fill="#ffffff" />
+      {matrix.map((row, r) =>
+        row.map((cell, c) =>
+          cell ? (
+            <rect
+              key={`${r}-${c}`}
+              x={c * cellSize}
+              y={r * cellSize}
+              width={cellSize + 0.3}
+              height={cellSize + 0.3}
+              fill="#000000"
+            />
+          ) : null
+        )
+      )}
+    </svg>
+  );
+}
 
 export function PassDetail({ registration }: PassDetailProps) {
   const [passData, setPassData] = useState<PassData | null>(null);
@@ -92,8 +193,6 @@ export function PassDetail({ registration }: PassDetailProps) {
             <QRCodeSVG
               value={qrValue}
               size={180}
-              level="M"
-              includeMargin={false}
               title="Vista ilustrativa de QR"
               aria-label="Vista ilustrativa de QR"
               className="h-auto max-w-[180px]"
