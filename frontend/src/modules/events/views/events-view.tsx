@@ -44,10 +44,12 @@ export function EventsView({ initialProposalId = null }: { initialProposalId?: s
   useEffect(() => {
     if (!selectedEventId) return;
     function handleKeyDown(event: KeyboardEvent) {
+      if (document.querySelector('[data-registration-dialog]') || event.target instanceof Element && event.target.closest('[data-registration-dialog]')) return;
       if (event.key === 'Escape') setSelectedEventId(null);
     }
     function handleOutsideClick(event: MouseEvent) {
       const target = event.target;
+      if (document.querySelector('[data-registration-dialog]') || target instanceof Element && target.closest('[data-registration-dialog], [data-slot="dialog-overlay"]')) return;
       if (!(target instanceof Element)) return;
       if (
         viewRef.current?.contains(target) &&
@@ -56,6 +58,7 @@ export function EventsView({ initialProposalId = null }: { initialProposalId?: s
       setSelectedEventId(null);
     }
     function handleSearchFocus(event: FocusEvent) {
+      if (document.querySelector('[data-registration-dialog]')) return;
       const target = event.target;
       if (target instanceof Element && viewRef.current?.contains(target) && target.matches('input[type="search"]')) {
         setSelectedEventId(null);
