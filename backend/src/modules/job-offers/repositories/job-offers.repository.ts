@@ -88,6 +88,19 @@ export class JobOffersRepository {
     });
   }
 
+  findHistoryByCompanyAndId(
+    companyId: string,
+    jobOfferId: string,
+  ): Promise<JobOfferRecord | null> {
+    return this.prisma.jobOffer.findFirst({
+      where: {
+        id: jobOfferId,
+        companyId,
+      },
+      select: JOB_OFFER_SELECT,
+    });
+  }
+
   update(jobOfferId: string, data: UpdateJobOfferData): Promise<JobOfferRecord> {
     const { skillIds, ...jobOffer } = data;
     return this.prisma.jobOffer.update({
