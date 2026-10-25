@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { ConfirmDeleteDialog } from "@/modules/profile";
@@ -46,7 +46,7 @@ export function WorkExperienceProfileSection() {
   const isBusy = saveMutation.isSaving || deleteMutation.isDeleting;
 
   const listFeedback: Feedback | null =
-    deleteMutation.feedback ?? (!isFormOpen ? saveMutation.feedback : null) ?? (error ? { type: "error", message: error } : null);
+    deleteMutation.feedback ?? (!isFormOpen ? saveMutation.feedback : null) ?? (error ? { type: 'error', message: error } : null);
 
   const handleEdit = (experience: WorkExperienceItem) => {
     if (isBusy) {
@@ -104,14 +104,14 @@ export function WorkExperienceProfileSection() {
         />
       ) : null}
 
-        <WorkExperienceListCard
-          onAdd={handleCreate}
-          experiences={experiences}
-          isLoading={isLoading}
-          isBusy={isBusy}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+      <WorkExperienceListCard
+        onAdd={handleCreate}
+        experiences={experiences}
+        isLoading={isLoading}
+        isBusy={isBusy}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
       {isFormOpen ? (
         <RecordEditorDialog
           key={formVersion}
@@ -122,17 +122,17 @@ export function WorkExperienceProfileSection() {
           onClose={resetForm}
         >
           {(requestClose) => (
-        <WorkExperienceForm
-          key={editingExperience ? editingExperience.id : `new-${formVersion}`}
-          initialValues={
-            editingExperience ? toWorkExperienceFormValues(editingExperience) : undefined
-          }
-          isPending={saveMutation.isSaving}
-          feedback={saveMutation.feedback}
-          onValuesChange={() => setHasChanges(true)}
-          onSubmit={handleSubmit}
-          onCancel={requestClose}
-        />
+            <WorkExperienceForm
+              key={editingExperience ? editingExperience.id : `new-${formVersion}`}
+              initialValues={
+                editingExperience ? toWorkExperienceFormValues(editingExperience) : undefined
+              }
+              isPending={saveMutation.isSaving}
+              feedback={saveMutation.feedback}
+              onValuesChange={() => setHasChanges(true)}
+              onSubmit={handleSubmit}
+              onCancel={requestClose}
+            />
           )}
         </RecordEditorDialog>
       ) : null}
