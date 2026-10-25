@@ -95,7 +95,7 @@ describe("useCreateAvailabilityBlock", () => {
     await act(async () => result.current.createBlock(repeatInput))
 
     expect(toast.success).toHaveBeenCalledWith("Se crearon 2 bloques.", {
-      description: "Fechas omitidas: 2024-01-22, 2024-01-29",
+      description: "Fechas omitidas: Lunes 22 de enero, Lunes 29 de enero",
     })
   })
 
@@ -110,7 +110,7 @@ describe("useCreateAvailabilityBlock", () => {
     await act(async () => result.current.createBlock(repeatInput))
 
     expect(toast.error).toHaveBeenCalledWith("No se creó ningún bloque.", {
-      description: "Fechas omitidas: 2024-01-22",
+      description: "Fechas omitidas: Lunes 22 de enero",
     })
     expect(toast.success).not.toHaveBeenCalled()
   })
