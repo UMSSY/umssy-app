@@ -79,10 +79,9 @@ export function MentorAvailabilityView({
   const handleCreate = async (values: CreateAvailabilityBlockInput) => {
     const result = await createBlock(values);
     if (!result) return;
+    if (isWeeklyRepeatResponse(result) && result.created === 0) return;
     setFormKey((key) => key + 1);
-    if (!isWeeklyRepeatResponse(result)) {
-      setWeekStart(getWeekRange(result.startAt).startAt);
-    }
+    setWeekStart(getWeekRange(values.startAt).startAt);
   };
 
   const handleCancelCreate = () => {
