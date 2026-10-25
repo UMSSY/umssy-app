@@ -83,6 +83,11 @@ export type Education = Prisma.EducationModel
  */
 export type WorkExperience = Prisma.WorkExperienceModel
 /**
+ * Model RadarArea
+ * 
+ */
+export type RadarArea = Prisma.RadarAreaModel
+/**
  * Model Skill
  * 
  */

@@ -64,6 +64,15 @@ The API is available at:
 http://localhost:8080/api
 ```
 
+## Email configuration
+
+See [.env.example](.env.example) for SMTP credentials, sender and optional logo settings.
+
+- Local: `MAIL_TRANSPORT=console`, or `smtp` with Mailpit/MailHog.
+- Production (Brevo): `MAIL_TRANSPORT=smtp`, a verified sender and an SMTP key
+  (not an API key). For port 587, use `SMTP_SECURE=false` and `SMTP_REQUIRE_TLS=true`.
+- Fonts, colors and branding: `src/modules/mail/mjml/layout.mjml` and `header.mjml`.
+
 ## Database Migrations
 
 Ensure your database container is running before executing migration commands.
@@ -124,13 +133,39 @@ Required environment variables in `.env`:
 
 - `JWT_SECRET` — secret used to sign tokens. You can generate with `openssl rand -base64 32` and paste in `JWT_SECRET` in `.env`.
 
-## Seed
+## Seeds
 
-After applying migrations, run `pnpm run seed`.
+### Production
 
-Seeds are idempotent and run in dependency order, with one transaction per module. A failure rolls back that module and stops execution; earlier modules remain committed.
+```bash
+pnpm run seed:production
+# Equivalent command, usable in any environment:
+pnpm run seed:catalogs
+```
 
-`SEED_TRANSACTION_TIMEOUT_MS` sets the timeout per module (default: `120000` ms; range: `1–600000`).
+Loads only required catalogs in a transaction. Creates no users or demo records.
+
+To explicitly initialize an administrator:
+
+```bash
+pnpm run seed:admin --email admin@example.com
+```
+
+Loads required catalogs and creates one account with the `administrativo` role. The generated password is stored with bcrypt and printed only after the transaction commits; save it immediately. Reruns with the same email preserve the password. Existing non-admin accounts are never promoted, and a different email cannot create a second administrator.
+
+The previous `seed:production --email ...` command is now `seed:admin --email ...`.
+
+### Development
+
+```bash
+pnpm run seed
+pnpm run seed:run
+```
+Test password: `Prueba123`. Development commands refuse to run when `NODE_ENV=production`.
+
+Repeated demo data is generated from shared user, availability, appointment and chat plans. Stable record keys preserve existing relationships and reruns use `skipDuplicates`. Catalog values and special scenarios remain explicit.
+
+`SEED_TRANSACTION_TIMEOUT_MS` controls the transaction timeout (default: `120000`; range: `1–600000` ms). Seed commands do not apply migrations.
 
    ## Resources
 - [NestJS Documentation](https://docs.nestjs.com?utm_source=gemini) — Learn more about the framework.
