@@ -47,6 +47,7 @@ describe('identidad en Mis pases', () => {
               userId: sub,
               cancelledAt: null,
               status: { title: 'Confirmada' },
+              event: { status: { title: 'Publicado' } },
             },
           }),
         );
