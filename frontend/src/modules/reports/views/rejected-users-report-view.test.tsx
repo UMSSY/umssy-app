@@ -265,7 +265,7 @@ describe("RejectedUsersReportView", () => {
       expect(screen.getByText("Mostrando 11-20 de 23 usuarios")).toBeDefined();
     });
     expect(getSearchInput().value).toBe("usuario");
-    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 2, limit: 10, search: "usuario" }, expect.any(AbortSignal));
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 2, limit: 10, search: "usuario", snapshotAt: expect.any(String) }, expect.any(AbortSignal));
   });
 
   it("se mantiene en la página actual si solo se agregan espacios al inicio o al final de la búsqueda", async () => {
@@ -285,7 +285,7 @@ describe("RejectedUsersReportView", () => {
 
     expect(screen.getByText("Mostrando 21-23 de 23 usuarios")).toBeDefined();
     expect(screen.getByRole("button", { name: "Página 3" }).getAttribute("aria-current")).toBe("page");
-    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 3, limit: 10, search: "usuario" }, expect.any(AbortSignal));
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 3, limit: 10, search: "usuario", snapshotAt: expect.any(String) }, expect.any(AbortSignal));
   });
 
   it("oculta el contador y la paginación cuando la búsqueda no encuentra usuarios", async () => {

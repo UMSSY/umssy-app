@@ -19,6 +19,7 @@ function buildUser(overrides: Partial<ReportUser>): ReportUser {
     identifier: 'ID-1',
     documentType: 'academic_diploma',
     registeredAt: '2026-01-01T00:00:00.000Z',
+    listedAt: '2026-01-01T00:00:00.000Z',
     registrationStatus: 'APPROVED',
     rejectionReason: null,
     ...overrides,
