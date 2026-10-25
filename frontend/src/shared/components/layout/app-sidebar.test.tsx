@@ -34,6 +34,7 @@ describe("AppSidebar", () => {
     ["/events/my-passes", "Talleres y eventos", "Mis inscripciones"],
     ["/mentor/availability", "Mentorías", "Mi disponibilidad"],
     ["/mentorship/orientation", "Mentorías", "Tipos de orientación"],
+    ["/appointments", "Mentorías", "Mis citas"],
     ["/backoffice/reports/history", "Reportes", "Historial de reportes"],
     ["/profile/settings", "Mi perfil", "Configuración del perfil"],
   ])("opens the current group and marks only the current destination for %s", (pathname, group, destination) => {
@@ -41,6 +42,15 @@ describe("AppSidebar", () => {
     expect(screen.getByRole("button", { name: group })).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("link", { name: destination })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("navigation", { name: "Menú principal" }).querySelectorAll('[aria-current="page"]')).toHaveLength(1);
+  });
+  it.each([["mentor"], ["titulado"]] as const)("shows the appointments link to %s", (role) => {
+    sessionRoles.current = [role]; renderSidebar();
+    fireEvent.click(screen.getByRole("button", { name: "Mentorías" }));
+    expect(screen.getByRole("link", { name: "Mis citas" })).toHaveAttribute("href", "/appointments");
+  });
+  it.each([["empresa"], ["administrativo"]] as const)("hides the appointments link from %s", (role) => {
+    sessionRoles.current = [role]; renderSidebar();
+    expect(screen.queryByRole("link", { name: "Mis citas" })).toBeNull();
   });
   it("keeps the group open for detail routes without selecting an unrelated destination", () => {
     route.pathname = "/mentors/example-id/availability"; renderSidebar();
