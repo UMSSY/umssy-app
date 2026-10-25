@@ -3,7 +3,6 @@ import { EventNotFoundException } from '../../events/exceptions/event-not-found.
 import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
 import { EventNotSupportableException } from '../exceptions/event-not-supportable.exception.js';
 import { ProposalExpiredException } from '../exceptions/proposal-expired.exception.js';
-import type { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import type { EventSupportContext } from '../types/event-support-context.types.js';
 
@@ -31,11 +30,9 @@ describe('EventRegistrationsService.support', () => {
   beforeEach(() => {
     findEventForSupport.mockReset();
     createSupport.mockReset();
-    service = new EventRegistrationsService({
-      findByUserId: vi.fn(),
-      findEventForSupport,
-      createSupport,
-    } as unknown as EventRegistrationsRepository);
+    service = new EventRegistrationsService({} as never, {} as never);
+    vi.spyOn(service, 'findEventForSupport').mockImplementation(findEventForSupport);
+    vi.spyOn(service, 'createSupport').mockImplementation(createSupport);
   });
 
   it('registra el apoyo y devuelve el progreso actualizado', async () => {
