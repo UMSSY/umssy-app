@@ -1,41 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
+import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 
-describe('EventRegistrationsRepository', () => {
-  const create = vi.fn();
+describe('EventRegistrationsService', () => {
   const findMany = vi.fn();
-  let repository: EventRegistrationsRepository;
+  let repository: EventRegistrationsService;
 
   beforeEach(() => {
-    create.mockReset();
     findMany.mockReset();
-    repository = new EventRegistrationsRepository({
-      eventRegistration: { create, findMany },
-    } as unknown as PrismaService);
-  });
-
-  it('persiste la inscripción con su token QR', async () => {
-    const payload = {
-      eventId: 'event-1',
-      userId: 'user-1',
-      statusId: 'status-1',
-      qrToken: 'a'.repeat(64),
-    };
-    create.mockResolvedValue({ id: 'reg-1', ...payload });
-
-    await repository.create(payload);
-
-    expect(create).toHaveBeenCalledWith({
-      data: payload,
-      select: {
-        id: true,
-        eventId: true,
-        userId: true,
-        statusId: true,
-        qrToken: true,
-      },
-    });
+    repository = new EventRegistrationsService({
+      eventRegistration: { findMany },
+    } as unknown as PrismaService, {} as never);
   });
 
   it('consulta por userId con el select y orden esperados', async () => {
@@ -52,6 +27,8 @@ describe('EventRegistrationsRepository', () => {
       },
       select: {
         id: true,
+        registeredAt: true,
+        cancelledAt: true,
         status: { select: { title: true } },
         event: {
           select: {

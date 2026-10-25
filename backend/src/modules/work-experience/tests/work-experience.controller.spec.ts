@@ -223,6 +223,7 @@ describe('WorkExperienceController', () => {
       .expect(404);
     expect(response.body).toEqual({
       statusCode: 404,
+        code: 'WORK_EXPERIENCE_NOT_FOUND',
       data: null,
       detail: 'Work experience not found',
       ok: false,
