@@ -8,7 +8,7 @@ export const REQUIREMENT_STATUS_LABELS: Record<RequirementStatus, string> = {
 
 export const REQUIREMENT_GROUP_LABELS: Record<RequirementCategory, string> = {
   skill: "Habilidades",
-  academic: "Académicos",
+  academic: "Académicos y experiencia",
   other: "Otros requisitos",
 };
 
