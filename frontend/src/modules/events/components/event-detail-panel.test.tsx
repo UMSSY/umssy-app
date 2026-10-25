@@ -1,9 +1,9 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { apiClient } from '@/shared/services/api-client';
 import { EventDetailPanel } from "./event-detail-panel";
 import type { EventDetail } from "../types/event-detail.types";
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -55,40 +55,34 @@ describe("EventDetailPanel", () => {
 
   it('updates availability when the displayed workshop changes', () => {
     const { rerender } = render(<EventDetailPanel event={event} />);
-    expect(screen.getByRole('button', { name: 'Inscripción no disponible' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Inscribirme' })).toBeEnabled();
     rerender(<EventDetailPanel event={{ ...event, id: 'full', availableSpots: 0, registrationCount: 30 }} />);
-    expect(screen.getByRole('button', { name: 'Inscripción no disponible' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Taller lleno' })).toBeDisabled();
     rerender(<EventDetailPanel event={{ ...event, id: 'unknown', availableSpots: null }} />);
     expect(screen.getByRole('button', { name: 'Inscripción no disponible' })).toBeDisabled();
     rerender(<EventDetailPanel event={event} />);
-    expect(screen.getByRole('button', { name: 'Inscripción no disponible' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Inscribirme' })).toBeEnabled();
   });
 
-  it('does not submit a form or send a registration request', () => {
-    const post = vi.spyOn(apiClient, 'post');
-    const fetch = vi.fn();
+  it('keeps the registration button outside form submission', () => {
     const submit = vi.fn();
-    vi.stubGlobal('fetch', fetch);
     render(<form onSubmit={submit}><EventDetailPanel event={event} /></form>);
-    fireEvent.click(screen.getByRole('button', { name: 'Inscripción no disponible' }));
-    expect(post).not.toHaveBeenCalled();
-    expect(fetch).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Inscribirme' })).toHaveAttribute('type', 'button');
     expect(submit).not.toHaveBeenCalled();
   });
-  it("shows detail without promising unsupported registration", () => {
+  it("shows detail and available registration", () => {
     render(<EventDetailPanel event={event} />);
     expect(screen.getByText("Ana")).toBeInTheDocument();
     expect(screen.getByText("Aula 101")).toBeInTheDocument();
     expect(screen.getByText("09:00 - 12:00 hrs")).toBeInTheDocument();
     expect(screen.getByText("Aprende React")).toBeInTheDocument();
-    const button = screen.getByRole("button", { name: "Inscripción no disponible" });
-    expect(button).toBeDisabled();
-    fireEvent.click(button);
+    const button = screen.getByRole("button", { name: "Inscribirme" });
+    expect(button).toBeEnabled();
     expect(screen.getByText("20 cupos disponibles")).toBeInTheDocument();
   });
   it("places the registration action before the descriptive content", () => {
     render(<EventDetailPanel event={event} />);
-    const action = screen.getByRole("button", { name: "Inscripción no disponible" });
+    const action = screen.getByRole("button", { name: "Inscribirme" });
     const description = screen.getByText("Aprende React");
     expect(action.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
@@ -98,7 +92,7 @@ describe("EventDetailPanel", () => {
         event={{ ...event, availableSpots: 0, registrationCount: 30 }}
       />,
     );
-    expect(screen.getByRole("button", { name: "Inscripción no disponible" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Taller lleno" })).toBeDisabled();
     expect(
       screen.getByText("Lleno · Sin cupos disponibles"),
     ).toBeInTheDocument();
@@ -119,7 +113,7 @@ describe("EventDetailPanel", () => {
     expect(screen.getAllByText("Por confirmar")).toHaveLength(2);
     expect(screen.getByText("Descripción por confirmar.")).toBeInTheDocument();
     expect(screen.getByText("Sin límite de cupos")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Inscripción no disponible" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Inscribirme" })).toBeEnabled();
   });
   it("labels virtual locations as an access link", () => {
     render(
