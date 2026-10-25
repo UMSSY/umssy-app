@@ -59,3 +59,24 @@ describe('registrationsService' , () => {
     expect(apiClient.get).not.toHaveBeenCalled();
   });
 });
+
+
+describe('Private pass API contract', () => {
+  beforeEach(() => { vi.clearAllMocks(); vi.mocked(getAccessToken).mockReturnValue('token'); apiClient.defaults.baseURL = 'http://localhost/api'; });
+  const data = { id: 'pass-1', qrToken: 'a'.repeat(64), status: { title: 'Confirmada' }, event: { title: 'React', eventDate: '2026-11-20', startTime: '09:00', endTime: '12:00', location: null } };
+  it('parses the nested event and status returned by the private endpoint', async () => {
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data } });
+    await expect(registrationsService.getPass('pass-1')).resolves.toMatchObject({ id: 'pass-1', qrToken: data.qrToken, eventName: 'React', date: '2026-11-20', status: 'Confirmada', location: null });
+  });
+  it.each([{ ...data, qrToken: null }, { ...data, qrToken: '' }, { ...data, qrToken: 'invalid' }, { ...data, id: 'another-pass' }, { ...data, status: { title: 'Cancelada' } }, { ...data, event: null }])('rejects an invalid private pass: %j', async (invalid) => {
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data: invalid } });
+    await expect(registrationsService.getPass('pass-1')).rejects.toThrow();
+  });
+  it('does not request the pass without a session or backend URL', async () => {
+    vi.mocked(getAccessToken).mockReturnValue(null);
+    await expect(registrationsService.getPass('pass-1')).rejects.toThrow('sesión');
+    vi.mocked(getAccessToken).mockReturnValue('token'); apiClient.defaults.baseURL = undefined;
+    await expect(registrationsService.getPass('pass-1')).rejects.toThrow('URL');
+    expect(apiClient.get).not.toHaveBeenCalled();
+  });
+});
