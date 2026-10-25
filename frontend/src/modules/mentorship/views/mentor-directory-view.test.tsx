@@ -556,6 +556,29 @@ describe("MentorDirectoryView", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("omite la insignia si el servidor aplicó A–Z aunque la URL solicite afinidad", async () => {
+    navigationMocks.search = "?sort=affinity";
+
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
+      makeDirectoryPage([{ ...mentors[0], sharedInterestsCount: 2 }], {
+        effectiveSort: "name_asc",
+        affinityStatus: "unmapped_skills",
+      }),
+    );
+
+    render(<MentorDirectoryView />);
+
+    await screen.findByRole("link", { name: /Ver perfil de María/ });
+
+    expect(screen.getByRole("combobox", { name: "Ordenar mentores" })).toHaveValue(
+      "affinity",
+    );
+    expect(screen.getByRole("note")).toHaveTextContent(
+      "aún no tienen correspondencia",
+    );
+    expect(screen.queryByText("2 intereses en común")).not.toBeInTheDocument();
+  });
+
   it("ordena por nombre A–Z y Z–A según el parámetro solicitado", async () => {
     mockDirectoryWithParams();
 

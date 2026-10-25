@@ -1,9 +1,9 @@
-
 import { describe, expect, it, vi } from 'vitest';
 import type { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import { MentorsService } from '../services/mentors.service.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
+import type { MentorAffinityService } from '../services/mentor-affinity.service.js';
 
 describe('MentorsService directory pagination', () => {
   const baseQuery: MentorDirectoryQuery = {
@@ -28,24 +28,26 @@ describe('MentorsService directory pagination', () => {
   function makeService(totalItems: number) {
     const countDirectoryMentors = vi.fn().mockResolvedValue(totalItems);
 
-    const findDirectoryPage = vi.fn().mockImplementation(
-      async (
-        _filters: unknown,
-        _now: Date,
-        page: number,
-        pageSize: number,
-        _sort?: string,
-      ) =>
-        Array.from(
-          {
-            length: Math.min(
-              pageSize,
-              Math.max(0, totalItems - (page - 1) * pageSize),
-            ),
-          },
-          (_, index) => mentor((page - 1) * pageSize + index + 1),
-        ),
-    );
+    const findDirectoryPage = vi
+      .fn()
+      .mockImplementation(
+        async (
+          _filters: unknown,
+          _now: Date,
+          page: number,
+          pageSize: number,
+          _sort?: string,
+        ) =>
+          Array.from(
+            {
+              length: Math.min(
+                pageSize,
+                Math.max(0, totalItems - (page - 1) * pageSize),
+              ),
+            },
+            (_, index) => mentor((page - 1) * pageSize + index + 1),
+          ),
+      );
 
     const findActiveMentors = vi.fn().mockResolvedValue([mentor(1)]);
 
@@ -155,14 +157,11 @@ describe('MentorsService directory pagination', () => {
   it('conserva todos los IDs al recorrer las páginas en orden Z-A', async () => {
     const totalItems = 14;
 
-    const allMentors = Array.from(
-      { length: totalItems },
-      (_, index) => ({
-        ...mentor(index + 1),
-        firstName: `Nombre${String(totalItems - index).padStart(2, '0')}`,
-        lastName: 'Apellido',
-      }),
-    );
+    const allMentors = Array.from({ length: totalItems }, (_, index) => ({
+      ...mentor(index + 1),
+      firstName: `Nombre${String(totalItems - index).padStart(2, '0')}`,
+      lastName: 'Apellido',
+    }));
 
     const expected = [...allMentors].sort(
       (a, b) =>
@@ -173,24 +172,23 @@ describe('MentorsService directory pagination', () => {
 
     const countDirectoryMentors = vi.fn().mockResolvedValue(totalItems);
 
-    const findDirectoryPage = vi.fn().mockImplementation(
-      async (
-        _filters: unknown,
-        _now: Date,
-        page: number,
-        pageSize: number,
-        sort?: string,
-      ) => {
-        if (sort !== 'name_desc') {
-          throw new Error('Se esperaba el orden name_desc');
-        }
+    const findDirectoryPage = vi
+      .fn()
+      .mockImplementation(
+        async (
+          _filters: unknown,
+          _now: Date,
+          page: number,
+          pageSize: number,
+          sort?: string,
+        ) => {
+          if (sort !== 'name_desc') {
+            throw new Error('Se esperaba el orden name_desc');
+          }
 
-        return expected.slice(
-          (page - 1) * pageSize,
-          page * pageSize,
-        );
-      },
-    );
+          return expected.slice((page - 1) * pageSize, page * pageSize);
+        },
+      );
 
     const repository = {
       countDirectoryMentors,
@@ -247,28 +245,25 @@ describe('MentorsService directory pagination', () => {
         a.id.localeCompare(b.id),
     );
 
-    const countDirectoryMentors = vi
+    const countDirectoryMentors = vi.fn().mockResolvedValue(allMentors.length);
+
+    const findDirectoryPage = vi
       .fn()
-      .mockResolvedValue(allMentors.length);
+      .mockImplementation(
+        async (
+          _filters: unknown,
+          _now: Date,
+          page: number,
+          pageSize: number,
+          sort?: string,
+        ) => {
+          if (sort !== 'name_desc') {
+            throw new Error('Se esperaba el orden name_desc');
+          }
 
-    const findDirectoryPage = vi.fn().mockImplementation(
-      async (
-        _filters: unknown,
-        _now: Date,
-        page: number,
-        pageSize: number,
-        sort?: string,
-      ) => {
-        if (sort !== 'name_desc') {
-          throw new Error('Se esperaba el orden name_desc');
-        }
-
-        return expected.slice(
-          (page - 1) * pageSize,
-          page * pageSize,
-        );
-      },
-    );
+          return expected.slice((page - 1) * pageSize, page * pageSize);
+        },
+      );
 
     const repository = {
       countDirectoryMentors,
@@ -305,7 +300,7 @@ describe('MentorsService directory pagination', () => {
     expect(findDirectoryPage).toHaveBeenCalledTimes(totalPages);
   });
 
-  it('rechaza afinidad sin hacer una consulta ni fingir afinidad', async () => {
+  it('requiere identidad autenticada para solicitar afinidad', async () => {
     const { service, countDirectoryMentors } = makeService(18);
 
     await expect(
@@ -313,10 +308,67 @@ describe('MentorsService directory pagination', () => {
         ...baseQuery,
         sort: 'affinity',
       }),
-    ).rejects.toMatchObject({ statusCode: 400 });
+    ).rejects.toThrow('Se requiere la identidad autenticada');
 
     expect(countDirectoryMentors).not.toHaveBeenCalled();
   });
+
+  it.each([
+    { status: 'no_skills' as const },
+    { status: 'unmapped_skills' as const },
+  ])(
+    'conserva A–Z, filtros y mentores sin conteos para $status',
+    async ({ status }) => {
+      const context = makeService(7);
+      const affinity = {
+        findUserAreaIds: vi
+          .fn()
+          .mockResolvedValue({ status, areaIds: new Set() }),
+      } as unknown as MentorAffinityService;
+      const repository = {
+        countDirectoryMentors: context.countDirectoryMentors,
+        findDirectoryPage: context.findDirectoryPage,
+      } as unknown as MentorsRepository;
+      const service = new MentorsService(
+        repository,
+        new MentorMapper(),
+        affinity,
+      );
+      const result = await service.findDirectory(
+        {
+          ...baseQuery,
+          page: 2,
+          search: 'Ana',
+          area: 'Backend',
+          available: true,
+          sort: 'affinity',
+        },
+        'session-user',
+      );
+
+      expect(result).toMatchObject({
+        page: 2,
+        totalItems: 7,
+        totalPages: 2,
+        effectiveSort: 'name_asc',
+        affinityStatus: status,
+      });
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0]).not.toHaveProperty('sharedInterestsCount');
+      expect(context.findDirectoryPage).toHaveBeenCalledWith(
+        {
+          search: 'Ana',
+          area: 'Backend',
+          available: true,
+        },
+        expect.any(Date),
+        2,
+        6,
+        'name_asc',
+      );
+      expect(affinity.findUserAreaIds).toHaveBeenCalledWith('session-user');
+    },
+  );
 
   it('mantiene findAll() y el mapper existente', async () => {
     const { service, findActiveMentors } = makeService(1);

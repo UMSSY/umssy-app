@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -92,11 +91,7 @@ export class MentorsRepository {
     const mentors = await this.prisma.user.findMany({
       where: this.activeMentorWhere(now),
       select: directorySelect,
-      orderBy: [
-        { firstName: 'asc' },
-        { lastName: 'asc' },
-        { id: 'asc' },
-      ],
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
     });
 
     return this.withPhotoVersions(mentors);
@@ -106,6 +101,45 @@ export class MentorsRepository {
     return this.prisma.user.count({
       where: this.directoryWhere(filters, now),
     });
+  }
+
+  findUserSkills(userId: string) {
+    return this.prisma.userSkill.findMany({
+      where: { userId },
+      select: { skill: { select: { name: true, isCustom: true } } },
+    });
+  }
+
+  findTechnicalAreasByNames(names: string[]) {
+    return this.prisma.technicalArea.findMany({
+      where: { name: { in: names } },
+      select: { id: true, name: true },
+    });
+  }
+
+  findDirectoryCandidates(filters: DirectoryFilters, now: Date) {
+    return this.prisma.user.findMany({
+      where: this.directoryWhere(filters, now),
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        mentorTechnicalAreas: { select: { technicalAreaId: true } },
+      },
+    });
+  }
+
+  async findDirectoryByIds(
+    ids: string[],
+    filters: DirectoryFilters,
+    now: Date,
+  ) {
+    const mentors = await this.prisma.user.findMany({
+      where: { ...this.directoryWhere(filters, now), id: { in: ids } },
+      select: directorySelect,
+    });
+
+    return this.withPhotoVersions(mentors);
   }
 
   async findDirectoryPage(
@@ -183,9 +217,7 @@ export class MentorsRepository {
     return where;
   }
 
-  private async withPhotoVersions<T extends { id: string }>(
-    mentors: T[],
-  ) {
+  private async withPhotoVersions<T extends { id: string }>(mentors: T[]) {
     const photos = mentors.length
       ? await this.prisma.user.findMany({
           where: {
@@ -314,10 +346,7 @@ export class MentorsRepository {
               },
             },
           },
-          orderBy: [
-            { isCurrent: 'desc' },
-            { startDate: 'desc' },
-          ],
+          orderBy: [{ isCurrent: 'desc' }, { startDate: 'desc' }],
         },
         userSkills: {
           select: {
@@ -462,10 +491,7 @@ export class MentorsRepository {
     });
   }
 
-  replaceMentorOrientationTypes(
-    userId: string,
-    orientationTypeIds: string[],
-  ) {
+  replaceMentorOrientationTypes(userId: string, orientationTypeIds: string[]) {
     return this.prisma.$transaction(async (transaction) => {
       await transaction.mentorOrientationType.deleteMany({
         where: {
