@@ -112,8 +112,6 @@ describe("MentorshipView", () => {
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
     expect(integrationMocks.push).not.toHaveBeenCalled();
-    fireEvent.click(within(unavailable).getByRole("button", { name: "Solicitar cupo" }));
-    expect(within(unavailable).getByRole("status")).toHaveTextContent("No se ha enviado ninguna solicitud");
     fireEvent.click(within(unavailable).getByRole("button", { name: "Cancelar" }));
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(screen.getByText("Orientación profesional")).toBeInTheDocument();

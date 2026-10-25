@@ -1,4 +1,5 @@
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, screen, waitFor, within } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import { SlotAvailabilityPreview } from "./slot-availability-preview";
