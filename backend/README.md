@@ -64,6 +64,15 @@ The API is available at:
 http://localhost:8080/api
 ```
 
+## Email configuration
+
+See [.env.example](.env.example) for SMTP credentials, sender and optional logo settings.
+
+- Local: `MAIL_TRANSPORT=console`, or `smtp` with Mailpit/MailHog.
+- Production (Brevo): `MAIL_TRANSPORT=smtp`, a verified sender and an SMTP key
+  (not an API key). For port 587, use `SMTP_SECURE=false` and `SMTP_REQUIRE_TLS=true`.
+- Fonts, colors and branding: `src/modules/mail/mjml/layout.mjml` and `header.mjml`.
+
 ## Database Migrations
 
 Ensure your database container is running before executing migration commands.
