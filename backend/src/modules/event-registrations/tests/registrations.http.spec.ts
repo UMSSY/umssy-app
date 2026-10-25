@@ -67,7 +67,7 @@ const ERROR_CASES = [
 
 describe('registration HTTP contract', () => {
   it('keeps the support route and uses the authenticated identity', async () => {
-    const support = vi.spyOn(app.get(EventRegistrationsService), 'support').mockResolvedValue({ eventId: EVENT_ID, supportCount: 1, supportThreshold: 8, supportsRemaining: 7, progressPercent: 12.5, hasSupported: true });
+    const support = vi.spyOn(app.get(EventRegistrationsService), 'support').mockResolvedValue({ eventId: EVENT_ID, status: 'voting', supportCount: 1, supportThreshold: 8, supportsRemaining: 7, progressPercent: 12.5, hasSupported: true });
     await request(app.getHttpServer()).post(`/api/event-registrations/support/${EVENT_ID}?userId=forged`)
       .set('Authorization', `Bearer ${token}`).expect(201);
     expect(support).toHaveBeenCalledWith(EVENT_ID, USER_ID);
