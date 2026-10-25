@@ -16,17 +16,17 @@ describe("buildWeeklyRepeatToast", () => {
     })
   })
 
-  it("lista las fechas omitidas cuando hay alguna", () => {
+  it("lista las fechas omitidas formateadas en español, sin el año", () => {
     expect(buildWeeklyRepeatToast({ created: 2, skipped: ["2024-01-22", "2024-01-29"] })).toEqual({
       title: "Se crearon 2 bloques.",
-      description: "Fechas omitidas: 2024-01-22, 2024-01-29",
+      description: "Fechas omitidas: Lunes 22 de enero, Lunes 29 de enero",
     })
   })
 
   it("informa cuando no se creó ningún bloque", () => {
     expect(buildWeeklyRepeatToast({ created: 0, skipped: ["2024-01-22"] })).toEqual({
       title: "No se creó ningún bloque.",
-      description: "Fechas omitidas: 2024-01-22",
+      description: "Fechas omitidas: Lunes 22 de enero",
     })
   })
 })
