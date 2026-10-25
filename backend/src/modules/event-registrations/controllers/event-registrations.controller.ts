@@ -100,4 +100,14 @@ export class EventRegistrationsController {
     return this.registrationsService.support(eventId, userId);
   }
 
+  @Get('event-registrations/passes/:id')
+  @ApiOperation({ summary: 'Consultar el pase privado de una inscripción activa de un evento publicado' })
+  @ApiParam({ name: 'id', format: 'uuid' })
+  getPassById(
+    @Param('id', new ZodValidationPipe(SupportEventIdSchema, () => new ValidationException())) id: string,
+    @CurrentUserId() userId: string,
+  ) {
+    return this.registrationsService.getPassById(id, userId);
+  }
+
 }
