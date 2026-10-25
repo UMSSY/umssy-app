@@ -6,6 +6,7 @@ import type { AvailabilityBlock } from "../types/availability-block.types";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
 import type { AvailabilityFilters } from "../types/availability-filters.types";
 import type { MentorAvailabilityStatus } from "../types/mentor-availability-status.types";
+import type { WeeklyRepeatResponse } from "../types/weekly-repeat-response.types";
 import type { WeekRange } from "@/shared/types/week-range.types";
 import type { Appointment } from "@/modules/appointments";
 import type { CreateAppointmentInput } from "../types/create-appointment-input.types";
@@ -56,12 +57,21 @@ export const availabilityApi = {
     return response.data.data;
   },
 
-  createAvailabilityBlock: async (input: CreateAvailabilityBlockInput): Promise<AvailabilityBlock> => {
+  createAvailabilityBlock: async (
+    input: CreateAvailabilityBlockInput,
+  ): Promise<AvailabilityBlock | WeeklyRepeatResponse> => {
     const payload: CreateAvailabilityBlockInput = {
       startAt: toISOString(input.startAt),
       endAt: toISOString(input.endAt),
     };
-    const response = await apiClient.post<ApiResponse<AvailabilityBlock>>("/availability-blocks", payload);
+    if (input.repeatWeekly) {
+      payload.repeatWeekly = input.repeatWeekly;
+      payload.repeatUntil = input.repeatUntil;
+    }
+    const response = await apiClient.post<ApiResponse<AvailabilityBlock | WeeklyRepeatResponse>>(
+      "/availability-blocks",
+      payload,
+    );
     return response.data.data;
   },
 

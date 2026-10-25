@@ -26,6 +26,7 @@ import type { AvailabilityBlock } from "../types/availability-block.types";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
 import type { MentorAvailabilityViewProps } from "../types/mentor-availability-view-props.types";
 import { formatWeekLabel } from "../utils/format-week-label";
+import { isWeeklyRepeatResponse } from "../utils/is-weekly-repeat-response";
 
 export function MentorAvailabilityView({
   initialWeekStart,
@@ -76,11 +77,11 @@ export function MentorAvailabilityView({
   };
 
   const handleCreate = async (values: CreateAvailabilityBlockInput) => {
-    const block = await createBlock(values);
-    if (block) {
-      setFormKey((key) => key + 1);
-      setWeekStart(getWeekRange(block.startAt).startAt);
-    }
+    const result = await createBlock(values);
+    if (!result) return;
+    if (isWeeklyRepeatResponse(result) && result.created === 0) return;
+    setFormKey((key) => key + 1);
+    setWeekStart(getWeekRange(values.startAt).startAt);
   };
 
   const handleCancelCreate = () => {
