@@ -44,7 +44,7 @@ export function SurveysView() {
         </div>
       }
     >
-      <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-center">
         <ReportSearchInput value={creatorSearch} onChange={setCreatorSearch} label={CREATOR_SEARCH_LABEL} />
         <ReportFilterSelect
           label={ACADEMIC_PERIOD_FILTER_LABEL}
