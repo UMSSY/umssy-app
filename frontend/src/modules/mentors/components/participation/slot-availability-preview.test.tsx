@@ -1,9 +1,13 @@
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, screen, waitFor, within } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SlotAvailabilityPreview } from "./slot-availability-preview";
 
-afterEach(cleanup);
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
+beforeEach(() => { vi.stubEnv("NODE_ENV", "development"); vi.stubEnv("NEXT_PUBLIC_HU7_PREVIEW", "true"); });
+afterEach(() => { cleanup(); vi.unstubAllEnvs(); });
 
 async function openModal() {
   const user = userEvent.setup();
@@ -25,13 +29,14 @@ describe("SlotAvailabilityPreview", () => {
     expect(screen.getByRole("button", { name: "Consultar cupos" })).toBeInTheDocument();
   });
 
-  it("explica FIFO y mantiene Solicitar cupo sin registrar una solicitud", async () => {
+  it("explica FIFO y registra una solicitud simulada", async () => {
     const { user, dialog } = await openModal();
     expect(within(dialog).getByRole("heading", { name: "No hay cupos disponibles" })).toBeInTheDocument();
-    expect(within(dialog).getByText(/la solicitud más antigua se atiende primero/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/Criterio de asignación institucional/)).toBeInTheDocument();
     await user.click(within(dialog).getByRole("button", { name: "Solicitar cupo" }));
-    expect(within(dialog).getByRole("status")).toHaveTextContent("No se ha enviado ninguna solicitud");
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    const confirmation = await screen.findByRole("dialog", { name: "Solicitud registrada correctamente" });
+    await user.click(within(confirmation).getByRole("button", { name: "Cerrar" }));
+    expect(await screen.findByText("Tu solicitud está en espera de disponibilidad de cupos.")).toBeInTheDocument();
   });
 
   it.each(["Cancelar", "Cerrar modal"])("cierra con %s y devuelve el foco", async (name) => {

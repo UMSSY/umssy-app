@@ -18,6 +18,7 @@
     "migrate": "prisma migrate dev --name",
     "migrate:apply": "prisma migrate deploy && prisma generate",
     "seed": "prisma db seed",
+    "seed:hu7": "tsx src/modules/mentor-participation/seeds/hu7-demo.seed.ts",
     "seed:run": "tsc -p tsconfig.seed.json && node dist-seed/src/common/database/development-seeds.js",
     "seed:production": "tsc -p tsconfig.seed.json && node dist-seed/src/common/database/catalog-seeds.js",
     "vercel-build": "prisma generate && pnpm vercel:migrate && pnpm build",

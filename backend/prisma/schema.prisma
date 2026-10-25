@@ -150,6 +150,10 @@ model User {
   exportHistories        AdminExportHistory[] @relation("AdminExportHistories")
   openedAccessRequests   AccessRequest[]      @relation("AccessRequestOpenedBy")
   reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
+  approvedAccessRequest AccessRequest? @relation("ApprovedGraduateAccount")
+  mentorParticipationRequests MentorParticipationRequest[]
+  mentorParticipationAttempts MentorParticipationAttempt[]
+  mentorParticipationSanctions MentorParticipationSanction[]
 
   conversationsAsUserA Conversation[]            @relation("UserAConversations")
   conversationsAsUserB Conversation[]            @relation("UserBConversations")
@@ -325,6 +329,7 @@ model TechnicalArea {
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   mentors MentorTechnicalArea[]
+  participationPreferences MentorRequestTechnicalArea[]
 
   @@map("technical_areas")
 }
@@ -338,6 +343,7 @@ model OrientationType {
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   mentors      MentorOrientationType[]
+  participationPreferences MentorRequestOrientationType[]
   appointments Appointment[]
 
   @@map("orientation_types")
@@ -720,6 +726,7 @@ model AccessRequest {
   reviewedById    String?   @map("reviewed_by_id") @db.Uuid
   reviewedAt      DateTime? @map("reviewed_at") @db.Timestamptz(6)
   rejectionReason String?   @map("rejection_reason") @db.VarChar(500)
+  approvedUserId  String?   @unique @map("approved_user_id") @db.Uuid
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -728,6 +735,7 @@ model AccessRequest {
   documentFile File?                      @relation(fields: [documentFileId], references: [id], onDelete: SetNull)
   openedBy     User?                      @relation("AccessRequestOpenedBy", fields: [openedById], references: [id], onDelete: SetNull)
   reviewedBy   User?                      @relation("AccessRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  approvedUser User?                      @relation("ApprovedGraduateAccount", fields: [approvedUserId], references: [id], onDelete: Restrict)
   career       Career                     @relation(fields: [careerId], references: [id], onDelete: Restrict)
 
   activationOtps ActivationOtp[]
@@ -738,6 +746,128 @@ model AccessRequest {
   @@index([idCardNumber])
   @@index([email])
   @@map("access_requests")
+}
+
+model MentorCapacityPolicy {
+  id         String   @id @db.VarChar(20)
+  percentage Int      @default(40) @db.SmallInt
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("mentor_capacity_policies")
+}
+
+model MentorParticipationRequest {
+  id                    String    @id @default(uuid()) @db.Uuid
+  userId                String    @map("user_id") @db.Uuid
+  status                String    @db.VarChar(20)
+  requestedAt           DateTime  @default(now()) @map("requested_at") @db.Timestamptz(6)
+  queuedAt              DateTime? @map("queued_at") @db.Timestamptz(6)
+  activatedAt           DateTime? @map("activated_at") @db.Timestamptz(6)
+  cancelledAt           DateTime? @map("cancelled_at") @db.Timestamptz(6)
+  leftAt                DateTime? @map("left_at") @db.Timestamptz(6)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user                  User                            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  technicalAreas        MentorRequestTechnicalArea[]
+  orientationTypes      MentorRequestOrientationType[]
+  offers                MentorSlotOffer[]
+  emails                MentorEmailOutbox[]
+
+  @@index([status, queuedAt, id])
+  @@index([userId, requestedAt])
+  @@map("mentor_participation_requests")
+}
+
+model MentorRequestTechnicalArea {
+  requestId       String   @map("request_id") @db.Uuid
+  technicalAreaId String   @map("technical_area_id") @db.Uuid
+  request         MentorParticipationRequest @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  technicalArea   TechnicalArea              @relation(fields: [technicalAreaId], references: [id], onDelete: Restrict)
+
+  @@id([requestId, technicalAreaId])
+  @@map("mentor_request_technical_areas")
+}
+
+model MentorRequestOrientationType {
+  requestId         String   @map("request_id") @db.Uuid
+  orientationTypeId String   @map("orientation_type_id") @db.Uuid
+  request           MentorParticipationRequest @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  orientationType   OrientationType            @relation(fields: [orientationTypeId], references: [id], onDelete: Restrict)
+
+  @@id([requestId, orientationTypeId])
+  @@map("mentor_request_orientation_types")
+}
+
+model MentorSlotOffer {
+  id          String    @id @default(uuid()) @db.Uuid
+  requestId   String    @map("request_id") @db.Uuid
+  status      String    @db.VarChar(20)
+  offeredAt   DateTime  @map("offered_at") @db.Timestamptz(6)
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(6)
+  confirmedAt DateTime? @map("confirmed_at") @db.Timestamptz(6)
+  expiredAt   DateTime? @map("expired_at") @db.Timestamptz(6)
+  cancelledAt DateTime? @map("cancelled_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  request     MentorParticipationRequest @relation(fields: [requestId], references: [id], onDelete: Restrict)
+
+  @@index([status, expiresAt])
+  @@map("mentor_slot_offers")
+}
+
+model MentorEmailOutbox {
+  id            String    @id @default(uuid()) @db.Uuid
+  eventKey      String    @unique @map("event_key") @db.VarChar(150)
+  requestId     String?   @map("request_id") @db.Uuid
+  type          String    @db.VarChar(30)
+  recipient     String    @db.VarChar(150)
+  payload       Json      @default("{}")
+  status        String    @default("PENDING") @db.VarChar(20)
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime  @default(now()) @map("next_attempt_at") @db.Timestamptz(6)
+  sentAt        DateTime? @map("sent_at") @db.Timestamptz(6)
+  lastError     String?   @map("last_error") @db.VarChar(500)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  request       MentorParticipationRequest? @relation(fields: [requestId], references: [id], onDelete: Restrict)
+
+  @@index([status, nextAttemptAt])
+  @@map("mentor_email_outbox")
+}
+
+model MentorParticipationAttempt {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  idempotencyKey String   @map("idempotency_key") @db.Uuid
+  payloadHash    String   @map("payload_hash") @db.VarChar(64)
+  action         String   @db.VarChar(20)
+  outcome        String   @db.VarChar(30)
+  counted        Boolean  @default(true)
+  statusCode     Int      @map("status_code")
+  detail         String?  @db.VarChar(300)
+  response       Json     @default("{}")
+  occurredAt     DateTime @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, occurredAt])
+  @@map("mentor_participation_attempts")
+}
+
+model MentorParticipationSanction {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  reason     String    @db.VarChar(80)
+  startsAt   DateTime  @map("starts_at") @db.Timestamptz(6)
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(6)
+  liftedAt   DateTime? @map("lifted_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, expiresAt])
+  @@map("mentor_participation_sanctions")
 }
 
 model ActivationOtp {
