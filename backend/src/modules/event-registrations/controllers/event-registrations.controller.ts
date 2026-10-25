@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -58,7 +58,7 @@ export class EventRegistrationsController {
   @ApiResponse({ status: 403, description: 'Acceso denegado al pase' })
   @ApiResponse({ status: 404, description: 'Pase no encontrado' })
   async getPassById(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.service.getPassById(id, user.id);

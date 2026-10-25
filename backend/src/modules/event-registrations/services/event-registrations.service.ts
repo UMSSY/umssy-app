@@ -12,10 +12,8 @@ import {
 import { EventNotFoundException } from '../../events/exceptions/event-not-found.exception.js';
 import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
 import { EventNotSupportableException } from '../exceptions/event-not-supportable.exception.js';
-import {
-  PassAccessDeniedException,
-  PassNotFoundException,
-} from '../exceptions/pass-access-denied.exception.js';
+import {PassAccessDeniedException } from '../exceptions/pass-access-denied.exception.js';
+import { PassNotFoundException } from '../exceptions/pass-not-found.exception.js';
 import { ProposalExpiredException } from '../exceptions/proposal-expired.exception.js';
 import { EventRegistrationsMapper } from '../mappers/event-registrations.mapper.js';
 import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';

@@ -5,8 +5,3 @@ export class PassAccessDeniedException extends DomainException {
   }
 }
 
-export class PassNotFoundException extends DomainException {
-  constructor(message = 'El pase solicitado no existe o no está disponible') {
-    super(message, 404);
-  }
-}
