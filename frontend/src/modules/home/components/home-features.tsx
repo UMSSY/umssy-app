@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { HomeReveal } from "./home-reveal";
 import { HomeSectionHeading } from "./home-section-heading";
 import { HOME_FEATURES, HOME_SECTION_INNER_CLASS, HOME_SLANT_TAG_CLASS } from "../constants/home.constants";
 
@@ -7,7 +8,7 @@ export function HomeFeatures() {
     <section id="community" className="scroll-mt-28 bg-ink text-surface">
       <div className={HOME_SECTION_INNER_CLASS}>
         <HomeSectionHeading title={HOME_FEATURES.title} />
-        <div className="mt-14 grid gap-8 md:grid-cols-3">
+        <HomeReveal className="mt-14 grid gap-8 md:grid-cols-3">
           {HOME_FEATURES.items.map((item) => (
             <article key={item.tag} className="bg-surface/5">
               <div className="relative aspect-4/3">
@@ -20,7 +21,7 @@ export function HomeFeatures() {
               </div>
             </article>
           ))}
-        </div>
+        </HomeReveal>
       </div>
     </section>
   );
