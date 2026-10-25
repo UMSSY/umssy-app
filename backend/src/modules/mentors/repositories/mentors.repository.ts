@@ -1,6 +1,34 @@
 import { Injectable } from '@nestjs/common';
+import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
+
+const directorySelect = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  headline: true,
+  isAvailableForMentoring: true,
+  educations: {
+    select: { degree: true, institution: true },
+    orderBy: [{ startDate: 'desc' }, { id: 'asc' }],
+    take: 1,
+  },
+  mentorOrientationTypes: {
+    where: { orientationType: { isActive: true } },
+    select: { orientationType: { select: { name: true } } },
+    orderBy: { orientationType: { name: 'asc' } },
+  },
+  mentorTechnicalAreas: {
+    select: { technicalArea: { select: { name: true } } },
+  },
+} satisfies Prisma.UserSelect;
+
+interface DirectoryFilters {
+  search: string;
+  area?: string;
+  available: boolean;
+}
 
 @Injectable()
 export class MentorsRepository {
@@ -59,46 +87,8 @@ export class MentorsRepository {
 
   async findActiveMentors(now: Date) {
     const mentors = await this.prisma.user.findMany({
-      where: {
-        isActive: true,
-        roles: {
-          some: {
-            deletedAt: null,
-            startAt: {
-              lte: now,
-            },
-            role: {
-              name: MENTOR_ROLE_NAME,
-            },
-          },
-        },
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        headline: true,
-        isAvailableForMentoring: true,
-        educations: {
-          select: { degree: true, institution: true },
-          orderBy: [{ startDate: 'desc' }, { id: 'asc' }],
-          take: 1,
-        },
-        mentorOrientationTypes: {
-          where: { orientationType: { isActive: true } },
-          select: { orientationType: { select: { name: true } } },
-          orderBy: { orientationType: { name: 'asc' } },
-        },
-        mentorTechnicalAreas: {
-          select: {
-            technicalArea: {
-              select: {
-                name: true,
-              },
-            },
-          },
-        },
-      },
+      where: this.activeMentorWhere(now),
+      select: directorySelect,
       orderBy: [
         {
           firstName: 'asc',
@@ -109,6 +99,78 @@ export class MentorsRepository {
       ],
     });
 
+    return this.withPhotoVersions(mentors);
+  }
+
+  countDirectoryMentors(filters: DirectoryFilters, now: Date) {
+    return this.prisma.user.count({
+      where: this.directoryWhere(filters, now),
+    });
+  }
+
+  async findDirectoryPage(
+    filters: DirectoryFilters,
+    now: Date,
+    page: number,
+    pageSize: number,
+  ) {
+    const mentors = await this.prisma.user.findMany({
+      where: this.directoryWhere(filters, now),
+      select: directorySelect,
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
+
+    return this.withPhotoVersions(mentors);
+  }
+
+  private activeMentorWhere(now: Date): Prisma.UserWhereInput {
+    return {
+      isActive: true,
+      roles: {
+        some: {
+          deletedAt: null,
+          startAt: { lte: now },
+          role: { name: MENTOR_ROLE_NAME },
+        },
+      },
+    };
+  }
+
+  private directoryWhere(
+    filters: DirectoryFilters,
+    now: Date,
+  ): Prisma.UserWhereInput {
+    const where = this.activeMentorWhere(now);
+    if (filters.available) where.isAvailableForMentoring = true;
+    if (filters.area) {
+      where.mentorTechnicalAreas = {
+        some: { technicalArea: { name: filters.area } },
+      };
+    }
+    if (filters.search) {
+      where.AND = filters.search.split(/\s+/).map((word) => ({
+        OR: [
+          { firstName: { contains: word, mode: 'insensitive' } },
+          { lastName: { contains: word, mode: 'insensitive' } },
+          { headline: { contains: word, mode: 'insensitive' } },
+          {
+            mentorTechnicalAreas: {
+              some: {
+                technicalArea: {
+                  name: { contains: word, mode: 'insensitive' },
+                },
+              },
+            },
+          },
+        ],
+      }));
+    }
+    return where;
+  }
+
+  private async withPhotoVersions<T extends { id: string }>(mentors: T[]) {
     const photos = mentors.length
       ? await this.prisma.user.findMany({
           where: {
@@ -132,19 +194,8 @@ export class MentorsRepository {
   findActiveMentorParticipation(userId: string, now: Date) {
     return this.prisma.user.findFirst({
       where: {
+        ...this.activeMentorWhere(now),
         id: userId,
-        isActive: true,
-        roles: {
-          some: {
-            deletedAt: null,
-            startAt: {
-              lte: now,
-            },
-            role: {
-              name: MENTOR_ROLE_NAME,
-            },
-          },
-        },
       },
       select: {
         id: true,
@@ -202,19 +253,8 @@ export class MentorsRepository {
   findActiveMentorById(userId: string, now: Date) {
     return this.prisma.user.findFirst({
       where: {
+        ...this.activeMentorWhere(now),
         id: userId,
-        isActive: true,
-        roles: {
-          some: {
-            deletedAt: null,
-            startAt: {
-              lte: now,
-            },
-            role: {
-              name: MENTOR_ROLE_NAME,
-            },
-          },
-        },
       },
       select: {
         id: true,

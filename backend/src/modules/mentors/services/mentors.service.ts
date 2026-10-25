@@ -11,6 +11,10 @@ import type { ActivateMentorDto } from '../requests/activate-mentor.schema.js';
 import type { UpdateMentorTechnicalAreasDto } from '../requests/update-mentor-technical-areas.schema.js';
 import type { UpdateMentorOrientationTypesDto } from '../requests/update-mentor-orientation-types.schema.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
+import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
+import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
+
+const DIRECTORY_PAGE_SIZE = 6 as const;
 
 @Injectable()
 export class MentorsService {
@@ -24,6 +28,47 @@ export class MentorsService {
     const mentors = await this.mentorsRepository.findActiveMentors(now);
 
     return this.mentorMapper.toDirectoryResponseList(mentors);
+  }
+
+  async findDirectory(query: MentorDirectoryQuery) {
+    if (query.sort !== 'name_asc') {
+      throw new RequestValidationException([
+        {
+          field: 'sort',
+          message: `El orden ${query.sort} aún no está disponible`,
+        },
+      ]);
+    }
+
+    const now = new Date();
+    const filters = {
+      search: query.search,
+      area: query.area,
+      available: query.available,
+    };
+    const totalItems = await this.mentorsRepository.countDirectoryMentors(
+      filters,
+      now,
+    );
+    const totalPages = Math.ceil(totalItems / DIRECTORY_PAGE_SIZE);
+    const page = Math.min(query.page, Math.max(1, totalPages));
+    const mentors = totalItems
+      ? await this.mentorsRepository.findDirectoryPage(
+          filters,
+          now,
+          page,
+          DIRECTORY_PAGE_SIZE,
+        )
+      : [];
+
+    return {
+      items: this.mentorMapper.toDirectoryResponseList(mentors),
+      page,
+      pageSize: DIRECTORY_PAGE_SIZE,
+      totalItems,
+      totalPages,
+      effectiveSort: 'name_asc' as const,
+    };
   }
 
   async findOne(userId: string) {
