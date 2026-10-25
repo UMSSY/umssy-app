@@ -28,7 +28,7 @@ describe('EventsRepository.expireOverdueProposals', () => {
     });
     expect(updateMany).toHaveBeenCalledWith({
       where: {
-        status: { title: 'Votacion' },
+        status: { title: { in: ['Votacion', 'En votación'] } },
         origin: { title: 'Comunidad' },
         votingDeadline: { lte: now },
       },
