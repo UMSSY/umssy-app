@@ -1,3 +1,4 @@
+
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import {
   cleanup,
@@ -55,6 +56,30 @@ vi.mock("next/navigation", () => ({
   }),
   usePathname: () => navigationMocks.pathname,
   useSearchParams: () => new URLSearchParams(navigationMocks.search),
+}));
+
+vi.mock("../hooks/use-mentorship-catalogs", () => ({
+  useMentorshipCatalogs: () => ({
+    technicalAreas: [
+      {
+        id: "area-backend",
+        name: "Backend",
+        description: null,
+      },
+      {
+        id: "area-cloud",
+        name: "Cloud",
+        description: null,
+      },
+    ],
+    isTechnicalAreasLoading: false,
+    isTechnicalAreasError: false,
+    retryTechnicalAreas: vi.fn(),
+    orientationTypes: [],
+    isOrientationTypesLoading: false,
+    isOrientationTypesError: false,
+    retryOrientationTypes: vi.fn(),
+  }),
 }));
 
 afterEach(() => {

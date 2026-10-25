@@ -13,10 +13,12 @@ import {
 } from "@/components/ui/native-select";
 import { PageHeading } from "@/shared/components/layout";
 import { MentorDirectoryGrid } from "../components/mentor/mentor-directory-grid";
+import { MentorDirectoryPagination } from "../components/mentor/mentor-directory-pagination";
 import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
 import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
 import { useCurrentUserId } from "../hooks/use-current-user-id";
 import { useMentorDirectory } from "../hooks/use-mentor-directory";
+import { useMentorshipCatalogs } from "../hooks/use-mentorship-catalogs";
 import type {
   DirectoryPage,
   MentorSort,
@@ -53,6 +55,8 @@ export function MentorDirectoryView({
 
   const { currentUserId } = useCurrentUserId();
 
+  const { technicalAreas } = useMentorshipCatalogs();
+
   const {
     data: directory,
     isPending,
@@ -68,15 +72,16 @@ export function MentorDirectoryView({
   });
 
   const mentors = useMemo(
-  () => directory?.items ?? [],
-  [directory?.items],
-);
+    () => directory?.items ?? [],
+    [directory?.items],
+  );
+
   const totalItems = directory?.totalItems ?? 0;
   const totalPages =
     directory?.totalPages ?? directoryState?.totalPages ?? 0;
 
-  // Para A-Z y Z-A respetamos la selección del usuario.
-  // La afinidad utiliza el resultado efectivo del backend.
+  // A-Z y Z-A respetan el orden aplicado por el backend.
+  // La afinidad utiliza el orden efectivo informado por el servidor.
   const effectiveSort: MentorSort =
     sortBy !== "affinity"
       ? sortBy
@@ -111,36 +116,6 @@ export function MentorDirectoryView({
     router,
     totalPages,
   ]);
-
-  const areas = useMemo(
-    () =>
-      [
-        ...new Set(
-          mentors.flatMap((mentor) => mentor.technicalAreas),
-        ),
-      ].sort((a, b) => a.localeCompare(b, "es")),
-    [mentors],
-  );
-
-  // El backend debe ordenar globalmente antes de paginar.
-  // Aquí ordenamos también los mentores de la página recibida.
-  const sortedMentors = useMemo(() => {
-    if (effectiveSort === "affinity") {
-      return mentors;
-    }
-
-    return [...mentors].sort((a, b) => {
-      const comparison = a.fullName.localeCompare(
-        b.fullName,
-        "es",
-        { sensitivity: "base" },
-      );
-
-      return effectiveSort === "name_desc"
-        ? -comparison
-        : comparison;
-    });
-  }, [effectiveSort, mentors]);
 
   const affinityMessage =
     sortBy !== "affinity" || effectiveSort === "affinity"
@@ -234,9 +209,12 @@ export function MentorDirectoryView({
                 Todas las áreas
               </NativeSelectOption>
 
-              {areas.map((name) => (
-                <NativeSelectOption key={name} value={name}>
-                  {name}
+              {technicalAreas.map((areaOption) => (
+                <NativeSelectOption
+                  key={areaOption.id}
+                  value={areaOption.name}
+                >
+                  {areaOption.name}
                 </NativeSelectOption>
               ))}
             </NativeSelect>
@@ -318,9 +296,7 @@ export function MentorDirectoryView({
         ) : (
           <>
             <h2 className="text-xl font-semibold text-ink">
-              {sortBy === "affinity"
-                ? "Preferencias"
-                : "Sugerencias"}
+              {sortBy === "affinity" ? "Preferencias" : "Sugerencias"}
             </h2>
 
             {affinityMessage ? (
@@ -340,45 +316,23 @@ export function MentorDirectoryView({
             </p>
 
             <MentorDirectoryGrid
-              mentors={sortedMentors}
+              mentors={mentors}
               currentUserId={currentUserId}
               returnTo={returnTo}
               showAffinityBadge={effectiveSort === "affinity"}
             />
 
-            {totalPages > 1 ? (
-              <nav
-                aria-label="Paginación de mentores"
-                className="flex items-center justify-center gap-4"
-              >
-                <Button
-                  variant="outline"
-                  disabled={page <= 1 || isFetching}
-                  onClick={() =>
-                    navigateWithUpdates({ page: page - 1 })
-                  }
-                >
-                  Anterior
-                </Button>
-
-                <span
-                  role="status"
-                  className="text-sm text-text-secondary"
-                >
-                  Página {page} de {totalPages}
-                </span>
-
-                <Button
-                  variant="outline"
-                  disabled={page >= totalPages || isFetching}
-                  onClick={() =>
-                    navigateWithUpdates({ page: page + 1 })
-                  }
-                >
-                  Siguiente
-                </Button>
-              </nav>
-            ) : null}
+            <MentorDirectoryPagination
+              page={directory?.page ?? page}
+              pageSize={directory?.pageSize ?? 6}
+              totalItems={directory?.totalItems ?? 0}
+              totalPages={directory?.totalPages ?? 0}
+              onPageChange={(nextPage) => {
+                if (!isFetching) {
+                  navigateWithUpdates({ page: nextPage });
+                }
+              }}
+            />
           </>
         )}
       </div>

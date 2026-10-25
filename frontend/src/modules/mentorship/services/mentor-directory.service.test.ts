@@ -1,3 +1,4 @@
+
 import { apiClient } from "@/shared/services/api-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getMentorDirectory } from "./mentor-directory.service";
@@ -165,5 +166,47 @@ describe("getMentorDirectory", () => {
       ...directory,
       items: mentors,
     });
+  });
+
+  it("envía name_asc a la API cuando se solicita afinidad", async () => {
+    const directory = {
+      items: [],
+      page: 1,
+      pageSize: 6,
+      totalItems: 0,
+      totalPages: 0,
+      effectiveSort: "name_asc" as const,
+      affinityStatus: "no_skills" as const,
+    };
+
+    const request = vi.spyOn(apiClient, "get").mockResolvedValue({
+      data: {
+        statusCode: 200,
+        ok: true,
+        detail: "Operación exitosa",
+        data: directory,
+      },
+    });
+
+    await getMentorDirectory({
+      page: 1,
+      search: "",
+      area: "",
+      available: false,
+      sort: "affinity",
+    });
+
+    expect(request).toHaveBeenCalledExactlyOnceWith(
+      "/mentors/directory",
+      expect.objectContaining({
+        params: {
+          page: 1,
+          search: undefined,
+          area: undefined,
+          available: "false",
+          sort: "name_asc",
+        },
+      }),
+    );
   });
 });

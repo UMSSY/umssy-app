@@ -1,6 +1,6 @@
 
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getMentorDirectory } from "@/modules/mentorship/services/mentor-directory.service";
 import MentorDirectoryPage from "./page";
@@ -92,7 +92,9 @@ describe("MentorDirectoryPage", () => {
       expect.any(AbortSignal),
     );
 
-    expect(queryClient.isFetching()).toBe(0);
+    await waitFor(() => {
+      expect(queryClient?.isFetching()).toBe(0);
+    });
 
     expect(
       screen.getByRole("heading", {
