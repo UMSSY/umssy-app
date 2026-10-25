@@ -70,6 +70,7 @@ function getSkillNames(experience: {
 export function WorkExperienceListCard({
   experiences = [],
   isLoading = false,
+  isBusy = false,
   onAdd,
   onEdit,
   onDelete,
@@ -82,7 +83,11 @@ export function WorkExperienceListCard({
     );
   }
 
-  const safeExperiences = experiences ?? [];
+  const safeExperiences = [...(experiences ?? [])].sort(
+    (a, b) =>
+      new Date(b.startDate).getTime() -
+      new Date(a.startDate).getTime(),
+  );
 
   return (
     <div className="space-y-6">
@@ -100,6 +105,7 @@ export function WorkExperienceListCard({
           variant="outline"
           size="sm"
           onClick={onAdd}
+          disabled={isBusy}
           className="gap-2"
         >
           Añadir experiencia
@@ -111,7 +117,7 @@ export function WorkExperienceListCard({
           Aún no registraste experiencia laboral.
         </section>
       ) : (
-        <div className="relative ml-2 space-y-8 border-l border-slate-300 pl-6">
+        <ul className="relative ml-2 space-y-8 border-l border-slate-300 pl-6">
           {safeExperiences.map((experience, index) => {
             const periodText = formatWorkPeriod(
               experience.startDate,
@@ -127,20 +133,25 @@ export function WorkExperienceListCard({
             );
 
             return (
-              <div
+              <li
                 key={experience.id ?? index}
                 className="group relative"
               >
-                <span className="absolute -left-[31px] top-1.5 size-3 rounded-full border-2 border-slate-400 bg-white" />
+                <span
+                  aria-hidden="true"
+                  className="absolute -left-[31px] top-1.5 size-3 rounded-full border-2 border-slate-400 bg-white"
+                />
 
                 <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="wrap-anywhere text-base font-semibold text-slate-900">
-                      {experience.position}
-                    </h4>
+                  <div className="min-w-0 flex-1">
+  <h4 className="wrap-anywhere text-base font-semibold text-slate-900">
+    {experience.position}
+  </h4>
+
                     <p className="text-sm font-medium text-slate-700">
                       {experience.companyName}
                     </p>
+
                     <p className="mt-0.5 text-xs font-medium text-slate-600">
                       {periodText}
                     </p>
@@ -151,7 +162,8 @@ export function WorkExperienceListCard({
                       variant="outline"
                       size="sm"
                       onClick={() => onEdit?.(experience)}
-                      aria-label="Editar experiencia"
+                      aria-label={`Editar ${experience.position}`}
+                      disabled={isBusy}
                       className="gap-1.5"
                     >
                       Editar
@@ -161,7 +173,8 @@ export function WorkExperienceListCard({
                       variant="ghost"
                       size="sm"
                       onClick={() => onDelete?.(experience)}
-                      aria-label="Eliminar experiencia"
+                      aria-label={`Eliminar ${experience.position}`}
+                      disabled={isBusy}
                       className="text-red-600 hover:bg-red-50 hover:text-red-700"
                     >
                       Eliminar
@@ -191,10 +204,10 @@ export function WorkExperienceListCard({
                     ))}
                   </div>
                 )}
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
     </div>
   );
