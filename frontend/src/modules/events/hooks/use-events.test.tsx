@@ -74,6 +74,33 @@ describe('useEvents', () => {
     expect(result.current.hasMore).toBe(false);
   });
 
+  it('keeps loaded pages when the event list is refreshed', async () => {
+    const firstPage: EventsListResponse = {
+      data: Array.from({ length: 50 }, (_, index) => ({ id: `event-${index}`, availableSpots: 5 })) as EventsListResponse['data'],
+      page: 1,
+      offset: 0,
+    };
+    const secondPage: EventsListResponse = {
+      data: [{ id: 'event-50', availableSpots: 5 }] as EventsListResponse['data'],
+      page: 2,
+      offset: 50,
+    };
+    getEventsMock
+      .mockResolvedValueOnce(firstPage)
+      .mockResolvedValueOnce(secondPage)
+      .mockResolvedValueOnce({ ...firstPage, data: firstPage.data.map((item, index) => index === 0 ? { ...item, availableSpots: 4 } : item) })
+      .mockResolvedValueOnce(secondPage);
+
+    const { result, client } = renderHook(() => useEvents());
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+    act(() => result.current.loadMore());
+    await waitFor(() => expect(result.current.events).toHaveLength(51));
+    await act(async () => { await client.invalidateQueries({ queryKey: ['events', 'list'] }); });
+    await waitFor(() => expect(result.current.events[0].availableSpots).toBe(4));
+    expect(result.current.events).toHaveLength(51);
+    expect(getEventsMock).toHaveBeenCalledTimes(4);
+  });
+
   it('expone error y permite volver a solicitar la primera pagina', async () => {
     getEventsMock
       .mockRejectedValueOnce(new Error('network failure'))

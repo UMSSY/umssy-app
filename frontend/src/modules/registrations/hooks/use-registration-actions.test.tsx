@@ -142,4 +142,42 @@ describe("useRegistrationActions", () => {
     await pending;
     expect(client.getQueryData(key)).toEqual(registration);
   });
+
+  it("submits only once when register is called twice before rendering", async () => {
+    let resolve!: (value: RegistrationResponse) => void;
+    vi.mocked(registrationsService.create).mockImplementation(() => new Promise((done) => { resolve = done; }));
+    const { result } = renderHookWithQuery(() => useRegistrationActions("e1"));
+    act(() => {
+      result.current.register();
+      result.current.register();
+    });
+    await waitFor(() => expect(registrationsService.create).toHaveBeenCalledTimes(1));
+    await act(async () => { resolve(registration); });
+    await waitFor(() => expect(result.current.isPending).toBe(false));
+  });
+
+  it("refreshes stale event and registration data after an already registered response", async () => {
+    vi.mocked(registrationsService.create).mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 409, data: { statusCode: 409, ok: false, code: "ALREADY_REGISTERED", detail: "Private detail", data: null } },
+    });
+    const { result, client } = renderHookWithQuery(() => useRegistrationActions("e1"));
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+    act(() => { result.current.register(); });
+    await waitFor(() => expect(result.current.isPending).toBe(false));
+    expect(result.current.errorCode).toBe("ALREADY_REGISTERED");
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: REGISTRATION_QUERY_KEYS.own("e1", "token-a"), exact: true });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: REGISTRATION_QUERY_KEYS.detail("e1") });
+  });
+
+  it("does not update cached data after unmounting during a request", async () => {
+    let resolve!: (value: RegistrationResponse) => void;
+    vi.mocked(registrationsService.create).mockImplementation(() => new Promise((done) => { resolve = done; }));
+    const { result, client, unmount } = renderHookWithQuery(() => useRegistrationActions("e1"));
+    act(() => { result.current.register(); });
+    await waitFor(() => expect(registrationsService.create).toHaveBeenCalledTimes(1));
+    unmount();
+    await act(async () => { resolve(registration); });
+    expect(client.getQueryData(REGISTRATION_QUERY_KEYS.own("e1", "token-a"))).toBeUndefined();
+  });
 });
