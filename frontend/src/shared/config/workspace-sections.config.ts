@@ -12,13 +12,14 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     ],
   },
   {
-    id: "mentorship", label: "Mentorías", icon: Users, patterns: [/^\/(?:mentorship|mentors|mentor)(?:\/|$)/],
+    id: "mentorship", label: "Mentorías", icon: Users, patterns: [/^\/(?:mentorship|mentors|mentor|appointments)(?:\/|$)/],
     items: [
       { label: "Encontrar mentores", href: "/mentorship/mentors" },
       { label: "Mi participación", href: "/mentors/participation" },
       { label: "Áreas técnicas", href: "/mentors/participation/technical-areas" },
       { label: "Tipos de orientación", href: "/mentorship/orientation" },
       { label: "Mi disponibilidad", href: "/mentor/availability" },
+      { label: "Mis citas", href: "/appointments" },
     ],
   },
   {
