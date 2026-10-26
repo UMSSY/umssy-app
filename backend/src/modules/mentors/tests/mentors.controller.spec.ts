@@ -9,6 +9,14 @@ import { MentorsController } from '../controllers/mentors.controller.js';
 import type { MentorsService } from '../services/mentors.service.js';
 
 describe('MentorsController', () => {
+  it('consulta los cupos con JWT sin modificar información', async () => {
+    const capacity = vi.fn().mockResolvedValue({ capacity: 1, occupied: 0, available: 1 });
+    const controller = new MentorsController({ capacity } as unknown as MentorsService);
+    expect(Reflect.getMetadata(GUARDS_METADATA, MentorsController.prototype.capacity)).toEqual([JwtAuthGuard]);
+    await expect(controller.capacity()).resolves.toEqual({ capacity: 1, occupied: 0, available: 1 });
+    expect(capacity).toHaveBeenCalledTimes(1);
+  });
+
   it('protege la ruta paginada con JWT', () => {
     const directoryMethod = Object.getOwnPropertyDescriptor(
       MentorsController.prototype,

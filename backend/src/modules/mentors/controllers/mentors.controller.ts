@@ -86,6 +86,12 @@ export class MentorsController {
     return this.mentorsService.updateMyOrientationTypes(user.id, body);
   }
 
+  @Get('capacity')
+  @UseGuards(JwtAuthGuard)
+  capacity() {
+    return this.mentorsService.capacity();
+  }
+
   @Get(':userId')
   findOne(
     @Param('userId', new ParseUUIDPipe({ version: '4' })) userId: string,
