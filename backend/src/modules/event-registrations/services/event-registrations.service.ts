@@ -59,11 +59,15 @@ export class EventRegistrationsService {
   }
 
   async createWithQrToken(payload: CreateEventRegistrationPayload) {
-    // Shared token persistence; callers enforce the rules of their registration flow.
     return this.prisma.eventRegistration.create({
-      data: { ...payload, qrToken: randomBytes(32).toString('hex') },
+      data: { ...payload, qrToken: this.generateQrToken() },
       select: { id: true, eventId: true, userId: true, statusId: true, qrToken: true },
     });
+  }
+
+  // Punto único de generación; la conversión debe conservar el token existente.
+  private generateQrToken(): string {
+    return randomBytes(32).toString('hex');
   }
 
   async create(eventId: string, userId: string): Promise<RegistrationResponse> {
@@ -91,7 +95,7 @@ export class EventRegistrationsService {
       const data = {
         status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
         cancelledAt: null,
-        qrToken: randomBytes(32).toString('hex'),
+        qrToken: this.generateQrToken(),
       };
       const registration = existing
         ? await tx.eventRegistration.update({ where: { id: existing.id }, data, select: REGISTRATION_SELECT })
@@ -259,7 +263,7 @@ export class EventRegistrationsService {
           event: { connect: { id: eventId } },
           user: { connect: { id: userId } },
           status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
-          qrToken: randomBytes(32).toString('hex'),
+          qrToken: this.generateQrToken(),
         },
         select: { id: true },
       });
