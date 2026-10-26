@@ -4,6 +4,7 @@ export const MENTOR_DIRECTORY_DEFAULTS = {
   page: 1,
   search: "",
   area: "",
+  orientation: "",
   available: false,
   sort: "name_asc",
 } as const;
@@ -12,6 +13,7 @@ export interface MentorDirectoryNavigationState {
   page: number;
   search: string;
   area: string;
+  orientation: string;
   available: boolean;
   sort: MentorSort;
 }
@@ -40,6 +42,7 @@ export function parseMentorDirectoryState(
     page,
     search: params.get("search") ?? "",
     area: params.get("area") ?? "",
+    orientation: params.get("orientation") ?? "",
     available: params.get("available") === "true",
     sort,
   };
@@ -77,6 +80,7 @@ export function updateMentorDirectoryParams(
   const resetsPage =
     updates.search !== undefined ||
     updates.area !== undefined ||
+    updates.orientation !== undefined ||
     updates.available !== undefined ||
     updates.sort !== undefined;
 
@@ -99,6 +103,14 @@ export function updateMentorDirectoryParams(
       next.set("area", updates.area);
     } else {
       next.delete("area");
+    }
+  }
+
+  if (updates.orientation !== undefined) {
+    if (updates.orientation) {
+      next.set("orientation", updates.orientation);
+    } else {
+      next.delete("orientation");
     }
   }
 
