@@ -7,16 +7,14 @@ afterEach(() => {
   cleanup();
 });
 
-const technicalAreas = [
-  { id: "area-backend", name: "Backend", description: null },
-];
+const technicalAreas = ["Backend"];
 
 const orientationTypes = [
-  { id: "1", name: "Búsqueda de empleo", description: null },
-  { id: "2", name: "Orientación profesional", description: null },
-  { id: "3", name: "Preparación para entrevistas", description: null },
-  { id: "4", name: "Revisión de CV", description: null },
-  { id: "5", name: "Orientación técnica", description: null },
+  "Búsqueda de empleo",
+  "Orientación profesional",
+  "Preparación para entrevistas",
+  "Revisión de CV",
+  "Orientación técnica",
 ];
 
 describe("MentorFiltersBar", () => {
@@ -64,7 +62,7 @@ describe("MentorFiltersBar", () => {
 
     for (const option of orientationTypes) {
       expect(
-        screen.getByRole("option", { name: option.name }),
+        screen.getByRole("option", { name: option }),
       ).toBeInTheDocument();
     }
 

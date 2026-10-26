@@ -8,16 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { OrientationTypeResponse } from "../../types/orientation-type-response.types";
-import type { TechnicalAreaResponse } from "../../types/technical-area-response.types";
 
 const ALL_VALUE = "__all__";
 
 interface MentorFiltersBarProps {
   area: string;
   orientation: string;
-  technicalAreas: TechnicalAreaResponse[];
-  orientationTypes: OrientationTypeResponse[];
+  technicalAreas: string[];
+  orientationTypes: string[];
   onAreaChange: (value: string) => void;
   onOrientationChange: (value: string) => void;
 }
@@ -30,11 +28,28 @@ export function MentorFiltersBar({
   onAreaChange,
   onOrientationChange,
 }: MentorFiltersBarProps) {
+  const areaItems = [
+    { value: ALL_VALUE, label: "Todas" },
+    ...technicalAreas.map((name) => ({
+      value: name,
+      label: name,
+    })),
+  ];
+
+  const orientationItems = [
+    { value: ALL_VALUE, label: "Todas" },
+    ...orientationTypes.map((name) => ({
+      value: name,
+      label: name,
+    })),
+  ];
+
   return (
     <>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="mentor-area">Área técnica</Label>
         <Select
+          items={areaItems}
           value={area || ALL_VALUE}
           onValueChange={(value) =>
             onAreaChange(value === ALL_VALUE ? "" : (value ?? ""))
@@ -47,11 +62,11 @@ export function MentorFiltersBar({
           >
             <SelectValue />
           </SelectTrigger>
+
           <SelectContent>
-            <SelectItem value={ALL_VALUE}>Todas</SelectItem>
-            {technicalAreas.map((areaOption) => (
-              <SelectItem key={areaOption.id} value={areaOption.name}>
-                {areaOption.name}
+            {areaItems.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -61,6 +76,7 @@ export function MentorFiltersBar({
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="mentor-orientation">Orientación</Label>
         <Select
+          items={orientationItems}
           value={orientation || ALL_VALUE}
           onValueChange={(value) =>
             onOrientationChange(value === ALL_VALUE ? "" : (value ?? ""))
@@ -73,14 +89,11 @@ export function MentorFiltersBar({
           >
             <SelectValue />
           </SelectTrigger>
+
           <SelectContent>
-            <SelectItem value={ALL_VALUE}>Todas</SelectItem>
-            {orientationTypes.map((orientationOption) => (
-              <SelectItem
-                key={orientationOption.id}
-                value={orientationOption.name}
-              >
-                {orientationOption.name}
+            {orientationItems.map((item) => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
               </SelectItem>
             ))}
           </SelectContent>

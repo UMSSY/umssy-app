@@ -200,8 +200,8 @@ export function MentorDirectoryView({
           <MentorFiltersBar
             area={area}
             orientation={orientation}
-            technicalAreas={technicalAreas}
-            orientationTypes={orientationTypes}
+            technicalAreas={technicalAreas.map((item) => item.name)}
+            orientationTypes={orientationTypes.map((item) => item.name)}
             onAreaChange={(value) =>
               navigateWithUpdates({ area: value })
             }

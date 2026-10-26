@@ -128,13 +128,7 @@ const mentors: MentorDirectoryItem[] = [
     photoUrl: null,
     education: null,
     isAvailable: false,
-    orientationTypes: [
-      { id: "1", name: "Búsqueda de empleo", description: null },
-      { id: "2", name: "Orientación profesional", description: null },
-      { id: "3", name: "Preparación para entrevistas", description: null },
-      { id: "4", name: "Revisión de CV", description: null },
-      { id: "5", name: "Orientación técnica", description: null },
-    ],
+    orientationTypes: [],
   },
 ];
 

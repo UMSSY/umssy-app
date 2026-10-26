@@ -12,6 +12,7 @@ describe("parseMentorDirectoryState", () => {
       page: 1,
       search: "",
       area: "",
+      orientation: "",
       available: false,
       sort: "name_asc",
     });
@@ -19,13 +20,14 @@ describe("parseMentorDirectoryState", () => {
 
   it("lee los parámetros de la URL", () => {
     const params = new URLSearchParams(
-      "page=2&search=hugo&area=Backend&available=true&sort=affinity",
+      "page=2&search=hugo&area=Backend&orientation=Orientaci%C3%B3n%20t%C3%A9cnica&available=true&sort=affinity",
     );
 
     expect(parseMentorDirectoryState(params)).toEqual({
       page: 2,
       search: "hugo",
       area: "Backend",
+      orientation: "Orientación técnica",
       available: true,
       sort: "affinity",
     });
