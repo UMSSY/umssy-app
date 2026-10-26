@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,11 +14,13 @@ import {
   VACANCY_LIST_TEXT,
 } from "../constants/vacancies.constants";
 import { useCompanyJobOffers } from "../hooks/use-company-job-offers";
-import type { JobOfferListScope } from "../types/job-offer.types";
+import type { JobOffer, JobOfferListScope } from "../types/job-offer.types";
 import { DEFAULT_JOB_OFFER_FILTERS, type JobOfferFilters } from "../utils/filter-job-offers";
 import { JobOfferDetailsDialog } from "./job-offer-details-dialog";
 import { VacancyCard } from "./vacancy-card";
 import { VacancyFiltersDialog } from "./vacancy-filters-dialog";
+import { DeleteVacancyModal } from "@/modules/vacancies/components/delete-vacancy-modal";
+import { deleteVacancy } from "@/modules/vacancies/services/vacancies.service";
 
 interface VacancyListProps {
   scope?: JobOfferListScope;
@@ -29,6 +32,10 @@ export function VacancyList({ scope = "published", onReopen }: VacancyListProps)
   const text = VACANCY_LIST_TEXT[scope];
   const [filters, setFilters] = useState<JobOfferFilters>(DEFAULT_JOB_OFFER_FILTERS);
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+  
+  const [selectedOfferToDelete, setSelectedOfferToDelete] = useState<JobOffer | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const { companyId, offers, status, reload } = useCompanyJobOffers(filters, scope);
 
   const hasSearch = filters.search !== "";
@@ -45,6 +52,40 @@ export function VacancyList({ scope = "published", onReopen }: VacancyListProps)
 
   const reset = () =>
     setFilters((current) => ({ ...DEFAULT_JOB_OFFER_FILTERS, search: current.search }));
+
+  const handleOpenDeleteModal = (offer: JobOffer) => {
+    setSelectedOfferToDelete(offer);
+  };
+
+  const handleCloseDeleteModal = () => {
+    if (isDeleting) return;
+    setSelectedOfferToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedOfferToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteVacancy(selectedOfferToDelete.company.id, selectedOfferToDelete.id);
+
+      toast.success("Vacante eliminada exitosamente", {
+        position: "top-center",
+        duration: 5000,
+      });
+
+      handleCloseDeleteModal();
+      
+      reload();
+    } catch {
+      toast.error("Ocurrió un error al intentar eliminar la vacante", {
+        position: "top-center",
+        duration: 5000,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (status === "loading") {
     if (isHistory) {
@@ -127,10 +168,12 @@ export function VacancyList({ scope = "published", onReopen }: VacancyListProps)
               onDetails={setSelectedOfferId}
               showStatus={isHistory}
               onReopen={onReopen}
+              onDelete={handleOpenDeleteModal}
             />
           ))}
         </ul>
       )}
+
       {companyId && selectedOfferId ? (
         <JobOfferDetailsDialog
           companyId={companyId}
@@ -138,6 +181,14 @@ export function VacancyList({ scope = "published", onReopen }: VacancyListProps)
           onClose={() => setSelectedOfferId(null)}
         />
       ) : null}
+
+      <DeleteVacancyModal
+        isOpen={Boolean(selectedOfferToDelete)}
+        vacancyTitle={selectedOfferToDelete?.title || null}
+        isDeleting={isDeleting}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+      />
     </section>
   );
 }

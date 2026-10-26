@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -16,6 +17,7 @@ import {
 import {
   ApiBody,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -49,6 +51,7 @@ import type {
 } from '../responses/job-offer.response.js';
 import { JobOffersService } from '../services/job-offers.service.js';
 import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
+
 const companyIdPipe = new ParseUUIDPipe({
   exceptionFactory: () =>
     new RequestValidationException([
@@ -62,7 +65,6 @@ const jobOfferIdPipe = new ParseUUIDPipe({
     ]),
 });
 
-// TODO: verificar el companyId de todas las operaciones de empresa contra la sesión (Epic 1)
 @ApiTags('job-offers')
 @UsePipes(
   new StandardSchemaValidationPipe({
@@ -172,5 +174,20 @@ export class JobOffersController {
     @Body({ schema: createJobOfferSchema }) request: CreateJobOfferRequest,
   ): Promise<JobOfferResponse> {
     return this.jobOffersService.update(companyId, jobOfferId, request);
+  }
+
+ @Delete('companies/:companyId/job-offers/:jobOfferId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('empresa')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Elimina una vacante de la empresa' })
+  @ApiNoContentResponse({ description: 'Vacante eliminada exitosamente' })
+  @ApiNotFoundResponse({ description: 'La vacante no existe o no pertenece a la empresa' })
+  remove(
+    @Param('companyId', companyIdPipe) companyId: string,
+    @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
+  ): Promise<void> {
+    console.log('>>> [BACKEND] Petición DELETE recibida:', { companyId, jobOfferId });
+    return this.jobOffersService.softDelete(companyId, jobOfferId);
   }
 }

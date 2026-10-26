@@ -24,9 +24,10 @@ interface VacancyCardProps {
   onDetails: (id: string) => void;
   showStatus?: boolean;
   onReopen?: (id: string) => void;
+  onDelete?: (offer: JobOffer) => void; // <--- 1. Añadimos la prop para manejar la eliminación
 }
 
-export function VacancyCard({ offer, onDetails, showStatus = false, onReopen }: VacancyCardProps) {
+export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, onDelete }: VacancyCardProps) {
   const isPublished = offer.status === PUBLISHED_STATUS;
   const isClosed = offer.status === CLOSED_STATUS;
   const isDeleted = offer.status === DELETED_STATUS;
@@ -96,6 +97,7 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen }: 
           size="icon-sm"
           aria-label={`Eliminar vacante ${offer.title}`}
           className="bg-destructive text-white hover:bg-destructive/90 max-md:size-11"
+          onClick={() => onDelete?.(offer)} // <--- 2. Conectamos el evento click para invocar el modal
         >
           <Trash2 aria-hidden="true" />
         </Button>
