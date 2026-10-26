@@ -8,6 +8,8 @@ import { REQUEST_REVIEW_QUERY_KEYS } from "../constants/request-review-query-key
 import { REVIEW_PAGE_SIZE } from "../constants/request-review.constants";
 import { requestReviewService } from "../services/request-review.service";
 import type { InboxPeriod } from "../types/inbox-filters.types";
+import type { ValidationResult } from "../types/automatic-validation.types";
+import { ALL_VALIDATIONS_VALUE } from "../constants/automatic-validation.constants";
 import type { ReviewStatus } from "../types/request-review.types";
 import { unwrapReviewResult } from "../utils/unwrap-review-result";
 
@@ -16,15 +18,17 @@ export function useRequestList() {
   const [searchInput, setSearchInput] = useState("");
   const [career, setCareer] = useState(ALL_CAREERS_VALUE);
   const [period, setPeriod] = useState<InboxPeriod>(DEFAULT_PERIOD);
+  const [validation, setValidation] = useState<string>(ALL_VALIDATIONS_VALUE);
   const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
   const search = debouncedSearch.length >= MIN_SEARCH_LENGTH ? debouncedSearch : "";
   const careerFilter = career === ALL_CAREERS_VALUE ? "" : career;
+  const validationFilter = validation === ALL_VALIDATIONS_VALUE ? undefined : (validation as ValidationResult);
 
-  const filterKey = `${status}|${search}|${careerFilter}|${period}`;
+  const filterKey = `${status}|${search}|${careerFilter}|${period}|${validationFilter ?? ""}`;
   const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
   const page = pageState.key === filterKey ? pageState.page : 1;
 
-  const filters = { search, career: careerFilter, period };
+  const filters = { search, career: careerFilter, period, ...(validationFilter && { validation: validationFilter }) };
   const query = useQuery({
     queryKey: REQUEST_REVIEW_QUERY_KEYS.list(status, page, filters),
     queryFn: async () => unwrapReviewResult(await requestReviewService.listRequests(status, page, undefined, filters)),
@@ -34,12 +38,14 @@ export function useRequestList() {
   const items = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
   const error = query.error?.message ?? null;
-  const hasActiveFilters = searchInput.trim() !== "" || career !== ALL_CAREERS_VALUE || period !== DEFAULT_PERIOD;
+  const hasActiveFilters =
+    searchInput.trim() !== "" || career !== ALL_CAREERS_VALUE || period !== DEFAULT_PERIOD || validation !== ALL_VALIDATIONS_VALUE;
 
   function clearFilters() {
     setSearchInput("");
     setCareer(ALL_CAREERS_VALUE);
     setPeriod(DEFAULT_PERIOD);
+    setValidation(ALL_VALIDATIONS_VALUE);
   }
 
   const totalPages = Math.max(1, Math.ceil(total / REVIEW_PAGE_SIZE));
@@ -52,9 +58,11 @@ export function useRequestList() {
     searchInput,
     career,
     period,
+    validation,
     changeSearch: setSearchInput,
     changeCareer: setCareer,
     changePeriod: setPeriod,
+    changeValidation: setValidation,
     clearFilters,
     hasActiveFilters,
     page,

@@ -25,7 +25,7 @@ describe("RequestTable: columnas fijas", () => {
     render(<RequestTable items={[item({})]} />);
 
     expect(screen.getByRole("table")).toHaveClass("table-fixed");
-    expect(columnWidths()).toEqual(["w-[26%]", "w-[11%]", "w-[17%]", "w-[15%]", "w-[10%]", "w-[11%]", "w-[10%]"]);
+    expect(columnWidths()).toEqual(["w-[22%]", "w-[10%]", "w-[15%]", "w-[14%]", "w-[9%]", "w-[13%]", "w-[9%]", "w-[8%]"]);
   });
 
   it("los anchos no cambian aunque cambie el contenido de las filas", () => {
@@ -34,7 +34,14 @@ describe("RequestTable: columnas fijas", () => {
 
     rerender(
       <RequestTable
-        items={[item({ status: "rejected", fullName: "María Fernanda Quispe Mamani", career: "Licenciatura Ingeniería en Informática" })]}
+        items={[
+          item({
+            status: "rejected",
+            fullName: "María Fernanda Quispe Mamani",
+            career: "Licenciatura Ingeniería en Informática",
+            validation: { result: "auto_rejected", matchScore: 12, reason: "El archivo no es un diploma" },
+          }),
+        ]}
       />,
     );
 
