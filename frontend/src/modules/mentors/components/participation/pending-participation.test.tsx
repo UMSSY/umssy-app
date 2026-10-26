@@ -21,6 +21,7 @@ async function finishRequest() {
 }
 
 beforeEach(() => {
+  vi.stubEnv("NEXT_PUBLIC_HU7_PREVIEW", "true");
   vi.stubEnv("NODE_ENV", "development");
   vi.stubEnv("NEXT_PUBLIC_APP_ENV", "local");
   vi.useFakeTimers();

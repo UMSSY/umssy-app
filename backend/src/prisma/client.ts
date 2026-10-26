@@ -247,6 +247,46 @@ export type Career = Prisma.CareerModel
  */
 export type AccessRequest = Prisma.AccessRequestModel
 /**
+ * Model MentorCapacityPolicy
+ * 
+ */
+export type MentorCapacityPolicy = Prisma.MentorCapacityPolicyModel
+/**
+ * Model MentorParticipationRequest
+ * 
+ */
+export type MentorParticipationRequest = Prisma.MentorParticipationRequestModel
+/**
+ * Model MentorRequestTechnicalArea
+ * 
+ */
+export type MentorRequestTechnicalArea = Prisma.MentorRequestTechnicalAreaModel
+/**
+ * Model MentorRequestOrientationType
+ * 
+ */
+export type MentorRequestOrientationType = Prisma.MentorRequestOrientationTypeModel
+/**
+ * Model MentorSlotOffer
+ * 
+ */
+export type MentorSlotOffer = Prisma.MentorSlotOfferModel
+/**
+ * Model MentorEmailOutbox
+ * 
+ */
+export type MentorEmailOutbox = Prisma.MentorEmailOutboxModel
+/**
+ * Model MentorParticipationAttempt
+ * 
+ */
+export type MentorParticipationAttempt = Prisma.MentorParticipationAttemptModel
+/**
+ * Model MentorParticipationSanction
+ * 
+ */
+export type MentorParticipationSanction = Prisma.MentorParticipationSanctionModel
+/**
  * Model ActivationOtp
  * 
  */

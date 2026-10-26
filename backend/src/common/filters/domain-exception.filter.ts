@@ -7,6 +7,7 @@ import { DomainException } from '../exceptions/domain.exception.js';
 export class DomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainException, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
+    if (exception.retryAfterSeconds) response.setHeader('Retry-After', String(exception.retryAfterSeconds));
 
     response.status(exception.statusCode).json({
       statusCode: exception.statusCode,

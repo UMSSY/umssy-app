@@ -26,10 +26,11 @@ export function PendingParticipation() {
 
   return <main className="mx-auto max-w-7xl space-y-6">
     <PageHeading title="Mi participación como mentor" description="Gestiona la información relacionada con tu participación en la red de mentorías." />
-    <aside className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface-soft p-4">
+    {preview.enabled && <aside className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface-soft p-4">
       <p className="text-xs text-text-secondary">Solicitud simulada de desarrollo, conservada solo en memoria. No está registrada en PostgreSQL y se descarta al recargar.</p>
       <Button size="sm" variant="outline" onClick={preview.reset}>Reiniciar simulación</Button>
-    </aside>
+      <div className="flex flex-wrap gap-2" aria-label="Simulación de oferta de cupo"><Button size="sm" variant="outline" onClick={() => preview.offerSlot()}>Simular cupo ofrecido</Button><Button size="sm" variant="outline" onClick={() => preview.offerSlot(true)}>Simular oferta vencida</Button></div>
+    </aside>}
     <section className="divide-y divide-border rounded-lg border border-border bg-surface px-6">
       <div className="flex flex-wrap items-center justify-between gap-4 py-6">
         <div className="flex items-start gap-4"><span className="rounded-full bg-notice p-3 text-notice-foreground"><Users aria-hidden="true" /></span><div><h2 className="font-semibold text-ink">Estado de participación <span className="ml-2 rounded bg-notice px-2 py-1 text-xs text-notice-foreground">Pendiente</span></h2><p className="mt-2 text-sm text-text-secondary">Tu solicitud está en espera de disponibilidad de cupos.</p></div></div>
@@ -42,7 +43,7 @@ export function PendingParticipation() {
     </section>
     <p className="flex items-start gap-2 text-sm text-text-secondary"><Info aria-hidden="true" className="size-5 shrink-0" />Ya tienes una solicitud activa. {duplicateMessage}</p>
 
-    <CancelSlotRequestDialog open={cancelOpen} isCancelling={preview.isCancelling} error={preview.cancellationError} onOpenChange={setCancelOpen} onConfirm={async (scenario) => {
+    <CancelSlotRequestDialog open={cancelOpen} isPreview={preview.enabled} isCancelling={preview.isCancelling} error={preview.cancellationError} onOpenChange={setCancelOpen} onConfirm={async (scenario) => {
       if (await preview.cancel(scenario)) router.push("/mentors/participation");
     }} />
 
@@ -50,21 +51,23 @@ export function PendingParticipation() {
       <DialogContent className="sm:max-w-lg">
         <CheckCircle aria-hidden="true" className="size-8 text-accent" />
         <DialogTitle className="text-xl font-bold text-ink">{preview.notice === "registered" ? "Solicitud registrada correctamente" : "Ya tienes una solicitud pendiente"}</DialogTitle>
-        <DialogDescription>{preview.notice === "registered" ? "Tu postulación simulada ha sido guardada temporalmente. Te notificaremos por la plataforma y a tu correo institucional cuando se libere un cupo en el flujo real." : duplicateMessage}</DialogDescription>
+        <DialogDescription>{preview.notice === "registered" ? "Tu solicitud quedó registrada. Te avisaremos por la plataforma y a tu correo institucional cuando se libere un cupo." : duplicateMessage}</DialogDescription>
         <div className="rounded-lg bg-surface-soft p-4 text-sm text-ink"><p className="font-semibold">Estado: Pendiente</p><p className="mt-2">Ya tienes una solicitud pendiente. {duplicateMessage}</p></div>
-        <p className="text-xs text-text-secondary">Datos simulados para desarrollo; no se ha realizado un registro en PostgreSQL.</p>
+        {preview.enabled && <p className="text-xs text-text-secondary">Datos simulados para desarrollo; no se ha realizado un registro en PostgreSQL.</p>}
         <div className="flex justify-end"><Button onClick={preview.dismissNotice}>Cerrar</Button></div>
       </DialogContent>
     </Dialog>
 
     <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
-        <div className="flex items-center gap-4"><span className="rounded-full bg-notice p-3 text-notice-foreground"><Clock aria-hidden="true" /></span><div className="space-y-2"><p className="text-xs font-semibold text-notice-foreground">ESTADO: PENDIENTE</p><DialogTitle className="text-xl font-bold text-ink">Solicitud pendiente</DialogTitle></div></div>
+        <div className="flex items-center gap-4"><span className="rounded-full bg-notice p-3 text-notice-foreground"><Clock aria-hidden="true" /></span><div className="space-y-2"><p className="text-xs font-semibold text-notice-foreground">Estado: Pendiente</p><DialogTitle className="text-xl font-bold text-ink">Solicitud pendiente</DialogTitle></div></div>
         <DialogDescription>Tu solicitud sigue en espera. Aún no hay cupos disponibles. Te notificaremos cuando se libere un cupo por la plataforma y a tu correo institucional.</DialogDescription>
         <div className="flex items-start gap-4 rounded-lg border border-border bg-surface-soft p-4"><CalendarDays aria-hidden="true" className="shrink-0 text-accent" /><div><p className="font-semibold text-ink">Solicitud enviada {age}</p><p className="mt-1 text-sm text-text-secondary">Registrada el {date}</p></div></div>
+        <p className="text-sm text-ink">Áreas técnicas: {request.areas.join(", ")}</p>
+        <p className="text-sm text-ink">Tipos de orientación: {request.orientations.join(", ")}</p>
         <div className="flex items-start gap-4 rounded-lg border border-border bg-surface-soft p-4"><Info aria-hidden="true" className="shrink-0 text-accent" /><div><p className="font-semibold text-ink">Ya tienes una solicitud activa</p><p className="mt-1 text-sm leading-relaxed text-text-secondary">{duplicateMessage}</p></div></div>
         <p className="flex flex-wrap items-center gap-2 text-sm text-text-secondary"><AtSign aria-hidden="true" className="size-4" />Notificaciones dirigidas a: <strong className="break-all text-ink">{preview.email}</strong></p>
-        <p className="text-xs text-text-secondary">Solicitud simulada de desarrollo.</p>
+        {preview.enabled && <p className="text-xs text-text-secondary">Solicitud simulada de desarrollo.</p>}
         <div className="flex justify-end"><Button onClick={() => setDetailsOpen(false)}>Volver</Button></div>
       </DialogContent>
     </Dialog>

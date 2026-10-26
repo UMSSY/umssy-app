@@ -183,6 +183,7 @@ export type TechnicalAreaWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"TechnicalArea"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TechnicalArea"> | Date | string
   mentors?: Prisma.MentorTechnicalAreaListRelationFilter
+  participationPreferences?: Prisma.MentorRequestTechnicalAreaListRelationFilter
 }
 
 export type TechnicalAreaOrderByWithRelationInput = {
@@ -192,6 +193,7 @@ export type TechnicalAreaOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   mentors?: Prisma.MentorTechnicalAreaOrderByRelationAggregateInput
+  participationPreferences?: Prisma.MentorRequestTechnicalAreaOrderByRelationAggregateInput
 }
 
 export type TechnicalAreaWhereUniqueInput = Prisma.AtLeast<{
@@ -204,6 +206,7 @@ export type TechnicalAreaWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"TechnicalArea"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TechnicalArea"> | Date | string
   mentors?: Prisma.MentorTechnicalAreaListRelationFilter
+  participationPreferences?: Prisma.MentorRequestTechnicalAreaListRelationFilter
 }, "id" | "name">
 
 export type TechnicalAreaOrderByWithAggregationInput = {
@@ -235,6 +238,7 @@ export type TechnicalAreaCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   mentors?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutTechnicalAreaInput
+  participationPreferences?: Prisma.MentorRequestTechnicalAreaCreateNestedManyWithoutTechnicalAreaInput
 }
 
 export type TechnicalAreaUncheckedCreateInput = {
@@ -244,6 +248,7 @@ export type TechnicalAreaUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   mentors?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutTechnicalAreaInput
+  participationPreferences?: Prisma.MentorRequestTechnicalAreaUncheckedCreateNestedManyWithoutTechnicalAreaInput
 }
 
 export type TechnicalAreaUpdateInput = {
@@ -253,6 +258,7 @@ export type TechnicalAreaUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentors?: Prisma.MentorTechnicalAreaUpdateManyWithoutTechnicalAreaNestedInput
+  participationPreferences?: Prisma.MentorRequestTechnicalAreaUpdateManyWithoutTechnicalAreaNestedInput
 }
 
 export type TechnicalAreaUncheckedUpdateInput = {
@@ -262,6 +268,7 @@ export type TechnicalAreaUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentors?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutTechnicalAreaNestedInput
+  participationPreferences?: Prisma.MentorRequestTechnicalAreaUncheckedUpdateManyWithoutTechnicalAreaNestedInput
 }
 
 export type TechnicalAreaCreateManyInput = {
@@ -331,12 +338,27 @@ export type TechnicalAreaUpdateOneRequiredWithoutMentorsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TechnicalAreaUpdateToOneWithWhereWithoutMentorsInput, Prisma.TechnicalAreaUpdateWithoutMentorsInput>, Prisma.TechnicalAreaUncheckedUpdateWithoutMentorsInput>
 }
 
+export type TechnicalAreaCreateNestedOneWithoutParticipationPreferencesInput = {
+  create?: Prisma.XOR<Prisma.TechnicalAreaCreateWithoutParticipationPreferencesInput, Prisma.TechnicalAreaUncheckedCreateWithoutParticipationPreferencesInput>
+  connectOrCreate?: Prisma.TechnicalAreaCreateOrConnectWithoutParticipationPreferencesInput
+  connect?: Prisma.TechnicalAreaWhereUniqueInput
+}
+
+export type TechnicalAreaUpdateOneRequiredWithoutParticipationPreferencesNestedInput = {
+  create?: Prisma.XOR<Prisma.TechnicalAreaCreateWithoutParticipationPreferencesInput, Prisma.TechnicalAreaUncheckedCreateWithoutParticipationPreferencesInput>
+  connectOrCreate?: Prisma.TechnicalAreaCreateOrConnectWithoutParticipationPreferencesInput
+  upsert?: Prisma.TechnicalAreaUpsertWithoutParticipationPreferencesInput
+  connect?: Prisma.TechnicalAreaWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TechnicalAreaUpdateToOneWithWhereWithoutParticipationPreferencesInput, Prisma.TechnicalAreaUpdateWithoutParticipationPreferencesInput>, Prisma.TechnicalAreaUncheckedUpdateWithoutParticipationPreferencesInput>
+}
+
 export type TechnicalAreaCreateWithoutMentorsInput = {
   id?: string
   name: string
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  participationPreferences?: Prisma.MentorRequestTechnicalAreaCreateNestedManyWithoutTechnicalAreaInput
 }
 
 export type TechnicalAreaUncheckedCreateWithoutMentorsInput = {
@@ -345,6 +367,7 @@ export type TechnicalAreaUncheckedCreateWithoutMentorsInput = {
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  participationPreferences?: Prisma.MentorRequestTechnicalAreaUncheckedCreateNestedManyWithoutTechnicalAreaInput
 }
 
 export type TechnicalAreaCreateOrConnectWithoutMentorsInput = {
@@ -369,6 +392,7 @@ export type TechnicalAreaUpdateWithoutMentorsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  participationPreferences?: Prisma.MentorRequestTechnicalAreaUpdateManyWithoutTechnicalAreaNestedInput
 }
 
 export type TechnicalAreaUncheckedUpdateWithoutMentorsInput = {
@@ -377,6 +401,59 @@ export type TechnicalAreaUncheckedUpdateWithoutMentorsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  participationPreferences?: Prisma.MentorRequestTechnicalAreaUncheckedUpdateManyWithoutTechnicalAreaNestedInput
+}
+
+export type TechnicalAreaCreateWithoutParticipationPreferencesInput = {
+  id?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentors?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutTechnicalAreaInput
+}
+
+export type TechnicalAreaUncheckedCreateWithoutParticipationPreferencesInput = {
+  id?: string
+  name: string
+  description?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentors?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutTechnicalAreaInput
+}
+
+export type TechnicalAreaCreateOrConnectWithoutParticipationPreferencesInput = {
+  where: Prisma.TechnicalAreaWhereUniqueInput
+  create: Prisma.XOR<Prisma.TechnicalAreaCreateWithoutParticipationPreferencesInput, Prisma.TechnicalAreaUncheckedCreateWithoutParticipationPreferencesInput>
+}
+
+export type TechnicalAreaUpsertWithoutParticipationPreferencesInput = {
+  update: Prisma.XOR<Prisma.TechnicalAreaUpdateWithoutParticipationPreferencesInput, Prisma.TechnicalAreaUncheckedUpdateWithoutParticipationPreferencesInput>
+  create: Prisma.XOR<Prisma.TechnicalAreaCreateWithoutParticipationPreferencesInput, Prisma.TechnicalAreaUncheckedCreateWithoutParticipationPreferencesInput>
+  where?: Prisma.TechnicalAreaWhereInput
+}
+
+export type TechnicalAreaUpdateToOneWithWhereWithoutParticipationPreferencesInput = {
+  where?: Prisma.TechnicalAreaWhereInput
+  data: Prisma.XOR<Prisma.TechnicalAreaUpdateWithoutParticipationPreferencesInput, Prisma.TechnicalAreaUncheckedUpdateWithoutParticipationPreferencesInput>
+}
+
+export type TechnicalAreaUpdateWithoutParticipationPreferencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentors?: Prisma.MentorTechnicalAreaUpdateManyWithoutTechnicalAreaNestedInput
+}
+
+export type TechnicalAreaUncheckedUpdateWithoutParticipationPreferencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentors?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutTechnicalAreaNestedInput
 }
 
 
@@ -386,10 +463,12 @@ export type TechnicalAreaUncheckedUpdateWithoutMentorsInput = {
 
 export type TechnicalAreaCountOutputType = {
   mentors: number
+  participationPreferences: number
 }
 
 export type TechnicalAreaCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   mentors?: boolean | TechnicalAreaCountOutputTypeCountMentorsArgs
+  participationPreferences?: boolean | TechnicalAreaCountOutputTypeCountParticipationPreferencesArgs
 }
 
 /**
@@ -409,6 +488,13 @@ export type TechnicalAreaCountOutputTypeCountMentorsArgs<ExtArgs extends runtime
   where?: Prisma.MentorTechnicalAreaWhereInput
 }
 
+/**
+ * TechnicalAreaCountOutputType without action
+ */
+export type TechnicalAreaCountOutputTypeCountParticipationPreferencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MentorRequestTechnicalAreaWhereInput
+}
+
 
 export type TechnicalAreaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -417,6 +503,7 @@ export type TechnicalAreaSelect<ExtArgs extends runtime.Types.Extensions.Interna
   createdAt?: boolean
   updatedAt?: boolean
   mentors?: boolean | Prisma.TechnicalArea$mentorsArgs<ExtArgs>
+  participationPreferences?: boolean | Prisma.TechnicalArea$participationPreferencesArgs<ExtArgs>
   _count?: boolean | Prisma.TechnicalAreaCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["technicalArea"]>
 
@@ -447,6 +534,7 @@ export type TechnicalAreaSelectScalar = {
 export type TechnicalAreaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["technicalArea"]>
 export type TechnicalAreaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   mentors?: boolean | Prisma.TechnicalArea$mentorsArgs<ExtArgs>
+  participationPreferences?: boolean | Prisma.TechnicalArea$participationPreferencesArgs<ExtArgs>
   _count?: boolean | Prisma.TechnicalAreaCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TechnicalAreaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -456,6 +544,7 @@ export type $TechnicalAreaPayload<ExtArgs extends runtime.Types.Extensions.Inter
   name: "TechnicalArea"
   objects: {
     mentors: Prisma.$MentorTechnicalAreaPayload<ExtArgs>[]
+    participationPreferences: Prisma.$MentorRequestTechnicalAreaPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -858,6 +947,7 @@ readonly fields: TechnicalAreaFieldRefs;
 export interface Prisma__TechnicalAreaClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   mentors<T extends Prisma.TechnicalArea$mentorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TechnicalArea$mentorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorTechnicalAreaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  participationPreferences<T extends Prisma.TechnicalArea$participationPreferencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TechnicalArea$participationPreferencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorRequestTechnicalAreaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1306,6 +1396,30 @@ export type TechnicalArea$mentorsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.MentorTechnicalAreaScalarFieldEnum | Prisma.MentorTechnicalAreaScalarFieldEnum[]
+}
+
+/**
+ * TechnicalArea.participationPreferences
+ */
+export type TechnicalArea$participationPreferencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MentorRequestTechnicalArea
+   */
+  select?: Prisma.MentorRequestTechnicalAreaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MentorRequestTechnicalArea
+   */
+  omit?: Prisma.MentorRequestTechnicalAreaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MentorRequestTechnicalAreaInclude<ExtArgs> | null
+  where?: Prisma.MentorRequestTechnicalAreaWhereInput
+  orderBy?: Prisma.MentorRequestTechnicalAreaOrderByWithRelationInput | Prisma.MentorRequestTechnicalAreaOrderByWithRelationInput[]
+  cursor?: Prisma.MentorRequestTechnicalAreaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MentorRequestTechnicalAreaScalarFieldEnum | Prisma.MentorRequestTechnicalAreaScalarFieldEnum[]
 }
 
 /**

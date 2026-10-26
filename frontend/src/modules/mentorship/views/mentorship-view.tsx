@@ -2,14 +2,16 @@
 
 import { useAuth } from "@/shared/contexts/auth-context";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { SlotUnavailableDialog } from "@/modules/mentors/components/participation/slot-availability-preview";
 import { ParticipationOverview } from "@/modules/mentors/components/participation/participation-overview";
 import { PendingParticipation } from "@/modules/mentors/components/participation/pending-participation";
 import { useSlotRequestPreview } from "@/modules/mentors/hooks/use-slot-request-preview";
 import { SlotCancellationFeedback } from "@/modules/mentors/components/participation/slot-cancellation-feedback";
+import { SlotOfferParticipation } from "@/modules/mentors/components/participation/slot-offer-participation";
 import { isApiError } from "@/shared/services/api-client";
 
 import { Button } from "@/components/ui/button";
@@ -28,7 +30,17 @@ export function MentorshipView() {
   const slotRequestPreview = useSlotRequestPreview();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const isAvailabilitySimulation = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_APP_ENV !== "prod";
+  const isAvailabilitySimulation = slotRequestPreview.enabled;
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
+  const sanction = slotRequestPreview.realState?.sanction;
+  const suspended = Boolean(sanction && new Date(sanction.expiresAt).getTime() > now);
+  const sanctionMessage = sanction ? `Las nuevas solicitudes están suspendidas hasta el ${new Intl.DateTimeFormat("es-BO", {
+    timeZone: "America/La_Paz", dateStyle: "full", timeStyle: "short",
+  }).format(new Date(sanction.expiresAt))} (hora de Bolivia).` : "";
   const [simulatedSlotsAvailable, setSimulatedSlotsAvailable] = useState(false);
   const [isUnavailableOpen, setIsUnavailableOpen] = useState(false);
   const [isSimulatedActive, setIsSimulatedActive] = useState(false);
@@ -88,7 +100,7 @@ export function MentorshipView() {
   );
 
   const handleActivate = async () => {
-    if (isActivating) {
+    if (isActivating || suspended) {
       return;
     }
 
@@ -114,6 +126,7 @@ export function MentorshipView() {
 
       clearMentorshipWizardDraft();
       setIsActivated(true);
+      void queryClient.invalidateQueries({ queryKey: ["mentor-participation"] });
       void queryClient.invalidateQueries({ queryKey: ["mentors", "participation"] });
       router.push("/mentors/participation");
     } catch (error) {
@@ -129,9 +142,13 @@ export function MentorshipView() {
             "Tu sesión ya no es válida. Inicia sesión nuevamente para activar tu participación.",
           );
         } else if (status === 409) {
-          setActivationError(
-            "Tu participación como mentor ya está activa.",
-          );
+          const code = (error.response?.data as { data?: { code?: string } } | undefined)?.data?.code;
+          if (code === "NO_SLOTS") setIsUnavailableOpen(true);
+          else if (code === "DUPLICATE_REQUEST") setActivationError("Ya tienes una solicitud vigente. Consulta Mi participación.");
+          else setActivationError("Tu participación como mentor ya está activa.");
+        } else if (status === 429) {
+          await queryClient.invalidateQueries({ queryKey: ["mentor-participation"] });
+          setActivationError("Las nuevas solicitudes están suspendidas temporalmente. Consulta Mi participación.");
         } else if (status === 500) {
           setActivationError(
             "Ocurrió un problema en el servidor. Intenta nuevamente más tarde.",
@@ -151,6 +168,7 @@ export function MentorshipView() {
     }
   };
 
+  if (slotRequestPreview.active || (slotRequestPreview.offer && slotRequestPreview.realState?.status !== "EXPIRED")) return <SlotOfferParticipation />;
   if (slotRequestPreview.request) return <PendingParticipation />;
   if (slotRequestPreview.notice === "cancelled") return <SlotCancellationFeedback />;
 
@@ -264,6 +282,7 @@ export function MentorshipView() {
         selectedTechnicalAreas={selectedTechnicalAreas}
         selectedOrientationTypes={selectedOrientationTypes}
         isActivating={isActivating}
+        isSuspended={suspended}
         activationError={activationError}
         onEditTechnicalAreas={() => goToStep(2)}
         onEditOrientationTypes={() => goToStep(3)}
@@ -274,6 +293,10 @@ export function MentorshipView() {
   };
 
   return (
+    <>
+    {suspended && <div role="alert" className="mx-auto max-w-5xl rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+      <strong>Solicitudes suspendidas temporalmente.</strong> {sanctionMessage} Puedes consultar tus solicitudes y ofertas existentes en <Link className="underline" href="/mentors/participation">Mi participación</Link>.
+    </div>}
     <MentorshipWizardShell
       currentStep={currentStep}
       canGoBack={canGoBack}
@@ -282,7 +305,8 @@ export function MentorshipView() {
       onNext={goNext}
     >
       {renderStepContent()}
-      <SlotUnavailableDialog open={isUnavailableOpen} onOpenChange={setIsUnavailableOpen} areas={selectedTechnicalAreas.map((area) => area.name)} orientations={selectedOrientationTypes.map((orientation) => orientation.name)} />
+      <SlotUnavailableDialog open={isUnavailableOpen} onOpenChange={setIsUnavailableOpen} areas={selectedTechnicalAreas.map((area) => area.name)} orientations={selectedOrientationTypes.map((orientation) => orientation.name)} ids={{ technicalAreaIds: selectedTechnicalAreaIds, orientationTypeIds: selectedOrientationTypeIds }} />
     </MentorshipWizardShell>
+    </>
   );
 }

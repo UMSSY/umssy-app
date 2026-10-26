@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Hourglass, Info, ListOrdered, LoaderCircle, Lock, Send, X } from "lucide-react";
+import { Hourglass, ListOrdered, LoaderCircle, Lock, Send, X } from "lucide-react";
 import { useSlotRequestPreview } from "../../hooks/use-slot-request-preview";
 import type { SlotRequestScenario } from "../../services/slot-request-preview.service";
 import { PendingParticipation } from "./pending-participation";
 import { SlotCancellationFeedback } from "./slot-cancellation-feedback";
+import { SlotOfferParticipation } from "./slot-offer-participation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,11 +16,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-/** Development preview only: no availability API exists yet. */
+/** Optional development preview for exercising the no-capacity flow. */
 export function SlotAvailabilityPreview() {
   const preview = useSlotRequestPreview();
   const [available, setAvailable] = useState(false);
   const [open, setOpen] = useState(false);
+  if (preview.offer || preview.active) return <SlotOfferParticipation />;
   if (preview.request) return <PendingParticipation />;
   if (preview.notice === "cancelled") return <SlotCancellationFeedback />;
   return (
@@ -45,13 +47,11 @@ export function SlotAvailabilityPreview() {
 }
 
 
-export function SlotUnavailableDialog({ open, onOpenChange, areas = [], orientations = [] }: { open: boolean; onOpenChange: (open: boolean) => void; areas?: string[]; orientations?: string[] }) {
+export function SlotUnavailableDialog({ open, onOpenChange, areas = [], orientations = [], ids }: { open: boolean; onOpenChange: (open: boolean) => void; areas?: string[]; orientations?: string[]; ids?: { technicalAreaIds: string[]; orientationTypeIds: string[] } }) {
   const preview = useSlotRequestPreview();
   const [scenario, setScenario] = useState<SlotRequestScenario>("success");
-  const [showRequestNotice, setShowRequestNotice] = useState(false);
   function changeOpen(nextOpen: boolean) {
     if (preview.isSubmitting) return;
-    setShowRequestNotice(false);
     onOpenChange(nextOpen);
   }
   return (
@@ -84,11 +84,10 @@ export function SlotUnavailableDialog({ open, onOpenChange, areas = [], orientat
               <div className="flex flex-wrap gap-2">{([{ value: "success", label: "Éxito" }, { value: "error", label: "Error" }, { value: "duplicate", label: "Duplicada" }] as const).map(({ value, label }) => <Button key={value} size="sm" variant="outline" aria-pressed={scenario === value} disabled={preview.isSubmitting} onClick={() => setScenario(value)}>{label}</Button>)}</div>
             </fieldset>}
             {preview.error && <p role="alert" className="text-sm text-destructive">{preview.error}</p>}
-            {showRequestNotice && <p role="status" className="flex items-start gap-2 rounded-lg bg-surface-soft p-3 text-sm text-ink"><Info aria-hidden="true" className="mt-0.5 size-4 shrink-0" />El registro de solicitudes aún no está habilitado. No se ha enviado ninguna solicitud.</p>}
           </div>
           <footer className="flex flex-wrap justify-end gap-3 border-t border-border bg-surface-soft px-6 py-4">
             <DialogClose render={<Button disabled={preview.isSubmitting} variant="outline" />}>Cancelar</DialogClose>
-            <Button disabled={preview.isSubmitting} onClick={() => { if (preview.enabled) { void preview.submit(scenario, areas, orientations); } else { setShowRequestNotice(true); } }}>
+            <Button disabled={preview.isSubmitting} onClick={() => { void preview.submit(scenario, areas, orientations, ids); }}>
               {preview.isSubmitting ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : <Send aria-hidden="true" />}{preview.isSubmitting ? "Enviando solicitud..." : "Solicitar cupo"}
             </Button>
           </footer>

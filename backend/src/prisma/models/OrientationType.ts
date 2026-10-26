@@ -191,6 +191,7 @@ export type OrientationTypeWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"OrientationType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"OrientationType"> | Date | string
   mentors?: Prisma.MentorOrientationTypeListRelationFilter
+  participationPreferences?: Prisma.MentorRequestOrientationTypeListRelationFilter
   appointments?: Prisma.AppointmentListRelationFilter
 }
 
@@ -202,6 +203,7 @@ export type OrientationTypeOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   mentors?: Prisma.MentorOrientationTypeOrderByRelationAggregateInput
+  participationPreferences?: Prisma.MentorRequestOrientationTypeOrderByRelationAggregateInput
   appointments?: Prisma.AppointmentOrderByRelationAggregateInput
 }
 
@@ -216,6 +218,7 @@ export type OrientationTypeWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"OrientationType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"OrientationType"> | Date | string
   mentors?: Prisma.MentorOrientationTypeListRelationFilter
+  participationPreferences?: Prisma.MentorRequestOrientationTypeListRelationFilter
   appointments?: Prisma.AppointmentListRelationFilter
 }, "id" | "name">
 
@@ -251,6 +254,7 @@ export type OrientationTypeCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   mentors?: Prisma.MentorOrientationTypeCreateNestedManyWithoutOrientationTypeInput
+  participationPreferences?: Prisma.MentorRequestOrientationTypeCreateNestedManyWithoutOrientationTypeInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutOrientationTypeInput
 }
 
@@ -262,6 +266,7 @@ export type OrientationTypeUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   mentors?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutOrientationTypeInput
+  participationPreferences?: Prisma.MentorRequestOrientationTypeUncheckedCreateNestedManyWithoutOrientationTypeInput
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutOrientationTypeInput
 }
 
@@ -273,6 +278,7 @@ export type OrientationTypeUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentors?: Prisma.MentorOrientationTypeUpdateManyWithoutOrientationTypeNestedInput
+  participationPreferences?: Prisma.MentorRequestOrientationTypeUpdateManyWithoutOrientationTypeNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutOrientationTypeNestedInput
 }
 
@@ -284,6 +290,7 @@ export type OrientationTypeUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentors?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutOrientationTypeNestedInput
+  participationPreferences?: Prisma.MentorRequestOrientationTypeUncheckedUpdateManyWithoutOrientationTypeNestedInput
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutOrientationTypeNestedInput
 }
 
@@ -381,6 +388,20 @@ export type OrientationTypeUpdateOneWithoutAppointmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrientationTypeUpdateToOneWithWhereWithoutAppointmentsInput, Prisma.OrientationTypeUpdateWithoutAppointmentsInput>, Prisma.OrientationTypeUncheckedUpdateWithoutAppointmentsInput>
 }
 
+export type OrientationTypeCreateNestedOneWithoutParticipationPreferencesInput = {
+  create?: Prisma.XOR<Prisma.OrientationTypeCreateWithoutParticipationPreferencesInput, Prisma.OrientationTypeUncheckedCreateWithoutParticipationPreferencesInput>
+  connectOrCreate?: Prisma.OrientationTypeCreateOrConnectWithoutParticipationPreferencesInput
+  connect?: Prisma.OrientationTypeWhereUniqueInput
+}
+
+export type OrientationTypeUpdateOneRequiredWithoutParticipationPreferencesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrientationTypeCreateWithoutParticipationPreferencesInput, Prisma.OrientationTypeUncheckedCreateWithoutParticipationPreferencesInput>
+  connectOrCreate?: Prisma.OrientationTypeCreateOrConnectWithoutParticipationPreferencesInput
+  upsert?: Prisma.OrientationTypeUpsertWithoutParticipationPreferencesInput
+  connect?: Prisma.OrientationTypeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrientationTypeUpdateToOneWithWhereWithoutParticipationPreferencesInput, Prisma.OrientationTypeUpdateWithoutParticipationPreferencesInput>, Prisma.OrientationTypeUncheckedUpdateWithoutParticipationPreferencesInput>
+}
+
 export type OrientationTypeCreateWithoutMentorsInput = {
   id?: string
   name: string
@@ -388,6 +409,7 @@ export type OrientationTypeCreateWithoutMentorsInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  participationPreferences?: Prisma.MentorRequestOrientationTypeCreateNestedManyWithoutOrientationTypeInput
   appointments?: Prisma.AppointmentCreateNestedManyWithoutOrientationTypeInput
 }
 
@@ -398,6 +420,7 @@ export type OrientationTypeUncheckedCreateWithoutMentorsInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  participationPreferences?: Prisma.MentorRequestOrientationTypeUncheckedCreateNestedManyWithoutOrientationTypeInput
   appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutOrientationTypeInput
 }
 
@@ -424,6 +447,7 @@ export type OrientationTypeUpdateWithoutMentorsInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  participationPreferences?: Prisma.MentorRequestOrientationTypeUpdateManyWithoutOrientationTypeNestedInput
   appointments?: Prisma.AppointmentUpdateManyWithoutOrientationTypeNestedInput
 }
 
@@ -434,6 +458,7 @@ export type OrientationTypeUncheckedUpdateWithoutMentorsInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  participationPreferences?: Prisma.MentorRequestOrientationTypeUncheckedUpdateManyWithoutOrientationTypeNestedInput
   appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutOrientationTypeNestedInput
 }
 
@@ -445,6 +470,7 @@ export type OrientationTypeCreateWithoutAppointmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   mentors?: Prisma.MentorOrientationTypeCreateNestedManyWithoutOrientationTypeInput
+  participationPreferences?: Prisma.MentorRequestOrientationTypeCreateNestedManyWithoutOrientationTypeInput
 }
 
 export type OrientationTypeUncheckedCreateWithoutAppointmentsInput = {
@@ -455,6 +481,7 @@ export type OrientationTypeUncheckedCreateWithoutAppointmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   mentors?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutOrientationTypeInput
+  participationPreferences?: Prisma.MentorRequestOrientationTypeUncheckedCreateNestedManyWithoutOrientationTypeInput
 }
 
 export type OrientationTypeCreateOrConnectWithoutAppointmentsInput = {
@@ -481,6 +508,7 @@ export type OrientationTypeUpdateWithoutAppointmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentors?: Prisma.MentorOrientationTypeUpdateManyWithoutOrientationTypeNestedInput
+  participationPreferences?: Prisma.MentorRequestOrientationTypeUpdateManyWithoutOrientationTypeNestedInput
 }
 
 export type OrientationTypeUncheckedUpdateWithoutAppointmentsInput = {
@@ -491,6 +519,67 @@ export type OrientationTypeUncheckedUpdateWithoutAppointmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentors?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutOrientationTypeNestedInput
+  participationPreferences?: Prisma.MentorRequestOrientationTypeUncheckedUpdateManyWithoutOrientationTypeNestedInput
+}
+
+export type OrientationTypeCreateWithoutParticipationPreferencesInput = {
+  id?: string
+  name: string
+  description?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentors?: Prisma.MentorOrientationTypeCreateNestedManyWithoutOrientationTypeInput
+  appointments?: Prisma.AppointmentCreateNestedManyWithoutOrientationTypeInput
+}
+
+export type OrientationTypeUncheckedCreateWithoutParticipationPreferencesInput = {
+  id?: string
+  name: string
+  description?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentors?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutOrientationTypeInput
+  appointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutOrientationTypeInput
+}
+
+export type OrientationTypeCreateOrConnectWithoutParticipationPreferencesInput = {
+  where: Prisma.OrientationTypeWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrientationTypeCreateWithoutParticipationPreferencesInput, Prisma.OrientationTypeUncheckedCreateWithoutParticipationPreferencesInput>
+}
+
+export type OrientationTypeUpsertWithoutParticipationPreferencesInput = {
+  update: Prisma.XOR<Prisma.OrientationTypeUpdateWithoutParticipationPreferencesInput, Prisma.OrientationTypeUncheckedUpdateWithoutParticipationPreferencesInput>
+  create: Prisma.XOR<Prisma.OrientationTypeCreateWithoutParticipationPreferencesInput, Prisma.OrientationTypeUncheckedCreateWithoutParticipationPreferencesInput>
+  where?: Prisma.OrientationTypeWhereInput
+}
+
+export type OrientationTypeUpdateToOneWithWhereWithoutParticipationPreferencesInput = {
+  where?: Prisma.OrientationTypeWhereInput
+  data: Prisma.XOR<Prisma.OrientationTypeUpdateWithoutParticipationPreferencesInput, Prisma.OrientationTypeUncheckedUpdateWithoutParticipationPreferencesInput>
+}
+
+export type OrientationTypeUpdateWithoutParticipationPreferencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentors?: Prisma.MentorOrientationTypeUpdateManyWithoutOrientationTypeNestedInput
+  appointments?: Prisma.AppointmentUpdateManyWithoutOrientationTypeNestedInput
+}
+
+export type OrientationTypeUncheckedUpdateWithoutParticipationPreferencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentors?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutOrientationTypeNestedInput
+  appointments?: Prisma.AppointmentUncheckedUpdateManyWithoutOrientationTypeNestedInput
 }
 
 
@@ -500,11 +589,13 @@ export type OrientationTypeUncheckedUpdateWithoutAppointmentsInput = {
 
 export type OrientationTypeCountOutputType = {
   mentors: number
+  participationPreferences: number
   appointments: number
 }
 
 export type OrientationTypeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   mentors?: boolean | OrientationTypeCountOutputTypeCountMentorsArgs
+  participationPreferences?: boolean | OrientationTypeCountOutputTypeCountParticipationPreferencesArgs
   appointments?: boolean | OrientationTypeCountOutputTypeCountAppointmentsArgs
 }
 
@@ -528,6 +619,13 @@ export type OrientationTypeCountOutputTypeCountMentorsArgs<ExtArgs extends runti
 /**
  * OrientationTypeCountOutputType without action
  */
+export type OrientationTypeCountOutputTypeCountParticipationPreferencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MentorRequestOrientationTypeWhereInput
+}
+
+/**
+ * OrientationTypeCountOutputType without action
+ */
 export type OrientationTypeCountOutputTypeCountAppointmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AppointmentWhereInput
 }
@@ -541,6 +639,7 @@ export type OrientationTypeSelect<ExtArgs extends runtime.Types.Extensions.Inter
   createdAt?: boolean
   updatedAt?: boolean
   mentors?: boolean | Prisma.OrientationType$mentorsArgs<ExtArgs>
+  participationPreferences?: boolean | Prisma.OrientationType$participationPreferencesArgs<ExtArgs>
   appointments?: boolean | Prisma.OrientationType$appointmentsArgs<ExtArgs>
   _count?: boolean | Prisma.OrientationTypeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["orientationType"]>
@@ -575,6 +674,7 @@ export type OrientationTypeSelectScalar = {
 export type OrientationTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["orientationType"]>
 export type OrientationTypeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   mentors?: boolean | Prisma.OrientationType$mentorsArgs<ExtArgs>
+  participationPreferences?: boolean | Prisma.OrientationType$participationPreferencesArgs<ExtArgs>
   appointments?: boolean | Prisma.OrientationType$appointmentsArgs<ExtArgs>
   _count?: boolean | Prisma.OrientationTypeCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -585,6 +685,7 @@ export type $OrientationTypePayload<ExtArgs extends runtime.Types.Extensions.Int
   name: "OrientationType"
   objects: {
     mentors: Prisma.$MentorOrientationTypePayload<ExtArgs>[]
+    participationPreferences: Prisma.$MentorRequestOrientationTypePayload<ExtArgs>[]
     appointments: Prisma.$AppointmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -989,6 +1090,7 @@ readonly fields: OrientationTypeFieldRefs;
 export interface Prisma__OrientationTypeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   mentors<T extends Prisma.OrientationType$mentorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrientationType$mentorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorOrientationTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  participationPreferences<T extends Prisma.OrientationType$participationPreferencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrientationType$participationPreferencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorRequestOrientationTypePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   appointments<T extends Prisma.OrientationType$appointmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrientationType$appointmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppointmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1439,6 +1541,30 @@ export type OrientationType$mentorsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.MentorOrientationTypeScalarFieldEnum | Prisma.MentorOrientationTypeScalarFieldEnum[]
+}
+
+/**
+ * OrientationType.participationPreferences
+ */
+export type OrientationType$participationPreferencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MentorRequestOrientationType
+   */
+  select?: Prisma.MentorRequestOrientationTypeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MentorRequestOrientationType
+   */
+  omit?: Prisma.MentorRequestOrientationTypeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MentorRequestOrientationTypeInclude<ExtArgs> | null
+  where?: Prisma.MentorRequestOrientationTypeWhereInput
+  orderBy?: Prisma.MentorRequestOrientationTypeOrderByWithRelationInput | Prisma.MentorRequestOrientationTypeOrderByWithRelationInput[]
+  cursor?: Prisma.MentorRequestOrientationTypeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MentorRequestOrientationTypeScalarFieldEnum | Prisma.MentorRequestOrientationTypeScalarFieldEnum[]
 }
 
 /**

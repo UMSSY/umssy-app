@@ -8,13 +8,14 @@ import type { SlotCancellationScenario } from "../../services/slot-request-previ
 
 type CancelSlotRequestDialogProps = {
   open: boolean;
+  isPreview?: boolean;
   isCancelling: boolean;
   error: string | null;
   onOpenChange: (open: boolean) => void;
   onConfirm: (scenario: SlotCancellationScenario) => void;
 };
 
-export function CancelSlotRequestDialog({ open, isCancelling, error, onOpenChange, onConfirm }: CancelSlotRequestDialogProps) {
+export function CancelSlotRequestDialog({ open, isPreview = true, isCancelling, error, onOpenChange, onConfirm }: CancelSlotRequestDialogProps) {
   const [scenario, setScenario] = useState<SlotCancellationScenario>("success");
   function changeOpen(nextOpen: boolean) {
     if (!isCancelling) onOpenChange(nextOpen);
@@ -33,19 +34,19 @@ export function CancelSlotRequestDialog({ open, isCancelling, error, onOpenChang
           <Info aria-hidden="true" className="size-5 shrink-0 text-accent" />
           <div><p className="text-sm font-semibold text-ink">Información importante</p><p className="mt-1 text-sm leading-relaxed text-text-secondary">Si cancelas tu solicitud, perderás tu prioridad en la lista de espera (FIFO). Si decides solicitar nuevamente un cupo, ingresarás al final de la cola.</p></div>
         </div>
-        <fieldset disabled={isCancelling} className="space-y-2 rounded-lg border border-border p-3">
+        {isPreview && <fieldset disabled={isCancelling} className="space-y-2 rounded-lg border border-border p-3">
           <legend className="px-1 text-xs text-text-secondary">Respuesta simulada de desarrollo</legend>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" disabled={isCancelling} aria-pressed={scenario === "success"} onClick={() => setScenario("success")}>Cancelación exitosa</Button>
             <Button size="sm" variant="outline" disabled={isCancelling} aria-pressed={scenario === "error"} onClick={() => setScenario("error")}>Error al cancelar</Button>
           </div>
-        </fieldset>
-        <p className="text-xs text-text-secondary">Solo se modificará la solicitud simulada en memoria; no se cambiarán datos en PostgreSQL.</p>
+        </fieldset>}
+        {isPreview && <p className="text-xs text-text-secondary">Solo se modificará la solicitud simulada en memoria; no se cambiarán datos en PostgreSQL.</p>}
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       </div>
       <footer className="flex flex-wrap justify-end gap-3 border-t border-border bg-surface-soft px-6 py-4">
         <Button variant="outline" disabled={isCancelling} onClick={() => changeOpen(false)}>Volver</Button>
-        <Button variant="brand" disabled={isCancelling} onClick={() => onConfirm(scenario)}>{isCancelling ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : <Trash2 aria-hidden="true" />}{isCancelling ? "Cancelando solicitud..." : "Confirmar cancelación"}</Button>
+        <Button variant="default" disabled={isCancelling} onClick={() => onConfirm(scenario)}>{isCancelling ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : <Trash2 aria-hidden="true" />}{isCancelling ? "Cancelando solicitud..." : "Confirmar cancelación"}</Button>
       </footer>
     </DialogContent>
   </Dialog>;

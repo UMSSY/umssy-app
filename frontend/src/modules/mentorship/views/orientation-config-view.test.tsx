@@ -1,5 +1,11 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getMentorOrientationTypes,
@@ -72,7 +78,11 @@ describe("OrientationConfigView", () => {
     vi.mocked(updateMentorOrientationTypes).mockResolvedValue();
   });
 
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    vi.clearAllTimers();
+    vi.useRealTimers();
+  });
 
   it("muestra loading mientras carga las consultas", () => {
     vi.mocked(getOrientationTypes).mockReturnValue(new Promise(() => {}));
@@ -165,6 +175,30 @@ describe("OrientationConfigView", () => {
     expectOrientationStyle("Búsqueda de empleo", "saved");
     expectOrientationStyle("Orientación profesional", "saved");
     expectOrientationStyle("Orientación técnica", "unselected");
+  });
+
+  it("oculta la notificación de éxito exactamente después de 5000 ms", async () => {
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+
+    fireEvent.click(checkbox("Orientación profesional"));
+    vi.useFakeTimers();
+
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("button", { name: "Guardar cambios" }),
+      );
+    });
+
+    const successMessage =
+      "Tipos de orientación actualizados correctamente";
+    expect(screen.getByText(successMessage)).toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(4999));
+    expect(screen.getByText(successMessage)).toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.queryByText(successMessage)).not.toBeInTheDocument();
   });
 
   it("mantiene la selección bloqueada mientras el backend confirma el guardado", async () => {

@@ -27,7 +27,11 @@ describe("activateMentor", () => {
     const result = await activateMentor(payload);
     const sentPayload = request.mock.calls[0]?.[1];
 
-    expect(request).toHaveBeenCalledWith("/mentors/activate", payload);
+    expect(request).toHaveBeenCalledWith("/mentors/activate", payload, {
+      headers: {
+        "Idempotency-Key": expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
+      },
+    });
     expect(sentPayload).toEqual({
       technicalAreaIds: payload.technicalAreaIds,
       orientationTypeIds: payload.orientationTypeIds,

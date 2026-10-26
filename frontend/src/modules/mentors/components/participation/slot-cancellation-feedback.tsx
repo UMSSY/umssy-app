@@ -14,8 +14,8 @@ export function SlotCancellationFeedback() {
       <DialogContent className="sm:max-w-lg">
         <CheckCircle aria-hidden="true" className="size-8 text-accent" />
         <DialogTitle className="text-xl font-bold text-ink">Solicitud cancelada correctamente</DialogTitle>
-        <DialogDescription>La solicitud simulada dejó de estar pendiente. Si vuelves a solicitar un cupo, será una nueva solicitud y entrará al final de la cola FIFO.</DialogDescription>
-        <p className="text-xs text-text-secondary">Cancelación de desarrollo: no se modificaron datos reales en PostgreSQL.</p>
+        <DialogDescription>La solicitud dejó de estar pendiente. Si vuelves a solicitar un cupo, será una nueva solicitud y entrará al final de la cola FIFO.</DialogDescription>
+        {preview.enabled && <p className="text-xs text-text-secondary">Cancelación de desarrollo: no se modificaron datos reales en PostgreSQL.</p>}
         <div className="flex justify-end"><Button onClick={preview.dismissNotice}>Cerrar</Button></div>
       </DialogContent>
     </Dialog>
