@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/native-select";
 import { PageHeading } from "@/shared/components/layout";
 import { MentorDirectoryGrid } from "../components/mentor/mentor-directory-grid";
+import { MentorFiltersBar } from "../components/mentor/mentor-filters-bar";
 import { MentorDirectoryPagination } from "../components/mentor/mentor-directory-pagination";
 import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
 import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
@@ -49,13 +50,14 @@ export function MentorDirectoryView({
     page,
     search,
     area,
+    orientation,
     available: isAvailableOnly,
     sort: sortBy,
   } = parseMentorDirectoryState(new URLSearchParams(queryString));
 
   const { currentUserId } = useCurrentUserId();
 
-  const { technicalAreas } = useMentorshipCatalogs();
+  const { technicalAreas, orientationTypes } = useMentorshipCatalogs();
 
   const {
     data: directory,
@@ -67,6 +69,7 @@ export function MentorDirectoryView({
     page,
     search,
     area,
+    orientation,
     available: isAvailableOnly,
     sort: sortBy,
   });
@@ -132,6 +135,7 @@ export function MentorDirectoryView({
     (updates: {
       search?: string;
       area?: string;
+      orientation?: string;
       available?: boolean;
       sort?: MentorSort;
       page?: number;
@@ -155,6 +159,7 @@ export function MentorDirectoryView({
     navigateWithUpdates({
       search: "",
       area: "",
+      orientation: "",
       available: false,
     });
   }
@@ -192,33 +197,18 @@ export function MentorDirectoryView({
             }
           />
 
-          <div className="flex items-center gap-2">
-            <Label htmlFor="mentor-area">Área</Label>
-
-            <NativeSelect
-              id="mentor-area"
-              className="max-w-64"
-              value={area}
-              onChange={(event) =>
-                navigateWithUpdates({
-                  area: event.target.value,
-                })
-              }
-            >
-              <NativeSelectOption value="">
-                Todas las áreas
-              </NativeSelectOption>
-
-              {technicalAreas.map((areaOption) => (
-                <NativeSelectOption
-                  key={areaOption.id}
-                  value={areaOption.name}
-                >
-                  {areaOption.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </div>
+          <MentorFiltersBar
+            area={area}
+            orientation={orientation}
+            technicalAreas={technicalAreas.map((item) => item.name)}
+            orientationTypes={orientationTypes.map((item) => item.name)}
+            onAreaChange={(value) =>
+              navigateWithUpdates({ area: value })
+            }
+            onOrientationChange={(value) =>
+              navigateWithUpdates({ orientation: value })
+            }
+          />
 
           <Label className="flex items-center gap-2">
             <Checkbox
@@ -264,7 +254,7 @@ export function MentorDirectoryView({
             </NativeSelect>
           </div>
 
-          {search || area || isAvailableOnly ? (
+          {search || area || orientation || isAvailableOnly ? (
             <Button
               variant="ghost"
               onClick={handleClearFilters}

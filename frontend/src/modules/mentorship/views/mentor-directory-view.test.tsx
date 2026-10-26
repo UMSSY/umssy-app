@@ -8,6 +8,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 import { profileService } from "@/modules/profile/services/profile.service";
 import {
   saveAccessToken,
@@ -75,7 +76,13 @@ vi.mock("../hooks/use-mentorship-catalogs", () => ({
     isTechnicalAreasLoading: false,
     isTechnicalAreasError: false,
     retryTechnicalAreas: vi.fn(),
-    orientationTypes: [],
+    orientationTypes: [
+      { id: "1", name: "Búsqueda de empleo", description: null },
+      { id: "2", name: "Orientación profesional", description: null },
+      { id: "3", name: "Preparación para entrevistas", description: null },
+      { id: "4", name: "Revisión de CV", description: null },
+      { id: "5", name: "Orientación técnica", description: null },
+    ],
     isOrientationTypesLoading: false,
     isOrientationTypesError: false,
     retryOrientationTypes: vi.fn(),
@@ -327,9 +334,12 @@ describe("MentorDirectoryView", () => {
       ).not.toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByRole("combobox", { name: "Área" }), {
-      target: { value: "Backend" },
-    });
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("combobox", { name: "Área técnica" }),
+    );
+    await user.click(screen.getByRole("option", { name: "Backend" }));
 
     applyNavigation(rerender);
 
@@ -412,9 +422,9 @@ describe("MentorDirectoryView", () => {
 
     expect(selector).toHaveValue("affinity");
 
-    expect(screen.getByRole("combobox", { name: "Área" })).toHaveValue(
-      "Backend",
-    );
+    expect(
+      screen.getByRole("combobox", { name: "Área técnica" }),
+    ).toHaveTextContent("Backend");
 
     expect(screen.getByRole("note")).toHaveTextContent(
       "todavía no está disponible",
@@ -445,9 +455,9 @@ describe("MentorDirectoryView", () => {
       screen.getByRole("combobox", { name: "Ordenar mentores" }),
     ).toHaveValue("affinity");
 
-    expect(screen.getByRole("combobox", { name: "Área" })).toHaveValue(
-      "Backend",
-    );
+    expect(
+      screen.getByRole("combobox", { name: "Área técnica" }),
+    ).toHaveTextContent("Backend");
 
     view.unmount();
 
@@ -459,9 +469,9 @@ describe("MentorDirectoryView", () => {
       screen.getByRole("combobox", { name: "Ordenar mentores" }),
     ).toHaveValue("affinity");
 
-    expect(screen.getByRole("combobox", { name: "Área" })).toHaveValue(
-      "Backend",
-    );
+    expect(
+      screen.getByRole("combobox", { name: "Área técnica" }),
+    ).toHaveTextContent("Backend");
 
     expect(navigationMocks.search).toContain("page=2");
     expect(navigationMocks.search).toContain("module=chat");
