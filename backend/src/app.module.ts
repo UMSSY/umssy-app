@@ -25,6 +25,7 @@ import { TechnicalAreasModule } from './modules/technical-areas/technical-areas.
 import { WorkExperienceModule } from './modules/work-experience/work-experience.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js';
+import { AuditEventsModule } from './modules/audit-events/audit-events.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
 import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
@@ -51,6 +52,7 @@ import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
     OrientationTypesModule,
     MentorsModule,
     AccessRequestsModule,
+    AuditEventsModule,
     ReportsModule,
     ChatModule,
     MatchingModule,
