@@ -2,6 +2,7 @@
 
 import { useRef, type KeyboardEvent, type ClipboardEvent, type ChangeEvent, type FocusEvent } from "react";
 import { cn } from "cn";
+import { Input } from "@/components/ui/input";
 
 interface OtpInputProps {
   value: string;
@@ -119,8 +120,7 @@ export function OtpInput({
   return (
     <div className="flex items-center justify-between gap-2 sm:gap-3" role="group" aria-label="Código de verificación">
       {Array.from({ length }).map((_, index) => (
-        // eslint-disable-next-line no-restricted-syntax
-        <input
+        <Input
           key={index}
           ref={(el) => {
             inputRefs.current[index] = el;
@@ -147,7 +147,7 @@ export function OtpInput({
           aria-invalid={isInvalid ? true : undefined}
           data-testid={`otp-input-${index}`}
           className={cn(
-            "size-12 rounded-xl border-2 border-border-strong bg-surface text-center text-xl font-bold text-ink transition-all duration-150 sm:size-14 sm:text-2xl",
+            "size-12 rounded-xl border-2 border-border-strong bg-surface px-0 text-center text-xl font-bold text-ink transition-all duration-150 sm:size-14 sm:text-2xl md:text-2xl",
             "outline-hidden focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20",
             disabled && "cursor-not-allowed opacity-50",
             isInvalid && "border-danger text-danger ring-2 ring-danger/20"
