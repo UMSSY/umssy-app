@@ -267,3 +267,8 @@ export type Message = Prisma.MessageModel
  *
  */
 export type UserPresence = Prisma.UserPresenceModel
+/**
+ * Model MentorParticipationAttemptLimit
+ *
+ */
+export type MentorParticipationAttemptLimit = Prisma.MentorParticipationAttemptLimitModel

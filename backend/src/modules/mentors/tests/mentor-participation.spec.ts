@@ -9,6 +9,7 @@ import { MentorParticipationService } from '../services/mentor-participation.ser
 
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
 const preferences = {
@@ -16,13 +17,22 @@ const preferences = {
   orientationTypeIds: ['22222222-2222-4222-8222-222222222222'],
 };
 
-function fixture(options: {
-  available?: number;
-  existingRequest?: boolean;
-  eligible?: boolean;
-  validPreferences?: boolean;
-  pending?: boolean;
-} = {}) {
+type AttemptLimit = {
+  userId: string;
+  attemptCount: number;
+  windowStartedAt: Date | null;
+  blockedUntil: Date | null;
+};
+
+function fixture(
+  options: {
+    available?: number;
+    existingRequest?: boolean;
+    eligible?: boolean;
+    validPreferences?: boolean;
+    pending?: boolean;
+  } = {},
+) {
   const queuedAt = new Date('2026-10-26T10:00:00Z');
 
   const request = {
@@ -34,14 +44,40 @@ function fixture(options: {
     ...preferences,
   };
 
-  const findFirst = vi.fn()
-    .mockResolvedValue(
-      options.existingRequest || options.pending
-        ? request
-        : null,
-    );
+  let attemptLimit: AttemptLimit | null = null;
+
+  const findAttemptLimit = vi.fn(async () => attemptLimit);
+
+  const createAttemptLimit = vi.fn(async ({ data }) => {
+    attemptLimit = { ...data };
+    return attemptLimit;
+  });
+
+  const updateAttemptLimit = vi.fn(async ({ data }) => {
+    if (!attemptLimit) {
+      throw new Error('No existe el control de intentos');
+    }
+
+    attemptLimit = { ...attemptLimit, ...data };
+    return attemptLimit;
+  });
+
+  const upsertAttemptLimit = vi.fn(async ({ create, update }) => {
+    attemptLimit = attemptLimit
+      ? { ...attemptLimit, ...update }
+      : { ...create };
+
+    return attemptLimit;
+  });
+
+  const findFirst = vi.fn().mockResolvedValue(
+    options.existingRequest || options.pending
+      ? request
+      : null,
+  );
 
   const create = vi.fn().mockResolvedValue(request);
+
   const update = vi.fn().mockImplementation(async ({ data }) => ({
     ...request,
     ...data,
@@ -83,6 +119,12 @@ function fixture(options: {
         options.validPreferences === false ? 0 : 1,
       ),
     },
+    mentorParticipationAttemptLimit: {
+      findUnique: findAttemptLimit,
+      create: createAttemptLimit,
+      update: updateAttemptLimit,
+      upsert: upsertAttemptLimit,
+    },
     mentorParticipationRequest: {
       findFirst,
       create,
@@ -110,7 +152,12 @@ function fixture(options: {
     findFirst,
     create,
     update,
+    findAttemptLimit,
+    createAttemptLimit,
+    updateAttemptLimit,
+    upsertAttemptLimit,
     transaction,
+    getAttemptLimit: () => attemptLimit,
   };
 }
 
@@ -183,7 +230,7 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
   });
 
   it('cancela una solicitud sin eliminar el historial', async () => {
-    const { service, update, request } = fixture({
+    const { service, update } = fixture({
       pending: true,
     });
 
@@ -192,7 +239,7 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
     expect(result.status).toBe('CANCELLED');
 
     expect(update).toHaveBeenCalledWith({
-      where: { id: request.id },
+      where: { id: 'request-1' },
       data: { status: 'CANCELLED' },
     });
   });
@@ -262,6 +309,106 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
     expect(create).toHaveBeenCalledWith(
       'jwt-user',
       preferences,
+    );
+  });
+});
+
+describe('HU7-4: limite de intentos y sanciones', () => {
+  it('permite cuatro intentos en 24 horas', async () => {
+    const { service, getAttemptLimit } = fixture({
+      existingRequest: true,
+    });
+
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      await expect(
+        service.create('user-1', preferences),
+      ).resolves.toMatchObject({
+        id: 'request-1',
+      });
+    }
+
+    expect(getAttemptLimit()?.attemptCount).toBe(4);
+    expect(getAttemptLimit()?.blockedUntil).toBeNull();
+  });
+
+  it('devuelve HTTP 429 en el quinto intento', async () => {
+    const { service, getAttemptLimit } = fixture({
+      existingRequest: true,
+    });
+
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      await service.create('user-1', preferences);
+    }
+
+    await expect(
+      service.create('user-1', preferences),
+    ).rejects.toMatchObject({
+      statusCode: 429,
+    });
+
+    expect(getAttemptLimit()?.attemptCount).toBe(5);
+    expect(getAttemptLimit()?.blockedUntil).toBeInstanceOf(Date);
+  });
+
+  it('mantiene la sancion durante 72 horas', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-26T12:00:00Z'));
+
+    const { service, getAttemptLimit } = fixture({
+      existingRequest: true,
+    });
+
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      await service.create('user-1', preferences);
+    }
+
+    await expect(
+      service.create('user-1', preferences),
+    ).rejects.toMatchObject({
+      statusCode: 429,
+    });
+
+    expect(getAttemptLimit()?.blockedUntil).toEqual(
+      new Date('2026-10-29T12:00:00Z'),
+    );
+
+    vi.setSystemTime(new Date('2026-10-29T11:59:59Z'));
+
+    await expect(
+      service.create('user-1', preferences),
+    ).rejects.toMatchObject({
+      statusCode: 429,
+    });
+
+    vi.setSystemTime(new Date('2026-10-29T12:00:00Z'));
+
+    await expect(
+      service.create('user-1', preferences),
+    ).resolves.toMatchObject({
+      id: 'request-1',
+    });
+
+    expect(getAttemptLimit()?.attemptCount).toBe(1);
+    expect(getAttemptLimit()?.blockedUntil).toBeNull();
+  });
+
+  it('reinicia el contador al terminar las 24 horas', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-26T12:00:00Z'));
+
+    const { service, getAttemptLimit } = fixture({
+      existingRequest: true,
+    });
+
+    await service.create('user-1', preferences);
+
+    vi.setSystemTime(new Date('2026-10-27T12:00:00Z'));
+
+    await service.create('user-1', preferences);
+
+    expect(getAttemptLimit()?.attemptCount).toBe(1);
+    expect(getAttemptLimit()?.windowStartedAt).toEqual(
+      new Date('2026-10-27T12:00:00Z'),
     );
   });
 });

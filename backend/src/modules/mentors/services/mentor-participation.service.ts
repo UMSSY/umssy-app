@@ -25,6 +25,12 @@ export class MentorParticipationService {
       case 'ALREADY_EXISTS':
         return result.request;
 
+      case 'SANCTIONED':
+        throw new MentorParticipationException(
+          `Has superado el limite de 4 intentos en 24 horas. Podras realizar otra solicitud a partir del ${result.blockedUntil.toISOString()}`,
+          429,
+        );
+
       case 'NOT_ELIGIBLE':
         throw new MentorParticipationException(
           'No cumples los requisitos para solicitar un cupo',
@@ -33,13 +39,13 @@ export class MentorParticipationService {
 
       case 'INVALID_PREFERENCES':
         throw new MentorParticipationException(
-          'Las preferencias seleccionadas no son válidas',
+          'Las preferencias seleccionadas no son validas',
           400,
         );
 
       case 'CAPACITY_AVAILABLE':
         throw new MentorParticipationException(
-          'Hay cupos disponibles para activación directa',
+          'Hay cupos disponibles para activacion directa',
           409,
         );
     }
@@ -72,7 +78,7 @@ export class MentorParticipationService {
 
     if (result.result === 'INVALID_PREFERENCES') {
       throw new MentorParticipationException(
-        'Las preferencias seleccionadas no son válidas',
+        'Las preferencias seleccionadas no son validas',
         400,
       );
     }

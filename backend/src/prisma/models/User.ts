@@ -287,6 +287,7 @@ export type UserWhereInput = {
   approvedAccessRequest?: Prisma.XOR<Prisma.AccessRequestNullableScalarRelationFilter, Prisma.AccessRequestWhereInput> | null
   mentorSlotOffers?: Prisma.MentorSlotOfferListRelationFilter
   mentorParticipationRequests?: Prisma.MentorParticipationRequestListRelationFilter
+  mentorParticipationAttemptLimit?: Prisma.XOR<Prisma.MentorParticipationAttemptLimitNullableScalarRelationFilter, Prisma.MentorParticipationAttemptLimitWhereInput> | null
   conversationsAsUserA?: Prisma.ConversationListRelationFilter
   conversationsAsUserB?: Prisma.ConversationListRelationFilter
   chatMessages?: Prisma.MessageListRelationFilter
@@ -335,6 +336,7 @@ export type UserOrderByWithRelationInput = {
   approvedAccessRequest?: Prisma.AccessRequestOrderByWithRelationInput
   mentorSlotOffers?: Prisma.MentorSlotOfferOrderByRelationAggregateInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestOrderByRelationAggregateInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitOrderByWithRelationInput
   conversationsAsUserA?: Prisma.ConversationOrderByRelationAggregateInput
   conversationsAsUserB?: Prisma.ConversationOrderByRelationAggregateInput
   chatMessages?: Prisma.MessageOrderByRelationAggregateInput
@@ -386,6 +388,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   approvedAccessRequest?: Prisma.XOR<Prisma.AccessRequestNullableScalarRelationFilter, Prisma.AccessRequestWhereInput> | null
   mentorSlotOffers?: Prisma.MentorSlotOfferListRelationFilter
   mentorParticipationRequests?: Prisma.MentorParticipationRequestListRelationFilter
+  mentorParticipationAttemptLimit?: Prisma.XOR<Prisma.MentorParticipationAttemptLimitNullableScalarRelationFilter, Prisma.MentorParticipationAttemptLimitWhereInput> | null
   conversationsAsUserA?: Prisma.ConversationListRelationFilter
   conversationsAsUserB?: Prisma.ConversationListRelationFilter
   chatMessages?: Prisma.MessageListRelationFilter
@@ -475,6 +478,7 @@ export type UserCreateInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -522,6 +526,7 @@ export type UserUncheckedCreateInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -569,6 +574,7 @@ export type UserUpdateInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -616,6 +622,7 @@ export type UserUncheckedUpdateInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -1220,6 +1227,20 @@ export type UserUpdateOneRequiredWithoutPresenceNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPresenceInput, Prisma.UserUpdateWithoutPresenceInput>, Prisma.UserUncheckedUpdateWithoutPresenceInput>
 }
 
+export type UserCreateNestedOneWithoutMentorParticipationAttemptLimitInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationAttemptLimitInput, Prisma.UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorParticipationAttemptLimitInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutMentorParticipationAttemptLimitNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationAttemptLimitInput, Prisma.UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorParticipationAttemptLimitInput
+  upsert?: Prisma.UserUpsertWithoutMentorParticipationAttemptLimitInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMentorParticipationAttemptLimitInput, Prisma.UserUpdateWithoutMentorParticipationAttemptLimitInput>, Prisma.UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput>
+}
+
 export type UserCreateWithoutCityInput = {
   id?: string
   firstName: string
@@ -1259,6 +1280,7 @@ export type UserCreateWithoutCityInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -1305,6 +1327,7 @@ export type UserUncheckedCreateWithoutCityInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -1398,6 +1421,7 @@ export type UserCreateWithoutRolesInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -1444,6 +1468,7 @@ export type UserUncheckedCreateWithoutRolesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -1506,6 +1531,7 @@ export type UserUpdateWithoutRolesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -1552,6 +1578,7 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -1598,6 +1625,7 @@ export type UserCreateWithoutEducationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -1644,6 +1672,7 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -1706,6 +1735,7 @@ export type UserUpdateWithoutEducationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -1752,6 +1782,7 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -1798,6 +1829,7 @@ export type UserCreateWithoutWorkExperiencesInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -1844,6 +1876,7 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -1906,6 +1939,7 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -1952,6 +1986,7 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -1998,6 +2033,7 @@ export type UserCreateWithoutUserSkillsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2044,6 +2080,7 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2106,6 +2143,7 @@ export type UserUpdateWithoutUserSkillsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2152,6 +2190,7 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2198,6 +2237,7 @@ export type UserCreateWithoutCertificationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2244,6 +2284,7 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2306,6 +2347,7 @@ export type UserUpdateWithoutCertificationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2352,6 +2394,7 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2398,6 +2441,7 @@ export type UserCreateWithoutCvFileInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2444,6 +2488,7 @@ export type UserUncheckedCreateWithoutCvFileInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2506,6 +2551,7 @@ export type UserUpdateWithoutCvFileInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2552,6 +2598,7 @@ export type UserUncheckedUpdateWithoutCvFileInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2598,6 +2645,7 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2644,6 +2692,7 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2706,6 +2755,7 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2752,6 +2802,7 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2798,6 +2849,7 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2844,6 +2896,7 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2906,6 +2959,7 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2952,6 +3006,7 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2998,6 +3053,7 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3044,6 +3100,7 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3106,6 +3163,7 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3152,6 +3210,7 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3198,6 +3257,7 @@ export type UserCreateWithoutBlockedDatesInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3244,6 +3304,7 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3306,6 +3367,7 @@ export type UserUpdateWithoutBlockedDatesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3352,6 +3414,7 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3398,6 +3461,7 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3444,6 +3508,7 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3495,6 +3560,7 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3541,6 +3607,7 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3592,6 +3659,7 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3638,6 +3706,7 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3700,6 +3769,7 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3746,6 +3816,7 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3803,6 +3874,7 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3849,6 +3921,7 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3906,6 +3979,7 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3952,6 +4026,7 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3998,6 +4073,7 @@ export type UserCreateWithoutAppointmentChangesInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4044,6 +4120,7 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4106,6 +4183,7 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4152,6 +4230,7 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4198,6 +4277,7 @@ export type UserCreateWithoutCreatedEventsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4244,6 +4324,7 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4295,6 +4376,7 @@ export type UserCreateWithoutModeratedEventsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4341,6 +4423,7 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4403,6 +4486,7 @@ export type UserUpdateWithoutCreatedEventsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4449,6 +4533,7 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4506,6 +4591,7 @@ export type UserUpdateWithoutModeratedEventsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4552,6 +4638,7 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4598,6 +4685,7 @@ export type UserCreateWithoutEventRegistrationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4644,6 +4732,7 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4706,6 +4795,7 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4752,6 +4842,7 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4798,6 +4889,7 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4844,6 +4936,7 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4906,6 +4999,7 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4952,6 +5046,7 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4998,6 +5093,7 @@ export type UserCreateWithoutExportHistoriesInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5044,6 +5140,7 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5106,6 +5203,7 @@ export type UserUpdateWithoutExportHistoriesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5152,6 +5250,7 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5198,6 +5297,7 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5244,6 +5344,7 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5295,6 +5396,7 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5341,6 +5443,7 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5392,6 +5495,7 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5438,6 +5542,7 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5500,6 +5605,7 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5546,6 +5652,7 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5603,6 +5710,7 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5649,6 +5757,7 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5706,6 +5815,7 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5752,6 +5862,7 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5798,6 +5909,7 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5844,6 +5956,7 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5906,6 +6019,7 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5952,6 +6066,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5998,6 +6113,7 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -6044,6 +6160,7 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -6106,6 +6223,7 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -6152,6 +6270,7 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -6199,6 +6318,7 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
@@ -6245,6 +6365,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
@@ -6296,6 +6417,7 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
@@ -6342,6 +6464,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
@@ -6404,6 +6527,7 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
@@ -6450,6 +6574,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
@@ -6507,6 +6632,7 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
@@ -6553,6 +6679,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
@@ -6599,6 +6726,7 @@ export type UserCreateWithoutChatParticipantsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -6645,6 +6773,7 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -6707,6 +6836,7 @@ export type UserUpdateWithoutChatParticipantsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -6753,6 +6883,7 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -6799,6 +6930,7 @@ export type UserCreateWithoutChatMessagesInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
@@ -6845,6 +6977,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
@@ -6907,6 +7040,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
@@ -6953,6 +7087,7 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
@@ -6999,6 +7134,7 @@ export type UserCreateWithoutPresenceInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -7045,6 +7181,7 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -7107,6 +7244,7 @@ export type UserUpdateWithoutPresenceInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -7153,10 +7291,215 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutMentorParticipationAttemptLimitInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationAttemptLimitInput, Prisma.UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput>
+}
+
+export type UserUpsertWithoutMentorParticipationAttemptLimitInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMentorParticipationAttemptLimitInput, Prisma.UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationAttemptLimitInput, Prisma.UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMentorParticipationAttemptLimitInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMentorParticipationAttemptLimitInput, Prisma.UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput>
+}
+
+export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyCityInput = {
@@ -7215,6 +7558,7 @@ export type UserUpdateWithoutCityInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -7261,6 +7605,7 @@ export type UserUncheckedUpdateWithoutCityInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -7582,6 +7927,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   approvedAccessRequest?: boolean | Prisma.User$approvedAccessRequestArgs<ExtArgs>
   mentorSlotOffers?: boolean | Prisma.User$mentorSlotOffersArgs<ExtArgs>
   mentorParticipationRequests?: boolean | Prisma.User$mentorParticipationRequestsArgs<ExtArgs>
+  mentorParticipationAttemptLimit?: boolean | Prisma.User$mentorParticipationAttemptLimitArgs<ExtArgs>
   conversationsAsUserA?: boolean | Prisma.User$conversationsAsUserAArgs<ExtArgs>
   conversationsAsUserB?: boolean | Prisma.User$conversationsAsUserBArgs<ExtArgs>
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
@@ -7673,6 +8019,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   approvedAccessRequest?: boolean | Prisma.User$approvedAccessRequestArgs<ExtArgs>
   mentorSlotOffers?: boolean | Prisma.User$mentorSlotOffersArgs<ExtArgs>
   mentorParticipationRequests?: boolean | Prisma.User$mentorParticipationRequestsArgs<ExtArgs>
+  mentorParticipationAttemptLimit?: boolean | Prisma.User$mentorParticipationAttemptLimitArgs<ExtArgs>
   conversationsAsUserA?: boolean | Prisma.User$conversationsAsUserAArgs<ExtArgs>
   conversationsAsUserB?: boolean | Prisma.User$conversationsAsUserBArgs<ExtArgs>
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
@@ -7715,6 +8062,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     approvedAccessRequest: Prisma.$AccessRequestPayload<ExtArgs> | null
     mentorSlotOffers: Prisma.$MentorSlotOfferPayload<ExtArgs>[]
     mentorParticipationRequests: Prisma.$MentorParticipationRequestPayload<ExtArgs>[]
+    mentorParticipationAttemptLimit: Prisma.$MentorParticipationAttemptLimitPayload<ExtArgs> | null
     conversationsAsUserA: Prisma.$ConversationPayload<ExtArgs>[]
     conversationsAsUserB: Prisma.$ConversationPayload<ExtArgs>[]
     chatMessages: Prisma.$MessagePayload<ExtArgs>[]
@@ -8156,6 +8504,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   approvedAccessRequest<T extends Prisma.User$approvedAccessRequestArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$approvedAccessRequestArgs<ExtArgs>>): Prisma.Prisma__AccessRequestClient<runtime.Types.Result.GetResult<Prisma.$AccessRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   mentorSlotOffers<T extends Prisma.User$mentorSlotOffersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorSlotOffersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorSlotOfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mentorParticipationRequests<T extends Prisma.User$mentorParticipationRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorParticipationRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorParticipationRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mentorParticipationAttemptLimit<T extends Prisma.User$mentorParticipationAttemptLimitArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorParticipationAttemptLimitArgs<ExtArgs>>): Prisma.Prisma__MentorParticipationAttemptLimitClient<runtime.Types.Result.GetResult<Prisma.$MentorParticipationAttemptLimitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   conversationsAsUserA<T extends Prisma.User$conversationsAsUserAArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationsAsUserAArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversationsAsUserB<T extends Prisma.User$conversationsAsUserBArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationsAsUserBArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   chatMessages<T extends Prisma.User$chatMessagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -9188,6 +9537,25 @@ export type User$mentorParticipationRequestsArgs<ExtArgs extends runtime.Types.E
   take?: number
   skip?: number
   distinct?: Prisma.MentorParticipationRequestScalarFieldEnum | Prisma.MentorParticipationRequestScalarFieldEnum[]
+}
+
+/**
+ * User.mentorParticipationAttemptLimit
+ */
+export type User$mentorParticipationAttemptLimitArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MentorParticipationAttemptLimit
+   */
+  select?: Prisma.MentorParticipationAttemptLimitSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MentorParticipationAttemptLimit
+   */
+  omit?: Prisma.MentorParticipationAttemptLimitOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MentorParticipationAttemptLimitInclude<ExtArgs> | null
+  where?: Prisma.MentorParticipationAttemptLimitWhereInput
 }
 
 /**

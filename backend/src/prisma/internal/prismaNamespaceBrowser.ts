@@ -100,7 +100,8 @@ export const ModelName = {
   Conversation: 'Conversation',
   ConversationParticipant: 'ConversationParticipant',
   Message: 'Message',
-  UserPresence: 'UserPresence'
+  UserPresence: 'UserPresence',
+  MentorParticipationAttemptLimit: 'MentorParticipationAttemptLimit'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -783,6 +784,16 @@ export const UserPresenceScalarFieldEnum = {
 } as const
 
 export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
+
+
+export const MentorParticipationAttemptLimitScalarFieldEnum = {
+  userId: 'userId',
+  attemptCount: 'attemptCount',
+  windowStartedAt: 'windowStartedAt',
+  blockedUntil: 'blockedUntil'
+} as const
+
+export type MentorParticipationAttemptLimitScalarFieldEnum = (typeof MentorParticipationAttemptLimitScalarFieldEnum)[keyof typeof MentorParticipationAttemptLimitScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -8,6 +8,10 @@ import {
   readMentorEligibility,
 } from './mentor-capacity.queries.js';
 
+const ATTEMPT_WINDOW_MS = 24 * 60 * 60 * 1000;
+const SANCTION_DURATION_MS = 72 * 60 * 60 * 1000;
+const MAX_ATTEMPTS = 4;
+
 @Injectable()
 export class MentorParticipationRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -41,6 +45,75 @@ export class MentorParticipationRepository {
     );
   }
 
+  private async registerAttempt(
+    tx: Prisma.TransactionClient,
+    userId: string,
+  ) {
+    const now = new Date();
+
+    const limit = await tx.mentorParticipationAttemptLimit.findUnique({
+      where: { userId },
+    });
+
+    if (limit?.blockedUntil && limit.blockedUntil > now) {
+      return {
+        result: 'SANCTIONED' as const,
+        blockedUntil: limit.blockedUntil,
+      };
+    }
+
+    const windowExpired =
+      !limit?.windowStartedAt ||
+      now.getTime() - limit.windowStartedAt.getTime() >= ATTEMPT_WINDOW_MS;
+
+    if (windowExpired || (limit?.blockedUntil && limit.blockedUntil <= now)) {
+      await tx.mentorParticipationAttemptLimit.upsert({
+        where: { userId },
+        create: {
+          userId,
+          attemptCount: 1,
+          windowStartedAt: now,
+          blockedUntil: null,
+        },
+        update: {
+          attemptCount: 1,
+          windowStartedAt: now,
+          blockedUntil: null,
+        },
+      });
+
+      return { result: 'ALLOWED' as const };
+    }
+
+    const attemptCount = limit.attemptCount + 1;
+
+    if (attemptCount > MAX_ATTEMPTS) {
+      const blockedUntil = new Date(
+        now.getTime() + SANCTION_DURATION_MS,
+      );
+
+      await tx.mentorParticipationAttemptLimit.update({
+        where: { userId },
+        data: {
+          attemptCount,
+          blockedUntil,
+        },
+      });
+
+      return {
+        result: 'SANCTIONED' as const,
+        blockedUntil,
+      };
+    }
+
+    await tx.mentorParticipationAttemptLimit.update({
+      where: { userId },
+      data: { attemptCount },
+    });
+
+    return { result: 'ALLOWED' as const };
+  }
+
   createRequest(
     userId: string,
     technicalAreaIds: string[],
@@ -53,16 +126,19 @@ export class MentorParticipationRepository {
         return { result: 'NOT_ELIGIBLE' as const };
       }
 
+      const attempt = await this.registerAttempt(tx, userId);
+
+      if (attempt.result === 'SANCTIONED') {
+        return attempt;
+      }
+
       const existingRequest =
         await tx.mentorParticipationRequest.findFirst({
           where: {
             userId,
             status: { in: ['PENDING', 'OFFERED'] },
           },
-          orderBy: [
-            { queuedAt: 'asc' },
-            { id: 'asc' },
-          ],
+          orderBy: [{ queuedAt: 'asc' }, { id: 'asc' }],
         });
 
       if (existingRequest) {
@@ -112,9 +188,7 @@ export class MentorParticipationRepository {
     return this.prisma.mentorParticipationRequest.findFirst({
       where: {
         userId,
-        status: {
-          in: ['PENDING', 'OFFERED', 'ACTIVE'],
-        },
+        status: { in: ['PENDING', 'OFFERED', 'ACTIVE'] },
       },
       orderBy: [
         { queuedAt: 'desc' },
@@ -123,12 +197,9 @@ export class MentorParticipationRepository {
     });
   }
 
-  // Consulta el historial completo sin modificar los estados ni la cola FIFO.
   findMyHistory(userId: string) {
     return this.prisma.mentorParticipationRequest.findMany({
-      where: {
-        userId,
-      },
+      where: { userId },
       orderBy: [
         { queuedAt: 'desc' },
         { id: 'desc' },
@@ -174,9 +245,7 @@ export class MentorParticipationRepository {
 
       const updated =
         await tx.mentorParticipationRequest.update({
-          where: {
-            id: request.id,
-          },
+          where: { id: request.id },
           data: {
             technicalAreaIds,
             orientationTypeIds,
@@ -212,12 +281,8 @@ export class MentorParticipationRepository {
 
       const cancelled =
         await tx.mentorParticipationRequest.update({
-          where: {
-            id: request.id,
-          },
-          data: {
-            status: 'CANCELLED',
-          },
+          where: { id: request.id },
+          data: { status: 'CANCELLED' },
         });
 
       return {
