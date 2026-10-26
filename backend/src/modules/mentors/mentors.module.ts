@@ -1,3 +1,4 @@
+
 import { Module } from '@nestjs/common';
 import { ProfileModule } from '../profile/profile.module.js';
 import { MentorPhotoController } from './controllers/mentor-photo.controller.js';
@@ -12,10 +13,18 @@ import { MentorOffersController } from './controllers/mentor-offers.controller.j
 import { MentorOffersRepository } from './repositories/mentor-offers.repository.js';
 import { MentorOffersService } from './services/mentor-offers.service.js';
 import { MentorOffersWorker } from './services/mentor-offers-worker.service.js';
+import { MentorParticipationController } from './controllers/mentor-participation.controller.js';
+import { MentorParticipationService } from './services/mentor-participation.service.js';
+import { MentorParticipationRepository } from './repositories/mentor-participation.repository.js';
 
 @Module({
   imports: [AuthModule, ProfileModule],
-  controllers: [MentorsController, MentorPhotoController, MentorOffersController],
+  controllers: [
+    MentorsController,
+    MentorPhotoController,
+    MentorOffersController,
+    MentorParticipationController,
+  ],
   providers: [
     MentorsService,
     MentorsRepository,
@@ -25,6 +34,8 @@ import { MentorOffersWorker } from './services/mentor-offers-worker.service.js';
     MentorOffersRepository,
     MentorOffersService,
     MentorOffersWorker,
+    MentorParticipationService,
+    MentorParticipationRepository,
   ],
   exports: [MentorsService],
 })
