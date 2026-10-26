@@ -227,6 +227,9 @@ describe('registration HTTP contract', () => {
       ok: true,
       data: { id: REGISTRATION_ID, eventId: EVENT_ID, status: 'confirmed' },
     });
+    expect(fixture.tx.eventRegistration.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ user: { connect: { id: USER_ID } } }),
+    }));
   });
 
   it('rejects POST /api/event-registrations with invalid eventId', async () => {
