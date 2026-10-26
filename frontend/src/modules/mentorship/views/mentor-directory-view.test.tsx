@@ -319,10 +319,19 @@ describe("MentorDirectoryView", () => {
       name: /Ver perfil de María/,
     });
 
+    const searchCallsBeforeMaria =
+      navigationMocks.replace.mock.calls.length;
+
     fireEvent.change(
-      screen.getByRole("searchbox", { name: "Buscar mentor" }),
+      screen.getByRole("searchbox", { name: "Buscar mentores por nombre" }),
       { target: { value: "maria" } },
     );
+
+    await waitFor(() => {
+      expect(navigationMocks.replace.mock.calls.length).toBeGreaterThan(
+        searchCallsBeforeMaria,
+      );
+    });
 
     applyNavigation(rerender);
 
@@ -357,10 +366,19 @@ describe("MentorDirectoryView", () => {
       }),
     ).toBeInTheDocument();
 
+    const searchCallsBeforeNoResults =
+      navigationMocks.replace.mock.calls.length;
+
     fireEvent.change(
-      screen.getByRole("searchbox", { name: "Buscar mentor" }),
+      screen.getByRole("searchbox", { name: "Buscar mentores por nombre" }),
       { target: { value: "noexiste" } },
     );
+
+    await waitFor(() => {
+      expect(navigationMocks.replace.mock.calls.length).toBeGreaterThan(
+        searchCallsBeforeNoResults,
+      );
+    });
 
     applyNavigation(rerender);
 
