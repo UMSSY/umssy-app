@@ -175,4 +175,65 @@ describe('EventCard y utilidades de formato', () => {
       width: '100%',
     });
   });
+
+  it('muestra apoyos y plazo en una propuesta en votación sin confundirlos con cupos', () => {
+    render(<EventCard event={{
+      ...MOCK_EVENT,
+      status: 'voting',
+      capacity: 40,
+      registrationCount: 14,
+      availableSpots: 26,
+      supportCount: 14,
+      supportThreshold: 20,
+      supportsRemaining: 6,
+      progressPercent: 70,
+      votingDeadline: '2026-10-15T02:00:00.000Z',
+      hasSupported: true,
+    }} />);
+
+    expect(screen.getByText('En votación')).toBeInTheDocument();
+    expect(screen.getByText('14 de 20 apoyos')).toBeInTheDocument();
+    expect(screen.getByText('70%')).toBeInTheDocument();
+    expect(screen.getByText('Faltan 6 apoyos para publicar el taller.')).toBeInTheDocument();
+    expect(screen.getByText(/Fecha límite: 14.*oct.*2026/)).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: /apoyos para/i })).toHaveAttribute('aria-valuenow', '70');
+    expect(screen.queryByRole('progressbar', { name: /cupos ocupados/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Tu apoyo ya fue registrado');
+  });
+
+  it('muestra el plazo vencido sin invitar a seguir apoyando', () => {
+    render(<EventCard event={{
+      ...MOCK_EVENT,
+      status: 'Vencido',
+      supportCount: 5,
+      supportThreshold: 20,
+      supportsRemaining: 15,
+      progressPercent: 25,
+      votingDeadline: '2026-10-15T02:00:00.000Z',
+      hasSupported: true,
+    }} />);
+
+    expect(screen.getByText('Vencido')).toBeInTheDocument();
+    expect(screen.getByText('5 de 20 apoyos')).toBeInTheDocument();
+    expect(screen.getByText('El plazo de apoyo terminó.')).toBeInTheDocument();
+    expect(screen.queryByText(/Faltan .* apoyos/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByRole('progressbar', { name: /cupos ocupados/i })).not.toBeInTheDocument();
+  });
+
+  it('conserva la barra de cupos para un taller publicado', () => {
+    render(<EventCard event={{ ...MOCK_EVENT, status: 'Publicado', supportCount: 24, supportThreshold: 20 }} />);
+
+    expect(screen.getByText('Publicado')).toBeInTheDocument();
+    expect(screen.getByText('24/30')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: /cupos ocupados/i })).toHaveAttribute('aria-valuenow', '80');
+    expect(screen.queryByRole('progressbar', { name: /apoyos para/i })).not.toBeInTheDocument();
+  });
+
+  it('no inventa un progreso si faltan datos de apoyos', () => {
+    render(<EventCard event={{ ...MOCK_EVENT, status: 'voting' }} />);
+
+    expect(screen.getByText('Información de apoyos no disponible.')).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
 });
