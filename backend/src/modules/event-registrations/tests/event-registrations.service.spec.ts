@@ -1,3 +1,4 @@
+import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 
@@ -9,7 +10,7 @@ describe('EventRegistrationsService', () => {
   beforeEach(() => {
     create.mockReset();
     findByUserId.mockReset();
-    service = new EventRegistrationsService({ eventRegistration: { create } } as never, {} as never);
+    service = new EventRegistrationsService(new EventRegistrationsRepository({ eventRegistration: { create } } as never), {} as never);
     vi.spyOn(service, 'findByUserId').mockImplementation(findByUserId);
   });
 

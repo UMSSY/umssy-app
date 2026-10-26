@@ -1,3 +1,4 @@
+import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
@@ -8,9 +9,9 @@ describe('EventRegistrationsService', () => {
 
   beforeEach(() => {
     findMany.mockReset();
-    repository = new EventRegistrationsService({
+    repository = new EventRegistrationsService(new EventRegistrationsRepository({
       eventRegistration: { findMany },
-    } as unknown as PrismaService, {} as never);
+    } as unknown as PrismaService), {} as never);
   });
 
   it('consulta por userId con el select y orden esperados', async () => {
