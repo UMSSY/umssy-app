@@ -3,6 +3,8 @@ import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 import { mentorCapacity } from '../utils/mentor-capacity.js';
 
+vi.mock('../repositories/mentor-offers.queries.js', () => ({ reconcileMentorOffers: vi.fn() }));
+
 describe('capacidad HU-7-1', () => {
   it.each([[0, 0], [2, 0], [3, 1], [9, 3], [25, 10]])('aplica el 40 %% de %i titulados con redondeo hacia abajo', (approvedGraduates, capacity) => {
     expect(mentorCapacity({ approvedGraduates, activeMentors: 0, reservedOffers: 0 }).capacity).toBe(capacity);
