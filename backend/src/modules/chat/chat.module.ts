@@ -23,6 +23,7 @@ import { UserPresenceRepository } from './repositories/user-presence.repository.
 import { UserLookupRepository } from './repositories/user-lookup.repository.js';
 import { ChatRepository } from './repositories/chat.repository.js';
 
+import {ChatGateway } from './gateways/chat.gateway.js'
 @Module({
   imports: [PrismaModule, JwtAuthModule, AuthModule],
   controllers: [
@@ -38,6 +39,7 @@ import { ChatRepository } from './repositories/chat.repository.js';
     MessageStatusService,
     UserPresenceService,
     ChatService,
+    ChatGateway,
 
     ConversationRepository,
     ConversationParticipantRepository,
@@ -53,6 +55,7 @@ import { ChatRepository } from './repositories/chat.repository.js';
     UserSearchService,
     UserPresenceService,
     ChatService,
+    ChatGateway,
   ],
 })
 export class ChatModule {}
