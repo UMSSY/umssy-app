@@ -75,6 +75,7 @@ describe('MentorsRepository', () => {
         userId: 'user-1',
         roleId: 'role-1',
         deletedAt: null,
+        startAt: { lte: expect.any(Date) },
       },
       select: { id: true },
     });
@@ -351,6 +352,10 @@ describe('MentorsRepository', () => {
     });
 
     const transaction = {
+      $queryRaw: vi.fn().mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ eligible: true, alreadyMentor: false }])
+        .mockResolvedValueOnce([{ approvedGraduates: 5, activeMentors: 0, reservedOffers: 0 }]),
+      $executeRaw: vi.fn(),
       userRole: { create: createUserRole },
       mentorTechnicalArea: { createMany: createTechnicalAreas },
       mentorOrientationType: { createMany: createOrientationTypes },
@@ -402,6 +407,10 @@ describe('MentorsRepository', () => {
     const createOrientationTypes = vi.fn();
 
     const transaction = {
+      $queryRaw: vi.fn().mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ eligible: true, alreadyMentor: false }])
+        .mockResolvedValueOnce([{ approvedGraduates: 5, activeMentors: 0, reservedOffers: 0 }]),
+      $executeRaw: vi.fn(),
       userRole: { create: createUserRole },
       mentorTechnicalArea: { createMany: createTechnicalAreas },
       mentorOrientationType: { createMany: createOrientationTypes },

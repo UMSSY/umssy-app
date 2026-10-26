@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
+import { AlreadyMentorException, MentorCapacityException, MentorEligibilityException } from '../exceptions/index.js';
+import { readMentorCapacity, readMentorEligibility } from './mentor-capacity.queries.js';
 
 const directorySelect = {
   id: true,
@@ -53,6 +55,7 @@ export class MentorsRepository {
         userId,
         roleId,
         deletedAt: null,
+        startAt: { lte: new Date() },
       },
       select: {
         id: true,
@@ -417,6 +420,10 @@ export class MentorsRepository {
     });
   }
 
+  capacity() {
+    return readMentorCapacity(this.prisma);
+  }
+
   activate(
     userId: string,
     roleId: string,
@@ -424,6 +431,15 @@ export class MentorsRepository {
     orientationTypeIds: string[],
   ) {
     return this.prisma.$transaction(async (transaction) => {
+      await transaction.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
+      // Todas las operaciones que ocupen o reserven cupos deben usar esta misma clave.
+      await transaction.$queryRaw`SELECT pg_advisory_xact_lock(1436)::text`;
+      const eligibility = await readMentorEligibility(transaction, userId);
+      if (!eligibility.eligible) throw new MentorEligibilityException();
+      if (eligibility.alreadyMentor) throw new AlreadyMentorException();
+      const capacity = await readMentorCapacity(transaction);
+      if (capacity.available < 1) throw new MentorCapacityException();
+
       await transaction.userRole.create({
         data: {
           userId,
@@ -456,7 +472,7 @@ export class MentorsRepository {
       });
 
       return { id: userId };
-    });
+    }, { isolationLevel: 'ReadCommitted', maxWait: 10_000, timeout: 30_000 });
   }
 
   updateAvailability(userId: string, isAvailable: boolean) {

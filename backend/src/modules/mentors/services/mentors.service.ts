@@ -223,6 +223,8 @@ export class MentorsService {
   }
 
   async activate(userId: string, data: ActivateMentorDto) {
+    if (!data.technicalAreaIds.length) throw new InvalidTechnicalAreasException();
+    if (!data.orientationTypeIds.length) throw new InvalidOrientationTypesException();
     const mentorRole = await this.mentorsRepository.findMentorRole();
 
     if (!mentorRole) {
@@ -267,6 +269,10 @@ export class MentorsService {
     await this.assertActiveMentor(userId);
 
     return this.mentorsRepository.updateAvailability(userId, isAvailable);
+  }
+
+  capacity() {
+    return this.mentorsRepository.capacity();
   }
 
   private async assertActiveMentor(userId: string): Promise<void> {
