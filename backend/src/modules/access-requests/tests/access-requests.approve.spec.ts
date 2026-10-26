@@ -2,7 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { Logger } from '@nestjs/common';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Prisma } from '../../../prisma/client.js';
-import { OTP_DIGITS, OTP_MAX_ATTEMPTS, OTP_TTL_HOURS } from '../constants/otp.constants.js';
+import { OTP_DIGITS, OTP_MAX_ATTEMPTS, OTP_TTL_MINUTES } from '../constants/otp.constants.js';
 import { AccessRequestsController } from '../controllers/access-requests.controller.js';
 import { AccessRequestNotFoundException, RequestNotInReviewException } from '../exceptions/index.js';
 import { ConsoleMailSender } from '../mail/console-mail-sender.js';
@@ -17,7 +17,7 @@ describe('generateOtpCode', () => {
       expect(generateOtpCode()).toMatch(new RegExp(`^\\d{${OTP_DIGITS}}$`));
     }
     expect(OTP_DIGITS).toBe(6);
-    expect(OTP_TTL_HOURS).toBe(24);
+    expect(OTP_TTL_MINUTES).toBe(10);
     expect(OTP_MAX_ATTEMPTS).toBe(5);
   });
 });
@@ -25,14 +25,18 @@ describe('generateOtpCode', () => {
 describe('ActivationOtpService', () => {
   const NOW = new Date('2026-10-05T12:00:00.000Z');
   const build = () => {
-    const repository = { create: vi.fn().mockResolvedValue({ id: 'otp-1' }) };
+    const repository = {
+      create: vi.fn().mockResolvedValue({ id: 'otp-1' }),
+      invalidateOthers: vi.fn().mockResolvedValue(undefined),
+      remove: vi.fn().mockResolvedValue(undefined),
+    };
     const mail = { sendActivationCode: vi.fn().mockResolvedValue(undefined), sendRejection: vi.fn() };
     return { repository, mail, service: new ActivationOtpService(repository as any, mail as any) };
   };
 
   afterEach(() => vi.restoreAllMocks());
 
-  it('guarda solo el hash bcrypt con 24 horas de vigencia y envía el código en texto al correo', async () => {
+  it('guarda solo el hash bcrypt con 10 minutos de vigencia y envía el código en texto al correo', async () => {
     const { repository, mail, service } = build();
 
     await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(true);
@@ -45,7 +49,7 @@ describe('ActivationOtpService', () => {
     expect(stored.codeHash).not.toBe(code);
     expect(JSON.stringify(stored)).not.toContain(code);
     expect(await bcrypt.compare(code, stored.codeHash)).toBe(true);
-    expect(stored.expiresAt).toEqual(new Date('2026-10-06T12:00:00.000Z'));
+    expect(stored.expiresAt).toEqual(new Date('2026-10-05T12:10:00.000Z'));
     expect(expiresAt).toEqual(stored.expiresAt);
   });
 
@@ -72,6 +76,47 @@ describe('ActivationOtpService', () => {
 
     await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(false);
     expect(mail.sendActivationCode).not.toHaveBeenCalled();
+  });
+
+    it('invalida los códigos anteriores de la solicitud solo después de enviar el nuevo', async () => {
+    const { repository, mail, service } = build();
+
+    await service.issueFor('req-1', 'ana@umss.test', NOW);
+
+    expect(repository.invalidateOthers).toHaveBeenCalledWith('req-1', 'otp-1', NOW);
+    expect(mail.sendActivationCode.mock.invocationCallOrder[0]).toBeLessThan(
+      repository.invalidateOthers.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('si el correo falla descarta el código nuevo y no toca los anteriores', async () => {
+    const { repository, mail, service } = build();
+    vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    mail.sendActivationCode.mockRejectedValue(new Error('smtp caído'));
+
+    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(false);
+    expect(repository.remove).toHaveBeenCalledWith('otp-1');
+    expect(repository.invalidateOthers).not.toHaveBeenCalled();
+  });
+
+  it('si no logra invalidar los anteriores igual devuelve true porque el código nuevo ya salió', async () => {
+    const { repository, service } = build();
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    repository.invalidateOthers.mockRejectedValue(new Error('base caída'));
+
+    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(true);
+    expect(repository.remove).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledOnce();
+  });
+
+  it('si tampoco puede descartar el código nuevo no lanza', async () => {
+    const { repository, mail, service } = build();
+    vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    mail.sendActivationCode.mockRejectedValue(new Error('smtp caído'));
+    repository.remove.mockRejectedValue(new Error('base caída'));
+
+    await expect(service.issueFor('req-1', 'ana@umss.test', NOW)).resolves.toBe(false);
   });
 });
 
@@ -179,7 +224,7 @@ describe('AccessRequestsService.approve', () => {
   const build = () => {
     const repository = { findDetailById: vi.fn(), setVerdict: vi.fn().mockResolvedValue(true) };
     const otp = { issueFor: vi.fn().mockResolvedValue(true) };
-    return { repository, otp, service: new AccessRequestsService(repository as any, {} as any, {} as any, otp as any) };
+    return { repository, otp, service: new AccessRequestsService(repository as any, {} as any, {} as any, otp as any, {} as any) };
   };
 
   it('una solicitud en revisión pasa a aprobada y emite el código de activación', async () => {
