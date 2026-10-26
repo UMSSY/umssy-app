@@ -27,4 +27,4 @@ export const GetEventsSchema = z.object({
     .optional(),
 });
 
-export type GetEventsPayload = z.infer<typeof GetEventsSchema>;
+export type { GetEventsPayload } from '../types/get-events-payload.types.js';

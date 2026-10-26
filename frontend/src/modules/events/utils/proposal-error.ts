@@ -1,8 +1,8 @@
 import { isApiError } from '@/shared/services/api-client';
-import type { ProposalErrors } from '../types/proposal.types';
+import type { ProposalError } from '../types/proposal-error.types';
 
-export function getProposalError(error: unknown): { message: string; fields: ProposalErrors } {
-  const fields: ProposalErrors = {};
+export function getProposalError(error: unknown): ProposalError {
+  const fields: ProposalError['fields'] = {};
   if (isApiError(error)) {
     const status = error.response?.status;
     const body: unknown = error.response?.data;

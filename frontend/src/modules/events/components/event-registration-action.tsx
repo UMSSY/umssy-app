@@ -1,5 +1,7 @@
 "use client";
 
+import type { EventRegistrationActionProps } from '../types/event-registration-action-props.types';
+
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -13,12 +15,7 @@ import { RequestFeedback } from "./request-feedback";
 import { RegistrationConfirmationDialog } from "./registration-confirmation-dialog";
 import { useEventFinished } from "../hooks/use-event-finished";
 import { hasValidEventCapacity } from "../utils/has-valid-event-capacity";
-import type { EventDetail } from "../types/event-detail.types";
 
-interface EventRegistrationActionProps {
-  event: EventDetail;
-  onEventNotFound?: () => void;
-}
 
 export function EventRegistrationAction({ event, onEventNotFound }: EventRegistrationActionProps) {
   const router = useRouter();
