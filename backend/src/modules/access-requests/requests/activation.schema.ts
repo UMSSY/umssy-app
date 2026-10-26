@@ -9,7 +9,7 @@ const codeField = z
   .trim()
   .regex(new RegExp(`^\\d{${OTP_DIGITS}}$`), `El código debe tener ${OTP_DIGITS} dígitos`);
 
-// Mismas reglas que la pantalla: 8 caracteres, una mayúscula y un número (CA6)
+
 const passwordField = z
   .string({ error: 'La contraseña es obligatoria' })
   .min(8, 'La contraseña debe tener al menos 8 caracteres')
