@@ -143,6 +143,8 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
   describe('getStatus', () => {
     const found = {
       requestCode: 'SOL-2026-0001',
+      firstName: 'Ana María',
+      lastName: 'Pérez López',
       submittedAt: new Date('2026-10-05T15:00:00Z'),
       reviewedAt: null,
       rejectionReason: null,
@@ -151,7 +153,7 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
       documentFile: { size: 2048, mimeType: 'application/pdf' },
     };
 
-    it('devuelve el estado, las fechas y el documento sin datos personales', async () => {
+    it('conserva el contrato de una solicitud pendiente sin devolver el nombre', async () => {
       repository.findByRequestCode.mockResolvedValue(found);
 
       const result = await service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo');
@@ -164,12 +166,9 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
         rejectionReason: null,
         document: { type: 'national_title', size: 2048, mimeType: 'application/pdf' },
       });
-      for (const forbidden of ['idCardNumber', 'sisCode', 'phone', 'email', 'content']) {
-        expect(result).not.toHaveProperty(forbidden);
-      }
     });
 
-    it('incluye el motivo de rechazo y la fecha de revisión cuando existen', async () => {
+    it('incluye el nombre completo, motivo y fecha de una solicitud rechazada', async () => {
       repository.findByRequestCode.mockResolvedValue({
         ...found,
         status: { title: 'rejected' },
@@ -177,37 +176,105 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
         rejectionReason: 'Documento ilegible',
       });
 
-      await expect(service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo')).resolves.toMatchObject({
+      const result = await service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo');
+
+      expect(result).toEqual({
+        requestCode: 'SOL-2026-0001',
         status: 'rejected',
+        fullName: 'Ana María Pérez López',
+        submittedAt: '2026-10-05T15:00:00.000Z',
         reviewedAt: '2026-10-06T10:00:00.000Z',
         rejectionReason: 'Documento ilegible',
+        document: { type: 'national_title', size: 2048, mimeType: 'application/pdf' },
       });
     });
 
-    it('document es null si no hay archivo o tipo', async () => {
-      repository.findByRequestCode.mockResolvedValue({ ...found, documentFile: null });
+    it.each(['draft', 'pending', 'in_review', 'approved'])(
+      'omite completamente el nombre cuando el estado es %s',
+      async (status) => {
+        repository.findByRequestCode.mockResolvedValue({
+          ...found,
+          status: { title: status },
+        });
 
-      await expect(service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo')).resolves.toMatchObject({ document: null });
+        const result = await service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo');
+
+        expect(result).not.toHaveProperty('fullName');
+        expect(result).not.toHaveProperty('firstName');
+        expect(result).not.toHaveProperty('lastName');
+      },
+    );
+
+    it('no añade otros datos personales a una solicitud rechazada', async () => {
+      repository.findByRequestCode.mockResolvedValue({
+        ...found,
+        status: { title: 'rejected' },
+      });
+
+      const result = await service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo');
+
+      for (const forbidden of [
+        'firstName',
+        'lastName',
+        'idCardNumber',
+        'sisCode',
+        'phone',
+        'email',
+        'birthDate',
+        'content',
+      ]) {
+        expect(result).not.toHaveProperty(forbidden);
+      }
+
+      expect(result.document).toEqual({
+        type: 'national_title',
+        size: 2048,
+        mimeType: 'application/pdf',
+      });
     });
 
-    it('normaliza el correo a minúsculas al consultar', async () => {
+    it.each([
+      { documentFile: null },
+      { documentType: null },
+    ])('document es null si falta archivo o tipo: %j', async (overrides) => {
+      repository.findByRequestCode.mockResolvedValue({
+        ...found,
+        ...overrides,
+      });
+
+      await expect(
+        service.getStatus('SOL-2026-0001', 'ana@umss.edu.bo'),
+      ).resolves.toMatchObject({ document: null });
+    });
+
+    it('normaliza el correo a minúsculas y elimina espacios externos', async () => {
       repository.findByRequestCode.mockResolvedValue(found);
 
       await service.getStatus('SOL-2026-0001', ' ANA@Umss.edu.bo ');
 
-      expect(repository.findByRequestCode).toHaveBeenCalledWith('SOL-2026-0001', 'ana@umss.edu.bo');
+      expect(repository.findByRequestCode).toHaveBeenCalledWith(
+        'SOL-2026-0001',
+        'ana@umss.edu.bo',
+      );
     });
 
-    it('lanza el mismo 404 si el código no existe o el correo no coincide', async () => {
+    it('lanza el mismo error genérico si el código no existe o el correo no coincide', async () => {
       repository.findByRequestCode.mockResolvedValue(null);
 
-      const missingCode = await service.getStatus('SOL-2026-9999', 'ana@umss.edu.bo').catch((e) => e);
-      const wrongEmail = await service.getStatus('SOL-2026-0001', 'otra@umss.edu.bo').catch((e) => e);
+      const missingCode = await service
+        .getStatus('SOL-2026-9999', 'ana@umss.edu.bo')
+        .catch((error) => error);
+
+      const wrongEmail = await service
+        .getStatus('SOL-2026-0001', 'otra@umss.edu.bo')
+        .catch((error) => error);
 
       expect(missingCode).toBeInstanceOf(AccessRequestNotFoundException);
       expect(wrongEmail).toBeInstanceOf(AccessRequestNotFoundException);
-      expect(wrongEmail.message).toBe(missingCode.message);
+      expect(missingCode.statusCode).toBe(404);
       expect(wrongEmail.statusCode).toBe(404);
+      expect(missingCode.message).toBe('La solicitud de acceso no existe');
+      expect(wrongEmail.message).toBe(missingCode.message);
     });
   });
 });

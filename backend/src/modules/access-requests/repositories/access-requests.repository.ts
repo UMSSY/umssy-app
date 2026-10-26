@@ -317,6 +317,8 @@ export class AccessRequestsRepository {
       where: { requestCode, email: { equals: email, mode: 'insensitive' } },
       select: {
         requestCode: true,
+        firstName: true,
+        lastName: true,
         submittedAt: true,
         reviewedAt: true,
         rejectionReason: true,
