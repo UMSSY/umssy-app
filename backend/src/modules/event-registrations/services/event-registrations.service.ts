@@ -234,12 +234,13 @@ export class EventRegistrationsService {
     assertSupportable: (event: EventSupportContext) => void,
   ): Promise<SupportTransactionResult | null> {
     return this.prisma.$transaction(async (tx) => {
+      const beforeLock = await this.loadSupportContext(tx, eventId);
+      if (!beforeLock) return null;
+
       await tx.$queryRaw`SELECT id FROM events WHERE id = ${eventId}::uuid FOR UPDATE`;
 
       const event = await this.loadSupportContext(tx, eventId);
       if (!event) return null;
-
-      assertSupportable(event);
 
       const existing = await tx.eventRegistration.findUnique({
         where: { eventId_userId: { eventId, userId } },
@@ -254,6 +255,17 @@ export class EventRegistrationsService {
         };
       }
 
+      const publishedWhileWaiting =
+        event.statusTitle === PUBLISHED_STATUS_TITLE &&
+        event.originTitle === COMMUNITY_ORIGIN_TITLE &&
+        beforeLock.originTitle === COMMUNITY_ORIGIN_TITLE &&
+        VOTING_STATUS_TITLES.includes(beforeLock.statusTitle) &&
+        event.supportThreshold !== null &&
+        event.supportThreshold > 0 &&
+        event.supportCount >= event.supportThreshold;
+
+      assertSupportable(publishedWhileWaiting ? beforeLock : event);
+
       await tx.eventRegistration.create({
         data: {
           event: { connect: { id: eventId } },
@@ -267,9 +279,10 @@ export class EventRegistrationsService {
       const supportCount = event.supportCount + 1;
       const threshold = event.supportThreshold;
       const published =
-        threshold !== null && threshold > 0 && supportCount >= threshold;
+        event.statusTitle === PUBLISHED_STATUS_TITLE ||
+        (threshold !== null && threshold > 0 && supportCount >= threshold);
 
-      if (published) {
+      if (published && event.statusTitle !== PUBLISHED_STATUS_TITLE) {
         await tx.event.update({
           where: { id: eventId },
           data: { status: { connect: { title: PUBLISHED_STATUS_TITLE } } },

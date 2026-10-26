@@ -53,6 +53,7 @@ describe('useEvents with filters', () => {
           categoryId: 'category-1',
         },
         expect.any(AbortSignal),
+        null,
       );
     });
   });
@@ -76,6 +77,7 @@ describe('useEvents with filters', () => {
           includeProposals: true, limit: 50,
         },
         expect.any(AbortSignal),
+        null,
       );
     });
   });
@@ -117,6 +119,7 @@ describe('useEvents with filters', () => {
           categoryId: 'category-2',
         },
         expect.any(AbortSignal),
+        null,
       );
     });
   });
@@ -175,6 +178,7 @@ describe('useEvents with filters', () => {
           page: 2,
         }),
         expect.any(AbortSignal),
+        null,
       );
     });
 
@@ -190,6 +194,7 @@ describe('useEvents with filters', () => {
           search: 'React',
         }),
         expect.any(AbortSignal),
+        null,
       );
     });
   });

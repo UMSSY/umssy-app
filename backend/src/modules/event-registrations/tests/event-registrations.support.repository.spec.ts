@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
+import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
+import { EventNotSupportableException } from '../exceptions/event-not-supportable.exception.js';
+
+const VOTING_DEADLINE = new Date(Date.now() + 86_400_000);
 
 function buildEventRow(
   overrides: Partial<{
@@ -13,7 +17,7 @@ function buildEventRow(
     overrides;
   return {
     id: 'event-1',
-    votingDeadline: new Date('2026-10-12T23:59:00.000Z'),
+    votingDeadline: VOTING_DEADLINE,
     supportThreshold,
     status: { title: status },
     origin: { title: origin },
@@ -54,14 +58,14 @@ describe('EventRegistrationsService.registerSupport', () => {
     repository = new EventRegistrationsService(prismaMock as never, {} as never);
   });
 
-  it('bloquea la fila del evento antes de leer su estado', async () => {
+  it('lee el estado previo, bloquea la fila y vuelve a leer el estado confirmado', async () => {
     tx.event.findUnique.mockResolvedValue(buildEventRow());
 
     await repository.registerSupport('event-1', 'user-1', assertSupportable);
 
-    expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
-      tx.event.findUnique.mock.invocationCallOrder[0],
-    );
+    expect(tx.event.findUnique).toHaveBeenCalledTimes(2);
+    expect(tx.event.findUnique.mock.invocationCallOrder[0]).toBeLessThan(tx.$queryRaw.mock.invocationCallOrder[0]);
+    expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(tx.event.findUnique.mock.invocationCallOrder[1]);
   });
 
   it('devuelve null y no crea nada si el evento no existe', async () => {
@@ -70,6 +74,7 @@ describe('EventRegistrationsService.registerSupport', () => {
     await expect(
       repository.registerSupport('x', 'user-1', assertSupportable),
     ).resolves.toBeNull();
+    expect(tx.$queryRaw).not.toHaveBeenCalled();
     expect(assertSupportable).not.toHaveBeenCalled();
     expect(tx.eventRegistration.create).not.toHaveBeenCalled();
   });
@@ -83,7 +88,7 @@ describe('EventRegistrationsService.registerSupport', () => {
       id: 'event-1',
       statusTitle: 'Votacion',
       originTitle: 'Comunidad',
-      votingDeadline: new Date('2026-10-12T23:59:00.000Z'),
+      votingDeadline: VOTING_DEADLINE,
       supportThreshold: 20,
       supportCount: 14,
     });
@@ -120,6 +125,135 @@ describe('EventRegistrationsService.registerSupport', () => {
     });
     expect(tx.eventRegistration.create).not.toHaveBeenCalled();
     expect(tx.event.update).not.toHaveBeenCalled();
+  });
+
+  it('reconoce el apoyo duplicado aunque la propuesta se haya publicado mientras esperaba', async () => {
+    tx.event.findUnique
+      .mockResolvedValueOnce(buildEventRow({ registrations: 19 }))
+      .mockResolvedValueOnce(buildEventRow({ registrations: 20, status: 'Publicado' }));
+    tx.eventRegistration.findUnique.mockResolvedValue({ id: 'reg-0' });
+
+    await expect(repository.registerSupport('event-1', 'user-1', assertSupportable))
+      .resolves.toMatchObject({ created: false, supportCount: 20 });
+
+    expect(assertSupportable).not.toHaveBeenCalled();
+    expect(tx.eventRegistration.create).not.toHaveBeenCalled();
+  });
+
+  it('devuelve ALREADY_SUPPORTED al reintentar después de publicar', async () => {
+    tx.event.findUnique.mockResolvedValue(buildEventRow({ registrations: 20, status: 'Publicado' }));
+    tx.eventRegistration.findUnique.mockResolvedValue({ id: 'reg-0' });
+
+    await expect(repository.support('event-1', 'user-1')).rejects.toBeInstanceOf(AlreadySupportedException);
+    expect(tx.eventRegistration.create).not.toHaveBeenCalled();
+  });
+
+  it('confirma al segundo titulado simultáneo sin volver a publicar', async () => {
+    tx.event.findUnique
+      .mockResolvedValueOnce(buildEventRow({ registrations: 19 }))
+      .mockResolvedValueOnce(buildEventRow({ registrations: 20, status: 'Publicado' }));
+
+    const result = await repository.registerSupport('event-1', 'user-2', assertSupportable);
+
+    expect(assertSupportable).toHaveBeenCalledWith(expect.objectContaining({ statusTitle: 'Votacion', supportCount: 19 }));
+    expect(tx.eventRegistration.create).toHaveBeenCalledTimes(1);
+    expect(tx.event.update).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ created: true, supportCount: 21, published: true });
+  });
+
+  it('responde Publicado al segundo titulado que comenzó mientras seguía en votación', async () => {
+    tx.event.findUnique
+      .mockResolvedValueOnce(buildEventRow({ registrations: 19 }))
+      .mockResolvedValueOnce(buildEventRow({ registrations: 20, status: 'Publicado' }));
+
+    await expect(repository.support('event-1', 'user-2')).resolves.toMatchObject({
+      status: 'Publicado', supportCount: 21, supportsRemaining: 0, progressPercent: 100, hasSupported: true,
+    });
+    expect(tx.event.update).not.toHaveBeenCalled();
+  });
+
+  it('confirma dos apoyos simultáneos con una sola publicación', async () => {
+    let supportCount = 19;
+    let status = 'Votacion';
+    let firstReads = 0;
+    let releaseReads!: () => void;
+    let releaseFirst!: () => void;
+    const bothRead = new Promise<void>((resolve) => { releaseReads = resolve; });
+    const firstCommitted = new Promise<void>((resolve) => { releaseFirst = resolve; });
+    const create = vi.fn().mockImplementation(async () => {
+      supportCount += 1;
+      return { id: `reg-${supportCount}` };
+    });
+    const update = vi.fn().mockImplementation(async () => {
+      status = 'Publicado';
+      return { id: 'event-1' };
+    });
+    function transactionClient(waitForFirst: boolean) {
+      let reads = 0;
+      return {
+        $queryRaw: vi.fn(async () => {
+          if (waitForFirst) await firstCommitted;
+          return [{ id: 'event-1' }];
+        }),
+        event: {
+          findUnique: vi.fn(async () => {
+            reads += 1;
+            if (reads === 1) {
+              firstReads += 1;
+              if (firstReads === 2) releaseReads();
+              await bothRead;
+              return buildEventRow({ registrations: 19 });
+            }
+            return buildEventRow({ registrations: supportCount, status });
+          }),
+          update,
+        },
+        eventRegistration: { findUnique: vi.fn().mockResolvedValue(null), create },
+      };
+    }
+    const first = transactionClient(false);
+    const second = transactionClient(true);
+    let attempts = 0;
+    const prismaMock = {
+      $transaction: vi.fn(async (callback: (client: typeof first) => Promise<unknown>) => {
+        const client = attempts++ === 0 ? first : second;
+        try { return await callback(client); }
+        finally { if (client === first) releaseFirst(); }
+      }),
+    };
+    const concurrent = new EventRegistrationsService(prismaMock as never, {} as never);
+
+    const responses = await Promise.all([
+      concurrent.support('event-1', 'user-1'),
+      concurrent.support('event-1', 'user-2'),
+    ]);
+
+    expect(responses).toMatchObject([
+      { status: 'Publicado', supportCount: 20, hasSupported: true },
+      { status: 'Publicado', supportCount: 21, hasSupported: true },
+    ]);
+    expect(create).toHaveBeenCalledTimes(2);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(supportCount).toBe(21);
+  });
+
+  it('rechaza un apoyo nuevo enviado después de la publicación', async () => {
+    tx.event.findUnique.mockResolvedValue(buildEventRow({ registrations: 20, status: 'Publicado' }));
+    const rejectPublished = vi.fn((event: { statusTitle: string }) => {
+      if (event.statusTitle === 'Publicado') throw new Error('no apoyable');
+    });
+
+    await expect(repository.registerSupport('event-1', 'user-2', rejectPublished))
+      .rejects.toThrow('no apoyable');
+
+    expect(tx.eventRegistration.create).not.toHaveBeenCalled();
+  });
+
+  it('mantiene EVENT_NOT_SUPPORTABLE si el apoyo comienza tras la publicación', async () => {
+    tx.event.findUnique.mockResolvedValue(buildEventRow({ registrations: 20, status: 'Publicado' }));
+
+    await expect(repository.support('event-1', 'user-2')).rejects.toBeInstanceOf(EventNotSupportableException);
+    expect(tx.eventRegistration.create).not.toHaveBeenCalled();
   });
 
   it('crea la inscripción confirmada con un qrToken de 64 caracteres', async () => {

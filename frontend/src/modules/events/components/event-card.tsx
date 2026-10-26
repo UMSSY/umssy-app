@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Check, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,7 @@ import { formatVotingDeadline, getEventDisplayStatus } from '../utils/event-disp
 import type { EventCardProps } from '../types/event.types';
 import { ProposalProgress } from './proposal-progress';
 import { WorkshopCover } from './workshop-cover';
+import { PROPOSAL_SUPPORT_ERROR_MESSAGES } from '../constants/proposal-support-errors.constants';
 
 const categoryBadge = cva('rounded-full px-3 py-1 text-xs font-semibold', {
   variants: {
@@ -94,7 +95,8 @@ export function EventCard({
           </span>
 
           {displayStatus === 'voting' && (
-            <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
+            <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
+              <Clock className="size-3.5" aria-hidden="true" />
               En votación
             </span>
           )}
@@ -112,8 +114,9 @@ export function EventCard({
             </span>
           )}
           {displayStatus === 'published' && event.status === 'Publicado' && (
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
-              Publicado
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+              <Check className="size-3.5" aria-hidden="true" />
+              Publicada
             </span>
           )}
         </div>
@@ -156,7 +159,8 @@ export function EventCard({
             <ProposalProgress event={event} isExpired={displayStatus === 'expired'} />
             {displayStatus === 'voting' && event.hasSupported && (
               <p role="status" className="rounded-md bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">
-                Tu apoyo ya fue registrado. No puedes apoyar dos veces.
+                <Check className="mr-1 inline size-3.5" aria-hidden="true" />
+                {PROPOSAL_SUPPORT_ERROR_MESSAGES.ALREADY_SUPPORTED}
               </p>
             )}
           </div>
