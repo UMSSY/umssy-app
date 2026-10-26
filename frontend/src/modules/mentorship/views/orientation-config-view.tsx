@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeading } from "@/shared/components/layout";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
@@ -34,6 +34,13 @@ export function OrientationConfigView() {
   const [showToast, setShowToast] = useState(false);
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!showToast) return;
+
+    const timer = window.setTimeout(() => setShowToast(false), 4000);
+    return () => window.clearTimeout(timer);
+  }, [showToast]);
 
   const handleCheckboxChange = (id: string) => {
     setErrorMessage(null);
