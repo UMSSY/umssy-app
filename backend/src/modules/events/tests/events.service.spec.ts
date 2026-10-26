@@ -1,3 +1,4 @@
+import { EventsRepository } from '../repositories/events.repository.js';
 import { EventNotFoundException } from '../exceptions/event-not-found.exception.js';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { EventsService } from '../services/events.service.js';
@@ -34,7 +35,7 @@ describe('EventsService', () => {
 
   beforeEach(() => {
     repositoryMock = { findAndCount: vi.fn(), findById: vi.fn() };
-    service = new EventsService({} as never);
+    service = new EventsService(new EventsRepository({} as never));
     vi.spyOn(service, 'findAndCount').mockImplementation(repositoryMock.findAndCount);
     vi.spyOn(service, 'findById').mockImplementation(repositoryMock.findById);
     vi.spyOn(service, 'expireOverdueProposals').mockResolvedValue(0);

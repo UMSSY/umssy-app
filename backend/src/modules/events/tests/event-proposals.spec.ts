@@ -1,3 +1,4 @@
+import { EventProposalsRepository } from '../repositories/event-proposals.repository.js';
 import { describe, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { EventProposalsService } from '../services/event-proposals.service.js';
@@ -9,7 +10,7 @@ function setup() {
   const tx = { user: { findFirst: vi.fn().mockResolvedValue({ firstName: 'Ana', lastName: 'López' }) }, eventCategory: { findUnique: vi.fn().mockResolvedValue({ id: valid.categoryId }) }, eventStatus: { upsert: vi.fn().mockResolvedValue({ id: 'status' }) }, eventOrigin: { upsert: vi.fn().mockResolvedValue({ id: 'origin' }) }, eventModality: { upsert: vi.fn().mockResolvedValue({ id: 'modality' }) }, event: { create: vi.fn().mockImplementation(({ data }) => { Object.assign(record, data); return record; }) } };
   const prisma = { event: { findUnique: vi.fn().mockResolvedValue(null), findFirst: vi.fn() }, $transaction: vi.fn((fn) => fn(tx)) };
   const files = { validate: vi.fn().mockReturnValue({ buffer: Buffer.from('validated image'), detectedMimeType: 'image/png' }) };
-  return { tx, prisma, record, files, service: new EventProposalsService(prisma as never, files as never) };
+  return { tx, prisma, record, files, service: new EventProposalsService(new EventProposalsRepository(prisma as never), files as never) };
 }
 describe('Workshop proposal validation and persistence', () => {
   it.each([{ title: '' }, { title: 'a'.repeat(81) }, { description: 'a'.repeat(301) }, { capacity: '1.5' }, { eventDate: '2026-02-30' }, { endTime: '08:59' }, { modality: 'virtual', location: 'javascript:alert(1)' }, { authorId: randomUUID() }])('rejects invalid or forged values: %j', (change) => {

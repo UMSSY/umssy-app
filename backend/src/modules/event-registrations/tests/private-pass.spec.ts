@@ -1,9 +1,10 @@
+import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
 import { describe, expect, it, vi } from 'vitest';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 
 function setup() {
   const findFirst = vi.fn();
-  const service = new EventRegistrationsService({ eventRegistration: { findFirst } } as never, {} as never);
+  const service = new EventRegistrationsService(new EventRegistrationsRepository({ eventRegistration: { findFirst } } as never), {} as never);
   return { service, findFirst };
 }
 
