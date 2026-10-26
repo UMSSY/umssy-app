@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
-import { CalendarDays, Clock3, MapPin, UserRound, X } from 'lucide-react';
+import { CalendarDays, Check, Clock3, MapPin, UserRound, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   calculateEventCapacityStatus,
@@ -17,6 +17,7 @@ import { WorkshopCover } from './workshop-cover';
 import { EventRegistrationAction } from './event-registration-action';
 import { ProposalProgress } from './proposal-progress';
 import { RequestFeedback } from './request-feedback';
+import { PROPOSAL_SUPPORT_ERROR_MESSAGES } from '../constants/proposal-support-errors.constants';
 
 import type { EventDetailPanelProps } from '../types/event-detail-panel-props.types';
 
@@ -61,7 +62,7 @@ export function EventDetailPanel({
               {event.category.name}
             </span>
             {displayStatus === 'voting' && (
-              <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">En votación</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700"><Clock3 className="size-3.5" aria-hidden="true" />En votación</span>
             )}
             {displayStatus === 'expired' && (
               <span className="rounded-full bg-surface-soft px-3 py-1 text-xs font-semibold text-text-secondary">Vencido</span>
@@ -70,7 +71,7 @@ export function EventDetailPanel({
               <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-danger">Lleno</span>
             )}
             {displayStatus === 'published' && event.status === 'Publicado' && (
-              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">Publicado</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800"><Check className="size-3.5" aria-hidden="true" />Publicada</span>
             )}
           </div>
           <h2 ref={titleRef} tabIndex={-1} className="text-lg leading-6 font-bold break-words text-ink">
@@ -140,25 +141,28 @@ export function EventDetailPanel({
             <ProposalProgress event={event} isExpired={displayStatus === 'expired'} />
             {displayStatus === 'voting' && event.hasSupported && (
               <p role="status" className="rounded-md bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">
-                Tu apoyo ya fue registrado. No puedes apoyar dos veces.
+                <Check className="mr-1 inline size-3.5" aria-hidden="true" />
+                {PROPOSAL_SUPPORT_ERROR_MESSAGES.ALREADY_SUPPORTED}
               </p>
             )}
           </section>
         )}
 
-        {displayStatus === 'voting' && (
+        {isProposal && (
           <Button
             type="button"
             size="lg"
             className="min-h-11 w-full bg-orange-500 text-white hover:bg-orange-600 disabled:bg-muted disabled:text-text-secondary disabled:opacity-100"
-            disabled={!onSupport || isSupportPending || isSupportDisabled || event.hasSupported}
+            disabled={displayStatus === 'expired' || !onSupport || isSupportPending || isSupportDisabled || event.hasSupported}
             onClick={() => onSupport?.(event)}
           >
-            {isSupportPending
-              ? 'Registrando apoyo...'
-              : event.hasSupported
-                ? 'Ya apoyaste esta propuesta'
-                : 'Preinscribirme/Apoyar propuesta'}
+            {displayStatus === 'expired'
+              ? 'Preinscribirme/Apoyar propuesta'
+              : isSupportPending
+                ? 'Registrando apoyo...'
+                : event.hasSupported
+                  ? 'Ya apoyaste esta propuesta'
+                  : 'Preinscribirme/Apoyar propuesta'}
           </Button>
         )}
         {displayStatus === 'voting' && supportNotice && (

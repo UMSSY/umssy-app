@@ -74,7 +74,7 @@ export function EventRegistrationAction({ event, onEventNotFound }: EventRegistr
   return (
     <div className="space-y-2">
       <Button
-        className="mt-2 min-h-11 w-full bg-primary text-primary-foreground hover:bg-brand-hover disabled:bg-muted disabled:text-text-secondary disabled:opacity-100"
+        className="mt-2 min-h-11 w-full bg-brand-red text-white hover:bg-brand-red/90 disabled:bg-muted disabled:text-text-secondary disabled:opacity-100"
         disabled={disabled}
         size="lg"
         type="button"

@@ -215,7 +215,7 @@ describe('EventCard y utilidades de formato', () => {
 
     expect(screen.getByText('Vencido')).toBeInTheDocument();
     expect(screen.getByText('5 de 20 apoyos')).toBeInTheDocument();
-    expect(screen.getByText('El plazo de apoyo terminó.')).toBeInTheDocument();
+    expect(screen.getByText('Fecha límite superada · vencida automáticamente')).toBeInTheDocument();
     expect(screen.queryByText(/Faltan .* apoyos/)).not.toBeInTheDocument();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(screen.queryByRole('progressbar', { name: /cupos ocupados/i })).not.toBeInTheDocument();
@@ -224,7 +224,7 @@ describe('EventCard y utilidades de formato', () => {
   it('conserva la barra de cupos para un taller publicado', () => {
     render(<EventCard event={{ ...MOCK_EVENT, status: 'Publicado', supportCount: 24, supportThreshold: 20 }} />);
 
-    expect(screen.getByText('Publicado')).toBeInTheDocument();
+    expect(screen.getByText('Publicada')).toBeInTheDocument();
     expect(screen.getByText('24/30')).toBeInTheDocument();
     expect(screen.getByRole('progressbar', { name: /cupos ocupados/i })).toHaveAttribute('aria-valuenow', '80');
     expect(screen.queryByRole('progressbar', { name: /apoyos para/i })).not.toBeInTheDocument();

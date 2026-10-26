@@ -205,7 +205,7 @@ describe("EventDetailPanel", () => {
     expect(onSupport).not.toHaveBeenCalled();
   });
 
-  it('shows an expired proposal without support or registration actions', () => {
+  it('shows an expired proposal with disabled support and no registration action', () => {
     render(<EventDetailPanel event={{
       ...event,
       status: 'Vencido',
@@ -218,8 +218,9 @@ describe("EventDetailPanel", () => {
 
     expect(screen.getByText('Vencido')).toBeInTheDocument();
     expect(screen.getByText('5 de 20 apoyos')).toBeInTheDocument();
-    expect(screen.getByText('El plazo de apoyo terminó.')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /apoyar propuesta|inscribirme/i })).not.toBeInTheDocument();
+    expect(screen.getByText('Fecha límite superada · vencida automáticamente')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Preinscribirme/Apoyar propuesta' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Inscribirme' })).not.toBeInTheDocument();
     expect(screen.queryByText('Cupos')).not.toBeInTheDocument();
   });
 });
