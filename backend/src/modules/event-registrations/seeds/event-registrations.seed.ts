@@ -1,3 +1,4 @@
+import { repairSeededQrTokens } from './repair-seeded-qr-tokens.js';
 import { randomBytes } from 'node:crypto';
 import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
 import type { Prisma } from '../../../prisma/client.js';
@@ -7,6 +8,7 @@ export async function seedEventRegistrations(
   tx: Prisma.TransactionClient,
   userId: string,
 ): Promise<void> {
+  await repairSeededQrTokens(tx);
   const regStatus = await tx.registrationStatus.upsert({
     where: { title: CONFIRMED_REGISTRATION_TITLE },
     update: {},
