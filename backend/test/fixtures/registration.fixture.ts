@@ -31,6 +31,7 @@ export function registrationFixture() {
     status: { title: 'Publicado' },
   };
   const tx = {
+    $queryRaw: vi.fn().mockResolvedValue([{ id: EVENT_ID }]),
     eventRegistration: {
       findUnique: vi.fn().mockResolvedValue(null),
       count: vi.fn().mockResolvedValue(0),
