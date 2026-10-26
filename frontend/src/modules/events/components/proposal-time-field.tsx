@@ -1,5 +1,7 @@
 'use client';
 
+import type { ProposalTimeFieldProps } from '../types/proposal-time-field-props.types';
+
 import { useState } from 'react';
 import { Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,9 +15,7 @@ import { ProposalField } from './proposal-field';
 const HOURS = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, '0'));
 const MINUTES = Array.from({ length: 60 }, (_, index) => String(index).padStart(2, '0'));
 
-export function ProposalTimeField({ id, label, value, onChange, error, disabled }: {
-  id: string; label: string; value: string; onChange: (value: string) => void; error?: string; disabled?: boolean;
-}) {
+export function ProposalTimeField({ id, label, value, onChange, error, disabled }: ProposalTimeFieldProps) {
   const [open, setOpen] = useState(false);
   const [hour, setHour] = useState('09');
   const [minute, setMinute] = useState('00');

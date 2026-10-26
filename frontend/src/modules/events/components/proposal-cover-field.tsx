@@ -1,19 +1,17 @@
 'use client';
 
+import type { ProposalCoverFieldProps } from '../types/proposal-cover-field-props.types';
+
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { ImagePlus, Upload, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PROPOSAL_COVER_ACCEPT } from '../constants/proposal.constants';
-import type { ProposalCover } from '../types/proposal.types';
 import { readProposalCover } from '../utils/read-proposal-cover';
 import { ProposalField } from './proposal-field';
 
-export function ProposalCoverField({ value, onChange, error, disabled, onBusyChange }: {
-  value: ProposalCover | null; onChange: (value: ProposalCover | null) => void;
-  error?: string; disabled?: boolean; onBusyChange: (busy: boolean) => void;
-}) {
+export function ProposalCoverField({ value, onChange, error, disabled, onBusyChange }: ProposalCoverFieldProps) {
   const input = useRef<HTMLInputElement>(null);
   const request = useRef(0);
   const [busy, setBusy] = useState(false);

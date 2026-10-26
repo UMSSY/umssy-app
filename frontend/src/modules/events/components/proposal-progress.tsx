@@ -1,9 +1,5 @@
-import type { EventItem } from '../types/event-item.types';
+import type { ProposalProgressProps } from '../types/proposal-progress-props.types';
 
-interface ProposalProgressProps {
-  event: EventItem;
-  isExpired?: boolean;
-}
 
 export function ProposalProgress({ event, isExpired = false }: ProposalProgressProps) {
   const count = event.supportCount;

@@ -1,16 +1,9 @@
+import type { RegistrationConfirmationDialogProps } from '../types/registration-confirmation-dialog-props.types';
 import { useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import type { EventDetail } from "../types/event-detail.types";
 
-interface RegistrationConfirmationDialogProps {
-  event: EventDetail;
-  open: boolean;
-  pending: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-}
 
 export function RegistrationConfirmationDialog({ event, open, pending, onClose, onConfirm }: RegistrationConfirmationDialogProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
