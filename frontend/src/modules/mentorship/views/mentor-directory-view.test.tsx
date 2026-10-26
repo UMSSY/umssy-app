@@ -500,6 +500,103 @@ describe("MentorDirectoryView", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("restaura búsqueda, área, orientación y disponibilidad al volver desde el perfil", async () => {
+    navigationMocks.search =
+      "?page=2&search=maria&area=Backend&orientation=Orientaci%C3%B3n%20t%C3%A9cnica&available=false&sort=affinity";
+
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
+      makeDirectoryPage(mentors, {
+        page: 2,
+        totalPages: 3,
+      }),
+    );
+
+    const view = render(<MentorDirectoryView />);
+
+    await screen.findByRole("link", {
+      name: /Ver perfil de María/,
+    });
+
+    expect(
+      screen.getByRole("searchbox", {
+        name: "Buscar mentores por nombre",
+      }),
+    ).toHaveValue("maria");
+
+    expect(
+      screen.getByRole("combobox", {
+        name: "Área técnica",
+      }),
+    ).toHaveTextContent("Backend");
+
+    expect(
+      screen.getByRole("combobox", {
+        name: "Orientación",
+      }),
+    ).toHaveTextContent("Orientación técnica");
+
+    expect(
+      screen.getByRole("checkbox", {
+        name: "Solo disponibles",
+      }),
+    ).not.toBeChecked();
+
+    const returnTo =
+      `/mentorship/mentors${new URLSearchParams(navigationMocks.search).toString() ? `?${new URLSearchParams(navigationMocks.search).toString()}` : ""}`;
+
+    const profileLink = screen.getByRole("link", {
+      name: /Ver perfil de María/,
+    });
+
+    expect(profileLink).toHaveAttribute(
+      "href",
+      `/mentors/${ownId}?returnTo=${encodeURIComponent(returnTo)}`,
+    );
+
+    view.rerender(
+      <MentorProfileNavigation
+        mentorName="María"
+        returnTo={returnTo}
+      />,
+    );
+
+    expect(
+      screen.getByRole("link", {
+        name: "Volver al directorio",
+      }),
+    ).toHaveAttribute("href", returnTo);
+
+    view.rerender(<MentorDirectoryView />);
+
+    await screen.findByRole("link", {
+      name: /Ver perfil de María/,
+    });
+
+    expect(
+      screen.getByRole("searchbox", {
+        name: "Buscar mentores por nombre",
+      }),
+    ).toHaveValue("maria");
+
+    expect(
+      screen.getByRole("combobox", {
+        name: "Área técnica",
+      }),
+    ).toHaveTextContent("Backend");
+
+    expect(
+      screen.getByRole("combobox", {
+        name: "Orientación",
+      }),
+    ).toHaveTextContent("Orientación técnica");
+
+    expect(
+      screen.getByRole("checkbox", {
+        name: "Solo disponibles",
+      }),
+    ).not.toBeChecked();
+  });
+
   it("conserva los filtros y la página en el enlace al perfil", async () => {
     navigationMocks.search =
       "?page=2&search=maria&area=Backend&available=true&sort=affinity&module=chat";
