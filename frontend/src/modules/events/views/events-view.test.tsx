@@ -92,6 +92,7 @@ const mockUseEventCategories = vi.mocked(useEventCategories);
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   clearAccessToken();
   vi.restoreAllMocks();
   push.mockReset();
@@ -100,6 +101,7 @@ afterEach(() => {
 });
 
 beforeEach(() => {
+  vi.useFakeTimers({ now: new Date("2026-10-10T12:00:00Z"), toFake: ["Date"] });
   vi.mocked(useEvent).mockReturnValue({
     event: null,
     isLoading: false,

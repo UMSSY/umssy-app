@@ -47,7 +47,7 @@ export function useRegistrationActions(eventId: string) {
     onSuccess: updateQueries,
     onError: async (error, variables) => {
       const code = parseApiError(error)?.code;
-      if (["EVENT_FULL", "ALREADY_REGISTERED", "REGISTRATION_CLOSED", "EVENT_CANCELLED", "EVENT_NOT_OPEN", "EVENT_NOT_FOUND"].includes(code ?? "")) {
+      if (["EVENT_FINISHED", "EVENT_FULL", "ALREADY_REGISTERED", "REGISTRATION_CLOSED", "EVENT_CANCELLED", "EVENT_NOT_OPEN", "EVENT_NOT_FOUND"].includes(code ?? "")) {
         await refreshQueries(variables, code === "ALREADY_REGISTERED");
       }
     },
