@@ -10,10 +10,23 @@ import type { MentorsService } from '../services/mentors.service.js';
 
 describe('MentorsController', () => {
   it('consulta los cupos con JWT sin modificar información', async () => {
-    const capacity = vi.fn().mockResolvedValue({ capacity: 1, occupied: 0, available: 1 });
-    const controller = new MentorsController({ capacity } as unknown as MentorsService);
-    expect(Reflect.getMetadata(GUARDS_METADATA, MentorsController.prototype.capacity)).toEqual([JwtAuthGuard]);
-    await expect(controller.capacity()).resolves.toEqual({ capacity: 1, occupied: 0, available: 1 });
+    const capacity = vi
+      .fn()
+      .mockResolvedValue({ capacity: 1, occupied: 0, available: 1 });
+    const controller = new MentorsController({
+      capacity,
+    } as unknown as MentorsService);
+    expect(
+      Reflect.getMetadata(
+        GUARDS_METADATA,
+        MentorsController.prototype.capacity,
+      ),
+    ).toEqual([JwtAuthGuard]);
+    await expect(controller.capacity()).resolves.toEqual({
+      capacity: 1,
+      occupied: 0,
+      available: 1,
+    });
     expect(capacity).toHaveBeenCalledTimes(1);
   });
 
@@ -30,6 +43,7 @@ describe('MentorsController', () => {
     const query = {
       page: 1,
       search: '',
+      orientation: 'Orientación técnica',
       available: false,
       sort: 'affinity' as const,
     };

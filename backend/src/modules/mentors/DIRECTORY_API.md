@@ -2,7 +2,9 @@
 
 `GET /api/mentors/directory` requiere JWT. La ruta anterior `GET /api/mentors` sigue devolviendo el arreglo original sin paginación. `GET /api/technical-areas` proporciona las opciones del filtro de área.
 
-Parámetros URL: `page` es entero positivo (por defecto `1`); `search` es texto de hasta 100 caracteres, recortado (por defecto vacío); `area` es el nombre exacto de un área técnica (hasta 80 caracteres); `available` acepta únicamente `true` o `false` (por defecto `false`); `sort` acepta `name_asc` (por defecto), `name_desc` o `affinity`. Los dos últimos valores están reservados para HU9-07 y HU9-01 y actualmente devuelven HTTP 400 con un mensaje explícito. Parámetros desconocidos, incluido `pageSize`, devuelven HTTP 400.
+Parámetros URL: `page` es entero positivo (por defecto `1`); `search` es texto de hasta 100 caracteres, recortado (por defecto vacío); `area` es el nombre exacto de un área técnica (hasta 80 caracteres); `orientation` es opcional y recibe el nombre exacto de un tipo de orientación activo, recortado y de hasta 80 caracteres; `available` acepta únicamente `true` o `false` (por defecto `false`); `sort` acepta `name_asc` (por defecto), `name_desc` o `affinity`. Los dos últimos valores están reservados para HU9-07 y HU9-01 y actualmente devuelven HTTP 400 con un mensaje explícito. Parámetros desconocidos, incluido `pageSize`, devuelven HTTP 400.
+
+Los filtros `search`, `area`, `orientation` y `available` se combinan con lógica AND. Cuando se envía `orientation`, el directorio incluye únicamente mentores asociados a ese tipo de orientación. Un nombre de orientación inexistente produce un conjunto vacío (`totalItems=0`, `totalPages=0`) y no genera un error.
 
 El `ResponseInterceptor` envuelve el resultado una vez:
 

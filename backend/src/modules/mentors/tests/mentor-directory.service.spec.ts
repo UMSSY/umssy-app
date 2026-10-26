@@ -131,6 +131,77 @@ describe('MentorsService directory pagination', () => {
     expect(empty.findDirectoryPage).not.toHaveBeenCalled();
   });
 
+  it('transmite orientation junto con los demás filtros y conserva la paginación', async () => {
+    const { service, countDirectoryMentors, findDirectoryPage } =
+      makeService(7);
+
+    const result = await service.findDirectory({
+      ...baseQuery,
+      page: 2,
+      search: 'Ana',
+      area: 'Backend',
+      orientation: 'Orientación técnica',
+      available: true,
+    });
+
+    const expectedFilters = {
+      search: 'Ana',
+      area: 'Backend',
+      orientation: 'Orientación técnica',
+      available: true,
+    };
+
+    expect(countDirectoryMentors).toHaveBeenCalledWith(
+      expectedFilters,
+      expect.any(Date),
+    );
+
+    expect(findDirectoryPage).toHaveBeenCalledWith(
+      expectedFilters,
+      expect.any(Date),
+      2,
+      6,
+      'name_asc',
+    );
+
+    expect(result).toMatchObject({
+      page: 2,
+      pageSize: 6,
+      totalItems: 7,
+      totalPages: 2,
+    });
+  });
+
+  it('devuelve cero resultados para una orientación inexistente', async () => {
+    const { service, countDirectoryMentors, findDirectoryPage } =
+      makeService(0);
+
+    const result = await service.findDirectory({
+      ...baseQuery,
+      orientation: 'Orientación inexistente',
+    });
+
+    expect(countDirectoryMentors).toHaveBeenCalledWith(
+      {
+        search: '',
+        area: undefined,
+        orientation: 'Orientación inexistente',
+        available: false,
+      },
+      expect.any(Date),
+    );
+
+    expect(result).toMatchObject({
+      items: [],
+      page: 1,
+      pageSize: 6,
+      totalItems: 0,
+      totalPages: 0,
+    });
+
+    expect(findDirectoryPage).not.toHaveBeenCalled();
+  });
+
   it('acepta Z-A y transmite el orden al repositorio', async () => {
     const { service, findDirectoryPage } = makeService(18);
 
@@ -145,6 +216,7 @@ describe('MentorsService directory pagination', () => {
       {
         search: '',
         area: undefined,
+        orientation: undefined,
         available: false,
       },
       expect.any(Date),
@@ -340,6 +412,7 @@ describe('MentorsService directory pagination', () => {
           page: 2,
           search: 'Ana',
           area: 'Backend',
+          orientation: undefined,
           available: true,
           sort: 'affinity',
         },
