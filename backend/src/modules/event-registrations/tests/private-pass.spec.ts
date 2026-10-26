@@ -22,6 +22,19 @@ describe('Private pass consultation', () => {
     });
   });
 
+  it('returns the persisted token unchanged on repeated consultations', async () => {
+    const { service, findFirst } = setup();
+    const pass = { id: 'pass-1', qrToken: 'a'.repeat(64) };
+    findFirst.mockResolvedValue(pass);
+
+    const first = await service.getPassById('pass-1', 'owner');
+    const second = await service.getPassById('pass-1', 'owner');
+
+    expect(first.qrToken).toBe(pass.qrToken);
+    expect(second.qrToken).toBe(first.qrToken);
+    expect(findFirst).toHaveBeenCalledTimes(2);
+  });
+
   it.each([null, { qrToken: null }, { qrToken: '' }])('rejects an unavailable pass or missing QR: %j', async (pass) => {
     const { service, findFirst } = setup();
     findFirst.mockResolvedValue(pass);
