@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
+import { ApplicationsController } from './controllers/applications.controller.js'; 
+import { ApplicationsService } from './services/applications.service.js';         
+import { ApplicationsRepository } from './repositories/applications.repository.js'; 
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
-import { JobOffersModule } from '../job-offers/job-offers.module.js';
-import { JobApplicationsService } from './services/job-applications.service.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule, JobOffersModule],
-  providers: [JobApplicationsService],
-  exports: [JobApplicationsService],
+  imports: [PrismaModule],
+  controllers: [ApplicationsController],
+  providers: [ApplicationsService, ApplicationsRepository],
+  exports: [ApplicationsService],
 })
 export class ApplicationsModule {}

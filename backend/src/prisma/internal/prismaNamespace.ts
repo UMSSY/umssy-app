@@ -4642,6 +4642,9 @@ export const JobOfferScalarFieldEnum = {
   salaryRange: 'salaryRange',
   languages: 'languages',
   locationUrl: 'locationUrl',
+  requiredCareers: 'requiredCareers',
+  minExperienceYears: 'minExperienceYears',
+  otherRequirements: 'otherRequirements',
   expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
