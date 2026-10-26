@@ -11,6 +11,7 @@ import { getRegistrationErrorMessage } from "@/modules/registrations";
 import { parseApiError } from "@/shared/utils/parse-api-error";
 import { RequestFeedback } from "./request-feedback";
 import { RegistrationConfirmationDialog } from "./registration-confirmation-dialog";
+import { useEventFinished } from "../hooks/use-event-finished";
 import { hasValidEventCapacity } from "../utils/has-valid-event-capacity";
 import type { EventDetail } from "../types/event-detail.types";
 
@@ -21,6 +22,7 @@ interface EventRegistrationActionProps {
 
 export function EventRegistrationAction({ event, onEventNotFound }: EventRegistrationActionProps) {
   const router = useRouter();
+  const hasFinished = useEventFinished(event);
   const session = useRegistrationSession();
   const own = useRegistration(event.id);
   const action = useRegistrationActions(event.id);
@@ -34,11 +36,12 @@ export function EventRegistrationAction({ event, onEventNotFound }: EventRegistr
   }, []);
 
   const isRegistered = own.registration?.status === "confirmed" || event.hasSupported === true || blockedCode === "ALREADY_REGISTERED";
+  const isFinished = hasFinished || blockedCode === "EVENT_FINISHED";
   const isFull = event.availableSpots === 0 || blockedCode === "EVENT_FULL";
   const isClosed = blockedCode === "REGISTRATION_CLOSED" || blockedCode === "EVENT_CANCELLED" || blockedCode === "EVENT_NOT_OPEN";
   const isUnavailable = !hasValidEventCapacity(event) || event.status === "voting" || event.status === "cancelled";
-  const disabled = action.isPending || isRegistered || isFull || isClosed || isUnavailable;
-  const label = action.isPending ? "Inscribiendo..." : isRegistered ? "Ya estás inscrito" : isFull ? "Taller lleno" : isClosed ? "Inscripción cerrada" : isUnavailable ? "Inscripción no disponible" : "Inscribirme";
+  const disabled = action.isPending || isRegistered || isFull || isClosed || isFinished || isUnavailable;
+  const label = action.isPending ? "Inscribiendo..." : isRegistered ? "Ya estás inscrito" : isFinished ? "El taller ya finalizó" : isFull ? "Taller lleno" : isClosed ? "Inscripción cerrada" : isUnavailable ? "Inscripción no disponible" : "Inscribirme";
   const showInlineError = action.error && !["EVENT_NOT_FOUND", "AUTH_REQUIRED", "UNAUTHENTICATED"].includes(action.errorCode ?? "");
   const retryable = !action.errorCode || ["VALIDATION_ERROR", "INTERNAL_ERROR"].includes(action.errorCode);
 
@@ -58,7 +61,7 @@ export function EventRegistrationAction({ event, onEventNotFound }: EventRegistr
     setOpen(false);
     if (!result.error) return;
     const code = parseApiError(result.error)?.code;
-    if (code && ["EVENT_FULL", "ALREADY_REGISTERED", "REGISTRATION_CLOSED", "EVENT_CANCELLED", "EVENT_NOT_OPEN"].includes(code)) {
+    if (code && ["EVENT_FINISHED", "EVENT_FULL", "ALREADY_REGISTERED", "REGISTRATION_CLOSED", "EVENT_CANCELLED", "EVENT_NOT_OPEN"].includes(code)) {
       setBlockedCode(code);
     }
     if (code === "EVENT_NOT_FOUND") {

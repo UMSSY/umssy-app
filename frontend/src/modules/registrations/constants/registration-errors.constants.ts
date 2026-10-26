@@ -10,6 +10,7 @@ export const REGISTRATION_ERROR_MESSAGES = {
   EVENT_NOT_FOUND: "No encontramos el evento solicitado.",
   REGISTRATION_NOT_FOUND: "No encontramos tu inscripción para este evento.",
   ALREADY_REGISTERED: "Ya estás inscrito en este evento.",
+  EVENT_FINISHED: "El taller ya finalizó",
   EVENT_FULL: "Ya no quedan cupos disponibles.",
   REGISTRATION_ALREADY_CANCELLED: "Tu inscripción ya estaba cancelada.",
   EVENT_NOT_OPEN: "Este evento no está habilitado para inscripciones.",
