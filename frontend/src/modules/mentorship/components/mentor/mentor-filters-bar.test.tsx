@@ -41,6 +41,49 @@ describe("MentorFiltersBar", () => {
     expect(onAreaChange).toHaveBeenCalledWith("Backend");
   });
 
+  it("permite operar área y orientación usando solo teclado", async () => {
+    const onAreaChange = vi.fn();
+    const onOrientationChange = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <MentorFiltersBar
+        area=""
+        orientation=""
+        technicalAreas={technicalAreas}
+        orientationTypes={orientationTypes}
+        onAreaChange={onAreaChange}
+        onOrientationChange={onOrientationChange}
+      />,
+    );
+
+    const area = screen.getByRole("combobox", {
+      name: "Área técnica",
+    });
+
+    area.focus();
+    expect(area).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+    await user.keyboard("{ArrowDown}{Enter}");
+
+    expect(onAreaChange).toHaveBeenCalledWith("Backend");
+
+    const orientation = screen.getByRole("combobox", {
+      name: "Orientación",
+    });
+
+    orientation.focus();
+    expect(orientation).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+    await user.keyboard("{ArrowDown}{Enter}");
+
+    expect(onOrientationChange).toHaveBeenCalledWith(
+      "Búsqueda de empleo",
+    );
+  });
+
   it("lista los cinco tipos y permite seleccionar orientación", async () => {
     const onOrientationChange = vi.fn();
     const user = userEvent.setup();

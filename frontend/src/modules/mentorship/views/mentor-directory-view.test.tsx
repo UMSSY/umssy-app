@@ -305,6 +305,82 @@ describe("MentorDirectoryView", () => {
     ).toBeInTheDocument();
   });
 
+  it("mantiene filtros accesibles, utilizables con teclado y preparados para pantallas estrechas", async () => {
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
+      makeDirectoryPage([mentors[0]]),
+    );
+
+    render(<MentorDirectoryView />);
+
+    await screen.findByRole("link", {
+      name: /Ver perfil de María/,
+    });
+
+    const filters = screen.getByRole("search", {
+      name: "Filtros de mentores",
+    });
+
+    expect(filters).toHaveClass("flex", "flex-wrap");
+
+    expect(
+      within(filters).getByRole("searchbox", {
+        name: "Buscar mentores por nombre",
+      }),
+    ).toBeVisible();
+
+    expect(
+      within(filters).getByRole("combobox", {
+        name: "Área técnica",
+      }),
+    ).toBeVisible();
+
+    expect(
+      within(filters).getByRole("combobox", {
+        name: "Orientación",
+      }),
+    ).toBeVisible();
+
+    const checkbox = within(filters).getByRole("checkbox", {
+      name: "Solo disponibles",
+    });
+
+    expect(checkbox).toBeVisible();
+
+    expect(
+      within(filters).getByRole("combobox", {
+        name: "Ordenar mentores",
+      }),
+    ).toBeVisible();
+
+    const clearButton = within(filters).getByRole("button", {
+      name: "Limpiar",
+    });
+
+    expect(clearButton).toBeVisible();
+
+    const user = userEvent.setup();
+
+    checkbox.focus();
+    expect(checkbox).toHaveFocus();
+
+    await user.keyboard(" ");
+
+    expect(navigationMocks.replace).toHaveBeenCalledWith(
+      "/mentorship/mentors?page=1&available=false",
+      { scroll: false },
+    );
+
+    clearButton.focus();
+    expect(clearButton).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+
+    expect(navigationMocks.replace).toHaveBeenCalledWith(
+      "/mentorship/mentors?page=1",
+      { scroll: false },
+    );
+  });
+
   it("renderiza enlaces hacia los perfiles de los mentores", async () => {
     vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
       makeDirectoryPage([mentors[0]]),
