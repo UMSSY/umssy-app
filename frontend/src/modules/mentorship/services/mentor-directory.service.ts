@@ -19,10 +19,6 @@ export async function getMentorDirectory(
   params: MentorDirectoryParams,
   signal?: AbortSignal,
 ): Promise<DirectoryPage> {
-  const requestedSort = params.sort;
-  const effectiveRequestedSort: MentorSort =
-    requestedSort === "affinity" ? "name_asc" : requestedSort;
-
   const response = await apiClient.get<ApiResponse<DirectoryPage>>(
     "/mentors/directory",
     {
@@ -31,7 +27,7 @@ export async function getMentorDirectory(
         search: params.search || undefined,
         area: params.area || undefined,
         available: String(params.available),
-        sort: effectiveRequestedSort,
+        sort: params.sort,
       },
       signal,
     },
