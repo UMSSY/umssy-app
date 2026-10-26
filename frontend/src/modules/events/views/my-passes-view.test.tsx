@@ -1,14 +1,24 @@
+import { saveAccessToken, clearAccessToken } from '@/shared/services/storage/access-token-storage';
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { registrationsService } from '../services/registrations.service';
 import { MyPassesView } from './my-passes-view';
 
-vi.mock('../services/registrations.service', () => ({ registrationsService: { getMine: vi.fn() } }));
+vi.mock('../services/registrations.service', () => ({ registrationsService: { getMine: vi.fn(), getPass: vi.fn() } }));
 const getMine = vi.mocked(registrationsService.getMine);
 const pass = { id: 'reg-1', eventName: 'React', date: '2026-10-20T00:00:00Z', startTime: '1970-01-01T09:00:00Z', endTime: '1970-01-01T12:00:00Z', location: 'Aula 101', status: 'Confirmada' };
-beforeEach(() => { getMine.mockReset(); });
-afterEach(cleanup);
+beforeEach(() => {
+  getMine.mockReset();
+  saveAccessToken('session');
+  vi.mocked(registrationsService.getPass).mockImplementation(async (id) => {
+    const rows = await getMine.mock.results.at(-1)?.value;
+    const row = rows?.find((item: typeof pass) => item.id === id);
+    if (!row) throw new Error('missing pass');
+    return { ...row, qrToken: 'a'.repeat(64) };
+  });
+});
+afterEach(() => { cleanup(); clearAccessToken(); });
 
 describe('Mis pases', () => {
   it('shows the QA location and 24-hour time consistently in passes', async () => {
@@ -88,7 +98,7 @@ describe('Mis pases', () => {
     expect(screen.getByText(longPass.id)).toBeInTheDocument();
     expect(within(card).getByText('Confirmada')).toBeInTheDocument();
     expect(screen.getByText('1 inscripción')).toBeInTheDocument();
-    expect(screen.getByLabelText('Vista ilustrativa de QR')).toBeInTheDocument();
+    expect(await screen.findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
   });
 
 });
