@@ -224,16 +224,6 @@ export class MentorsRepository {
         OR: [
           { firstName: { contains: word, mode: 'insensitive' } },
           { lastName: { contains: word, mode: 'insensitive' } },
-          { headline: { contains: word, mode: 'insensitive' } },
-          {
-            mentorTechnicalAreas: {
-              some: {
-                technicalArea: {
-                  name: { contains: word, mode: 'insensitive' },
-                },
-              },
-            },
-          },
         ],
       }));
     }
