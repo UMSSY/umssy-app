@@ -283,11 +283,11 @@ export function OrientationConfigView() {
 
       {showToast && (
         <Alert
-          className="fixed inset-x-4 bottom-4 z-50 flex w-auto items-center gap-3 rounded-lg border border-border bg-surface px-6 py-3 text-ink shadow-none sm:right-8 sm:bottom-8 sm:left-auto"
+          className="fixed inset-x-4 bottom-4 z-50 flex w-auto items-center gap-3 rounded-lg border-2 border-green-600 bg-green-50 px-6 py-3 text-green-950 shadow-md sm:right-8 sm:bottom-8 sm:left-auto"
           role="status"
         >
-          <CheckCircle2 size={20} className="text-ink-soft" />
-          <span className="text-sm font-medium">
+          <CheckCircle2 size={24} className="shrink-0 text-green-700" />
+          <span className="text-base font-medium">
             Tipos de orientación actualizados correctamente
           </span>
         </Alert>
