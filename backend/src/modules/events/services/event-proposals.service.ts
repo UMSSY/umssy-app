@@ -1,4 +1,8 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
+import { ForbiddenRoleException } from '../../../common/exceptions/forbidden-role.exception.js';
+import { ProposalKeyConflictException } from '../exceptions/proposal-key-conflict.exception.js';
+import { ProposalCoverNotFoundException } from '../exceptions/proposal-cover-not-found.exception.js';
+import { Injectable } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
@@ -12,9 +16,9 @@ export class EventProposalsService {
   constructor(private readonly prisma: PrismaService, private readonly files: FileValidationService) {}
 
   async create(userId: string, body: unknown, file: MulterFile | undefined, key: string | undefined) {
-    if (!key || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key)) throw new BadRequestException('Se requiere una clave de idempotencia UUID.');
+    if (!key || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key)) throw new RequestValidationException([{ field: 'idempotencyKey', message: 'Se requiere una clave de idempotencia UUID.' }]);
     const parsed = CreateProposalSchema.safeParse(body);
-    if (!parsed.success) throw new BadRequestException({ message: 'Revisa los campos de la propuesta.', errors: Object.fromEntries(parsed.error.issues.map((issue) => [String(issue.path[0]), issue.message])) });
+    if (!parsed.success) throw new RequestValidationException(parsed.error.issues.map((issue) => ({ field: issue.path.join('.') || 'body', message: issue.message })));
     const values = parsed.data;
     const cover = this.files.validate(file ? { originalName: file.originalname, mimeType: file.mimetype, size: file.size, buffer: file.buffer } : undefined, { allowedTypes: ['jpg', 'png'], maxSizeBytes: 5 * 1024 * 1024 });
     const hash = createHash('sha256').update(JSON.stringify(values)).update(cover.buffer).digest('hex');
@@ -23,8 +27,8 @@ export class EventProposalsService {
     try {
       return await this.prisma.$transaction(async (tx) => {
         const author = await tx.user.findFirst({ where: { id: userId, isActive: true, roles: { some: { deletedAt: null, role: { name: 'titulado' } } } }, select: { firstName: true, lastName: true } });
-        if (!author) throw new ForbiddenException('Solo un titulado activo puede proponer talleres.');
-        if (!await tx.eventCategory.findUnique({ where: { id: values.categoryId }, select: { id: true } })) throw new BadRequestException({ errors: { categoryId: 'Selecciona una categoría disponible.' } });
+        if (!author) throw new ForbiddenRoleException('Solo un titulado activo puede proponer talleres.');
+        if (!await tx.eventCategory.findUnique({ where: { id: values.categoryId }, select: { id: true } })) throw new RequestValidationException([{ field: 'categoryId', message: 'Selecciona una categoría disponible.' }]);
         const status = await tx.eventStatus.upsert({ where: { title: 'En votación' }, update: {}, create: { title: 'En votación' } });
         const origin = await tx.eventOrigin.upsert({ where: { title: 'Comunidad' }, update: {}, create: { title: 'Comunidad' } });
         const title = values.modality === 'virtual' ? 'Virtual' : 'Presencial';
@@ -51,11 +55,11 @@ export class EventProposalsService {
   }
   async cover(id: string) {
     const event = await this.prisma.event.findFirst({ where: { id, status: { title: { in: CATALOG_STATUS_TITLES } } }, select: { coverData: true, coverMimeType: true } });
-    if (!event?.coverData || !event.coverMimeType) throw new NotFoundException('Portada no disponible.');
+    if (!event?.coverData || !event.coverMimeType) throw new ProposalCoverNotFoundException();
     return { content: Buffer.from(event.coverData), mimeType: event.coverMimeType };
   }
   private replay(event: Event, hash: string) {
-    if (event.proposalHash !== hash) throw new ConflictException('La clave de envío ya corresponde a otra propuesta.');
+    if (event.proposalHash !== hash) throw new ProposalKeyConflictException();
     return this.response(event);
   }
   private response(event: Event) {
