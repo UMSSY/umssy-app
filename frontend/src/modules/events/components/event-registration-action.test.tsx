@@ -40,12 +40,14 @@ const confirmed: RegistrationResponse = {
 };
 
 beforeEach(() => {
+  vi.useFakeTimers({ now: new Date("2026-10-26T12:00:00Z"), toFake: ["Date"] });
   saveAccessToken("token-a");
   vi.spyOn(registrationsService, "getOwn").mockResolvedValue(null);
 });
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   clearAccessToken();
   vi.restoreAllMocks();
   push.mockReset();
@@ -54,6 +56,22 @@ afterEach(() => {
 });
 
 describe("EventRegistrationAction", () => {
+  it('blocks already finished workshops without submitting a request', () => {
+    const create = vi.spyOn(registrationsService, 'create');
+    renderWithQuery(<EventRegistrationAction event={{ ...event, eventDate: '2026-10-25' }} />);
+    expect(screen.getByRole('button', { name: 'El taller ya finalizó' })).toBeDisabled();
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('disables registration when the workshop finishes while the view remains open', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-20T15:59:59Z'));
+    renderWithQuery(<EventRegistrationAction event={event} />);
+    expect(screen.getByRole('button', { name: 'Inscribirme' })).toBeEnabled();
+    act(() => { vi.advanceTimersByTime(1000); });
+    expect(screen.getByRole('button', { name: 'El taller ya finalizó' })).toBeDisabled();
+  });
+
   it("confirms before submitting and prevents a second request while pending", async () => {
     let resolve!: (value: RegistrationResponse) => void;
     const create = vi.spyOn(registrationsService, "create").mockImplementation(() => new Promise((done) => { resolve = done; }));
@@ -143,6 +161,7 @@ describe("EventRegistrationAction", () => {
 
   it.each([
     ["EVENT_FULL", "Taller lleno", "Ya no quedan cupos disponibles."],
+    ["EVENT_FINISHED", "El taller ya finalizó", "El taller ya finalizó"],
     ["ALREADY_REGISTERED", "Ya estás inscrito", "Ya estás inscrito en este evento."],
     ["REGISTRATION_CLOSED", "Inscripción cerrada", "El plazo de inscripción y cancelación ha terminado."],
     ["EVENT_CANCELLED", "Inscripción cerrada", "Este evento ha sido cancelado y no admite inscripciones."],
@@ -156,6 +175,6 @@ describe("EventRegistrationAction", () => {
     fireEvent.click(screen.getByRole("button", { name: "Inscribirme" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirmar" }));
     await waitFor(() => expect(screen.getByRole("button", { name: button })).toBeDisabled());
-    expect(screen.getByText(message)).toBeInTheDocument();
+    expect(screen.getAllByText(message).length).toBeGreaterThan(0);
   });
 });

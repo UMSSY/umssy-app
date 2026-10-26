@@ -12,6 +12,7 @@ const ERROR_CASES = [
   ["EVENT_NOT_FOUND", 404, "No encontramos el evento solicitado."],
   ["REGISTRATION_NOT_FOUND", 404, "No encontramos tu inscripción para este evento."],
   ["ALREADY_REGISTERED", 409, "Ya estás inscrito en este evento."],
+  ["EVENT_FINISHED", 422, "El taller ya finalizó"],
   ["EVENT_FULL", 409, "Ya no quedan cupos disponibles."],
   ["REGISTRATION_ALREADY_CANCELLED", 409, "Tu inscripción ya estaba cancelada."],
   ["EVENT_NOT_OPEN", 422, "Este evento no está habilitado para inscripciones."],
