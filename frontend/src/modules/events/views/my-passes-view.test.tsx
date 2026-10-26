@@ -24,7 +24,7 @@ describe('Mis pases', () => {
   it('shows the QA location and 24-hour time consistently in passes', async () => {
     getMine.mockResolvedValue([{ ...pass, location: 'Laboratorio 1, Facultad de Ciencias y Tecnología, UMSS' }]);
     render(<MyPassesView />);
-    await screen.findByText('reg-1');
+    await within(await screen.findByRole('complementary', { name: 'Detalle de la inscripción' })).findByText('reg-1');
     expect(screen.getAllByText('Laboratorio 1, Facultad de Ciencias y Tecnología')).toHaveLength(2);
     expect(screen.queryByText(/, UMSS$/)).not.toBeInTheDocument();
     expect(screen.getByText(/09:00 - 12:00 hrs/)).toBeInTheDocument();
@@ -35,23 +35,25 @@ describe('Mis pases', () => {
     render(<MyPassesView />);
     expect(screen.getByRole('status')).toHaveTextContent('Cargando');
     expect(screen.queryByRole('region', { name: 'Aún no tienes inscripciones.' })).not.toBeInTheDocument();
-    await screen.findByText('reg-1');
+    await within(await screen.findByRole('complementary', { name: 'Detalle de la inscripción' })).findByText('reg-1');
     expect(screen.getAllByText('Aula 101')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('2 inscripciones')).toBeInTheDocument();
+    expect(screen.getByText('2 pases')).toBeInTheDocument();
     expect(screen.getByText(/09:00 - 12:00/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Prisma/ }));
-    expect(screen.getByText('reg-2')).toBeInTheDocument();
+    expect(within(screen.getByRole('complementary', { name: 'Detalle de la inscripción' })).getByText('reg-2')).toBeInTheDocument();
     expect(screen.getAllByText('Lab 2')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /Prisma/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /Prisma/ })).toHaveClass('bg-accent', 'text-surface');
+    expect(screen.getByRole('button', { name: /React/ })).toHaveClass('bg-surface');
     expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.queryByText('reg-1')).not.toBeInTheDocument();
+    expect(within(screen.getByRole('complementary', { name: 'Detalle de la inscripción' })).queryByText('reg-1')).not.toBeInTheDocument();
   });
   it('muestra el estado vacío y acceso al catálogo', async () => {
     getMine.mockResolvedValue([]);
     render(<MyPassesView />);
     expect(await screen.findByRole('region', { name: 'Aún no tienes inscripciones.' })).toBeInTheDocument();
-    expect(screen.getByText('0 inscripciones')).toBeInTheDocument();
+    expect(screen.getByText('0 pases')).toBeInTheDocument();
     expect(screen.queryByText('ID Inscripción')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Vista ilustrativa de QR')).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Explorar talleres disponibles' })).toHaveAttribute('href', '/events');
@@ -61,8 +63,8 @@ describe('Mis pases', () => {
     render(<MyPassesView />);
     await screen.findByRole('alert');
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
-    await screen.findByText('reg-1');
-    expect(screen.getByText('1 inscripción')).toBeInTheDocument();
+    await within(await screen.findByRole('complementary', { name: 'Detalle de la inscripción' })).findByText('reg-1');
+    expect(screen.getByText('1 pase')).toBeInTheDocument();
     expect(getMine).toHaveBeenCalledTimes(2);
   });
   it.each([
@@ -95,9 +97,11 @@ describe('Mis pases', () => {
     render(<MyPassesView />);
     const card = await screen.findByRole('button', { name: new RegExp(longPass.eventName) });
     expect(within(card).getByText(longPass.location)).toBeInTheDocument();
-    expect(screen.getByText(longPass.id)).toBeInTheDocument();
+    expect(within(card).getByText(longPass.id)).toBeInTheDocument();
+    expect(within(card).getByText('ID Inscripción:')).toBeInTheDocument();
+    expect(within(screen.getByRole('complementary', { name: 'Detalle de la inscripción' })).getByText(longPass.id)).toBeInTheDocument();
     expect(within(card).getByText('Confirmada')).toBeInTheDocument();
-    expect(screen.getByText('1 inscripción')).toBeInTheDocument();
+    expect(screen.getByText('1 pase')).toBeInTheDocument();
     expect(await screen.findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
   });
 
