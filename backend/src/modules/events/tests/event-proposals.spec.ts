@@ -31,17 +31,17 @@ describe('Workshop proposal validation and persistence', () => {
     const first = await service.create('author', valid, undefined, key);
     prisma.event.findUnique.mockResolvedValue(record);
     expect(await service.create('author', valid, undefined, key)).toEqual(first);
-    await expect(service.create('author', { ...valid, title: 'Other' }, undefined, key)).rejects.toMatchObject({ status: 409 });
+    await expect(service.create('author', { ...valid, title: 'Other' }, undefined, key)).rejects.toMatchObject({ statusCode: 409, code: 'PROPOSAL_KEY_CONFLICT' });
     expect(tx.event.create).toHaveBeenCalledTimes(1);
   });
   it('rejects users without the active titulado role', async () => {
     const { service, tx } = setup(); tx.user.findFirst.mockResolvedValue(null);
-    await expect(service.create('author', valid, undefined, randomUUID())).rejects.toMatchObject({ status: 403 });
+    await expect(service.create('author', valid, undefined, randomUUID())).rejects.toMatchObject({ statusCode: 403, code: 'FORBIDDEN_ROLE' });
     expect(tx.event.create).not.toHaveBeenCalled();
   });
   it('rejects a category missing from the database', async () => {
     const { service, tx } = setup(); tx.eventCategory.findUnique.mockResolvedValue(null);
-    await expect(service.create('author', valid, undefined, randomUUID())).rejects.toMatchObject({ status: 400 });
+    await expect(service.create('author', valid, undefined, randomUUID())).rejects.toMatchObject({ statusCode: 400, code: 'VALIDATION_ERROR', errors: [{ field: 'categoryId', message: 'Selecciona una categoría disponible.' }] });
     expect(tx.event.create).not.toHaveBeenCalled();
   });
   it('sirve la portada de propuestas vencidas y de ambos estados de votación', async () => {
