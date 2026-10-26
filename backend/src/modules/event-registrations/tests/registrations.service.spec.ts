@@ -17,6 +17,9 @@ describe('registration creation', () => {
       registeredAt: '2026-10-22T10:00:00.000Z', cancelledAt: null,
     });
     expect(prisma.$transaction).toHaveBeenCalledWith(expect.any(Function), { isolationLevel: 'Serializable' });
+    expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
+      events.findForRegistration.mock.invocationCallOrder[0],
+    );
     expect(events.findForRegistration).toHaveBeenCalledWith(EVENT_ID, tx);
     expect(tx.eventRegistration.count).toHaveBeenCalledWith({ where: {
       eventId: EVENT_ID, cancelledAt: null, status: { title: 'Confirmada' },
@@ -28,7 +31,7 @@ describe('registration creation', () => {
   });
 
   it('reactivates the same row, preserves its registration date and replaces the QR', async () => {
-    const { service, tx } = registrationFixture();
+    const { service, tx, events } = registrationFixture();
     const previous = registrationRecord({ status: { title: 'Cancelada' }, cancelledAt: NOW });
     tx.eventRegistration.findUnique.mockResolvedValue(previous);
     const result = await service.create(EVENT_ID, USER_ID);
@@ -42,15 +45,25 @@ describe('registration creation', () => {
         status: { connect: { title: 'Confirmada' } }, cancelledAt: null, qrToken: result.qrToken,
       },
     }));
+    expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
+      events.findForRegistration.mock.invocationCallOrder[0],
+    );
   });
 
-  it('prioritizes an existing confirmation over closing and capacity', async () => {
+  it('returns an existing confirmation without consuming another seat', async () => {
     const { service, tx, event } = registrationFixture();
     event.status.title = 'Cancelado';
     event.capacity = 0;
-    tx.eventRegistration.findUnique.mockResolvedValue(registrationRecord());
-    await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({ code: 'ALREADY_REGISTERED', statusCode: 409 });
+    const existing = registrationRecord();
+    tx.eventRegistration.findUnique.mockResolvedValue(existing);
+    await expect(service.create(EVENT_ID, USER_ID)).resolves.toMatchObject({
+      id: existing.id,
+      qrToken: existing.qrToken,
+      status: 'confirmed',
+    });
     expect(tx.eventRegistration.count).not.toHaveBeenCalled();
+    expect(tx.eventRegistration.create).not.toHaveBeenCalled();
+    expect(tx.eventRegistration.update).not.toHaveBeenCalled();
   });
 
   it('rejects unpublished events before considering the deadline', async () => {
@@ -60,11 +73,22 @@ describe('registration creation', () => {
     await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({ code: 'EVENT_NOT_OPEN' });
   });
 
-  it.each(['2026-10-23T13:00:00.000Z', '2026-10-24T00:00:00.000Z'])(
-    'closes at the Bolivia start time: %s', async (now) => {
+  it('closes at the Bolivia start time', async () => {
+    vi.setSystemTime('2026-10-23T13:00:00.000Z');
+    const { service, tx } = registrationFixture();
+    await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({ code: 'REGISTRATION_CLOSED', statusCode: 422 });
+    expect(tx.eventRegistration.create).not.toHaveBeenCalled();
+  });
+
+  it.each(['2026-10-23T15:00:00.000Z', '2026-10-24T00:00:00.000Z'])(
+    'rejects a finished event at the Bolivia end time: %s', async (now) => {
       vi.setSystemTime(now);
       const { service, tx } = registrationFixture();
-      await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({ code: 'REGISTRATION_CLOSED', statusCode: 422 });
+      await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({
+        code: 'EVENT_FINISHED',
+        statusCode: 422,
+        message: 'El taller ya finalizó',
+      });
       expect(tx.eventRegistration.create).not.toHaveBeenCalled();
     },
   );
@@ -97,11 +121,16 @@ describe('registration creation', () => {
     expect(prisma.$transaction).toHaveBeenCalledTimes(2);
   });
 
-  it('reevaluates a unique conflict as an existing registration', async () => {
+  it('reevaluates a unique conflict and returns the existing registration', async () => {
     const { service, prisma, tx } = registrationFixture();
     prisma.$transaction.mockRejectedValueOnce(conflict('P2002'));
-    tx.eventRegistration.findUnique.mockResolvedValue(registrationRecord());
-    await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({ code: 'ALREADY_REGISTERED' });
+    const existing = registrationRecord();
+    tx.eventRegistration.findUnique.mockResolvedValue(existing);
+    await expect(service.create(EVENT_ID, USER_ID)).resolves.toMatchObject({
+      id: existing.id,
+      qrToken: existing.qrToken,
+      status: 'confirmed',
+    });
   });
 
   it('bounds transient retries without reporting a false capacity error', async () => {
@@ -144,7 +173,7 @@ describe('own registration lookup', () => {
 
 describe('registration cancellation', () => {
   it('performs a soft cancellation and preserves the row and QR', async () => {
-    const { service, tx, event } = registrationFixture();
+    const { service, tx, event, events } = registrationFixture();
     event.status.title = 'Cancelado';
     tx.eventRegistration.findUnique.mockResolvedValue(registrationRecord());
     const result = await service.cancel(REGISTRATION_ID, USER_ID);
@@ -152,6 +181,9 @@ describe('registration cancellation', () => {
     expect(tx.eventRegistration.update).toHaveBeenCalledWith(expect.objectContaining({ data: {
       cancelledAt: NOW, status: { connect: { title: 'Cancelada' } },
     } }));
+    expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(
+      events.findForRegistration.mock.invocationCallOrder[0],
+    );
   });
 
   it.each([
