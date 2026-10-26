@@ -82,6 +82,24 @@ export function useProposalSupport(eventId: string | null) {
         });
       }
     },
+    onError: (error, variables) => {
+      if (getAccessToken() !== variables.accessToken) return;
+      const code = parseApiError(error)?.code;
+      if (!["ALREADY_SUPPORTED", "PROPOSAL_EXPIRED", "EVENT_NOT_SUPPORTABLE", "EVENT_NOT_FOUND"].includes(code ?? "")) return;
+      void queryClient.invalidateQueries({
+        queryKey: [...REGISTRATION_QUERY_KEYS.list, variables.accessToken],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [...REGISTRATION_QUERY_KEYS.detail(variables.eventId), variables.accessToken],
+        exact: true,
+      });
+      if (code === "ALREADY_SUPPORTED") {
+        void queryClient.invalidateQueries({
+          queryKey: REGISTRATION_QUERY_KEYS.own(variables.eventId, variables.accessToken),
+          exact: true,
+        });
+      }
+    },
     retry: false,
   });
 
@@ -105,6 +123,7 @@ export function useProposalSupport(eventId: string | null) {
     },
     isPending: mutation.isPending && mutation.variables?.accessToken === accessToken,
     isSuccess: mutation.isSuccess && isCurrentMutation,
+    data: isCurrentMutation ? mutation.data ?? null : null,
     errorCode: isCurrentMutation ? parseApiError(mutation.error)?.code ?? null : null,
     error: isCurrentMutation && mutation.error
       ? getProposalSupportErrorMessage(mutation.error)

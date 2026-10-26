@@ -33,7 +33,7 @@ export function EventRegistrationAction({ event, onEventNotFound }: EventRegistr
     return () => { isMountedRef.current = false; };
   }, []);
 
-  const isRegistered = own.registration?.status === "confirmed" || blockedCode === "ALREADY_REGISTERED";
+  const isRegistered = own.registration?.status === "confirmed" || event.hasSupported === true || blockedCode === "ALREADY_REGISTERED";
   const isFull = event.availableSpots === 0 || blockedCode === "EVENT_FULL";
   const isClosed = blockedCode === "REGISTRATION_CLOSED" || blockedCode === "EVENT_CANCELLED" || blockedCode === "EVENT_NOT_OPEN";
   const isUnavailable = !hasValidEventCapacity(event) || event.status === "voting" || event.status === "cancelled";
