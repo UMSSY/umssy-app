@@ -76,18 +76,20 @@ describe("updateMentorDirectoryParams", () => {
 
   it("elimina filtros vacíos", () => {
     const current = new URLSearchParams(
-      "page=2&search=hugo&area=Backend&available=false",
+      "page=2&search=hugo&area=Backend&orientation=Orientaci%C3%B3n%20t%C3%A9cnica&available=false",
     );
 
     const next = updateMentorDirectoryParams(current, {
       search: "",
       area: "",
+      orientation: "",
       available: true,
     });
 
     expect(next.get("page")).toBe("1");
     expect(next.has("search")).toBe(false);
     expect(next.has("area")).toBe(false);
+    expect(next.has("orientation")).toBe(false);
     expect(next.has("available")).toBe(false);
   });
 
