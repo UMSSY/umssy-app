@@ -3,7 +3,6 @@ import { PROPOSAL_ENDPOINT } from '../constants/proposal.constants';
 import type { CreatedProposal, ProposalValues } from '../types/proposal.types';
 import { readCount, readRecord, readString } from '../utils/response-validation';
 
-// Contract for HU4 backend: see proposal-api-contract.md. No simulated success.
 export const proposalsService = {
   async create(values: ProposalValues, cover: File, requestId: string): Promise<CreatedProposal> {
     const payload = new FormData();
