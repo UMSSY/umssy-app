@@ -1,3 +1,4 @@
+import { repairSeededQrTokens } from './repair-seeded-qr-tokens.js';
 import { randomBytes } from 'node:crypto';
 import type { Prisma } from '../../../prisma/client.js';
 import type { FixtureContext } from '../../../common/database/fixture-context.js';
@@ -1320,6 +1321,7 @@ export async function seedEventRegistrationsFixtures(
   tx: Prisma.TransactionClient,
   context: FixtureContext,
 ): Promise<number> {
+  await repairSeededQrTokens(tx);
   const data: Prisma.EventRegistrationCreateManyInput[] =
     REGISTRATION_PLANS.flatMap((plan) =>
       plan.registrations.map((registration, index) => {
