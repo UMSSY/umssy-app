@@ -13,14 +13,14 @@ describe("parseMentorDirectoryState", () => {
       search: "",
       area: "",
       orientation: "",
-      available: false,
+      available: true,
       sort: "name_asc",
     });
   });
 
   it("lee los parámetros de la URL", () => {
     const params = new URLSearchParams(
-      "page=2&search=hugo&area=Backend&orientation=Orientaci%C3%B3n%20t%C3%A9cnica&available=true&sort=affinity",
+      "page=2&search=hugo&area=Backend&orientation=Orientaci%C3%B3n%20t%C3%A9cnica&available=false&sort=affinity",
     );
 
     expect(parseMentorDirectoryState(params)).toEqual({
@@ -28,7 +28,7 @@ describe("parseMentorDirectoryState", () => {
       search: "hugo",
       area: "Backend",
       orientation: "Orientación técnica",
-      available: true,
+      available: false,
       sort: "affinity",
     });
   });
@@ -42,7 +42,7 @@ describe("parseMentorDirectoryState", () => {
   it("normaliza parámetros propios sin alterar los ajenos", () => {
     const params = new URLSearchParams("page=02&sort=unknown&available=yes&module=chat");
     expect(normalizeMentorDirectoryParams(params).toString())
-      .toBe("page=1&sort=name_asc&available=false&module=chat");
+      .toBe("page=1&sort=name_asc&available=true&module=chat");
   });
 
   it("ajusta la página fuera de rango cuando se conoce totalPages", () => {
@@ -76,13 +76,13 @@ describe("updateMentorDirectoryParams", () => {
 
   it("elimina filtros vacíos", () => {
     const current = new URLSearchParams(
-      "page=2&search=hugo&area=Backend&available=true",
+      "page=2&search=hugo&area=Backend&available=false",
     );
 
     const next = updateMentorDirectoryParams(current, {
       search: "",
       area: "",
-      available: false,
+      available: true,
     });
 
     expect(next.get("page")).toBe("1");
@@ -93,7 +93,7 @@ describe("updateMentorDirectoryParams", () => {
 
   it("conserva todos los filtros al actualizar sin cambios", () => {
     const current = new URLSearchParams(
-      "page=2&search=hugo&area=Backend&available=true&sort=affinity",
+      "page=2&search=hugo&area=Backend&available=false&sort=affinity",
     );
 
     const next = updateMentorDirectoryParams(current, {});
@@ -101,7 +101,7 @@ describe("updateMentorDirectoryParams", () => {
     expect(next.get("page")).toBe("2");
     expect(next.get("search")).toBe("hugo");
     expect(next.get("area")).toBe("Backend");
-    expect(next.get("available")).toBe("true");
+    expect(next.get("available")).toBe("false");
     expect(next.get("sort")).toBe("affinity");
   });
 });

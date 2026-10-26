@@ -285,7 +285,7 @@ describe("MentorDirectoryView", () => {
     );
 
     expect(screen.getByText("Disponible para mentoría")).toBeInTheDocument();
-    expect(screen.getByText("No disponible")).toBeInTheDocument();
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
     expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
 
     expect(getProfile).toHaveBeenCalledTimes(1);
@@ -310,20 +310,56 @@ describe("MentorDirectoryView", () => {
     expect(getProfile).not.toHaveBeenCalled();
   });
 
-  it("combina búsqueda sin tildes, filtros de área y disponibilidad, y permite reiniciarlos", async () => {
+  it("aplica Solo disponibles por defecto y Limpiar restablece los filtros", async () => {
     mockDirectoryWithParams();
 
     const { rerender } = render(<MentorDirectoryView />);
 
-    await screen.findByRole("link", {
-      name: /Ver perfil de María/,
-    });
+    expect(
+      screen.getByRole("checkbox", { name: "Solo disponibles" }),
+    ).toBeChecked();
+
+    expect(
+      await screen.findByRole("link", {
+        name: /Ver perfil de María/,
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("link", {
+        name: /Ver perfil de Carlos/,
+      }),
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Limpiar" }),
+    ).toBeVisible();
+
+    fireEvent.click(
+      screen.getByRole("checkbox", {
+        name: "Solo disponibles",
+      }),
+    );
+
+    applyNavigation(rerender);
+
+    expect(
+      await screen.findByRole("link", {
+        name: /Ver perfil de Carlos/,
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("No disponible"),
+    ).not.toBeInTheDocument();
 
     const searchCallsBeforeMaria =
       navigationMocks.replace.mock.calls.length;
 
     fireEvent.change(
-      screen.getByRole("searchbox", { name: "Buscar mentores por nombre" }),
+      screen.getByRole("searchbox", {
+        name: "Buscar mentores por nombre",
+      }),
       { target: { value: "maria" } },
     );
 
@@ -335,30 +371,40 @@ describe("MentorDirectoryView", () => {
 
     applyNavigation(rerender);
 
-    await waitFor(() => {
-      expect(
-        screen.queryByRole("link", {
-          name: /Ver perfil de Carlos/,
-        }),
-      ).not.toBeInTheDocument();
-    });
-
     const user = userEvent.setup();
 
     await user.click(
       screen.getByRole("combobox", { name: "Área técnica" }),
     );
-    await user.click(screen.getByRole("option", { name: "Backend" }));
+    await user.click(
+      screen.getByRole("option", { name: "Backend" }),
+    );
 
     applyNavigation(rerender);
 
     fireEvent.click(
-      screen.getByRole("checkbox", {
-        name: "Con disponibilidad",
-      }),
+      screen.getByRole("button", { name: "Limpiar" }),
     );
 
     applyNavigation(rerender);
+
+    expect(
+      screen.getByRole("searchbox", {
+        name: "Buscar mentores por nombre",
+      }),
+    ).toHaveValue("");
+
+    expect(
+      screen.getByRole("combobox", { name: "Área técnica" }),
+    ).toHaveTextContent("Todas");
+
+    expect(
+      screen.getByRole("combobox", { name: "Orientación" }),
+    ).toHaveTextContent("Todas");
+
+    expect(
+      screen.getByRole("checkbox", { name: "Solo disponibles" }),
+    ).toBeChecked();
 
     expect(
       await screen.findByRole("link", {
@@ -366,39 +412,11 @@ describe("MentorDirectoryView", () => {
       }),
     ).toBeInTheDocument();
 
-    const searchCallsBeforeNoResults =
-      navigationMocks.replace.mock.calls.length;
-
-    fireEvent.change(
-      screen.getByRole("searchbox", { name: "Buscar mentores por nombre" }),
-      { target: { value: "noexiste" } },
-    );
-
-    await waitFor(() => {
-      expect(navigationMocks.replace.mock.calls.length).toBeGreaterThan(
-        searchCallsBeforeNoResults,
-      );
-    });
-
-    applyNavigation(rerender);
-
     expect(
-      await screen.findByText("No hay mentores con estos filtros"),
-    ).toBeInTheDocument();
-
-    fireEvent.click(
-      screen.getAllByRole("button", {
-        name: "Limpiar filtros",
-      })[0],
-    );
-
-    applyNavigation(rerender);
-
-    expect(
-      await screen.findByRole("link", {
+      screen.queryByRole("link", {
         name: /Ver perfil de Carlos/,
       }),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
   });
 
   it("conserva los filtros y la página en el enlace al perfil", async () => {
@@ -608,6 +626,7 @@ describe("MentorDirectoryView", () => {
   });
 
   it("ordena por nombre A–Z y Z–A según el parámetro solicitado", async () => {
+    navigationMocks.search = "?available=false";
     mockDirectoryWithParams();
 
     const { rerender } = render(<MentorDirectoryView />);

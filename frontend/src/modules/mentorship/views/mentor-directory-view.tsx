@@ -160,7 +160,7 @@ export function MentorDirectoryView({
       search: "",
       area: "",
       orientation: "",
-      available: false,
+      available: true,
     });
   }
 
@@ -216,7 +216,7 @@ export function MentorDirectoryView({
                 })
               }
             />
-            Con disponibilidad
+            Solo disponibles
           </Label>
 
           <div className="flex flex-col gap-1.5">
@@ -251,14 +251,12 @@ export function MentorDirectoryView({
             </NativeSelect>
           </div>
 
-          {search || area || orientation || isAvailableOnly ? (
-            <Button
-              variant="ghost"
-              onClick={handleClearFilters}
-            >
-              Limpiar filtros
-            </Button>
-          ) : null}
+          <Button
+            variant="ghost"
+            onClick={handleClearFilters}
+          >
+            Limpiar
+          </Button>
         </div>
 
         {isPending || (isError && isFetching) ? (
