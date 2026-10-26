@@ -11,6 +11,12 @@ describe('mentorDirectoryQuerySchema', () => {
     });
   });
 
+  it('convierte una búsqueda de solo espacios en búsqueda vacía', () => {
+    expect(mentorDirectoryQuerySchema.parse({ search: '     ' }).search).toBe(
+      '',
+    );
+  });
+
   it.each(['0', '-1', 'abc', '1.5', '9007199254740992'])(
     'rechaza página inválida %s',
     (page) => {
