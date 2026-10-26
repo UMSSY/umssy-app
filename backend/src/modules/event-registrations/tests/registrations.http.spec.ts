@@ -58,7 +58,6 @@ const ERROR_CASES = [
   ['REGISTRATION_NOT_OWNED', 403, 'La inscripción no pertenece al usuario autenticado.'],
   ['EVENT_NOT_FOUND', 404, 'El evento no existe.'],
   ['REGISTRATION_NOT_FOUND', 404, 'La inscripción no existe.'],
-  ['ALREADY_REGISTERED', 409, 'El usuario ya tiene una inscripción confirmada para este evento.'],
   ['EVENT_FULL', 409, 'El evento no tiene cupos disponibles.'],
   ['REGISTRATION_ALREADY_CANCELLED', 409, 'La inscripción ya está cancelada.'],
   ['EVENT_NOT_OPEN', 422, 'El estado del evento no permite inscripciones.'],
@@ -128,7 +127,6 @@ describe('registration HTTP contract', () => {
         fixture.tx.eventRegistration.findUnique.mockResolvedValue(registrationRecord({ userId: 'another-user' })); break;
       case 'EVENT_NOT_FOUND': fixture.events.findForRegistration.mockRejectedValue(new EventNotFoundException()); break;
       case 'REGISTRATION_NOT_FOUND': method = 'get'; url += '/me'; break;
-      case 'ALREADY_REGISTERED': fixture.tx.eventRegistration.findUnique.mockResolvedValue(registrationRecord()); break;
       case 'EVENT_FULL': fixture.tx.eventRegistration.count.mockResolvedValue(1); break;
       case 'REGISTRATION_ALREADY_CANCELLED':
         method = 'delete'; url = `/api/registrations/${REGISTRATION_ID}`;
@@ -151,6 +149,21 @@ describe('registration HTTP contract', () => {
       .set('Authorization', `Bearer ${token}`).expect(201);
     expect(response.body).toMatchObject({ statusCode: 201, ok: true, detail: 'Operación exitosa', data: { id: REGISTRATION_ID, eventId: EVENT_ID, status: 'confirmed', cancelledAt: null } });
     expect(fixture.tx.eventRegistration.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ user: { connect: { id: USER_ID } } }) }));
+  });
+
+  it('returns the same registration and QR when the request is retried', async () => {
+    const existing = registrationRecord();
+    fixture.tx.eventRegistration.findUnique.mockResolvedValue(existing);
+
+    const response = await request(app.getHttpServer()).post(`/api/events/${EVENT_ID}/registrations`)
+      .set('Authorization', `Bearer ${token}`).expect(201);
+
+    expect(response.body.data).toMatchObject({
+      id: existing.id,
+      qrToken: existing.qrToken,
+      status: 'confirmed',
+    });
+    expect(fixture.tx.eventRegistration.create).not.toHaveBeenCalled();
   });
 
   it.each([{ userId: USER_ID }, { status: 'confirmed' }, { qrToken: 'forged' }])('rejects unsolicited body fields', async (body) => {
