@@ -57,4 +57,11 @@ describe("MentorDirectoryGrid", () => {
 
     expect(screen.queryByRole("link")).toBeNull();
   });
+
+  it("resalta el área seleccionada solo en las tarjetas que la tienen", () => {
+    render(<MentorDirectoryGrid mentors={mentors} selectedArea="Backend" />);
+
+    expect(screen.getByText("Backend", { selector: "li" })).toHaveAttribute("aria-current", "true");
+    expect(screen.getByText("QA", { selector: "li" })).not.toHaveAttribute("aria-current");
+  });
 });

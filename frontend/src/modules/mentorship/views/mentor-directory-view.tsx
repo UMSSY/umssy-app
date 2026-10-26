@@ -308,6 +308,7 @@ export function MentorDirectoryView({
               currentUserId={currentUserId}
               returnTo={returnTo}
               showAffinityBadge={effectiveSort === "affinity"}
+              selectedArea={area}
             />
 
             <MentorDirectoryPagination
