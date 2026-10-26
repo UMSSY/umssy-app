@@ -89,23 +89,21 @@ describe("MentorCard", () => {
       "rounded-full",
       "bg-accent",
     );
-    const header = availability.parentElement;
+    const indicators = availability.parentElement;
+    expect(indicators).toHaveClass("ml-auto", "flex-col", "items-end");
+    const header = indicators?.parentElement;
     expect(header).toHaveClass("flex-wrap");
-    expect(availability).toHaveClass("ml-auto");
     expect(header?.firstElementChild).toContainElement(
       screen.getByRole("heading", { name: mentor.fullName }),
     );
-    expect(header?.firstElementChild).toHaveClass("basis-36", "min-w-0");
-    expect(header?.lastElementChild).toBe(availability);
+    expect(header?.firstElementChild).toHaveClass("basis-56", "min-w-0");
+    expect(header?.lastElementChild).toBe(indicators);
   });
 
-  it("omite formación ausente y muestra un estado neutral", () => {
+  it("omite formación ausente y no muestra badge de disponibilidad", () => {
     render(<MentorCard mentor={mentor} />);
     expect(screen.queryByText(/Ingeniería/)).not.toBeInTheDocument();
-    expect(screen.getByText("No disponible")).toHaveClass(
-      "border-border",
-      "text-text-secondary",
-    );
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
     expect(screen.queryByText("Disponible para mentoría")).not.toBeInTheDocument();
   });
 
@@ -116,7 +114,7 @@ describe("MentorCard", () => {
       />,
     );
     expect(screen.getByText("Orientación técnica")).toBeVisible();
-    expect(screen.getByText("No disponible")).toBeVisible();
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
   });
 
   it("muestra orientaciones reales y conserva un vacío discreto", () => {
@@ -148,6 +146,9 @@ describe("MentorCard", () => {
       expect(screen.getByText(text)).toHaveClass("[overflow-wrap:anywhere]");
     }
     expect(screen.getByText("Disponible para mentoría").parentElement).toHaveClass(
+      "flex-col",
+    );
+    expect(screen.getByText("Disponible para mentoría").parentElement?.parentElement).toHaveClass(
       "flex-wrap",
     );
     expect(screen.getByRole("link")).toHaveAttribute(
@@ -165,7 +166,7 @@ describe("MentorCard", () => {
     expect(screen.getByText("APIs")).toBeDefined();
     expect(screen.getByText("Bases de datos")).toBeDefined();
     expect(screen.queryByText("Disponible")).toBeNull();
-    expect(screen.getByText("No disponible")).toBeVisible();
+    expect(screen.queryByText("No disponible")).toBeNull();
   });
 
   it("no fabrica un cargo cuando headline es null", () => {
@@ -252,7 +253,7 @@ describe("MentorCard", () => {
       />,
     );
     expect(screen.getByText(label)).toBeVisible();
-    expect(screen.getByText("No disponible")).toBeVisible();
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: `Ver perfil de ${mentor.fullName}` }))
       .toHaveAttribute("href", `/mentors/${mentor.id}`);
   });

@@ -1,8 +1,8 @@
+
 "use client";
 
 import { useCallback, useEffect, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -10,14 +10,21 @@ import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
-import { normalizeSearch } from "@/shared/utils/get-workspace-tasks";
 import { PageHeading } from "@/shared/components/layout";
 import { MentorDirectoryGrid } from "../components/mentor/mentor-directory-grid";
+import { MentorSearchBar } from "../components/mentor/mentor-search-bar";
+import { MentorFiltersBar } from "../components/mentor/mentor-filters-bar";
+import { MentorFiltersSummary } from "../components/mentor/mentor-filters-summary";
+import { MentorDirectoryPagination } from "../components/mentor/mentor-directory-pagination";
 import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
 import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
 import { useCurrentUserId } from "../hooks/use-current-user-id";
 import { useMentorDirectory } from "../hooks/use-mentor-directory";
-import type { DirectoryPage, MentorSort } from "../types/mentor-directory.types";
+import { useMentorshipCatalogs } from "../hooks/use-mentorship-catalogs";
+import type {
+  DirectoryPage,
+  MentorSort,
+} from "../types/mentor-directory.types";
 import {
   normalizeMentorDirectoryParams,
   parseMentorDirectoryState,
@@ -25,90 +32,111 @@ import {
 } from "../utils/mentor-directory-navigation";
 
 type MentorDirectoryViewProps = {
-  directoryState?: Pick<DirectoryPage, "effectiveSort" | "affinityStatus"> &
+  directoryState?: Pick<
+    DirectoryPage,
+    "effectiveSort" | "affinityStatus"
+  > &
     Partial<Pick<DirectoryPage, "totalPages">>;
 };
 
-export function MentorDirectoryView({ directoryState }: MentorDirectoryViewProps) {
+export function MentorDirectoryView({
+  directoryState,
+}: MentorDirectoryViewProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
 
-  const { search, area, available: isAvailableOnly, sort: sortBy } =
-    parseMentorDirectoryState(new URLSearchParams(queryString));
+  const {
+    page,
+    search,
+    area,
+    orientation,
+    available: isAvailableOnly,
+    sort: sortBy,
+  } = parseMentorDirectoryState(new URLSearchParams(queryString));
 
   const { currentUserId } = useCurrentUserId();
 
+  const { technicalAreas, orientationTypes } = useMentorshipCatalogs();
+
   const {
-    data: mentors = [],
+    data: directory,
     isPending,
     isError,
     isFetching,
     refetch,
-  } = useMentorDirectory();
+  } = useMentorDirectory({
+    page,
+    search,
+    area,
+    orientation,
+    available: isAvailableOnly,
+    sort: sortBy,
+  });
+
+  const mentors = useMemo(
+    () => directory?.items ?? [],
+    [directory?.items],
+  );
+
+  const totalItems = directory?.totalItems ?? 0;
+  const totalPages =
+    directory?.totalPages ?? directoryState?.totalPages ?? 0;
+
+  // A-Z y Z-A respetan el orden aplicado por el backend.
+  // La afinidad utiliza el orden efectivo informado por el servidor.
+  const effectiveSort: MentorSort =
+    sortBy !== "affinity"
+      ? sortBy
+      : directory?.effectiveSort ??
+        directoryState?.effectiveSort ??
+        "name_asc";
+
+  const affinityStatus =
+    directory?.affinityStatus ?? directoryState?.affinityStatus;
 
   useEffect(() => {
+    if (!directory && directoryState?.totalPages === undefined) {
+      return;
+    }
+
     const normalized = normalizeMentorDirectoryParams(
       new URLSearchParams(queryString),
-      directoryState?.totalPages,
+      totalPages,
     ).toString();
+
     if (normalized !== queryString) {
-      router.replace(normalized ? `${pathname}?${normalized}` : pathname, {
-        scroll: false,
-      });
+      router.replace(
+        normalized ? `${pathname}?${normalized}` : pathname,
+        { scroll: false },
+      );
     }
-  }, [directoryState?.totalPages, pathname, queryString, router]);
+  }, [
+    directory,
+    directoryState?.totalPages,
+    pathname,
+    queryString,
+    router,
+    totalPages,
+  ]);
 
-  const areas = useMemo(
-    () =>
-      [...new Set(mentors.flatMap((mentor) => mentor.technicalAreas))].sort(
-        (a, b) => a.localeCompare(b, "es"),
-      ),
-    [mentors],
-  );
-
-  const filteredMentors = useMemo(
-    () =>
-      mentors.filter(
-        (mentor) =>
-          normalizeSearch(
-            [mentor.fullName, mentor.headline, ...mentor.technicalAreas].join(
-              " ",
-            ),
-          ).includes(normalizeSearch(search)) &&
-          (!area || mentor.technicalAreas.includes(area)) &&
-          (!isAvailableOnly || mentor.isAvailable),
-      ),
-    [mentors, search, area, isAvailableOnly],
-  );
-
-  const effectiveSort = sortBy === "affinity"
-    ? directoryState?.effectiveSort === "affinity" && directoryState.affinityStatus === "ready"
-      ? "affinity"
-      : "name_asc"
-    : sortBy;
-  const sortedMentors = useMemo(
-    () => effectiveSort === "affinity" ? filteredMentors : [...filteredMentors].sort((a, b) => {
-      const comparison = a.fullName.localeCompare(b.fullName, "es", { sensitivity: "base" });
-      return effectiveSort === "name_asc" ? comparison : -comparison;
-    }),
-    [effectiveSort, filteredMentors],
-  );
-  const affinityMessage = sortBy !== "affinity" || effectiveSort === "affinity"
-    ? null
-    : directoryState?.affinityStatus === "no_skills"
-      ? "Agrega habilidades profesionales a tu perfil para encontrar mentores con mayor afinidad. Se muestran los mentores por nombre."
-      : directoryState?.affinityStatus === "unmapped_skills"
-        ? "Tus habilidades profesionales aún no tienen correspondencia con las áreas técnicas. Se muestran los mentores por nombre."
-        : directoryState?.affinityStatus === "ready"
-          ? "El orden por afinidad no se aplicó. Se muestran los mentores por nombre."
-          : "La afinidad todavía no está disponible. Se muestran los mentores por nombre.";
+  const affinityMessage =
+    sortBy !== "affinity" || effectiveSort === "affinity"
+      ? null
+      : affinityStatus === "no_skills"
+        ? "Agrega habilidades profesionales a tu perfil para encontrar mentores con mayor afinidad. Se muestran los mentores por nombre."
+        : affinityStatus === "unmapped_skills"
+          ? "Tus habilidades profesionales aún no tienen correspondencia con las áreas técnicas. Se muestran los mentores por nombre."
+          : affinityStatus === "ready"
+            ? "El orden por afinidad no se aplicó. Se muestran los mentores por nombre."
+            : "La afinidad todavía no está disponible. Se muestran los mentores por nombre.";
 
   const navigateWithUpdates = useCallback(
     (updates: {
       search?: string;
       area?: string;
+      orientation?: string;
       available?: boolean;
       sort?: MentorSort;
       page?: number;
@@ -120,9 +148,10 @@ export function MentorDirectoryView({ directoryState }: MentorDirectoryViewProps
 
       const query = next.toString();
 
-      router.replace(query ? `${pathname}?${query}` : pathname, {
-        scroll: false,
-      });
+      router.replace(
+        query ? `${pathname}?${query}` : pathname,
+        { scroll: false },
+      );
     },
     [pathname, queryString, router],
   );
@@ -131,7 +160,8 @@ export function MentorDirectoryView({ directoryState }: MentorDirectoryViewProps
     navigateWithUpdates({
       search: "",
       area: "",
-      available: false,
+      orientation: "",
+      available: true,
     });
   }
 
@@ -155,68 +185,79 @@ export function MentorDirectoryView({ directoryState }: MentorDirectoryViewProps
           aria-label="Filtros de mentores"
           className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-surface p-4"
         >
-          <Input
-            type="search"
-            className="min-w-56 flex-1"
-            aria-label="Buscar mentor"
-            placeholder="Nombre o especialidad"
+          <MentorSearchBar
+            key={search}
             value={search}
-            onChange={(event) => navigateWithUpdates({ search: event.target.value })}
+            onSearchChange={(nextSearch) =>
+              navigateWithUpdates({
+                search: nextSearch,
+              })
+            }
           />
 
-          <div className="flex items-center gap-2">
-            <Label htmlFor="mentor-area">Área</Label>
-
-            <NativeSelect
-              id="mentor-area"
-              className="max-w-64"
-              value={area}
-              onChange={(event) => {
-                navigateWithUpdates({ area: event.target.value });
-              }}
-            >
-              <NativeSelectOption value="">
-                Todas las áreas
-              </NativeSelectOption>
-
-              {areas.map((name) => (
-                <NativeSelectOption key={name} value={name}>
-                  {name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </div>
+          <MentorFiltersBar
+            area={area}
+            orientation={orientation}
+            technicalAreas={technicalAreas.map((item) => item.name)}
+            orientationTypes={orientationTypes.map((item) => item.name)}
+            onAreaChange={(value) =>
+              navigateWithUpdates({ area: value })
+            }
+            onOrientationChange={(value) =>
+              navigateWithUpdates({ orientation: value })
+            }
+          />
 
           <Label className="flex items-center gap-2">
             <Checkbox
               checked={isAvailableOnly}
-              onCheckedChange={(checked) => {
-                navigateWithUpdates({ available: checked === true });
-              }}
+              onCheckedChange={(checked) =>
+                navigateWithUpdates({
+                  available: checked === true,
+                })
+              }
             />
-            Con disponibilidad
+            Solo disponibles
           </Label>
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="mentor-sort">Ordenar por</Label>
+
             <NativeSelect
               id="mentor-sort"
               aria-label="Ordenar mentores"
-              className={sortBy === "affinity" ? "rounded-lg ring-2 ring-accent" : undefined}
+              className={
+                sortBy === "affinity"
+                  ? "rounded-lg ring-2 ring-accent"
+                  : undefined
+              }
               value={sortBy}
-              onChange={(event) => navigateWithUpdates({ sort: event.target.value as MentorSort })}
+              onChange={(event) =>
+                navigateWithUpdates({
+                  sort: event.target.value as MentorSort,
+                })
+              }
             >
-              <NativeSelectOption value="name_asc">Nombre (A–Z)</NativeSelectOption>
-              <NativeSelectOption value="name_desc">Nombre (Z–A)</NativeSelectOption>
-              <NativeSelectOption value="affinity">Mayor afinidad</NativeSelectOption>
+              <NativeSelectOption value="name_asc">
+                Nombre (A–Z)
+              </NativeSelectOption>
+
+              <NativeSelectOption value="name_desc">
+                Nombre (Z–A)
+              </NativeSelectOption>
+
+              <NativeSelectOption value="affinity">
+                Mayor afinidad
+              </NativeSelectOption>
             </NativeSelect>
           </div>
 
-          {search || area || isAvailableOnly ? (
-            <Button variant="ghost" onClick={handleClearFilters}>
-              Limpiar filtros
-            </Button>
-          ) : null}
+          <Button
+            variant="ghost"
+            onClick={handleClearFilters}
+          >
+            Limpiar
+          </Button>
         </div>
 
         {isPending || (isError && isFetching) ? (
@@ -231,42 +272,56 @@ export function MentorDirectoryView({ directoryState }: MentorDirectoryViewProps
           />
         ) : mentors.length === 0 ? (
           <MentorQueryFeedback
-            title="No hay mentores activos"
-            description="Por el momento no hay mentores activos para mostrar. Vuelve a consultar más adelante."
+            title={
+              totalItems === 0
+                ? "No hay mentores con estos filtros"
+                : "No hay mentores en esta página"
+            }
+            description="Prueba otros filtros o vuelve a consultar más adelante."
+            onClearFilters={handleClearFilters}
           />
         ) : (
           <>
             <h2 className="text-xl font-semibold text-ink">
               {sortBy === "affinity" ? "Preferencias" : "Sugerencias"}
             </h2>
+
             {affinityMessage ? (
-              <p role="note" className="rounded-lg border border-border bg-surface p-4 text-sm text-text-secondary">
+              <p
+                role="note"
+                className="rounded-lg border border-border bg-surface p-4 text-sm text-text-secondary"
+              >
                 {affinityMessage}
               </p>
             ) : null}
-            <p role="status" className="text-sm text-text-secondary">
-              {filteredMentors.length} mentores encontrados
-            </p>
 
-            {filteredMentors.length > 0 ? (
-              <MentorDirectoryGrid
-                mentors={sortedMentors}
-                currentUserId={currentUserId}
-                returnTo={returnTo}
-                showAffinityBadge={effectiveSort === "affinity"}
-                selectedArea={area}
-              />
-            ) : (
-              <div className="rounded-lg border border-border bg-surface p-8 text-center">
-                <h2 className="mb-4 text-lg font-semibold">
-                  No hay mentores con estos filtros
-                </h2>
+            <MentorFiltersSummary
+              search={search}
+              area={area}
+              orientation={orientation}
+              available={isAvailableOnly}
+              totalItems={totalItems}
+            />
 
-                <Button variant="outline" onClick={handleClearFilters}>
-                  Limpiar filtros
-                </Button>
-              </div>
-            )}
+            <MentorDirectoryGrid
+              mentors={mentors}
+              currentUserId={currentUserId}
+              returnTo={returnTo}
+              showAffinityBadge={effectiveSort === "affinity"}
+              selectedArea={area}
+            />
+
+            <MentorDirectoryPagination
+              page={directory?.page ?? page}
+              pageSize={directory?.pageSize ?? 6}
+              totalItems={directory?.totalItems ?? 0}
+              totalPages={directory?.totalPages ?? 0}
+              onPageChange={(nextPage) => {
+                if (!isFetching) {
+                  navigateWithUpdates({ page: nextPage });
+                }
+              }}
+            />
           </>
         )}
       </div>

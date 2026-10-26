@@ -2,6 +2,17 @@ import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
+import {
+  AlreadyMentorException,
+  MentorCapacityException,
+  MentorEligibilityException,
+} from '../exceptions/index.js';
+import {
+  readMentorCapacity,
+  readMentorEligibility,
+} from './mentor-capacity.queries.js';
+import { withMentorCapacityLock } from './mentor-capacity-lock.js';
+import { reconcileMentorOffers } from './mentor-offers.queries.js';
 
 const directorySelect = {
   id: true,
@@ -27,8 +38,11 @@ const directorySelect = {
 interface DirectoryFilters {
   search: string;
   area?: string;
+  orientation?: string;
   available: boolean;
 }
+
+type MentorDirectorySort = 'name_asc' | 'name_desc';
 
 @Injectable()
 export class MentorsRepository {
@@ -51,6 +65,7 @@ export class MentorsRepository {
         userId,
         roleId,
         deletedAt: null,
+        startAt: { lte: new Date() },
       },
       select: {
         id: true,
@@ -89,14 +104,7 @@ export class MentorsRepository {
     const mentors = await this.prisma.user.findMany({
       where: this.activeMentorWhere(now),
       select: directorySelect,
-      orderBy: [
-        {
-          firstName: 'asc',
-        },
-        {
-          lastName: 'asc',
-        },
-      ],
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
     });
 
     return this.withPhotoVersions(mentors);
@@ -108,16 +116,62 @@ export class MentorsRepository {
     });
   }
 
+  findUserSkills(userId: string) {
+    return this.prisma.userSkill.findMany({
+      where: { userId },
+      select: { skill: { select: { name: true, isCustom: true } } },
+    });
+  }
+
+  findTechnicalAreasByNames(names: string[]) {
+    return this.prisma.technicalArea.findMany({
+      where: { name: { in: names } },
+      select: { id: true, name: true },
+    });
+  }
+
+  findDirectoryCandidates(filters: DirectoryFilters, now: Date) {
+    return this.prisma.user.findMany({
+      where: this.directoryWhere(filters, now),
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        mentorTechnicalAreas: { select: { technicalAreaId: true } },
+      },
+    });
+  }
+
+  async findDirectoryByIds(
+    ids: string[],
+    filters: DirectoryFilters,
+    now: Date,
+  ) {
+    const mentors = await this.prisma.user.findMany({
+      where: { ...this.directoryWhere(filters, now), id: { in: ids } },
+      select: directorySelect,
+    });
+
+    return this.withPhotoVersions(mentors);
+  }
+
   async findDirectoryPage(
     filters: DirectoryFilters,
     now: Date,
     page: number,
     pageSize: number,
+    sort: MentorDirectorySort = 'name_asc',
   ) {
+    const direction = sort === 'name_desc' ? 'desc' : 'asc';
+
     const mentors = await this.prisma.user.findMany({
       where: this.directoryWhere(filters, now),
       select: directorySelect,
-      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
+      orderBy: [
+        { firstName: direction },
+        { lastName: direction },
+        { id: 'asc' },
+      ],
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
@@ -143,30 +197,37 @@ export class MentorsRepository {
     now: Date,
   ): Prisma.UserWhereInput {
     const where = this.activeMentorWhere(now);
-    if (filters.available) where.isAvailableForMentoring = true;
+
+    if (filters.available) {
+      where.isAvailableForMentoring = true;
+    }
+
     if (filters.area) {
       where.mentorTechnicalAreas = {
         some: { technicalArea: { name: filters.area } },
       };
     }
+
+    if (filters.orientation) {
+      where.mentorOrientationTypes = {
+        some: {
+          orientationType: {
+            name: filters.orientation,
+            isActive: true,
+          },
+        },
+      };
+    }
+
     if (filters.search) {
       where.AND = filters.search.split(/\s+/).map((word) => ({
         OR: [
           { firstName: { contains: word, mode: 'insensitive' } },
           { lastName: { contains: word, mode: 'insensitive' } },
-          { headline: { contains: word, mode: 'insensitive' } },
-          {
-            mentorTechnicalAreas: {
-              some: {
-                technicalArea: {
-                  name: { contains: word, mode: 'insensitive' },
-                },
-              },
-            },
-          },
         ],
       }));
     }
+
     return where;
   }
 
@@ -181,6 +242,7 @@ export class MentorsRepository {
           select: { id: true, updatedAt: true },
         })
       : [];
+
     const photoVersions = new Map(
       photos.map((photo) => [photo.id, photo.updatedAt.toISOString()]),
     );
@@ -298,14 +360,7 @@ export class MentorsRepository {
               },
             },
           },
-          orderBy: [
-            {
-              isCurrent: 'desc',
-            },
-            {
-              startDate: 'desc',
-            },
-          ],
+          orderBy: [{ isCurrent: 'desc' }, { startDate: 'desc' }],
         },
         userSkills: {
           select: {
@@ -376,13 +431,24 @@ export class MentorsRepository {
     });
   }
 
+  capacity() {
+    return readMentorCapacity(this.prisma);
+  }
+
   activate(
     userId: string,
     roleId: string,
     technicalAreaIds: string[],
     orientationTypeIds: string[],
   ) {
-    return this.prisma.$transaction(async (transaction) => {
+    return withMentorCapacityLock(this.prisma, async (transaction) => {
+      await reconcileMentorOffers(transaction);
+      const eligibility = await readMentorEligibility(transaction, userId);
+      if (!eligibility.eligible) throw new MentorEligibilityException();
+      if (eligibility.alreadyMentor) throw new AlreadyMentorException();
+      const capacity = await readMentorCapacity(transaction);
+      if (capacity.available < 1) throw new MentorCapacityException();
+
       await transaction.userRole.create({
         data: {
           userId,

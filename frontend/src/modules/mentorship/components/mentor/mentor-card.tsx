@@ -71,7 +71,7 @@ export function MentorCard({
     >
       <CardContent className="flex flex-1 flex-col gap-5">
         <div className="flex flex-wrap items-start gap-4">
-          <div className="flex min-w-0 flex-1 basis-36 items-start gap-4">
+          <div className="flex min-w-0 flex-1 basis-56 items-start gap-4">
             <Avatar className="size-14 shrink-0">
               {mentor.photoUrl ? (
                 <AvatarImage
@@ -105,28 +105,26 @@ export function MentorCard({
             </div>
           </div>
 
-          <Badge
-            variant="outline"
-            className={`ml-auto gap-1.5 px-2.5 ${
-              mentor.isAvailable
-                ? "border-availability-border bg-availability text-availability-foreground"
-                : "border-border bg-surface-soft text-text-secondary"
-            }`}
-          >
-            <span
-              aria-hidden="true"
-              className={`size-1.5 shrink-0 rounded-full ${
-                mentor.isAvailable ? "bg-accent" : "bg-text-secondary"
-              }`}
-            />
-            {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
-          </Badge>
-          {showAffinityBadge &&
-            mentor.sharedInterestsCount !== undefined && (
-              <Badge variant="secondary">
-                {mentor.sharedInterestsCount} {mentor.sharedInterestsCount === 1 ? "interés" : "intereses"} en común
+          <div className="ml-auto flex shrink-0 flex-col items-end gap-2">
+            {mentor.isAvailable ? (
+              <Badge
+                variant="outline"
+                className="gap-1.5 border-availability-border bg-availability px-2.5 whitespace-nowrap text-availability-foreground"
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 shrink-0 rounded-full bg-accent"
+                />
+                Disponible para mentoría
               </Badge>
-            )}
+            ) : null}
+            {showAffinityBadge &&
+              mentor.sharedInterestsCount !== undefined && (
+                <Badge variant="secondary" className="whitespace-nowrap">
+                  {mentor.sharedInterestsCount} {mentor.sharedInterestsCount === 1 ? "interés" : "intereses"} en común
+                </Badge>
+              )}
+          </div>
         </div>
 
         <div>

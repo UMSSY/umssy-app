@@ -1,6 +1,6 @@
 
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getMentorDirectory } from "@/modules/mentorship/services/mentor-directory.service";
 import MentorDirectoryPage from "./page";
@@ -66,7 +66,15 @@ describe("MentorDirectoryPage", () => {
       orientationTypes: [],
     };
 
-    vi.mocked(getMentorDirectory).mockResolvedValue([mentor]);
+    vi.mocked(getMentorDirectory).mockResolvedValue({
+      items: [mentor],
+      page: 1,
+      pageSize: 6,
+      totalItems: 1,
+      totalPages: 1,
+      effectiveSort: "name_asc",
+      affinityStatus: "ready",
+    });
 
     queryClient = render(<MentorDirectoryPage />).client;
 
@@ -80,10 +88,13 @@ describe("MentorDirectoryPage", () => {
     );
 
     expect(getMentorDirectory).toHaveBeenCalledExactlyOnceWith(
+      expect.any(Object),
       expect.any(AbortSignal),
     );
 
-    expect(queryClient.isFetching()).toBe(0);
+    await waitFor(() => {
+      expect(queryClient?.isFetching()).toBe(0);
+    });
 
     expect(
       screen.getByRole("heading", {
