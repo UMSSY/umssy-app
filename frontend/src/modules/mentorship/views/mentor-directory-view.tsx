@@ -3,7 +3,6 @@
 
 import { useCallback, useEffect, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -13,6 +12,8 @@ import {
 } from "@/components/ui/native-select";
 import { PageHeading } from "@/shared/components/layout";
 import { MentorDirectoryGrid } from "../components/mentor/mentor-directory-grid";
+import { MentorSearchBar } from "../components/mentor/mentor-search-bar";
+import { MentorFiltersBar } from "../components/mentor/mentor-filters-bar";
 import { MentorDirectoryPagination } from "../components/mentor/mentor-directory-pagination";
 import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
 import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
@@ -49,13 +50,14 @@ export function MentorDirectoryView({
     page,
     search,
     area,
+    orientation,
     available: isAvailableOnly,
     sort: sortBy,
   } = parseMentorDirectoryState(new URLSearchParams(queryString));
 
   const { currentUserId } = useCurrentUserId();
 
-  const { technicalAreas } = useMentorshipCatalogs();
+  const { technicalAreas, orientationTypes } = useMentorshipCatalogs();
 
   const {
     data: directory,
@@ -67,6 +69,7 @@ export function MentorDirectoryView({
     page,
     search,
     area,
+    orientation,
     available: isAvailableOnly,
     sort: sortBy,
   });
@@ -132,6 +135,7 @@ export function MentorDirectoryView({
     (updates: {
       search?: string;
       area?: string;
+      orientation?: string;
       available?: boolean;
       sort?: MentorSort;
       page?: number;
@@ -155,6 +159,7 @@ export function MentorDirectoryView({
     navigateWithUpdates({
       search: "",
       area: "",
+      orientation: "",
       available: true,
     });
   }
@@ -179,46 +184,28 @@ export function MentorDirectoryView({
           aria-label="Filtros de mentores"
           className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-surface p-4"
         >
-          <Input
-            type="search"
-            className="min-w-56 flex-1"
-            aria-label="Buscar mentor"
-            placeholder="Nombre o especialidad"
+          <MentorSearchBar
+            key={search}
             value={search}
-            onChange={(event) =>
+            onSearchChange={(nextSearch) =>
               navigateWithUpdates({
-                search: event.target.value,
+                search: nextSearch,
               })
             }
           />
 
-          <div className="flex items-center gap-2">
-            <Label htmlFor="mentor-area">Área</Label>
-
-            <NativeSelect
-              id="mentor-area"
-              className="max-w-64"
-              value={area}
-              onChange={(event) =>
-                navigateWithUpdates({
-                  area: event.target.value,
-                })
-              }
-            >
-              <NativeSelectOption value="">
-                Todas las áreas
-              </NativeSelectOption>
-
-              {technicalAreas.map((areaOption) => (
-                <NativeSelectOption
-                  key={areaOption.id}
-                  value={areaOption.name}
-                >
-                  {areaOption.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-          </div>
+          <MentorFiltersBar
+            area={area}
+            orientation={orientation}
+            technicalAreas={technicalAreas.map((item) => item.name)}
+            orientationTypes={orientationTypes.map((item) => item.name)}
+            onAreaChange={(value) =>
+              navigateWithUpdates({ area: value })
+            }
+            onOrientationChange={(value) =>
+              navigateWithUpdates({ orientation: value })
+            }
+          />
 
           <Label className="flex items-center gap-2">
             <Checkbox
