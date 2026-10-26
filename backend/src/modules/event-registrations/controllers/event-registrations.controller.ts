@@ -12,10 +12,12 @@ import { ValidationException } from '../../../common/exceptions/validation.excep
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import { RegistrationResponses } from '../decorators/registration-responses.decorator.js';
 import { EVENT_REGISTRATION_PARAMS_SCHEMA, REGISTRATION_ID_SCHEMA, REGISTRATION_PARAMS_SCHEMA } from '../requests/registration-params.schema.js';
-import type { EventRegistrationParams, RegistrationIdParam, RegistrationParams } from '../requests/registration-params.schema.js';
+import type { EventRegistrationParams } from '../types/event-registration-params.types.js';
+import type { RegistrationIdParam } from '../types/registration-id-param.types.js';
+import type { RegistrationParams } from '../types/registration-params.types.js';
 import { REGISTRATION_BODY_SCHEMA } from '../requests/registration-body.schema.js';
 import { CREATE_EVENT_REGISTRATION_BODY_SCHEMA } from '../requests/create-event-registration-body.schema.js';
-import type { CreateEventRegistrationBody } from '../requests/create-event-registration-body.schema.js';
+import type { CreateEventRegistrationBody } from '../types/create-event-registration-body.types.js';
 
 @ApiTags('Registrations')
 @ApiBearerAuth()

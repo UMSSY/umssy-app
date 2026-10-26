@@ -12,6 +12,6 @@ export const REGISTRATION_ID_SCHEMA = z.object({
   id: z.guid({ error: 'El identificador de la inscripción no es válido.' }),
 });
 
-export type EventRegistrationParams = z.infer<typeof EVENT_REGISTRATION_PARAMS_SCHEMA>;
-export type RegistrationParams = z.infer<typeof REGISTRATION_PARAMS_SCHEMA>;
-export type RegistrationIdParam = z.infer<typeof REGISTRATION_ID_SCHEMA>;
+export type { EventRegistrationParams } from '../types/event-registration-params.types.js';
+export type { RegistrationParams } from '../types/registration-params.types.js';
+export type { RegistrationIdParam } from '../types/registration-id-param.types.js';
