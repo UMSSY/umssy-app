@@ -5,18 +5,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import { formatBlockRange } from "@/shared/utils/date-time";
 import {
   APPOINTMENT_STATUS_LABELS,
   APPOINTMENTS_TEXT,
 } from "../constants/appointments.constants";
-import type { Appointment } from "../types/appointment.types";
+import type { AppointmentCardProps } from "../types/appointment-card-props.types";
 
-export function AppointmentCard({
-  appointment,
-}: {
-  appointment: Appointment;
-}) {
+export function AppointmentCard({ appointment }: AppointmentCardProps) {
   const dateLabel = new Intl.DateTimeFormat("es-BO", {
     dateStyle: "long",
     timeZone: "America/La_Paz",
@@ -41,10 +38,10 @@ export function AppointmentCard({
           {formatBlockRange(appointment.startAt, appointment.endAt)}
         </p>
         <p className="text-muted-foreground">
-          {APPOINTMENTS_TEXT.timezone}
+          {BOLIVIA_TIME_LABEL}
         </p>
         <p className="wrap-anywhere">
-          Tema: {appointment.orientationType?.name ?? APPOINTMENTS_TEXT.noTopic}
+          {`${APPOINTMENTS_TEXT.topicLabel} ${appointment.orientationType?.name ?? APPOINTMENTS_TEXT.noTopic}`}
         </p>
       </CardContent>
     </Card>
