@@ -8,7 +8,7 @@ describe('event registration lookup', () => {
     const tx = { event: { findUnique: vi.fn().mockResolvedValue(event) } };
     const service = new EventsService(prisma as never);
     await expect(service.findForRegistration('event', tx as never)).resolves.toBe(event);
-    expect(tx.event.findUnique).toHaveBeenCalledWith({ where: { id: 'event' }, select: { id: true, capacity: true, eventDate: true, startTime: true, status: { select: { title: true } } } });
+    expect(tx.event.findUnique).toHaveBeenCalledWith({ where: { id: 'event' }, select: { id: true, capacity: true, eventDate: true, startTime: true, endTime: true, status: { select: { title: true } } } });
     expect(prisma.event.findUnique).not.toHaveBeenCalled();
   });
 
