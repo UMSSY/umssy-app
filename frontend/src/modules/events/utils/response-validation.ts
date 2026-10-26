@@ -26,3 +26,7 @@ export function readArray(value: unknown): unknown[] {
   if (!Array.isArray(value)) invalidResponse();
   return value;
 }
+export function readBoolean(value: unknown): boolean {
+  if (typeof value !== 'boolean') invalidResponse();
+  return value;
+}
