@@ -1,3 +1,4 @@
+import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventNotFoundException } from '../../events/exceptions/event-not-found.exception.js';
 import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
@@ -57,7 +58,7 @@ describe('EventRegistrationsService.support', () => {
 
   beforeEach(() => {
     registerSupport.mockReset();
-    service = new EventRegistrationsService({} as never, {} as never);
+    service = new EventRegistrationsService(new EventRegistrationsRepository({} as never), {} as never);
     vi.spyOn(service, 'registerSupport').mockImplementation(registerSupport);
   });
 

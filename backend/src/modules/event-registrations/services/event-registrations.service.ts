@@ -1,7 +1,5 @@
 import { PassNotFoundException } from '../exceptions/pass-not-found.exception.js';
-import { VOTING_STATUS_RESPONSE } from '../constants/event-registrations.constants.js';
 import type { SupportTransactionResult } from '../types/support-transaction-result.types.js';
-import { calculateProgressPercent, calculateSupportsRemaining } from '../../../common/utils/support-progress.js';
 import { COMMUNITY_ORIGIN_TITLE, EXPIRED_STATUS_TITLE, VOTING_STATUS_TITLES } from '../../events/constants/events.constants.js';
 import { EventNotFoundException } from '../../events/exceptions/event-not-found.exception.js';
 import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
@@ -13,8 +11,8 @@ import { EventRegistrationsMapper } from '../mappers/event-registrations.mapper.
 import type { CreateEventRegistrationPayload, MyRegistrationResponse } from '../types/event-registrations.types.js';
 import { Injectable } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
-import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
+import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
+import { mapSupportResponse } from '../mappers/support-response.mapper.js';
 import { InternalException } from '../../../common/exceptions/internal.exception.js';
 import { Prisma } from '../../../prisma/client.js';
 import { EventsService, PUBLISHED_STATUS_TITLE } from '../../events/index.js';
@@ -23,7 +21,7 @@ import { EventNotOpenException } from '../exceptions/event-not-open.exception.js
 import { RegistrationAlreadyCancelledException } from '../exceptions/registration-already-cancelled.exception.js';
 import { RegistrationNotFoundException } from '../exceptions/registration-not-found.exception.js';
 import { RegistrationNotOwnedException } from '../exceptions/registration-not-owned.exception.js';
-import { REGISTRATION_SELECT, REGISTRATION_TRANSACTION_ATTEMPTS } from '../constants/registrations.constants.js';
+import { REGISTRATION_TRANSACTION_ATTEMPTS } from '../constants/registrations.constants.js';
 import { mapRegistration } from '../mappers/registration.mapper.js';
 import { assertRegistrationOpen } from '../utils/assert-registration-open.js';
 import type { RegistrationResponse } from '../types/registration-response.types.js';
@@ -31,37 +29,18 @@ import type { RegistrationResponse } from '../types/registration-response.types.
 @Injectable()
 export class EventRegistrationsService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly repository: EventRegistrationsRepository,
     private readonly eventsService: EventsService,
   ) {}
 
   async getPassById(id: string, userId: string) {
-    const pass = await this.prisma.eventRegistration.findFirst({
-      where: {
-        id,
-        userId,
-        cancelledAt: null,
-        status: { title: REGISTRATION_STATUS_TITLES.confirmed },
-        event: { status: { title: PUBLISHED_STATUS_TITLE } },
-      },
-      select: {
-        id: true,
-        qrToken: true,
-        createdAt: true,
-        status: { select: { title: true } },
-        event: { select: { id: true, title: true, eventDate: true, startTime: true, endTime: true, location: true, description: true } },
-        user: { select: { id: true, firstName: true, lastName: true, email: true } },
-      },
-    });
+    const pass = await this.repository.getPassById(id, userId);
     if (!pass || !pass.qrToken) throw new PassNotFoundException();
     return pass;
   }
 
-  async createWithQrToken(payload: CreateEventRegistrationPayload) {
-    return this.prisma.eventRegistration.create({
-      data: { ...payload, qrToken: this.generateQrToken() },
-      select: { id: true, eventId: true, userId: true, statusId: true, qrToken: true },
-    });
+  createWithQrToken(payload: CreateEventRegistrationPayload) {
+    return this.repository.createWithQrToken(payload, this.generateQrToken());
   }
 
   private generateQrToken(): string {
@@ -72,56 +51,34 @@ export class EventRegistrationsService {
     return this.transact(async (tx) => {
       await this.lockEventRow(tx, eventId);
       const event = await this.eventsService.findForRegistration(eventId, tx);
-      const existing = await tx.eventRegistration.findUnique({
-        where: { eventId_userId: { eventId, userId } },
-        select: REGISTRATION_SELECT,
-      });
+      const existing = await this.repository.findOwn(eventId, userId, tx);
       if (existing && mapRegistration(existing).status === 'confirmed') {
         return mapRegistration(existing);
       }
       if (event.status.title !== PUBLISHED_STATUS_TITLE) throw new EventNotOpenException();
       assertRegistrationOpen(event);
       if (event.capacity !== null) {
-        const count = await tx.eventRegistration.count({
-          where: {
-            eventId,
-            cancelledAt: null,
-            status: { title: REGISTRATION_STATUS_TITLES.confirmed },
-          },
-        });
+        const count = await this.repository.countConfirmed(tx, eventId);
         if (count >= event.capacity) throw new EventFullException();
       }
-      const data = {
-        status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
-        cancelledAt: null,
-        qrToken: this.generateQrToken(),
-      };
+      const qrToken = this.generateQrToken();
       const registration = existing
-        ? await tx.eventRegistration.update({ where: { id: existing.id }, data, select: REGISTRATION_SELECT })
-        : await tx.eventRegistration.create({
-            data: { ...data, event: { connect: { id: eventId } }, user: { connect: { id: userId } } },
-            select: REGISTRATION_SELECT,
-          });
+        ? await this.repository.reactivate(tx, existing.id, qrToken)
+        : await this.repository.createConfirmed(tx, eventId, userId, qrToken);
       return mapRegistration(registration);
     });
   }
 
   async findOwn(eventId: string, userId: string): Promise<RegistrationResponse> {
     await this.eventsService.findForRegistration(eventId);
-    const registration = await this.prisma.eventRegistration.findUnique({
-      where: { eventId_userId: { eventId, userId } },
-      select: REGISTRATION_SELECT,
-    });
+    const registration = await this.repository.findOwn(eventId, userId);
     if (!registration) throw new RegistrationNotFoundException();
     return mapRegistration(registration);
   }
 
   async cancel(registrationId: string, userId: string): Promise<RegistrationResponse> {
     return this.transact(async (tx) => {
-      const registration = await tx.eventRegistration.findUnique({
-        where: { id: registrationId },
-        select: REGISTRATION_SELECT,
-      });
+      const registration = await this.repository.findById(registrationId, tx);
       if (!registration) throw new RegistrationNotFoundException();
       if (registration.userId !== userId) throw new RegistrationNotOwnedException();
       if (mapRegistration(registration).status === 'cancelled') {
@@ -130,21 +87,14 @@ export class EventRegistrationsService {
       await this.lockEventRow(tx, registration.eventId);
       const event = await this.eventsService.findForRegistration(registration.eventId, tx);
       assertRegistrationOpen(event);
-      return mapRegistration(await tx.eventRegistration.update({
-        where: { id: registrationId },
-        data: {
-          cancelledAt: new Date(),
-          status: { connect: { title: REGISTRATION_STATUS_TITLES.cancelled } },
-        },
-        select: REGISTRATION_SELECT,
-      }));
+      return mapRegistration(await this.repository.cancel(tx, registrationId, new Date()));
     });
   }
 
   private async transact<T>(operation: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
     for (let attempt = 0; attempt < REGISTRATION_TRANSACTION_ATTEMPTS; attempt += 1) {
       try {
-        return await this.prisma.$transaction(operation, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+        return await this.repository.transaction(operation, Prisma.TransactionIsolationLevel.Serializable);
       } catch (error) {
         if (!(error instanceof Prisma.PrismaClientKnownRequestError) || !['P2034', 'P2002'].includes(error.code)) {
           throw error;
@@ -154,8 +104,8 @@ export class EventRegistrationsService {
     throw new InternalException();
   }
 
-  private async lockEventRow(tx: Prisma.TransactionClient, eventId: string): Promise<void> {
-    await tx.$queryRaw`SELECT id FROM events WHERE id = ${eventId}::uuid FOR UPDATE`;
+  private lockEventRow(tx: Prisma.TransactionClient, eventId: string): Promise<void> {
+    return this.repository.lockEventRow(tx, eventId);
   }
 
   async findMine(userId: string): Promise<MyRegistrationResponse[]> {
@@ -163,30 +113,7 @@ export class EventRegistrationsService {
   }
 
   findByUserId(userId: string) {
-    return this.prisma.eventRegistration.findMany({
-      where: {
-        userId,
-        cancelledAt: null,
-        status: { title: REGISTRATION_STATUS_TITLES.confirmed },
-        event: { status: { title: PUBLISHED_STATUS_TITLE } },
-      },
-      select: {
-        id: true,
-        registeredAt: true,
-        cancelledAt: true,
-        status: { select: { title: true } },
-        event: {
-          select: {
-            title: true,
-            eventDate: true,
-            startTime: true,
-            endTime: true,
-            location: true,
-          },
-        },
-      },
-      orderBy: { event: { eventDate: 'asc' } },
-    });
+    return this.repository.findByUserId(userId);
   }
   async support(eventId: string, userId: string): Promise<SupportResponse> {
     const result = await this.registerSupport(
@@ -203,21 +130,7 @@ export class EventRegistrationsService {
       throw new AlreadySupportedException();
     }
 
-    return {
-      eventId,
-      status: result.published ? PUBLISHED_STATUS_TITLE : VOTING_STATUS_RESPONSE,
-      supportCount: result.supportCount,
-      supportThreshold: result.supportThreshold,
-      supportsRemaining: calculateSupportsRemaining(
-        result.supportCount,
-        result.supportThreshold,
-      ),
-      progressPercent: calculateProgressPercent(
-        result.supportCount,
-        result.supportThreshold,
-      ),
-      hasSupported: true,
-    };
+    return mapSupportResponse(eventId, result);
   }
 
   private assertSupportable(event: EventSupportContext): void {
@@ -242,7 +155,7 @@ export class EventRegistrationsService {
     userId: string,
     assertSupportable: (event: EventSupportContext) => void,
   ): Promise<SupportTransactionResult | null> {
-    return this.prisma.$transaction(async (tx) => {
+    return this.repository.transaction(async (tx) => {
       const beforeLock = await this.loadSupportContext(tx, eventId);
       if (!beforeLock) return null;
 
@@ -251,10 +164,7 @@ export class EventRegistrationsService {
       const event = await this.loadSupportContext(tx, eventId);
       if (!event) return null;
 
-      const existing = await tx.eventRegistration.findUnique({
-        where: { eventId_userId: { eventId, userId } },
-        select: { id: true },
-      });
+      const existing = await this.repository.findSupport(tx, eventId, userId);
       if (existing) {
         return {
           created: false,
@@ -275,15 +185,7 @@ export class EventRegistrationsService {
 
       assertSupportable(publishedWhileWaiting ? beforeLock : event);
 
-      await tx.eventRegistration.create({
-        data: {
-          event: { connect: { id: eventId } },
-          user: { connect: { id: userId } },
-          status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
-          qrToken: this.generateQrToken(),
-        },
-        select: { id: true },
-      });
+      await this.repository.createSupport(tx, eventId, userId, this.generateQrToken());
 
       const supportCount = event.supportCount + 1;
       const threshold = event.supportThreshold;
@@ -292,11 +194,7 @@ export class EventRegistrationsService {
         (threshold !== null && threshold > 0 && supportCount >= threshold);
 
       if (published && event.statusTitle !== PUBLISHED_STATUS_TITLE) {
-        await tx.event.update({
-          where: { id: eventId },
-          data: { status: { connect: { title: PUBLISHED_STATUS_TITLE } } },
-          select: { id: true },
-        });
+        await this.repository.publish(tx, eventId);
       }
 
       return {
@@ -308,40 +206,7 @@ export class EventRegistrationsService {
     });
   }
 
-  private async loadSupportContext(
-    tx: Prisma.TransactionClient,
-    eventId: string,
-  ): Promise<EventSupportContext | null> {
-    const event = await tx.event.findUnique({
-      where: { id: eventId },
-      select: {
-        id: true,
-        votingDeadline: true,
-        supportThreshold: true,
-        status: { select: { title: true } },
-        origin: { select: { title: true } },
-        _count: {
-          select: {
-            registrations: {
-              where: {
-                cancelledAt: null,
-                status: { title: REGISTRATION_STATUS_TITLES.confirmed },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!event) return null;
-
-    return {
-      id: event.id,
-      statusTitle: event.status.title,
-      originTitle: event.origin.title,
-      votingDeadline: event.votingDeadline,
-      supportThreshold: event.supportThreshold,
-      supportCount: event._count.registrations,
-    };
+  private loadSupportContext(tx: Prisma.TransactionClient, eventId: string): Promise<EventSupportContext | null> {
+    return this.repository.loadSupportContext(tx, eventId);
   }
 }

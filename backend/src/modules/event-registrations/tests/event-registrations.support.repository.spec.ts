@@ -1,3 +1,4 @@
+import { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventRegistrationsService } from '../services/event-registrations.service.js';
 import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
@@ -55,7 +56,7 @@ describe('EventRegistrationsService.registerSupport', () => {
         callback(tx),
       ),
     };
-    repository = new EventRegistrationsService(prismaMock as never, {} as never);
+    repository = new EventRegistrationsService(new EventRegistrationsRepository(prismaMock as never), {} as never);
   });
 
   it('lee el estado previo, bloquea la fila y vuelve a leer el estado confirmado', async () => {
@@ -221,7 +222,7 @@ describe('EventRegistrationsService.registerSupport', () => {
         finally { if (client === first) releaseFirst(); }
       }),
     };
-    const concurrent = new EventRegistrationsService(prismaMock as never, {} as never);
+    const concurrent = new EventRegistrationsService(new EventRegistrationsRepository(prismaMock as never), {} as never);
 
     const responses = await Promise.all([
       concurrent.support('event-1', 'user-1'),
