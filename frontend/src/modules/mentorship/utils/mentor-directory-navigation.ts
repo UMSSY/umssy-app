@@ -4,7 +4,7 @@ export const MENTOR_DIRECTORY_DEFAULTS = {
   page: 1,
   search: "",
   area: "",
-  available: false,
+  available: true,
   sort: "name_asc",
 } as const;
 
@@ -40,7 +40,7 @@ export function parseMentorDirectoryState(
     page,
     search: params.get("search") ?? "",
     area: params.get("area") ?? "",
-    available: params.get("available") === "true",
+    available: params.get("available") !== "false",
     sort,
   };
 }
@@ -103,10 +103,10 @@ export function updateMentorDirectoryParams(
   }
 
   if (updates.available !== undefined) {
-    if (updates.available) {
-      next.set("available", "true");
-    } else {
+    if (updates.available === MENTOR_DIRECTORY_DEFAULTS.available) {
       next.delete("available");
+    } else {
+      next.set("available", "false");
     }
   }
 

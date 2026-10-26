@@ -104,22 +104,18 @@ export function MentorCard({
           </div>
 
           <div className="ml-auto flex shrink-0 flex-col items-end gap-2">
-            <Badge
-              variant="outline"
-              className={`gap-1.5 px-2.5 whitespace-nowrap ${
-                mentor.isAvailable
-                  ? "border-availability-border bg-availability text-availability-foreground"
-                  : "border-border bg-surface-soft text-text-secondary"
-              }`}
-            >
-              <span
-                aria-hidden="true"
-                className={`size-1.5 shrink-0 rounded-full ${
-                  mentor.isAvailable ? "bg-accent" : "bg-text-secondary"
-                }`}
-              />
-              {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
-            </Badge>
+            {mentor.isAvailable ? (
+              <Badge
+                variant="outline"
+                className="gap-1.5 border-availability-border bg-availability px-2.5 whitespace-nowrap text-availability-foreground"
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 shrink-0 rounded-full bg-accent"
+                />
+                Disponible para mentoría
+              </Badge>
+            ) : null}
             {showAffinityBadge &&
               mentor.sharedInterestsCount !== undefined && (
                 <Badge variant="secondary" className="whitespace-nowrap">
