@@ -2,8 +2,15 @@ import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
-import { AlreadyMentorException, MentorCapacityException, MentorEligibilityException } from '../exceptions/index.js';
-import { readMentorCapacity, readMentorEligibility } from './mentor-capacity.queries.js';
+import {
+  AlreadyMentorException,
+  MentorCapacityException,
+  MentorEligibilityException,
+} from '../exceptions/index.js';
+import {
+  readMentorCapacity,
+  readMentorEligibility,
+} from './mentor-capacity.queries.js';
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
 
@@ -31,6 +38,7 @@ const directorySelect = {
 interface DirectoryFilters {
   search: string;
   area?: string;
+  orientation?: string;
   available: boolean;
 }
 
@@ -197,6 +205,17 @@ export class MentorsRepository {
     if (filters.area) {
       where.mentorTechnicalAreas = {
         some: { technicalArea: { name: filters.area } },
+      };
+    }
+
+    if (filters.orientation) {
+      where.mentorOrientationTypes = {
+        some: {
+          orientationType: {
+            name: filters.orientation,
+            isActive: true,
+          },
+        },
       };
     }
 

@@ -27,8 +27,18 @@ describe('mentorDirectoryQuerySchema', () => {
     { search: ['Ana'] },
     { pageSize: '100' },
     { area: '' },
+    { orientation: '' },
+    { orientation: 'x'.repeat(81) },
   ])('rechaza query inválida %j', (query) => {
     expect(mentorDirectoryQuerySchema.safeParse(query).success).toBe(false);
+  });
+
+  it('acepta y recorta el tipo de orientación', () => {
+    expect(
+      mentorDirectoryQuerySchema.parse({
+        orientation: '  Orientación técnica  ',
+      }).orientation,
+    ).toBe('Orientación técnica');
   });
 
   it('acepta los valores reservados para dar una respuesta explícita en el servicio', () => {

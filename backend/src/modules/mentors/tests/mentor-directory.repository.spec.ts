@@ -1,4 +1,3 @@
-
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
@@ -10,6 +9,7 @@ describe('MentorsRepository directory page', () => {
   const filters = {
     search: 'Ana Rojas',
     area: 'Backend',
+    orientation: 'Orientación técnica',
     available: true,
   };
 
@@ -27,9 +27,9 @@ describe('MentorsRepository directory page', () => {
 
     expect(await repository.countDirectoryMentors(filters, now)).toBe(20);
 
-    expect(
-      await repository.findDirectoryPage(filters, now, 4, 6),
-    ).toEqual([{ id: 'mentor-19', photoVersion: null }]);
+    expect(await repository.findDirectoryPage(filters, now, 4, 6)).toEqual([
+      { id: 'mentor-19', photoVersion: null },
+    ]);
 
     const where = count.mock.calls[0]?.[0].where;
 
@@ -50,6 +50,14 @@ describe('MentorsRepository directory page', () => {
           technicalArea: { name: 'Backend' },
         },
       },
+      mentorOrientationTypes: {
+        some: {
+          orientationType: {
+            name: 'Orientación técnica',
+            isActive: true,
+          },
+        },
+      },
     });
 
     expect(where.AND).toHaveLength(2);
@@ -63,18 +71,12 @@ describe('MentorsRepository directory page', () => {
     });
 
     expect(findMany.mock.calls[0]?.[0]).toMatchObject({
-      orderBy: [
-        { firstName: 'asc' },
-        { lastName: 'asc' },
-        { id: 'asc' },
-      ],
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
       skip: 18,
       take: 6,
     });
 
-    expect(
-      findMany.mock.calls[0]?.[0].select,
-    ).not.toHaveProperty('photoUrl');
+    expect(findMany.mock.calls[0]?.[0].select).not.toHaveProperty('photoUrl');
 
     expect(findMany.mock.calls[1]?.[0].select).toEqual({
       id: true,
@@ -99,11 +101,7 @@ describe('MentorsRepository directory page', () => {
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderBy: [
-          { firstName: 'desc' },
-          { lastName: 'desc' },
-          { id: 'asc' },
-        ],
+        orderBy: [{ firstName: 'desc' }, { lastName: 'desc' }, { id: 'asc' }],
         skip: 6,
         take: 6,
       }),
@@ -127,11 +125,7 @@ describe('MentorsRepository directory page', () => {
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderBy: [
-          { firstName: 'desc' },
-          { lastName: 'desc' },
-          { id: 'asc' },
-        ],
+        orderBy: [{ firstName: 'desc' }, { lastName: 'desc' }, { id: 'asc' }],
         skip: 0,
         take: 2,
       }),
@@ -160,6 +154,7 @@ describe('MentorsRepository directory page', () => {
 
     expect(where).not.toHaveProperty('AND');
     expect(where).not.toHaveProperty('mentorTechnicalAreas');
+    expect(where).not.toHaveProperty('mentorOrientationTypes');
     expect(where).not.toHaveProperty('isAvailableForMentoring');
   });
 });

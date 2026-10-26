@@ -54,6 +54,7 @@ export class MentorsService {
     const filters = {
       search: query.search,
       area: query.area,
+      orientation: query.orientation,
       available: query.available,
     };
     let affinityStatus: 'no_skills' | 'unmapped_skills' | undefined;
@@ -223,8 +224,10 @@ export class MentorsService {
   }
 
   async activate(userId: string, data: ActivateMentorDto) {
-    if (!data.technicalAreaIds.length) throw new InvalidTechnicalAreasException();
-    if (!data.orientationTypeIds.length) throw new InvalidOrientationTypesException();
+    if (!data.technicalAreaIds.length)
+      throw new InvalidTechnicalAreasException();
+    if (!data.orientationTypeIds.length)
+      throw new InvalidOrientationTypesException();
     const mentorRole = await this.mentorsRepository.findMentorRole();
 
     if (!mentorRole) {
