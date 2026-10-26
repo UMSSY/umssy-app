@@ -9,7 +9,6 @@ import { ResponseInterceptor } from '../src/common/interceptors/response.interce
 import { PrismaService } from '../src/common/prisma/prisma.service.js';
 import { EventRegistrationsService } from '../src/modules/event-registrations/services/event-registrations.service.js';
 import { EventRegistrationsModule } from '../src/modules/event-registrations/index.js';
-import { EventsService } from '../src/modules/events/index.js';
 import { createRegistrationDatabaseFixture } from './fixtures/registration-database.fixture.js';
 
 const DATABASE = process.env.REGISTRATIONS_E2E_DATABASE;
@@ -50,21 +49,24 @@ describe.skipIf(!DATABASE)('registration persistence and concurrent HTTP request
   const support = (eventId: string, user = 0) => request(app.getHttpServer())
     .post(`/api/event-registrations/support/${eventId}`).set('Authorization', `Bearer ${tokens[user]}`).timeout(REQUEST_TIMEOUT);
 
-  function synchronizeEventReads() {
-    const service = app.get(EventsService);
-    const read = service.findForRegistration.bind(service);
+  function synchronizeEventLocks() {
+    const service = app.get(EventRegistrationsService) as unknown as {
+      lockEventRow: (tx: unknown, eventId: string) => Promise<void>;
+    };
+    const lock = service.lockEventRow.bind(service);
     let arrived = 0;
     let release!: () => void;
     const gate = new Promise<void>((resolve) => { release = resolve; });
     const timer = setTimeout(release, 5_000);
-    vi.spyOn(service, 'findForRegistration').mockImplementation(async (...args) => {
-      const event = await read(...args);
-      arrived += 1;
-      if (arrived >= 2) { clearTimeout(timer); release(); }
-      await gate;
-      return event;
+    vi.spyOn(service, 'lockEventRow').mockImplementation(async (tx, eventId) => {
+      if (arrived < 2) {
+        arrived += 1;
+        if (arrived === 2) { clearTimeout(timer); release(); }
+        await gate;
+      }
+      await lock(tx, eventId);
     });
-    return () => { clearTimeout(timer); release(); expect(arrived).toBeGreaterThanOrEqual(2); };
+    return () => { clearTimeout(timer); release(); expect(arrived).toBe(2); };
   }
 
   function synchronizeSupportReads() {
@@ -105,7 +107,7 @@ describe.skipIf(!DATABASE)('registration persistence and concurrent HTTP request
 
   it('allows only one concurrent request for the last available seat', async () => {
     const event = await fixture.createEvent();
-    const verifyOverlap = synchronizeEventReads();
+    const verifyOverlap = synchronizeEventLocks();
     const responses = await Promise.all([create(event.id, 0), create(event.id, 1)]);
     verifyOverlap();
     expect(responses.map((response) => response.status).sort((left, right) => left - right)).toEqual([201, 409]);
@@ -115,18 +117,19 @@ describe.skipIf(!DATABASE)('registration persistence and concurrent HTTP request
 
   it('normalizes concurrent duplicate requests without creating a second row', async () => {
     const event = await fixture.createEvent(null);
-    const verifyOverlap = synchronizeEventReads();
+    const verifyOverlap = synchronizeEventLocks();
     const responses = await Promise.all([create(event.id), create(event.id)]);
     verifyOverlap();
-    expect(responses.map((response) => response.status).sort((left, right) => left - right)).toEqual([201, 409]);
-    expect(responses.find((response) => response.status === 409)?.body.code).toBe('ALREADY_REGISTERED');
+    expect(responses.map((response) => response.status).sort((left, right) => left - right)).toEqual([201, 201]);
+    expect(responses[0]!.body.data).toEqual(responses[1]!.body.data);
+    expect(responses[0]!.body.data.qrToken).toMatch(/^[a-f0-9]{64}$/);
     expect(await fixture.client.eventRegistration.count({ where: { eventId: event.id } })).toBe(1);
   }, 20_000);
 
   it('allows only one concurrent cancellation', async () => {
     const event = await fixture.createEvent();
     const created = (await create(event.id).expect(201)).body.data;
-    const verifyOverlap = synchronizeEventReads();
+    const verifyOverlap = synchronizeEventLocks();
     const responses = await Promise.all([cancel(created.id), cancel(created.id)]);
     verifyOverlap();
     expect(responses.map((response) => response.status).sort((left, right) => left - right)).toEqual([200, 409]);
