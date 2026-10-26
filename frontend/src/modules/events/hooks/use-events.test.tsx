@@ -2,7 +2,8 @@ import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useEvents } from './use-events';
-import type { EventsListResponse } from '../types/event.types';
+import { clearAccessToken, saveAccessToken } from '@/shared/services/storage/access-token-storage';
+import type { EventItem, EventsListResponse } from '../types/event.types';
 
 const getEventsMock = vi.hoisted(() => vi.fn());
 
@@ -12,9 +13,11 @@ vi.mock('../services/events.service', () => ({
 
 afterEach(() => {
   cleanup();
+  clearAccessToken();
 });
 
 beforeEach(() => {
+  clearAccessToken();
   getEventsMock.mockReset();
 });
 
@@ -34,6 +37,7 @@ describe('useEvents', () => {
     expect(getEventsMock).toHaveBeenCalledWith(
       { page: 1, includeProposals: true, limit: 50 },
       expect.any(AbortSignal),
+      null,
     );
     expect(result.current.events).toEqual([]);
     expect(result.current.hasMore).toBe(false);
@@ -70,6 +74,7 @@ describe('useEvents', () => {
     expect(getEventsMock).toHaveBeenLastCalledWith(
       { page: 2, includeProposals: true, limit: 50 },
       expect.any(AbortSignal),
+      null,
     );
     expect(result.current.hasMore).toBe(false);
   });
@@ -129,5 +134,40 @@ describe('useEvents', () => {
     unmount();
 
     expect(requestSignal?.aborted).toBe(true);
+  });
+
+  it('separa hasSupported entre la sesión anónima y dos usuarios', async () => {
+    getEventsMock.mockImplementation((
+      _params: unknown,
+      _signal: AbortSignal,
+      token: string | null,
+    ) => Promise.resolve({
+      data: [{ id: 'proposal-1', hasSupported: token === 'token-a' }] as EventItem[],
+      page: 1,
+      offset: 0,
+    }));
+
+    const { result } = renderHook(() => useEvents());
+    await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(false));
+
+    act(() => saveAccessToken('token-a'));
+    await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(true));
+
+    act(() => saveAccessToken('token-b'));
+    await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(false));
+
+    act(() => clearAccessToken());
+    await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(false));
+
+    expect(getEventsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ includeProposals: true }),
+      expect.any(AbortSignal),
+      'token-a',
+    );
+    expect(getEventsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ includeProposals: true }),
+      expect.any(AbortSignal),
+      'token-b',
+    );
   });
 });
