@@ -1,4 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { AuditEventRecorderService } from '../../audit-events/services/audit-event-recorder.service.js';
+import type { RecordAuditEventInput } from '../../audit-events/types/record-audit-event-input.types.js';
+import {
+  toActivationCodeSentAuditEvent,
+  toApprovedAuditEvent,
+  toOpenedAuditEvent,
+  toRejectedAuditEvent,
+  toSubmittedAuditEvent,
+} from '../mappers/access-request-audit-event.mapper.js';
 import { FilesService } from '../../files/services/files.service.js';
 import { FileNotFoundException } from '../../files/exceptions/index.js';
 import { AuthService } from '../../auth/services/auth.service.js';
@@ -49,7 +58,22 @@ export class AccessRequestsService {
     private readonly filesService: FilesService,
     private readonly activationOtpService: ActivationOtpService,
     private readonly rejectionNotificationService: RejectionNotificationService,
+    private readonly auditEventRecorder: AuditEventRecorderService,
   ) {}
+
+  private readonly logger = new Logger(AccessRequestsService.name);
+
+  // Evento que ocurre después de confirmar el cambio; si no se puede guardar, se registra el error sin deshacer el dictamen
+  private async recordAfterCommit(accessRequestId: string, buildInput: () => RecordAuditEventInput) {
+    try {
+      await this.auditEventRecorder.record(buildInput());
+    } catch (error) {
+      this.logger.error(
+        `No se pudo registrar un evento de auditoría de la solicitud ${accessRequestId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
 
   async create(dto: CreateAccessRequestDto) {
     await this.assertNoDuplicates(dto);
@@ -163,7 +187,9 @@ export class AccessRequestsService {
       throw new ActiveAccessRequestExistsException();
     }
 
-    const submitted = await this.accessRequestsRepository.submitWithGeneratedCode(id);
+    const submitted = await this.accessRequestsRepository.submitWithGeneratedCode(id, (source, tx) =>
+      this.auditEventRecorder.record(toSubmittedAuditEvent(source), tx),
+    );
     return {
       id: submitted.id,
       requestCode: submitted.requestCode,
@@ -181,7 +207,9 @@ export class AccessRequestsService {
       return toAccessRequestDetail(current);
     }
 
-    await this.accessRequestsRepository.markInReview(id, reviewerId);
+    await this.accessRequestsRepository.markInReview(id, reviewerId, (source, tx) =>
+      this.auditEventRecorder.record(toOpenedAuditEvent(source, reviewerId), tx),
+    );
     const updated = await this.accessRequestsRepository.findDetailById(id);
     if (!updated) {
       throw new AccessRequestNotFoundException();
@@ -198,12 +226,18 @@ export class AccessRequestsService {
       throw new RequestNotInReviewException();
     }
 
-    const updated = await this.accessRequestsRepository.setVerdict(id, reviewerId, { status: ACCESS_REQUEST_STATUS.APPROVED });
+    const updated = await this.accessRequestsRepository.setVerdict(id, reviewerId, { status: ACCESS_REQUEST_STATUS.APPROVED }, (source, tx) =>
+      this.auditEventRecorder.record(toApprovedAuditEvent(source, reviewerId), tx),
+    );
     if (!updated) {
       throw new RequestNotInReviewException();
     }
 
     const activationCodeSent = await this.activationOtpService.issueFor(id, current.email);
+    // Solo se registra el envío que el servicio de correo confirmó
+    if (activationCodeSent) {
+      await this.recordAfterCommit(id, () => toActivationCodeSentAuditEvent(current, current.email));
+    }
     return { id, status: ACCESS_REQUEST_STATUS.APPROVED, activationCodeSent };
   }
 
@@ -216,10 +250,12 @@ export class AccessRequestsService {
       throw new RequestNotInReviewException();
     }
 
-    const updated = await this.accessRequestsRepository.setVerdict(id, reviewerId, {
-      status: ACCESS_REQUEST_STATUS.REJECTED,
-      rejectionReason: reason,
-    });
+    const updated = await this.accessRequestsRepository.setVerdict(
+      id,
+      reviewerId,
+      { status: ACCESS_REQUEST_STATUS.REJECTED, rejectionReason: reason },
+      (source, tx) => this.auditEventRecorder.record(toRejectedAuditEvent(source, reviewerId, reason), tx),
+    );
     if (!updated) {
       throw new RequestNotInReviewException();
     }
