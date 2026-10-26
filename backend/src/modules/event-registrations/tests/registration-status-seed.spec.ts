@@ -13,3 +13,13 @@ describe('registration catalog seed', () => {
     for (const [args] of registrations.mock.calls) expect(args.update).toEqual({});
   });
 });
+
+  it('creates distinct valid QR tokens for the initial workshop registrations', async () => {
+    const upsert = vi.fn().mockResolvedValue({ id: 'status' });
+    const registrations = vi.fn();
+    await seedEventRegistrations({ registrationStatus: { upsert }, eventRegistration: { upsert: registrations } } as never, 'user');
+    const tokens = registrations.mock.calls.map(([args]) => args.create.qrToken);
+    expect(tokens).toHaveLength(2);
+    for (const token of tokens) expect(token).toMatch(/^[a-f0-9]{64}$/);
+    expect(new Set(tokens).size).toBe(tokens.length);
+  });
