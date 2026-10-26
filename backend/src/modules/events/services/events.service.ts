@@ -1,10 +1,18 @@
+
 import { Injectable } from '@nestjs/common';
 import { EventNotFoundException } from '../exceptions/event-not-found.exception.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { escapePgWildcards } from '../../../common/utils/escape-pg-wildcards.js';
 import type { Prisma } from '../../../prisma/client.js';
 import type { FindEventsPayload, FindEventsResponse, EventWithRelations } from '../types/events.types.js';
-import { CATALOG_STATUS_TITLES, PUBLISHED_STATUS_TITLE, CONFIRMED_REGISTRATION_TITLE } from '../constants/events.constants.js';
+import {
+  CATALOG_STATUS_TITLES,
+  COMMUNITY_ORIGIN_TITLE,
+  CONFIRMED_REGISTRATION_TITLE,
+  EXPIRED_STATUS_TITLE,
+  PUBLISHED_STATUS_TITLE,
+  VOTING_STATUS_TITLES,
+} from '../constants/events.constants.js';
 import {
   mapEventToResponse,
   mapEventsToListResponse,
@@ -63,6 +71,7 @@ export class EventsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(payload: GetEventsPayload, userId?: string): Promise<EventsListResponse> {
+    await this.expireOverdueProposals(new Date());
     const { page, limit, categoryId, statusId, search } = payload;
     const offset = (page - 1) * limit;
     const isPublishedOnly = statusId === undefined;
@@ -82,6 +91,7 @@ export class EventsService {
   }
 
   async findOne(id: string, userId?: string): Promise<EventDetailResponse> {
+    await this.expireOverdueProposals(new Date());
     const event = await this.findById(id, userId);
 
     if (!event) {
@@ -97,6 +107,27 @@ export class EventsService {
       modality: event.modality,
     };
   }
+
+  async expireOverdueProposals(now: Date): Promise<number> {
+    const expiredStatus = await this.prisma.eventStatus.findUnique({
+      where: { title: EXPIRED_STATUS_TITLE },
+      select: { id: true },
+    });
+
+    if (!expiredStatus) return 0;
+
+    const { count } = await this.prisma.event.updateMany({
+      where: {
+        status: { title: { in: VOTING_STATUS_TITLES } },
+        origin: { title: COMMUNITY_ORIGIN_TITLE },
+        votingDeadline: { lte: now },
+      },
+      data: { statusId: expiredStatus.id },
+    });
+
+    return count;
+  }
+
   async findAndCount(payload: FindEventsPayload): Promise<FindEventsResponse> {
     const { categoryId, statusId, isPublishedOnly, search, userId, skip, take } =
       payload;
