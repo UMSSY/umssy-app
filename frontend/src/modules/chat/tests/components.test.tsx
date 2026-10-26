@@ -1,5 +1,6 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent, cleanup } from "@testing-library/react";
 import { EmptyChatState } from '../components/empty-chat-state';
 import { ConversationSkeleton } from '../components/conversation-skeleton';
 import { ConversationItem } from '../components/conversation-item';

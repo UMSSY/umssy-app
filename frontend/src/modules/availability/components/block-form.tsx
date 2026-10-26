@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { DateField } from "@/shared/components/date-field";
 import { Input } from "@/components/ui/input";
 import { TimeSelect } from "./time-select";
 import { toBoliviaTime, toUtcIso } from "@/shared/utils/date-time";
@@ -22,7 +23,7 @@ import { formatDayAndMonth, formatLongDate, getBoliviaToday, toCalendarDate, toD
 
 function RequiredMark() {
   return (
-    <span aria-hidden="true" className="text-destructive">
+    <span aria-hidden="true" className="text-ink-soft">
       *
     </span>
   );
@@ -36,6 +37,7 @@ export function BlockForm({
   submitError,
   onSubmit,
   onCancel,
+  onValuesChange,
 }: BlockFormProps) {
   const [today] = useState(getBoliviaToday);
   const [date, setDate] = useState(() =>
@@ -61,16 +63,19 @@ export function BlockForm({
   };
 
   const handleDateSelect = (day?: Date) => {
+    onValuesChange?.();
     setDate(day ? toDateString(day) : "");
     clearErrors("date", "startAt");
   };
 
   const handleStartChange = (value: string) => {
+    onValuesChange?.();
     setStartTime(value);
     clearErrors("startAt", "endAt");
   };
 
   const handleEndChange = (value: string) => {
+    onValuesChange?.();
     setEndTime(value);
     clearErrors("endAt");
   };
@@ -102,7 +107,7 @@ export function BlockForm({
   return (
     <Card
       className={cn(
-        "w-full [--card-spacing:--spacing(4)] sm:[--card-spacing:--spacing(6)]",
+        "w-full rounded-lg border border-border bg-surface shadow-none [--card-spacing:--spacing(6)]",
         mode === "edit" && "ring-1 ring-border-strong",
       )}
     >
@@ -126,19 +131,18 @@ export function BlockForm({
                       aria-hidden="true"
                       className={cn(
                         "flex h-10 items-center rounded-lg border border-transparent px-3 text-sm font-medium",
-                        "bg-danger/10 text-ink",
+                        "bg-interaction text-ink",
                       )}
                     >
                       {date ? formatDayAndMonth(date) : ""}
                     </span>
-                    <input
+                    <DateField
                       id="date"
-                      type="date"
                       value={date}
                       readOnly
                       aria-invalid={errors.date ? true : undefined}
                       aria-describedby={errors.date ? "date-error" : undefined}
-                      className="absolute inset-0 h-full w-full cursor-default opacity-0"
+                      className="absolute inset-0 size-full cursor-default opacity-0"
                     />
                   </>
                 ) : (
@@ -215,7 +219,7 @@ export function BlockForm({
 
               {mode !== "edit" && (
                 <FieldDescription className="col-span-1 text-xs sm:col-span-2">
-                  La hora de fin debe ser posterior a la de inicio. Horario en hora de Bolivia (GMT-4).
+                  La hora de fin debe ser posterior a la de inicio.
                 </FieldDescription>
               )}
             </FieldGroup>
@@ -231,7 +235,7 @@ export function BlockForm({
 
         <CardFooter
           className={cn(
-            "flex-col-reverse gap-2 bg-transparent",
+            "flex-col-reverse gap-3 border-t border-border bg-transparent",
             mode === "edit" ? "items-stretch" : "sm:flex-row sm:justify-end",
           )}
         >
@@ -248,7 +252,7 @@ export function BlockForm({
             type="submit"
             size="lg"
             className={cn(
-              "w-full bg-accent text-surface hover:bg-danger",
+              "w-full bg-primary text-primary-foreground hover:bg-brand-hover",
               mode !== "edit" && "sm:w-auto",
             )}
             disabled={isSubmitting || disabled}

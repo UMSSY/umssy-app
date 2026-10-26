@@ -41,7 +41,7 @@ describe("BlockForm", () => {
     expect(screen.getByText("Nuevo bloque de disponibilidad")).toBeInTheDocument()
     expect(screen.getByLabelText(/Fecha/)).toHaveValue("")
     expect(screen.getByText("Los días anteriores a hoy no se pueden elegir.")).toBeInTheDocument()
-    expect(screen.getByText(/Horario en hora de Bolivia/)).toBeInTheDocument()
+    expect(screen.queryByText(/Horario en hora de Bolivia/)).not.toBeInTheDocument()
     expect(screen.getByLabelText(/Hora de inicio/)).toBeInTheDocument()
     expect(screen.getByLabelText(/Hora de fin/)).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument()
@@ -159,15 +159,15 @@ describe("BlockForm", () => {
     })
 
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
-    expect(screen.getByLabelText(/Día/)).toHaveValue("2026-10-13")
+    expect(screen.getByLabelText(/Día/)).toHaveValue("13/10/2026")
     expect(screen.getByLabelText(/Día/)).toHaveAttribute("readonly")
     expect(screen.getByText("Martes 13 de octubre")).toBeInTheDocument()
     expect(screen.getByLabelText(/Desde/)).toHaveTextContent("18:00")
     expect(screen.getByLabelText(/Hasta/)).toHaveTextContent("20:00")
     expect(screen.queryByText(/Horario en hora de Bolivia/)).not.toBeInTheDocument()
 
-    await user.type(screen.getByLabelText(/Día/), "2026-10-15")
-    expect(screen.getByLabelText(/Día/)).toHaveValue("2026-10-13")
+    await user.type(screen.getByLabelText(/Día/), "15102026")
+    expect(screen.getByLabelText(/Día/)).toHaveValue("13/10/2026")
     await selectTime(user, /Desde/, "17:00")
     await selectTime(user, /Hasta/, "19:00")
     await user.click(screen.getByRole("button", { name: "Guardar cambios" }))
@@ -184,7 +184,7 @@ describe("BlockForm", () => {
       initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-14T00:00:00.000Z" },
     })
 
-    expect(screen.getByText("Martes 13 de octubre")).toHaveClass("bg-danger/10")
+    expect(screen.getByText("Martes 13 de octubre")).toHaveClass("bg-interaction")
     const card = screen.getByText("Editar bloque").closest('[data-slot="card"]')
     expect(card).toHaveClass("ring-1", "ring-border-strong")
     expect(screen.queryByText("Los días anteriores a hoy no se pueden elegir.")).not.toBeInTheDocument()
@@ -193,7 +193,7 @@ describe("BlockForm", () => {
     ).not.toBeInTheDocument()
 
     const submit = screen.getByRole("button", { name: "Guardar cambios" })
-    expect(submit).toHaveClass("bg-accent", "text-surface")
+    expect(submit).toHaveClass("bg-primary", "text-primary-foreground")
   })
 
   it("deshabilita el envío mientras se guarda y muestra el error del servidor", () => {

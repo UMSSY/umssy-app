@@ -45,7 +45,7 @@ describe("DeleteBlockDialog", () => {
     expect(await screen.findByText("¿Eliminar este bloque?")).toBeInTheDocument()
     expect(screen.getByText("BLOQUE LIBRE")).toBeInTheDocument()
     expect(screen.getByText(/15 de enero/)).toBeInTheDocument()
-    expect(screen.getByText(/\d{2}:\d{2} - \d{2}:\d{2} · Hora de Bolivia \(GMT-4\)/)).toBeInTheDocument()
+    expect(screen.getByText(/\d{2}:\d{2} - \d{2}:\d{2}/)).toBeInTheDocument()
     expect(screen.getByText(/Los egresados dejarán de ver este horario/)).toBeInTheDocument()
     expect(screen.getByText(/Esta acción no se puede deshacer\./)).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeInTheDocument()
