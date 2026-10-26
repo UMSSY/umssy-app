@@ -1,15 +1,17 @@
 "use client";
 
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useRegistrationSession } from "@/modules/registrations";
 import { eventsService } from "../services/events.service";
 import { EVENTS_PAGE_SIZE, NO_EVENT_FILTERS } from "../constants/events.constants";
 import type { EventFiltersPayload } from "../types/event-filters.types";
 
 export function useEvents(filters: EventFiltersPayload = NO_EVENT_FILTERS) {
   const queryClient = useQueryClient();
+  const accessToken = useRegistrationSession();
   const search = filters.search.trim();
   const categoryId = filters.categoryId;
-  const queryKey = ["events", "list", search, categoryId];
+  const queryKey = ["events", "list", accessToken, search, categoryId];
   const query = useInfiniteQuery({
     queryKey,
     initialPageParam: 1,
@@ -17,7 +19,7 @@ export function useEvents(filters: EventFiltersPayload = NO_EVENT_FILTERS) {
       page: pageParam, limit: EVENTS_PAGE_SIZE,
       includeProposals: true,
       ...(search && { search }), ...(categoryId && { categoryId }),
-    }, signal),
+    }, signal, accessToken),
     getNextPageParam: (lastPage, pages) => lastPage.data.length === EVENTS_PAGE_SIZE ? pages.length + 1 : undefined,
   });
   return {
