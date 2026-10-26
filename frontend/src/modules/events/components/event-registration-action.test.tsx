@@ -99,6 +99,13 @@ describe("EventRegistrationAction", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "Ya estás inscrito" })).toBeDisabled());
   });
 
+  it("recognizes confirmed proposal support immediately after publication", () => {
+    const create = vi.spyOn(registrationsService, "create");
+    renderWithQuery(<EventRegistrationAction event={{ ...event, status: "Publicado", hasSupported: true }} />);
+    expect(screen.getByRole("button", { name: "Ya estás inscrito" })).toBeDisabled();
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it("shows the catalog fallback and allows retry after a network failure", async () => {
     vi.spyOn(registrationsService, "create").mockRejectedValue(new Error("offline"));
     renderWithQuery(<EventRegistrationAction event={event} />);

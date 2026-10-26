@@ -33,6 +33,19 @@ describe('Private pass detail', () => {
     expect(screen.queryByRole('img', { name: 'Código QR del pase' })).not.toBeInTheDocument();
   });
 
+  it('replaces the QR with the selected pass token after a successful load', async () => {
+    vi.mocked(registrationsService.getPass)
+      .mockResolvedValueOnce({ ...pass, qrToken: 'a'.repeat(64) })
+      .mockResolvedValueOnce({ ...pass, id: 'pass-2', qrToken: 'b'.repeat(64) });
+    const { rerender } = renderWithQuery(<PassDetail registration={pass} />);
+
+    const firstQr = await screen.findByRole('img', { name: 'Código QR del pase' });
+    rerender(<PassDetail registration={{ ...pass, id: 'pass-2' }} />);
+    const secondQr = await screen.findByRole('img', { name: 'Código QR del pase' });
+
+    expect(secondQr.outerHTML).not.toBe(firstQr.outerHTML);
+  });
+
   it('does not request a private pass without authentication', () => {
     clearAccessToken();
     renderWithQuery(<PassDetail registration={pass} />);

@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../../src/prisma/client.js';
 import { buildDatabaseConnectionString } from '../../src/common/prisma/build-connection-string.js';
@@ -17,7 +17,7 @@ export async function createRegistrationDatabaseFixture() {
   }
   const suffix = randomUUID();
   const role = await client.role.upsert({ where: { name: 'titulado' }, update: {}, create: { name: 'titulado' } });
-  const users = await Promise.all([0, 1].map((index) => client.user.create({
+  const users = await Promise.all([0, 1, 2].map((index) => client.user.create({
     data: {
       firstName: 'Registration', lastName: 'Fixture', email: `registration-${suffix}-${index}@example.test`,
       roles: { create: { roleId: role.id } },
@@ -31,6 +31,7 @@ export async function createRegistrationDatabaseFixture() {
     await client.registrationStatus.upsert({ where: { title }, update: {}, create: { title } });
   }
   const eventIds: string[] = [];
+  const seededUserIds: string[] = [];
   return {
     client,
     users,
@@ -45,10 +46,38 @@ export async function createRegistrationDatabaseFixture() {
       eventIds.push(event.id);
       return event;
     },
+    async createVotingProposal(existingSupports = 7) {
+      const [community, voting, confirmed] = await Promise.all([
+        client.eventOrigin.upsert({ where: { title: 'Comunidad' }, update: {}, create: { title: 'Comunidad' } }),
+        client.eventStatus.upsert({ where: { title: 'Votacion' }, update: {}, create: { title: 'Votacion' } }),
+        client.registrationStatus.findUniqueOrThrow({ where: { title: 'Confirmada' } }),
+      ]);
+      const event = await client.event.create({ data: {
+        title: `Voting fixture ${suffix}`,
+        eventDate: new Date(Date.now() + 3 * 86_400_000),
+        startTime: new Date('1970-01-01T09:00:00Z'), endTime: new Date('1970-01-01T12:00:00Z'),
+        capacity: 40, supportThreshold: 8, votingDeadline: new Date(Date.now() + 86_400_000),
+        categoryId: category.id, modalityId: modality.id, originId: community.id,
+        statusId: voting.id, createdById: users[0].id,
+      } });
+      eventIds.push(event.id);
+      for (let index = 0; index < existingSupports; index += 1) {
+        const supporter = await client.user.create({ data: {
+          firstName: 'Support', lastName: 'Fixture',
+          email: `support-${suffix}-${index}@example.test`,
+        } });
+        seededUserIds.push(supporter.id);
+        await client.eventRegistration.create({ data: {
+          eventId: event.id, userId: supporter.id, statusId: confirmed.id,
+          qrToken: randomBytes(32).toString('hex'),
+        } });
+      }
+      return event;
+    },
     async cleanup() {
       try {
         await client.event.deleteMany({ where: { id: { in: eventIds } } });
-        await client.user.deleteMany({ where: { id: { in: users.map((user) => user.id) } } });
+        await client.user.deleteMany({ where: { id: { in: [...users.map((user) => user.id), ...seededUserIds] } } });
         await client.eventCategory.delete({ where: { id: category.id } });
         await client.eventModality.delete({ where: { id: modality.id } });
         await client.eventOrigin.delete({ where: { id: origin.id } });

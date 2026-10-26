@@ -170,6 +170,31 @@ describe("EventDetailPanel", () => {
     expect(onSupport).not.toHaveBeenCalled();
   });
 
+  it('shows support eligibility, a retryable error, and publication feedback', () => {
+    const proposal: EventDetail = { ...event, status: 'voting', hasSupported: false };
+    const onSupport = vi.fn();
+    const onRetrySupport = vi.fn();
+    const { rerender } = render(
+      <EventDetailPanel
+        event={proposal}
+        onSupport={onSupport}
+        isSupportDisabled
+        supportNotice="Solo los usuarios con perfil Titulado pueden apoyar propuestas."
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Preinscribirme/Apoyar propuesta' })).toBeDisabled();
+    expect(screen.getByText('Solo los usuarios con perfil Titulado pueden apoyar propuestas.')).toBeInTheDocument();
+
+    rerender(<EventDetailPanel event={proposal} onSupport={onSupport} supportError="No pudimos registrar tu apoyo." onRetrySupport={onRetrySupport} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('No pudimos registrar tu apoyo.');
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar apoyo' }));
+    expect(onRetrySupport).toHaveBeenCalledOnce();
+
+    rerender(<EventDetailPanel event={{ ...proposal, status: 'Publicado', hasSupported: true }} supportSuccessMessage="Tu inscripción quedó confirmada." />);
+    expect(screen.getByText('Tu inscripción quedó confirmada.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Preinscribirme/Apoyar propuesta' })).not.toBeInTheDocument();
+  });
+
   it('prevents a second support and does not offer normal registration', () => {
     const onSupport = vi.fn();
     render(<EventDetailPanel event={{ ...event, status: 'voting', hasSupported: true }} onSupport={onSupport} />);
@@ -180,7 +205,7 @@ describe("EventDetailPanel", () => {
     expect(onSupport).not.toHaveBeenCalled();
   });
 
-  it('shows an expired proposal without support or registration actions', () => {
+  it('shows an expired proposal with disabled support and no registration action', () => {
     render(<EventDetailPanel event={{
       ...event,
       status: 'Vencido',
@@ -193,8 +218,9 @@ describe("EventDetailPanel", () => {
 
     expect(screen.getByText('Vencido')).toBeInTheDocument();
     expect(screen.getByText('5 de 20 apoyos')).toBeInTheDocument();
-    expect(screen.getByText('El plazo de apoyo terminó.')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /apoyar propuesta|inscribirme/i })).not.toBeInTheDocument();
+    expect(screen.getByText('Fecha límite superada · vencida automáticamente')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Preinscribirme/Apoyar propuesta' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Inscribirme' })).not.toBeInTheDocument();
     expect(screen.queryByText('Cupos')).not.toBeInTheDocument();
   });
 });

@@ -37,7 +37,7 @@ export function ProposalProgress({ event, isExpired = false }: ProposalProgressP
       </div>
       <p className="text-text-secondary">
         {isExpired
-          ? 'El plazo de apoyo terminó.'
+          ? 'Fecha límite superada · vencida automáticamente'
           : remaining === 0
             ? 'Se alcanzó la meta de apoyos.'
             : `Faltan ${remaining} apoyos para publicar el taller.`}
