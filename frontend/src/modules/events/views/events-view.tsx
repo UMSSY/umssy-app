@@ -1,5 +1,7 @@
 'use client';
 
+import type { EventsViewProps } from '../types/events-view-props.types';
+
 import { cn } from "@/lib/utils";
 import { PageHeading } from "@/shared/components/layout";
 import Link from "next/link";
@@ -28,7 +30,7 @@ import type { EventItem } from '../types/event.types';
 import type { EventDetail } from '../types/event-detail.types';
 import { getProposalSupportErrorMessage } from '../utils/proposal-support-error';
 
-export function EventsView({ initialProposalId = null }: { initialProposalId?: string | null }) {
+export function EventsView({ initialProposalId = null }: EventsViewProps) {
   const router = useRouter();
   const session = useRegistrationSession();
   const { roles, isLoading: rolesLoading } = useAuth();

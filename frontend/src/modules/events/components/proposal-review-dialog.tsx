@@ -1,15 +1,12 @@
+import type { ProposalReviewDialogProps } from '../types/proposal-review-dialog-props.types';
 import Image from 'next/image';
 import { useRef } from 'react';
 import { CalendarDays, Clock, Info, Loader2, MapPin, UserRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import type { ProposalCover, ProposalValues } from '../types/proposal.types';
 import { formatProposalDate, formatProposalDuration, formatProposalTime } from '../utils/proposal-format';
 
-export function ProposalReviewDialog({ open, values, cover, tutor, category, pending, unavailable, error, onClose, onConfirm }: {
-  open: boolean; values: ProposalValues; cover: ProposalCover | null; tutor: string; category: string;
-  pending: boolean; unavailable: boolean; error: string | null; onClose: () => void; onConfirm: () => void;
-}) {
+export function ProposalReviewDialog({ open, values, cover, tutor, category, pending, unavailable, error, onClose, onConfirm }: ProposalReviewDialogProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next && !pending) onClose(); }}>

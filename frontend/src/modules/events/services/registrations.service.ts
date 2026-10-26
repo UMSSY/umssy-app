@@ -1,3 +1,5 @@
+import type { PassData } from '../types/pass-data.types';
+export type { PassData } from '../types/pass-data.types';
 import { registrationsService as registrationApi } from '@/modules/registrations/services/registrations.service';
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { readRecord, readString, readNullableString } from '../utils/response-validation';
@@ -6,16 +8,6 @@ import { apiClient } from '@/shared/services/api-client';
 import { parseProposalSupportResponse } from '../utils/proposal-support-response';
 import type { ProposalSupportResponse } from '../types/proposal-support-response.types';
 
-export interface PassData {
-  id: string;
-  qrToken: string;
-  eventName: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  location: string | null;
-  status: string;
-}
 
 export const registrationsService = {
   getMine: registrationApi.getMine,

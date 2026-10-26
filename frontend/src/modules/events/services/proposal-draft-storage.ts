@@ -1,7 +1,8 @@
+import type { ProposalDraft } from '../types/proposal-draft.types';
+export type { ProposalDraft } from '../types/proposal-draft.types';
 import { EMPTY_PROPOSAL } from '../constants/proposal.constants';
 import type { ProposalValues } from '../types/proposal.types';
 
-export interface ProposalDraft { values: ProposalValues; file: File | null; operationKey: string | null }
 
 function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {

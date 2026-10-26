@@ -1,7 +1,8 @@
+import type { EventDisplayStatus } from '../types/event-display-status.types';
+export type { EventDisplayStatus } from '../types/event-display-status.types';
 import type { EventItem } from '../types/event-item.types';
 import { calculateEventCapacityStatus } from './event-card';
 
-export type EventDisplayStatus = 'voting' | 'expired' | 'published' | 'full';
 
 export function getEventDisplayStatus(event: EventItem): EventDisplayStatus {
   if (event.status === 'voting') return 'voting';
