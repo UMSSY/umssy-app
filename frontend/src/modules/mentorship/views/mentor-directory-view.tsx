@@ -14,6 +14,7 @@ import { PageHeading } from "@/shared/components/layout";
 import { MentorDirectoryGrid } from "../components/mentor/mentor-directory-grid";
 import { MentorSearchBar } from "../components/mentor/mentor-search-bar";
 import { MentorFiltersBar } from "../components/mentor/mentor-filters-bar";
+import { MentorFiltersSummary } from "../components/mentor/mentor-filters-summary";
 import { MentorDirectoryPagination } from "../components/mentor/mentor-directory-pagination";
 import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
 import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
@@ -293,12 +294,13 @@ export function MentorDirectoryView({
               </p>
             ) : null}
 
-            <p
-              role="status"
-              className="text-sm text-text-secondary"
-            >
-              {totalItems} mentores encontrados
-            </p>
+            <MentorFiltersSummary
+              search={search}
+              area={area}
+              orientation={orientation}
+              available={isAvailableOnly}
+              totalItems={totalItems}
+            />
 
             <MentorDirectoryGrid
               mentors={mentors}
