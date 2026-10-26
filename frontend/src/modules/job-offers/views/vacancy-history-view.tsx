@@ -8,7 +8,7 @@ export function VacancyHistoryView() {
         title="Historial de vacantes"
         description="Consulta todas las vacantes que has publicado, con su estado actual."
       />
-      <VacancyList scope="history" />
+      <VacancyList scope="history" onReopen={(id) => console.log("Reabierta:", id)} />
     </main>
   );
 }

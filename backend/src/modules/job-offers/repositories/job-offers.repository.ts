@@ -112,4 +112,31 @@ export class JobOffersRepository {
       select: JOB_OFFER_SELECT,
     });
   }
+
+  async updateStatus(
+    id: string,
+    statusTitle: JobOfferStatus,
+  ): Promise<JobOfferCreatedRecord> {
+    const status = await this.prisma.jobOfferStatus.findUnique({
+      where: { title: statusTitle },
+      select: { id: true },
+    });
+
+    if (!status) {
+      throw new Error(`El estado ${statusTitle} no está configurado en la base de datos.`);
+    }
+
+    return this.prisma.jobOffer.update({
+      where: { id },
+      data: { statusId: status.id },
+      select: JOB_OFFER_CREATED_SELECT,
+    });
+  }
+
+  findById(id: string): Promise<JobOfferRecord | null> {
+    return this.prisma.jobOffer.findUnique({
+      where: { id },
+      select: JOB_OFFER_SELECT,
+    });
+  }
 }

@@ -11,6 +11,8 @@ import {
   STATUS_LABELS,
 } from "../constants/vacancies.constants";
 import type { JobOffer } from "../types/job-offer.types";
+import { ReopenVacancyButton } from "./reopen-vacancy-button";
+import { getCurrentCompany } from "../utils/get-current-company";
 
 const dateFormatter = new Intl.DateTimeFormat("es-BO", {
   day: "2-digit",
@@ -30,6 +32,8 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen }: 
   const isPublished = offer.status === PUBLISHED_STATUS;
   const isClosed = offer.status === CLOSED_STATUS;
   const isDeleted = offer.status === DELETED_STATUS;
+  const company = getCurrentCompany();
+  const companyId = company?.id;
 
   return (
     <li
@@ -77,16 +81,14 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen }: 
         ) : null}
         {isClosed ? (
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="max-md:h-11"
-              disabled={!onReopen}
-              onClick={() => onReopen?.(offer.id)}
-            >
-              Reabrir
-            </Button>
+            {/* INTEGRACIÓN HU6: Botón para reabrir la vacante */}
+            {companyId ? (
+              <ReopenVacancyButton
+                jobOffer={offer}
+                companyId={companyId}
+                onReopened={onReopen}
+              />
+            ) : null}
           </div>
         ) : null}
       </div>

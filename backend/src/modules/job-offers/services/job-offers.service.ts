@@ -3,6 +3,7 @@ import {
   CompanyNotFoundException,
   JobOfferCatalogNotFoundException,
   JobOfferNotFoundException,
+  JobOfferNotReopenableException,
 } from '../exceptions/index.js';
 import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
 import { JobOffersRepository } from '../repositories/job-offers.repository.js';
@@ -52,10 +53,32 @@ export class JobOffersService {
     return this.jobOfferMapper.toCreatedResponse(record);
   }
 
+  async reopen(id: string, companyId: string): Promise<void> {
+    await this.ensureCompanyExists(companyId);
+
+    const offer = await this.jobOffersRepository.findById(id);
+
+    // Se usa CompanyNotFoundException para no revelar la existencia de la oferta a otras empresas.
+    if (!offer || offer.company.id !== companyId) {
+      throw new CompanyNotFoundException();
+    }
+
+    const reopenableStatuses: JobOfferStatus[] = [
+      JobOfferStatus.CLOSED,
+    ];
+
+    if (!reopenableStatuses.includes(offer.status.title as JobOfferStatus)) {
+      throw new JobOfferNotReopenableException();
+    }
+
+    await this.jobOffersRepository.updateStatus(id, JobOfferStatus.PUBLISHED);
+  }
+
   async listPublished(): Promise<JobOfferResponse[]> {
     const records = await this.jobOffersRepository.findPublished(new Date());
     return records.map((record) => this.jobOfferMapper.toResponse(record));
   }
+
   async listByCompany(
     companyId: string,
     filters: ListCompanyJobOffersRequest = DEFAULT_COMPANY_JOB_OFFERS_FILTERS,
