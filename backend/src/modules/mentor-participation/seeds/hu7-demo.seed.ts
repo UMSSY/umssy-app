@@ -158,12 +158,15 @@ async function main() {
   try {
     const password = await bcrypt.hash(SEED_PASSWORD, 10);
     await client.$transaction((tx) => seed(tx, password, new Date()), { maxWait: 10_000, timeout: 120_000 });
+    const countedAt = new Date();
     const approvedGraduates = await client.user.count({ where: { isActive: true,
-      roles: { some: { deletedAt: null, role: { name: 'titulado' } } },
+      roles: { some: { deletedAt: null, startAt: { lte: countedAt }, role: { name: 'titulado' } } },
       approvedAccessRequest: { is: { status: { title: 'approved' } } },
     } });
-    const activeMentors = await client.user.count({ where: { roles: { some: { deletedAt: null, role: { name: 'mentor' } } } } });
-    const reservedOffers = await client.mentorSlotOffer.count({ where: { status: 'OFFERED', expiresAt: { gt: new Date() } } });
+    const activeMentors = await client.user.count({ where: { isActive: true,
+      roles: { some: { deletedAt: null, startAt: { lte: countedAt }, role: { name: 'mentor' } } },
+    } });
+    const reservedOffers = await client.mentorSlotOffer.count({ where: { status: 'OFFERED', expiresAt: { gt: countedAt } } });
     const capacity = Math.floor(approvedGraduates * .4);
     process.stdout.write(`HU7 local: aprobados=${approvedGraduates}, capacidad=${capacity}, mentores=${activeMentors}, reservas=${reservedOffers}, disponibles=${Math.max(0, capacity - activeMentors - reservedOffers)}\n`);
   } finally { await client.$disconnect(); }

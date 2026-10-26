@@ -16,7 +16,7 @@ const keys = [
 ];
 
 function fixture(options: { approved?: boolean; active?: boolean; mentor?: boolean;
-  existing?: boolean; reservedOffers?: number } = {}) {
+  existing?: boolean; reservedOffers?: number; inactiveMentor?: boolean } = {}) {
   const attempts: { userId: string; idempotencyKey: string }[] = [];
   const requests: { id: string; userId: string; status: string; requestedAt: Date }[] = [];
   const existing = options.existing ? {
@@ -48,8 +48,8 @@ function fixture(options: { approved?: boolean; active?: boolean; mentor?: boole
         roles: [{ role: { name: 'titulado' } }, ...(options.mentor ? [{ role: { name: 'mentor' } }] : [])],
         approvedAccessRequest: options.approved === false ? null : { status: { title: 'approved' } },
       }),
-      count: async ({ where }: { where: { approvedAccessRequest?: unknown } }) =>
-        where.approvedAccessRequest ? 3 : activeMentors,
+      count: async ({ where }: { where: { approvedAccessRequest?: unknown; isActive?: boolean } }) =>
+        where.approvedAccessRequest ? 3 : activeMentors + (options.inactiveMentor && !where.isActive ? 1 : 0),
       update: async () => ({}),
     },
     technicalArea: { count: async () => 1 },
@@ -110,6 +110,12 @@ describe('alta HU7 con política de cupos', () => {
     });
     expect(context.requests).toHaveLength(0);
     expect(context.activeMentors).toBe(0);
+  });
+
+  it('no ocupa un cupo con el rol mentor de una cuenta inactiva', async () => {
+    const context = fixture({ inactiveMentor: true });
+    await expect(context.service.activate(userIds[0], preferences, keys[0])).resolves.toMatchObject({ status: 'ACTIVE' });
+    expect(context.activeMentors).toBe(1);
   });
 
   it('conserva identificador y fecha originales al detectar un duplicado', async () => {

@@ -105,6 +105,7 @@ export class MentorParticipationService {
       approvedAccessRequest: { is: { status: { title: 'approved' } } },
     } });
     const activeMentors = await tx.user.count({ where: {
+      isActive: true,
       roles: { some: { deletedAt: null, startAt: { lte: now }, role: { name: 'mentor' } } },
     } });
     const reservedOffers = await tx.mentorSlotOffer.count({ where: { status: 'OFFERED', expiresAt: { gt: now } } });
