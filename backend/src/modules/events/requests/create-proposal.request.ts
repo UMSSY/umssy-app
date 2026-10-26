@@ -20,4 +20,4 @@ export const CreateProposalSchema = z.object({
     } catch { context.addIssue({ code: 'custom', path: ['location'], message: 'Ingresa un enlace http:// o https:// válido.' }); }
   }
 });
-export type CreateProposalPayload = z.infer<typeof CreateProposalSchema>;
+export type { CreateProposalPayload } from '../types/create-proposal-payload.types.js';

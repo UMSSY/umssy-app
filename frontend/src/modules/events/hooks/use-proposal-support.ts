@@ -1,5 +1,7 @@
 "use client";
 
+import type { SupportMutation } from '../types/support-mutation.types';
+
 import { useRef } from "react";
 import { useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { REGISTRATION_QUERY_KEYS, useRegistrationSession } from "@/modules/registrations";
@@ -12,10 +14,6 @@ import type { EventDetail } from "../types/event-detail.types";
 import type { EventsListResponse } from "../types/events-list-response.types";
 import type { ProposalSupportResponse } from "../types/proposal-support-response.types";
 
-interface SupportMutation {
-  eventId: string;
-  accessToken: string;
-}
 
 function applySupport<T extends EventItem>(event: T, response: ProposalSupportResponse): T {
   if (event.id !== response.eventId) return event;

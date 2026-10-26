@@ -1,9 +1,7 @@
-import type { ReactNode } from 'react';
+import type { ProposalFieldProps } from '../types/proposal-field-props.types';
 import { Label } from '@/components/ui/label';
 
-export function ProposalField({ id, label, error, required = true, children }: {
-  id: string; label: string; error?: string; required?: boolean; children: ReactNode;
-}) {
+export function ProposalField({ id, label, error, required = true, children }: ProposalFieldProps) {
   return (
     <div className="min-w-0 space-y-2">
       <Label htmlFor={id} className="font-semibold text-ink">

@@ -58,7 +58,6 @@ export class EventRegistrationsService {
   }
 
   async createWithQrToken(payload: CreateEventRegistrationPayload) {
-    // Shared token persistence; callers enforce the rules of their registration flow.
     return this.prisma.eventRegistration.create({
       data: { ...payload, qrToken: this.generateQrToken() },
       select: { id: true, eventId: true, userId: true, statusId: true, qrToken: true },
