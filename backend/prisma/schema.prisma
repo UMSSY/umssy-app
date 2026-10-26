@@ -150,6 +150,8 @@ model User {
   exportHistories        AdminExportHistory[] @relation("AdminExportHistories")
   openedAccessRequests   AccessRequest[]      @relation("AccessRequestOpenedBy")
   reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
+  approvedAccessRequest  AccessRequest?       @relation("ApprovedGraduateAccount")
+  mentorSlotOffers       MentorSlotOffer[]
 
   conversationsAsUserA Conversation[]            @relation("UserAConversations")
   conversationsAsUserB Conversation[]            @relation("UserBConversations")
@@ -718,6 +720,7 @@ model AccessRequest {
   openedById      String?   @map("opened_by_id") @db.Uuid
   openedAt        DateTime? @map("opened_at") @db.Timestamptz(6)
   reviewedById    String?   @map("reviewed_by_id") @db.Uuid
+  approvedUserId  String?   @unique @map("approved_user_id") @db.Uuid
   reviewedAt      DateTime? @map("reviewed_at") @db.Timestamptz(6)
   rejectionReason String?   @map("rejection_reason") @db.VarChar(500)
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -728,6 +731,7 @@ model AccessRequest {
   documentFile File?                      @relation(fields: [documentFileId], references: [id], onDelete: SetNull)
   openedBy     User?                      @relation("AccessRequestOpenedBy", fields: [openedById], references: [id], onDelete: SetNull)
   reviewedBy   User?                      @relation("AccessRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  approvedUser User?                      @relation("ApprovedGraduateAccount", fields: [approvedUserId], references: [id], onDelete: SetNull)
   career       Career                     @relation(fields: [careerId], references: [id], onDelete: Restrict)
 
   activationOtps ActivationOtp[]
@@ -738,6 +742,20 @@ model AccessRequest {
   @@index([idCardNumber])
   @@index([email])
   @@map("access_requests")
+}
+
+// Una oferta vigente reserva una plaza. Su asignación y confirmación pertenecen a HU-7-3.
+model MentorSlotOffer {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  status    String   @default("OFFERED") @db.VarChar(20)
+  offeredAt DateTime @default(now()) @map("offered_at") @db.Timestamptz(6)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([status, expiresAt])
+  @@map("mentor_slot_offers")
 }
 
 model ActivationOtp {
