@@ -1,4 +1,5 @@
 export { LoginView } from "./views/login-view";
+export { ForgotPasswordView } from "./views/forgot-password-view";
 export { useLogin } from "./hooks/use-login";
 export { authService } from "./services/auth.service";
 export { SessionGate } from "./components/session-gate";
