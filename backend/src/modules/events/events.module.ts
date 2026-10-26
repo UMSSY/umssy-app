@@ -5,12 +5,13 @@ import { FileValidationService } from '../../common/services/file-validation.ser
 import { EventProposalsController } from './controllers/event-proposals.controller.js';
 import { EventProposalsService } from './services/event-proposals.service.js';
 import { EventsController } from './controllers/events.controller.js';
+import { EventsRepository } from './repositories/events.repository.js';
 import { EventsService } from './services/events.service.js';
 
 @Module({
   imports: [JwtAuthModule],
   controllers: [EventsController, EventProposalsController],
-  providers: [EventsService, EventProposalsService, RolesGuard, FileValidationService],
+  providers: [EventsRepository, EventsService, EventProposalsService, RolesGuard, FileValidationService],
   exports: [EventsService],
 })
 export class EventsModule {}
