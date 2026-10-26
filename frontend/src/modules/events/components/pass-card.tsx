@@ -10,6 +10,7 @@ export function PassCard({
   date,
   status,
   location,
+  registrationId,
   isSelected,
   onClick,
 }: PassCardProps) {
@@ -22,14 +23,14 @@ export function PassCard({
         onClick={onClick}
         className={`flex h-auto w-full min-w-0 flex-col items-stretch gap-4 rounded-lg p-5 text-left whitespace-normal transition-all ${
           isSelected
-            ? 'border border-accent/30 bg-interaction text-accent hover:bg-interaction'
+            ? 'border border-accent bg-accent text-surface hover:bg-accent hover:text-surface'
             : 'border border-border bg-surface text-ink hover:border-border-strong'
         }`}
       >
         <div
           className={`flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ${
             isSelected
-              ? 'text-ink-soft'
+              ? 'text-surface/85'
               : 'text-text-secondary'
           }`}
         >
@@ -42,7 +43,7 @@ export function PassCard({
           </h3>
           <div
             className={`flex items-center gap-2 text-sm ${
-              isSelected ? 'text-ink-soft' : 'text-text-secondary'
+              isSelected ? 'text-surface/85' : 'text-text-secondary'
             }`}
           >
             <Calendar className="size-4 opacity-70" />
@@ -52,6 +53,10 @@ export function PassCard({
             {formatEventLocation(location)}
           </p>
         </div>
+        <p className="min-w-0 text-xs">
+          <span className="font-semibold">ID Inscripción: </span>
+          <span className="break-all">{registrationId}</span>
+        </p>
       </Button>
     </Card>
   );
