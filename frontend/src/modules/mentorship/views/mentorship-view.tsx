@@ -64,8 +64,8 @@ export function MentorshipView() {
       ...previous,
       currentStep: 1,
       wantsToParticipate: true,
-      selectedTechnicalAreaIds: savedParticipation.technicalAreaIds,
-      selectedOrientationTypeIds: savedParticipation.orientationTypeIds,
+      selectedTechnicalAreaIds: savedParticipation.technicalAreaIds ?? [],
+      selectedOrientationTypeIds: savedParticipation.orientationTypeIds ?? [],
     }));
   }, [isDraftHydrated, participation.state, setState]);
 

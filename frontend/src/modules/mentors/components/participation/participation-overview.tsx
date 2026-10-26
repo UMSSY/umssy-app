@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, CheckCircle2, Pencil, UserRoundX, Zap } from "lucide-react";
+import { CheckCircle2, Info, Pencil, UserRoundX, Zap } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { PageHeading } from "@/shared/components/layout";
 import { updateMentorParticipation } from "../../services/mentor-participation.service";
+import type { MentorParticipation } from "../../services/mentor-participation.service";
 import { ActivateParticipationModal } from "./activate-participation-modal";
 import { DeactivateParticipationModal } from "./deactivate-participation-modal";
 
@@ -87,11 +88,14 @@ export function ParticipationOverview({
 }: ParticipationOverviewProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [participationOverride, setParticipationOverride] = useState<boolean | null>(null);
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
   const [isActivateModalOpen, setIsActivateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const participationIsActive = participationOverride ?? isActive;
 
   useEffect(() => {
     if (!successMessage) return;
@@ -107,11 +111,20 @@ export function ParticipationOverview({
     setSuccessMessage(null);
     try {
       await updateMentorParticipation(nextIsActive);
-      queryClient.setQueryData(["mentors", "participation"], {
-        isActive: nextIsActive,
-        areas,
-        orientations,
-      });
+      setParticipationOverride(nextIsActive);
+      queryClient.setQueryData<MentorParticipation | null>(
+        ["mentors", "participation"],
+        (previous) =>
+          previous
+            ? { ...previous, isActive: nextIsActive }
+            : {
+                isActive: nextIsActive,
+                areas,
+                orientations,
+                technicalAreaIds: [],
+                orientationTypeIds: [],
+              },
+      );
       setIsActivateModalOpen(false);
       setIsDeactivateModalOpen(false);
       setSuccessMessage(
@@ -178,27 +191,27 @@ export function ParticipationOverview({
                   </CardTitle>
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-wider uppercase ${
-                      isActive
+                      participationIsActive
                         ? "bg-green-100 text-green-800"
-                        : "border border-border bg-surface-soft text-text-secondary"
+                        : "border border-danger/20 bg-danger/5 text-danger"
                     }`}
                   >
                     <span
                       aria-hidden="true"
                       className={`size-2 rounded-full ${
-                        isActive ? "bg-green-600" : "bg-text-secondary"
+                        participationIsActive ? "bg-green-600" : "bg-danger"
                       }`}
                     />
-                    {isActive ? "Activo" : "Desactivado"}
+                    {participationIsActive ? "Activo" : "Desactivado"}
                   </span>
                 </div>
                 <p className="text-sm text-text-secondary">
-                  {isActive
+                  {participationIsActive
                     ? "Tu perfil puede aparecer como mentor disponible en el directorio."
                     : "Tu perfil puede aparecer como mentor no disponible en el directorio."}
                 </p>
               </div>
-              {isActive ? (
+              {participationIsActive ? (
                 <Button
                   type="button"
                   variant="outline"
@@ -225,16 +238,17 @@ export function ParticipationOverview({
                 </Button>
               )}
             </div>
-            {!isActive && (
+            {!participationIsActive && (
               <div className="flex items-start gap-3 rounded-xl border border-border bg-surface-soft p-3.5">
-                <Check
+                <Info
                   aria-hidden="true"
-                  className="mt-0.5 shrink-0 text-accent"
+                  className="mt-0.5 shrink-0 text-danger"
                   size={16}
                 />
                 <p className="text-xs leading-relaxed text-text-secondary">
-                  Tus preferencias y credenciales continúan guardadas. Al
-                  reactivar, tus áreas y opciones volverán a estar disponibles.
+                  Tus preferencias y credenciales continúan guardadas con total
+                  seguridad. Al reactivar, tus áreas y opciones volverán a estar
+                  activas de inmediato.
                 </p>
               </div>
             )}
@@ -247,7 +261,7 @@ export function ParticipationOverview({
           editHref="/mentors/participation/technical-areas"
           editLabel="Editar áreas técnicas"
           items={areas}
-          isEditable={isActive}
+          isEditable={participationIsActive}
         />
 
         <ParticipationPreferencesCard
@@ -255,7 +269,7 @@ export function ParticipationOverview({
           editHref="/mentorship/orientation"
           editLabel="Editar tipos de orientación"
           items={orientations}
-          isEditable={isActive}
+          isEditable={participationIsActive}
         />
         </div>
       </div>

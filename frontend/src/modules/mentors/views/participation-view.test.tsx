@@ -153,6 +153,17 @@ describe("ParticipationView", () => {
       await screen.findByText("Has desactivado tu participación temporalmente."),
     ).toBeInTheDocument();
     expect(await screen.findByText("Desactivado")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Activar participación" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Desactivar participación" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Tus preferencias y credenciales continúan guardadas con total seguridad. Al reactivar, tus áreas y opciones volverán a estar activas de inmediato.",
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
   });
 

@@ -140,6 +140,25 @@ describe("MentorshipView", () => {
     ).toHaveAttribute("aria-pressed", "true");
   });
 
+  it("usa selecciones vacías si la participación guardada no incluye sus IDs", async () => {
+    integrationMocks.getMentorParticipation.mockResolvedValueOnce({
+      isActive: false,
+      areas: ["Backend"],
+      orientations: ["Orientación profesional"],
+    });
+    renderWithQuery(<MentorshipView />);
+
+    await screen.findByRole("heading", { name: "Participación" });
+    await waitFor(() =>
+      expect(
+        screen.getByRole("checkbox", { name: "Quiero participar como mentor" }),
+      ).toBeChecked(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Continuar/i }));
+
+    expect(screen.getByText("Paso 2: Áreas técnicas")).toBeInTheDocument();
+  });
+
   it("con cupos ocupados abre el modal después de confirmar sin activar ni perder selecciones", async () => {
     vi.stubEnv("NODE_ENV", "development");
     renderWithQuery(<MentorshipView />);
