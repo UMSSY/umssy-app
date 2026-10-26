@@ -145,10 +145,27 @@ describe("useProposalSupport", () => {
 
     expect(client.getQueryData(listKey)).toEqual(before);
     expect(client.getQueryData(detailKey)).toEqual(proposal);
-    expect(invalidate).not.toHaveBeenCalled();
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["events", "list", "token-a"] });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: detailKey, exact: true });
+    expect(invalidate).toHaveBeenCalledWith({
+      queryKey: REGISTRATION_QUERY_KEYS.own(proposal.id, "token-a"), exact: true,
+    });
     await waitFor(() => expect(result.current.errorCode).toBe("ALREADY_SUPPORTED"));
     expect(result.current.error).toBe("Tu apoyo ya fue registrado. No puedes preinscribirte dos veces.");
     expect(registrationsService.supportProposal).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the cached proposal on a network failure and offers a retryable error", async () => {
+    vi.mocked(registrationsService.supportProposal).mockRejectedValue(new Error("offline"));
+    const { result, client } = renderHookWithQuery(() => useProposalSupport(proposal.id));
+    client.setQueryData(listKey, listWith([proposal]));
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+
+    await act(async () => { await result.current.support(); });
+
+    expect(client.getQueryData<InfiniteData<EventsListResponse>>(listKey)!.pages[0].data[0]).toEqual(proposal);
+    expect(invalidate).not.toHaveBeenCalled();
+    await waitFor(() => expect(result.current.error).toBe("No pudimos registrar tu apoyo. Revisa la conexión e inténtalo nuevamente."));
   });
 
   it("submits only once on rapid repeated actions", async () => {

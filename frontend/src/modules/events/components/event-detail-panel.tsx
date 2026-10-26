@@ -16,6 +16,7 @@ import { hasValidEventCapacity } from '../utils/has-valid-event-capacity';
 import { WorkshopCover } from './workshop-cover';
 import { EventRegistrationAction } from './event-registration-action';
 import { ProposalProgress } from './proposal-progress';
+import { RequestFeedback } from './request-feedback';
 
 import type { EventDetailPanelProps } from '../types/event-detail-panel-props.types';
 
@@ -24,6 +25,11 @@ export function EventDetailPanel({
   onClose,
   onSupport,
   isSupportPending = false,
+  isSupportDisabled = false,
+  supportNotice,
+  supportError,
+  supportSuccessMessage,
+  onRetrySupport,
 }: EventDetailPanelProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { titleRef.current?.focus(); }, [event.id]);
@@ -145,7 +151,7 @@ export function EventDetailPanel({
             type="button"
             size="lg"
             className="min-h-11 w-full bg-orange-500 text-white hover:bg-orange-600 disabled:bg-muted disabled:text-text-secondary disabled:opacity-100"
-            disabled={!onSupport || isSupportPending || event.hasSupported}
+            disabled={!onSupport || isSupportPending || isSupportDisabled || event.hasSupported}
             onClick={() => onSupport?.(event)}
           >
             {isSupportPending
@@ -155,6 +161,11 @@ export function EventDetailPanel({
                 : 'Preinscribirme/Apoyar propuesta'}
           </Button>
         )}
+        {displayStatus === 'voting' && supportNotice && (
+          <RequestFeedback message={supportNotice} />
+        )}
+        {supportError && <RequestFeedback message={supportError} isError onRetry={onRetrySupport} retryLabel="Reintentar apoyo" />}
+        {supportSuccessMessage && <RequestFeedback message={supportSuccessMessage} />}
 
         {!isProposal && <section aria-labelledby="event-capacity-title" className="space-y-2">
           <div className="flex items-center justify-between gap-3">
