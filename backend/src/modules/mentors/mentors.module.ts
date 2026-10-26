@@ -16,6 +16,8 @@ import { MentorOffersWorker } from './services/mentor-offers-worker.service.js';
 import { MentorParticipationController } from './controllers/mentor-participation.controller.js';
 import { MentorParticipationService } from './services/mentor-participation.service.js';
 import { MentorParticipationRepository } from './repositories/mentor-participation.repository.js';
+import { MentorExitController } from './controllers/mentor-exit.controller.js';
+import { MentorExitRepository } from './repositories/mentor-exit.repository.js';
 
 @Module({
   imports: [AuthModule, ProfileModule],
@@ -24,6 +26,7 @@ import { MentorParticipationRepository } from './repositories/mentor-participati
     MentorPhotoController,
     MentorOffersController,
     MentorParticipationController,
+    MentorExitController,
   ],
   providers: [
     MentorsService,
@@ -36,6 +39,7 @@ import { MentorParticipationRepository } from './repositories/mentor-participati
     MentorOffersWorker,
     MentorParticipationService,
     MentorParticipationRepository,
+    MentorExitRepository,
   ],
   exports: [MentorsService],
 })
