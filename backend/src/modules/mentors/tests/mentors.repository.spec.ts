@@ -3,6 +3,8 @@ import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 
+vi.mock('../repositories/mentor-offers.queries.js', () => ({ reconcileMentorOffers: vi.fn() }));
+
 describe('MentorsRepository', () => {
   it('no consulta metadatos de fotos si el directorio está vacío', async () => {
     const findMany = vi.fn().mockResolvedValue([]);

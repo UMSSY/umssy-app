@@ -152,6 +152,7 @@ model User {
   reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
   approvedAccessRequest  AccessRequest?       @relation("ApprovedGraduateAccount")
   mentorSlotOffers       MentorSlotOffer[]
+  mentorParticipationRequests MentorParticipationRequest[]
 
   conversationsAsUserA Conversation[]            @relation("UserAConversations")
   conversationsAsUserB Conversation[]            @relation("UserBConversations")
@@ -744,15 +745,34 @@ model AccessRequest {
   @@map("access_requests")
 }
 
-// Una oferta vigente reserva una plaza. Su asignación y confirmación pertenecen a HU-7-3.
+// Contrato persistido para las solicitudes de HU-7-2; una postulación nueva crea otro ID.
+model MentorParticipationRequest {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  status             String   @default("PENDING") @db.VarChar(20)
+  queuedAt           DateTime @default(now()) @map("queued_at") @db.Timestamptz(6)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  technicalAreaIds    String[] @map("technical_area_ids") @db.Uuid
+  orientationTypeIds String[] @map("orientation_type_ids") @db.Uuid
+
+  user  User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  offer MentorSlotOffer?
+
+  @@index([status, queuedAt, id])
+  @@map("mentor_participation_requests")
+}
+
 model MentorSlotOffer {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
   status    String   @default("OFFERED") @db.VarChar(20)
   offeredAt DateTime @default(now()) @map("offered_at") @db.Timestamptz(6)
   expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  requestId String?  @unique @map("request_id") @db.Uuid
+  confirmedAt DateTime? @map("confirmed_at") @db.Timestamptz(6)
 
   user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  request MentorParticipationRequest? @relation(fields: [requestId], references: [id], onDelete: Restrict)
 
   @@index([status, expiresAt])
   @@map("mentor_slot_offers")
