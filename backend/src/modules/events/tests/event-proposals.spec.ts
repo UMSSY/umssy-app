@@ -7,7 +7,7 @@ const valid = { title: 'Python', description: 'Taller práctico', categoryId: '1
 function setup() {
   const record = { id: randomUUID(), supportThreshold: 16, votingDeadline: new Date('2026-12-01T12:00:00Z'), proposalHash: '' };
   const tx = { user: { findFirst: vi.fn().mockResolvedValue({ firstName: 'Ana', lastName: 'López' }) }, eventCategory: { findUnique: vi.fn().mockResolvedValue({ id: valid.categoryId }) }, eventStatus: { upsert: vi.fn().mockResolvedValue({ id: 'status' }) }, eventOrigin: { upsert: vi.fn().mockResolvedValue({ id: 'origin' }) }, eventModality: { upsert: vi.fn().mockResolvedValue({ id: 'modality' }) }, event: { create: vi.fn().mockImplementation(({ data }) => { Object.assign(record, data); return record; }) } };
-  const prisma = { event: { findUnique: vi.fn().mockResolvedValue(null) }, $transaction: vi.fn((fn) => fn(tx)) };
+  const prisma = { event: { findUnique: vi.fn().mockResolvedValue(null), findFirst: vi.fn() }, $transaction: vi.fn((fn) => fn(tx)) };
   const files = { validate: vi.fn().mockReturnValue({ buffer: Buffer.from('validated image'), detectedMimeType: 'image/png' }) };
   return { tx, prisma, record, files, service: new EventProposalsService(prisma as never, files as never) };
 }
@@ -43,5 +43,14 @@ describe('Workshop proposal validation and persistence', () => {
     const { service, tx } = setup(); tx.eventCategory.findUnique.mockResolvedValue(null);
     await expect(service.create('author', valid, undefined, randomUUID())).rejects.toMatchObject({ status: 400 });
     expect(tx.event.create).not.toHaveBeenCalled();
+  });
+  it('sirve la portada de propuestas vencidas y de ambos estados de votación', async () => {
+    const { service, prisma } = setup();
+    prisma.event.findFirst.mockResolvedValue({ coverData: new Uint8Array([1, 2, 3]), coverMimeType: 'image/png' });
+
+    await expect(service.cover(randomUUID())).resolves.toMatchObject({ content: Buffer.from([1, 2, 3]), mimeType: 'image/png' });
+    expect(prisma.event.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ status: { title: { in: ['Publicado', 'Votacion', 'En votación', 'Vencido'] } } }),
+    }));
   });
 });

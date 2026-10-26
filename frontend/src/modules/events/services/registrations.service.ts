@@ -3,6 +3,8 @@ import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { readRecord, readString, readNullableString } from '../utils/response-validation';
 import { REQUEST_TIMEOUT_MS } from '../constants/events.constants';
 import { apiClient } from '@/shared/services/api-client';
+import { parseProposalSupportResponse } from '../utils/proposal-support-response';
+import type { ProposalSupportResponse } from '../types/proposal-support-response.types';
 
 export interface PassData {
   id: string;
@@ -17,6 +19,25 @@ export interface PassData {
 
 export const registrationsService = {
   getMine: registrationApi.getMine,
+
+  async supportProposal(
+    eventId: string,
+    accessToken = getAccessToken(),
+  ): Promise<ProposalSupportResponse> {
+    if (!apiClient.defaults.baseURL)
+      throw new Error('La URL del backend no está configurada.');
+
+    const response = await apiClient.post<unknown>(
+      `/event-registrations/support/${encodeURIComponent(eventId)}`,
+      undefined,
+      {
+        headers: { Authorization: accessToken ? `Bearer ${accessToken}` : '' },
+        timeout: REQUEST_TIMEOUT_MS,
+      },
+    );
+
+    return parseProposalSupportResponse(response.data, eventId);
+  },
 
   async getPass(registrationId: string, signal?: AbortSignal, accessToken = getAccessToken()): Promise<PassData> {
     const token = accessToken;

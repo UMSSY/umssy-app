@@ -7,6 +7,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import { DomainExceptionFilter } from '../src/common/filters/domain-exception.filter.js';
 import { ResponseInterceptor } from '../src/common/interceptors/response.interceptor.js';
 import { PrismaService } from '../src/common/prisma/prisma.service.js';
+import { EventRegistrationsService } from '../src/modules/event-registrations/services/event-registrations.service.js';
 import { EventRegistrationsModule } from '../src/modules/event-registrations/index.js';
 import { EventsService } from '../src/modules/events/index.js';
 import { createRegistrationDatabaseFixture } from './fixtures/registration-database.fixture.js';
@@ -46,6 +47,8 @@ describe.skipIf(!DATABASE)('registration persistence and concurrent HTTP request
     .post(`/api/events/${eventId}/registrations`).set('Authorization', `Bearer ${tokens[user]}`).timeout(REQUEST_TIMEOUT);
   const cancel = (id: string, user = 0) => request(app.getHttpServer())
     .delete(`/api/registrations/${id}`).set('Authorization', `Bearer ${tokens[user]}`).timeout(REQUEST_TIMEOUT);
+  const support = (eventId: string, user = 0) => request(app.getHttpServer())
+    .post(`/api/event-registrations/support/${eventId}`).set('Authorization', `Bearer ${tokens[user]}`).timeout(REQUEST_TIMEOUT);
 
   function synchronizeEventReads() {
     const service = app.get(EventsService);
@@ -62,6 +65,27 @@ describe.skipIf(!DATABASE)('registration persistence and concurrent HTTP request
       return event;
     });
     return () => { clearTimeout(timer); release(); expect(arrived).toBeGreaterThanOrEqual(2); };
+  }
+
+  function synchronizeSupportReads() {
+    const service = app.get(EventRegistrationsService) as unknown as {
+      loadSupportContext: (tx: unknown, eventId: string) => Promise<unknown>;
+    };
+    const read = service.loadSupportContext.bind(service);
+    let arrived = 0;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const timer = setTimeout(release, 5_000);
+    vi.spyOn(service, 'loadSupportContext').mockImplementation(async (tx, eventId) => {
+      const context = await read(tx, eventId);
+      if (arrived < 2) {
+        arrived += 1;
+        if (arrived === 2) { clearTimeout(timer); release(); }
+        await gate;
+      }
+      return context;
+    });
+    return () => { clearTimeout(timer); release(); expect(arrived).toBe(2); };
   }
 
   it('persists cancellation and reactivation on the same row with a new QR', async () => {
@@ -117,4 +141,33 @@ describe.skipIf(!DATABASE)('registration persistence and concurrent HTTP request
     expect((await create(event.id, 1).expect(403)).body.code).toBe('USER_INACTIVE');
     await fixture.client.user.update({ where: { id: fixture.users[1].id }, data: { isActive: true } });
   });
+
+  it('persists both simultaneous threshold supports and exposes their confirmed passes', async () => {
+    const event = await fixture.createVotingProposal();
+    for (const user of [0, 1]) {
+      const mine = await request(app.getHttpServer()).get('/api/event-registrations/me')
+        .set('Authorization', `Bearer ${tokens[user]}`).expect(200);
+      expect(mine.body.data.some((item: { eventName: string }) => item.eventName === event.title)).toBe(false);
+    }
+
+    const verifyOverlap = synchronizeSupportReads();
+    const responses = await Promise.all([support(event.id, 0), support(event.id, 1)]);
+    verifyOverlap();
+
+    expect(responses.map((response) => response.status)).toEqual([201, 201]);
+    expect(responses.map((response) => response.body.data.status)).toEqual(['Publicado', 'Publicado']);
+    expect(responses.map((response) => response.body.data.supportCount).sort((left, right) => left - right)).toEqual([8, 9]);
+    expect((await fixture.client.event.findUniqueOrThrow({ where: { id: event.id }, include: { status: true } })).status.title).toBe('Publicado');
+    expect(await fixture.client.eventRegistration.count({ where: { eventId: event.id, cancelledAt: null } })).toBe(9);
+    for (const user of [0, 1]) {
+      const mine = await request(app.getHttpServer()).get('/api/event-registrations/me')
+        .set('Authorization', `Bearer ${tokens[user]}`).expect(200);
+      expect(mine.body.data).toEqual(expect.arrayContaining([
+        expect.objectContaining({ eventName: event.title, status: 'Confirmada' }),
+      ]));
+    }
+    expect((await support(event.id, 0).expect(409)).body.code).toBe('ALREADY_SUPPORTED');
+    expect((await support(event.id, 2).expect(409)).body.code).toBe('EVENT_NOT_SUPPORTABLE');
+    expect(await fixture.client.eventRegistration.count({ where: { eventId: event.id, cancelledAt: null } })).toBe(9);
+  }, 20_000);
 });

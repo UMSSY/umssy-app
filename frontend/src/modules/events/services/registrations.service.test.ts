@@ -6,7 +6,7 @@ import { registrationsService } from './registrations.service';
 
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/shared/services/api-client")>()),
-  apiClient: { defaults: { baseURL: 'http://localhost/api' }, get: vi.fn() },
+  apiClient: { defaults: { baseURL: 'http://localhost/api' }, get: vi.fn(), post: vi.fn() },
 }));
 
 vi.mock('@/shared/services/storage/access-token-storage', () => ({ getAccessToken: vi.fn() }));
@@ -78,5 +78,76 @@ describe('Private pass API contract', () => {
     vi.mocked(getAccessToken).mockReturnValue('token'); apiClient.defaults.baseURL = undefined;
     await expect(registrationsService.getPass('pass-1')).rejects.toThrow('URL');
     expect(apiClient.get).not.toHaveBeenCalled();
+  });
+});
+
+describe('Proposal support API contract', () => {
+  const support = {
+    eventId: 'proposal-1',
+    status: 'voting',
+    supportCount: 15,
+    supportThreshold: 20,
+    supportsRemaining: 5,
+    progressPercent: 75,
+    hasSupported: true,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getAccessToken).mockReturnValue('signed-token');
+    apiClient.defaults.baseURL = 'http://localhost/api';
+  });
+
+  it('sends a bodyless POST with the session token and returns voting progress', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({
+      data: { statusCode: 201, ok: true, detail: 'Operación exitosa', data: support },
+    });
+
+    await expect(registrationsService.supportProposal('proposal-1')).resolves.toEqual(support);
+    expect(apiClient.post).toHaveBeenCalledExactlyOnceWith(
+      '/event-registrations/support/proposal-1',
+      undefined,
+      {
+        headers: { Authorization: 'Bearer signed-token' },
+        timeout: 10_000,
+      },
+    );
+  });
+
+  it('accepts publication when the support completes the threshold', async () => {
+    const published = {
+      ...support,
+      status: 'Publicado',
+      supportCount: 20,
+      supportsRemaining: 0,
+      progressPercent: 100,
+    };
+    vi.mocked(apiClient.post).mockResolvedValue({
+      data: { statusCode: 201, ok: true, data: published },
+    });
+
+    await expect(registrationsService.supportProposal('proposal-1', 'other-token'))
+      .resolves.toEqual(published);
+    expect(apiClient.post).toHaveBeenCalledWith(
+      '/event-registrations/support/proposal-1',
+      undefined,
+      expect.objectContaining({ headers: { Authorization: 'Bearer other-token' } }),
+    );
+  });
+
+  it('does not send a request without a configured backend URL', async () => {
+    apiClient.defaults.baseURL = undefined;
+
+    await expect(registrationsService.supportProposal('proposal-1')).rejects.toThrow(
+      'La URL del backend no está configurada.',
+    );
+    expect(apiClient.post).not.toHaveBeenCalled();
+  });
+
+  it('preserves the backend error for code-based handling by the action hook', async () => {
+    const error = { isAxiosError: true, response: { status: 409 } };
+    vi.mocked(apiClient.post).mockRejectedValue(error);
+
+    await expect(registrationsService.supportProposal('proposal-1')).rejects.toBe(error);
   });
 });

@@ -60,9 +60,13 @@ export class EventRegistrationsService {
   async createWithQrToken(payload: CreateEventRegistrationPayload) {
     // Shared token persistence; callers enforce the rules of their registration flow.
     return this.prisma.eventRegistration.create({
-      data: { ...payload, qrToken: randomBytes(32).toString('hex') },
+      data: { ...payload, qrToken: this.generateQrToken() },
       select: { id: true, eventId: true, userId: true, statusId: true, qrToken: true },
     });
+  }
+
+  private generateQrToken(): string {
+    return randomBytes(32).toString('hex');
   }
 
   async create(eventId: string, userId: string): Promise<RegistrationResponse> {
@@ -91,7 +95,7 @@ export class EventRegistrationsService {
       const data = {
         status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
         cancelledAt: null,
-        qrToken: randomBytes(32).toString('hex'),
+        qrToken: this.generateQrToken(),
       };
       const registration = existing
         ? await tx.eventRegistration.update({ where: { id: existing.id }, data, select: REGISTRATION_SELECT })
@@ -240,12 +244,13 @@ export class EventRegistrationsService {
     assertSupportable: (event: EventSupportContext) => void,
   ): Promise<SupportTransactionResult | null> {
     return this.prisma.$transaction(async (tx) => {
+      const beforeLock = await this.loadSupportContext(tx, eventId);
+      if (!beforeLock) return null;
+
       await this.lockEventRow(tx, eventId);
 
       const event = await this.loadSupportContext(tx, eventId);
       if (!event) return null;
-
-      assertSupportable(event);
 
       const existing = await tx.eventRegistration.findUnique({
         where: { eventId_userId: { eventId, userId } },
@@ -260,12 +265,23 @@ export class EventRegistrationsService {
         };
       }
 
+      const publishedWhileWaiting =
+        event.statusTitle === PUBLISHED_STATUS_TITLE &&
+        event.originTitle === COMMUNITY_ORIGIN_TITLE &&
+        beforeLock.originTitle === COMMUNITY_ORIGIN_TITLE &&
+        VOTING_STATUS_TITLES.includes(beforeLock.statusTitle) &&
+        event.supportThreshold !== null &&
+        event.supportThreshold > 0 &&
+        event.supportCount >= event.supportThreshold;
+
+      assertSupportable(publishedWhileWaiting ? beforeLock : event);
+
       await tx.eventRegistration.create({
         data: {
           event: { connect: { id: eventId } },
           user: { connect: { id: userId } },
           status: { connect: { title: REGISTRATION_STATUS_TITLES.confirmed } },
-          qrToken: randomBytes(32).toString('hex'),
+          qrToken: this.generateQrToken(),
         },
         select: { id: true },
       });
@@ -273,9 +289,10 @@ export class EventRegistrationsService {
       const supportCount = event.supportCount + 1;
       const threshold = event.supportThreshold;
       const published =
-        threshold !== null && threshold > 0 && supportCount >= threshold;
+        event.statusTitle === PUBLISHED_STATUS_TITLE ||
+        (threshold !== null && threshold > 0 && supportCount >= threshold);
 
-      if (published) {
+      if (published && event.statusTitle !== PUBLISHED_STATUS_TITLE) {
         await tx.event.update({
           where: { id: eventId },
           data: { status: { connect: { title: PUBLISHED_STATUS_TITLE } } },
