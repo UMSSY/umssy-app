@@ -17,7 +17,7 @@ import {
   mapEventToResponse,
   mapEventsToListResponse,
 } from '../mappers/events.mapper.js';
-import type { GetEventsPayload } from '../requests/get-events.request.js';
+import type { GetEventsPayload } from '../types/get-events-payload.types.js';
 import type {
   EventDetailResponse,
   EventsListResponse,

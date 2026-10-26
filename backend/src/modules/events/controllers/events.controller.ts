@@ -15,7 +15,7 @@ import {
   MAX_PAGE_SIZE,
   MAX_SEARCH_LENGTH,
 } from '../requests/get-events.request.js';
-import type { GetEventsPayload } from '../requests/get-events.request.js';
+import type { GetEventsPayload } from '../types/get-events-payload.types.js';
 import type { AuthenticatedRequest } from '../../../common/types/authenticated-request.types.js';
 
 @ApiTags('Events')
