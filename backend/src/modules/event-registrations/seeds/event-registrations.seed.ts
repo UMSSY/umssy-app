@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { SEED_EVENTS } from '../../events/constants/seed-events.constants.js';
@@ -28,7 +29,7 @@ export async function seedEventRegistrations(
           eventId: e.id,
           userId: userId,
           statusId: regStatus.id,
-          qrToken: `qr-seed-${e.id.slice(-4)}`,
+          qrToken: randomBytes(32).toString('hex'),
         },
       });
     }
