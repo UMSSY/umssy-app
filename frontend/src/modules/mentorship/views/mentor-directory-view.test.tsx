@@ -313,7 +313,7 @@ describe("MentorDirectoryView", () => {
     });
 
     fireEvent.change(
-      screen.getByRole("searchbox", { name: "Buscar mentor" }),
+      screen.getByRole("searchbox", { name: "Buscar mentores por nombre" }),
       { target: { value: "maria" } },
     );
 
@@ -348,7 +348,7 @@ describe("MentorDirectoryView", () => {
     ).toBeInTheDocument();
 
     fireEvent.change(
-      screen.getByRole("searchbox", { name: "Buscar mentor" }),
+      screen.getByRole("searchbox", { name: "Buscar mentores por nombre" }),
       { target: { value: "noexiste" } },
     );
 
