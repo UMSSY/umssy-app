@@ -278,6 +278,7 @@ export function MentorDirectoryView({
                 : "No hay mentores en esta página"
             }
             description="Prueba otros filtros o vuelve a consultar más adelante."
+            onClearFilters={handleClearFilters}
           />
         ) : (
           <>

@@ -210,6 +210,87 @@ function mockDirectoryWithParams() {
 }
 
 describe("MentorDirectoryView", () => {
+  it("muestra el indicador mientras carga el directorio", () => {
+    vi.spyOn(directoryService, "getMentorDirectory").mockImplementation(
+      () => new Promise<DirectoryPage>(() => {}),
+    );
+
+    render(<MentorDirectoryView />);
+
+    expect(
+      screen.getByRole("status", {
+        name: "Cargando directorio de mentores",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("region", {
+        name: "Listado de mentores",
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("muestra el estado sin resultados y permite limpiar los filtros", async () => {
+    navigationMocks.search =
+      "?search=noexiste&area=Backend&available=false";
+
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
+      makeDirectoryPage([]),
+    );
+
+    render(<MentorDirectoryView />);
+
+    expect(
+      await screen.findByText("No hay mentores con estos filtros"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("region", {
+        name: "Listado de mentores",
+      }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Limpiar filtros",
+      }),
+    );
+
+    expect(navigationMocks.replace).toHaveBeenLastCalledWith(
+      "/mentorship/mentors?page=1",
+      { scroll: false },
+    );
+  });
+
+  it("muestra el error y Reintentar vuelve a consultar el directorio", async () => {
+    const getDirectory = vi
+      .spyOn(directoryService, "getMentorDirectory")
+      .mockRejectedValueOnce(new Error("network error"))
+      .mockResolvedValueOnce(makeDirectoryPage([mentors[0]]));
+
+    render(<MentorDirectoryView />);
+
+    expect(
+      await screen.findByRole("alert"),
+    ).toHaveTextContent("No pudimos cargar el directorio");
+
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Reintentar",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("link", {
+        name: /Ver perfil de María/,
+      }),
+    ).toBeInTheDocument();
+
+    expect(getDirectory).toHaveBeenCalledTimes(2);
+  });
+
   it("renderiza el encabezado del directorio", () => {
     vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
       makeDirectoryPage([]),
@@ -377,7 +458,7 @@ describe("MentorDirectoryView", () => {
       screen.getByRole("combobox", { name: "Área técnica" }),
     );
     await user.click(
-      screen.getByRole("option", { name: "Backend" }),
+      await screen.findByRole("option", { name: "Backend" }),
     );
 
     applyNavigation(rerender);
