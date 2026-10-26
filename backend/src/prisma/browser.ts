@@ -282,3 +282,18 @@ export type SurveyResponse = Prisma.SurveyResponseModel
  * 
  */
 export type SurveyAnswer = Prisma.SurveyAnswerModel
+/**
+ * Model AuditAction
+ * 
+ */
+export type AuditAction = Prisma.AuditActionModel
+/**
+ * Model AuditEvent
+ * 
+ */
+export type AuditEvent = Prisma.AuditEventModel
+/**
+ * Model DocumentValidation
+ * 
+ */
+export type DocumentValidation = Prisma.DocumentValidationModel
