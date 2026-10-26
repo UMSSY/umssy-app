@@ -14,21 +14,22 @@ import type { RequestTableProps } from "../../types/request-table-props.types";
 
 const HEAD_CLASS = "h-10 px-5 lg:px-4 text-[11.5px] font-semibold text-ink-soft";
 const CELL_CLASS = "px-5 lg:px-4 text-sm text-ink";
-const WRAP_CLASS = "lg:whitespace-normal";
+const WRAP_CLASS = "whitespace-normal break-words";
 const TABLE_COLUMN_COUNT = 7;
+const COLUMN_WIDTHS = ["w-[26%]", "w-[11%]", "w-[17%]", "w-[15%]", "w-[10%]", "w-[11%]", "w-[10%]"] as const;
 
 export function RequestTable({ items = [], isLoading = false }: RequestTableProps) {
   return (
-    <Table>
+    <Table className="min-w-[960px] table-fixed">
       <TableHeader className="bg-surface-soft">
         <TableRow className="hover:bg-transparent">
-          <TableHead className={HEAD_CLASS}>Solicitante</TableHead>
-          <TableHead className={HEAD_CLASS}>Código SIS</TableHead>
-          <TableHead className={HEAD_CLASS}>Carrera</TableHead>
-          <TableHead className={HEAD_CLASS}>Documento</TableHead>
-          <TableHead className={HEAD_CLASS}>Enviada</TableHead>
-          <TableHead className={HEAD_CLASS}>Estado</TableHead>
-          <TableHead className={cn(HEAD_CLASS, "text-right")}>Acción</TableHead>
+          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[0])}>Solicitante</TableHead>
+          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[1])}>Código SIS</TableHead>
+          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[2])}>Carrera</TableHead>
+          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[3])}>Documento</TableHead>
+          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[4])}>Enviada</TableHead>
+          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[5])}>Estado</TableHead>
+          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[6], "text-right")}>Acción</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -52,9 +53,11 @@ export function RequestTable({ items = [], isLoading = false }: RequestTableProp
                     >
                       {getInitials(item.fullName)}
                     </span>
-                    <div className="flex flex-col">
+                    <div className="flex min-w-0 flex-col">
                       <span className="font-semibold text-ink">{item.fullName}</span>
-                      <span className="text-sm text-text-secondary">{item.email}</span>
+                      <span className="truncate text-sm text-text-secondary" title={item.email}>
+                        {item.email}
+                      </span>
                     </div>
                   </div>
                 </TableCell>

@@ -14,7 +14,7 @@ const STEPS = [
 
 export function RequestStepsSidebar({ currentStep = 1 }: RequestStepsSidebarProps) {
   return (
-    <aside className="flex w-72 shrink-0 flex-col justify-between gap-10 border-r border-sidebar-border bg-sidebar px-6 py-8 text-sidebar-foreground">
+    <aside className="sticky top-app-header flex h-app-sidebar w-72 shrink-0 flex-col justify-between gap-10 self-start overflow-y-auto border-r border-sidebar-border bg-sidebar px-6 py-8 text-sidebar-foreground">
       <div>
         <h2 className="text-2xl font-bold">Solicitud de acceso</h2>
         <p className="mt-2 mb-[22px] max-w-75 text-sm text-text-secondary">
