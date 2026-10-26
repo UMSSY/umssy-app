@@ -1,5 +1,9 @@
 # HU-MEN-07 — demostración local v3
 
+## Integración con la épica
+
+Las notificaciones HU7 conservan el outbox y sus reintentos, y se envían mediante el `MailModule` compartido de la épica. Para usar Mailpit local, configurar `MAIL_TRANSPORT=smtp`, `SMTP_HOST=127.0.0.1`, `SMTP_PORT=1025` (o el puerto local elegido), `SMTP_SECURE=false`, `SMTP_REQUIRE_TLS=false` y `MAIL_FROM_ADDRESS=hu7@umssy.test`. La configuración predeterminada `MAIL_TRANSPORT=console` registra los correos localmente. Las variables anteriores `MAIL_HOST`, `MAIL_PORT`, `MAIL_FROM` y el transporte `mailpit` ya no se utilizan. La evidencia de la demostración que sigue corresponde a la configuración anterior.
+
 Estado comprobado el 24/10/2026. Todo está en esta computadora. No se hizo commit, push, PR, merge, despliegue ni cambio remoto. Esta guía reemplaza las decisiones anteriores sobre «pausar mentoría». Fuentes: prompt local `C:\Users\usuario\Downloads\Prompt_Maestro_HU7_UMSSY_Local_v3_Reglas_Confirmadas.md`, mockups `C:\Users\usuario\Downloads\hu7.pdf`, [HU7 #1386](https://github.com/UMSSY/umssy-app/issues/1386), [HU8 #1184](https://github.com/UMSSY/umssy-app/issues/1184) y [Epic 7 #1176](https://github.com/UMSSY/umssy-app/issues/1176). Las issues se leyeron sin modificarlas.
 
 ## Abrir la demo actual

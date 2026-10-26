@@ -182,12 +182,11 @@ describe("OrientationConfigView", () => {
     await screen.findByRole("checkbox", { name: "Orientación profesional" });
 
     fireEvent.click(checkbox("Orientación profesional"));
-    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
     vi.useFakeTimers();
 
     await act(async () => {
       fireEvent.click(
-        screen.getByRole("button", { name: "Sí, guardar cambios" }),
+        screen.getByRole("button", { name: "Guardar cambios" }),
       );
     });
 

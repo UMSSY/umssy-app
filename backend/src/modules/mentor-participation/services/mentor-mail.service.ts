@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { createConnection } from 'node:net';
+import { MailService } from '../../mail/services/mail.service.js';
 
 const SUBJECTS: Record<string, string> = {
   WAITING: 'Solicitud de cupo recibida',
@@ -12,14 +12,9 @@ const SUBJECTS: Record<string, string> = {
 
 @Injectable()
 export class MentorMailService {
+  constructor(private readonly mail: MailService) {}
+
   async send(event: { eventKey: string; recipient: string; type: string; payload?: unknown }): Promise<void> {
-    if (process.env.MAIL_TRANSPORT !== 'mailpit') throw new Error('HU7 requiere MAIL_TRANSPORT=mailpit');
-    const host = process.env.MAIL_HOST ?? 'localhost';
-    const port = Number(process.env.MAIL_PORT ?? '1025');
-    if (!['localhost', '127.0.0.1', '::1'].includes(host) || !Number.isInteger(port) || port < 1024 || port > 65535) {
-      throw new Error('HU7 solo envía a Mailpit local');
-    }
-    const from = process.env.MAIL_FROM ?? 'hu7@umssy.test';
     const appOrigin = process.env.CORS_ORIGIN?.split(',')[0] ?? 'http://localhost:3000';
     const subject = SUBJECTS[event.type] ?? 'Actualización de mentorías';
     const sanctionPayload = event.payload as { startsAt?: string; expiresAt?: string } | undefined;
@@ -39,59 +34,13 @@ export class MentorMailService {
           : event.type === 'CANCELLED'
             ? 'Tu solicitud fue cancelada. Si vuelves a solicitar, ingresarás al final de la cola.'
             : 'Tu participación como mentor ya está activa.';
-    const socket = createConnection({ host, port });
-    socket.setTimeout(10_000);
-    const connected = new Promise<void>((resolve, reject) => {
-      socket.once('connect', resolve);
-      socket.once('error', reject);
-      socket.once('timeout', () => reject(new Error('SMTP no respondió')));
+    const appUrl = `${appOrigin}/mentors/participation`;
+    await this.mail.send({
+      to: event.recipient,
+      subject,
+      text: `${body}\n\nAbre ${appUrl} e inicia sesión.`,
+      mjml: '<mj-section><mj-column><mj-text>{{message}}</mj-text><mj-button href="{{appUrl}}">Ver mi participación</mj-button></mj-column></mj-section>',
+      values: { message: body, appUrl },
     });
-    socket.on('error', () => undefined);
-    let buffer = '';
-    const lines: string[] = [];
-    const waiting: Array<(line: string) => void> = [];
-    socket.on('data', (chunk: Buffer) => {
-      buffer += chunk.toString('utf8');
-      while (buffer.includes('\n')) {
-        const index = buffer.indexOf('\n');
-        const line = buffer.slice(0, index).trimEnd();
-        buffer = buffer.slice(index + 1);
-        const listener = waiting.shift();
-        if (listener) listener(line); else lines.push(line);
-      }
-    });
-    const line = () => new Promise<string>((resolve, reject) => {
-      if (lines.length) return resolve(lines.shift()!);
-      const timer = setTimeout(() => reject(new Error('SMTP sin respuesta')), 10_000);
-      waiting.push((value) => { clearTimeout(timer); resolve(value); });
-    });
-    const response = async (expected: number[]) => {
-      let current = await line();
-      while (/^\d{3}-/.test(current)) current = await line();
-      const code = Number(current.slice(0, 3));
-      if (!expected.includes(code)) throw new Error(`SMTP respondió ${code}`);
-    };
-    const command = async (value: string, expected: number[]) => {
-      socket.write(`${value}\r\n`);
-      await response(expected);
-    };
-    try {
-      await connected;
-      await response([220]);
-      await command('EHLO localhost', [250]);
-      await command(`MAIL FROM:<${from}>`, [250]);
-      await command(`RCPT TO:<${event.recipient}>`, [250, 251]);
-      await command('DATA', [354]);
-      const message = [
-        `From: ${from}`, `To: ${event.recipient}`, `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
-        `Message-ID: <${event.eventKey.replace(/[^a-zA-Z0-9:.-]/g, '')}@umssy.test>`,
-        'MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', '',
-        body, '', `Abre ${appOrigin}/mentors/participation e inicia sesión.`,
-      ].join('\r\n').replace(/\r\n\./g, '\r\n..');
-      await command(`${message}\r\n.`, [250]);
-      socket.write('QUIT\r\n');
-    } finally {
-      socket.end();
-    }
   }
 }

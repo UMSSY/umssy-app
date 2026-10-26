@@ -8,11 +8,18 @@ import { MentorsService } from './services/mentors.service.js';
 import { MentorsRepository } from './repositories/mentors.repository.js';
 import { MentorMapper } from './mappers/mentor.mapper.js';
 import { MentorParticipationModule } from '../mentor-participation/mentor-participation.module.js';
+import { MentorAffinityService } from './services/mentor-affinity.service.js';
 
 @Module({
   imports: [AuthModule, ProfileModule, MentorParticipationModule],
   controllers: [MentorsController, MentorPhotoController],
-  providers: [MentorsService, MentorsRepository, MentorMapper, MentorPhotoService],
+  providers: [
+    MentorsService,
+    MentorsRepository,
+    MentorMapper,
+    MentorPhotoService,
+    MentorAffinityService,
+  ],
   exports: [MentorsService],
 })
 export class MentorsModule {}

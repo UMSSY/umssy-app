@@ -11,7 +11,6 @@ import { MentorsService } from '../services/mentors.service.js';
 import { MentorParticipationService } from '../../mentor-participation/services/mentor-participation.service.js';
 import { MentorNotFoundException } from '../exceptions/mentor-not-found.exception.js';
 import { AlreadyMentorException } from '../exceptions/already-mentor.exception.js';
-import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { TechnicalAreasController } from '../../technical-areas/controllers/technical-areas.controller.js';
 import { TechnicalAreasService } from '../../technical-areas/services/technical-areas.service.js';
 import { OrientationTypesController } from '../../orientation-types/controllers/orientation-types.controller.js';
@@ -128,45 +127,55 @@ describe('Mentorship Standard Response HTTP', () => {
       totalPages: 1,
       effectiveSort: 'name_asc',
     });
-    expect(mentorsService.findDirectory).toHaveBeenCalledWith({
-      page: 2,
-      search: 'Ana',
-      area: 'Backend',
-      available: true,
-      sort: 'name_asc',
-    });
+    expect(mentorsService.findDirectory).toHaveBeenCalledWith(
+      {
+        page: 2,
+        search: 'Ana',
+        area: 'Backend',
+        available: true,
+        sort: 'name_asc',
+      },
+      userId,
+    );
   });
 
   it('GET /api/mentors/directory aplica los valores predeterminados', async () => {
     await request(server).get('/api/mentors/directory').expect(200);
-    expect(mentorsService.findDirectory).toHaveBeenLastCalledWith({
-      page: 1,
-      search: '',
-      available: false,
-      sort: 'name_asc',
-    });
+    expect(mentorsService.findDirectory).toHaveBeenLastCalledWith(
+      {
+        page: 1,
+        search: '',
+        available: false,
+        sort: 'name_asc',
+      },
+      userId,
+    );
   });
 
-  it('devuelve un error controlado para un orden reservado', async () => {
-    mentorsService.findDirectory.mockRejectedValueOnce(
-      new RequestValidationException([
-        { field: 'sort', message: 'El orden affinity aún no está disponible' },
-      ]),
-    );
-    await request(server)
+  it('envuelve una sola vez la respuesta de afinidad y usa la identidad del JWT', async () => {
+    const affinityPage = {
+      items: [{ ...directory[0], sharedInterestsCount: 2 }],
+      page: 1,
+      pageSize: 6,
+      totalItems: 1,
+      totalPages: 1,
+      effectiveSort: 'affinity',
+      affinityStatus: 'ready',
+    };
+    mentorsService.findDirectory.mockResolvedValueOnce(affinityPage);
+    const response = await request(server)
       .get('/api/mentors/directory?sort=affinity')
-      .expect(400)
-      .expect({
-        statusCode: 400,
-        data: [
-          { field: 'sort', message: 'El orden affinity aún no está disponible' },
-        ],
-        detail: 'sort: El orden affinity aún no está disponible',
-        ok: false,
-        errors: [
-          { field: 'sort', message: 'El orden affinity aún no está disponible' },
-        ],
-      });
+      .expect(200);
+    expect(response.body.data).toEqual(affinityPage);
+    expect(mentorsService.findDirectory).toHaveBeenLastCalledWith(
+      {
+        page: 1,
+        search: '',
+        available: false,
+        sort: 'affinity',
+      },
+      userId,
+    );
   });
 
   it.each([

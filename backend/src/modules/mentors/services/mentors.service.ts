@@ -12,15 +12,30 @@ import type { UpdateMentorTechnicalAreasDto } from '../requests/update-mentor-te
 import type { UpdateMentorOrientationTypesDto } from '../requests/update-mentor-orientation-types.schema.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
-import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
+import { MentorAffinityService } from './mentor-affinity.service.js';
 
 const DIRECTORY_PAGE_SIZE = 6 as const;
+
+type DirectoryPage = {
+  items: Array<
+    ReturnType<MentorMapper['toDirectoryResponse']> & {
+      sharedInterestsCount?: number;
+    }
+  >;
+  page: number;
+  pageSize: typeof DIRECTORY_PAGE_SIZE;
+  totalItems: number;
+  totalPages: number;
+  effectiveSort: MentorDirectoryQuery['sort'];
+  affinityStatus?: 'ready' | 'no_skills' | 'unmapped_skills';
+};
 
 @Injectable()
 export class MentorsService {
   constructor(
     private readonly mentorsRepository: MentorsRepository,
     private readonly mentorMapper: MentorMapper,
+    private readonly mentorAffinityService?: MentorAffinityService,
   ) {}
 
   async findAll() {
@@ -30,34 +45,91 @@ export class MentorsService {
     return this.mentorMapper.toDirectoryResponseList(mentors);
   }
 
-  async findDirectory(query: MentorDirectoryQuery) {
-    if (query.sort !== 'name_asc') {
-      throw new RequestValidationException([
-        {
-          field: 'sort',
-          message: `El orden ${query.sort} aún no está disponible`,
-        },
-      ]);
-    }
-
+  async findDirectory(
+    query: MentorDirectoryQuery,
+    userId?: string,
+  ): Promise<DirectoryPage> {
     const now = new Date();
+
     const filters = {
       search: query.search,
       area: query.area,
       available: query.available,
     };
+    let affinityStatus: 'no_skills' | 'unmapped_skills' | undefined;
+
+    if (query.sort === 'affinity') {
+      if (!userId || !this.mentorAffinityService) {
+        throw new Error(
+          'Se requiere la identidad autenticada para calcular afinidad',
+        );
+      }
+
+      const affinity = await this.mentorAffinityService.findUserAreaIds(userId);
+
+      if (affinity.status === 'ready') {
+        const candidates = await this.mentorsRepository.findDirectoryCandidates(
+          filters,
+          now,
+        );
+        const ranked = this.mentorAffinityService.rankMentors(
+          candidates,
+          affinity.areaIds,
+        );
+        const totalItems = ranked.length;
+        const totalPages = Math.ceil(totalItems / DIRECTORY_PAGE_SIZE);
+        const page = Math.min(query.page, Math.max(1, totalPages));
+        const pageRanks = ranked.slice(
+          (page - 1) * DIRECTORY_PAGE_SIZE,
+          page * DIRECTORY_PAGE_SIZE,
+        );
+        const ids = pageRanks.map(({ id }) => id);
+        const mentors = ids.length
+          ? await this.mentorsRepository.findDirectoryByIds(ids, filters, now)
+          : [];
+        const mentorsById = new Map(
+          mentors.map((mentor) => [mentor.id, mentor]),
+        );
+
+        return {
+          items: pageRanks.flatMap(({ id, sharedInterestsCount }) => {
+            const mentor = mentorsById.get(id);
+            return mentor
+              ? [
+                  {
+                    ...this.mentorMapper.toDirectoryResponse(mentor),
+                    sharedInterestsCount,
+                  },
+                ]
+              : [];
+          }),
+          page,
+          pageSize: DIRECTORY_PAGE_SIZE,
+          totalItems,
+          totalPages,
+          effectiveSort: 'affinity' as const,
+          affinityStatus: 'ready' as const,
+        };
+      }
+
+      affinityStatus = affinity.status;
+    }
+
     const totalItems = await this.mentorsRepository.countDirectoryMentors(
       filters,
       now,
     );
+
     const totalPages = Math.ceil(totalItems / DIRECTORY_PAGE_SIZE);
     const page = Math.min(query.page, Math.max(1, totalPages));
+
     const mentors = totalItems
       ? await this.mentorsRepository.findDirectoryPage(
           filters,
           now,
           page,
           DIRECTORY_PAGE_SIZE,
+          query.sort === 'affinity' ? 'name_asc' : query.sort,
         )
       : [];
 
@@ -67,7 +139,9 @@ export class MentorsService {
       pageSize: DIRECTORY_PAGE_SIZE,
       totalItems,
       totalPages,
-      effectiveSort: 'name_asc' as const,
+      effectiveSort:
+        query.sort === 'affinity' ? ('name_asc' as const) : query.sort,
+      ...(affinityStatus ? { affinityStatus } : {}),
     };
   }
 
@@ -87,6 +161,7 @@ export class MentorsService {
 
   async findMyTechnicalAreas(userId: string) {
     await this.assertActiveMentor(userId);
+
     const relations =
       await this.mentorsRepository.findMentorTechnicalAreas(userId);
 
@@ -98,6 +173,7 @@ export class MentorsService {
     data: UpdateMentorTechnicalAreasDto,
   ) {
     await this.assertActiveMentor(userId);
+
     const technicalAreas = await this.mentorsRepository.findTechnicalAreas(
       data.technicalAreaIds,
     );
@@ -116,6 +192,7 @@ export class MentorsService {
 
   async findMyOrientationTypes(userId: string) {
     await this.assertActiveMentor(userId);
+
     const relations =
       await this.mentorsRepository.findMentorOrientationTypes(userId);
 
@@ -127,6 +204,7 @@ export class MentorsService {
     data: UpdateMentorOrientationTypesDto,
   ) {
     await this.assertActiveMentor(userId);
+
     const orientationTypes =
       await this.mentorsRepository.findActiveOrientationTypes(
         data.orientationTypeIds,

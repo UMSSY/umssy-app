@@ -79,14 +79,14 @@ const eslintConfig = defineConfig([
   },
   {
     files: ["src/**/*.{ts,tsx}"],
-    ignores: ["src/components/ui/**/*.{ts,tsx}"],
+    ignores: ["src/components/ui/**/*.{ts,tsx}", "src/**/*.test.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [
         "error",
         {
           patterns: [
             {
-              group: ["@radix-ui/*", "@mui/base*", "@base-ui-components/*"],
+              group: ["@radix-ui/*", "radix-ui", "@mui/base*", "@base-ui-components/*", "@base-ui/react", "@base-ui/react/*"],
               message:
                 "UI Standard: Consume components from @/components/ui/. Direct consumption of base libraries (Radix/Base UI) is blocked.",
             },
@@ -112,22 +112,35 @@ const eslintConfig = defineConfig([
             "TemplateElement[value.raw=/[\\u2600-\\u27BF\\uD83C-\\uDBFF\\uDC00-\\uDFFF]/]",
           message: "Standard 2.1: Emojis are not allowed in text templates.",
         },
+      ],
+      "react/forbid-elements": [
+        "error",
         {
-          selector: "JSXOpeningElement[name.name='button']",
-          message:
-            "UI Standard: Use the <Button> component from Shadcn/Base UI instead of the native HTML <button> tag.",
-        },
-        {
-          selector: "JSXOpeningElement[name.name='input']",
-          message:
-            "UI Standard: Use the <Input> component from Shadcn/Base UI instead of the native HTML <input> tag.",
-        },
-        {
-          selector: "JSXOpeningElement[name.name='select']",
-          message:
-            "UI Standard: Use the <Select> component from Shadcn/Base UI instead of the native HTML <select> tag.",
+          forbid: [
+            {
+              element: "button",
+              message:
+                "UI Standard: Use the <Button> component from Shadcn/Base UI instead of the native HTML <button> tag.",
+            },
+            {
+              element: "input",
+              message:
+                "UI Standard: Use the <Input> component from Shadcn/Base UI instead of the native HTML <input> tag.",
+            },
+            {
+              element: "select",
+              message:
+                "UI Standard: Use the <Select> component from Shadcn/Base UI instead of the native HTML <select> tag.",
+            },
+          ],
         },
       ],
+    },
+  },
+  {
+    files: ["src/**/*.test.{ts,tsx}"],
+    rules: {
+      "tailwindcss/no-custom-classname": "off",
     },
   },
   {
