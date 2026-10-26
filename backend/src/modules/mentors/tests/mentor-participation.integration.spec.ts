@@ -368,7 +368,7 @@ describe.skipIf(!connectionString)(
 
     describe('HU7-4: intentos y sanciones', () => {
       it('permite cuatro intentos dentro de 24 horas', async () => {
-        const requests = [];
+        const requests: Awaited<ReturnType<MentorParticipationService['create']>>[] = [];
 
         for (let attempt = 0; attempt < 4; attempt += 1) {
           requests.push(
