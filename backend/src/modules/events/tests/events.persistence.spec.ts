@@ -1,3 +1,4 @@
+import { EventsRepository } from '../repositories/events.repository.js';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { EventsService } from '../services/events.service.js';
 
@@ -16,7 +17,7 @@ describe('EventsService', () => {
       },
       $transaction: vi.fn().mockImplementation((promises) => Promise.all(promises)),
     };
-    repository = new EventsService(prismaMock as never);
+    repository = new EventsService(new EventsRepository(prismaMock as never));
   });
 
   it('keeps voting proposals and cover metadata available after registration integration', async () => {

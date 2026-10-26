@@ -1,74 +1,15 @@
-
 import { Injectable } from '@nestjs/common';
-import { EventNotFoundException } from '../exceptions/event-not-found.exception.js';
-import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { escapePgWildcards } from '../../../common/utils/escape-pg-wildcards.js';
 import type { Prisma } from '../../../prisma/client.js';
-import type { FindEventsPayload, FindEventsResponse, EventWithRelations } from '../types/events.types.js';
-import {
-  CATALOG_STATUS_TITLES,
-  COMMUNITY_ORIGIN_TITLE,
-  CONFIRMED_REGISTRATION_TITLE,
-  EXPIRED_STATUS_TITLE,
-  PUBLISHED_STATUS_TITLE,
-  VOTING_STATUS_TITLES,
-} from '../constants/events.constants.js';
-import {
-  mapEventToResponse,
-  mapEventsToListResponse,
-} from '../mappers/events.mapper.js';
+import { EventNotFoundException } from '../exceptions/event-not-found.exception.js';
+import { EventsRepository } from '../repositories/events.repository.js';
+import { mapEventsToListResponse } from '../mappers/events.mapper.js';
+import { mapEventDetailToResponse } from '../mappers/event-detail.mapper.js';
 import type { GetEventsPayload } from '../types/get-events-payload.types.js';
-import type {
-  EventDetailResponse,
-  EventsListResponse,
-} from '../types/events.types.js';
-
-function buildSelect(userId?: string): Prisma.EventSelect {
-  return {
-    coverMimeType: true,
-    id: true,
-    title: true,
-    description: true,
-    eventDate: true,
-    startTime: true,
-    endTime: true,
-    location: true,
-    capacity: true,
-    statusId: true,
-    instructorName: true,
-    modalityId: true,
-    supportThreshold: true,
-    votingDeadline: true,
-    status: { select: { title: true } },
-    origin: { select: { title: true } },
-    category: { select: { id: true, name: true } },
-    _count: {
-      select: {
-        registrations: {
-          where: {
-            cancelledAt: null,
-            status: { title: CONFIRMED_REGISTRATION_TITLE },
-          },
-        },
-      },
-    },
-    ...(userId !== undefined && {
-      registrations: {
-        where: {
-          userId,
-          cancelledAt: null,
-          status: { title: CONFIRMED_REGISTRATION_TITLE },
-        },
-        select: { id: true },
-        take: 1,
-      },
-    }),
-  };
-}
+import type { EventDetailResponse, EventsListResponse, FindEventsPayload } from '../types/events.types.js';
 
 @Injectable()
 export class EventsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly repository: EventsRepository) {}
 
   async findAll(payload: GetEventsPayload, userId?: string): Promise<EventsListResponse> {
     await this.expireOverdueProposals(new Date());
@@ -98,103 +39,23 @@ export class EventsService {
       throw new EventNotFoundException(id);
     }
 
-    const availableSpots =
-      event.capacity === null
-        ? null
-        : Math.max(0, event.capacity - event._count.registrations);
-    return {
-      ...mapEventToResponse(event, availableSpots),
-      modality: event.modality,
-    };
+    return mapEventDetailToResponse(event);
   }
 
-  async expireOverdueProposals(now: Date): Promise<number> {
-    const expiredStatus = await this.prisma.eventStatus.findUnique({
-      where: { title: EXPIRED_STATUS_TITLE },
-      select: { id: true },
-    });
-
-    if (!expiredStatus) return 0;
-
-    const { count } = await this.prisma.event.updateMany({
-      where: {
-        status: { title: { in: VOTING_STATUS_TITLES } },
-        origin: { title: COMMUNITY_ORIGIN_TITLE },
-        votingDeadline: { lte: now },
-      },
-      data: { statusId: expiredStatus.id },
-    });
-
-    return count;
+  expireOverdueProposals(now: Date): Promise<number> {
+    return this.repository.expireOverdueProposals(now);
   }
 
-  async findAndCount(payload: FindEventsPayload): Promise<FindEventsResponse> {
-    const { categoryId, statusId, isPublishedOnly, search, userId, skip, take } =
-      payload;
-
-    const where: Prisma.EventWhereInput = {
-      ...(categoryId !== undefined && { categoryId }),
-      ...(statusId !== undefined
-        ? { statusId }
-        : isPublishedOnly
-          ? { status: { title: payload.includeProposals ? { in: CATALOG_STATUS_TITLES } : PUBLISHED_STATUS_TITLE } }
-          : {}),
-      ...(search !== undefined && {
-        title: {
-          contains: escapePgWildcards(search),
-          mode: 'insensitive',
-        },
-      }),
-    };
-
-    const [items, total] = await this.prisma.$transaction([
-      this.prisma.event.findMany({
-        select: buildSelect(userId),
-        where,
-        orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }],
-        skip,
-        take,
-      }),
-      this.prisma.event.count({ where }),
-    ]);
-
-    return {
-      items: items as unknown as EventWithRelations[],
-      total,
-    };
+  findAndCount(payload: FindEventsPayload) {
+    return this.repository.findAndCount(payload);
   }
 
-  async findById(
-    id: string,
-    userId?: string,
-  ): Promise<
-    (EventWithRelations & { modality: { id: string; title: string } }) | null
-  > {
-    const event = await this.prisma.event.findUnique({
-      where: { id },
-      select: {
-        ...buildSelect(userId),
-        modality: { select: { id: true, title: true } },
-      },
-    });
-
-    return event as unknown as
-      | (EventWithRelations & { modality: { id: string; title: string } })
-      | null;
+  findById(id: string, userId?: string) {
+    return this.repository.findById(id, userId);
   }
 
-  async findForRegistration(id: string, tx: Prisma.TransactionClient = this.prisma) {
-    const event = await tx.event.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        capacity: true,
-        eventDate: true,
-        startTime: true,
-        endTime: true,
-        status: { select: { title: true } },
-      },
-    });
+  async findForRegistration(id: string, tx?: Prisma.TransactionClient) {
+    const event = await this.repository.findForRegistration(id, tx);
     if (!event) throw new EventNotFoundException(id);
     return event;
   }
