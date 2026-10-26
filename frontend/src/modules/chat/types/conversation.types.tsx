@@ -5,6 +5,14 @@ export interface UserSummary {
   fullName: string;
   avatarUrl?: string | null;
   isOnline: boolean;
+  role?: string | null;
+  roleName?: string | null;
+  email?: string | null;
+  isEmailVisible?: boolean;
+  academicTitle?: string | null;
+  isAcademicTitleVisible?: boolean;
+  skills?: string[];
+  areSkillsVisible?: boolean;
 }
 
 export type MessageStatus = 'sending' | 'sent' | 'error';

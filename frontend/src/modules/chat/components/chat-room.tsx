@@ -14,6 +14,7 @@ import type {
   Message,
 } from "../types/conversation.types";
 import { MessageInputBar } from "./message-input-bar";
+import { ContactProfileModal } from "./contact-profile-modal";
 import { ChatErrorState } from "./chat-error-state";
 import {
   getInitials,
@@ -142,6 +143,7 @@ function ChatRoomContent({
   onRetryMessages,
 }: ChatRoomProps) {
   const [inputText, setInputText] = useState("");
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [sendError, setSendError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -394,42 +396,53 @@ function ChatRoomContent({
               />
             </svg>
           </Button>
-          <div className="relative shrink-0">
-            {conversation.contact.avatarUrl ? (
-              <Image
-                src={conversation.contact.avatarUrl}
-                alt={conversation.contact.fullName}
-                width={40}
-                height={40}
-                unoptimized
-                className="size-10 rounded-full border border-[#E3E7EC] object-cover"
-              />
-            ) : (
-              <div className="flex size-10 items-center justify-center rounded-full border border-[#E3E7EC] bg-slate-200 text-xs font-bold text-[#0B1F2E]">
-                {getInitials(conversation.contact.fullName)}
-              </div>
-            )}
-            {conversation.contact.isOnline && (
-              <span
-                data-testid="online-indicator"
-                className="absolute right-0 bottom-0 size-2.5 rounded-full border-2 border-white bg-emerald-500"
-                title="En línea"
-              />
-            )}
-          </div>
-          <div>
-            <h3
-              data-testid="chat-contact-name"
-              className="text-sm leading-tight font-bold text-[#0B1F2E] md:text-base"
-            >
-              {conversation.contact.fullName}
-            </h3>
-            <span className="text-xs font-medium text-emerald-600">
-              {conversation.contact.isOnline
-                ? "En línea"
-                : "Desconectado"}
-            </span>
-          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="default"
+            data-testid="chat-contact-profile-trigger"
+            title="Ver perfil de usuario"
+            aria-label="Ver perfil de usuario"
+            onClick={() => setIsProfileModalOpen(true)}
+            className="flex h-auto items-center gap-3 p-1 hover:bg-slate-100"
+          >
+            <div className="relative shrink-0">
+              {conversation.contact.avatarUrl ? (
+                <Image
+                  src={conversation.contact.avatarUrl}
+                  alt={conversation.contact.fullName}
+                  width={40}
+                  height={40}
+                  unoptimized
+                  className="size-10 rounded-full border border-[#E3E7EC] object-cover"
+                />
+              ) : (
+                <div className="flex size-10 items-center justify-center rounded-full border border-[#E3E7EC] bg-slate-200 text-xs font-bold text-[#0B1F2E]">
+                  {getInitials(conversation.contact.fullName)}
+                </div>
+              )}
+              {conversation.contact.isOnline && (
+                <span
+                  data-testid="online-indicator"
+                  className="absolute right-0 bottom-0 size-2.5 rounded-full border-2 border-white bg-emerald-500"
+                  title="En línea"
+                />
+              )}
+            </div>
+            <div className="text-left">
+              <h3
+                data-testid="chat-contact-name"
+                className="text-sm leading-tight font-bold text-[#0B1F2E] md:text-base"
+              >
+                {conversation.contact.fullName}
+              </h3>
+              <span className="text-xs font-medium text-emerald-600">
+                {conversation.contact.isOnline
+                  ? "En línea"
+                  : "Desconectado"}
+              </span>
+            </div>
+          </Button>
         </div>
       </header>
       <div
@@ -597,6 +610,11 @@ function ChatRoomContent({
           showInitialLoading ||
           (isMessagesError && messages.length === 0)
         }
+      />
+      <ContactProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        contact={conversation.contact}
       />
     </div>
   );
