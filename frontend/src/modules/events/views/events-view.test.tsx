@@ -431,6 +431,13 @@ describe("EventsView", () => {
 });
 
 describe("EventsView proposal support", () => {
+  beforeEach(() => {
+    mockUseEvents.mockReturnValue({
+      events: [PROPOSAL], error: null, hasMore: false, isLoading: false,
+      isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn(),
+    });
+  });
+
   it("sends guests to login and returns them to the selected proposal", () => {
     showProposal();
     const supportRequest = vi.spyOn(registrationsService, "supportProposal");
@@ -484,8 +491,13 @@ describe("EventsView proposal support", () => {
     render(<EventsView initialProposalId={PROPOSAL.id} />);
     fireEvent.click(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" }));
 
-    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Tu apoyo ya fue registrado."));
-    expect(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" })).toBeDisabled();
+    await waitFor(() => expect(screen.getByRole("button", { name: "Ya apoyaste esta propuesta" })).toBeDisabled());
+    expect(screen.getByRole("complementary", { name: `Detalle de ${PROPOSAL.title}` }))
+      .toHaveTextContent("Tu apoyo ya fue registrado. No puedes preinscribirte dos veces.");
+    expect(within(screen.getByRole("region", { name: "Listado de talleres" }))
+      .getByRole("button", { name: /desarrollo web con react/i }))
+      .toHaveTextContent("Tu apoyo ya fue registrado. No puedes preinscribirte dos veces.");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Reintentar apoyo" })).not.toBeInTheDocument();
   });
 
@@ -502,6 +514,48 @@ describe("EventsView proposal support", () => {
     fireEvent.click(screen.getByRole("button", { name: "Reintentar apoyo" }));
     await waitFor(() => expect(supportRequest).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(screen.queryByRole("button", { name: "Reintentar apoyo" })).not.toBeInTheDocument());
+  });
+
+  it("replaces a proposal that expired during the open detail", async () => {
+    saveAccessToken(tokenWithRoles(["titulado"]));
+    showProposal();
+    vi.spyOn(registrationsService, "supportProposal").mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 409, data: { statusCode: 409, ok: false, data: null, code: "PROPOSAL_EXPIRED", detail: "Private detail" } },
+    });
+    const { rerender } = render(<EventsView initialProposalId={PROPOSAL.id} />);
+    fireEvent.click(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" }));
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("La propuesta ya venció."));
+
+    const expired = { ...PROPOSAL, status: "Vencido" };
+    showProposal(expired);
+    mockUseEvents.mockReturnValue({ events: [expired], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
+    rerender(<EventsView initialProposalId={PROPOSAL.id} />);
+
+    expect(within(screen.getByRole("complementary", { name: `Detalle de ${PROPOSAL.title}` }))
+      .getByText("Fecha límite superada · vencida automáticamente")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" })).toBeDisabled();
+  });
+
+  it("offers normal registration if another support published the proposal", async () => {
+    saveAccessToken(tokenWithRoles(["titulado"]));
+    showProposal();
+    vi.spyOn(registrationApi, "getOwn").mockResolvedValue(null);
+    vi.spyOn(registrationsService, "supportProposal").mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 409, data: { statusCode: 409, ok: false, data: null, code: "EVENT_NOT_SUPPORTABLE", detail: "Private detail" } },
+    });
+    const { rerender } = render(<EventsView initialProposalId={PROPOSAL.id} />);
+    fireEvent.click(screen.getByRole("button", { name: "Preinscribirme/Apoyar propuesta" }));
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("La propuesta ya no acepta apoyos."));
+
+    const published = { ...PROPOSAL, status: "Publicado", hasSupported: false, registrationCount: 20, availableSpots: 10 };
+    showProposal(published);
+    mockUseEvents.mockReturnValue({ events: [published], error: null, hasMore: false, isLoading: false, isLoadingMore: false, loadMore: vi.fn(), retry: vi.fn() });
+    rerender(<EventsView initialProposalId={PROPOSAL.id} />);
+
+    expect(screen.getByRole("button", { name: "Inscribirme" })).toHaveClass("bg-brand-red");
+    expect(screen.queryByRole("button", { name: "Preinscribirme/Apoyar propuesta" })).not.toBeInTheDocument();
   });
 
   it("shows publication and the confirmed registration after reaching the threshold", async () => {

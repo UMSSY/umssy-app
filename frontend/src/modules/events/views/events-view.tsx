@@ -51,6 +51,10 @@ export function EventsView({ initialProposalId = null }: { initialProposalId?: s
 
   const detail = useEvent(selectedEventId);
   const support = useProposalSupport(selectedEventId);
+  const alreadySupported = support.errorCode === 'ALREADY_SUPPORTED';
+  const displayedDetail = alreadySupported && detail.event
+    ? { ...detail.event, hasSupported: true }
+    : detail.event;
   const supportBlocked = [
     'ALREADY_SUPPORTED', 'PROPOSAL_EXPIRED', 'EVENT_NOT_SUPPORTABLE',
     'FORBIDDEN_ROLE', 'USER_INACTIVE',
@@ -83,8 +87,11 @@ export function EventsView({ initialProposalId = null }: { initialProposalId?: s
       router.push(buildLoginUrl(returnToProposal));
     }
   }
-  const visibleEvents = initialProposalId && detail.event?.id === initialProposalId && !filters.search.trim() && !filters.categoryId && !events.some((event) => event.id === initialProposalId)
-    ? [detail.event, ...events] : events;
+  const listedEvents = initialProposalId && displayedDetail?.id === initialProposalId && !filters.search.trim() && !filters.categoryId && !events.some((event) => event.id === initialProposalId)
+    ? [displayedDetail, ...events] : events;
+  const visibleEvents = alreadySupported
+    ? listedEvents.map((event) => event.id === selectedEventId ? { ...event, hasSupported: true } : event)
+    : listedEvents;
 
   useEffect(() => {
     if (!selectedEventId) return;
@@ -196,15 +203,15 @@ export function EventsView({ initialProposalId = null }: { initialProposalId?: s
       </div>
 
       <div className="order-first min-w-0 @4xl/events:sticky @4xl/events:top-24 @4xl/events:order-none @4xl/events:max-h-event-detail @4xl/events:overflow-x-hidden @4xl/events:overflow-y-auto @4xl/events:overscroll-contain">
-      {selectedEventId && (detail.event ? (
+      {selectedEventId && (displayedDetail ? (
         <EventDetailPanel
-          event={detail.event}
+          event={displayedDetail}
           onClose={() => setSelectedEventId(null)}
           onSupport={(event) => { void handleSupport(event); }}
           isSupportPending={support.isPending}
           isSupportDisabled={Boolean(session && (rolesLoading || !roles.includes('titulado'))) || supportBlocked}
           supportNotice={supportNotice}
-          supportError={support.errorCode === 'EVENT_NOT_FOUND' || support.errorCode === 'AUTH_REQUIRED' || support.errorCode === 'UNAUTHENTICATED' ? null : support.error}
+          supportError={alreadySupported || support.errorCode === 'EVENT_NOT_FOUND' || support.errorCode === 'AUTH_REQUIRED' || support.errorCode === 'UNAUTHENTICATED' ? null : support.error}
           supportSuccessMessage={support.isSuccess && support.data?.status === 'Publicado'
             ? 'La propuesta fue publicada y tu inscripción quedó confirmada. Puedes ver tu pase en Mis inscripciones.'
             : null}

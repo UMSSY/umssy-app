@@ -5,6 +5,7 @@ import { FileValidationService } from '../../../common/services/file-validation.
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { CreateProposalSchema } from '../requests/create-proposal.request.js';
 import type { Event } from '../../../prisma/client.js';
+import { CATALOG_STATUS_TITLES } from '../constants/events.constants.js';
 
 @Injectable()
 export class EventProposalsService {
@@ -49,7 +50,7 @@ export class EventProposalsService {
     }
   }
   async cover(id: string) {
-    const event = await this.prisma.event.findFirst({ where: { id, status: { title: { in: ['Publicado', 'En votación'] } } }, select: { coverData: true, coverMimeType: true } });
+    const event = await this.prisma.event.findFirst({ where: { id, status: { title: { in: CATALOG_STATUS_TITLES } } }, select: { coverData: true, coverMimeType: true } });
     if (!event?.coverData || !event.coverMimeType) throw new NotFoundException('Portada no disponible.');
     return { content: Buffer.from(event.coverData), mimeType: event.coverMimeType };
   }
