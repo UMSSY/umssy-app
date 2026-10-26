@@ -58,10 +58,10 @@ const ERROR_CASES = [
   ['REGISTRATION_NOT_OWNED', 403, 'La inscripción no pertenece al usuario autenticado.'],
   ['EVENT_NOT_FOUND', 404, 'El evento no existe.'],
   ['REGISTRATION_NOT_FOUND', 404, 'La inscripción no existe.'],
-  ['ALREADY_REGISTERED', 409, 'El usuario ya tiene una inscripción confirmada para este evento.'],
   ['EVENT_FULL', 409, 'El evento no tiene cupos disponibles.'],
   ['REGISTRATION_ALREADY_CANCELLED', 409, 'La inscripción ya está cancelada.'],
   ['EVENT_NOT_OPEN', 422, 'El estado del evento no permite inscripciones.'],
+  ['EVENT_FINISHED', 422, 'El taller ya finalizó'],
   ['REGISTRATION_CLOSED', 422, 'El plazo para inscribirse o cancelar la inscripción ha terminado.'],
   ['INTERNAL_ERROR', 500, 'Ocurrió un error interno al procesar la solicitud.'],
 ] as const;
@@ -128,13 +128,13 @@ describe('registration HTTP contract', () => {
         fixture.tx.eventRegistration.findUnique.mockResolvedValue(registrationRecord({ userId: 'another-user' })); break;
       case 'EVENT_NOT_FOUND': fixture.events.findForRegistration.mockRejectedValue(new EventNotFoundException()); break;
       case 'REGISTRATION_NOT_FOUND': method = 'get'; url += '/me'; break;
-      case 'ALREADY_REGISTERED': fixture.tx.eventRegistration.findUnique.mockResolvedValue(registrationRecord()); break;
       case 'EVENT_FULL': fixture.tx.eventRegistration.count.mockResolvedValue(1); break;
       case 'REGISTRATION_ALREADY_CANCELLED':
         method = 'delete'; url = `/api/registrations/${REGISTRATION_ID}`;
         fixture.tx.eventRegistration.findUnique.mockResolvedValue(registrationRecord({ status: { title: 'Cancelada' }, cancelledAt: NOW })); break;
       case 'EVENT_NOT_OPEN': fixture.event.status.title = 'Borrador'; break;
-      case 'REGISTRATION_CLOSED': fixture.event.eventDate = new Date('2026-10-22'); break;
+      case 'EVENT_FINISHED': fixture.event.eventDate = new Date('2026-10-22'); break;
+      case 'REGISTRATION_CLOSED': vi.setSystemTime('2026-10-23T13:00:00.000Z'); break;
       case 'INTERNAL_ERROR':
         vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
         fixture.prisma.$transaction.mockRejectedValue(new Error('Private database details')); break;
@@ -153,9 +153,43 @@ describe('registration HTTP contract', () => {
     expect(fixture.tx.eventRegistration.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ user: { connect: { id: USER_ID } } }) }));
   });
 
+  it('returns the same registration and QR when the request is retried', async () => {
+    const existing = registrationRecord();
+    fixture.tx.eventRegistration.findUnique.mockResolvedValue(existing);
+
+    const response = await request(app.getHttpServer()).post(`/api/events/${EVENT_ID}/registrations`)
+      .set('Authorization', `Bearer ${token}`).expect(201);
+
+    expect(response.body.data).toMatchObject({
+      id: existing.id,
+      qrToken: existing.qrToken,
+      status: 'confirmed',
+    });
+    expect(fixture.tx.eventRegistration.create).not.toHaveBeenCalled();
+  });
+
   it.each([{ userId: USER_ID }, { status: 'confirmed' }, { qrToken: 'forged' }])('rejects unsolicited body fields', async (body) => {
     const response = await request(app.getHttpServer()).post(`/api/events/${EVENT_ID}/registrations`)
       .set('Authorization', `Bearer ${token}`).send(body).expect(400);
+    expect(response.body).toMatchObject({ code: 'VALIDATION_ERROR', data: null });
+    expect(fixture.prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('requires the titulado role for either registration endpoint', async () => {
+    findFirst.mockResolvedValue({ id: USER_ID, email: 'user@example.test', isActive: true, roles: [{ role: { name: 'empresa' } }] });
+
+    await request(app.getHttpServer()).post(`/api/events/${EVENT_ID}/registrations`)
+      .set('Authorization', `Bearer ${token}`).expect(403);
+    await request(app.getHttpServer()).post('/api/event-registrations')
+      .set('Authorization', `Bearer ${token}`).send({ eventId: EVENT_ID }).expect(403);
+
+    expect(fixture.prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('rejects a forged userId in the eventId registration body', async () => {
+    const response = await request(app.getHttpServer()).post('/api/event-registrations')
+      .set('Authorization', `Bearer ${token}`).send({ eventId: EVENT_ID, userId: 'another-user' }).expect(400);
+
     expect(response.body).toMatchObject({ code: 'VALIDATION_ERROR', data: null });
     expect(fixture.prisma.$transaction).not.toHaveBeenCalled();
   });
@@ -193,6 +227,9 @@ describe('registration HTTP contract', () => {
       ok: true,
       data: { id: REGISTRATION_ID, eventId: EVENT_ID, status: 'confirmed' },
     });
+    expect(fixture.tx.eventRegistration.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ user: { connect: { id: USER_ID } } }),
+    }));
   });
 
   it('rejects POST /api/event-registrations with invalid eventId', async () => {

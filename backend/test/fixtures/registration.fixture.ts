@@ -28,9 +28,11 @@ export function registrationFixture() {
     capacity: 1 as number | null,
     eventDate: new Date('2026-10-23T00:00:00.000Z'),
     startTime: new Date('1970-01-01T09:00:00.000Z'),
+    endTime: new Date('1970-01-01T11:00:00.000Z'),
     status: { title: 'Publicado' },
   };
   const tx = {
+    $queryRaw: vi.fn().mockResolvedValue([{ id: EVENT_ID }]),
     eventRegistration: {
       findUnique: vi.fn().mockResolvedValue(null),
       count: vi.fn().mockResolvedValue(0),

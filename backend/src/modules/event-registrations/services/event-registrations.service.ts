@@ -18,7 +18,6 @@ import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registrati
 import { InternalException } from '../../../common/exceptions/internal.exception.js';
 import { Prisma } from '../../../prisma/client.js';
 import { EventsService, PUBLISHED_STATUS_TITLE } from '../../events/index.js';
-import { AlreadyRegisteredException } from '../exceptions/already-registered.exception.js';
 import { EventFullException } from '../exceptions/event-full.exception.js';
 import { EventNotOpenException } from '../exceptions/event-not-open.exception.js';
 import { RegistrationAlreadyCancelledException } from '../exceptions/registration-already-cancelled.exception.js';
@@ -59,26 +58,27 @@ export class EventRegistrationsService {
   }
 
   async createWithQrToken(payload: CreateEventRegistrationPayload) {
+    // Shared token persistence; callers enforce the rules of their registration flow.
     return this.prisma.eventRegistration.create({
       data: { ...payload, qrToken: this.generateQrToken() },
       select: { id: true, eventId: true, userId: true, statusId: true, qrToken: true },
     });
   }
 
-  // Punto único de generación; la conversión debe conservar el token existente.
   private generateQrToken(): string {
     return randomBytes(32).toString('hex');
   }
 
   async create(eventId: string, userId: string): Promise<RegistrationResponse> {
     return this.transact(async (tx) => {
+      await this.lockEventRow(tx, eventId);
       const event = await this.eventsService.findForRegistration(eventId, tx);
       const existing = await tx.eventRegistration.findUnique({
         where: { eventId_userId: { eventId, userId } },
         select: REGISTRATION_SELECT,
       });
       if (existing && mapRegistration(existing).status === 'confirmed') {
-        throw new AlreadyRegisteredException();
+        return mapRegistration(existing);
       }
       if (event.status.title !== PUBLISHED_STATUS_TITLE) throw new EventNotOpenException();
       assertRegistrationOpen(event);
@@ -128,6 +128,7 @@ export class EventRegistrationsService {
       if (mapRegistration(registration).status === 'cancelled') {
         throw new RegistrationAlreadyCancelledException();
       }
+      await this.lockEventRow(tx, registration.eventId);
       const event = await this.eventsService.findForRegistration(registration.eventId, tx);
       assertRegistrationOpen(event);
       return mapRegistration(await tx.eventRegistration.update({
@@ -153,6 +154,11 @@ export class EventRegistrationsService {
     }
     throw new InternalException();
   }
+
+  private async lockEventRow(tx: Prisma.TransactionClient, eventId: string): Promise<void> {
+    await tx.$queryRaw`SELECT id FROM events WHERE id = ${eventId}::uuid FOR UPDATE`;
+  }
+
   async findMine(userId: string): Promise<MyRegistrationResponse[]> {
     return EventRegistrationsMapper.toMyRegistrationList(await this.findByUserId(userId));
   }
@@ -241,7 +247,7 @@ export class EventRegistrationsService {
       const beforeLock = await this.loadSupportContext(tx, eventId);
       if (!beforeLock) return null;
 
-      await tx.$queryRaw`SELECT id FROM events WHERE id = ${eventId}::uuid FOR UPDATE`;
+      await this.lockEventRow(tx, eventId);
 
       const event = await this.loadSupportContext(tx, eventId);
       if (!event) return null;

@@ -191,6 +191,7 @@ export class EventsService {
         capacity: true,
         eventDate: true,
         startTime: true,
+        endTime: true,
         status: { select: { title: true } },
       },
     });

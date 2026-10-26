@@ -9,6 +9,7 @@ export const REGISTRATION_ERRORS = {
   EVENT_FULL: { statusCode: 409, detail: 'El evento no tiene cupos disponibles.' },
   REGISTRATION_ALREADY_CANCELLED: { statusCode: 409, detail: 'La inscripción ya está cancelada.' },
   EVENT_NOT_OPEN: { statusCode: 422, detail: 'El estado del evento no permite inscripciones.' },
+  EVENT_FINISHED: { statusCode: 422, detail: 'El taller ya finalizó' },
   REGISTRATION_CLOSED: { statusCode: 422, detail: 'El plazo para inscribirse o cancelar la inscripción ha terminado.' },
   INTERNAL_ERROR: { statusCode: 500, detail: 'Ocurrió un error interno al procesar la solicitud.' },
 } as const;
