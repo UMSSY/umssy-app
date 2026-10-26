@@ -70,6 +70,7 @@ describe('AccountActivationService.getStatus', () => {
 
     expect(status).toEqual({
       state: 'ready',
+      serverTime: '2026-10-05T12:00:00.000Z',
       expiresAt: '2026-10-05T12:05:00.000Z',
       resendAvailableAt: '2026-10-05T11:59:00.000Z',
       resendsRemaining: 2,
@@ -93,7 +94,7 @@ describe('AccountActivationService.getStatus', () => {
     await expect(service.getStatus(EMAIL, NOW)).resolves.toMatchObject({
       state: 'no_code',
       expiresAt: null,
-      resendAvailableAt: '2026-10-05T12:01:00.000Z',
+      resendAvailableAt: '2026-10-05T12:00:00.000Z',
     });
   });
 
@@ -104,7 +105,11 @@ describe('AccountActivationService.getStatus', () => {
 
   it('informa cuenta activada si el código ya se usó', async () => {
     const { service } = build({ otp: otpRow({ usedAt: NOW }) });
-    await expect(service.getStatus(EMAIL, NOW)).resolves.toMatchObject({ state: 'activated', expiresAt: null });
+    await expect(service.getStatus(EMAIL, NOW)).resolves.toMatchObject({
+      state: 'activated',
+      serverTime: '2026-10-05T12:00:00.000Z',
+      expiresAt: null,
+    });
   });
 
   it('informa cuenta activada si ya existe un usuario con ese correo', async () => {
@@ -241,6 +246,7 @@ describe('AccountActivationService.resend', () => {
     const { service, otpService } = build({ resends: 0 });
 
     await expect(service.resend(EMAIL, NOW)).resolves.toEqual({
+      serverTime: '2026-10-05T12:00:00.000Z',
       expiresAt: '2026-10-05T12:10:00.000Z',
       resendAvailableAt: '2026-10-05T12:01:00.000Z',
       resendsRemaining: 2,

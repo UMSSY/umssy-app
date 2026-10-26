@@ -52,13 +52,14 @@ export class AccountActivationService {
   async getStatus(email: string, now: Date = new Date()) {
     const { request, otp, activated } = await this.loadContext(email);
     if (activated) {
-      return { state: 'activated' as ActivationState, expiresAt: null, resendAvailableAt: null, resendsRemaining: 0, remainingAttempts: 0 };
+      return { state: 'activated' as ActivationState, serverTime: now.toISOString(), expiresAt: null, resendAvailableAt: null, resendsRemaining: 0, remainingAttempts: 0 };
     }
     const resends = await this.otpRepository.countResendsSince(request.id, new Date(now.getTime() - MS_PER_HOUR));
     return {
       state: this.resolveState(otp, now),
+      serverTime: now.toISOString(),
       expiresAt: otp ? otp.expiresAt.toISOString() : null,
-      resendAvailableAt: new Date((otp ? otp.createdAt.getTime() : now.getTime()) + OTP_RESEND_COOLDOWN_SECONDS * MS_PER_SECOND).toISOString(),
+      resendAvailableAt: (otp ? new Date(otp.createdAt.getTime() + OTP_RESEND_COOLDOWN_SECONDS * MS_PER_SECOND) : now).toISOString(),
       resendsRemaining: Math.max(0, OTP_MAX_RESENDS_PER_HOUR - resends),
       remainingAttempts: otp ? Math.max(0, OTP_MAX_ATTEMPTS - otp.attempts) : 0,
     };
@@ -108,6 +109,7 @@ export class AccountActivationService {
     if (!sent) throw new ActivationCodeNotSentException();
 
     return {
+      serverTime: now.toISOString(),
       expiresAt: new Date(now.getTime() + OTP_TTL_MINUTES * MS_PER_MINUTE).toISOString(),
       resendAvailableAt: new Date(now.getTime() + OTP_RESEND_COOLDOWN_SECONDS * MS_PER_SECOND).toISOString(),
       resendsRemaining: Math.max(0, OTP_MAX_RESENDS_PER_HOUR - resends - 1),
