@@ -12,7 +12,7 @@ export const APPOINTMENTS_TEXT = {
   loadError: "No se pudieron cargar tus citas.",
   loading: "Cargando citas",
   searchMentors: "Buscar mentores",
-  timezone: "Hora de Bolivia (GMT-4)",
+  topicLabel: "Tema:",
   noTopic: "Tema no especificado",
 } as const;
 
