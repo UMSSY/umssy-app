@@ -38,7 +38,7 @@ describe('Mis pases', () => {
     await within(await screen.findByRole('complementary', { name: 'Detalle de la inscripción' })).findByText('reg-1');
     expect(screen.getAllByText('Aula 101')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('2 inscripciones')).toBeInTheDocument();
+    expect(screen.getByText('2 pases')).toBeInTheDocument();
     expect(screen.getByText(/09:00 - 12:00/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Prisma/ }));
     expect(within(screen.getByRole('complementary', { name: 'Detalle de la inscripción' })).getByText('reg-2')).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe('Mis pases', () => {
     getMine.mockResolvedValue([]);
     render(<MyPassesView />);
     expect(await screen.findByRole('region', { name: 'Aún no tienes inscripciones.' })).toBeInTheDocument();
-    expect(screen.getByText('0 inscripciones')).toBeInTheDocument();
+    expect(screen.getByText('0 pases')).toBeInTheDocument();
     expect(screen.queryByText('ID Inscripción')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Vista ilustrativa de QR')).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Explorar talleres disponibles' })).toHaveAttribute('href', '/events');
@@ -64,7 +64,7 @@ describe('Mis pases', () => {
     await screen.findByRole('alert');
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
     await within(await screen.findByRole('complementary', { name: 'Detalle de la inscripción' })).findByText('reg-1');
-    expect(screen.getByText('1 inscripción')).toBeInTheDocument();
+    expect(screen.getByText('1 pase')).toBeInTheDocument();
     expect(getMine).toHaveBeenCalledTimes(2);
   });
   it.each([
@@ -101,7 +101,7 @@ describe('Mis pases', () => {
     expect(within(card).getByText('ID Inscripción:')).toBeInTheDocument();
     expect(within(screen.getByRole('complementary', { name: 'Detalle de la inscripción' })).getByText(longPass.id)).toBeInTheDocument();
     expect(within(card).getByText('Confirmada')).toBeInTheDocument();
-    expect(screen.getByText('1 inscripción')).toBeInTheDocument();
+    expect(screen.getByText('1 pase')).toBeInTheDocument();
     expect(await screen.findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
   });
 
