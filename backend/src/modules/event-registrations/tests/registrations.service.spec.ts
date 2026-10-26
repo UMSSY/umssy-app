@@ -73,11 +73,22 @@ describe('registration creation', () => {
     await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({ code: 'EVENT_NOT_OPEN' });
   });
 
-  it.each(['2026-10-23T13:00:00.000Z', '2026-10-24T00:00:00.000Z'])(
-    'closes at the Bolivia start time: %s', async (now) => {
+  it('closes at the Bolivia start time', async () => {
+    vi.setSystemTime('2026-10-23T13:00:00.000Z');
+    const { service, tx } = registrationFixture();
+    await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({ code: 'REGISTRATION_CLOSED', statusCode: 422 });
+    expect(tx.eventRegistration.create).not.toHaveBeenCalled();
+  });
+
+  it.each(['2026-10-23T15:00:00.000Z', '2026-10-24T00:00:00.000Z'])(
+    'rejects a finished event at the Bolivia end time: %s', async (now) => {
       vi.setSystemTime(now);
       const { service, tx } = registrationFixture();
-      await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({ code: 'REGISTRATION_CLOSED', statusCode: 422 });
+      await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({
+        code: 'EVENT_FINISHED',
+        statusCode: 422,
+        message: 'El taller ya finalizó',
+      });
       expect(tx.eventRegistration.create).not.toHaveBeenCalled();
     },
   );

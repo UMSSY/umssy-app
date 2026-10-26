@@ -25,6 +25,8 @@ export class EventRegistrationsController {
   constructor(private readonly registrationsService: EventRegistrationsService) {}
 
   @Post('events/:eventId/registrations')
+  @UseGuards(RolesGuard)
+  @Roles('titulado')
   @HttpCode(201)
   @ApiOperation({ summary: 'Inscribirse o reactivar una inscripción', description: 'Sin cuerpo de solicitud. El usuario se obtiene de la sesión.' })
   @ApiParam({ name: 'eventId', format: 'uuid' })
@@ -61,6 +63,8 @@ export class EventRegistrationsController {
   }
 
   @Post('event-registrations')
+  @UseGuards(RolesGuard)
+  @Roles('titulado')
   @HttpCode(201)
   @ApiOperation({ summary: 'Inscribir al usuario autenticado en un evento mediante su identificador en el cuerpo' })
   @RegistrationResponses(201)
