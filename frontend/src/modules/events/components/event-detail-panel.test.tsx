@@ -1,11 +1,13 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EventDetailPanel } from "./event-detail-panel";
 import type { EventDetail } from "../types/event-detail.types";
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+beforeEach(() => { vi.useFakeTimers({ now: new Date("2026-10-10T12:00:00Z"), toFake: ["Date"] }); });
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });

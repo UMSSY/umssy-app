@@ -7,9 +7,13 @@ export function getProposalError(error: unknown): { message: string; fields: Pro
     const status = error.response?.status;
     const body: unknown = error.response?.data;
     if (body && typeof body === 'object' && 'errors' in body && body.errors && typeof body.errors === 'object') {
+      const errors = body.errors;
       for (const key of ['title', 'description', 'categoryId', 'eventDate', 'startTime', 'endTime', 'capacity', 'modality', 'location', 'cover'] as const) {
-        const value = (body.errors as Record<string, unknown>)[key];
+        const value: unknown = Array.isArray(errors)
+          ? errors.find((error: unknown) => error !== null && typeof error === 'object' && 'field' in error && error.field === key)
+          : (errors as Record<string, unknown>)[key];
         if (typeof value === 'string') fields[key] = value;
+        else if (value !== null && typeof value === 'object' && 'message' in value && typeof value.message === 'string') fields[key] = value.message;
       }
     }
     const messages: Record<number, string> = {
