@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
+import { UserSkillService } from '../../skills/services/user-skill.service.js';
 import { JobMatchRepository } from '../repositories/job-match.repository.js';
 import type { CandidateProfile } from '../types/gap-analysis.types.js';
 import type { JobMatchRecord } from '../types/job-match.types.js';
@@ -10,6 +11,7 @@ import type {
 import { toVacancyRequirements } from '../utils/build-vacancy-requirements.js';
 import { buildScoreRequirements } from '../utils/build-score-requirements.js';
 import type { RequirementState } from '../types/requirement-state.types.js';
+import { CandidateProfileService } from './candidate-profile.service.js';
 import { VacancyRankingService } from './vacancy-ranking.service.js';
 import { WeightedScoreService } from './weighted-score.service.js';
 
@@ -20,7 +22,8 @@ function allFulfilled(requirements: readonly RequirementState[]): boolean {
 @Injectable()
 export class JobRecommendationsService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly userSkillService: UserSkillService,
+    private readonly candidateProfileService: CandidateProfileService,
     private readonly jobMatchRepository: JobMatchRepository,
     private readonly ranking: VacancyRankingService,
     private readonly score: WeightedScoreService,
@@ -32,7 +35,7 @@ export class JobRecommendationsService {
 
     const [vacancies, profile] = await Promise.all([
       this.jobMatchRepository.findPublished(new Date()),
-      this.jobMatchRepository.findCandidateProfile(userId),
+      this.candidateProfileService.findCandidateProfile(userId),
     ]);
     const candidate: CandidateProfile = {
       skills,
@@ -47,11 +50,13 @@ export class JobRecommendationsService {
   }
 
   private async profileSkills(userId: string): Promise<string[]> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { userSkills: { select: { skill: { select: { name: true } } } } },
-    });
-    return user?.userSkills.map(({ skill }) => skill.name) ?? [];
+    try {
+      const skills = await this.userSkillService.getUserSkills(userId);
+      return skills.map(({ name }) => name);
+    } catch (error) {
+      if (error instanceof ProfileNotFoundException) return [];
+      throw error;
+    }
   }
 
   private evaluate(vacancy: JobMatchRecord, candidate: CandidateProfile) {

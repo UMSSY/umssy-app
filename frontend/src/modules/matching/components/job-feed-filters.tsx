@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { JOB_FEED_MESSAGES, JOB_FEED_MODALITIES } from "../constants/job-matching.constants";
 import type { JobFeedFilters as JobFeedFiltersValue } from "../types/job-feed-filters.types";
@@ -50,14 +51,14 @@ export function JobFeedFilters({ filters, onChange, onClear }: JobFeedFiltersPro
         ))}
       </NativeSelect>
 
-      <label htmlFor="job-feed-high-affinity" className="flex items-center gap-2 text-sm text-ink">
+      <Label htmlFor="job-feed-high-affinity" className="text-ink">
         <Checkbox
           id="job-feed-high-affinity"
           checked={filters.onlyHighAffinity}
           onCheckedChange={(checked) => onChange({ ...filters, onlyHighAffinity: checked })}
         />
         {JOB_FEED_MESSAGES.onlyHighAffinity}
-      </label>
+      </Label>
 
       <Button
         variant="ghost"

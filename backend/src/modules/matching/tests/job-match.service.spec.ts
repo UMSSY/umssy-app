@@ -3,6 +3,7 @@ import type { UserSkillService } from '../../skills/services/user-skill.service.
 import { JOB_OFFER_NOT_AVAILABLE_MESSAGE } from '../constants/job-match.constants.js';
 import { JobOfferNotAvailableException } from '../exceptions/job-offer-not-available.exception.js';
 import type { JobMatchRepository } from '../repositories/job-match.repository.js';
+import type { CandidateProfileService } from '../services/candidate-profile.service.js';
 import { JobMatchService } from '../services/job-match.service.js';
 import { WeightedScoreService } from '../services/weighted-score.service.js';
 import type { JobMatchRecord } from '../types/job-match.types.js';
@@ -38,16 +39,14 @@ function vacancyRecord(
 const skill = (name: string) => ({ id: `id-${name}`, name, isCustom: false });
 
 describe('JobMatchService', () => {
-  let repository: {
-    findPublishedById: ReturnType<typeof vi.fn>;
-    findCandidateProfile: ReturnType<typeof vi.fn>;
-  };
+  let repository: { findPublishedById: ReturnType<typeof vi.fn> };
+  let candidateProfile: { findCandidateProfile: ReturnType<typeof vi.fn> };
   let userSkillService: { getUserSkills: ReturnType<typeof vi.fn> };
   let service: JobMatchService;
 
   beforeEach(() => {
-    repository = {
-      findPublishedById: vi.fn(),
+    repository = { findPublishedById: vi.fn() };
+    candidateProfile = {
       findCandidateProfile: vi.fn().mockResolvedValue(NO_PROFILE),
     };
     userSkillService = { getUserSkills: vi.fn().mockResolvedValue([]) };
@@ -55,6 +54,7 @@ describe('JobMatchService', () => {
     service = new JobMatchService(
       repository as unknown as JobMatchRepository,
       userSkillService as unknown as UserSkillService,
+      candidateProfile as unknown as CandidateProfileService,
       new WeightedScoreService(),
     );
   });
@@ -97,7 +97,7 @@ describe('JobMatchService', () => {
     expect(id).toBe(JOB_OFFER_ID);
     expect(now.getTime()).toBeGreaterThanOrEqual(before);
     expect(userSkillService.getUserSkills).toHaveBeenCalledWith(USER_ID);
-    expect(repository.findCandidateProfile).toHaveBeenCalledWith(USER_ID);
+    expect(candidateProfile.findCandidateProfile).toHaveBeenCalledWith(USER_ID);
   });
 
   it('lanza 404 con el aviso aprobado cuando la vacante no existe, no está publicada o venció', async () => {
@@ -116,7 +116,7 @@ describe('JobMatchService', () => {
       'La vacante no existe o no está disponible',
     );
     expect(userSkillService.getUserSkills).not.toHaveBeenCalled();
-    expect(repository.findCandidateProfile).not.toHaveBeenCalled();
+    expect(candidateProfile.findCandidateProfile).not.toHaveBeenCalled();
   });
 
   it('una vacante sin requisitos da 100 % y no tiene pendientes (AC-03.5, AC-04.4)', async () => {
@@ -200,7 +200,7 @@ describe('JobMatchService', () => {
     });
 
     it('lista las tres categorías con su estado y pondera con los pesos de cada una (AC-04.5, AC-04.6)', async () => {
-      repository.findCandidateProfile.mockResolvedValue({
+      candidateProfile.findCandidateProfile.mockResolvedValue({
         career: 'Ingeniería de Sistemas',
         experienceYears: 1,
       });
@@ -220,7 +220,7 @@ describe('JobMatchService', () => {
     });
 
     it('marca la carrera como pendiente cuando la formación es otra', async () => {
-      repository.findCandidateProfile.mockResolvedValue({
+      candidateProfile.findCandidateProfile.mockResolvedValue({
         career: 'Ingeniería Comercial',
         experienceYears: 5,
       });
@@ -237,7 +237,7 @@ describe('JobMatchService', () => {
     });
 
     it('acepta la carrera sin tildes ni mayúsculas y los años mínimos exactos', async () => {
-      repository.findCandidateProfile.mockResolvedValue({
+      candidateProfile.findCandidateProfile.mockResolvedValue({
         career: 'ingenieria de sistemas',
         experienceYears: 3,
       });
@@ -250,7 +250,7 @@ describe('JobMatchService', () => {
     });
 
     it('deja pendiente la carrera cuando la persona no registró formación', async () => {
-      repository.findCandidateProfile.mockResolvedValue(NO_PROFILE);
+      candidateProfile.findCandidateProfile.mockResolvedValue(NO_PROFILE);
 
       const result = await service.getMatch(USER_ID, JOB_OFFER_ID);
 

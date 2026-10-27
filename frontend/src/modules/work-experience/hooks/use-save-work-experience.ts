@@ -3,8 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useState } from "react";
-import { skillsAnalysisService } from "@/modules/matching/services/skills-analysis.service";
-import type { SkillsAnalysisResult } from "@/modules/matching/types/skills-analysis.types";
+import { skillsAnalysisService, type SkillsAnalysisResult } from "@/modules/matching";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
 import type { Feedback } from "@/modules/profile";

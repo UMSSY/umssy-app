@@ -1,16 +1,14 @@
-import { Application } from '../types/application.types';
+import { apiClient } from "@/shared/services/api-client";
+import type { ApiResponse } from "@/shared/types/api-response.types";
+import { APPLICATIONS_ENDPOINT, getWithdrawApplicationEndpoint } from "../constants/application.constants";
+import type { Application } from "../types/application.types";
 
-export const ApplicationService = {
-  async getMyApplications(): Promise<Application[]> {
-    const response = await fetch('/api/applications/me');
-    if (!response.ok) throw new Error('Error al cargar postulaciones');
-    return response.json();
+export const applicationService = {
+  getMine: async (): Promise<Application[]> => {
+    const response = await apiClient.get<ApiResponse<Application[]>>(APPLICATIONS_ENDPOINT);
+    return response.data.data;
   },
-
-  async withdrawApplication(id: string): Promise<void> {
-    const response = await fetch(`/api/applications/${id}/withdraw`, {
-      method: 'PATCH'
-    });
-    if (!response.ok) throw new Error('Error al retirar postulación');
-  }
+  withdraw: async (applicationId: string): Promise<void> => {
+    await apiClient.patch(getWithdrawApplicationEndpoint(applicationId));
+  },
 };

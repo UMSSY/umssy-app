@@ -43,12 +43,12 @@ export function MissingRequirements({
                 <span className="text-ink">{name}</span>
                 {status === "Cumple" ? (
                   <span className="flex items-center gap-1.5 font-semibold text-ink">
-                    <Check className="size-5" aria-hidden="true" />
+                    <Check className="size-4" aria-hidden="true" />
                     {REQUIREMENT_STATUS_LABELS[status]}
                   </span>
                 ) : (
                   <span className="flex items-center gap-1.5 text-text-secondary">
-                    <Circle className="size-5" aria-hidden="true" />
+                    <Circle className="size-4" aria-hidden="true" />
                     {REQUIREMENT_STATUS_LABELS[status]}
                   </span>
                 )}

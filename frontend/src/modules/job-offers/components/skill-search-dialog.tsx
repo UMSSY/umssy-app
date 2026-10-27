@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { normalizeSearchText } from "@/shared/utils/normalize-search-text";
 import { SKILL_SEARCH_TEXT } from "../constants/vacancies.constants";
 import type { SkillOption } from "../types/vacancy-conditions.types";
-import { normalizeSearchText } from "../utils/normalize-search-text";
 
 interface SkillSearchDialogProps {
   catalog: SkillOption[];

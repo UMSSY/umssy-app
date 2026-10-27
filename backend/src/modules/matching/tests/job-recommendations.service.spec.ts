@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
+import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 import type { JobMatchRepository } from '../repositories/job-match.repository.js';
+import type { CandidateProfileService } from '../services/candidate-profile.service.js';
 import { JobRecommendationsService } from '../services/job-recommendations.service.js';
 import { VacancyRankingService } from '../services/vacancy-ranking.service.js';
 import { WeightedScoreService } from '../services/weighted-score.service.js';
@@ -30,16 +32,16 @@ function offer(
   } as JobMatchRecord;
 }
 
+const skill = (name: string) => ({ id: `id-${name}`, name, isCustom: false });
+
 describe('HU-06 recommendations contract', () => {
-  const findUnique = vi.fn();
+  const getUserSkills = vi.fn();
   const findPublished = vi.fn();
   const findCandidateProfile = vi.fn();
   let service: JobRecommendationsService;
 
   beforeEach(() => {
-    findUnique
-      .mockReset()
-      .mockResolvedValue({ userSkills: [{ skill: { name: 'Python' } }] });
+    getUserSkills.mockReset().mockResolvedValue([skill('Python')]);
     findPublished
       .mockReset()
       .mockResolvedValue([
@@ -52,8 +54,9 @@ describe('HU-06 recommendations contract', () => {
       .mockReset()
       .mockResolvedValue({ career: null, experienceYears: 0 });
     service = new JobRecommendationsService(
-      { user: { findUnique } } as unknown as PrismaService,
-      { findPublished, findCandidateProfile } as unknown as JobMatchRepository,
+      { getUserSkills } as unknown as UserSkillService,
+      { findCandidateProfile } as unknown as CandidateProfileService,
+      { findPublished } as unknown as JobMatchRepository,
       new VacancyRankingService(),
       new WeightedScoreService(),
     );
@@ -67,9 +70,7 @@ describe('HU-06 recommendations contract', () => {
       ['partial', 50],
       ['none', 0],
     ]);
-    expect(findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: 'user' } }),
-    );
+    expect(getUserSkills).toHaveBeenCalledWith('user');
     expect(findCandidateProfile).toHaveBeenCalledWith('user');
   });
 
@@ -95,9 +96,7 @@ describe('HU-06 recommendations contract', () => {
         (item) => item.jobOfferId === 'partial',
       )?.score;
     expect(await scoreOf()).toBe(50);
-    findUnique.mockResolvedValue({
-      userSkills: ['Python', 'SQL'].map((name) => ({ skill: { name } })),
-    });
+    getUserSkills.mockResolvedValue([skill('Python'), skill('SQL')]);
     expect(await scoreOf()).toBe(100);
   });
 
@@ -139,17 +138,23 @@ describe('HU-06 recommendations contract', () => {
     ]);
   });
 
-  it.each([null, { userSkills: [] }])(
-    'returns an incomplete profile without listing offers: %j',
-    async (user) => {
-      findUnique.mockResolvedValue(user);
-      await expect(service.recommendations('user')).resolves.toEqual({
-        isProfileComplete: false,
-        items: [],
-      });
-      expect(findPublished).not.toHaveBeenCalled();
-    },
-  );
+  it('returns an incomplete profile without listing offers when there are no skills', async () => {
+    getUserSkills.mockResolvedValue([]);
+    await expect(service.recommendations('user')).resolves.toEqual({
+      isProfileComplete: false,
+      items: [],
+    });
+    expect(findPublished).not.toHaveBeenCalled();
+  });
+
+  it('returns an incomplete profile when the person has no profile yet', async () => {
+    getUserSkills.mockRejectedValue(new ProfileNotFoundException());
+    await expect(service.recommendations('user')).resolves.toEqual({
+      isProfileComplete: false,
+      items: [],
+    });
+    expect(findPublished).not.toHaveBeenCalled();
+  });
 
   it('returns an empty feed when there are no published offers', async () => {
     findPublished.mockResolvedValue([]);
@@ -160,7 +165,7 @@ describe('HU-06 recommendations contract', () => {
   });
 
   it('propagates connection failures so the UI can offer retry', async () => {
-    findUnique.mockRejectedValue(new Error('Database unavailable'));
+    getUserSkills.mockRejectedValue(new Error('Database unavailable'));
     await expect(service.recommendations('user')).rejects.toThrow(
       'Database unavailable',
     );
