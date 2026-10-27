@@ -83,6 +83,23 @@ describe('AvailabilityService', () => {
     );
   });
 
+  describe('findBlockWithAppointments', () => {
+    it('lee el bloque con sus citas activas dentro de la transacción recibida', async () => {
+      const stored = block('block-1', [AppointmentStatusTitle.CONFIRMED]);
+      availabilityRepository.findById.mockResolvedValue(stored);
+
+      await expect(service.findBlockWithAppointments('block-1', TX as never)).resolves.toBe(stored);
+      expect(availabilityRepository.findById).toHaveBeenCalledExactlyOnceWith('block-1', TX);
+    });
+
+    it('devuelve null si el bloque no existe', async () => {
+      availabilityRepository.findById.mockResolvedValue(null);
+
+      await expect(service.findBlockWithAppointments('missing')).resolves.toBeNull();
+      expect(availabilityRepository.findById).toHaveBeenCalledExactlyOnceWith('missing', undefined);
+    });
+  });
+
   describe('findMyBlocks', () => {
     it('consulta solo los bloques del mentor en sesión dentro del rango pedido', async () => {
       await service.findMyBlocks('mentor-1', QUERY);

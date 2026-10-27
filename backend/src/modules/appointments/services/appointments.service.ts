@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
 import { BlockNotFoundException } from '../../availability/exceptions/index.js';
-import { AvailabilityRepository } from '../../availability/repositories/availability.repository.js';
+import { AvailabilityService } from '../../availability/services/availability.service.js';
 import { BlockedDatesService } from '../../availability/services/blocked-dates.service.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import {
@@ -25,7 +25,7 @@ export class AppointmentsService {
   constructor(
     private readonly appointmentsRepository: AppointmentsRepository,
     private readonly appointmentMapper: AppointmentMapper,
-    private readonly availabilityRepository: AvailabilityRepository,
+    private readonly availabilityService: AvailabilityService,
     private readonly blockedDatesService: BlockedDatesService,
     private readonly mentorsService: MentorsService,
   ) {}
@@ -34,7 +34,9 @@ export class AppointmentsService {
     user: AuthenticatedUser,
     payload: CreateAppointmentDto,
   ): Promise<MyAppointmentResponse> {
-    const block = await this.availabilityRepository.findById(payload.blockId);
+    const block = await this.availabilityService.findBlockWithAppointments(
+      payload.blockId,
+    );
 
     if (!block) {
       throw new BlockNotFoundException();
@@ -67,7 +69,7 @@ export class AppointmentsService {
       block.mentorId,
       block.startAt,
       async (tx) => {
-        const current = await this.availabilityRepository.findById(
+        const current = await this.availabilityService.findBlockWithAppointments(
           payload.blockId,
           tx,
         );
