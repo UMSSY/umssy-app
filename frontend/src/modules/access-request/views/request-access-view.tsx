@@ -14,9 +14,9 @@ function RequestAccessLayout() {
   return (
     <div className="flex min-h-screen flex-col">
       <PublicHeader />
-      <div className="flex flex-1">
+      <div className="flex flex-1 flex-col lg:flex-row">
         <RequestStepsSidebar currentStep={currentStep} />
-        <section className="flex min-w-0 flex-1 flex-col p-8">
+        <section className="flex min-w-0 flex-1 flex-col px-4 py-6 md:p-8">
           <div className="mx-auto flex w-full max-w-5xl justify-center">
             {currentStep === 1 ? <PersonalDataForm /> : currentStep === 2 ? <DocumentStep /> : <ReviewStep />}
           </div>

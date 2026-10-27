@@ -286,3 +286,18 @@ export type UserPresence = Prisma.UserPresenceModel
  * 
  */
 export type PasswordResetOtp = Prisma.PasswordResetOtpModel
+/**
+ * Model AuditAction
+ * 
+ */
+export type AuditAction = Prisma.AuditActionModel
+/**
+ * Model AuditEvent
+ * 
+ */
+export type AuditEvent = Prisma.AuditEventModel
+/**
+ * Model DocumentValidation
+ * 
+ */
+export type DocumentValidation = Prisma.DocumentValidationModel

@@ -67,8 +67,8 @@ export function DocumentDropzone() {
           <FileUp className="size-6" />
         </span>
         <div className="flex flex-col gap-1">
-          <p className="text-base font-semibold text-ink 2xl:text-lg">Arrastra tu documento aquí o elige un archivo.</p>
-          <p className="text-[12.5px] text-text-secondary 2xl:text-base">JPG, PNG o PDF. Máximo 10 MB.</p>
+          <p className="text-base font-semibold text-ink">Arrastra tu documento aquí o elige un archivo.</p>
+          <p className="text-xs text-text-secondary">JPG, PNG o PDF. Máximo 10 MB.</p>
         </div>
 
         <Input
@@ -89,7 +89,7 @@ export function DocumentDropzone() {
           variant="secondary"
           disabled={isDisabled}
           onClick={() => inputRef.current?.click()}
-          className="h-10 rounded-md px-5 text-sm font-semibold text-ink 2xl:h-12"
+          className="h-11 rounded-md px-5 text-sm font-semibold text-ink"
         >
           Elegir archivo
         </Button>
@@ -97,7 +97,7 @@ export function DocumentDropzone() {
         {isUploading ? (
           <div className="flex w-full max-w-sm flex-col gap-2" role="status">
             <Progress value={documentState.progress} aria-label="Progreso de la subida" />
-            <p className="text-[12.5px] text-text-secondary 2xl:text-base">{`Subiendo... ${documentState.progress}%`}</p>
+            <p className="text-xs text-text-secondary">{`Subiendo... ${documentState.progress}%`}</p>
           </div>
         ) : null}
       </div>

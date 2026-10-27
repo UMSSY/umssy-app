@@ -99,7 +99,10 @@ export const ModelName = {
   ConversationParticipant: 'ConversationParticipant',
   Message: 'Message',
   UserPresence: 'UserPresence',
-  PasswordResetOtp: 'PasswordResetOtp'
+  PasswordResetOtp: 'PasswordResetOtp',
+  AuditAction: 'AuditAction',
+  AuditEvent: 'AuditEvent',
+  DocumentValidation: 'DocumentValidation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -769,6 +772,56 @@ export const PasswordResetOtpScalarFieldEnum = {
 } as const
 
 export type PasswordResetOtpScalarFieldEnum = (typeof PasswordResetOtpScalarFieldEnum)[keyof typeof PasswordResetOtpScalarFieldEnum]
+
+
+export const AuditActionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AuditActionScalarFieldEnum = (typeof AuditActionScalarFieldEnum)[keyof typeof AuditActionScalarFieldEnum]
+
+
+export const AuditEventScalarFieldEnum = {
+  id: 'id',
+  number: 'number',
+  accessRequestId: 'accessRequestId',
+  requestCode: 'requestCode',
+  applicantName: 'applicantName',
+  applicantCareer: 'applicantCareer',
+  actionId: 'actionId',
+  actorId: 'actorId',
+  actorName: 'actorName',
+  actorRole: 'actorRole',
+  detail: 'detail',
+  evidenceFileId: 'evidenceFileId',
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AuditEventScalarFieldEnum = (typeof AuditEventScalarFieldEnum)[keyof typeof AuditEventScalarFieldEnum]
+
+
+export const DocumentValidationScalarFieldEnum = {
+  id: 'id',
+  accessRequestId: 'accessRequestId',
+  result: 'result',
+  matchScore: 'matchScore',
+  reason: 'reason',
+  fieldResults: 'fieldResults',
+  queuedAt: 'queuedAt',
+  readAt: 'readAt',
+  revertedAt: 'revertedAt',
+  revertedById: 'revertedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentValidationScalarFieldEnum = (typeof DocumentValidationScalarFieldEnum)[keyof typeof DocumentValidationScalarFieldEnum]
 
 
 export const SortOrder = {
