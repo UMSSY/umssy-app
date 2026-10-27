@@ -4,9 +4,11 @@ import type { SavedCv } from "../types/saved-cv.types";
 
 export function toSavedCv(response: CvResponse): SavedCv {
   return {
+    id: response.id,
     fileName: response.fileName,
     fileType: CV_FILE_TYPE_LABEL,
     sizeInBytes: response.sizeInBytes,
     updatedAt: new Date(response.updatedAt),
+    isCurrent: response.isCurrent,
   };
 }

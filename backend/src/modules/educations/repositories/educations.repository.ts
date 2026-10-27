@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { EducationAnalysisSourceResponse } from '../responses/education-analysis-source.response.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { EDUCATION_TRANSACTION_ATTEMPTS } from '../constants/education-conflict.constants.js';
@@ -17,6 +18,14 @@ import type { EducationPeriodSnapshot } from '../types/education-period-snapshot
 @Injectable()
 export class EducationsRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  findAnalysisSources(userId: string): Promise<EducationAnalysisSourceResponse[]> {
+    return this.prisma.education.findMany({
+      where: { userId },
+      orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
+      select: { id: true, degree: true, description: true },
+    });
+  }
 
   findManyByUserId(userId: string): Promise<EducationRecord[]> {
     return this.prisma.education.findMany({
