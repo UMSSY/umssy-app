@@ -1,6 +1,7 @@
 import { EventRegistrationsRepository } from '../../src/modules/event-registrations/repositories/event-registrations.repository.js';
 import { vi } from 'vitest';
 import type { PrismaService } from '../../src/common/prisma/prisma.service.js';
+import { EventsRepository } from '../../src/modules/events/repositories/events.repository.js';
 import { EventsService } from '../../src/modules/events/index.js';
 import { EventRegistrationsService } from '../../src/modules/event-registrations/services/event-registrations.service.js';
 import type { RegistrationRecord } from '../../src/modules/event-registrations/types/registration-record.types.js';
@@ -49,7 +50,8 @@ export function registrationFixture() {
     ...tx,
     $transaction: vi.fn().mockImplementation((operation) => operation(tx)),
   };
-  const events = { findForRegistration: vi.fn().mockResolvedValue(event) };
+  const eventService = new EventsService(new EventsRepository(prisma as never));
+  const events = { findForRegistration: vi.fn().mockResolvedValue(event), lockEventRow: eventService.lockEventRow.bind(eventService) };
   const service = new EventRegistrationsService(new EventRegistrationsRepository(prisma as unknown as PrismaService), events as unknown as EventsService);
   return { event, tx, prisma, events, service };
 }
