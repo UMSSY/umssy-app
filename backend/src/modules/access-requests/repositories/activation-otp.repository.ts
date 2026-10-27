@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { Prisma } from '../../../prisma/client.js';
+import { OTP_MAX_ATTEMPTS } from '../constants/otp.constants.js';
 
 const OTP_SELECT = {
   id: true,
@@ -29,11 +31,27 @@ export class ActivationOtpRepository {
     });
   }
 
-  incrementAttempts(id: string) {
-    return this.prisma.activationOtp.update({
-      where: { id },
-      data: { attempts: { increment: 1 } },
-      select: { attempts: true },
+  // Reserva un intento ANTES de comparar el código. La condición va dentro del propio UPDATE,
+  // así que aunque lleguen muchas peticiones a la vez nunca se pasa de OTP_MAX_ATTEMPTS.
+  // Devuelve null si el código ya no admite intentos (agotado, vencido o usado).
+  async reserveAttempt(id: string, now: Date): Promise<{ attempts: number } | null> {
+    try {
+      return await this.prisma.activationOtp.update({
+        where: { id, usedAt: null, expiresAt: { gt: now }, attempts: { lt: OTP_MAX_ATTEMPTS } },
+        data: { attempts: { increment: 1 } },
+        select: { attempts: true },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') return null;
+      throw error;
+    }
+  }
+
+  // Un código correcto no gasta intentos: se devuelve el que se había reservado
+  async releaseAttempt(id: string): Promise<void> {
+    await this.prisma.activationOtp.updateMany({
+      where: { id, attempts: { gt: 0 } },
+      data: { attempts: { decrement: 1 } },
     });
   }
 
