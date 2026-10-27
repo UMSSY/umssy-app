@@ -416,6 +416,7 @@ export const ModelName = {
   UserSkill: 'UserSkill',
   Certification: 'Certification',
   UserCvFile: 'UserCvFile',
+  ProfileSkillProcessingState: 'ProfileSkillProcessingState',
   TechnicalArea: 'TechnicalArea',
   OrientationType: 'OrientationType',
   MentorTechnicalArea: 'MentorTechnicalArea',
@@ -472,7 +473,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1879,6 +1880,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCvFileCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCvFileCountAggregateOutputType> | number
+        }
+      }
+    }
+    ProfileSkillProcessingState: {
+      payload: Prisma.$ProfileSkillProcessingStatePayload<ExtArgs>
+      fields: Prisma.ProfileSkillProcessingStateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProfileSkillProcessingStateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfileSkillProcessingStatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProfileSkillProcessingStateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfileSkillProcessingStatePayload>
+        }
+        findFirst: {
+          args: Prisma.ProfileSkillProcessingStateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfileSkillProcessingStatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProfileSkillProcessingStateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfileSkillProcessingStatePayload>
+        }
+        findMany: {
+          args: Prisma.ProfileSkillProcessingStateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfileSkillProcessingStatePayload>[]
+        }
+        create: {
+          args: Prisma.ProfileSkillProcessingStateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfileSkillProcessingStatePayload>
+        }
+        createMany: {
+          args: Prisma.ProfileSkillProcessingStateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProfileSkillProcessingStateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfileSkillProcessingStatePayload>[]
+        }
+        delete: {
+          args: Prisma.ProfileSkillProcessingStateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfileSkillProcessingStatePayload>
+        }
+        update: {
+          args: Prisma.ProfileSkillProcessingStateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfileSkillProcessingStatePayload>
+        }
+        deleteMany: {
+          args: Prisma.ProfileSkillProcessingStateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProfileSkillProcessingStateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProfileSkillProcessingStateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfileSkillProcessingStatePayload>[]
+        }
+        upsert: {
+          args: Prisma.ProfileSkillProcessingStateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProfileSkillProcessingStatePayload>
+        }
+        aggregate: {
+          args: Prisma.ProfileSkillProcessingStateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProfileSkillProcessingState>
+        }
+        groupBy: {
+          args: Prisma.ProfileSkillProcessingStateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProfileSkillProcessingStateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProfileSkillProcessingStateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProfileSkillProcessingStateCountAggregateOutputType> | number
         }
       }
     }
@@ -5192,6 +5267,19 @@ export const UserCvFileScalarFieldEnum = {
 export type UserCvFileScalarFieldEnum = (typeof UserCvFileScalarFieldEnum)[keyof typeof UserCvFileScalarFieldEnum]
 
 
+export const ProfileSkillProcessingStateScalarFieldEnum = {
+  userId: 'userId',
+  status: 'status',
+  inputRevision: 'inputRevision',
+  processedRevision: 'processedRevision',
+  resultVersion: 'resultVersion',
+  updatedAt: 'updatedAt',
+  dictionaryVersion: 'dictionaryVersion'
+} as const
+
+export type ProfileSkillProcessingStateScalarFieldEnum = (typeof ProfileSkillProcessingStateScalarFieldEnum)[keyof typeof ProfileSkillProcessingStateScalarFieldEnum]
+
+
 export const TechnicalAreaScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -6067,6 +6155,7 @@ export type GlobalOmitConfig = {
   userSkill?: Prisma.UserSkillOmit
   certification?: Prisma.CertificationOmit
   userCvFile?: Prisma.UserCvFileOmit
+  profileSkillProcessingState?: Prisma.ProfileSkillProcessingStateOmit
   technicalArea?: Prisma.TechnicalAreaOmit
   orientationType?: Prisma.OrientationTypeOmit
   mentorTechnicalArea?: Prisma.MentorTechnicalAreaOmit
