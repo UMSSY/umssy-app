@@ -1,6 +1,7 @@
 import type { Prisma } from '../../../prisma/client.js';
 import type { FixtureContext } from '../../../common/database/fixture-context.js';
 import { SURVEY_FIXTURES } from '../constants/survey-fixtures.constants.js';
+import { SurveyQuestionType } from '../types/survey.enum.js';
 import {
   selectedOptionIndexes,
   surveyOptionFixtureId,
@@ -20,7 +21,7 @@ export async function seedSurveyAnswersFixtures(
             respondentNumber,
             questionIndex,
             question.options.length,
-            question.type === 'MULTIPLE_CHOICE',
+            question.type === SurveyQuestionType.MULTIPLE_CHOICE,
           ).map((optionIndex) => ({
             id: context.getId(
               `survey-${survey.key}-response-${respondentNumber}-question-${questionIndex}-option-${optionIndex}`,

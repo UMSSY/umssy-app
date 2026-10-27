@@ -9,7 +9,7 @@ import type {
   SurveyStatistics,
   SurveySummary,
 } from "../types/survey.types";
-import type { SubmitSurveyPayload, SurveyToAnswer } from "../types/survey-answer.types";
+import type { SubmitSurveyPayload } from "../types/survey-answer.types";
 
 export const surveysService = {
   createSurvey: async (payload: CreateSurveyPayload): Promise<ApiResponse<CreatedSurvey>> => {
@@ -39,11 +39,6 @@ export const surveysService = {
 
   getSurveyStatistics: async (id: string): Promise<ApiResponse<SurveyStatistics>> => {
     const { data } = await apiClient.get<ApiResponse<SurveyStatistics>>(`/surveys/${id}/statistics`);
-    return data;
-  },
-
-  getSurveyToAnswer: async (id: string): Promise<ApiResponse<SurveyToAnswer>> => {
-    const { data } = await apiClient.get<ApiResponse<SurveyToAnswer>>(`/surveys/${id}`);
     return data;
   },
 

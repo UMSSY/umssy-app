@@ -197,3 +197,31 @@ export interface SurveyDetailViewProps {
 export interface SurveyReadOnlyViewProps {
   survey: SurveyDetail;
 }
+
+export interface SurveyQuestionFieldOption {
+  id: string;
+  label: string;
+}
+
+export interface SurveyQuestionFieldQuestion {
+  id: string;
+  statement: string;
+  type: QuestionType;
+  isRequired: boolean;
+  options: SurveyQuestionFieldOption[];
+}
+
+export interface SurveyQuestionFieldProps {
+  question: SurveyQuestionFieldQuestion;
+  index: number;
+  idPrefix: string;
+  selectedOptionIds?: string[];
+  onChange?: (optionIds: string[]) => void;
+  isReadOnly?: boolean;
+  hint?: string;
+  error?: string;
+}
+
+export interface AnswerSurveyViewProps {
+  id: string;
+}

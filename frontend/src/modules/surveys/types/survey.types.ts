@@ -114,5 +114,7 @@ export interface SurveyDetail {
   academicPeriod: string | null;
   opensAt: string | null;
   closesAt: string | null;
+  hasAnswered?: boolean;
+  isExpired?: boolean;
   questions: SurveyDetailQuestion[];
 }

@@ -32,7 +32,7 @@ export type SurveyMinAggregateOutputType = {
   academicPeriod: string | null
   opensAt: Date | null
   closesAt: Date | null
-  status: $Enums.SurveyStatus | null
+  statusId: string | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -46,7 +46,7 @@ export type SurveyMaxAggregateOutputType = {
   academicPeriod: string | null
   opensAt: Date | null
   closesAt: Date | null
-  status: $Enums.SurveyStatus | null
+  statusId: string | null
   createdById: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -60,7 +60,7 @@ export type SurveyCountAggregateOutputType = {
   academicPeriod: number
   opensAt: number
   closesAt: number
-  status: number
+  statusId: number
   createdById: number
   createdAt: number
   updatedAt: number
@@ -76,7 +76,7 @@ export type SurveyMinAggregateInputType = {
   academicPeriod?: true
   opensAt?: true
   closesAt?: true
-  status?: true
+  statusId?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -90,7 +90,7 @@ export type SurveyMaxAggregateInputType = {
   academicPeriod?: true
   opensAt?: true
   closesAt?: true
-  status?: true
+  statusId?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -104,7 +104,7 @@ export type SurveyCountAggregateInputType = {
   academicPeriod?: true
   opensAt?: true
   closesAt?: true
-  status?: true
+  statusId?: true
   createdById?: true
   createdAt?: true
   updatedAt?: true
@@ -191,7 +191,7 @@ export type SurveyGroupByOutputType = {
   academicPeriod: string | null
   opensAt: Date | null
   closesAt: Date | null
-  status: $Enums.SurveyStatus
+  statusId: string
   createdById: string
   createdAt: Date
   updatedAt: Date
@@ -226,11 +226,12 @@ export type SurveyWhereInput = {
   academicPeriod?: Prisma.StringNullableFilter<"Survey"> | string | null
   opensAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
   closesAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
-  status?: Prisma.EnumSurveyStatusFilter<"Survey"> | $Enums.SurveyStatus
+  statusId?: Prisma.UuidFilter<"Survey"> | string
   createdById?: Prisma.UuidFilter<"Survey"> | string
   createdAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
   career?: Prisma.XOR<Prisma.CareerNullableScalarRelationFilter, Prisma.CareerWhereInput> | null
+  status?: Prisma.XOR<Prisma.SurveyStatusScalarRelationFilter, Prisma.SurveyStatusWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   questions?: Prisma.SurveyQuestionListRelationFilter
   responses?: Prisma.SurveyResponseListRelationFilter
@@ -244,11 +245,12 @@ export type SurveyOrderByWithRelationInput = {
   academicPeriod?: Prisma.SortOrderInput | Prisma.SortOrder
   opensAt?: Prisma.SortOrderInput | Prisma.SortOrder
   closesAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   career?: Prisma.CareerOrderByWithRelationInput
+  status?: Prisma.SurveyStatusOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
   questions?: Prisma.SurveyQuestionOrderByRelationAggregateInput
   responses?: Prisma.SurveyResponseOrderByRelationAggregateInput
@@ -265,11 +267,12 @@ export type SurveyWhereUniqueInput = Prisma.AtLeast<{
   academicPeriod?: Prisma.StringNullableFilter<"Survey"> | string | null
   opensAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
   closesAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
-  status?: Prisma.EnumSurveyStatusFilter<"Survey"> | $Enums.SurveyStatus
+  statusId?: Prisma.UuidFilter<"Survey"> | string
   createdById?: Prisma.UuidFilter<"Survey"> | string
   createdAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
   career?: Prisma.XOR<Prisma.CareerNullableScalarRelationFilter, Prisma.CareerWhereInput> | null
+  status?: Prisma.XOR<Prisma.SurveyStatusScalarRelationFilter, Prisma.SurveyStatusWhereInput>
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   questions?: Prisma.SurveyQuestionListRelationFilter
   responses?: Prisma.SurveyResponseListRelationFilter
@@ -283,7 +286,7 @@ export type SurveyOrderByWithAggregationInput = {
   academicPeriod?: Prisma.SortOrderInput | Prisma.SortOrder
   opensAt?: Prisma.SortOrderInput | Prisma.SortOrder
   closesAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -303,7 +306,7 @@ export type SurveyScalarWhereWithAggregatesInput = {
   academicPeriod?: Prisma.StringNullableWithAggregatesFilter<"Survey"> | string | null
   opensAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Survey"> | Date | string | null
   closesAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Survey"> | Date | string | null
-  status?: Prisma.EnumSurveyStatusWithAggregatesFilter<"Survey"> | $Enums.SurveyStatus
+  statusId?: Prisma.UuidWithAggregatesFilter<"Survey"> | string
   createdById?: Prisma.UuidWithAggregatesFilter<"Survey"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Survey"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Survey"> | Date | string
@@ -316,10 +319,10 @@ export type SurveyCreateInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
+  status: Prisma.SurveyStatusCreateNestedOneWithoutSurveysInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
   questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
@@ -333,7 +336,7 @@ export type SurveyUncheckedCreateInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
+  statusId: string
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -348,10 +351,10 @@ export type SurveyUpdateInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
+  status?: Prisma.SurveyStatusUpdateOneRequiredWithoutSurveysNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
   questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
@@ -365,7 +368,7 @@ export type SurveyUncheckedUpdateInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -381,7 +384,7 @@ export type SurveyCreateManyInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
+  statusId: string
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -394,7 +397,6 @@ export type SurveyUpdateManyMutationInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -407,7 +409,7 @@ export type SurveyUncheckedUpdateManyInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -431,7 +433,7 @@ export type SurveyCountOrderByAggregateInput = {
   academicPeriod?: Prisma.SortOrder
   opensAt?: Prisma.SortOrder
   closesAt?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -445,7 +447,7 @@ export type SurveyMaxOrderByAggregateInput = {
   academicPeriod?: Prisma.SortOrder
   opensAt?: Prisma.SortOrder
   closesAt?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -459,7 +461,7 @@ export type SurveyMinOrderByAggregateInput = {
   academicPeriod?: Prisma.SortOrder
   opensAt?: Prisma.SortOrder
   closesAt?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -554,8 +556,46 @@ export type SurveyUncheckedUpdateManyWithoutCareerNestedInput = {
   deleteMany?: Prisma.SurveyScalarWhereInput | Prisma.SurveyScalarWhereInput[]
 }
 
-export type EnumSurveyStatusFieldUpdateOperationsInput = {
-  set?: $Enums.SurveyStatus
+export type SurveyCreateNestedManyWithoutStatusInput = {
+  create?: Prisma.XOR<Prisma.SurveyCreateWithoutStatusInput, Prisma.SurveyUncheckedCreateWithoutStatusInput> | Prisma.SurveyCreateWithoutStatusInput[] | Prisma.SurveyUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.SurveyCreateOrConnectWithoutStatusInput | Prisma.SurveyCreateOrConnectWithoutStatusInput[]
+  createMany?: Prisma.SurveyCreateManyStatusInputEnvelope
+  connect?: Prisma.SurveyWhereUniqueInput | Prisma.SurveyWhereUniqueInput[]
+}
+
+export type SurveyUncheckedCreateNestedManyWithoutStatusInput = {
+  create?: Prisma.XOR<Prisma.SurveyCreateWithoutStatusInput, Prisma.SurveyUncheckedCreateWithoutStatusInput> | Prisma.SurveyCreateWithoutStatusInput[] | Prisma.SurveyUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.SurveyCreateOrConnectWithoutStatusInput | Prisma.SurveyCreateOrConnectWithoutStatusInput[]
+  createMany?: Prisma.SurveyCreateManyStatusInputEnvelope
+  connect?: Prisma.SurveyWhereUniqueInput | Prisma.SurveyWhereUniqueInput[]
+}
+
+export type SurveyUpdateManyWithoutStatusNestedInput = {
+  create?: Prisma.XOR<Prisma.SurveyCreateWithoutStatusInput, Prisma.SurveyUncheckedCreateWithoutStatusInput> | Prisma.SurveyCreateWithoutStatusInput[] | Prisma.SurveyUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.SurveyCreateOrConnectWithoutStatusInput | Prisma.SurveyCreateOrConnectWithoutStatusInput[]
+  upsert?: Prisma.SurveyUpsertWithWhereUniqueWithoutStatusInput | Prisma.SurveyUpsertWithWhereUniqueWithoutStatusInput[]
+  createMany?: Prisma.SurveyCreateManyStatusInputEnvelope
+  set?: Prisma.SurveyWhereUniqueInput | Prisma.SurveyWhereUniqueInput[]
+  disconnect?: Prisma.SurveyWhereUniqueInput | Prisma.SurveyWhereUniqueInput[]
+  delete?: Prisma.SurveyWhereUniqueInput | Prisma.SurveyWhereUniqueInput[]
+  connect?: Prisma.SurveyWhereUniqueInput | Prisma.SurveyWhereUniqueInput[]
+  update?: Prisma.SurveyUpdateWithWhereUniqueWithoutStatusInput | Prisma.SurveyUpdateWithWhereUniqueWithoutStatusInput[]
+  updateMany?: Prisma.SurveyUpdateManyWithWhereWithoutStatusInput | Prisma.SurveyUpdateManyWithWhereWithoutStatusInput[]
+  deleteMany?: Prisma.SurveyScalarWhereInput | Prisma.SurveyScalarWhereInput[]
+}
+
+export type SurveyUncheckedUpdateManyWithoutStatusNestedInput = {
+  create?: Prisma.XOR<Prisma.SurveyCreateWithoutStatusInput, Prisma.SurveyUncheckedCreateWithoutStatusInput> | Prisma.SurveyCreateWithoutStatusInput[] | Prisma.SurveyUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.SurveyCreateOrConnectWithoutStatusInput | Prisma.SurveyCreateOrConnectWithoutStatusInput[]
+  upsert?: Prisma.SurveyUpsertWithWhereUniqueWithoutStatusInput | Prisma.SurveyUpsertWithWhereUniqueWithoutStatusInput[]
+  createMany?: Prisma.SurveyCreateManyStatusInputEnvelope
+  set?: Prisma.SurveyWhereUniqueInput | Prisma.SurveyWhereUniqueInput[]
+  disconnect?: Prisma.SurveyWhereUniqueInput | Prisma.SurveyWhereUniqueInput[]
+  delete?: Prisma.SurveyWhereUniqueInput | Prisma.SurveyWhereUniqueInput[]
+  connect?: Prisma.SurveyWhereUniqueInput | Prisma.SurveyWhereUniqueInput[]
+  update?: Prisma.SurveyUpdateWithWhereUniqueWithoutStatusInput | Prisma.SurveyUpdateWithWhereUniqueWithoutStatusInput[]
+  updateMany?: Prisma.SurveyUpdateManyWithWhereWithoutStatusInput | Prisma.SurveyUpdateManyWithWhereWithoutStatusInput[]
+  deleteMany?: Prisma.SurveyScalarWhereInput | Prisma.SurveyScalarWhereInput[]
 }
 
 export type SurveyCreateNestedOneWithoutQuestionsInput = {
@@ -593,10 +633,10 @@ export type SurveyCreateWithoutCreatedByInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
+  status: Prisma.SurveyStatusCreateNestedOneWithoutSurveysInput
   questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
 }
@@ -609,7 +649,7 @@ export type SurveyUncheckedCreateWithoutCreatedByInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
+  statusId: string
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.SurveyQuestionUncheckedCreateNestedManyWithoutSurveyInput
@@ -653,7 +693,7 @@ export type SurveyScalarWhereInput = {
   academicPeriod?: Prisma.StringNullableFilter<"Survey"> | string | null
   opensAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
   closesAt?: Prisma.DateTimeNullableFilter<"Survey"> | Date | string | null
-  status?: Prisma.EnumSurveyStatusFilter<"Survey"> | $Enums.SurveyStatus
+  statusId?: Prisma.UuidFilter<"Survey"> | string
   createdById?: Prisma.UuidFilter<"Survey"> | string
   createdAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Survey"> | Date | string
@@ -666,9 +706,9 @@ export type SurveyCreateWithoutCareerInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  status: Prisma.SurveyStatusCreateNestedOneWithoutSurveysInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
   questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
   responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
@@ -681,7 +721,7 @@ export type SurveyUncheckedCreateWithoutCareerInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
+  statusId: string
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -715,6 +755,62 @@ export type SurveyUpdateManyWithWhereWithoutCareerInput = {
   data: Prisma.XOR<Prisma.SurveyUpdateManyMutationInput, Prisma.SurveyUncheckedUpdateManyWithoutCareerInput>
 }
 
+export type SurveyCreateWithoutStatusInput = {
+  id?: string
+  title: string
+  description?: string | null
+  academicPeriod?: string | null
+  opensAt?: Date | string | null
+  closesAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
+  createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
+  questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
+  responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
+}
+
+export type SurveyUncheckedCreateWithoutStatusInput = {
+  id?: string
+  title: string
+  description?: string | null
+  careerId?: string | null
+  academicPeriod?: string | null
+  opensAt?: Date | string | null
+  closesAt?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  questions?: Prisma.SurveyQuestionUncheckedCreateNestedManyWithoutSurveyInput
+  responses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutSurveyInput
+}
+
+export type SurveyCreateOrConnectWithoutStatusInput = {
+  where: Prisma.SurveyWhereUniqueInput
+  create: Prisma.XOR<Prisma.SurveyCreateWithoutStatusInput, Prisma.SurveyUncheckedCreateWithoutStatusInput>
+}
+
+export type SurveyCreateManyStatusInputEnvelope = {
+  data: Prisma.SurveyCreateManyStatusInput | Prisma.SurveyCreateManyStatusInput[]
+  skipDuplicates?: boolean
+}
+
+export type SurveyUpsertWithWhereUniqueWithoutStatusInput = {
+  where: Prisma.SurveyWhereUniqueInput
+  update: Prisma.XOR<Prisma.SurveyUpdateWithoutStatusInput, Prisma.SurveyUncheckedUpdateWithoutStatusInput>
+  create: Prisma.XOR<Prisma.SurveyCreateWithoutStatusInput, Prisma.SurveyUncheckedCreateWithoutStatusInput>
+}
+
+export type SurveyUpdateWithWhereUniqueWithoutStatusInput = {
+  where: Prisma.SurveyWhereUniqueInput
+  data: Prisma.XOR<Prisma.SurveyUpdateWithoutStatusInput, Prisma.SurveyUncheckedUpdateWithoutStatusInput>
+}
+
+export type SurveyUpdateManyWithWhereWithoutStatusInput = {
+  where: Prisma.SurveyScalarWhereInput
+  data: Prisma.XOR<Prisma.SurveyUpdateManyMutationInput, Prisma.SurveyUncheckedUpdateManyWithoutStatusInput>
+}
+
 export type SurveyCreateWithoutQuestionsInput = {
   id?: string
   title: string
@@ -722,10 +818,10 @@ export type SurveyCreateWithoutQuestionsInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
+  status: Prisma.SurveyStatusCreateNestedOneWithoutSurveysInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
   responses?: Prisma.SurveyResponseCreateNestedManyWithoutSurveyInput
 }
@@ -738,7 +834,7 @@ export type SurveyUncheckedCreateWithoutQuestionsInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
+  statusId: string
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -768,10 +864,10 @@ export type SurveyUpdateWithoutQuestionsInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
+  status?: Prisma.SurveyStatusUpdateOneRequiredWithoutSurveysNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
   responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
 }
@@ -784,7 +880,7 @@ export type SurveyUncheckedUpdateWithoutQuestionsInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -798,10 +894,10 @@ export type SurveyCreateWithoutResponsesInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
   createdAt?: Date | string
   updatedAt?: Date | string
   career?: Prisma.CareerCreateNestedOneWithoutSurveysInput
+  status: Prisma.SurveyStatusCreateNestedOneWithoutSurveysInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedSurveysInput
   questions?: Prisma.SurveyQuestionCreateNestedManyWithoutSurveyInput
 }
@@ -814,7 +910,7 @@ export type SurveyUncheckedCreateWithoutResponsesInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
+  statusId: string
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -844,10 +940,10 @@ export type SurveyUpdateWithoutResponsesInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
+  status?: Prisma.SurveyStatusUpdateOneRequiredWithoutSurveysNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
   questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
 }
@@ -860,7 +956,7 @@ export type SurveyUncheckedUpdateWithoutResponsesInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -875,7 +971,7 @@ export type SurveyCreateManyCreatedByInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
+  statusId: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -887,10 +983,10 @@ export type SurveyUpdateWithoutCreatedByInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
+  status?: Prisma.SurveyStatusUpdateOneRequiredWithoutSurveysNestedInput
   questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
 }
@@ -903,7 +999,7 @@ export type SurveyUncheckedUpdateWithoutCreatedByInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.SurveyQuestionUncheckedUpdateManyWithoutSurveyNestedInput
@@ -918,7 +1014,7 @@ export type SurveyUncheckedUpdateManyWithoutCreatedByInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -930,7 +1026,7 @@ export type SurveyCreateManyCareerInput = {
   academicPeriod?: string | null
   opensAt?: Date | string | null
   closesAt?: Date | string | null
-  status?: $Enums.SurveyStatus
+  statusId: string
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -943,9 +1039,9 @@ export type SurveyUpdateWithoutCareerInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.SurveyStatusUpdateOneRequiredWithoutSurveysNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
   questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
   responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
@@ -958,7 +1054,7 @@ export type SurveyUncheckedUpdateWithoutCareerInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -973,7 +1069,63 @@ export type SurveyUncheckedUpdateManyWithoutCareerInput = {
   academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  status?: Prisma.EnumSurveyStatusFieldUpdateOperationsInput | $Enums.SurveyStatus
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SurveyCreateManyStatusInput = {
+  id?: string
+  title: string
+  description?: string | null
+  careerId?: string | null
+  academicPeriod?: string | null
+  opensAt?: Date | string | null
+  closesAt?: Date | string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type SurveyUpdateWithoutStatusInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  career?: Prisma.CareerUpdateOneWithoutSurveysNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedSurveysNestedInput
+  questions?: Prisma.SurveyQuestionUpdateManyWithoutSurveyNestedInput
+  responses?: Prisma.SurveyResponseUpdateManyWithoutSurveyNestedInput
+}
+
+export type SurveyUncheckedUpdateWithoutStatusInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  careerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  questions?: Prisma.SurveyQuestionUncheckedUpdateManyWithoutSurveyNestedInput
+  responses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutSurveyNestedInput
+}
+
+export type SurveyUncheckedUpdateManyWithoutStatusInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  careerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  academicPeriod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  opensAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  closesAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1027,11 +1179,12 @@ export type SurveySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   academicPeriod?: boolean
   opensAt?: boolean
   closesAt?: boolean
-  status?: boolean
+  statusId?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   career?: boolean | Prisma.Survey$careerArgs<ExtArgs>
+  status?: boolean | Prisma.SurveyStatusDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   questions?: boolean | Prisma.Survey$questionsArgs<ExtArgs>
   responses?: boolean | Prisma.Survey$responsesArgs<ExtArgs>
@@ -1046,11 +1199,12 @@ export type SurveySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   academicPeriod?: boolean
   opensAt?: boolean
   closesAt?: boolean
-  status?: boolean
+  statusId?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   career?: boolean | Prisma.Survey$careerArgs<ExtArgs>
+  status?: boolean | Prisma.SurveyStatusDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["survey"]>
 
@@ -1062,11 +1216,12 @@ export type SurveySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   academicPeriod?: boolean
   opensAt?: boolean
   closesAt?: boolean
-  status?: boolean
+  statusId?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   career?: boolean | Prisma.Survey$careerArgs<ExtArgs>
+  status?: boolean | Prisma.SurveyStatusDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["survey"]>
 
@@ -1078,15 +1233,16 @@ export type SurveySelectScalar = {
   academicPeriod?: boolean
   opensAt?: boolean
   closesAt?: boolean
-  status?: boolean
+  statusId?: boolean
   createdById?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SurveyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "careerId" | "academicPeriod" | "opensAt" | "closesAt" | "status" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["survey"]>
+export type SurveyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "careerId" | "academicPeriod" | "opensAt" | "closesAt" | "statusId" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["survey"]>
 export type SurveyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   career?: boolean | Prisma.Survey$careerArgs<ExtArgs>
+  status?: boolean | Prisma.SurveyStatusDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   questions?: boolean | Prisma.Survey$questionsArgs<ExtArgs>
   responses?: boolean | Prisma.Survey$responsesArgs<ExtArgs>
@@ -1094,10 +1250,12 @@ export type SurveyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 }
 export type SurveyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   career?: boolean | Prisma.Survey$careerArgs<ExtArgs>
+  status?: boolean | Prisma.SurveyStatusDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type SurveyIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   career?: boolean | Prisma.Survey$careerArgs<ExtArgs>
+  status?: boolean | Prisma.SurveyStatusDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
@@ -1105,6 +1263,7 @@ export type $SurveyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name: "Survey"
   objects: {
     career: Prisma.$CareerPayload<ExtArgs> | null
+    status: Prisma.$SurveyStatusPayload<ExtArgs>
     createdBy: Prisma.$UserPayload<ExtArgs>
     questions: Prisma.$SurveyQuestionPayload<ExtArgs>[]
     responses: Prisma.$SurveyResponsePayload<ExtArgs>[]
@@ -1117,7 +1276,7 @@ export type $SurveyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     academicPeriod: string | null
     opensAt: Date | null
     closesAt: Date | null
-    status: $Enums.SurveyStatus
+    statusId: string
     createdById: string
     createdAt: Date
     updatedAt: Date
@@ -1516,6 +1675,7 @@ readonly fields: SurveyFieldRefs;
 export interface Prisma__SurveyClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   career<T extends Prisma.Survey$careerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Survey$careerArgs<ExtArgs>>): Prisma.Prisma__CareerClient<runtime.Types.Result.GetResult<Prisma.$CareerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  status<T extends Prisma.SurveyStatusDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SurveyStatusDefaultArgs<ExtArgs>>): Prisma.Prisma__SurveyStatusClient<runtime.Types.Result.GetResult<Prisma.$SurveyStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   questions<T extends Prisma.Survey$questionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Survey$questionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SurveyQuestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   responses<T extends Prisma.Survey$responsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Survey$responsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SurveyResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1555,7 +1715,7 @@ export interface SurveyFieldRefs {
   readonly academicPeriod: Prisma.FieldRef<"Survey", 'String'>
   readonly opensAt: Prisma.FieldRef<"Survey", 'DateTime'>
   readonly closesAt: Prisma.FieldRef<"Survey", 'DateTime'>
-  readonly status: Prisma.FieldRef<"Survey", 'SurveyStatus'>
+  readonly statusId: Prisma.FieldRef<"Survey", 'String'>
   readonly createdById: Prisma.FieldRef<"Survey", 'String'>
   readonly createdAt: Prisma.FieldRef<"Survey", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Survey", 'DateTime'>

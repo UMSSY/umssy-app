@@ -17,6 +17,18 @@ function createPrisma() {
     survey: { create: vi.fn().mockResolvedValue({ id: 'survey-1' }) },
     surveyQuestion: { createMany: vi.fn() },
     surveyQuestionOption: { createMany: vi.fn() },
+    surveyStatus: {
+      findMany: vi.fn().mockResolvedValue([
+        { id: 'status-draft', title: 'draft' },
+        { id: 'status-published', title: 'published' },
+      ]),
+    },
+    surveyQuestionType: {
+      findMany: vi.fn().mockResolvedValue([
+        { id: 'type-single', title: 'single_choice' },
+        { id: 'type-multiple', title: 'multiple_choice' },
+      ]),
+    },
   };
   return {
     tx,
@@ -37,7 +49,7 @@ const BASE_DATA: CreateSurveyData = {
   academicPeriod: 'II-2026',
   opensAt: null,
   closesAt: null,
-  status: 'PUBLISHED',
+  status: 'published',
   createdById: 'admin-1',
   questions: [],
 };
@@ -79,13 +91,13 @@ describe('SurveysRepository', () => {
       questions: [
         {
           statement: 'Primera',
-          type: 'SINGLE_CHOICE',
+          type: 'single_choice',
           isRequired: true,
           options: [{ label: 'Sí' }, { label: 'No' }],
         },
         {
           statement: 'Segunda',
-          type: 'MULTIPLE_CHOICE',
+          type: 'multiple_choice',
           isRequired: false,
           options: [{ label: 'A' }, { label: 'B' }, { label: 'C' }],
         },
@@ -101,7 +113,7 @@ describe('SurveysRepository', () => {
         academicPeriod: 'II-2026',
         opensAt: null,
         closesAt: null,
-        status: 'PUBLISHED',
+        statusId: 'status-published',
         createdById: 'admin-1',
       },
       select: SURVEY_CREATED_SELECT,
@@ -114,12 +126,12 @@ describe('SurveysRepository', () => {
       surveyId: 'survey-1',
       position: 1,
       statement: 'Primera',
-      type: 'SINGLE_CHOICE',
+      typeId: 'type-single',
       isRequired: true,
     });
     expect(questions[1]).toMatchObject({
       position: 2,
-      type: 'MULTIPLE_CHOICE',
+      typeId: 'type-multiple',
       isRequired: false,
     });
     expect(questions[0].id).toMatch(UUID_PATTERN);
@@ -153,7 +165,7 @@ describe('SurveysRepository', () => {
     await repository.create({
       ...BASE_DATA,
       questions: [
-        { statement: '', type: 'SINGLE_CHOICE', isRequired: true, options: [] },
+        { statement: '', type: 'single_choice', isRequired: true, options: [] },
       ],
     });
 
@@ -269,19 +281,17 @@ describe('CareersRepository', () => {
 });
 
 
-describe('SurveysRepository sin modelos de encuestas en Prisma', () => {
+describe('SurveysRepository sin catálogos de encuestas', () => {
   it('responde que el registro de encuestas no está disponible', async () => {
-    const repository = new SurveysRepository({} as PrismaService);
+    const prisma = createPrisma();
+    prisma.tx.surveyStatus.findMany.mockResolvedValue([]);
+    const repository = new SurveysRepository(prisma as unknown as PrismaService);
 
-    await expect(repository.findAll()).rejects.toBeInstanceOf(
+    await expect(repository.create(BASE_DATA)).rejects.toBeInstanceOf(
       SurveysStorageUnavailableException,
     );
-    await expect(
-      repository.existsWithTitle({
-        title: 'Encuesta',
-        careerId: null,
-        academicPeriod: null,
-      }),
-    ).rejects.toMatchObject({ statusCode: 503 });
+    await expect(repository.create(BASE_DATA)).rejects.toMatchObject({
+      statusCode: 503,
+    });
   });
 });

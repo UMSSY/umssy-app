@@ -99,6 +99,8 @@ export const ModelName = {
   ConversationParticipant: 'ConversationParticipant',
   Message: 'Message',
   UserPresence: 'UserPresence',
+  SurveyStatus: 'SurveyStatus',
+  SurveyQuestionType: 'SurveyQuestionType',
   Survey: 'Survey',
   SurveyQuestion: 'SurveyQuestion',
   SurveyQuestionOption: 'SurveyQuestionOption',
@@ -764,6 +766,26 @@ export const UserPresenceScalarFieldEnum = {
 export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
 
 
+export const SurveyStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyStatusScalarFieldEnum = (typeof SurveyStatusScalarFieldEnum)[keyof typeof SurveyStatusScalarFieldEnum]
+
+
+export const SurveyQuestionTypeScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyQuestionTypeScalarFieldEnum = (typeof SurveyQuestionTypeScalarFieldEnum)[keyof typeof SurveyQuestionTypeScalarFieldEnum]
+
+
 export const SurveyScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -772,7 +794,7 @@ export const SurveyScalarFieldEnum = {
   academicPeriod: 'academicPeriod',
   opensAt: 'opensAt',
   closesAt: 'closesAt',
-  status: 'status',
+  statusId: 'statusId',
   createdById: 'createdById',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -786,7 +808,7 @@ export const SurveyQuestionScalarFieldEnum = {
   surveyId: 'surveyId',
   position: 'position',
   statement: 'statement',
-  type: 'type',
+  typeId: 'typeId',
   isRequired: 'isRequired',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

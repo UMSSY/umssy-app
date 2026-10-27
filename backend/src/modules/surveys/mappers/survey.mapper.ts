@@ -22,37 +22,9 @@ import type {
 import { calculatePercentage } from '../utils/calculate-percentage.js';
 import { resolveSurveyStatus } from '../utils/resolve-survey-status.js';
 import {
-  SurveyQuestionType,
-  SurveyStatus,
-  type SurveyQuestionTypeValue,
-  type SurveyStatusValue,
-} from '../types/survey.enum.js';
-
-const STATUS_TO_RECORD: Record<SurveyStatusValue, SurveyStatus> = {
-  draft: SurveyStatus.DRAFT,
-  published: SurveyStatus.PUBLISHED,
-};
-
-const STATUS_TO_RESPONSE: Record<SurveyStatus, SurveyStatusValue> = {
-  [SurveyStatus.DRAFT]: 'draft',
-  [SurveyStatus.PUBLISHED]: 'published',
-};
-
-const QUESTION_TYPE_TO_RECORD: Record<
-  SurveyQuestionTypeValue,
-  SurveyQuestionType
-> = {
-  single_choice: SurveyQuestionType.SINGLE_CHOICE,
-  multiple_choice: SurveyQuestionType.MULTIPLE_CHOICE,
-};
-
-const QUESTION_TYPE_TO_RESPONSE: Record<
-  SurveyQuestionType,
-  SurveyQuestionTypeValue
-> = {
-  [SurveyQuestionType.SINGLE_CHOICE]: 'single_choice',
-  [SurveyQuestionType.MULTIPLE_CHOICE]: 'multiple_choice',
-};
+  toSurveyQuestionTypeValue,
+  toSurveyStatusValue,
+} from '../utils/survey-catalog-values.js';
 
 @Injectable()
 export class SurveyMapper {
@@ -71,10 +43,10 @@ export class SurveyMapper {
       academicPeriod: request.academicPeriod ?? null,
       opensAt: request.opensAt ? new Date(request.opensAt) : null,
       closesAt: request.closesAt ? new Date(request.closesAt) : null,
-      status: STATUS_TO_RECORD[request.status],
+      status: request.status,
       questions: (request.questions ?? []).map((question) => ({
         statement: question.statement,
-        type: QUESTION_TYPE_TO_RECORD[question.type],
+        type: question.type,
         isRequired: question.isRequired,
         options: (question.options ?? []).map(({ label }) => ({ label })),
       })),
@@ -85,7 +57,7 @@ export class SurveyMapper {
     return {
       id: record.id,
       title: record.title,
-      status: STATUS_TO_RESPONSE[record.status],
+      status: toSurveyStatusValue(record.status.title),
       createdAt: record.createdAt.toISOString(),
     };
   }
@@ -94,7 +66,7 @@ export class SurveyMapper {
     return {
       id: record.id,
       title: record.title,
-      status: resolveSurveyStatus(record.status, record.closesAt, now),
+      status: resolveSurveyStatus(record.status.title, record.closesAt, now),
       career: record.career ? this.toCareerResponse(record.career) : null,
       createdBy: {
         fullName: `${record.createdBy.firstName} ${record.createdBy.lastName}`.trim(),
@@ -118,7 +90,7 @@ export class SurveyMapper {
       id: record.id,
       title: record.title,
       description: record.description,
-      status: resolveSurveyStatus(record.status, record.closesAt, now),
+      status: resolveSurveyStatus(record.status.title, record.closesAt, now),
       career: record.career ? this.toCareerResponse(record.career) : null,
       academicPeriod: record.academicPeriod,
       opensAt: record.opensAt?.toISOString() ?? null,
@@ -127,7 +99,7 @@ export class SurveyMapper {
         id: question.id,
         position: question.position,
         statement: question.statement,
-        type: QUESTION_TYPE_TO_RESPONSE[question.type],
+        type: toSurveyQuestionTypeValue(question.type.title),
         isRequired: question.isRequired,
         options: question.options.map(({ id, position, label }) => ({ id, position, label })),
       })),
@@ -141,7 +113,7 @@ export class SurveyMapper {
       id: record.id,
       title: record.title,
       description: record.description,
-      status: resolveSurveyStatus(record.status, record.closesAt, now),
+      status: resolveSurveyStatus(record.status.title, record.closesAt, now),
       academicPeriod: record.academicPeriod,
       career: record.career ? this.toCareerResponse(record.career) : null,
       opensAt: record.opensAt?.toISOString() ?? null,
@@ -168,7 +140,7 @@ export class SurveyMapper {
       id: question.id,
       position: question.position,
       statement: question.statement,
-      type: QUESTION_TYPE_TO_RESPONSE[question.type],
+      type: toSurveyQuestionTypeValue(question.type.title),
       isRequired: question.isRequired,
       answeredCount: question._count.answers,
       totalSelections: options.reduce((total, option) => total + option.count, 0),

@@ -47,3 +47,7 @@ export function formatIsoDateTime(iso: string | null): string {
   const { date, time } = toBoliviaTime(iso);
   return `${date} ${time}`;
 }
+
+export function toCompleteDateValue(value: string | null | undefined): string {
+  return value && toCalendarDate(value) ? value : "";
+}

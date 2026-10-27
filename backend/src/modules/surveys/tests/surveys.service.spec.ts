@@ -40,7 +40,7 @@ function createRepositories() {
       create: vi.fn().mockResolvedValue({
         id: 'survey-1',
         title: PUBLISHED_REQUEST.title,
-        status: 'PUBLISHED',
+        status: { title: 'published' },
         createdAt: NOW,
       }),
       findAll: vi.fn(),
@@ -91,12 +91,12 @@ describe('SurveysService', () => {
     expect(repositories.surveys.create).toHaveBeenCalledWith(
       expect.objectContaining({
         createdById: 'admin-1',
-        status: 'PUBLISHED',
+        status: 'published',
         opensAt: new Date('2026-11-03T04:00:00.000Z'),
         questions: [
           {
             statement: '¿Trabajas actualmente?',
-            type: 'SINGLE_CHOICE',
+            type: 'single_choice',
             isRequired: true,
             options: [{ label: 'Sí' }, { label: 'No' }],
           },
@@ -109,7 +109,7 @@ describe('SurveysService', () => {
     repositories.surveys.create.mockResolvedValue({
       id: 'survey-2',
       title: 'Borrador',
-      status: 'DRAFT',
+      status: { title: 'draft' },
       createdAt: NOW,
     });
 
@@ -123,7 +123,7 @@ describe('SurveysService', () => {
       academicPeriod: null,
     });
     expect(repositories.surveys.create).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'DRAFT', careerId: null, opensAt: null, closesAt: null }),
+      expect.objectContaining({ status: 'draft', careerId: null, opensAt: null, closesAt: null }),
     );
   });
 
@@ -222,7 +222,7 @@ describe('SurveysService', () => {
       {
         id: 'survey-1',
         title: 'Encuesta',
-        status: 'PUBLISHED',
+        status: { title: 'published' },
         academicPeriod: 'II-2026',
         opensAt: NOW,
         closesAt: NOW,

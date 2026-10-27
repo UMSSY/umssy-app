@@ -3,6 +3,7 @@ import { SURVEY_ERROR_SUMMARIES, SURVEY_FIELD_LABELS, SURVEY_MESSAGES } from "..
 import type { SurveyBuilderState } from "../types/survey-builder.types";
 import type { SurveyErrorMap, SurveyValidationError } from "../types/survey-validation.types";
 import { hasDuplicatedLabels } from "./find-duplicated-labels";
+import { toCompleteDateValue } from "./survey-dates";
 
 type SurveyValidationInput = Pick<
   SurveyBuilderState,
@@ -26,7 +27,12 @@ export function validateDraft(survey: Pick<SurveyBuilderState, "title">): Survey
   return titleError ? [titleError] : [];
 }
 
-export function validateSurvey(survey: SurveyValidationInput, today: string): SurveyValidationError[] {
+export function validateSurvey(input: SurveyValidationInput, today: string): SurveyValidationError[] {
+  const survey = {
+    ...input,
+    opensAt: toCompleteDateValue(input.opensAt),
+    closesAt: toCompleteDateValue(input.closesAt),
+  };
   const errors: SurveyValidationError[] = [];
   const titleError = getTitleError(survey.title);
   if (titleError) errors.push(titleError);

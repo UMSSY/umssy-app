@@ -30,11 +30,11 @@ describe('SurveyMapper', () => {
       academicPeriod: 'II-2026',
       opensAt: new Date('2026-11-03T04:00:00.000Z'),
       closesAt: new Date('2026-12-16T03:59:59.999Z'),
-      status: 'PUBLISHED',
+      status: 'published',
       createdById: 'admin-1',
       questions: [
-        { statement: 'A', type: 'SINGLE_CHOICE', isRequired: true, options: [{ label: 'x' }] },
-        { statement: 'B', type: 'MULTIPLE_CHOICE', isRequired: false, options: [] },
+        { statement: 'A', type: 'single_choice', isRequired: true, options: [{ label: 'x' }] },
+        { statement: 'B', type: 'multiple_choice', isRequired: false, options: [] },
       ],
     });
   });
@@ -47,7 +47,7 @@ describe('SurveyMapper', () => {
       academicPeriod: null,
       opensAt: null,
       closesAt: null,
-      status: 'DRAFT',
+      status: 'draft',
       createdById: 'admin-1',
       questions: [],
     });
@@ -55,7 +55,7 @@ describe('SurveyMapper', () => {
 
   it('expone el estado de la encuesta creada en minúsculas', () => {
     expect(
-      mapper.toCreatedResponse({ id: 'survey-1', title: 'Encuesta', status: 'DRAFT', createdAt: CREATED_AT }),
+      mapper.toCreatedResponse({ id: 'survey-1', title: 'Encuesta', status: { title: 'draft' }, createdAt: CREATED_AT }),
     ).toEqual({ id: 'survey-1', title: 'Encuesta', status: 'draft', createdAt: CREATED_AT.toISOString() });
   });
 
@@ -64,7 +64,7 @@ describe('SurveyMapper', () => {
       mapper.toSummaryResponse({
         id: 'survey-1',
         title: 'Borrador',
-        status: 'DRAFT',
+        status: { title: 'draft' },
         academicPeriod: null,
         opensAt: null,
         closesAt: null,

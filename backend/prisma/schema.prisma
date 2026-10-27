@@ -846,55 +846,70 @@ model UserPresence {
   @@map("user_presences")
 }
 
-enum SurveyStatus {
-  DRAFT
-  PUBLISHED
+model SurveyStatus {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  surveys Survey[]
+
+  @@map("survey_statuses")
 }
 
-enum SurveyQuestionType {
-  SINGLE_CHOICE
-  MULTIPLE_CHOICE
+model SurveyQuestionType {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  questions SurveyQuestion[]
+
+  @@map("survey_question_types")
 }
 
 model Survey {
-  id             String       @id @default(uuid()) @db.Uuid
-  title          String       @db.VarChar(150)
-  description    String?      @db.VarChar(500)
-  careerId       String?      @map("career_id") @db.Uuid
-  academicPeriod String?      @map("academic_period") @db.VarChar(7)
-  opensAt        DateTime?    @map("opens_at") @db.Timestamptz(6)
-  closesAt       DateTime?    @map("closes_at") @db.Timestamptz(6)
-  status         SurveyStatus @default(DRAFT)
-  createdById    String       @map("created_by_id") @db.Uuid
-  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id             String    @id @default(uuid()) @db.Uuid
+  title          String    @db.VarChar(150)
+  description    String?   @db.VarChar(500)
+  careerId       String?   @map("career_id") @db.Uuid
+  academicPeriod String?   @map("academic_period") @db.VarChar(7)
+  opensAt        DateTime? @map("opens_at") @db.Timestamptz(6)
+  closesAt       DateTime? @map("closes_at") @db.Timestamptz(6)
+  statusId       String    @map("status_id") @db.Uuid
+  createdById    String    @map("created_by_id") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   career    Career?          @relation(fields: [careerId], references: [id], onDelete: Restrict)
+  status    SurveyStatus     @relation(fields: [statusId], references: [id], onDelete: Restrict)
   createdBy User             @relation("SurveyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
   questions SurveyQuestion[]
   responses SurveyResponse[]
 
   @@index([careerId, academicPeriod])
   @@index([createdById])
-  @@index([status])
+  @@index([statusId])
   @@map("surveys")
 }
 
 model SurveyQuestion {
-  id         String             @id @default(uuid()) @db.Uuid
-  surveyId   String             @map("survey_id") @db.Uuid
+  id         String   @id @default(uuid()) @db.Uuid
+  surveyId   String   @map("survey_id") @db.Uuid
   position   Int
-  statement  String             @db.VarChar(250)
-  type       SurveyQuestionType
-  isRequired Boolean            @default(true) @map("is_required")
-  createdAt  DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  statement  String   @db.VarChar(250)
+  typeId     String   @map("type_id") @db.Uuid
+  isRequired Boolean  @default(true) @map("is_required")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   survey  Survey                 @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  type    SurveyQuestionType     @relation(fields: [typeId], references: [id], onDelete: Restrict)
   options SurveyQuestionOption[]
   answers SurveyAnswer[]
 
   @@unique([surveyId, position])
+  @@index([typeId])
   @@map("survey_questions")
 }
 
@@ -945,7 +960,6 @@ model SurveyAnswer {
   @@map("survey_answers")
 }
 
-// HU 1.5.2 · Catálogo de acciones de auditoría (aprobada, rechazada, código enviado, etc.)
 model AuditAction {
   id          String   @id @default(uuid()) @db.Uuid
   title       String   @unique @db.VarChar(100)
@@ -958,7 +972,6 @@ model AuditAction {
   @@map("audit_actions")
 }
 
-// HU 1.5.2 · Registro de auditoría: un evento por cada hecho sobre una solicitud (solo se agrega y se lee)
 model AuditEvent {
   id              String   @id @default(uuid()) @db.Uuid
   number          Int      @unique @default(autoincrement())
@@ -989,7 +1002,6 @@ model AuditEvent {
   @@map("audit_events")
 }
 
-// HU 1.5.3 · Resultado de la validación automática del documento de cada solicitud (una por solicitud)
 model DocumentValidation {
   id              String    @id @default(uuid()) @db.Uuid
   accessRequestId String    @unique @map("access_request_id") @db.Uuid

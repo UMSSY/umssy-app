@@ -4,12 +4,11 @@ import type {
   SURVEY_DETAIL_INCLUDE,
   SURVEY_STATISTICS_INCLUDE,
 } from '../constants/survey.constants.js';
-import type { SurveyStatus } from './survey.enum.js';
 
 export interface SurveyCreatedRecord {
   id: string;
   title: string;
-  status: SurveyStatus;
+  status: { title: string };
   createdAt: Date;
 }
 
