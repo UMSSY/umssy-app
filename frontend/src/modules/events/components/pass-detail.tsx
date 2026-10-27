@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useRegistrationSession } from '@/modules/registrations/hooks/use-registration-session';
+import { useRegistrationSession } from '@/modules/registrations';
 import { Button } from '@/components/ui/button';
 import { PassQr } from './pass-qr';
 import { formatTimeRange } from '../utils/event-card';

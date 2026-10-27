@@ -1,19 +1,13 @@
+import { readRecord, readArray } from '@/shared/utils/response-validation';
 import { apiClient } from "@/shared/services/api-client";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { parseApiError } from "@/shared/utils/parse-api-error";
 import { parseRegistrationResponse } from "../utils/registration-contract-response";
-import { parseRegistration, readArray } from "../utils/registration-response";
+import { parseRegistration } from "../utils/registration-response";
 import type { RegistrationResponse } from "../types/registration-response.types";
 import type { Registration } from "../types/registration.types";
 
-const REQUEST_TIMEOUT_MS = 10_000;
-
-function readRecord(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("La respuesta del backend no es válida.");
-  }
-  return value as Record<string, unknown>;
-}
+import { REQUEST_TIMEOUT_MS } from '@/shared/constants/http.constants';
 
 export const registrationsService = {
   async create(eventId: string, accessToken = getAccessToken()): Promise<RegistrationResponse> {

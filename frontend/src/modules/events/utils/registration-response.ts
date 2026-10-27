@@ -1,1 +1,1 @@
-export { parseRegistration } from '@/modules/registrations/utils/registration-response';
+export { parseRegistration } from '@/modules/registrations';

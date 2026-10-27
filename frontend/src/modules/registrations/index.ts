@@ -10,3 +10,4 @@ export { parseRegistrationResponse } from "./utils/registration-contract-respons
 export { useRegistration } from "./hooks/use-registration";
 export { useRegistrationActions } from "./hooks/use-registration-actions";
 export { useRegistrationSession } from "./hooks/use-registration-session";
+export { parseRegistration } from './utils/registration-response';

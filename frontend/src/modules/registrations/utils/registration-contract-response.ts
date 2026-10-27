@@ -1,19 +1,6 @@
+import { readRecord, readString } from '@/shared/utils/response-validation';
 import { DEFAULT_REGISTRATION_ERROR_MESSAGE } from "../constants/registration-errors.constants";
 import type { RegistrationResponse } from "../types/registration-response.types";
-
-function readRecord(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("La respuesta del backend no es válida.");
-  }
-  return value as Record<string, unknown>;
-}
-
-function readString(value: unknown): string {
-  if (typeof value !== "string") {
-    throw new Error("La respuesta del backend no es válida.");
-  }
-  return value;
-}
 
 export function parseRegistrationResponse(value: unknown, statusCode: 200 | 201): RegistrationResponse {
   const body = readRecord(value);

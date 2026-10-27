@@ -1,23 +1,5 @@
+import { readRecord, readString } from '@/shared/utils/response-validation';
 import type { Registration } from "../types/registration.types";
-
-function invalidResponse(): never {
-  throw new Error("La respuesta del backend no es válida.");
-}
-
-function readRecord(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) invalidResponse();
-  return value as Record<string, unknown>;
-}
-
-function readString(value: unknown): string {
-  if (typeof value !== "string") invalidResponse();
-  return value;
-}
-
-export function readArray(value: unknown): unknown[] {
-  if (!Array.isArray(value)) invalidResponse();
-  return value;
-}
 
 export function parseRegistration(value: unknown): Registration {
   const registration = readRecord(value);
@@ -38,3 +20,5 @@ export function parseRegistration(value: unknown): Registration {
   }
   return parsed;
 }
+
+export { readArray } from '@/shared/utils/response-validation';
