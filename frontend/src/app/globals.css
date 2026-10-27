@@ -172,6 +172,8 @@
     @apply font-sans;
     scrollbar-color: var(--color-border-strong) var(--background);
     scrollbar-width: thin;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   ::selection {
     @apply bg-interaction text-ink;

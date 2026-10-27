@@ -14,6 +14,8 @@ import { seedAccessRequestStatusesCatalog } from '../../modules/access-requests/
 import { seedAccessRequestDocumentTypesCatalog } from '../../modules/access-requests/seeds/access-request-document-types-catalog.seed.js';
 import { seedCareersCatalog } from '../../modules/access-requests/seeds/careers-catalog.seed.js';
 import { seedMessageStatusesCatalog } from '../../modules/chat/seeds/message-statuses-catalog.seed.js';
+import { seedSurveyStatusesCatalog } from '../../modules/surveys/seeds/survey-statuses-catalog.seed.js';
+import { seedSurveyQuestionTypesCatalog } from '../../modules/surveys/seeds/survey-question-types-catalog.seed.js';
 import type { Prisma } from '../../prisma/client.js';
 
 export async function seedCatalogStages(
@@ -35,4 +37,6 @@ export async function seedCatalogStages(
   await seedAccessRequestDocumentTypesCatalog(tx);
   await seedCareersCatalog(tx);
   await seedMessageStatusesCatalog(tx);
+  await seedSurveyStatusesCatalog(tx);
+  await seedSurveyQuestionTypesCatalog(tx);
 }

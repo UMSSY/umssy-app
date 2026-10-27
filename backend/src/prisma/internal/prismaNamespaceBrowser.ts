@@ -99,6 +99,13 @@ export const ModelName = {
   ConversationParticipant: 'ConversationParticipant',
   Message: 'Message',
   UserPresence: 'UserPresence',
+  SurveyStatus: 'SurveyStatus',
+  SurveyQuestionType: 'SurveyQuestionType',
+  Survey: 'Survey',
+  SurveyQuestion: 'SurveyQuestion',
+  SurveyQuestionOption: 'SurveyQuestionOption',
+  SurveyResponse: 'SurveyResponse',
+  SurveyAnswer: 'SurveyAnswer',
   AuditAction: 'AuditAction',
   AuditEvent: 'AuditEvent',
   DocumentValidation: 'DocumentValidation'
@@ -757,6 +764,96 @@ export const UserPresenceScalarFieldEnum = {
 } as const
 
 export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
+
+
+export const SurveyStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyStatusScalarFieldEnum = (typeof SurveyStatusScalarFieldEnum)[keyof typeof SurveyStatusScalarFieldEnum]
+
+
+export const SurveyQuestionTypeScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyQuestionTypeScalarFieldEnum = (typeof SurveyQuestionTypeScalarFieldEnum)[keyof typeof SurveyQuestionTypeScalarFieldEnum]
+
+
+export const SurveyScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  careerId: 'careerId',
+  academicPeriod: 'academicPeriod',
+  opensAt: 'opensAt',
+  closesAt: 'closesAt',
+  statusId: 'statusId',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyScalarFieldEnum = (typeof SurveyScalarFieldEnum)[keyof typeof SurveyScalarFieldEnum]
+
+
+export const SurveyQuestionScalarFieldEnum = {
+  id: 'id',
+  surveyId: 'surveyId',
+  position: 'position',
+  statement: 'statement',
+  typeId: 'typeId',
+  isRequired: 'isRequired',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyQuestionScalarFieldEnum = (typeof SurveyQuestionScalarFieldEnum)[keyof typeof SurveyQuestionScalarFieldEnum]
+
+
+export const SurveyQuestionOptionScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  position: 'position',
+  label: 'label',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyQuestionOptionScalarFieldEnum = (typeof SurveyQuestionOptionScalarFieldEnum)[keyof typeof SurveyQuestionOptionScalarFieldEnum]
+
+
+export const SurveyResponseScalarFieldEnum = {
+  id: 'id',
+  surveyId: 'surveyId',
+  respondentId: 'respondentId',
+  submittedAt: 'submittedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyResponseScalarFieldEnum = (typeof SurveyResponseScalarFieldEnum)[keyof typeof SurveyResponseScalarFieldEnum]
+
+
+export const SurveyAnswerScalarFieldEnum = {
+  id: 'id',
+  responseId: 'responseId',
+  questionId: 'questionId',
+  optionId: 'optionId',
+  textValue: 'textValue',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyAnswerScalarFieldEnum = (typeof SurveyAnswerScalarFieldEnum)[keyof typeof SurveyAnswerScalarFieldEnum]
 
 
 export const AuditActionScalarFieldEnum = {
