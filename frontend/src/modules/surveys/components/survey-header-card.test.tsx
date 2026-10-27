@@ -63,15 +63,15 @@ describe("SurveyHeaderCard", () => {
 
     expect(screen.getByRole("combobox", { name: "Carrera dirigida" })).toHaveTextContent("Cargando...");
     expect(screen.getByRole("combobox", { name: "Gestión" })).toHaveTextContent("Seleccione la gestión");
-    expect(screen.getByRole("button", { name: "Apertura: dd/mm/aaaa" })).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Apertura/)).toHaveAttribute("placeholder", "dd/mm/aaaa");
   });
 
   it("muestra la carrera y la fecha seleccionadas", () => {
     renderHeader({ values: buildSurveyState() });
 
     expect(screen.getByRole("combobox", { name: "Carrera dirigida" })).toHaveTextContent(CAREERS[0].title);
-    expect(screen.getByRole("button", { name: "Apertura: 03/11/2026" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cierre: 15/12/2026" })).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Apertura/)).toHaveValue("03/11/2026");
+    expect(screen.getByLabelText(/^Cierre/)).toHaveValue("15/12/2026");
   });
 
   it("marca los campos inválidos con su mensaje", () => {
@@ -82,7 +82,7 @@ describe("SurveyHeaderCard", () => {
 
     expect(screen.getByLabelText("Título")).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByRole("combobox", { name: "Gestión" })).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByRole("button", { name: /^Cierre/ })).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText(/^Cierre/)).toHaveAttribute("aria-invalid", "true");
     for (const message of ["Título inválido", "Gestión inválida", "Cierre inválido", "No se pudieron cargar las carreras"]) {
       expect(screen.getByText(message)).toBeInTheDocument();
     }

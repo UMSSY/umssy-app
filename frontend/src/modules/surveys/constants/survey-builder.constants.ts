@@ -57,7 +57,6 @@ export const SURVEY_TEXT = {
   selectCareer: "Seleccione una carrera",
   loading: "Cargando...",
   selectPeriod: "Seleccione la gestión",
-  selectDate: "dd/mm/aaaa",
   cancel: "Cancelar",
   preview: "Vista previa",
   saveDraft: "Guardar borrador",
@@ -94,5 +93,4 @@ export const SURVEY_ARIA = {
   option: (position: number) => `Texto de la opción ${position}`,
   toolbar: "Acciones de la pregunta",
   editQuestion: (position: number) => `Editar pregunta ${position}`,
-  pickDate: (label: string) => `Elegir ${label.toLowerCase()}`,
 } as const;

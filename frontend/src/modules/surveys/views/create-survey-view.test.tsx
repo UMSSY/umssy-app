@@ -29,19 +29,18 @@ async function selectOption(user: ReturnType<typeof userEvent.setup>, comboboxNa
   await user.click(await screen.findByRole("option", { name: optionName }));
 }
 
-async function pickDate(user: ReturnType<typeof userEvent.setup>, fieldLabel: RegExp, day: RegExp) {
-  await user.click(screen.getByRole("button", { name: fieldLabel }));
-  const dialog = await screen.findByRole("dialog");
-  await user.click(within(dialog).getByRole("button", { name: day }));
-  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+async function pickDate(user: ReturnType<typeof userEvent.setup>, fieldLabel: RegExp, date: string) {
+  const input = screen.getByLabelText(fieldLabel);
+  await user.clear(input);
+  await user.type(input, date);
 }
 
 async function fillValidSurvey(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText("Título"), "Encuesta de Empleabilidad");
   await selectOption(user, "Carrera dirigida", CAREERS[0].title);
   await selectOption(user, "Gestión", "2026");
-  await pickDate(user, /^Apertura/, /24 de octubre/i);
-  await pickDate(user, /^Cierre/, /27 de octubre/i);
+  await pickDate(user, /^Apertura/, "24102026");
+  await pickDate(user, /^Cierre/, "27102026");
   await user.type(screen.getByLabelText("Enunciado de la pregunta 1"), "¿Trabajas actualmente?");
   await user.type(screen.getByLabelText("Texto de la opción 1"), "Sí");
   await user.type(screen.getByLabelText("Texto de la opción 2"), "No");
@@ -73,8 +72,8 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     expect(screen.getByLabelText("Descripción")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Carrera dirigida" })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Gestión" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^Apertura/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^Cierre/ })).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Apertura/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Cierre/)).toBeInTheDocument();
     expect(screen.getByLabelText("Enunciado de la pregunta 1")).toHaveValue("");
     expect(screen.getByLabelText("Enunciado de la pregunta 1")).toHaveAttribute("placeholder", "Pregunta sin título");
     for (const name of ["Cancelar", "Vista previa", "Guardar borrador", "Publicar encuesta"]) {
@@ -268,7 +267,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   it("CA9: rechaza una fecha de cierre igual o anterior a la apertura", async () => {
     const user = renderView();
     await fillValidSurvey(user);
-    await pickDate(user, /^Cierre/, /24 de octubre/i);
+    await pickDate(user, /^Cierre/, "24102026");
 
     await user.click(screen.getByRole("button", { name: /Publicar encuesta/ }));
 
@@ -279,7 +278,8 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   it("CA9: no permite elegir una apertura anterior a hoy en el calendario", async () => {
     const user = renderView();
 
-    await user.click(screen.getByRole("button", { name: /^Apertura/ }));
+    const [opensAtCalendarButton] = screen.getAllByRole("button", { name: "Elegir fecha en el calendario" });
+    await user.click(opensAtCalendarButton);
     const dialog = await screen.findByRole("dialog");
 
     expect(within(dialog).getByRole("button", { name: /21 de octubre/i })).toBeDisabled();
