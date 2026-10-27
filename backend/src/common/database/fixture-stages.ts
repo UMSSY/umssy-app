@@ -28,6 +28,11 @@ import { seedConversationsFixtures } from '../../modules/chat/seeds/conversation
 import { seedConversationParticipantsFixtures } from '../../modules/chat/seeds/conversation-participants-fixtures.seed.js';
 import { seedMessagesFixtures } from '../../modules/chat/seeds/messages-fixtures.seed.js';
 import { seedAdminExportHistoriesFixtures } from '../../modules/reports/seeds/admin-export-histories-fixtures.seed.js';
+import { seedSurveysFixtures } from '../../modules/surveys/seeds/surveys-fixtures.seed.js';
+import { seedSurveyQuestionsFixtures } from '../../modules/surveys/seeds/survey-questions-fixtures.seed.js';
+import { seedSurveyQuestionOptionsFixtures } from '../../modules/surveys/seeds/survey-question-options-fixtures.seed.js';
+import { seedSurveyResponsesFixtures } from '../../modules/surveys/seeds/survey-responses-fixtures.seed.js';
+import { seedSurveyAnswersFixtures } from '../../modules/surveys/seeds/survey-answers-fixtures.seed.js';
 import type { Prisma } from '../../prisma/client.js';
 import type { FixtureContext } from './fixture-context.js';
 
@@ -85,5 +90,13 @@ export async function seedFixtureStages(
     tx,
     context,
   );
+  counts['surveys'] = await seedSurveysFixtures(tx, context);
+  counts['survey_questions'] = await seedSurveyQuestionsFixtures(tx, context);
+  counts['survey_question_options'] = await seedSurveyQuestionOptionsFixtures(
+    tx,
+    context,
+  );
+  counts['survey_responses'] = await seedSurveyResponsesFixtures(tx, context);
+  counts['survey_answers'] = await seedSurveyAnswersFixtures(tx, context);
   return counts;
 }

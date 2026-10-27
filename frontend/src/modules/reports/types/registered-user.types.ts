@@ -20,6 +20,7 @@ export interface RegisteredUsersParams {
   userType?: RoleTag;
   period?: AcademicPeriod;
   search?: string;
+  snapshotAt?: string;
 }
 
 export type RegisteredUsersExportParams = Pick<RegisteredUsersParams, "userType" | "period" | "search">;
