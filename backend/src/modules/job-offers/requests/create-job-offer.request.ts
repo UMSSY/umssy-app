@@ -2,9 +2,12 @@ import { z } from 'zod';
 import {
   JOB_OFFER_DESCRIPTION_MAX_LENGTH,
   JOB_OFFER_LANGUAGES_MAX_LENGTH,
+  JOB_OFFER_MAX_EXPERIENCE_YEARS,
   JOB_OFFER_MAX_POSITIONS,
+  JOB_OFFER_MAX_REQUIREMENTS,
   JOB_OFFER_MAX_SALARY,
   JOB_OFFER_MAX_SKILLS,
+  JOB_OFFER_REQUIREMENT_MAX_LENGTH,
   JOB_OFFER_TITLE_MAX_LENGTH,
   JOB_OFFER_VALIDATION_MESSAGES as MESSAGES,
 } from '../constants/job-offer.constants.js';
@@ -56,6 +59,20 @@ export const createJobOfferSchema = z
       .array(z.uuid(MESSAGES.INVALID_SKILL_ID))
       .min(1, MESSAGES.SKILLS_REQUIRED)
       .max(JOB_OFFER_MAX_SKILLS, MESSAGES.SKILLS_TOO_MANY),
+    requiredCareers: z
+      .array(z.string().trim().min(1).max(JOB_OFFER_REQUIREMENT_MAX_LENGTH, MESSAGES.REQUIREMENT_TOO_LONG))
+      .max(JOB_OFFER_MAX_REQUIREMENTS, MESSAGES.REQUIREMENTS_TOO_MANY)
+      .default([]),
+    minExperienceYears: z
+      .number()
+      .int(MESSAGES.EXPERIENCE_NOT_INTEGER)
+      .min(0, MESSAGES.EXPERIENCE_OUT_OF_RANGE)
+      .max(JOB_OFFER_MAX_EXPERIENCE_YEARS, MESSAGES.EXPERIENCE_OUT_OF_RANGE)
+      .optional(),
+    otherRequirements: z
+      .array(z.string().trim().min(1).max(JOB_OFFER_REQUIREMENT_MAX_LENGTH, MESSAGES.REQUIREMENT_TOO_LONG))
+      .max(JOB_OFFER_MAX_REQUIREMENTS, MESSAGES.REQUIREMENTS_TOO_MANY)
+      .default([]),
   })
   .refine(
     (data) =>
