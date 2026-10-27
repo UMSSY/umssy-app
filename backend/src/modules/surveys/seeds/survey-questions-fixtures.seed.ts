@@ -17,7 +17,7 @@ export async function seedSurveyQuestionsFixtures(
         surveyId: surveyFixtureId(context, survey),
         position: questionIndex + 1,
         statement: question.statement,
-        type: question.type,
+        typeId: context.getReference('survey_question_types', question.type),
         isRequired: question.isRequired,
       })),
   );

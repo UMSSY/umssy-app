@@ -19,7 +19,7 @@ export async function seedSurveysFixtures(
       academicPeriod: survey.academicPeriod,
       opensAt: surveyFixtureDate(context, survey.opensAtDays),
       closesAt: surveyFixtureDate(context, survey.closesAtDays),
-      status: survey.status,
+      statusId: context.getReference('survey_statuses', survey.status),
       createdById: context.adminId,
       createdAt: surveyFixtureDate(context, survey.createdAtDays),
     }),

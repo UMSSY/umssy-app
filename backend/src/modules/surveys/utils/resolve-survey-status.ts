@@ -4,7 +4,7 @@ import {
 } from '../types/survey.enum.js';
 
 export function resolveSurveyStatus(
-  status: SurveyStatus,
+  status: string,
   closesAt: Date | null,
   now: Date,
 ): SurveyDisplayStatusValue {

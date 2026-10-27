@@ -55,17 +55,19 @@ export const SURVEY_DISPLAY_STATUS_LABELS = {
   closed: 'Cerrada',
 } as const;
 
+export const CATALOG_TITLE_SELECT = { select: { title: true } } as const;
+
 export const SURVEY_CREATED_SELECT = {
   id: true,
   title: true,
-  status: true,
+  status: CATALOG_TITLE_SELECT,
   createdAt: true,
 } as const;
 
 export const SURVEY_SUMMARY_SELECT = {
   id: true,
   title: true,
-  status: true,
+  status: CATALOG_TITLE_SELECT,
   academicPeriod: true,
   opensAt: true,
   closesAt: true,
@@ -79,17 +81,23 @@ export const CAREER_SELECT = { id: true, title: true } as const;
 
 export const SURVEY_DETAIL_INCLUDE = {
   career: { select: CAREER_SELECT },
+  status: CATALOG_TITLE_SELECT,
   questions: {
     orderBy: { position: 'asc' },
-    include: { options: { orderBy: { position: 'asc' } } },
+    include: {
+      type: CATALOG_TITLE_SELECT,
+      options: { orderBy: { position: 'asc' } },
+    },
   },
 } as const;
 
 export const SURVEY_STATISTICS_INCLUDE = {
   career: { select: CAREER_SELECT },
+  status: CATALOG_TITLE_SELECT,
   questions: {
     orderBy: { position: 'asc' },
     include: {
+      type: CATALOG_TITLE_SELECT,
       options: {
         orderBy: { position: 'asc' },
         include: { _count: { select: { answers: true } } },

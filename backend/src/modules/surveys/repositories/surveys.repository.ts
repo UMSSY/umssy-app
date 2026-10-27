@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { Prisma } from '../../../prisma/client.js';
 import {
   CAREER_SELECT,
+  CATALOG_TITLE_SELECT,
   SURVEY_ALL_ACADEMIC_PERIODS,
   SURVEY_CREATED_SELECT,
   SURVEY_DETAIL_INCLUDE,
@@ -17,10 +19,6 @@ import type {
   UpdateSurveyData,
 } from '../types/create-survey-data.type.js';
 import type {
-  SurveysDatabaseClient,
-  SurveysTransactionClient,
-} from '../types/surveys-database-client.type.js';
-import type {
   SurveyCreatedRecord,
   SurveyDetailRecord,
   SurveyStatisticsRecord,
@@ -28,18 +26,15 @@ import type {
   SurveyTitleScope,
 } from '../types/survey-record.type.js';
 import type { GraduateProfile } from '../types/graduate-profile.type.js';
-import type { SurveyStatus } from '../types/survey.enum.js';
+import { SurveyStatus } from '../types/survey.enum.js';
+import {
+  toSurveyQuestionTypeValue,
+  toSurveyStatusValue,
+} from '../utils/survey-catalog-values.js';
 
 @Injectable()
 export class SurveysRepository {
   constructor(private readonly prisma: PrismaService) {}
-
-  // TODO: usar this.prisma directamente cuando DevOps agregue los modelos Survey, SurveyQuestion y SurveyQuestionOption al schema de Prisma
-  private get database(): SurveysDatabaseClient {
-    const database = this.prisma as unknown as Partial<SurveysDatabaseClient>;
-    if (!database.survey) throw new SurveysStorageUnavailableException();
-    return database as SurveysDatabaseClient;
-  }
 
   async existsWithTitle({
     title,
@@ -47,7 +42,7 @@ export class SurveysRepository {
     academicPeriod,
     excludedId,
   }: SurveyTitleScope): Promise<boolean> {
-    const survey = await this.database.survey.findFirst({
+    const survey = await this.prisma.survey.findFirst({
       where: {
         title: { equals: title, mode: 'insensitive' },
         careerId,
@@ -60,12 +55,13 @@ export class SurveysRepository {
   }
 
   async create(data: CreateSurveyData): Promise<SurveyCreatedRecord> {
-    const { questions, ...survey } = data;
-    const { questionRows, optionRows } = this.toQuestionRows(questions);
+    const { questions, status, ...survey } = data;
 
-    return this.database.$transaction(async (tx: SurveysTransactionClient) => {
+    return this.prisma.$transaction(async (tx) => {
+      const catalogs = await this.findCatalogIds(tx);
+      const { questionRows, optionRows } = this.toQuestionRows(questions, catalogs.typeIds);
       const created = await tx.survey.create({
-        data: survey,
+        data: { ...survey, statusId: this.requireCatalogId(catalogs.statusIds, status) },
         select: SURVEY_CREATED_SELECT,
       });
 
@@ -84,7 +80,7 @@ export class SurveysRepository {
   }
 
   async findAll(): Promise<SurveySummaryRecord[]> {
-    return this.database.survey.findMany({
+    return this.prisma.survey.findMany({
       select: SURVEY_SUMMARY_SELECT,
       orderBy: { createdAt: 'desc' },
     });
@@ -97,23 +93,25 @@ export class SurveysRepository {
     });
   }
 
-  findStatus(surveyId: string): Promise<{ status: SurveyStatus } | null> {
-    return this.prisma.survey.findUnique({
+  async findStatus(surveyId: string): Promise<{ status: string } | null> {
+    const survey = await this.prisma.survey.findUnique({
       where: { id: surveyId },
-      select: { status: true },
+      select: { status: CATALOG_TITLE_SELECT },
     });
+    return survey ? { status: survey.status.title } : null;
   }
 
   update(surveyId: string, data: UpdateSurveyData): Promise<SurveyCreatedRecord> {
-    const { questions, ...survey } = data;
-    const { questionRows, optionRows } = this.toQuestionRows(questions);
+    const { questions, status, ...survey } = data;
 
     return this.prisma.$transaction(async (tx) => {
+      const catalogs = await this.findCatalogIds(tx);
+      const { questionRows, optionRows } = this.toQuestionRows(questions, catalogs.typeIds);
       await tx.surveyQuestion.deleteMany({ where: { surveyId } });
 
       const updated = await tx.survey.update({
         where: { id: surveyId },
-        data: survey,
+        data: { ...survey, statusId: this.requireCatalogId(catalogs.statusIds, status) },
         select: SURVEY_CREATED_SELECT,
       });
 
@@ -161,7 +159,7 @@ export class SurveysRepository {
   ): Promise<SurveyNotificationResponse[]> {
     const surveys = await this.prisma.survey.findMany({
       where: {
-        status: 'PUBLISHED',
+        status: { title: SurveyStatus.PUBLISHED },
         AND: [
           { OR: [{ careerId: null }, { careerId: graduate.careerId }] },
           {
@@ -211,9 +209,11 @@ export class SurveysRepository {
       where: { id },
       include: {
         career: { select: CAREER_SELECT },
+        status: CATALOG_TITLE_SELECT,
         questions: {
           orderBy: { position: 'asc' },
           include: {
+            type: CATALOG_TITLE_SELECT,
             options: {
               orderBy: { position: 'asc' },
             },
@@ -235,7 +235,7 @@ export class SurveysRepository {
       id: survey.id,
       title: survey.title,
       description: survey.description,
-      status: (survey.status === 'PUBLISHED' ? 'published' : 'draft') as 'published' | 'draft',
+      status: toSurveyStatusValue(survey.status.title),
       career: survey.career ? { id: survey.career.id, title: survey.career.title } : null,
       academicPeriod: survey.academicPeriod,
       opensAt: survey.opensAt?.toISOString() ?? null,
@@ -246,7 +246,7 @@ export class SurveysRepository {
         id: q.id,
         position: q.position,
         statement: q.statement,
-        type: (q.type === 'MULTIPLE_CHOICE' ? 'multiple_choice' : 'single_choice') as 'single_choice' | 'multiple_choice',
+        type: toSurveyQuestionTypeValue(q.type.title),
         isRequired: q.isRequired,
         options: q.options.map((opt) => ({
           id: opt.id,
@@ -286,12 +286,32 @@ export class SurveysRepository {
     });
   }
 
-  private toQuestionRows(questions: CreateSurveyData['questions']) {
+  private async findCatalogIds(tx: Prisma.TransactionClient) {
+    const [statuses, types] = await Promise.all([
+      tx.surveyStatus.findMany({ select: { id: true, title: true } }),
+      tx.surveyQuestionType.findMany({ select: { id: true, title: true } }),
+    ]);
+    return {
+      statusIds: new Map(statuses.map(({ id, title }) => [title, id])),
+      typeIds: new Map(types.map(({ id, title }) => [title, id])),
+    };
+  }
+
+  private requireCatalogId(ids: ReadonlyMap<string, string>, title: string): string {
+    const id = ids.get(title);
+    if (!id) throw new SurveysStorageUnavailableException();
+    return id;
+  }
+
+  private toQuestionRows(
+    questions: CreateSurveyData['questions'],
+    typeIds: ReadonlyMap<string, string>,
+  ) {
     const questionRows = questions.map((question, index) => ({
       id: randomUUID(),
       position: index + 1,
       statement: question.statement,
-      type: question.type,
+      typeId: this.requireCatalogId(typeIds, question.type),
       isRequired: question.isRequired,
     }));
     const optionRows = questions.flatMap((question, questionIndex) =>

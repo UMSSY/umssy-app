@@ -1,4 +1,5 @@
 import type { SurveyFixture } from '../types/survey-fixture.type.js';
+import { SurveyQuestionType, SurveyStatus } from '../types/survey.enum.js';
 
 const SYSTEMS_CAREER = 'Licenciatura en Ingeniería de Sistemas';
 const INFORMATICS_CAREER = 'Licenciatura Ingeniería en Informática';
@@ -11,14 +12,14 @@ export const SURVEY_FIXTURES: readonly SurveyFixture[] = [
       'Conoce la situación laboral de los titulados de la gestión 2020.',
     career: SYSTEMS_CAREER,
     academicPeriod: '2020',
-    status: 'PUBLISHED',
+    status: SurveyStatus.PUBLISHED,
     opensAtDays: -7,
     closesAtDays: 365,
     createdAtDays: -10,
     questions: [
       {
         statement: '¿Cuál es tu situación laboral actual?',
-        type: 'SINGLE_CHOICE',
+        type: SurveyQuestionType.SINGLE_CHOICE,
         isRequired: true,
         options: [
           'Empleado a tiempo completo',
@@ -29,7 +30,7 @@ export const SURVEY_FIXTURES: readonly SurveyFixture[] = [
       },
       {
         statement: '¿Cuánto tiempo tardaste en conseguir tu primer empleo?',
-        type: 'SINGLE_CHOICE',
+        type: SurveyQuestionType.SINGLE_CHOICE,
         isRequired: true,
         options: [
           'Menos de 3 meses',
@@ -40,7 +41,7 @@ export const SURVEY_FIXTURES: readonly SurveyFixture[] = [
       },
       {
         statement: '¿Qué competencias usas con más frecuencia en tu trabajo?',
-        type: 'MULTIPLE_CHOICE',
+        type: SurveyQuestionType.MULTIPLE_CHOICE,
         isRequired: false,
         options: [
           'Programación',
@@ -59,14 +60,14 @@ export const SURVEY_FIXTURES: readonly SurveyFixture[] = [
       'Seguimiento de la relación entre el trabajo actual y la carrera.',
     career: INFORMATICS_CAREER,
     academicPeriod: 'Todas',
-    status: 'PUBLISHED',
+    status: SurveyStatus.PUBLISHED,
     opensAtDays: -5,
     closesAtDays: 365,
     createdAtDays: -6,
     questions: [
       {
         statement: '¿Tu trabajo actual está relacionado con tu carrera?',
-        type: 'SINGLE_CHOICE',
+        type: SurveyQuestionType.SINGLE_CHOICE,
         isRequired: true,
         options: [
           'Totalmente relacionado',
@@ -76,7 +77,7 @@ export const SURVEY_FIXTURES: readonly SurveyFixture[] = [
       },
       {
         statement: '¿En qué rango está tu ingreso mensual?',
-        type: 'SINGLE_CHOICE',
+        type: SurveyQuestionType.SINGLE_CHOICE,
         isRequired: true,
         options: ['Menos de 3000 Bs', 'Entre 3000 y 6000 Bs', 'Más de 6000 Bs'],
       },
@@ -89,14 +90,14 @@ export const SURVEY_FIXTURES: readonly SurveyFixture[] = [
     description: 'Experiencia laboral de los titulados durante sus estudios.',
     career: SYSTEMS_CAREER,
     academicPeriod: '2020',
-    status: 'PUBLISHED',
+    status: SurveyStatus.PUBLISHED,
     opensAtDays: -60,
     closesAtDays: -30,
     createdAtDays: -62,
     questions: [
       {
         statement: '¿Trabajaste durante tus estudios?',
-        type: 'SINGLE_CHOICE',
+        type: SurveyQuestionType.SINGLE_CHOICE,
         isRequired: true,
         options: ['Sí', 'No'],
       },
@@ -109,14 +110,14 @@ export const SURVEY_FIXTURES: readonly SurveyFixture[] = [
     description: 'Valoración de la formación recibida durante la carrera.',
     career: INFORMATICS_CAREER,
     academicPeriod: '2020',
-    status: 'DRAFT',
+    status: SurveyStatus.DRAFT,
     opensAtDays: null,
     closesAtDays: null,
     createdAtDays: -2,
     questions: [
       {
         statement: '¿Cómo calificas la formación recibida?',
-        type: 'SINGLE_CHOICE',
+        type: SurveyQuestionType.SINGLE_CHOICE,
         isRequired: true,
         options: ['Excelente', 'Buena', 'Regular', 'Deficiente'],
       },
