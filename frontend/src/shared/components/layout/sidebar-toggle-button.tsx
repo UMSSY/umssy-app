@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
 
 export function SidebarToggleButton() {
-  const { open, toggleSidebar } = useSidebar();
+  const { open, openMobile, isMobile, toggleSidebar } = useSidebar();
+  const sidebarVisible = isMobile ? openMobile : open;
 
   return (
     <Button
@@ -17,10 +18,10 @@ export function SidebarToggleButton() {
       type="button"
       onClick={toggleSidebar}
       aria-label="Abrir menú"
-      aria-hidden={open || undefined}
-      tabIndex={open ? -1 : 0}
-      aria-expanded={open}
-      className={cn("border-app-header-foreground/70 bg-transparent text-app-header-foreground hover:border-app-header-foreground hover:bg-transparent hover:text-app-header-foreground focus-visible:ring-app-header-foreground aria-expanded:bg-transparent aria-expanded:text-app-header-foreground", open && "invisible")}
+      aria-hidden={sidebarVisible || undefined}
+      tabIndex={sidebarVisible ? -1 : 0}
+      aria-expanded={sidebarVisible}
+      className={cn("border-app-header-foreground/70 bg-transparent text-app-header-foreground hover:border-app-header-foreground hover:bg-transparent hover:text-app-header-foreground focus-visible:ring-app-header-foreground aria-expanded:bg-transparent aria-expanded:text-app-header-foreground", sidebarVisible && "invisible")}
     >
       <Menu className="size-5" aria-hidden="true" />
     </Button>

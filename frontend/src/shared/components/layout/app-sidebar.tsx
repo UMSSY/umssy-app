@@ -32,28 +32,31 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const pathname = usePathname();
   const { roles } = useAuth();
-  const { open, setOpen } = useSidebar();
+  const { open, setOpen, isMobile, openMobile, setOpenMobile } = useSidebar();
+  const sidebarOpen = isMobile ? openMobile : open;
+  const setSidebarOpen = isMobile ? setOpenMobile : setOpen;
   const closeRef = useRef<HTMLButtonElement>(null);
-  const previousOpen = useRef(open);
+  const previousOpen = useRef(sidebarOpen);
   useEffect(() => {
-    if (previousOpen.current !== open) {
-      if (open) closeRef.current?.focus();
+    if (previousOpen.current !== sidebarOpen) {
+      if (sidebarOpen) closeRef.current?.focus();
       else document.getElementById(SIDEBAR_TOGGLE_ID)?.focus();
-      previousOpen.current = open;
+      previousOpen.current = sidebarOpen;
     }
-  }, [open]);
+  }, [sidebarOpen]);
+  useEffect(() => { if (isMobile) setOpenMobile(false); }, [pathname, isMobile, setOpenMobile]);
   const visibleItems = filterNavigationByRoles(items, roles);
 
   return (
     <Sidebar
       collapsible="offcanvas"
-      onKeyDown={(event) => { if (event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); setOpen(false); } }}
+      onKeyDown={(event) => { if (event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); setSidebarOpen(false); } }}
       className="top-0 z-40 h-svh border-sidebar-border bg-sidebar text-sidebar-foreground"
     >
       <SidebarHeader className="h-app-header shrink-0 justify-center border-b border-sidebar-border px-4 py-2">
         <div className="flex items-center justify-between gap-3">
           {showBrand ? brand ?? <SidebarBrand /> : <SidebarBrand />}
-          <Button ref={closeRef} type="button" variant="ghost" size="icon-sm" aria-label="Cerrar barra lateral" onClick={() => setOpen(false)} className="shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"><X aria-hidden="true" /></Button>
+          <Button ref={closeRef} type="button" variant="ghost" size="icon-sm" aria-label="Cerrar barra lateral" onClick={() => setSidebarOpen(false)} className="shrink-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"><X aria-hidden="true" /></Button>
         </div>
       </SidebarHeader>
 

@@ -8,6 +8,7 @@ import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { AccessRequestsController } from '../controllers/access-requests.controller.js';
 import { AccessRequestNotFoundException } from '../exceptions/index.js';
 import { AccessRequestsService } from '../services/access-requests.service.js';
+import { ApprovedAccountActivationService } from '../services/approved-account-activation.service.js';
 
 const UNKNOWN_ID = '3f2b8a54-6d2e-4c7e-9a41-0b1d5f6c7e88';
 
@@ -25,7 +26,10 @@ describe('AccessRequestsController: identificador de la solicitud', () => {
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [AccessRequestsController],
-      providers: [{ provide: AccessRequestsService, useValue: service }],
+      providers: [
+        { provide: AccessRequestsService, useValue: service },
+        { provide: ApprovedAccountActivationService, useValue: { activate: vi.fn() } },
+      ],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({

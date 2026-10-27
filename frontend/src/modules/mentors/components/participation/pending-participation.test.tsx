@@ -1,3 +1,4 @@
+import type { MentorParticipationRequestResponse } from "../../types/mentor-participation-request-response.types";
 
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -20,7 +21,7 @@ vi.mock("@/modules/mentorship/hooks/use-mentorship-catalogs", () => ({
   }),
 }));
 
-const pendingRequest: participationService.MentorParticipationRequest = {
+const pendingRequest: MentorParticipationRequestResponse = {
   id: "request-1",
   userId: "user-1",
   status: "PENDING",
@@ -52,7 +53,7 @@ describe("Participación pendiente HU7-2", () => {
       screen.getByRole("heading", { name: "Solicitud pendiente" }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText("PENDING")).toBeInTheDocument();
+    expect(screen.getByText("Pendiente")).toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
 
@@ -205,7 +206,7 @@ describe("Participación pendiente HU7-2", () => {
     });
 
     expect(
-      await screen.findByText("Estado: CANCELLED"),
+      await screen.findByText("Estado: Cancelada"),
     ).toBeInTheDocument();
   });
 });

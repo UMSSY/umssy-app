@@ -1,3 +1,11 @@
+import { MentorIntakeOperationCode } from '../types/mentor-intake-operation.enum.js';
+import { isEligibleMentor } from './mentor-eligibility.service.js';
+import type { DirectoryPage } from '../types/directory-page.types.js';
+import { withMentorIntake } from './mentor-intake.service.js';
+import { reconcileMentorOffers } from './mentor-offer-allocation.service.js';
+import { mentorCapacity } from '../utils/mentor-capacity.js';
+import { MentorEligibilityException } from '../exceptions/mentor-eligibility.exception.js';
+import { MentorCapacityException } from '../exceptions/mentor-capacity.exception.js';
 import { Injectable } from '@nestjs/common';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 import {
@@ -13,22 +21,9 @@ import type { UpdateMentorOrientationTypesDto } from '../requests/update-mentor-
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MentorAffinityService } from './mentor-affinity.service.js';
+import type { Prisma } from '../../../prisma/client.js';
 
 const DIRECTORY_PAGE_SIZE = 6 as const;
-
-type DirectoryPage = {
-  items: Array<
-    ReturnType<MentorMapper['toDirectoryResponse']> & {
-      sharedInterestsCount?: number;
-    }
-  >;
-  page: number;
-  pageSize: typeof DIRECTORY_PAGE_SIZE;
-  totalItems: number;
-  totalPages: number;
-  effectiveSort: MentorDirectoryQuery['sort'];
-  affinityStatus?: 'ready' | 'no_skills' | 'unmapped_skills';
-};
 
 @Injectable()
 export class MentorsService {
@@ -227,48 +222,64 @@ export class MentorsService {
     return { orientationTypeIds: data.orientationTypeIds };
   }
 
-  async activate(userId: string, data: ActivateMentorDto) {
+  async activate(
+    userId: string,
+    data: ActivateMentorDto,
+    key?: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<{ id: string }> {
+    if (key)
+      return withMentorIntake(
+        this.mentorsRepository,
+        userId,
+        MentorIntakeOperationCode.ACTIVATE,
+        key,
+        data,
+        (transaction) => this.activate(userId, data, undefined, transaction),
+      );
     if (!data.technicalAreaIds.length)
       throw new InvalidTechnicalAreasException();
     if (!data.orientationTypeIds.length)
       throw new InvalidOrientationTypesException();
-    const mentorRole = await this.mentorsRepository.findMentorRole();
-
-    if (!mentorRole) {
-      throw new MentorRoleNotFoundException();
-    }
-
+    if (!tx)
+      return this.mentorsRepository.withLock((transaction) =>
+        this.activate(userId, data, undefined, transaction),
+      );
+    await reconcileMentorOffers(this.mentorsRepository, tx);
+    const eligibility = await this.mentorsRepository.admissionFacts(userId, tx);
+    if (!isEligibleMentor(eligibility)) throw new MentorEligibilityException();
+    if (eligibility.alreadyMentor) throw new AlreadyMentorException();
+    const capacity = mentorCapacity(
+      await this.mentorsRepository.capacityCounts(tx),
+    );
+    if (capacity.available < 1) throw new MentorCapacityException();
+    const mentorRole = await this.mentorsRepository.findMentorRole(tx);
+    if (!mentorRole) throw new MentorRoleNotFoundException();
     const existingRole = await this.mentorsRepository.findActiveUserRole(
       userId,
       mentorRole.id,
+      tx,
     );
-
-    if (existingRole) {
-      throw new AlreadyMentorException();
-    }
-
+    if (existingRole) throw new AlreadyMentorException();
     const technicalAreas = await this.mentorsRepository.findTechnicalAreas(
       data.technicalAreaIds,
+      tx,
     );
-
-    if (technicalAreas.length !== data.technicalAreaIds.length) {
+    if (technicalAreas.length !== data.technicalAreaIds.length)
       throw new InvalidTechnicalAreasException();
-    }
-
-    const orientationTypes =
+    const orientations =
       await this.mentorsRepository.findActiveOrientationTypes(
         data.orientationTypeIds,
+        tx,
       );
-
-    if (orientationTypes.length !== data.orientationTypeIds.length) {
+    if (orientations.length !== data.orientationTypeIds.length)
       throw new InvalidOrientationTypesException();
-    }
-
     return this.mentorsRepository.activate(
       userId,
       mentorRole.id,
       data.technicalAreaIds,
       data.orientationTypeIds,
+      tx,
     );
   }
 
@@ -278,8 +289,8 @@ export class MentorsService {
     return this.mentorsRepository.updateAvailability(userId, isAvailable);
   }
 
-  capacity() {
-    return this.mentorsRepository.capacity();
+  async capacity() {
+    return mentorCapacity(await this.mentorsRepository.capacityCounts());
   }
 
   private async assertActiveMentor(userId: string): Promise<void> {

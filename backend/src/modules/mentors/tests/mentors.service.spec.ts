@@ -1,3 +1,6 @@
+vi.mock('../services/mentor-offer-allocation.service.js', () => ({
+  reconcileMentorOffers: vi.fn(),
+}));
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
@@ -34,10 +37,15 @@ describe('MentorsService', () => {
   it.each([
     { technicalAreaIds: [], orientationTypeIds: data.orientationTypeIds },
     { technicalAreaIds: data.technicalAreaIds, orientationTypeIds: [] },
-  ])('rechaza el formulario incompleto antes de consultar o escribir', async (form) => {
-    const service = new MentorsService({} as MentorsRepository, mapper);
-    await expect(service.activate(userId, form)).rejects.toMatchObject({ statusCode: 400 });
-  });
+  ])(
+    'rechaza el formulario incompleto antes de consultar o escribir',
+    async (form) => {
+      const service = new MentorsService({} as MentorsRepository, mapper);
+      await expect(service.activate(userId, form)).rejects.toMatchObject({
+        statusCode: 400,
+      });
+    },
+  );
 
   it('transforma mentores activos al contrato del directorio', async () => {
     const findActiveMentors = vi.fn().mockResolvedValue([
@@ -246,7 +254,9 @@ describe('MentorsService', () => {
       headline: 'Arquitecta de Software',
       aboutMe: 'Mentora de ingeniería de software.',
       isAvailable: true,
-      photoUrl: expect.stringMatching(/^\/mentors\/[^/]+\/photo\?v=[a-f0-9]{64}$/),
+      photoUrl: expect.stringMatching(
+        /^\/mentors\/[^/]+\/photo\?v=[a-f0-9]{64}$/,
+      ),
       city: { id: 'city-1', title: 'Cochabamba' },
       educations: [
         {
@@ -556,6 +566,22 @@ describe('MentorsService', () => {
       .mockResolvedValue([{ id: data.orientationTypeIds[0] }]);
     const activate = vi.fn().mockResolvedValue(activationResult);
     const repository = {
+      withLock: vi.fn(async (action) => action({})),
+      admissionFacts: vi
+        .fn()
+        .mockResolvedValue({
+          isActive: true,
+          hasGraduateRole: true,
+          hasApprovedAccount: true,
+          alreadyMentor: false,
+        }),
+      capacityCounts: vi
+        .fn()
+        .mockResolvedValue({
+          approvedGraduates: 3,
+          activeMentors: 0,
+          reservedOffers: 0,
+        }),
       findMentorRole,
       findActiveUserRole,
       findTechnicalAreas,
@@ -567,16 +593,25 @@ describe('MentorsService', () => {
     const result = await service.activate(userId, data);
 
     expect(findMentorRole).toHaveBeenCalledTimes(1);
-    expect(findActiveUserRole).toHaveBeenCalledWith(userId, roleId);
-    expect(findTechnicalAreas).toHaveBeenCalledWith(data.technicalAreaIds);
+    expect(findActiveUserRole).toHaveBeenCalledWith(
+      userId,
+      roleId,
+      expect.anything(),
+    );
+    expect(findTechnicalAreas).toHaveBeenCalledWith(
+      data.technicalAreaIds,
+      expect.anything(),
+    );
     expect(findActiveOrientationTypes).toHaveBeenCalledWith(
       data.orientationTypeIds,
+      expect.anything(),
     );
     expect(activate).toHaveBeenCalledWith(
       userId,
       roleId,
       data.technicalAreaIds,
       data.orientationTypeIds,
+      expect.anything(),
     );
     expect(result).toBe(activationResult);
   });
@@ -584,6 +619,22 @@ describe('MentorsService', () => {
   it('rechaza la activacion si no existe el rol mentor', async () => {
     const activate = vi.fn();
     const repository = {
+      withLock: vi.fn(async (action) => action({})),
+      admissionFacts: vi
+        .fn()
+        .mockResolvedValue({
+          isActive: true,
+          hasGraduateRole: true,
+          hasApprovedAccount: true,
+          alreadyMentor: false,
+        }),
+      capacityCounts: vi
+        .fn()
+        .mockResolvedValue({
+          approvedGraduates: 3,
+          activeMentors: 0,
+          reservedOffers: 0,
+        }),
       findMentorRole: vi.fn().mockResolvedValue(null),
       activate,
     } as unknown as MentorsRepository;
@@ -598,6 +649,22 @@ describe('MentorsService', () => {
   it('rechaza la activacion si el usuario ya es mentor', async () => {
     const activate = vi.fn();
     const repository = {
+      withLock: vi.fn(async (action) => action({})),
+      admissionFacts: vi
+        .fn()
+        .mockResolvedValue({
+          isActive: true,
+          hasGraduateRole: true,
+          hasApprovedAccount: true,
+          alreadyMentor: false,
+        }),
+      capacityCounts: vi
+        .fn()
+        .mockResolvedValue({
+          approvedGraduates: 3,
+          activeMentors: 0,
+          reservedOffers: 0,
+        }),
       findMentorRole: vi.fn().mockResolvedValue({ id: roleId }),
       findActiveUserRole: vi.fn().mockResolvedValue({ id: 'user-role-id' }),
       activate,
@@ -613,6 +680,22 @@ describe('MentorsService', () => {
   it('rechaza la activacion si existen areas tecnicas invalidas', async () => {
     const activate = vi.fn();
     const repository = {
+      withLock: vi.fn(async (action) => action({})),
+      admissionFacts: vi
+        .fn()
+        .mockResolvedValue({
+          isActive: true,
+          hasGraduateRole: true,
+          hasApprovedAccount: true,
+          alreadyMentor: false,
+        }),
+      capacityCounts: vi
+        .fn()
+        .mockResolvedValue({
+          approvedGraduates: 3,
+          activeMentors: 0,
+          reservedOffers: 0,
+        }),
       findMentorRole: vi.fn().mockResolvedValue({ id: roleId }),
       findActiveUserRole: vi.fn().mockResolvedValue(null),
       findTechnicalAreas: vi.fn().mockResolvedValue([]),
@@ -629,6 +712,22 @@ describe('MentorsService', () => {
   it('rechaza la activacion si existen orientaciones invalidas o inactivas', async () => {
     const activate = vi.fn();
     const repository = {
+      withLock: vi.fn(async (action) => action({})),
+      admissionFacts: vi
+        .fn()
+        .mockResolvedValue({
+          isActive: true,
+          hasGraduateRole: true,
+          hasApprovedAccount: true,
+          alreadyMentor: false,
+        }),
+      capacityCounts: vi
+        .fn()
+        .mockResolvedValue({
+          approvedGraduates: 3,
+          activeMentors: 0,
+          reservedOffers: 0,
+        }),
       findMentorRole: vi.fn().mockResolvedValue({ id: roleId }),
       findActiveUserRole: vi.fn().mockResolvedValue(null),
       findTechnicalAreas: vi

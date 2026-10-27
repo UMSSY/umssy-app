@@ -14,6 +14,23 @@ const preferences = {
 };
 
 describe('contrato de solicitudes HU7-2', () => {
+  it.each([undefined, 'invalid'])(
+    'rechaza clave faltante o malformada antes de escribir: %s',
+    (key) => {
+      const service = { create: vi.fn() };
+      const controller = new MentorParticipationController(
+        service as unknown as MentorParticipationService,
+      );
+      expect(() =>
+        controller.create(
+          { id: 'jwt-user' } as AuthenticatedUser,
+          preferences,
+          key,
+        ),
+      ).toThrow();
+      expect(service.create).not.toHaveBeenCalled();
+    },
+  );
   it('todas las operaciones usan el usuario JWT y el controlador exige autenticación', async () => {
     const service = {
       create: vi.fn(),
@@ -29,12 +46,20 @@ describe('contrato de solicitudes HU7-2', () => {
     expect(
       Reflect.getMetadata(GUARDS_METADATA, MentorParticipationController),
     ).toContain(JwtAuthGuard);
-    await controller.create(user, preferences);
+    await controller.create(
+      user,
+      preferences,
+      '11111111-1111-4111-8111-111111111111',
+    );
     await controller.findMyRequest(user);
     await controller.findMyHistory(user);
     await controller.updatePreferences(user, preferences);
     await controller.cancel(user);
-    expect(service.create).toHaveBeenCalledWith(user.id, preferences);
+    expect(service.create).toHaveBeenCalledWith(
+      user.id,
+      preferences,
+      '11111111-1111-4111-8111-111111111111',
+    );
     expect(service.findMyRequest).toHaveBeenCalledWith(user.id);
     expect(service.findMyHistory).toHaveBeenCalledWith(user.id);
     expect(service.updatePreferences).toHaveBeenCalledWith(
@@ -72,7 +97,34 @@ describe('contrato de solicitudes HU7-2', () => {
     ['CAPACITY_AVAILABLE', 409],
     ['OFFER_EXISTS', 409],
   ])('traduce %s a error controlado %s', async (result, statusCode) => {
-    const repository = { createRequest: vi.fn().mockResolvedValue({ result }) };
+    const repository = {
+      withLock: async (action) => action({}),
+      admissionFacts: vi
+        .fn()
+        .mockResolvedValue({
+          isActive: result !== 'NOT_ELIGIBLE',
+          hasGraduateRole: true,
+          hasApprovedAccount: true,
+          alreadyMentor: false,
+        }),
+      expireOffers: vi.fn(),
+      allocateOffers: vi.fn(),
+      capacityCounts: vi
+        .fn()
+        .mockResolvedValue({
+          approvedGraduates: 3,
+          activeMentors: result === 'CAPACITY_AVAILABLE' ? 0 : 1,
+          reservedOffers: 0,
+        }),
+      openRequest: vi.fn().mockResolvedValue(null),
+      hasOffer: vi.fn().mockResolvedValue(result === 'OFFER_EXISTS'),
+      preferenceCounts: vi
+        .fn()
+        .mockResolvedValue({
+          areas: result === 'INVALID_PREFERENCES' ? 0 : 1,
+          orientations: 1,
+        }),
+    };
     const service = new MentorParticipationService(
       repository as unknown as MentorParticipationRepository,
     );
@@ -88,17 +140,35 @@ describe('contrato de solicitudes HU7-2', () => {
       status: 'PENDING',
     };
     const service = new MentorParticipationService({
-      createRequest: vi.fn().mockResolvedValue({
-        result: 'ALREADY_EXISTS',
-        request,
-      }),
+      withLock: async (action) => action({}),
+      admissionFacts: vi
+        .fn()
+        .mockResolvedValue({
+          isActive: true,
+          hasGraduateRole: true,
+          hasApprovedAccount: true,
+          alreadyMentor: false,
+        }),
+      expireOffers: vi.fn(),
+      capacityCounts: vi
+        .fn()
+        .mockResolvedValue({
+          approvedGraduates: 3,
+          activeMentors: 1,
+          reservedOffers: 0,
+        }),
+      openRequest: vi.fn().mockResolvedValue(request),
     } as unknown as MentorParticipationRepository);
-    await expect(service.create('user', preferences)).rejects.toMatchObject({ statusCode: 409, data: { code: 'REQUEST_ALREADY_EXISTS' } });
+    await expect(service.create('user', preferences)).rejects.toMatchObject({
+      statusCode: 409,
+      data: { code: 'REQUEST_ALREADY_EXISTS' },
+    });
   });
 
   it('propaga errores de almacenamiento sin convertirlos en respuestas exitosas', async () => {
     const failure = new Error('DB unavailable');
     const repository = {
+      withLock: vi.fn().mockRejectedValue(failure),
       createRequest: vi.fn().mockRejectedValue(failure),
       updatePreferences: vi.fn().mockRejectedValue(failure),
       cancelRequest: vi.fn().mockRejectedValue(failure),

@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { AccessRequestsController } from '../controllers/access-requests.controller.js';
 import { AccessRequestsService } from '../services/access-requests.service.js';
+import { ApprovedAccountActivationService } from '../services/approved-account-activation.service.js';
 import { MAX_FILE_SIZE_BYTES } from '../../files/constants/file-rules.constants.js';
 
 const ID = '3f2b8a54-6d2e-4c7e-9a41-0b1d5f6c7e88';
@@ -19,7 +20,10 @@ describe('AccessRequestsController (documento de respaldo)', () => {
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [AccessRequestsController],
-      providers: [{ provide: AccessRequestsService, useValue: service }],
+      providers: [
+        { provide: AccessRequestsService, useValue: service },
+        { provide: ApprovedAccountActivationService, useValue: { activate: vi.fn() } },
+      ],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue({ canActivate: () => true })

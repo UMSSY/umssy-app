@@ -1,3 +1,5 @@
+import type { ParticipationPreferencesCardProps } from "../../types/participation-preferences-card-props.types";
+import type { ParticipationOverviewProps } from "../../types/participation-overview-props.types";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,21 +12,7 @@ import {
 } from "@/components/ui/card";
 import { PageHeading } from "@/shared/components/layout";
 
-type ParticipationOverviewProps = {
-  isActive: boolean;
-  areas: string[];
-  orientations: string[];
-  onAction: () => void;
-  actionEnabled?: boolean;
-};
 
-type ParticipationPreferencesCardProps = {
-  title: string;
-  editHref: string;
-  editLabel: string;
-  items: string[];
-  isEditable: boolean;
-};
 
 function ParticipationPreferencesCard({
   title,
@@ -109,7 +97,7 @@ export function ParticipationOverview({
                 {isActive ? "Activo" : "Desactivado"}
               </span>
               {actionEnabled && <Button type="button" variant={isActive ? "outline" : "default"} onClick={onAction}>
-                {isActive ? "Desactivar participación" : "Activar participación"}
+                {isActive ? "Pausar mentoría" : "Activar participación"}
               </Button>}
             </div>
           </CardContent>

@@ -102,9 +102,17 @@ export const ModelName = {
   Message: 'Message',
   UserPresence: 'UserPresence',
   MentorParticipationAttemptLimit: 'MentorParticipationAttemptLimit',
+  MentorIntakeAttempt: 'MentorIntakeAttempt',
+  MentorParticipationSanction: 'MentorParticipationSanction',
+  MentorMailOutbox: 'MentorMailOutbox',
   AuditAction: 'AuditAction',
   AuditEvent: 'AuditEvent',
-  DocumentValidation: 'DocumentValidation'
+  DocumentValidation: 'DocumentValidation',
+  MentorRequestStatus: 'MentorRequestStatus',
+  MentorOfferStatus: 'MentorOfferStatus',
+  MentorMailStatus: 'MentorMailStatus',
+  MentorIntakeOperation: 'MentorIntakeOperation',
+  MentorMailKind: 'MentorMailKind'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -689,11 +697,12 @@ export type AccessRequestScalarFieldEnum = (typeof AccessRequestScalarFieldEnum)
 export const MentorParticipationRequestScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  status: 'status',
+  statusId: 'statusId',
   queuedAt: 'queuedAt',
   createdAt: 'createdAt',
   technicalAreaIds: 'technicalAreaIds',
-  orientationTypeIds: 'orientationTypeIds'
+  orientationTypeIds: 'orientationTypeIds',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorParticipationRequestScalarFieldEnum = (typeof MentorParticipationRequestScalarFieldEnum)[keyof typeof MentorParticipationRequestScalarFieldEnum]
@@ -702,11 +711,13 @@ export type MentorParticipationRequestScalarFieldEnum = (typeof MentorParticipat
 export const MentorSlotOfferScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  status: 'status',
+  statusId: 'statusId',
   offeredAt: 'offeredAt',
   expiresAt: 'expiresAt',
   requestId: 'requestId',
-  confirmedAt: 'confirmedAt'
+  confirmedAt: 'confirmedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorSlotOfferScalarFieldEnum = (typeof MentorSlotOfferScalarFieldEnum)[keyof typeof MentorSlotOfferScalarFieldEnum]
@@ -793,10 +804,62 @@ export const MentorParticipationAttemptLimitScalarFieldEnum = {
   userId: 'userId',
   attemptCount: 'attemptCount',
   windowStartedAt: 'windowStartedAt',
-  blockedUntil: 'blockedUntil'
+  blockedUntil: 'blockedUntil',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorParticipationAttemptLimitScalarFieldEnum = (typeof MentorParticipationAttemptLimitScalarFieldEnum)[keyof typeof MentorParticipationAttemptLimitScalarFieldEnum]
+
+
+export const MentorIntakeAttemptScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  operationId: 'operationId',
+  idempotencyKey: 'idempotencyKey',
+  payloadHash: 'payloadHash',
+  occurredAt: 'occurredAt',
+  counted: 'counted',
+  responseStatus: 'responseStatus',
+  responseData: 'responseData',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorIntakeAttemptScalarFieldEnum = (typeof MentorIntakeAttemptScalarFieldEnum)[keyof typeof MentorIntakeAttemptScalarFieldEnum]
+
+
+export const MentorParticipationSanctionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  triggerAttemptId: 'triggerAttemptId',
+  startedAt: 'startedAt',
+  endsAt: 'endsAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorParticipationSanctionScalarFieldEnum = (typeof MentorParticipationSanctionScalarFieldEnum)[keyof typeof MentorParticipationSanctionScalarFieldEnum]
+
+
+export const MentorMailOutboxScalarFieldEnum = {
+  id: 'id',
+  eventKey: 'eventKey',
+  kindId: 'kindId',
+  userId: 'userId',
+  recipient: 'recipient',
+  payload: 'payload',
+  statusId: 'statusId',
+  attempts: 'attempts',
+  availableAt: 'availableAt',
+  claimedAt: 'claimedAt',
+  sentAt: 'sentAt',
+  lastError: 'lastError',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorMailOutboxScalarFieldEnum = (typeof MentorMailOutboxScalarFieldEnum)[keyof typeof MentorMailOutboxScalarFieldEnum]
 
 
 export const AuditActionScalarFieldEnum = {
@@ -849,6 +912,61 @@ export const DocumentValidationScalarFieldEnum = {
 export type DocumentValidationScalarFieldEnum = (typeof DocumentValidationScalarFieldEnum)[keyof typeof DocumentValidationScalarFieldEnum]
 
 
+export const MentorRequestStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorRequestStatusScalarFieldEnum = (typeof MentorRequestStatusScalarFieldEnum)[keyof typeof MentorRequestStatusScalarFieldEnum]
+
+
+export const MentorOfferStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorOfferStatusScalarFieldEnum = (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum]
+
+
+export const MentorMailStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorMailStatusScalarFieldEnum = (typeof MentorMailStatusScalarFieldEnum)[keyof typeof MentorMailStatusScalarFieldEnum]
+
+
+export const MentorIntakeOperationScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorIntakeOperationScalarFieldEnum = (typeof MentorIntakeOperationScalarFieldEnum)[keyof typeof MentorIntakeOperationScalarFieldEnum]
+
+
+export const MentorMailKindScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorMailKindScalarFieldEnum = (typeof MentorMailKindScalarFieldEnum)[keyof typeof MentorMailKindScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -863,6 +981,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

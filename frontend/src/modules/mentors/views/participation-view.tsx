@@ -18,7 +18,7 @@ import { ActivateParticipationModal } from "../components/participation/activate
 import { DeactivateParticipationModal } from "../components/participation/deactivate-participation-modal";
 import { useParticipation } from "../hooks/use-participation";
 import { participationErrorCode, participationErrorMessage } from "../utils/participation-error";
-import { loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "@/modules/mentorship";
+import { clearMentorIntakeIntentions, loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "@/modules/mentorship";
 
 const getServerToken = () => null;
 
@@ -85,6 +85,7 @@ export function ParticipationView({ registered = false, activated = false }: { r
   const isActive = state.status === "ACTIVE";
   const hasHistory = state.status === "DEACTIVATED";
   const currentRequest = request.data;
+  const hasClosedRequest = ["EXPIRED", "CANCELLED", "ENDED"].includes(currentRequest?.status ?? "");
 
   return <div className="mx-auto max-w-7xl space-y-6">
     {notice && <div role="status" className="flex flex-wrap items-center gap-3 rounded-lg border p-3">
@@ -104,9 +105,9 @@ export function ParticipationView({ registered = false, activated = false }: { r
         ? <SlotOfferParticipation key={currentRequest.offer.id} request={currentRequest} showHeading={!hasHistory} onConfirmed={() => { void refreshRoles(); void client.invalidateQueries({ queryKey: ["mentors", "participation"] }); void client.invalidateQueries({ queryKey: ["mentorship", "directory"] }); void client.invalidateQueries({ queryKey: ["mentorship", "profile"] }); setNotice("Participación activada correctamente"); }} />
         : <Alert variant="destructive">No se pudo consultar la oferta. Actualiza la página.</Alert>)}
     {!isActive && !hasHistory && !["PENDING", "OFFERED"].includes(currentRequest?.status ?? "") &&
-      <div className="space-y-6"><SlotAvailability /><ParticipationEmptyState /></div>}
-    {hasHistory && ["EXPIRED", "CANCELLED"].includes(currentRequest?.status ?? "") &&
-      <p role="status">{currentRequest?.status === "EXPIRED" ? "La oferta venció." : "La solicitud fue cancelada."} Puedes revisar las condiciones vigentes en el proceso de incorporación.</p>}
+      <div className="space-y-6"><SlotAvailability /><ParticipationEmptyState onStart={hasClosedRequest ? () => clearMentorIntakeIntentions() : undefined} /></div>}
+    {!isActive && hasClosedRequest &&
+      <p role="status">{currentRequest?.status === "EXPIRED" ? "El plazo ha vencido." : currentRequest?.status === "CANCELLED" ? "La solicitud fue cancelada." : "Tu participación como mentor ha finalizado."} Puedes revisar las condiciones vigentes en el proceso de incorporación.</p>}
     <DeactivateParticipationModal
       isOpen={modal === "deactivate"} onClose={() => setModal(null)}
       onConfirm={() => void deactivate()} isLoading={submitting}
@@ -118,6 +119,7 @@ export function ParticipationView({ registered = false, activated = false }: { r
       isOpen={modal === "activate"} onClose={() => setModal(null)}
       onConfirm={() => {
         void (async () => {
+          clearMentorIntakeIntentions();
           if (hasDraftStorageError) {
             setModal(null);
             router.push("/mentorship");

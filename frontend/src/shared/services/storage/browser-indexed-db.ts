@@ -56,3 +56,36 @@ export async function removeIndexedDb(key: string): Promise<void> {
     database.close();
   }
 }
+
+export async function updateIndexedDb<T>(
+  key: string,
+  update: (current: T | null) => T | null,
+): Promise<T | null> {
+  const database = await openDatabase();
+  if (!database) throw new Error("IndexedDB no está disponible");
+  try {
+    return await new Promise<T | null>((resolve, reject) => {
+      const transaction = database.transaction(STORE_NAME, "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      let next: T | null = null;
+
+      transaction.oncomplete = () => resolve(next);
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error ?? new Error("La actualización de IndexedDB se canceló"));
+
+      const request = store.get(key);
+      request.onsuccess = () => {
+        try {
+          next = update((request.result as T | undefined) ?? null);
+          if (next === null) store.delete(key);
+          else store.put(next, key);
+        } catch (error) {
+          transaction.abort();
+          reject(error);
+        }
+      };
+    });
+  } finally {
+    database.close();
+  }
+}

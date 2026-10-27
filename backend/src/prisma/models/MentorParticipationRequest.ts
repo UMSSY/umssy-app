@@ -27,27 +27,30 @@ export type AggregateMentorParticipationRequest = {
 export type MentorParticipationRequestMinAggregateOutputType = {
   id: string | null
   userId: string | null
-  status: string | null
+  statusId: string | null
   queuedAt: Date | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type MentorParticipationRequestMaxAggregateOutputType = {
   id: string | null
   userId: string | null
-  status: string | null
+  statusId: string | null
   queuedAt: Date | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type MentorParticipationRequestCountAggregateOutputType = {
   id: number
   userId: number
-  status: number
+  statusId: number
   queuedAt: number
   createdAt: number
   technicalAreaIds: number
   orientationTypeIds: number
+  updatedAt: number
   _all: number
 }
 
@@ -55,27 +58,30 @@ export type MentorParticipationRequestCountAggregateOutputType = {
 export type MentorParticipationRequestMinAggregateInputType = {
   id?: true
   userId?: true
-  status?: true
+  statusId?: true
   queuedAt?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type MentorParticipationRequestMaxAggregateInputType = {
   id?: true
   userId?: true
-  status?: true
+  statusId?: true
   queuedAt?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type MentorParticipationRequestCountAggregateInputType = {
   id?: true
   userId?: true
-  status?: true
+  statusId?: true
   queuedAt?: true
   createdAt?: true
   technicalAreaIds?: true
   orientationTypeIds?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -154,11 +160,12 @@ export type MentorParticipationRequestGroupByArgs<ExtArgs extends runtime.Types.
 export type MentorParticipationRequestGroupByOutputType = {
   id: string
   userId: string
-  status: string
+  statusId: string
   queuedAt: Date
   createdAt: Date
   technicalAreaIds: string[]
   orientationTypeIds: string[]
+  updatedAt: Date
   _count: MentorParticipationRequestCountAggregateOutputType | null
   _min: MentorParticipationRequestMinAggregateOutputType | null
   _max: MentorParticipationRequestMaxAggregateOutputType | null
@@ -185,25 +192,29 @@ export type MentorParticipationRequestWhereInput = {
   NOT?: Prisma.MentorParticipationRequestWhereInput | Prisma.MentorParticipationRequestWhereInput[]
   id?: Prisma.UuidFilter<"MentorParticipationRequest"> | string
   userId?: Prisma.UuidFilter<"MentorParticipationRequest"> | string
-  status?: Prisma.StringFilter<"MentorParticipationRequest"> | string
+  statusId?: Prisma.UuidFilter<"MentorParticipationRequest"> | string
   queuedAt?: Prisma.DateTimeFilter<"MentorParticipationRequest"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"MentorParticipationRequest"> | Date | string
   technicalAreaIds?: Prisma.StringNullableListFilter<"MentorParticipationRequest">
   orientationTypeIds?: Prisma.StringNullableListFilter<"MentorParticipationRequest">
+  updatedAt?: Prisma.DateTimeFilter<"MentorParticipationRequest"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   offer?: Prisma.XOR<Prisma.MentorSlotOfferNullableScalarRelationFilter, Prisma.MentorSlotOfferWhereInput> | null
+  status?: Prisma.XOR<Prisma.MentorRequestStatusScalarRelationFilter, Prisma.MentorRequestStatusWhereInput>
 }
 
 export type MentorParticipationRequestOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   queuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   technicalAreaIds?: Prisma.SortOrder
   orientationTypeIds?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   offer?: Prisma.MentorSlotOfferOrderByWithRelationInput
+  status?: Prisma.MentorRequestStatusOrderByWithRelationInput
 }
 
 export type MentorParticipationRequestWhereUniqueInput = Prisma.AtLeast<{
@@ -212,23 +223,26 @@ export type MentorParticipationRequestWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.MentorParticipationRequestWhereInput[]
   NOT?: Prisma.MentorParticipationRequestWhereInput | Prisma.MentorParticipationRequestWhereInput[]
   userId?: Prisma.UuidFilter<"MentorParticipationRequest"> | string
-  status?: Prisma.StringFilter<"MentorParticipationRequest"> | string
+  statusId?: Prisma.UuidFilter<"MentorParticipationRequest"> | string
   queuedAt?: Prisma.DateTimeFilter<"MentorParticipationRequest"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"MentorParticipationRequest"> | Date | string
   technicalAreaIds?: Prisma.StringNullableListFilter<"MentorParticipationRequest">
   orientationTypeIds?: Prisma.StringNullableListFilter<"MentorParticipationRequest">
+  updatedAt?: Prisma.DateTimeFilter<"MentorParticipationRequest"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   offer?: Prisma.XOR<Prisma.MentorSlotOfferNullableScalarRelationFilter, Prisma.MentorSlotOfferWhereInput> | null
+  status?: Prisma.XOR<Prisma.MentorRequestStatusScalarRelationFilter, Prisma.MentorRequestStatusWhereInput>
 }, "id">
 
 export type MentorParticipationRequestOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   queuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   technicalAreaIds?: Prisma.SortOrder
   orientationTypeIds?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.MentorParticipationRequestCountOrderByAggregateInput
   _max?: Prisma.MentorParticipationRequestMaxOrderByAggregateInput
   _min?: Prisma.MentorParticipationRequestMinOrderByAggregateInput
@@ -240,84 +254,91 @@ export type MentorParticipationRequestScalarWhereWithAggregatesInput = {
   NOT?: Prisma.MentorParticipationRequestScalarWhereWithAggregatesInput | Prisma.MentorParticipationRequestScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"MentorParticipationRequest"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"MentorParticipationRequest"> | string
-  status?: Prisma.StringWithAggregatesFilter<"MentorParticipationRequest"> | string
+  statusId?: Prisma.UuidWithAggregatesFilter<"MentorParticipationRequest"> | string
   queuedAt?: Prisma.DateTimeWithAggregatesFilter<"MentorParticipationRequest"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"MentorParticipationRequest"> | Date | string
   technicalAreaIds?: Prisma.StringNullableListFilter<"MentorParticipationRequest">
   orientationTypeIds?: Prisma.StringNullableListFilter<"MentorParticipationRequest">
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"MentorParticipationRequest"> | Date | string
 }
 
 export type MentorParticipationRequestCreateInput = {
   id?: string
-  status?: string
   queuedAt?: Date | string
   createdAt?: Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestCreatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestCreateorientationTypeIdsInput | string[]
+  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMentorParticipationRequestsInput
   offer?: Prisma.MentorSlotOfferCreateNestedOneWithoutRequestInput
+  status?: Prisma.MentorRequestStatusCreateNestedOneWithoutRequestsInput
 }
 
 export type MentorParticipationRequestUncheckedCreateInput = {
   id?: string
   userId: string
-  status?: string
+  statusId?: string
   queuedAt?: Date | string
   createdAt?: Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestCreatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestCreateorientationTypeIdsInput | string[]
+  updatedAt?: Date | string
   offer?: Prisma.MentorSlotOfferUncheckedCreateNestedOneWithoutRequestInput
 }
 
 export type MentorParticipationRequestUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
   queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMentorParticipationRequestsNestedInput
   offer?: Prisma.MentorSlotOfferUpdateOneWithoutRequestNestedInput
+  status?: Prisma.MentorRequestStatusUpdateOneRequiredWithoutRequestsNestedInput
 }
 
 export type MentorParticipationRequestUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   offer?: Prisma.MentorSlotOfferUncheckedUpdateOneWithoutRequestNestedInput
 }
 
 export type MentorParticipationRequestCreateManyInput = {
   id?: string
   userId: string
-  status?: string
+  statusId?: string
   queuedAt?: Date | string
   createdAt?: Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestCreatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestCreateorientationTypeIdsInput | string[]
+  updatedAt?: Date | string
 }
 
 export type MentorParticipationRequestUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
   queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorParticipationRequestUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorParticipationRequestListRelationFilter = {
@@ -341,27 +362,30 @@ export type StringNullableListFilter<$PrismaModel = never> = {
 export type MentorParticipationRequestCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   queuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   technicalAreaIds?: Prisma.SortOrder
   orientationTypeIds?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorParticipationRequestMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   queuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorParticipationRequestMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   queuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorParticipationRequestNullableScalarRelationFilter = {
@@ -445,23 +469,67 @@ export type MentorParticipationRequestUpdateOneWithoutOfferNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MentorParticipationRequestUpdateToOneWithWhereWithoutOfferInput, Prisma.MentorParticipationRequestUpdateWithoutOfferInput>, Prisma.MentorParticipationRequestUncheckedUpdateWithoutOfferInput>
 }
 
+export type MentorParticipationRequestCreateNestedManyWithoutStatusInput = {
+  create?: Prisma.XOR<Prisma.MentorParticipationRequestCreateWithoutStatusInput, Prisma.MentorParticipationRequestUncheckedCreateWithoutStatusInput> | Prisma.MentorParticipationRequestCreateWithoutStatusInput[] | Prisma.MentorParticipationRequestUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.MentorParticipationRequestCreateOrConnectWithoutStatusInput | Prisma.MentorParticipationRequestCreateOrConnectWithoutStatusInput[]
+  createMany?: Prisma.MentorParticipationRequestCreateManyStatusInputEnvelope
+  connect?: Prisma.MentorParticipationRequestWhereUniqueInput | Prisma.MentorParticipationRequestWhereUniqueInput[]
+}
+
+export type MentorParticipationRequestUncheckedCreateNestedManyWithoutStatusInput = {
+  create?: Prisma.XOR<Prisma.MentorParticipationRequestCreateWithoutStatusInput, Prisma.MentorParticipationRequestUncheckedCreateWithoutStatusInput> | Prisma.MentorParticipationRequestCreateWithoutStatusInput[] | Prisma.MentorParticipationRequestUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.MentorParticipationRequestCreateOrConnectWithoutStatusInput | Prisma.MentorParticipationRequestCreateOrConnectWithoutStatusInput[]
+  createMany?: Prisma.MentorParticipationRequestCreateManyStatusInputEnvelope
+  connect?: Prisma.MentorParticipationRequestWhereUniqueInput | Prisma.MentorParticipationRequestWhereUniqueInput[]
+}
+
+export type MentorParticipationRequestUpdateManyWithoutStatusNestedInput = {
+  create?: Prisma.XOR<Prisma.MentorParticipationRequestCreateWithoutStatusInput, Prisma.MentorParticipationRequestUncheckedCreateWithoutStatusInput> | Prisma.MentorParticipationRequestCreateWithoutStatusInput[] | Prisma.MentorParticipationRequestUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.MentorParticipationRequestCreateOrConnectWithoutStatusInput | Prisma.MentorParticipationRequestCreateOrConnectWithoutStatusInput[]
+  upsert?: Prisma.MentorParticipationRequestUpsertWithWhereUniqueWithoutStatusInput | Prisma.MentorParticipationRequestUpsertWithWhereUniqueWithoutStatusInput[]
+  createMany?: Prisma.MentorParticipationRequestCreateManyStatusInputEnvelope
+  set?: Prisma.MentorParticipationRequestWhereUniqueInput | Prisma.MentorParticipationRequestWhereUniqueInput[]
+  disconnect?: Prisma.MentorParticipationRequestWhereUniqueInput | Prisma.MentorParticipationRequestWhereUniqueInput[]
+  delete?: Prisma.MentorParticipationRequestWhereUniqueInput | Prisma.MentorParticipationRequestWhereUniqueInput[]
+  connect?: Prisma.MentorParticipationRequestWhereUniqueInput | Prisma.MentorParticipationRequestWhereUniqueInput[]
+  update?: Prisma.MentorParticipationRequestUpdateWithWhereUniqueWithoutStatusInput | Prisma.MentorParticipationRequestUpdateWithWhereUniqueWithoutStatusInput[]
+  updateMany?: Prisma.MentorParticipationRequestUpdateManyWithWhereWithoutStatusInput | Prisma.MentorParticipationRequestUpdateManyWithWhereWithoutStatusInput[]
+  deleteMany?: Prisma.MentorParticipationRequestScalarWhereInput | Prisma.MentorParticipationRequestScalarWhereInput[]
+}
+
+export type MentorParticipationRequestUncheckedUpdateManyWithoutStatusNestedInput = {
+  create?: Prisma.XOR<Prisma.MentorParticipationRequestCreateWithoutStatusInput, Prisma.MentorParticipationRequestUncheckedCreateWithoutStatusInput> | Prisma.MentorParticipationRequestCreateWithoutStatusInput[] | Prisma.MentorParticipationRequestUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.MentorParticipationRequestCreateOrConnectWithoutStatusInput | Prisma.MentorParticipationRequestCreateOrConnectWithoutStatusInput[]
+  upsert?: Prisma.MentorParticipationRequestUpsertWithWhereUniqueWithoutStatusInput | Prisma.MentorParticipationRequestUpsertWithWhereUniqueWithoutStatusInput[]
+  createMany?: Prisma.MentorParticipationRequestCreateManyStatusInputEnvelope
+  set?: Prisma.MentorParticipationRequestWhereUniqueInput | Prisma.MentorParticipationRequestWhereUniqueInput[]
+  disconnect?: Prisma.MentorParticipationRequestWhereUniqueInput | Prisma.MentorParticipationRequestWhereUniqueInput[]
+  delete?: Prisma.MentorParticipationRequestWhereUniqueInput | Prisma.MentorParticipationRequestWhereUniqueInput[]
+  connect?: Prisma.MentorParticipationRequestWhereUniqueInput | Prisma.MentorParticipationRequestWhereUniqueInput[]
+  update?: Prisma.MentorParticipationRequestUpdateWithWhereUniqueWithoutStatusInput | Prisma.MentorParticipationRequestUpdateWithWhereUniqueWithoutStatusInput[]
+  updateMany?: Prisma.MentorParticipationRequestUpdateManyWithWhereWithoutStatusInput | Prisma.MentorParticipationRequestUpdateManyWithWhereWithoutStatusInput[]
+  deleteMany?: Prisma.MentorParticipationRequestScalarWhereInput | Prisma.MentorParticipationRequestScalarWhereInput[]
+}
+
 export type MentorParticipationRequestCreateWithoutUserInput = {
   id?: string
-  status?: string
   queuedAt?: Date | string
   createdAt?: Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestCreatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestCreateorientationTypeIdsInput | string[]
+  updatedAt?: Date | string
   offer?: Prisma.MentorSlotOfferCreateNestedOneWithoutRequestInput
+  status?: Prisma.MentorRequestStatusCreateNestedOneWithoutRequestsInput
 }
 
 export type MentorParticipationRequestUncheckedCreateWithoutUserInput = {
   id?: string
-  status?: string
+  statusId?: string
   queuedAt?: Date | string
   createdAt?: Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestCreatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestCreateorientationTypeIdsInput | string[]
+  updatedAt?: Date | string
   offer?: Prisma.MentorSlotOfferUncheckedCreateNestedOneWithoutRequestInput
 }
 
@@ -497,31 +565,34 @@ export type MentorParticipationRequestScalarWhereInput = {
   NOT?: Prisma.MentorParticipationRequestScalarWhereInput | Prisma.MentorParticipationRequestScalarWhereInput[]
   id?: Prisma.UuidFilter<"MentorParticipationRequest"> | string
   userId?: Prisma.UuidFilter<"MentorParticipationRequest"> | string
-  status?: Prisma.StringFilter<"MentorParticipationRequest"> | string
+  statusId?: Prisma.UuidFilter<"MentorParticipationRequest"> | string
   queuedAt?: Prisma.DateTimeFilter<"MentorParticipationRequest"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"MentorParticipationRequest"> | Date | string
   technicalAreaIds?: Prisma.StringNullableListFilter<"MentorParticipationRequest">
   orientationTypeIds?: Prisma.StringNullableListFilter<"MentorParticipationRequest">
+  updatedAt?: Prisma.DateTimeFilter<"MentorParticipationRequest"> | Date | string
 }
 
 export type MentorParticipationRequestCreateWithoutOfferInput = {
   id?: string
-  status?: string
   queuedAt?: Date | string
   createdAt?: Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestCreatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestCreateorientationTypeIdsInput | string[]
+  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMentorParticipationRequestsInput
+  status?: Prisma.MentorRequestStatusCreateNestedOneWithoutRequestsInput
 }
 
 export type MentorParticipationRequestUncheckedCreateWithoutOfferInput = {
   id?: string
   userId: string
-  status?: string
+  statusId?: string
   queuedAt?: Date | string
   createdAt?: Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestCreatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestCreateorientationTypeIdsInput | string[]
+  updatedAt?: Date | string
 }
 
 export type MentorParticipationRequestCreateOrConnectWithoutOfferInput = {
@@ -542,60 +613,156 @@ export type MentorParticipationRequestUpdateToOneWithWhereWithoutOfferInput = {
 
 export type MentorParticipationRequestUpdateWithoutOfferInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
   queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMentorParticipationRequestsNestedInput
+  status?: Prisma.MentorRequestStatusUpdateOneRequiredWithoutRequestsNestedInput
 }
 
 export type MentorParticipationRequestUncheckedUpdateWithoutOfferInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type MentorParticipationRequestCreateManyUserInput = {
+export type MentorParticipationRequestCreateWithoutStatusInput = {
   id?: string
-  status?: string
   queuedAt?: Date | string
   createdAt?: Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestCreatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestCreateorientationTypeIdsInput | string[]
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutMentorParticipationRequestsInput
+  offer?: Prisma.MentorSlotOfferCreateNestedOneWithoutRequestInput
+}
+
+export type MentorParticipationRequestUncheckedCreateWithoutStatusInput = {
+  id?: string
+  userId: string
+  queuedAt?: Date | string
+  createdAt?: Date | string
+  technicalAreaIds?: Prisma.MentorParticipationRequestCreatetechnicalAreaIdsInput | string[]
+  orientationTypeIds?: Prisma.MentorParticipationRequestCreateorientationTypeIdsInput | string[]
+  updatedAt?: Date | string
+  offer?: Prisma.MentorSlotOfferUncheckedCreateNestedOneWithoutRequestInput
+}
+
+export type MentorParticipationRequestCreateOrConnectWithoutStatusInput = {
+  where: Prisma.MentorParticipationRequestWhereUniqueInput
+  create: Prisma.XOR<Prisma.MentorParticipationRequestCreateWithoutStatusInput, Prisma.MentorParticipationRequestUncheckedCreateWithoutStatusInput>
+}
+
+export type MentorParticipationRequestCreateManyStatusInputEnvelope = {
+  data: Prisma.MentorParticipationRequestCreateManyStatusInput | Prisma.MentorParticipationRequestCreateManyStatusInput[]
+  skipDuplicates?: boolean
+}
+
+export type MentorParticipationRequestUpsertWithWhereUniqueWithoutStatusInput = {
+  where: Prisma.MentorParticipationRequestWhereUniqueInput
+  update: Prisma.XOR<Prisma.MentorParticipationRequestUpdateWithoutStatusInput, Prisma.MentorParticipationRequestUncheckedUpdateWithoutStatusInput>
+  create: Prisma.XOR<Prisma.MentorParticipationRequestCreateWithoutStatusInput, Prisma.MentorParticipationRequestUncheckedCreateWithoutStatusInput>
+}
+
+export type MentorParticipationRequestUpdateWithWhereUniqueWithoutStatusInput = {
+  where: Prisma.MentorParticipationRequestWhereUniqueInput
+  data: Prisma.XOR<Prisma.MentorParticipationRequestUpdateWithoutStatusInput, Prisma.MentorParticipationRequestUncheckedUpdateWithoutStatusInput>
+}
+
+export type MentorParticipationRequestUpdateManyWithWhereWithoutStatusInput = {
+  where: Prisma.MentorParticipationRequestScalarWhereInput
+  data: Prisma.XOR<Prisma.MentorParticipationRequestUpdateManyMutationInput, Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutStatusInput>
+}
+
+export type MentorParticipationRequestCreateManyUserInput = {
+  id?: string
+  statusId?: string
+  queuedAt?: Date | string
+  createdAt?: Date | string
+  technicalAreaIds?: Prisma.MentorParticipationRequestCreatetechnicalAreaIdsInput | string[]
+  orientationTypeIds?: Prisma.MentorParticipationRequestCreateorientationTypeIdsInput | string[]
+  updatedAt?: Date | string
 }
 
 export type MentorParticipationRequestUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
   queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   offer?: Prisma.MentorSlotOfferUpdateOneWithoutRequestNestedInput
+  status?: Prisma.MentorRequestStatusUpdateOneRequiredWithoutRequestsNestedInput
 }
 
 export type MentorParticipationRequestUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   offer?: Prisma.MentorSlotOfferUncheckedUpdateOneWithoutRequestNestedInput
 }
 
 export type MentorParticipationRequestUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
   orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MentorParticipationRequestCreateManyStatusInput = {
+  id?: string
+  userId: string
+  queuedAt?: Date | string
+  createdAt?: Date | string
+  technicalAreaIds?: Prisma.MentorParticipationRequestCreatetechnicalAreaIdsInput | string[]
+  orientationTypeIds?: Prisma.MentorParticipationRequestCreateorientationTypeIdsInput | string[]
+  updatedAt?: Date | string
+}
+
+export type MentorParticipationRequestUpdateWithoutStatusInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
+  orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutMentorParticipationRequestsNestedInput
+  offer?: Prisma.MentorSlotOfferUpdateOneWithoutRequestNestedInput
+}
+
+export type MentorParticipationRequestUncheckedUpdateWithoutStatusInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
+  orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  offer?: Prisma.MentorSlotOfferUncheckedUpdateOneWithoutRequestNestedInput
+}
+
+export type MentorParticipationRequestUncheckedUpdateManyWithoutStatusInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  queuedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  technicalAreaIds?: Prisma.MentorParticipationRequestUpdatetechnicalAreaIdsInput | string[]
+  orientationTypeIds?: Prisma.MentorParticipationRequestUpdateorientationTypeIdsInput | string[]
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -603,57 +770,67 @@ export type MentorParticipationRequestUncheckedUpdateManyWithoutUserInput = {
 export type MentorParticipationRequestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  status?: boolean
+  statusId?: boolean
   queuedAt?: boolean
   createdAt?: boolean
   technicalAreaIds?: boolean
   orientationTypeIds?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   offer?: boolean | Prisma.MentorParticipationRequest$offerArgs<ExtArgs>
+  status?: boolean | Prisma.MentorRequestStatusDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorParticipationRequest"]>
 
 export type MentorParticipationRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  status?: boolean
+  statusId?: boolean
   queuedAt?: boolean
   createdAt?: boolean
   technicalAreaIds?: boolean
   orientationTypeIds?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  status?: boolean | Prisma.MentorRequestStatusDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorParticipationRequest"]>
 
 export type MentorParticipationRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  status?: boolean
+  statusId?: boolean
   queuedAt?: boolean
   createdAt?: boolean
   technicalAreaIds?: boolean
   orientationTypeIds?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  status?: boolean | Prisma.MentorRequestStatusDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorParticipationRequest"]>
 
 export type MentorParticipationRequestSelectScalar = {
   id?: boolean
   userId?: boolean
-  status?: boolean
+  statusId?: boolean
   queuedAt?: boolean
   createdAt?: boolean
   technicalAreaIds?: boolean
   orientationTypeIds?: boolean
+  updatedAt?: boolean
 }
 
-export type MentorParticipationRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "status" | "queuedAt" | "createdAt" | "technicalAreaIds" | "orientationTypeIds", ExtArgs["result"]["mentorParticipationRequest"]>
+export type MentorParticipationRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "statusId" | "queuedAt" | "createdAt" | "technicalAreaIds" | "orientationTypeIds" | "updatedAt", ExtArgs["result"]["mentorParticipationRequest"]>
 export type MentorParticipationRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   offer?: boolean | Prisma.MentorParticipationRequest$offerArgs<ExtArgs>
+  status?: boolean | Prisma.MentorRequestStatusDefaultArgs<ExtArgs>
 }
 export type MentorParticipationRequestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  status?: boolean | Prisma.MentorRequestStatusDefaultArgs<ExtArgs>
 }
 export type MentorParticipationRequestIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  status?: boolean | Prisma.MentorRequestStatusDefaultArgs<ExtArgs>
 }
 
 export type $MentorParticipationRequestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -661,15 +838,17 @@ export type $MentorParticipationRequestPayload<ExtArgs extends runtime.Types.Ext
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
     offer: Prisma.$MentorSlotOfferPayload<ExtArgs> | null
+    status: Prisma.$MentorRequestStatusPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
-    status: string
+    statusId: string
     queuedAt: Date
     createdAt: Date
     technicalAreaIds: string[]
     orientationTypeIds: string[]
+    updatedAt: Date
   }, ExtArgs["result"]["mentorParticipationRequest"]>
   composites: {}
 }
@@ -1066,6 +1245,7 @@ export interface Prisma__MentorParticipationRequestClient<T, Null = never, ExtAr
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   offer<T extends Prisma.MentorParticipationRequest$offerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MentorParticipationRequest$offerArgs<ExtArgs>>): Prisma.Prisma__MentorSlotOfferClient<runtime.Types.Result.GetResult<Prisma.$MentorSlotOfferPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  status<T extends Prisma.MentorRequestStatusDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MentorRequestStatusDefaultArgs<ExtArgs>>): Prisma.Prisma__MentorRequestStatusClient<runtime.Types.Result.GetResult<Prisma.$MentorRequestStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1097,11 +1277,12 @@ export interface Prisma__MentorParticipationRequestClient<T, Null = never, ExtAr
 export interface MentorParticipationRequestFieldRefs {
   readonly id: Prisma.FieldRef<"MentorParticipationRequest", 'String'>
   readonly userId: Prisma.FieldRef<"MentorParticipationRequest", 'String'>
-  readonly status: Prisma.FieldRef<"MentorParticipationRequest", 'String'>
+  readonly statusId: Prisma.FieldRef<"MentorParticipationRequest", 'String'>
   readonly queuedAt: Prisma.FieldRef<"MentorParticipationRequest", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"MentorParticipationRequest", 'DateTime'>
   readonly technicalAreaIds: Prisma.FieldRef<"MentorParticipationRequest", 'String[]'>
   readonly orientationTypeIds: Prisma.FieldRef<"MentorParticipationRequest", 'String[]'>
+  readonly updatedAt: Prisma.FieldRef<"MentorParticipationRequest", 'DateTime'>
 }
 
 
