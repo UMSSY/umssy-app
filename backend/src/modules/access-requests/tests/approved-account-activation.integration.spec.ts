@@ -1,3 +1,4 @@
+import { ApprovedAccountActivationRepository } from '../repositories/approved-account-activation.repository.js';
 import {
   afterAll,
   beforeAll,
@@ -80,7 +81,9 @@ describe.skipIf(!connectionString)(
           { schema },
         ),
       });
-      activation = new ApprovedAccountActivationService(db());
+      activation = new ApprovedAccountActivationService(
+        new ApprovedAccountActivationRepository(db()),
+      );
       inReviewId = (
         await prisma.accessRequestStatus.create({
           data: { title: 'in_review' },
@@ -202,9 +205,19 @@ describe.skipIf(!connectionString)(
           randomUUID(),
         ),
       ).rejects.toMatchObject({ statusCode: 409 });
-    const participation = new MentorParticipationService(new MentorParticipationRepository(db()));
-    const pending = await participation.create(user.id, { technicalAreaIds: [areaId], orientationTypeIds: [orientationId] }, randomUUID());
-    expect(await participation.findMyRequest(user.id)).toMatchObject({ id: pending.id, userId: user.id, status: 'PENDING' });
+      const participation = new MentorParticipationService(
+        new MentorParticipationRepository(db()),
+      );
+      const pending = await participation.create(
+        user.id,
+        { technicalAreaIds: [areaId], orientationTypeIds: [orientationId] },
+        randomUUID(),
+      );
+      expect(await participation.findMyRequest(user.id)).toMatchObject({
+        id: pending.id,
+        userId: user.id,
+        status: 'PENDING',
+      });
       await expect(
         activation.activate(requestId, input()),
       ).rejects.toMatchObject({ statusCode: 400 });

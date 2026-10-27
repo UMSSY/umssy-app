@@ -1,3 +1,6 @@
+import { MentorIntakeOperationCode } from '../types/mentor-intake-operation.enum.js';
+import { KIND_IDS } from './mentor-catalog-test-values.js';
+import { MentorOffersService } from '../services/mentor-offers.service.js';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
@@ -11,7 +14,7 @@ import { MentorOffersRepository } from '../repositories/mentor-offers.repository
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorsService } from '../services/mentors.service.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
-import { withMentorIntake } from '../repositories/mentor-intake-policy.js';
+import { withMentorIntake } from '../services/mentor-intake.service.js';
 
 const connectionString = process.env.HU7_TEST_DATABASE_URL;
 const schema = `hu7_participation_test_${randomBytes(6).toString('hex')}`;
@@ -142,9 +145,11 @@ describe.skipIf(!connectionString)(
       orientationTypeIds: [orientationId],
     });
     const queue = () => prisma.$queryRaw<{ id: string }[]>`
-    SELECT id FROM mentor_participation_requests WHERE status = 'PENDING' ORDER BY queued_at, id`;
+    SELECT id FROM mentor_participation_requests WHERE status_id = mentor_request_status('PENDING') ORDER BY queued_at, id`;
     const allocator = () =>
-      new MentorOffersRepository(prisma as unknown as PrismaService);
+      new MentorOffersService(
+        new MentorOffersRepository(prisma as unknown as PrismaService),
+      );
 
     it('persiste fecha, usuario y preferencias; consulta solo los datos del usuario autenticado', async () => {
       expect(await service.findMyRequest(userId(1))).toBeNull();
@@ -159,6 +164,19 @@ describe.skipIf(!connectionString)(
       expect(await service.findMyRequest(userId(1))).toMatchObject(request);
       expect(await service.findMyRequest(userId(2))).toBeNull();
       expect(await service.findMyHistory(userId(2))).toEqual([]);
+    });
+
+    it('el historial conserva el mismo instante aunque la conexión esté en hora de Bolivia', async () => {
+      const original = await service.create(userId(1), preferences());
+      const localTimeClient = new PrismaClient({
+        adapter: new PrismaPg({ connectionString: connectionString!, options: `-c search_path=${schema} -c TimeZone=America/La_Paz` }, { schema }),
+      });
+      try {
+        const localService = new MentorParticipationService(new MentorParticipationRepository(localTimeClient as unknown as PrismaService));
+        const history = await localService.findMyHistory(userId(1));
+        expect(history[0].queuedAt).toEqual(original.queuedAt);
+        expect(history[0].createdAt).toEqual(original.createdAt);
+      } finally { await localTimeClient.$disconnect(); }
     });
 
     it('dos creaciones simultáneas conservan el mismo ID y fecha, incluso si cambian las preferencias', async () => {
@@ -258,7 +276,7 @@ describe.skipIf(!connectionString)(
 
     it('resuelve ofertas vencidas antes de volver a postular y conserva ambos registros', async () => {
       const original = await service.create(userId(1), preferences());
-      await prisma.$executeRaw`UPDATE mentor_participation_requests SET status = 'OFFERED' WHERE id = ${original.id}::uuid`;
+      await prisma.$executeRaw`UPDATE mentor_participation_requests SET status_id = mentor_request_status('OFFERED') WHERE id = ${original.id}::uuid`;
       await prisma.$executeRaw`INSERT INTO mentor_slot_offers (id, user_id, request_id, expires_at)
       VALUES (gen_random_uuid(), ${userId(1)}::uuid, ${original.id}::uuid, clock_timestamp())`;
       const returned = await service.create(userId(1), preferences());
@@ -423,7 +441,9 @@ describe.skipIf(!connectionString)(
           (await prisma.mentorParticipationSanction.findFirstOrThrow()).endsAt,
         ).toEqual(sanction.endsAt);
         expect(
-          await prisma.mentorMailOutbox.count({ where: { kind: 'SANCTION' } }),
+          await prisma.mentorMailOutbox.count({
+            where: { kindId: KIND_IDS.SANCTION },
+          }),
         ).toBe(1);
         expect(
           await prisma.mentorIntakeAttempt.count({ where: { counted: true } }),
@@ -463,7 +483,9 @@ describe.skipIf(!connectionString)(
         expect(await prisma.mentorParticipationRequest.count()).toBe(1);
         expect(await prisma.mentorParticipationSanction.count()).toBe(1);
         expect(
-          await prisma.mentorMailOutbox.count({ where: { kind: 'SANCTION' } }),
+          await prisma.mentorMailOutbox.count({
+            where: { kindId: KIND_IDS.SANCTION },
+          }),
         ).toBe(1);
         expect(
           await prisma.mentorIntakeAttempt.count({ where: { counted: true } }),
@@ -490,9 +512,9 @@ describe.skipIf(!connectionString)(
       it('un fallo interno revierte tanto las escrituras de negocio como el intento', async () => {
         await expect(
           withMentorIntake(
-            prisma as unknown as PrismaService,
+            repository,
             userId(1),
-            'REQUEST',
+            MentorIntakeOperationCode.REQUEST,
             randomUUID(),
             preferences(),
             async (tx) => {

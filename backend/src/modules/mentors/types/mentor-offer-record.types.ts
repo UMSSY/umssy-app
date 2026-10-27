@@ -5,7 +5,3 @@ export interface MentorOfferRecord {
   technicalAreaIds: string[];
   orientationTypeIds: string[];
 }
-
-export type MentorOfferConfirmation =
-  | { id: string; status: 'ACTIVE'; alreadyConfirmed: boolean }
-  | { expired: true };

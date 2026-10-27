@@ -18,13 +18,18 @@ export async function readMentorCapacity(tx: Prisma.TransactionClient) {
           WHERE ur.user_id = u.id AND r.name = 'mentor' AND ur.deleted_at IS NULL
             AND ur.start_at <= (SELECT now FROM instant))) AS "activeMentors",
       (SELECT count(*)::int FROM mentor_slot_offers
-        WHERE status = 'OFFERED' AND expires_at > (SELECT now FROM instant)) AS "reservedOffers"
+        WHERE status_id = mentor_offer_status('OFFERED') AND expires_at > (SELECT now FROM instant)) AS "reservedOffers"
   `;
   return mentorCapacity(counts);
 }
 
-export async function readMentorEligibility(tx: Prisma.TransactionClient, userId: string) {
-  const [eligibility] = await tx.$queryRaw<{ eligible: boolean; alreadyMentor: boolean }[]>`
+export async function readMentorEligibility(
+  tx: Prisma.TransactionClient,
+  userId: string,
+) {
+  const [eligibility] = await tx.$queryRaw<
+    { eligible: boolean; alreadyMentor: boolean }[]
+  >`
     SELECT EXISTS (
       SELECT 1 FROM users u WHERE u.id = ${userId}::uuid AND u.is_active = true
         AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id

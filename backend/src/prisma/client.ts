@@ -326,3 +326,28 @@ export type AuditEvent = Prisma.AuditEventModel
  *
  */
 export type DocumentValidation = Prisma.DocumentValidationModel
+/**
+ * Model MentorRequestStatus
+ *
+ */
+export type MentorRequestStatus = Prisma.MentorRequestStatusModel
+/**
+ * Model MentorOfferStatus
+ *
+ */
+export type MentorOfferStatus = Prisma.MentorOfferStatusModel
+/**
+ * Model MentorMailStatus
+ *
+ */
+export type MentorMailStatus = Prisma.MentorMailStatusModel
+/**
+ * Model MentorIntakeOperation
+ *
+ */
+export type MentorIntakeOperation = Prisma.MentorIntakeOperationModel
+/**
+ * Model MentorMailKind
+ *
+ */
+export type MentorMailKind = Prisma.MentorMailKindModel

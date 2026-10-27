@@ -1,54 +1,49 @@
 # Descripción preparada para PR1713
 
-**Título:** fix(mentors): completar admisión HU7 con idempotencia, sanciones y correo transaccional
+**Título:** fix(mentors): complete HU7 flow and address integration review
 
 **Origen:** `feature/grupo-6-hu7-main-flow-correction`
 **Destino:** `epic/grupo-6-red-mentorias`
 
 ## Problema y resultado
 
-La activación directa y la espera tenían políticas de intentos distintas; el contador era fijo, los reintentos no tenían identidad persistente y las ofertas/sanciones no se despachaban mediante correo transaccional. La admisión ahora comparte una ventana móvil real, claves UUID y una sola sanción exacta de 72 horas al quinto intento distinto, conservando solicitudes y ofertas previas.
+Completa HU7 para que la incorporación directa y la lista de espera compartan validaciones, idempotencia y sanciones. Una respuesta de red perdida se reintenta con el mismo UUID sin duplicar solicitudes ni contar otra intención. Se conservan el límite del 40 %, FIFO, las reservas de 24 horas y la salida definitiva con preferencias guardadas por HU6.
 
-Se mantiene el FIFO y el mecanismo existente de reservas de 24 horas, confirmación, expiración y salida definitiva. Se completa el vínculo de cuentas aprobadas consumiendo el OTP institucional de Epic 1 sin cambiar el login. Se corrigen envíos repetidos, preferencias residuales al volver a participar y navegación móvil detectada durante QA.
+También atiende las observaciones aplicables a HU7 de [zer4c en la integración de Epic 6](https://github.com/UMSSY/umssy-app/pull/1712#pullrequestreview-5665806535).
 
 ## Cambios
 
-- UUID obligatorio en ambas rutas de entrada; resultado persistido por usuario, operación y clave, conflicto ante otros datos y rollback ante fallos técnicos.
-- Respuesta 429 con MENTOR_REQUEST_SUSPENDED, sanctionEndsAt y Retry-After; mensaje genérico en frontend.
-- Outbox atómico para ofertas y sanciones, proveedor MailService existente, reclamo concurrente seguro y recuperación explícita de entregas inciertas.
-- Activación aprobada: OTP válido de un solo uso, approvedUserId explícito y contraseña actual obligatoria para vincular una cuenta existente.
-- UUID de frontend conservado después de fallos de red/5xx, bloqueo inmediato de mutaciones y controles móviles accesibles.
-- Ninguna revocación automática por reducción de capacidad; una reserva vigente se confirma sin doble ocupación.
-- Sincronización con Epic 6 en da499bb6 (#1705 y #1711): conserva el panel activo/desactivado y las preferencias de HU6, reutiliza su modal para la salida definitiva de HU7 y mantiene visible el vencimiento de ofertas.
-- Las intenciones de idempotencia terminan solo ante una operación reconocida o una incorporación nueva explícita después de cerrar la anterior; recargar, reintentar o fallar una salida conserva la clave.
-- Documentación con 33 CA y requisitos adicionales: [informe](hu7-main-flow-correction.md).
+- Servicios coordinan admisión, elegibilidad, intentos, sanciones, ofertas y salida. Los controllers invocan servicios y los repositories mantienen consultas y escrituras atómicas.
+- Alta directa y confirmación reutilizan la asignación de rol, preferencias y disponibilidad.
+- Ventana móvil de 24 horas, sanción exacta de 72 horas al quinto intento distinto, replay persistente y respuesta 429 con metadatos y Retry-After.
+- Correo transaccional con outbox y proveedor MailService existente. Se conservan la exclusión entre workers, Message-ID estable y conciliación de resultados SMTP ambiguos.
+- Vinculación de cuenta aprobada mediante OTP, sin reemplazar la contraseña de una cuenta existente. Persistencia extraída a su repository de Epic 1.
+- Catálogos UUID para solicitudes, ofertas, estados de correo, operaciones y tipos de evento; auditoría e índices completos y enums TypeScript del módulo.
+- Contratos y props en types/. Hooks separados para historial, edición y cancelación; cuatro diálogos, errores compartidos, Label de shadcn e imports públicos.
+- Wrapper compartido con idb; intenciones por usuario/operación y actualización atómica. Recuperación del UUID anterior sin perder reintentos pendientes.
+- RoleGate genérico con fallback configurado por ruta. Estados visibles en español y documentación de salida alineada con HU6.
+- Lectura UTC del historial para que conserve la misma fecha que la solicitud incluso con conexiones PostgreSQL en hora de Bolivia.
 
-## Validación
+## Validación local
 
-- Backend: 772 comprobaciones aprobadas. Se repitieron aisladamente los 26 contratos HTTP que el runner concurrente dejó inconclusos.
-- Frontend: ejecución completa con 3.134 aprobadas y un timeout en certificaciones. La regresión final de mentorías y ese archivo pasó sus 309 casos; en conjunto se verificaron 3.139 casos sin fallos pendientes.
-- PostgreSQL: 63 casos distintos verificados en esquemas temporales locales, incluidos concurrencia, replay, ventana móvil, reservas con capacidad reducida, migración y aprobación→OTP→login→espera.
-- SMTP local: oferta y sanción recibidas en Mailpit; los reintentos no duplican eventos.
-- TypeScript, Prisma validate, compilaciones backend y Next.js (42 páginas), ESLint sin errores. Oxlint sin errores; una advertencia existente de unbound-method en un test de controlador.
-- Las verificaciones visuales y limitaciones de entrega externa están detalladas en el informe.
-- HTTP y navegador locales: panel ACTIVE, preferencias reales, capacidad 4/4 y confirmación inequívoca de Pausar mentoría; cancelar conserva el estado.
+- Suite completa backend: 1.946 casos ejecutados aprobados.
+- Regresión final de HU7 y activación aprobada: 278 casos aprobados con PostgreSQL y SMTP locales, incluidos 65 casos de integración.
+- Suite completa frontend: 3.140 aprobados y tres timeouts en disponibilidad/educación. Los tres archivos se repitieron aisladamente y pasaron sus 63 casos. Regresión final de los flujos modificados: 36 aprobados.
+- TypeScript, builds backend/Next.js de producción, ESLint y comprobación de diff: aprobados. Oxlint sin errores; advertencias previas documentadas.
+- Todas las migraciones aplicadas sobre una base vacía y prisma migrate diff --exit-code: sin diferencias.
+- Conversión de datos anteriores comprobada con FKs y unicidad. Base local respaldada; sus cinco solicitudes y dos ofertas se conservaron.
+- Navegador: solicitud pendiente, historial con la misma fecha BOT, preferencias precargadas y confirmación de cancelación, manteniendo la solicitud existente.
 
-## Migración y puesta en marcha
+Evidencia y limitaciones: [informe de HU7](docs/hu7-main-flow-correction.md), secciones G y H.
 
-Aplicar `20261027030000_mentor_intake_idempotency_outbox` antes de arrancar la versión nueva y regenerar el cliente Prisma. Es aditiva: conserva las tablas e historial existentes e importa sanciones vigentes sin renovar su fecha. No admite convivencia con instancias anteriores que sigan escribiendo el contador fijo; usar el procedimiento Recreate existente.
+## Migración y revisiones requeridas
 
-El frontend y backend deben actualizarse coordinadamente, porque ambos POST exigen Idempotency-Key. El contenedor persistente de Epic 6 mantiene el worker existente. No se modificó el repositorio de despliegue ni secretos reales.
+Aplicar las migraciones de HU7 antes de arrancar el backend nuevo. La nueva `20261027180000_mentor_participation_catalogs` convierte los estados dentro de una transacción y conserva IDs, preferencias, fechas, historial, intentos, sanciones y correo. Mantener el procedimiento Recreate: las instancias anteriores usan las columnas de texto sustituidas. Las migraciones previas permanecen intactas.
 
-## Limitaciones conocidas
+**Database:** revisar esquema, catálogos, backfill, índices y auditoría.
 
-La recepción en bandejas institucionales del despliegue queda pendiente de verificación externa de SMTP/remitente. Mailpit confirma transporte y recepción local, no reputación o entrega remota.
+**DevOps:** idb 8.0.4 añade una dependencia en frontend/package.json y su lockfile. La regla vigente de CI Files protege ese archivo en ramas de grupo; necesita incorporarse mediante el flujo permitido por DevOps. Este PR conserva su rama de grupo y las reglas de CI.
 
-SMTP no proporciona exactamente una vez ante una caída después de DATA. Un evento ambiguo o abandonado queda UNCERTAIN para reconciliar con el proveedor; no se reenvía automáticamente ni se afirma que esté entregado. Se reintentan únicamente fallos previos a aceptación o rechazos explícitos.
+La recepción en correo institucional desplegado sigue requiriendo verificación externa de SMTP/remitente. La recepción local no certifica ese tramo.
 
-El contador histórico solo contenía cantidad y comienzo de ventana. Se conservan esos datos conocidos; no se pueden reconstruir timestamps individuales anteriores. Los intentos nuevos usan ventana móvil exacta.
-
-## Relación con issues
-
-Relacionadas: #1386, #1395, #1407, #1409, #1410, #1411, #1436, #1437, #1438, #1439 y #1440. No incluye instrucciones de cierre automático.
-
-No contiene datos de demostración, cuentas sembradas en producción, archivos de entorno, bases locales ni logs.
+Relacionado con #1386, #1395, #1407, #1409, #1410, #1411 y #1436–#1440. Incluye únicamente implementación, catálogos de negocio, pruebas automatizadas y documentación; sin cuentas sembradas de demostración, archivos de entorno, bases locales ni logs.

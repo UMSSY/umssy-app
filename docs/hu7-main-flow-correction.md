@@ -273,3 +273,43 @@ Validación de la sincronización:
 - Navegador: se verificaron la vista nueva, el botón Pausar mentoría y su confirmación; cancelar el modal conserva la participación. Los servidores locales se actualizaron sin reiniciar ni sembrar la base de datos.
 
 La primera validación remota detectó que cuatro relaciones nuevas de Prisma asumían ON UPDATE CASCADE, mientras que la migración publicada define NO ACTION. Se explicitó `onUpdate: NoAction` en el esquema y se regeneró el cliente, sin reescribir la migración. La comprobación posterior creó una base temporal independiente, aplicó todas las migraciones y ejecutó el mismo `prisma migrate diff --exit-code` del CI: no detectó diferencias. La base temporal se eliminó al terminar; la base de demostración no se modificó.
+
+## H. Correcciones de estándares y revisión de zer4c
+
+Se atendieron los puntos aplicables a HU7 de la [revisión de zer4c en PR1712](https://github.com/UMSSY/umssy-app/pull/1712#pullrequestreview-5665806535), contrastados con los estándares generales aportados el 27 de octubre. Esta sección describe el estado posterior a G; la aprobación de código y de Database corresponde a sus revisores.
+
+| Observación | Corrección |
+|---|---|
+| Controller conectado al repository | MentorExitController invoca MentorExitService. El servicio decide sobre rol vigente, citas futuras y reasignación; el repository conserva únicamente consultas, bloqueo y escritura. |
+| Decisiones de negocio en persistencia | Admisión, elegibilidad, capacidad, intentos, sanciones y confirmación se coordinan desde servicios. Persistencia devuelve hechos de cuenta/roles/aprobación; el servicio evalúa los requisitos. Se conserva la unidad transaccional y el bloqueo compartido. |
+| Servicios añadidos con acceso directo a Prisma | Se añadieron repositories de outbox y activación aprobada. Los servicios conservan OTP, contraseña, decisiones de vinculación y tratamiento SMTP; las operaciones de DB permanecen en repositories. |
+| Estados como texto | Solicitudes, ofertas y outbox usan catálogos referenciados por UUID. También se normalizaron operación de intento y tipo de correo. Los títulos se devuelven en el JSON público para conservar el contrato; los servicios usan enums TypeScript. |
+| Auditoría y FKs | Se completaron createdAt/updatedAt, sus índices y la actualización de auditoría de escrituras SQL. La referencia opcional al intento de sanción usa SetNull. Los IDs nuevos mantienen @default(uuid()). |
+| Tipos y props mezclados con implementación | Contratos HTTP, props de componentes y contratos internos se extrajeron a types/, con un contrato por archivo y sufijos Response/Payload/Props donde corresponden. |
+| IndexedDB nativo | El wrapper compartido usa idb 8.0.4, conserva sus consumidores y añade actualización atómica de registros. Las intenciones de HU7 se guardan por usuario/operación en esta capa, con respaldo en memoria si el navegador impide persistir. |
+| PendingParticipation concentra responsabilidades | Se separaron hooks de historial, edición y cancelación, composición de estado y cuatro diálogos. Se reutiliza el parser de errores del módulo, se consume la API pública de mentorship y se usan Label de shadcn. |
+| Activación duplicada | Alta directa y confirmación comparten la misma asignación transaccional de rol, preferencias y disponibilidad. |
+| RoleGate específico de mentorías | El componente genérico recibe fallback. El contenido de mentorías vive en el módulo y se configura por ruta. |
+| Idioma y documentación | Los estados visibles se traducen al español, se retiró el comentario narrativo señalado y se corrigió HU7-1440.md: las preferencias se conservan conforme a HU6, sin conservar rol/cupo/prioridad. |
+
+La migración `20261027180000_mentor_participation_catalogs` realiza la conversión dentro de una transacción: crea catálogos, relaciona cada valor existente, exige FKs y reconstruye las restricciones de una solicitud abierta y una oferta vigente por usuario. Conserva IDs, fechas y preferencias de negocio, historial de ofertas, intentos, sanciones y eventos de correo. No modifica las migraciones anteriores. Los campos de auditoría inexistentes se completan con fechas de negocio conocidas cuando están disponibles; no se reconstruye una historia de modificaciones que antes no se registraba.
+
+Se debe detener la versión anterior antes de aplicar la conversión, pues sus consultas usan las columnas de texto sustituidas. Mantener el procedimiento Recreate existente y actualizar frontend/backend coordinadamente. Los catálogos se cargan por la migración para que una base recién desplegada no dependa de ejecutar semillas de demostración.
+
+Las claves antiguas pendientes de sessionStorage se recuperan mediante el wrapper compartido y se trasladan sin cambiar su UUID. No se escriben intenciones nuevas allí. Ante red/5xx se conserva la clave; terminar la operación o iniciar explícitamente otra incorporación descarta la anterior. Se comprueba también que una intención de otro usuario no se reutiliza ni se elimina. El almacenamiento de autenticación global se sigue consumiendo mediante su API existente; su evolución pertenece al módulo de autenticación.
+
+La prueba de navegador descubrió además que el historial podía desplazar cuatro horas una fecha cuando la conexión PostgreSQL estaba en America/La_Paz. Su lectura ahora fija UTC dentro de una transacción sin tomar el bloqueo de capacidad. El frontend sigue convirtiendo a BOT únicamente al presentar la fecha. Una regresión PostgreSQL comprueba que solicitud e historial conservan el mismo instante con una conexión regional.
+
+Validación de esta corrección:
+
+- Suite completa backend: 1.946 casos ejecutados aprobados. Las integraciones que requieren configuración local se comprobaron aparte.
+- Regresión final backend de mentorías y activación aprobada: 278 casos aprobados con PostgreSQL y SMTP locales, incluyendo 65 casos de integración. No se eliminaron escenarios para adaptar la arquitectura.
+- Suite completa frontend: 3.140 casos aprobados y tres timeouts de cinco segundos en disponibilidad y educación. Los tres archivos completos se repitieron sin paralelismo y pasaron sus 63 casos. La regresión final de los flujos modificados pasó sus 36 casos, incluyendo migración de UUID anteriores y separación entre usuarios.
+- Prisma validate, aplicación de todas las migraciones sobre una base vacía y migrate diff --exit-code: aprobados, sin diferencias. La prueba de conversión comprueba conservación de datos y restricciones FK/uniqueness.
+- TypeScript, build backend y Next.js de producción: aprobados. Se utilizó la misma caché local de fuentes de las validaciones anteriores.
+- ESLint frontend/backend: sin errores. Oxlint: sin errores; conserva advertencias previas de chat y métodos de pruebas sin enlazar.
+- La base local se respaldó fuera del repositorio. Antes y después de la conversión se compararon solicitudes, ofertas, sanciones y correo: datos conservados, cinco solicitudes y dos ofertas. No se reinicializó ni se sembró otra vez.
+
+La dependencia idb modifica frontend/package.json y su lockfile. La regla vigente de CI Files protege package.json en ramas de grupo; corresponde a DevOps incorporar/autorizar esa dependencia mediante el flujo permitido. La nueva migración y el esquema requieren revisión de Database. Se conserva la rama de grupo y no se cambian workflows, reglas ni umbrales para evitar dichas revisiones.
+
+PR1713 sigue dirigido a Epic 6. Su integración no equivale al pase de Epic 6 hacia develop en PR1712, que conserva su propia revisión y conflictos de integración.

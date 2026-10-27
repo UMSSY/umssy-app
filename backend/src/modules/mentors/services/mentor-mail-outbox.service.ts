@@ -1,14 +1,7 @@
+import { MentorMailKindCode } from '../types/mentor-mail-kind.enum.js';
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { MentorMailOutboxRepository } from '../repositories/mentor-mail-outbox.repository.js';
 import { MailService } from '../../mail/services/mail.service.js';
-
-type OutboxMessage = {
-  id: string;
-  kind: string;
-  recipient: string;
-  attempts: number;
-  payload: { offerId?: string; expiresAt?: string; sanctionEndsAt?: string };
-};
 
 function safeToRetry(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
@@ -31,41 +24,28 @@ function safeToRetry(error: unknown): boolean {
 @Injectable()
 export class MentorMailOutboxService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly repository: MentorMailOutboxRepository,
     private readonly mail: MailService,
   ) {}
 
   async dispatch() {
-    // Console transport is not evidence of delivery. Leave events pending.
+    // El transporte de consola no acredita entrega: conserva el evento pendiente.
     if (!this.mail.isSmtpConfigured()) return;
-    // SMTP cannot prove whether an interrupted DATA was accepted. Never resend
-    // an abandoned in-flight event automatically: require delivery reconciliation.
-    await this.prisma.$executeRaw`
-      UPDATE mentor_mail_outbox SET status = 'UNCERTAIN', last_error = 'DISPATCH_INTERRUPTED'
-      WHERE status = 'SENDING' AND claimed_at < clock_timestamp() - INTERVAL '5 minutes'`;
+    // Una entrega SMTP ambigua requiere conciliación antes de autorizar un reenvío.
+    await this.repository.quarantineInterrupted();
     for (let index = 0; index < 10; index++) {
-      const [message] = await this.prisma.$queryRaw<OutboxMessage[]>`
-        WITH next AS (
-          SELECT id FROM mentor_mail_outbox WHERE status = 'PENDING' AND available_at <= clock_timestamp()
-          ORDER BY available_at, id FOR UPDATE SKIP LOCKED LIMIT 1
-        )
-        UPDATE mentor_mail_outbox m SET status = 'SENDING', claimed_at = clock_timestamp(), attempts = attempts + 1
-        FROM next WHERE m.id = next.id RETURNING m.id, m.kind, m.recipient, m.payload, m.attempts`;
+      const message = await this.repository.claim();
       if (!message) break;
-      if (message.kind === 'OFFER') {
-        const [offer] = await this.prisma.$queryRaw<{ valid: boolean }[]>`
-          SELECT EXISTS (SELECT 1 FROM mentor_slot_offers
-            WHERE id::text = ${message.payload.offerId ?? ''} AND status = 'OFFERED'
-              AND expires_at > clock_timestamp()) AS valid`;
-        if (!offer.valid) {
-          await this.prisma.$executeRaw`
-            UPDATE mentor_mail_outbox SET status = 'SUPERSEDED', last_error = NULL
-            WHERE id = ${message.id}::uuid AND status = 'SENDING'`;
+      if (message.kind === MentorMailKindCode.OFFER) {
+        if (
+          !(await this.repository.offerIsCurrent(message.payload.offerId ?? ''))
+        ) {
+          await this.repository.supersede(message.id);
           continue;
         }
       }
       const deadline =
-        message.kind === 'OFFER'
+        message.kind === MentorMailKindCode.OFFER
           ? message.payload.expiresAt
           : message.payload.sanctionEndsAt;
       if (!deadline || Number.isNaN(new Date(deadline).getTime())) {
@@ -82,11 +62,11 @@ export class MentorMailOutboxService {
         timeZone: 'America/La_Paz',
       }).format(new Date(deadline));
       const subject =
-        message.kind === 'OFFER'
+        message.kind === MentorMailKindCode.OFFER
           ? 'Tienes un cupo disponible para mentoría'
           : 'Suspensión temporal de solicitudes de mentoría';
       const text =
-        message.kind === 'OFFER'
+        message.kind === MentorMailKindCode.OFFER
           ? `Tienes una oferta de cupo. El plazo es de 24 horas desde la asignación y vence el ${date} BOT. Ingresa a Mi participación en UMSSY para confirmar.`
           : `Tus solicitudes de participación como mentor se han suspendido durante 72 horas. Podrás volver a solicitar después del ${date} BOT. Las solicitudes y ofertas anteriores se conservan.`;
       try {
@@ -104,24 +84,16 @@ export class MentorMailOutboxService {
             3600,
             30 * 2 ** Math.min(message.attempts, 7),
           );
-          await this.prisma.$executeRaw`
-            UPDATE mentor_mail_outbox SET status = 'PENDING', claimed_at = NULL, last_error = 'SMTP_RETRYABLE',
-              available_at = clock_timestamp() + ${seconds} * INTERVAL '1 second'
-            WHERE id = ${message.id}::uuid AND status = 'SENDING'`;
+          await this.repository.retry(message.id, seconds);
         } else await this.uncertain(message.id, 'SMTP_DELIVERY_UNCERTAIN');
         continue;
       }
-      // A DB failure after SMTP acceptance intentionally leaves SENDING. The
-      // next worker quarantines it rather than risking duplicate delivery.
-      await this.prisma.$executeRaw`
-        UPDATE mentor_mail_outbox SET status = 'SENT', sent_at = clock_timestamp(), last_error = NULL
-        WHERE id = ${message.id}::uuid AND status = 'SENDING'`;
+      // Si falla la escritura tras aceptar SMTP, conserva SENDING para conciliar la entrega.
+      await this.repository.sent(message.id);
     }
   }
 
   private uncertain(id: string, reason: string) {
-    return this.prisma.$executeRaw`
-      UPDATE mentor_mail_outbox SET status = 'UNCERTAIN', last_error = ${reason}
-      WHERE id = ${id}::uuid AND status = 'SENDING'`;
+    return this.repository.uncertain(id, reason);
   }
 }

@@ -37,35 +37,41 @@ export type MentorIntakeAttemptSumAggregateOutputType = {
 export type MentorIntakeAttemptMinAggregateOutputType = {
   id: string | null
   userId: string | null
-  operation: string | null
+  operationId: string | null
   idempotencyKey: string | null
   payloadHash: string | null
   occurredAt: Date | null
   counted: boolean | null
   responseStatus: number | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type MentorIntakeAttemptMaxAggregateOutputType = {
   id: string | null
   userId: string | null
-  operation: string | null
+  operationId: string | null
   idempotencyKey: string | null
   payloadHash: string | null
   occurredAt: Date | null
   counted: boolean | null
   responseStatus: number | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type MentorIntakeAttemptCountAggregateOutputType = {
   id: number
   userId: number
-  operation: number
+  operationId: number
   idempotencyKey: number
   payloadHash: number
   occurredAt: number
   counted: number
   responseStatus: number
   responseData: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -81,35 +87,41 @@ export type MentorIntakeAttemptSumAggregateInputType = {
 export type MentorIntakeAttemptMinAggregateInputType = {
   id?: true
   userId?: true
-  operation?: true
+  operationId?: true
   idempotencyKey?: true
   payloadHash?: true
   occurredAt?: true
   counted?: true
   responseStatus?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type MentorIntakeAttemptMaxAggregateInputType = {
   id?: true
   userId?: true
-  operation?: true
+  operationId?: true
   idempotencyKey?: true
   payloadHash?: true
   occurredAt?: true
   counted?: true
   responseStatus?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type MentorIntakeAttemptCountAggregateInputType = {
   id?: true
   userId?: true
-  operation?: true
+  operationId?: true
   idempotencyKey?: true
   payloadHash?: true
   occurredAt?: true
   counted?: true
   responseStatus?: true
   responseData?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -202,13 +214,15 @@ export type MentorIntakeAttemptGroupByArgs<ExtArgs extends runtime.Types.Extensi
 export type MentorIntakeAttemptGroupByOutputType = {
   id: string
   userId: string
-  operation: string
+  operationId: string
   idempotencyKey: string
   payloadHash: string
   occurredAt: Date
   counted: boolean
   responseStatus: number
   responseData: runtime.JsonValue
+  createdAt: Date
+  updatedAt: Date
   _count: MentorIntakeAttemptCountAggregateOutputType | null
   _avg: MentorIntakeAttemptAvgAggregateOutputType | null
   _sum: MentorIntakeAttemptSumAggregateOutputType | null
@@ -237,59 +251,70 @@ export type MentorIntakeAttemptWhereInput = {
   NOT?: Prisma.MentorIntakeAttemptWhereInput | Prisma.MentorIntakeAttemptWhereInput[]
   id?: Prisma.UuidFilter<"MentorIntakeAttempt"> | string
   userId?: Prisma.UuidFilter<"MentorIntakeAttempt"> | string
-  operation?: Prisma.StringFilter<"MentorIntakeAttempt"> | string
+  operationId?: Prisma.UuidFilter<"MentorIntakeAttempt"> | string
   idempotencyKey?: Prisma.UuidFilter<"MentorIntakeAttempt"> | string
   payloadHash?: Prisma.StringFilter<"MentorIntakeAttempt"> | string
   occurredAt?: Prisma.DateTimeFilter<"MentorIntakeAttempt"> | Date | string
   counted?: Prisma.BoolFilter<"MentorIntakeAttempt"> | boolean
   responseStatus?: Prisma.IntFilter<"MentorIntakeAttempt"> | number
   responseData?: Prisma.JsonFilter<"MentorIntakeAttempt">
+  createdAt?: Prisma.DateTimeFilter<"MentorIntakeAttempt"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorIntakeAttempt"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   sanction?: Prisma.XOR<Prisma.MentorParticipationSanctionNullableScalarRelationFilter, Prisma.MentorParticipationSanctionWhereInput> | null
+  operation?: Prisma.XOR<Prisma.MentorIntakeOperationScalarRelationFilter, Prisma.MentorIntakeOperationWhereInput>
 }
 
 export type MentorIntakeAttemptOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  operation?: Prisma.SortOrder
+  operationId?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   payloadHash?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   counted?: Prisma.SortOrder
   responseStatus?: Prisma.SortOrder
   responseData?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   sanction?: Prisma.MentorParticipationSanctionOrderByWithRelationInput
+  operation?: Prisma.MentorIntakeOperationOrderByWithRelationInput
 }
 
 export type MentorIntakeAttemptWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  userId_operation_idempotencyKey?: Prisma.MentorIntakeAttemptUserIdOperationIdempotencyKeyCompoundUniqueInput
+  userId_operationId_idempotencyKey?: Prisma.MentorIntakeAttemptUserIdOperationIdIdempotencyKeyCompoundUniqueInput
   AND?: Prisma.MentorIntakeAttemptWhereInput | Prisma.MentorIntakeAttemptWhereInput[]
   OR?: Prisma.MentorIntakeAttemptWhereInput[]
   NOT?: Prisma.MentorIntakeAttemptWhereInput | Prisma.MentorIntakeAttemptWhereInput[]
   userId?: Prisma.UuidFilter<"MentorIntakeAttempt"> | string
-  operation?: Prisma.StringFilter<"MentorIntakeAttempt"> | string
+  operationId?: Prisma.UuidFilter<"MentorIntakeAttempt"> | string
   idempotencyKey?: Prisma.UuidFilter<"MentorIntakeAttempt"> | string
   payloadHash?: Prisma.StringFilter<"MentorIntakeAttempt"> | string
   occurredAt?: Prisma.DateTimeFilter<"MentorIntakeAttempt"> | Date | string
   counted?: Prisma.BoolFilter<"MentorIntakeAttempt"> | boolean
   responseStatus?: Prisma.IntFilter<"MentorIntakeAttempt"> | number
   responseData?: Prisma.JsonFilter<"MentorIntakeAttempt">
+  createdAt?: Prisma.DateTimeFilter<"MentorIntakeAttempt"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorIntakeAttempt"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   sanction?: Prisma.XOR<Prisma.MentorParticipationSanctionNullableScalarRelationFilter, Prisma.MentorParticipationSanctionWhereInput> | null
-}, "id" | "userId_operation_idempotencyKey">
+  operation?: Prisma.XOR<Prisma.MentorIntakeOperationScalarRelationFilter, Prisma.MentorIntakeOperationWhereInput>
+}, "id" | "userId_operationId_idempotencyKey">
 
 export type MentorIntakeAttemptOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  operation?: Prisma.SortOrder
+  operationId?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   payloadHash?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   counted?: Prisma.SortOrder
   responseStatus?: Prisma.SortOrder
   responseData?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.MentorIntakeAttemptCountOrderByAggregateInput
   _avg?: Prisma.MentorIntakeAttemptAvgOrderByAggregateInput
   _max?: Prisma.MentorIntakeAttemptMaxOrderByAggregateInput
@@ -303,100 +328,115 @@ export type MentorIntakeAttemptScalarWhereWithAggregatesInput = {
   NOT?: Prisma.MentorIntakeAttemptScalarWhereWithAggregatesInput | Prisma.MentorIntakeAttemptScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"MentorIntakeAttempt"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"MentorIntakeAttempt"> | string
-  operation?: Prisma.StringWithAggregatesFilter<"MentorIntakeAttempt"> | string
+  operationId?: Prisma.UuidWithAggregatesFilter<"MentorIntakeAttempt"> | string
   idempotencyKey?: Prisma.UuidWithAggregatesFilter<"MentorIntakeAttempt"> | string
   payloadHash?: Prisma.StringWithAggregatesFilter<"MentorIntakeAttempt"> | string
   occurredAt?: Prisma.DateTimeWithAggregatesFilter<"MentorIntakeAttempt"> | Date | string
   counted?: Prisma.BoolWithAggregatesFilter<"MentorIntakeAttempt"> | boolean
   responseStatus?: Prisma.IntWithAggregatesFilter<"MentorIntakeAttempt"> | number
   responseData?: Prisma.JsonWithAggregatesFilter<"MentorIntakeAttempt">
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"MentorIntakeAttempt"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"MentorIntakeAttempt"> | Date | string
 }
 
 export type MentorIntakeAttemptCreateInput = {
   id?: string
-  operation: string
   idempotencyKey: string
   payloadHash: string
   occurredAt?: Date | string
   counted?: boolean
   responseStatus: number
   responseData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMentorIntakeAttemptsInput
   sanction?: Prisma.MentorParticipationSanctionCreateNestedOneWithoutTriggerAttemptInput
+  operation: Prisma.MentorIntakeOperationCreateNestedOneWithoutAttemptsInput
 }
 
 export type MentorIntakeAttemptUncheckedCreateInput = {
   id?: string
   userId: string
-  operation: string
+  operationId: string
   idempotencyKey: string
   payloadHash: string
   occurredAt?: Date | string
   counted?: boolean
   responseStatus: number
   responseData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
   sanction?: Prisma.MentorParticipationSanctionUncheckedCreateNestedOneWithoutTriggerAttemptInput
 }
 
 export type MentorIntakeAttemptUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  operation?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
   responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMentorIntakeAttemptsNestedInput
   sanction?: Prisma.MentorParticipationSanctionUpdateOneWithoutTriggerAttemptNestedInput
+  operation?: Prisma.MentorIntakeOperationUpdateOneRequiredWithoutAttemptsNestedInput
 }
 
 export type MentorIntakeAttemptUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  operationId?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
   responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sanction?: Prisma.MentorParticipationSanctionUncheckedUpdateOneWithoutTriggerAttemptNestedInput
 }
 
 export type MentorIntakeAttemptCreateManyInput = {
   id?: string
   userId: string
-  operation: string
+  operationId: string
   idempotencyKey: string
   payloadHash: string
   occurredAt?: Date | string
   counted?: boolean
   responseStatus: number
   responseData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorIntakeAttemptUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  operation?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
   responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorIntakeAttemptUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  operationId?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
   responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorIntakeAttemptListRelationFilter = {
@@ -409,22 +449,24 @@ export type MentorIntakeAttemptOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type MentorIntakeAttemptUserIdOperationIdempotencyKeyCompoundUniqueInput = {
+export type MentorIntakeAttemptUserIdOperationIdIdempotencyKeyCompoundUniqueInput = {
   userId: string
-  operation: string
+  operationId: string
   idempotencyKey: string
 }
 
 export type MentorIntakeAttemptCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  operation?: Prisma.SortOrder
+  operationId?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   payloadHash?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   counted?: Prisma.SortOrder
   responseStatus?: Prisma.SortOrder
   responseData?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorIntakeAttemptAvgOrderByAggregateInput = {
@@ -434,23 +476,27 @@ export type MentorIntakeAttemptAvgOrderByAggregateInput = {
 export type MentorIntakeAttemptMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  operation?: Prisma.SortOrder
+  operationId?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   payloadHash?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   counted?: Prisma.SortOrder
   responseStatus?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorIntakeAttemptMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  operation?: Prisma.SortOrder
+  operationId?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   payloadHash?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   counted?: Prisma.SortOrder
   responseStatus?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorIntakeAttemptSumOrderByAggregateInput = {
@@ -520,27 +566,73 @@ export type MentorIntakeAttemptUpdateOneWithoutSanctionNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MentorIntakeAttemptUpdateToOneWithWhereWithoutSanctionInput, Prisma.MentorIntakeAttemptUpdateWithoutSanctionInput>, Prisma.MentorIntakeAttemptUncheckedUpdateWithoutSanctionInput>
 }
 
+export type MentorIntakeAttemptCreateNestedManyWithoutOperationInput = {
+  create?: Prisma.XOR<Prisma.MentorIntakeAttemptCreateWithoutOperationInput, Prisma.MentorIntakeAttemptUncheckedCreateWithoutOperationInput> | Prisma.MentorIntakeAttemptCreateWithoutOperationInput[] | Prisma.MentorIntakeAttemptUncheckedCreateWithoutOperationInput[]
+  connectOrCreate?: Prisma.MentorIntakeAttemptCreateOrConnectWithoutOperationInput | Prisma.MentorIntakeAttemptCreateOrConnectWithoutOperationInput[]
+  createMany?: Prisma.MentorIntakeAttemptCreateManyOperationInputEnvelope
+  connect?: Prisma.MentorIntakeAttemptWhereUniqueInput | Prisma.MentorIntakeAttemptWhereUniqueInput[]
+}
+
+export type MentorIntakeAttemptUncheckedCreateNestedManyWithoutOperationInput = {
+  create?: Prisma.XOR<Prisma.MentorIntakeAttemptCreateWithoutOperationInput, Prisma.MentorIntakeAttemptUncheckedCreateWithoutOperationInput> | Prisma.MentorIntakeAttemptCreateWithoutOperationInput[] | Prisma.MentorIntakeAttemptUncheckedCreateWithoutOperationInput[]
+  connectOrCreate?: Prisma.MentorIntakeAttemptCreateOrConnectWithoutOperationInput | Prisma.MentorIntakeAttemptCreateOrConnectWithoutOperationInput[]
+  createMany?: Prisma.MentorIntakeAttemptCreateManyOperationInputEnvelope
+  connect?: Prisma.MentorIntakeAttemptWhereUniqueInput | Prisma.MentorIntakeAttemptWhereUniqueInput[]
+}
+
+export type MentorIntakeAttemptUpdateManyWithoutOperationNestedInput = {
+  create?: Prisma.XOR<Prisma.MentorIntakeAttemptCreateWithoutOperationInput, Prisma.MentorIntakeAttemptUncheckedCreateWithoutOperationInput> | Prisma.MentorIntakeAttemptCreateWithoutOperationInput[] | Prisma.MentorIntakeAttemptUncheckedCreateWithoutOperationInput[]
+  connectOrCreate?: Prisma.MentorIntakeAttemptCreateOrConnectWithoutOperationInput | Prisma.MentorIntakeAttemptCreateOrConnectWithoutOperationInput[]
+  upsert?: Prisma.MentorIntakeAttemptUpsertWithWhereUniqueWithoutOperationInput | Prisma.MentorIntakeAttemptUpsertWithWhereUniqueWithoutOperationInput[]
+  createMany?: Prisma.MentorIntakeAttemptCreateManyOperationInputEnvelope
+  set?: Prisma.MentorIntakeAttemptWhereUniqueInput | Prisma.MentorIntakeAttemptWhereUniqueInput[]
+  disconnect?: Prisma.MentorIntakeAttemptWhereUniqueInput | Prisma.MentorIntakeAttemptWhereUniqueInput[]
+  delete?: Prisma.MentorIntakeAttemptWhereUniqueInput | Prisma.MentorIntakeAttemptWhereUniqueInput[]
+  connect?: Prisma.MentorIntakeAttemptWhereUniqueInput | Prisma.MentorIntakeAttemptWhereUniqueInput[]
+  update?: Prisma.MentorIntakeAttemptUpdateWithWhereUniqueWithoutOperationInput | Prisma.MentorIntakeAttemptUpdateWithWhereUniqueWithoutOperationInput[]
+  updateMany?: Prisma.MentorIntakeAttemptUpdateManyWithWhereWithoutOperationInput | Prisma.MentorIntakeAttemptUpdateManyWithWhereWithoutOperationInput[]
+  deleteMany?: Prisma.MentorIntakeAttemptScalarWhereInput | Prisma.MentorIntakeAttemptScalarWhereInput[]
+}
+
+export type MentorIntakeAttemptUncheckedUpdateManyWithoutOperationNestedInput = {
+  create?: Prisma.XOR<Prisma.MentorIntakeAttemptCreateWithoutOperationInput, Prisma.MentorIntakeAttemptUncheckedCreateWithoutOperationInput> | Prisma.MentorIntakeAttemptCreateWithoutOperationInput[] | Prisma.MentorIntakeAttemptUncheckedCreateWithoutOperationInput[]
+  connectOrCreate?: Prisma.MentorIntakeAttemptCreateOrConnectWithoutOperationInput | Prisma.MentorIntakeAttemptCreateOrConnectWithoutOperationInput[]
+  upsert?: Prisma.MentorIntakeAttemptUpsertWithWhereUniqueWithoutOperationInput | Prisma.MentorIntakeAttemptUpsertWithWhereUniqueWithoutOperationInput[]
+  createMany?: Prisma.MentorIntakeAttemptCreateManyOperationInputEnvelope
+  set?: Prisma.MentorIntakeAttemptWhereUniqueInput | Prisma.MentorIntakeAttemptWhereUniqueInput[]
+  disconnect?: Prisma.MentorIntakeAttemptWhereUniqueInput | Prisma.MentorIntakeAttemptWhereUniqueInput[]
+  delete?: Prisma.MentorIntakeAttemptWhereUniqueInput | Prisma.MentorIntakeAttemptWhereUniqueInput[]
+  connect?: Prisma.MentorIntakeAttemptWhereUniqueInput | Prisma.MentorIntakeAttemptWhereUniqueInput[]
+  update?: Prisma.MentorIntakeAttemptUpdateWithWhereUniqueWithoutOperationInput | Prisma.MentorIntakeAttemptUpdateWithWhereUniqueWithoutOperationInput[]
+  updateMany?: Prisma.MentorIntakeAttemptUpdateManyWithWhereWithoutOperationInput | Prisma.MentorIntakeAttemptUpdateManyWithWhereWithoutOperationInput[]
+  deleteMany?: Prisma.MentorIntakeAttemptScalarWhereInput | Prisma.MentorIntakeAttemptScalarWhereInput[]
+}
+
 export type MentorIntakeAttemptCreateWithoutUserInput = {
   id?: string
-  operation: string
   idempotencyKey: string
   payloadHash: string
   occurredAt?: Date | string
   counted?: boolean
   responseStatus: number
   responseData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
   sanction?: Prisma.MentorParticipationSanctionCreateNestedOneWithoutTriggerAttemptInput
+  operation: Prisma.MentorIntakeOperationCreateNestedOneWithoutAttemptsInput
 }
 
 export type MentorIntakeAttemptUncheckedCreateWithoutUserInput = {
   id?: string
-  operation: string
+  operationId: string
   idempotencyKey: string
   payloadHash: string
   occurredAt?: Date | string
   counted?: boolean
   responseStatus: number
   responseData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
   sanction?: Prisma.MentorParticipationSanctionUncheckedCreateNestedOneWithoutTriggerAttemptInput
 }
 
@@ -576,37 +668,43 @@ export type MentorIntakeAttemptScalarWhereInput = {
   NOT?: Prisma.MentorIntakeAttemptScalarWhereInput | Prisma.MentorIntakeAttemptScalarWhereInput[]
   id?: Prisma.UuidFilter<"MentorIntakeAttempt"> | string
   userId?: Prisma.UuidFilter<"MentorIntakeAttempt"> | string
-  operation?: Prisma.StringFilter<"MentorIntakeAttempt"> | string
+  operationId?: Prisma.UuidFilter<"MentorIntakeAttempt"> | string
   idempotencyKey?: Prisma.UuidFilter<"MentorIntakeAttempt"> | string
   payloadHash?: Prisma.StringFilter<"MentorIntakeAttempt"> | string
   occurredAt?: Prisma.DateTimeFilter<"MentorIntakeAttempt"> | Date | string
   counted?: Prisma.BoolFilter<"MentorIntakeAttempt"> | boolean
   responseStatus?: Prisma.IntFilter<"MentorIntakeAttempt"> | number
   responseData?: Prisma.JsonFilter<"MentorIntakeAttempt">
+  createdAt?: Prisma.DateTimeFilter<"MentorIntakeAttempt"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorIntakeAttempt"> | Date | string
 }
 
 export type MentorIntakeAttemptCreateWithoutSanctionInput = {
   id?: string
-  operation: string
   idempotencyKey: string
   payloadHash: string
   occurredAt?: Date | string
   counted?: boolean
   responseStatus: number
   responseData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMentorIntakeAttemptsInput
+  operation: Prisma.MentorIntakeOperationCreateNestedOneWithoutAttemptsInput
 }
 
 export type MentorIntakeAttemptUncheckedCreateWithoutSanctionInput = {
   id?: string
   userId: string
-  operation: string
+  operationId: string
   idempotencyKey: string
   payloadHash: string
   occurredAt?: Date | string
   counted?: boolean
   responseStatus: number
   responseData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorIntakeAttemptCreateOrConnectWithoutSanctionInput = {
@@ -627,72 +725,192 @@ export type MentorIntakeAttemptUpdateToOneWithWhereWithoutSanctionInput = {
 
 export type MentorIntakeAttemptUpdateWithoutSanctionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  operation?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
   responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMentorIntakeAttemptsNestedInput
+  operation?: Prisma.MentorIntakeOperationUpdateOneRequiredWithoutAttemptsNestedInput
 }
 
 export type MentorIntakeAttemptUncheckedUpdateWithoutSanctionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  operationId?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
   responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type MentorIntakeAttemptCreateManyUserInput = {
+export type MentorIntakeAttemptCreateWithoutOperationInput = {
   id?: string
-  operation: string
   idempotencyKey: string
   payloadHash: string
   occurredAt?: Date | string
   counted?: boolean
   responseStatus: number
   responseData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutMentorIntakeAttemptsInput
+  sanction?: Prisma.MentorParticipationSanctionCreateNestedOneWithoutTriggerAttemptInput
+}
+
+export type MentorIntakeAttemptUncheckedCreateWithoutOperationInput = {
+  id?: string
+  userId: string
+  idempotencyKey: string
+  payloadHash: string
+  occurredAt?: Date | string
+  counted?: boolean
+  responseStatus: number
+  responseData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sanction?: Prisma.MentorParticipationSanctionUncheckedCreateNestedOneWithoutTriggerAttemptInput
+}
+
+export type MentorIntakeAttemptCreateOrConnectWithoutOperationInput = {
+  where: Prisma.MentorIntakeAttemptWhereUniqueInput
+  create: Prisma.XOR<Prisma.MentorIntakeAttemptCreateWithoutOperationInput, Prisma.MentorIntakeAttemptUncheckedCreateWithoutOperationInput>
+}
+
+export type MentorIntakeAttemptCreateManyOperationInputEnvelope = {
+  data: Prisma.MentorIntakeAttemptCreateManyOperationInput | Prisma.MentorIntakeAttemptCreateManyOperationInput[]
+  skipDuplicates?: boolean
+}
+
+export type MentorIntakeAttemptUpsertWithWhereUniqueWithoutOperationInput = {
+  where: Prisma.MentorIntakeAttemptWhereUniqueInput
+  update: Prisma.XOR<Prisma.MentorIntakeAttemptUpdateWithoutOperationInput, Prisma.MentorIntakeAttemptUncheckedUpdateWithoutOperationInput>
+  create: Prisma.XOR<Prisma.MentorIntakeAttemptCreateWithoutOperationInput, Prisma.MentorIntakeAttemptUncheckedCreateWithoutOperationInput>
+}
+
+export type MentorIntakeAttemptUpdateWithWhereUniqueWithoutOperationInput = {
+  where: Prisma.MentorIntakeAttemptWhereUniqueInput
+  data: Prisma.XOR<Prisma.MentorIntakeAttemptUpdateWithoutOperationInput, Prisma.MentorIntakeAttemptUncheckedUpdateWithoutOperationInput>
+}
+
+export type MentorIntakeAttemptUpdateManyWithWhereWithoutOperationInput = {
+  where: Prisma.MentorIntakeAttemptScalarWhereInput
+  data: Prisma.XOR<Prisma.MentorIntakeAttemptUpdateManyMutationInput, Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutOperationInput>
+}
+
+export type MentorIntakeAttemptCreateManyUserInput = {
+  id?: string
+  operationId: string
+  idempotencyKey: string
+  payloadHash: string
+  occurredAt?: Date | string
+  counted?: boolean
+  responseStatus: number
+  responseData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorIntakeAttemptUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  operation?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
   responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sanction?: Prisma.MentorParticipationSanctionUpdateOneWithoutTriggerAttemptNestedInput
+  operation?: Prisma.MentorIntakeOperationUpdateOneRequiredWithoutAttemptsNestedInput
 }
 
 export type MentorIntakeAttemptUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  operationId?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
   responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sanction?: Prisma.MentorParticipationSanctionUncheckedUpdateOneWithoutTriggerAttemptNestedInput
 }
 
 export type MentorIntakeAttemptUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  operation?: Prisma.StringFieldUpdateOperationsInput | string
+  operationId?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
   responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MentorIntakeAttemptCreateManyOperationInput = {
+  id?: string
+  userId: string
+  idempotencyKey: string
+  payloadHash: string
+  occurredAt?: Date | string
+  counted?: boolean
+  responseStatus: number
+  responseData: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type MentorIntakeAttemptUpdateWithoutOperationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
+  occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
+  responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutMentorIntakeAttemptsNestedInput
+  sanction?: Prisma.MentorParticipationSanctionUpdateOneWithoutTriggerAttemptNestedInput
+}
+
+export type MentorIntakeAttemptUncheckedUpdateWithoutOperationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
+  occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
+  responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sanction?: Prisma.MentorParticipationSanctionUncheckedUpdateOneWithoutTriggerAttemptNestedInput
+}
+
+export type MentorIntakeAttemptUncheckedUpdateManyWithoutOperationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  payloadHash?: Prisma.StringFieldUpdateOperationsInput | string
+  occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  counted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  responseStatus?: Prisma.IntFieldUpdateOperationsInput | number
+  responseData?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -700,65 +918,79 @@ export type MentorIntakeAttemptUncheckedUpdateManyWithoutUserInput = {
 export type MentorIntakeAttemptSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  operation?: boolean
+  operationId?: boolean
   idempotencyKey?: boolean
   payloadHash?: boolean
   occurredAt?: boolean
   counted?: boolean
   responseStatus?: boolean
   responseData?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   sanction?: boolean | Prisma.MentorIntakeAttempt$sanctionArgs<ExtArgs>
+  operation?: boolean | Prisma.MentorIntakeOperationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorIntakeAttempt"]>
 
 export type MentorIntakeAttemptSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  operation?: boolean
+  operationId?: boolean
   idempotencyKey?: boolean
   payloadHash?: boolean
   occurredAt?: boolean
   counted?: boolean
   responseStatus?: boolean
   responseData?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  operation?: boolean | Prisma.MentorIntakeOperationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorIntakeAttempt"]>
 
 export type MentorIntakeAttemptSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  operation?: boolean
+  operationId?: boolean
   idempotencyKey?: boolean
   payloadHash?: boolean
   occurredAt?: boolean
   counted?: boolean
   responseStatus?: boolean
   responseData?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  operation?: boolean | Prisma.MentorIntakeOperationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorIntakeAttempt"]>
 
 export type MentorIntakeAttemptSelectScalar = {
   id?: boolean
   userId?: boolean
-  operation?: boolean
+  operationId?: boolean
   idempotencyKey?: boolean
   payloadHash?: boolean
   occurredAt?: boolean
   counted?: boolean
   responseStatus?: boolean
   responseData?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type MentorIntakeAttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "operation" | "idempotencyKey" | "payloadHash" | "occurredAt" | "counted" | "responseStatus" | "responseData", ExtArgs["result"]["mentorIntakeAttempt"]>
+export type MentorIntakeAttemptOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "operationId" | "idempotencyKey" | "payloadHash" | "occurredAt" | "counted" | "responseStatus" | "responseData" | "createdAt" | "updatedAt", ExtArgs["result"]["mentorIntakeAttempt"]>
 export type MentorIntakeAttemptInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   sanction?: boolean | Prisma.MentorIntakeAttempt$sanctionArgs<ExtArgs>
+  operation?: boolean | Prisma.MentorIntakeOperationDefaultArgs<ExtArgs>
 }
 export type MentorIntakeAttemptIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  operation?: boolean | Prisma.MentorIntakeOperationDefaultArgs<ExtArgs>
 }
 export type MentorIntakeAttemptIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  operation?: boolean | Prisma.MentorIntakeOperationDefaultArgs<ExtArgs>
 }
 
 export type $MentorIntakeAttemptPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -766,17 +998,20 @@ export type $MentorIntakeAttemptPayload<ExtArgs extends runtime.Types.Extensions
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
     sanction: Prisma.$MentorParticipationSanctionPayload<ExtArgs> | null
+    operation: Prisma.$MentorIntakeOperationPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
-    operation: string
+    operationId: string
     idempotencyKey: string
     payloadHash: string
     occurredAt: Date
     counted: boolean
     responseStatus: number
     responseData: runtime.JsonValue
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["mentorIntakeAttempt"]>
   composites: {}
 }
@@ -1173,6 +1408,7 @@ export interface Prisma__MentorIntakeAttemptClient<T, Null = never, ExtArgs exte
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   sanction<T extends Prisma.MentorIntakeAttempt$sanctionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MentorIntakeAttempt$sanctionArgs<ExtArgs>>): Prisma.Prisma__MentorParticipationSanctionClient<runtime.Types.Result.GetResult<Prisma.$MentorParticipationSanctionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  operation<T extends Prisma.MentorIntakeOperationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MentorIntakeOperationDefaultArgs<ExtArgs>>): Prisma.Prisma__MentorIntakeOperationClient<runtime.Types.Result.GetResult<Prisma.$MentorIntakeOperationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1204,13 +1440,15 @@ export interface Prisma__MentorIntakeAttemptClient<T, Null = never, ExtArgs exte
 export interface MentorIntakeAttemptFieldRefs {
   readonly id: Prisma.FieldRef<"MentorIntakeAttempt", 'String'>
   readonly userId: Prisma.FieldRef<"MentorIntakeAttempt", 'String'>
-  readonly operation: Prisma.FieldRef<"MentorIntakeAttempt", 'String'>
+  readonly operationId: Prisma.FieldRef<"MentorIntakeAttempt", 'String'>
   readonly idempotencyKey: Prisma.FieldRef<"MentorIntakeAttempt", 'String'>
   readonly payloadHash: Prisma.FieldRef<"MentorIntakeAttempt", 'String'>
   readonly occurredAt: Prisma.FieldRef<"MentorIntakeAttempt", 'DateTime'>
   readonly counted: Prisma.FieldRef<"MentorIntakeAttempt", 'Boolean'>
   readonly responseStatus: Prisma.FieldRef<"MentorIntakeAttempt", 'Int'>
   readonly responseData: Prisma.FieldRef<"MentorIntakeAttempt", 'Json'>
+  readonly createdAt: Prisma.FieldRef<"MentorIntakeAttempt", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"MentorIntakeAttempt", 'DateTime'>
 }
 
 

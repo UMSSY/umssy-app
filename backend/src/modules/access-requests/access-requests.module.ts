@@ -1,3 +1,4 @@
+import { ApprovedAccountActivationRepository } from './repositories/approved-account-activation.repository.js';
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module.js';
 import { FilesModule } from '../files/files.module.js';
@@ -23,6 +24,7 @@ import { MAIL_SENDER } from './mail/mail-sender.js';
     RejectionNotificationService,
     { provide: MAIL_SENDER, useClass: InstitutionalMailSender },
     ApprovedAccountActivationService,
+    ApprovedAccountActivationRepository,
   ],
   exports: [AccessRequestsService],
 })

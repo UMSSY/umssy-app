@@ -19,7 +19,7 @@ import {
   type CreateMentorParticipationDto,
 } from '../requests/create-mentor-participation.schema.js';
 import { MentorParticipationService } from '../services/mentor-participation.service.js';
-import { requireMentorIdempotencyKey } from '../repositories/mentor-intake-policy.js';
+import { requireMentorIdempotencyKey } from '../utils/mentor-idempotency-key.js';
 
 @Controller('mentor-participation/requests')
 @UseGuards(JwtAuthGuard)

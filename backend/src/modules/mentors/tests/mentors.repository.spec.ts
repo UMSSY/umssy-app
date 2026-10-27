@@ -3,27 +3,45 @@ import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 
-vi.mock('../repositories/mentor-offers.queries.js', () => ({
+vi.mock('../services/mentor-offer-allocation.service.js', () => ({
   reconcileMentorOffers: vi.fn(),
 }));
 
 describe('MentorsRepository', () => {
   it('distingue un exmentor de un titulado nuevo y devuelve solo sus preferencias', async () => {
-    const roles = vi.fn().mockResolvedValueOnce([{ deletedAt: new Date(), startAt: new Date(0) }]).mockResolvedValueOnce([]);
-    const areas = vi.fn().mockResolvedValue([{ technicalArea: { id: 'area', name: 'Backend' } }]);
-    const orientations = vi.fn().mockResolvedValue([{ orientationType: { id: 'orientation', name: 'Empleo' } }]);
+    const roles = vi
+      .fn()
+      .mockResolvedValueOnce([{ deletedAt: new Date(), startAt: new Date(0) }])
+      .mockResolvedValueOnce([]);
+    const areas = vi
+      .fn()
+      .mockResolvedValue([{ technicalArea: { id: 'area', name: 'Backend' } }]);
+    const orientations = vi
+      .fn()
+      .mockResolvedValue([
+        { orientationType: { id: 'orientation', name: 'Empleo' } },
+      ]);
     const repository = new MentorsRepository({
       userRole: { findMany: roles },
       mentorTechnicalArea: { findMany: areas },
       mentorOrientationType: { findMany: orientations },
     } as unknown as PrismaService);
     expect(await repository.findMyParticipation('self')).toEqual({
-      status: 'DEACTIVATED', areas: [{ id: 'area', name: 'Backend' }],
+      status: 'DEACTIVATED',
+      areas: [{ id: 'area', name: 'Backend' }],
       orientations: [{ id: 'orientation', name: 'Empleo' }],
     });
-    expect(await repository.findMyParticipation('new')).toMatchObject({ status: 'NEVER' });
-    expect(roles).toHaveBeenCalledWith(expect.objectContaining({ where: { userId: 'self', role: { name: MENTOR_ROLE_NAME } } }));
-    expect(areas).toHaveBeenCalledWith(expect.objectContaining({ where: { mentorId: 'self' } }));
+    expect(await repository.findMyParticipation('new')).toMatchObject({
+      status: 'NEVER',
+    });
+    expect(roles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId: 'self', role: { name: MENTOR_ROLE_NAME } },
+      }),
+    );
+    expect(areas).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { mentorId: 'self' } }),
+    );
   });
   it('no consulta metadatos de fotos si el directorio está vacío', async () => {
     const findMany = vi.fn().mockResolvedValue([]);

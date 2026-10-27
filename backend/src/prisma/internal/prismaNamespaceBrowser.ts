@@ -107,7 +107,12 @@ export const ModelName = {
   MentorMailOutbox: 'MentorMailOutbox',
   AuditAction: 'AuditAction',
   AuditEvent: 'AuditEvent',
-  DocumentValidation: 'DocumentValidation'
+  DocumentValidation: 'DocumentValidation',
+  MentorRequestStatus: 'MentorRequestStatus',
+  MentorOfferStatus: 'MentorOfferStatus',
+  MentorMailStatus: 'MentorMailStatus',
+  MentorIntakeOperation: 'MentorIntakeOperation',
+  MentorMailKind: 'MentorMailKind'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -692,11 +697,12 @@ export type AccessRequestScalarFieldEnum = (typeof AccessRequestScalarFieldEnum)
 export const MentorParticipationRequestScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  status: 'status',
+  statusId: 'statusId',
   queuedAt: 'queuedAt',
   createdAt: 'createdAt',
   technicalAreaIds: 'technicalAreaIds',
-  orientationTypeIds: 'orientationTypeIds'
+  orientationTypeIds: 'orientationTypeIds',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorParticipationRequestScalarFieldEnum = (typeof MentorParticipationRequestScalarFieldEnum)[keyof typeof MentorParticipationRequestScalarFieldEnum]
@@ -705,11 +711,13 @@ export type MentorParticipationRequestScalarFieldEnum = (typeof MentorParticipat
 export const MentorSlotOfferScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  status: 'status',
+  statusId: 'statusId',
   offeredAt: 'offeredAt',
   expiresAt: 'expiresAt',
   requestId: 'requestId',
-  confirmedAt: 'confirmedAt'
+  confirmedAt: 'confirmedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorSlotOfferScalarFieldEnum = (typeof MentorSlotOfferScalarFieldEnum)[keyof typeof MentorSlotOfferScalarFieldEnum]
@@ -796,7 +804,9 @@ export const MentorParticipationAttemptLimitScalarFieldEnum = {
   userId: 'userId',
   attemptCount: 'attemptCount',
   windowStartedAt: 'windowStartedAt',
-  blockedUntil: 'blockedUntil'
+  blockedUntil: 'blockedUntil',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorParticipationAttemptLimitScalarFieldEnum = (typeof MentorParticipationAttemptLimitScalarFieldEnum)[keyof typeof MentorParticipationAttemptLimitScalarFieldEnum]
@@ -805,13 +815,15 @@ export type MentorParticipationAttemptLimitScalarFieldEnum = (typeof MentorParti
 export const MentorIntakeAttemptScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  operation: 'operation',
+  operationId: 'operationId',
   idempotencyKey: 'idempotencyKey',
   payloadHash: 'payloadHash',
   occurredAt: 'occurredAt',
   counted: 'counted',
   responseStatus: 'responseStatus',
-  responseData: 'responseData'
+  responseData: 'responseData',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorIntakeAttemptScalarFieldEnum = (typeof MentorIntakeAttemptScalarFieldEnum)[keyof typeof MentorIntakeAttemptScalarFieldEnum]
@@ -822,7 +834,9 @@ export const MentorParticipationSanctionScalarFieldEnum = {
   userId: 'userId',
   triggerAttemptId: 'triggerAttemptId',
   startedAt: 'startedAt',
-  endsAt: 'endsAt'
+  endsAt: 'endsAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorParticipationSanctionScalarFieldEnum = (typeof MentorParticipationSanctionScalarFieldEnum)[keyof typeof MentorParticipationSanctionScalarFieldEnum]
@@ -831,17 +845,18 @@ export type MentorParticipationSanctionScalarFieldEnum = (typeof MentorParticipa
 export const MentorMailOutboxScalarFieldEnum = {
   id: 'id',
   eventKey: 'eventKey',
-  kind: 'kind',
+  kindId: 'kindId',
   userId: 'userId',
   recipient: 'recipient',
   payload: 'payload',
-  status: 'status',
+  statusId: 'statusId',
   attempts: 'attempts',
   availableAt: 'availableAt',
   claimedAt: 'claimedAt',
   sentAt: 'sentAt',
   lastError: 'lastError',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorMailOutboxScalarFieldEnum = (typeof MentorMailOutboxScalarFieldEnum)[keyof typeof MentorMailOutboxScalarFieldEnum]
@@ -895,6 +910,61 @@ export const DocumentValidationScalarFieldEnum = {
 } as const
 
 export type DocumentValidationScalarFieldEnum = (typeof DocumentValidationScalarFieldEnum)[keyof typeof DocumentValidationScalarFieldEnum]
+
+
+export const MentorRequestStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorRequestStatusScalarFieldEnum = (typeof MentorRequestStatusScalarFieldEnum)[keyof typeof MentorRequestStatusScalarFieldEnum]
+
+
+export const MentorOfferStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorOfferStatusScalarFieldEnum = (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum]
+
+
+export const MentorMailStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorMailStatusScalarFieldEnum = (typeof MentorMailStatusScalarFieldEnum)[keyof typeof MentorMailStatusScalarFieldEnum]
+
+
+export const MentorIntakeOperationScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorIntakeOperationScalarFieldEnum = (typeof MentorIntakeOperationScalarFieldEnum)[keyof typeof MentorIntakeOperationScalarFieldEnum]
+
+
+export const MentorMailKindScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorMailKindScalarFieldEnum = (typeof MentorMailKindScalarFieldEnum)[keyof typeof MentorMailKindScalarFieldEnum]
 
 
 export const SortOrder = {

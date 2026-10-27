@@ -1,3 +1,13 @@
+import {
+  REQUEST_IDS,
+  MAIL_IDS,
+  KIND_IDS,
+} from './mentor-catalog-test-values.js';
+import { MentorsService } from '../services/mentors.service.js';
+import { MentorMapper } from '../mappers/mentor.mapper.js';
+import { MentorParticipationService } from '../services/mentor-participation.service.js';
+import { MentorMailOutboxRepository } from '../repositories/mentor-mail-outbox.repository.js';
+import { MentorExitService } from '../services/mentor-exit.service.js';
 // HU7_TEST_DATABASE_URL debe apuntar a PostgreSQL local. Cada ejecución crea y elimina su propio esquema.
 import {
   afterAll,
@@ -140,10 +150,10 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
         ARRAY[${areaId}::uuid], ARRAY[${orientationId}::uuid])`;
   }
   const offers = () => prisma.$queryRaw<Offer[]>`
-    SELECT id, user_id AS "userId", request_id AS "requestId", status,
+    SELECT id, user_id AS "userId", request_id AS "requestId", mentor_offer_status_title(status_id) AS status,
       offered_at AS "offeredAt", expires_at AS "expiresAt" FROM mentor_slot_offers ORDER BY offered_at, id`;
   async function expireCurrent() {
-    await prisma.$executeRaw`UPDATE mentor_slot_offers SET expires_at = clock_timestamp() WHERE status = 'OFFERED'`;
+    await prisma.$executeRaw`UPDATE mentor_slot_offers SET expires_at = clock_timestamp() WHERE status_id = mentor_offer_status('OFFERED')`;
   }
 
   beforeEach(async () => {
@@ -171,7 +181,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       records[0].expiresAt.getTime() - records[0].offeredAt.getTime(),
     ).toBe(24 * 3_600_000);
     expect(
-      await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${uuid('a000', 2)}::uuid`,
+      await prisma.$queryRaw`SELECT mentor_request_status_title(status_id) AS status FROM mentor_participation_requests WHERE id = ${uuid('a000', 2)}::uuid`,
     ).toEqual([{ status: 'PENDING' }]);
   });
 
@@ -182,8 +192,9 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       where: { id: uuid('8000', 3) },
       data: { isActive: false },
     });
-    const repository = new MentorsRepository(
-      prisma as unknown as PrismaService,
+    const repository = new MentorsService(
+      new MentorsRepository(prisma as unknown as PrismaService),
+      new MentorMapper(),
     );
     expect(await repository.capacity()).toMatchObject({
       capacity: 0,
@@ -200,12 +211,10 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     });
     expect(await offers()).toHaveLength(1);
     await expect(
-      repository.activate(
-        uuid('8000', 1),
-        mentorRoleId,
-        [areaId],
-        [orientationId],
-      ),
+      repository.activate(uuid('8000', 1), {
+        technicalAreaIds: [areaId],
+        orientationTypeIds: [orientationId],
+      }),
     ).rejects.toMatchObject({ statusCode: 409 });
   });
 
@@ -215,7 +224,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       send: ReturnType<typeof vi.fn>;
     }) =>
       new MentorMailOutboxService(
-        prisma as unknown as PrismaService,
+        new MentorMailOutboxRepository(prisma as unknown as PrismaService),
         mail as unknown as MailService,
       );
     const smtp = () => ({
@@ -238,7 +247,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       );
       expect(await prisma.mentorMailOutbox.count()).toBe(1);
       expect(await prisma.mentorMailOutbox.findFirstOrThrow()).toMatchObject({
-        status: 'SENT',
+        statusId: MAIL_IDS.SENT,
         attempts: 1,
       });
     });
@@ -249,7 +258,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       mail.send.mockRejectedValueOnce({ code: 'ECONNECTION' });
       await outbox(mail).dispatch();
       expect(await prisma.mentorMailOutbox.findFirstOrThrow()).toMatchObject({
-        status: 'PENDING',
+        statusId: MAIL_IDS.PENDING,
         attempts: 1,
       });
       await prisma.mentorMailOutbox.updateMany({
@@ -261,7 +270,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
         mail.send.mock.calls[1][0].messageId,
       );
       expect(await prisma.mentorMailOutbox.findFirstOrThrow()).toMatchObject({
-        status: 'SENT',
+        statusId: MAIL_IDS.SENT,
         attempts: 2,
       });
     });
@@ -274,7 +283,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       await outbox(mail).dispatch();
       expect(mail.send).toHaveBeenCalledTimes(1);
       expect(await prisma.mentorMailOutbox.findFirstOrThrow()).toMatchObject({
-        status: 'UNCERTAIN',
+        statusId: MAIL_IDS.UNCERTAIN,
       });
     });
 
@@ -283,16 +292,16 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       const mail = smtp();
       await outbox({ ...mail, isSmtpConfigured: () => false }).dispatch();
       expect(await prisma.mentorMailOutbox.findFirstOrThrow()).toMatchObject({
-        status: 'PENDING',
+        statusId: MAIL_IDS.PENDING,
         attempts: 0,
       });
       await prisma.mentorMailOutbox.updateMany({
-        data: { status: 'SENDING', claimedAt: new Date(0) },
+        data: { statusId: MAIL_IDS.SENDING, claimedAt: new Date(0) },
       });
       await outbox(mail).dispatch();
       expect(mail.send).not.toHaveBeenCalled();
       expect(await prisma.mentorMailOutbox.findFirstOrThrow()).toMatchObject({
-        status: 'UNCERTAIN',
+        statusId: MAIL_IDS.UNCERTAIN,
         lastError: 'DISPATCH_INTERRUPTED',
       });
     });
@@ -304,7 +313,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       await outbox(mail).dispatch();
       expect(mail.send).not.toHaveBeenCalled();
       expect(await prisma.mentorMailOutbox.findFirstOrThrow()).toMatchObject({
-        status: 'SUPERSEDED',
+        statusId: MAIL_IDS.SUPERSEDED,
         sentAt: null,
       });
     });
@@ -324,7 +333,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
           await prisma.mentorMailOutbox.create({
             data: {
               eventKey: 'smtp-sanction',
-              kind: 'SANCTION',
+              kindId: KIND_IDS.SANCTION,
               userId: uuid('8000', 1),
               recipient: 'hu7.1@example.test',
               payload: {
@@ -335,13 +344,15 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
             },
           });
           const sender = new MentorMailOutboxService(
-            prisma as unknown as PrismaService,
+            new MentorMailOutboxRepository(prisma as unknown as PrismaService),
             new MailService(new MailTemplateService()),
           );
           await sender.dispatch();
           await sender.dispatch();
           expect(
-            await prisma.mentorMailOutbox.count({ where: { status: 'SENT' } }),
+            await prisma.mentorMailOutbox.count({
+              where: { statusId: MAIL_IDS.SENT },
+            }),
           ).toBe(2);
         } finally {
           vi.unstubAllEnvs();
@@ -351,8 +362,8 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
   });
 
   it('expone la oferta y el correo propios y conserva el estado vencido para el frontend', async () => {
-    const participation = new MentorParticipationRepository(
-      prisma as unknown as PrismaService,
+    const participation = new MentorParticipationService(
+      new MentorParticipationRepository(prisma as unknown as PrismaService),
     );
     const current = await participation.findMyRequest(uuid('8000', 2));
     expect(current).toMatchObject({
@@ -375,21 +386,20 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
   });
 
   it('una solicitud cerrada no oculta una activación directa posterior', async () => {
-    const participation = new MentorParticipationRepository(
-      prisma as unknown as PrismaService,
+    const participation = new MentorParticipationService(
+      new MentorParticipationRepository(prisma as unknown as PrismaService),
     );
     await prisma.mentorParticipationRequest.updateMany({
-      data: { status: 'CANCELLED' },
+      data: { statusId: REQUEST_IDS.CANCELLED },
     });
-    const repository = new MentorsRepository(
-      prisma as unknown as PrismaService,
+    const repository = new MentorsService(
+      new MentorsRepository(prisma as unknown as PrismaService),
+      new MentorMapper(),
     );
-    await repository.activate(
-      uuid('8000', 1),
-      mentorRoleId,
-      [areaId],
-      [orientationId],
-    );
+    await repository.activate(uuid('8000', 1), {
+      technicalAreaIds: [areaId],
+      orientationTypeIds: [orientationId],
+    });
     expect(await participation.findMyRequest(uuid('8000', 1))).toBeNull();
     expect(await participation.findMyRequest(uuid('8000', 2))).toMatchObject({
       status: 'CANCELLED',
@@ -416,8 +426,9 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     ).toBe(1);
     expect(await prisma.mentorTechnicalArea.count()).toBe(1);
     expect(
-      await new MentorsRepository(
-        prisma as unknown as PrismaService,
+      await new MentorsService(
+        new MentorsRepository(prisma as unknown as PrismaService),
+        new MentorMapper(),
       ).capacity(),
     ).toMatchObject({ activeMentors: 1, reservedOffers: 0, available: 0 });
   });
@@ -432,7 +443,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       service.confirm(original.userId, original.id),
     ).rejects.toMatchObject({ statusCode: 409 });
     expect(
-      await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${original.requestId}::uuid`,
+      await prisma.$queryRaw`SELECT mentor_request_status_title(status_id) AS status FROM mentor_participation_requests WHERE id = ${original.requestId}::uuid`,
     ).toEqual([{ status: 'EXPIRED' }]);
     await enqueue(4, 2, new Date().toISOString());
     expect(
@@ -451,16 +462,15 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
   });
 
   it('el alta directa no adelanta a quienes esperan en FIFO', async () => {
-    const repository = new MentorsRepository(
-      prisma as unknown as PrismaService,
+    const repository = new MentorsService(
+      new MentorsRepository(prisma as unknown as PrismaService),
+      new MentorMapper(),
     );
     await expect(
-      repository.activate(
-        uuid('8000', 3),
-        mentorRoleId,
-        [areaId],
-        [orientationId],
-      ),
+      repository.activate(uuid('8000', 3), {
+        technicalAreaIds: [areaId],
+        orientationTypeIds: [orientationId],
+      }),
     ).rejects.toMatchObject({ statusCode: 409 });
     expect(
       await prisma.userRole.count({ where: { roleId: mentorRoleId } }),
@@ -486,7 +496,9 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
   });
 
   const exits = () =>
-    new MentorExitRepository(prisma as unknown as PrismaService);
+    new MentorExitService(
+      new MentorExitRepository(prisma as unknown as PrismaService),
+    );
   async function activateFirst() {
     await service.reconcile();
     const [offer] = await offers();
@@ -532,7 +544,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
         await prisma.user.findUnique({ where: { id: offer.userId } }),
       ).toMatchObject({ isAvailableForMentoring: true });
       expect(
-        await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`,
+        await prisma.$queryRaw`SELECT mentor_request_status_title(status_id) AS status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`,
       ).toEqual([{ status: 'ACTIVE' }]);
       expect(await offers()).toHaveLength(1);
     },
@@ -571,8 +583,9 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     expect(await prisma.mentorTechnicalArea.count()).toBe(1);
     expect(await prisma.mentorOrientationType.count()).toBe(1);
     expect(
-      await new MentorsRepository(
-        prisma as unknown as PrismaService,
+      await new MentorsService(
+        new MentorsRepository(prisma as unknown as PrismaService),
+        new MentorMapper(),
       ).findMyParticipation(offer.userId),
     ).toMatchObject({
       status: 'DEACTIVATED',
@@ -580,7 +593,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       orientations: [{ id: orientationId }],
     });
     expect(
-      await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`,
+      await prisma.$queryRaw`SELECT mentor_request_status_title(status_id) AS status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`,
     ).toEqual([{ status: 'ENDED' }]);
     expect(
       (await offers())
@@ -588,8 +601,9 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
         .map(({ requestId }) => requestId),
     ).toEqual([uuid('a000', 2)]);
     expect(
-      await new MentorsRepository(
-        prisma as unknown as PrismaService,
+      await new MentorsService(
+        new MentorsRepository(prisma as unknown as PrismaService),
+        new MentorMapper(),
       ).capacity(),
     ).toMatchObject({ activeMentors: 0, reservedOffers: 1, available: 0 });
     await expect(service.confirm(offer.userId, offer.id)).rejects.toMatchObject(
@@ -601,16 +615,15 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     const original = await activateFirst();
     await exits().leave(original.userId);
     await enqueue(4, 2, new Date().toISOString());
-    const repository = new MentorsRepository(
-      prisma as unknown as PrismaService,
+    const repository = new MentorsService(
+      new MentorsRepository(prisma as unknown as PrismaService),
+      new MentorMapper(),
     );
     await expect(
-      repository.activate(
-        original.userId,
-        mentorRoleId,
-        [areaId],
-        [orientationId],
-      ),
+      repository.activate(original.userId, {
+        technicalAreaIds: [areaId],
+        orientationTypeIds: [orientationId],
+      }),
     ).rejects.toMatchObject({ statusCode: 409 });
     await expireCurrent();
     await service.reconcile();
@@ -627,12 +640,10 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       (await offers()).filter(({ status }) => status === 'OFFERED'),
     ).toHaveLength(0);
     await expect(
-      repository.activate(
-        original.userId,
-        mentorRoleId,
-        [areaId],
-        [orientationId],
-      ),
+      repository.activate(original.userId, {
+        technicalAreaIds: [areaId],
+        orientationTypeIds: [orientationId],
+      }),
     ).rejects.toMatchObject({ statusCode: 403 });
     await prisma.user.update({
       where: { id: original.userId },
@@ -660,8 +671,9 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
 
   it('la disponibilidad reversible conserva rol, participación y cupo', async () => {
     const offer = await activateFirst();
-    const repository = new MentorsRepository(
-      prisma as unknown as PrismaService,
+    const repository = new MentorsService(
+      new MentorsRepository(prisma as unknown as PrismaService),
+      new MentorMapper(),
     );
     await repository.updateAvailability(offer.userId, false);
     expect(await repository.capacity()).toMatchObject({
@@ -670,7 +682,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
       available: 0,
     });
     expect(
-      await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`,
+      await prisma.$queryRaw`SELECT mentor_request_status_title(status_id) AS status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`,
     ).toEqual([{ status: 'ACTIVE' }]);
     await repository.updateAvailability(offer.userId, true);
     expect(
@@ -702,7 +714,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     ).toMatchObject({ isAvailableForMentoring: true });
     expect(await prisma.mentorTechnicalArea.count()).toBe(1);
     expect(
-      await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`,
+      await prisma.$queryRaw`SELECT mentor_request_status_title(status_id) AS status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`,
     ).toEqual([{ status: 'ACTIVE' }]);
     expect(await offers()).toHaveLength(1);
   });

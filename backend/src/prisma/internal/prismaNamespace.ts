@@ -453,7 +453,12 @@ export const ModelName = {
   MentorMailOutbox: 'MentorMailOutbox',
   AuditAction: 'AuditAction',
   AuditEvent: 'AuditEvent',
-  DocumentValidation: 'DocumentValidation'
+  DocumentValidation: 'DocumentValidation',
+  MentorRequestStatus: 'MentorRequestStatus',
+  MentorOfferStatus: 'MentorOfferStatus',
+  MentorMailStatus: 'MentorMailStatus',
+  MentorIntakeOperation: 'MentorIntakeOperation',
+  MentorMailKind: 'MentorMailKind'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -469,7 +474,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence" | "mentorParticipationAttemptLimit" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorMailOutbox" | "auditAction" | "auditEvent" | "documentValidation"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence" | "mentorParticipationAttemptLimit" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorMailOutbox" | "auditAction" | "auditEvent" | "documentValidation" | "mentorRequestStatus" | "mentorOfferStatus" | "mentorMailStatus" | "mentorIntakeOperation" | "mentorMailKind"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -4691,6 +4696,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MentorRequestStatus: {
+      payload: Prisma.$MentorRequestStatusPayload<ExtArgs>
+      fields: Prisma.MentorRequestStatusFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorRequestStatusFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorRequestStatusPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorRequestStatusFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorRequestStatusPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorRequestStatusFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorRequestStatusPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorRequestStatusFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorRequestStatusPayload>
+        }
+        findMany: {
+          args: Prisma.MentorRequestStatusFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorRequestStatusPayload>[]
+        }
+        create: {
+          args: Prisma.MentorRequestStatusCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorRequestStatusPayload>
+        }
+        createMany: {
+          args: Prisma.MentorRequestStatusCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorRequestStatusCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorRequestStatusPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorRequestStatusDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorRequestStatusPayload>
+        }
+        update: {
+          args: Prisma.MentorRequestStatusUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorRequestStatusPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorRequestStatusDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorRequestStatusUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorRequestStatusUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorRequestStatusPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorRequestStatusUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorRequestStatusPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorRequestStatusAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorRequestStatus>
+        }
+        groupBy: {
+          args: Prisma.MentorRequestStatusGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorRequestStatusGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorRequestStatusCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorRequestStatusCountAggregateOutputType> | number
+        }
+      }
+    }
+    MentorOfferStatus: {
+      payload: Prisma.$MentorOfferStatusPayload<ExtArgs>
+      fields: Prisma.MentorOfferStatusFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorOfferStatusFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorOfferStatusFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorOfferStatusFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorOfferStatusFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        findMany: {
+          args: Prisma.MentorOfferStatusFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>[]
+        }
+        create: {
+          args: Prisma.MentorOfferStatusCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        createMany: {
+          args: Prisma.MentorOfferStatusCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorOfferStatusCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorOfferStatusDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        update: {
+          args: Prisma.MentorOfferStatusUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorOfferStatusDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorOfferStatusUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorOfferStatusUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorOfferStatusUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorOfferStatusPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorOfferStatusAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorOfferStatus>
+        }
+        groupBy: {
+          args: Prisma.MentorOfferStatusGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorOfferStatusGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorOfferStatusCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorOfferStatusCountAggregateOutputType> | number
+        }
+      }
+    }
+    MentorMailStatus: {
+      payload: Prisma.$MentorMailStatusPayload<ExtArgs>
+      fields: Prisma.MentorMailStatusFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorMailStatusFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailStatusPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorMailStatusFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailStatusPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorMailStatusFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailStatusPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorMailStatusFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailStatusPayload>
+        }
+        findMany: {
+          args: Prisma.MentorMailStatusFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailStatusPayload>[]
+        }
+        create: {
+          args: Prisma.MentorMailStatusCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailStatusPayload>
+        }
+        createMany: {
+          args: Prisma.MentorMailStatusCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorMailStatusCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailStatusPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorMailStatusDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailStatusPayload>
+        }
+        update: {
+          args: Prisma.MentorMailStatusUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailStatusPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorMailStatusDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorMailStatusUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorMailStatusUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailStatusPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorMailStatusUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailStatusPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorMailStatusAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorMailStatus>
+        }
+        groupBy: {
+          args: Prisma.MentorMailStatusGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorMailStatusGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorMailStatusCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorMailStatusCountAggregateOutputType> | number
+        }
+      }
+    }
+    MentorIntakeOperation: {
+      payload: Prisma.$MentorIntakeOperationPayload<ExtArgs>
+      fields: Prisma.MentorIntakeOperationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorIntakeOperationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorIntakeOperationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorIntakeOperationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorIntakeOperationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        findMany: {
+          args: Prisma.MentorIntakeOperationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>[]
+        }
+        create: {
+          args: Prisma.MentorIntakeOperationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        createMany: {
+          args: Prisma.MentorIntakeOperationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorIntakeOperationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorIntakeOperationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        update: {
+          args: Prisma.MentorIntakeOperationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorIntakeOperationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorIntakeOperationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorIntakeOperationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorIntakeOperationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorIntakeOperationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorIntakeOperation>
+        }
+        groupBy: {
+          args: Prisma.MentorIntakeOperationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorIntakeOperationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorIntakeOperationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorIntakeOperationCountAggregateOutputType> | number
+        }
+      }
+    }
+    MentorMailKind: {
+      payload: Prisma.$MentorMailKindPayload<ExtArgs>
+      fields: Prisma.MentorMailKindFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorMailKindFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailKindPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorMailKindFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailKindPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorMailKindFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailKindPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorMailKindFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailKindPayload>
+        }
+        findMany: {
+          args: Prisma.MentorMailKindFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailKindPayload>[]
+        }
+        create: {
+          args: Prisma.MentorMailKindCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailKindPayload>
+        }
+        createMany: {
+          args: Prisma.MentorMailKindCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorMailKindCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailKindPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorMailKindDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailKindPayload>
+        }
+        update: {
+          args: Prisma.MentorMailKindUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailKindPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorMailKindDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorMailKindUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorMailKindUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailKindPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorMailKindUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorMailKindPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorMailKindAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorMailKind>
+        }
+        groupBy: {
+          args: Prisma.MentorMailKindGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorMailKindGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorMailKindCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorMailKindCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -5296,11 +5671,12 @@ export type AccessRequestScalarFieldEnum = (typeof AccessRequestScalarFieldEnum)
 export const MentorParticipationRequestScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  status: 'status',
+  statusId: 'statusId',
   queuedAt: 'queuedAt',
   createdAt: 'createdAt',
   technicalAreaIds: 'technicalAreaIds',
-  orientationTypeIds: 'orientationTypeIds'
+  orientationTypeIds: 'orientationTypeIds',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorParticipationRequestScalarFieldEnum = (typeof MentorParticipationRequestScalarFieldEnum)[keyof typeof MentorParticipationRequestScalarFieldEnum]
@@ -5309,11 +5685,13 @@ export type MentorParticipationRequestScalarFieldEnum = (typeof MentorParticipat
 export const MentorSlotOfferScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  status: 'status',
+  statusId: 'statusId',
   offeredAt: 'offeredAt',
   expiresAt: 'expiresAt',
   requestId: 'requestId',
-  confirmedAt: 'confirmedAt'
+  confirmedAt: 'confirmedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorSlotOfferScalarFieldEnum = (typeof MentorSlotOfferScalarFieldEnum)[keyof typeof MentorSlotOfferScalarFieldEnum]
@@ -5400,7 +5778,9 @@ export const MentorParticipationAttemptLimitScalarFieldEnum = {
   userId: 'userId',
   attemptCount: 'attemptCount',
   windowStartedAt: 'windowStartedAt',
-  blockedUntil: 'blockedUntil'
+  blockedUntil: 'blockedUntil',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorParticipationAttemptLimitScalarFieldEnum = (typeof MentorParticipationAttemptLimitScalarFieldEnum)[keyof typeof MentorParticipationAttemptLimitScalarFieldEnum]
@@ -5409,13 +5789,15 @@ export type MentorParticipationAttemptLimitScalarFieldEnum = (typeof MentorParti
 export const MentorIntakeAttemptScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  operation: 'operation',
+  operationId: 'operationId',
   idempotencyKey: 'idempotencyKey',
   payloadHash: 'payloadHash',
   occurredAt: 'occurredAt',
   counted: 'counted',
   responseStatus: 'responseStatus',
-  responseData: 'responseData'
+  responseData: 'responseData',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorIntakeAttemptScalarFieldEnum = (typeof MentorIntakeAttemptScalarFieldEnum)[keyof typeof MentorIntakeAttemptScalarFieldEnum]
@@ -5426,7 +5808,9 @@ export const MentorParticipationSanctionScalarFieldEnum = {
   userId: 'userId',
   triggerAttemptId: 'triggerAttemptId',
   startedAt: 'startedAt',
-  endsAt: 'endsAt'
+  endsAt: 'endsAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorParticipationSanctionScalarFieldEnum = (typeof MentorParticipationSanctionScalarFieldEnum)[keyof typeof MentorParticipationSanctionScalarFieldEnum]
@@ -5435,17 +5819,18 @@ export type MentorParticipationSanctionScalarFieldEnum = (typeof MentorParticipa
 export const MentorMailOutboxScalarFieldEnum = {
   id: 'id',
   eventKey: 'eventKey',
-  kind: 'kind',
+  kindId: 'kindId',
   userId: 'userId',
   recipient: 'recipient',
   payload: 'payload',
-  status: 'status',
+  statusId: 'statusId',
   attempts: 'attempts',
   availableAt: 'availableAt',
   claimedAt: 'claimedAt',
   sentAt: 'sentAt',
   lastError: 'lastError',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type MentorMailOutboxScalarFieldEnum = (typeof MentorMailOutboxScalarFieldEnum)[keyof typeof MentorMailOutboxScalarFieldEnum]
@@ -5499,6 +5884,61 @@ export const DocumentValidationScalarFieldEnum = {
 } as const
 
 export type DocumentValidationScalarFieldEnum = (typeof DocumentValidationScalarFieldEnum)[keyof typeof DocumentValidationScalarFieldEnum]
+
+
+export const MentorRequestStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorRequestStatusScalarFieldEnum = (typeof MentorRequestStatusScalarFieldEnum)[keyof typeof MentorRequestStatusScalarFieldEnum]
+
+
+export const MentorOfferStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorOfferStatusScalarFieldEnum = (typeof MentorOfferStatusScalarFieldEnum)[keyof typeof MentorOfferStatusScalarFieldEnum]
+
+
+export const MentorMailStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorMailStatusScalarFieldEnum = (typeof MentorMailStatusScalarFieldEnum)[keyof typeof MentorMailStatusScalarFieldEnum]
+
+
+export const MentorIntakeOperationScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorIntakeOperationScalarFieldEnum = (typeof MentorIntakeOperationScalarFieldEnum)[keyof typeof MentorIntakeOperationScalarFieldEnum]
+
+
+export const MentorMailKindScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorMailKindScalarFieldEnum = (typeof MentorMailKindScalarFieldEnum)[keyof typeof MentorMailKindScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -5853,6 +6293,11 @@ export type GlobalOmitConfig = {
   auditAction?: Prisma.AuditActionOmit
   auditEvent?: Prisma.AuditEventOmit
   documentValidation?: Prisma.DocumentValidationOmit
+  mentorRequestStatus?: Prisma.MentorRequestStatusOmit
+  mentorOfferStatus?: Prisma.MentorOfferStatusOmit
+  mentorMailStatus?: Prisma.MentorMailStatusOmit
+  mentorIntakeOperation?: Prisma.MentorIntakeOperationOmit
+  mentorMailKind?: Prisma.MentorMailKindOmit
 }
 
 /* Types for Logging */

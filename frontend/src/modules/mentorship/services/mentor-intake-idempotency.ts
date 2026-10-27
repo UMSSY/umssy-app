@@ -1,61 +1,68 @@
 import { isApiError } from "@/shared/services/api-client";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
-
-type Preferences = { technicalAreaIds: string[]; orientationTypeIds: string[] };
-type SavedIntention = { subject: string; fingerprint: string; key: string };
-const memory = new Map<string, SavedIntention>();
+import { updateBusinessRecord } from "@/shared/services/storage/business-record-storage";
+import { readSessionStorage, removeSessionStorage } from "@/shared/services/storage/browser-session-storage";
+import type { MentorIntakePreferences } from "../types/mentor-intake-preferences.types";
+import type { MentorIntakeIntention } from "../types/mentor-intake-intention.types";
+import type { MentorIntakeOperation } from "../types/mentor-intake-operation.types";
+import type { LegacyMentorIntakeIntention } from "../types/legacy-mentor-intake-intention.types";
 
 function currentSubject(): string {
   try {
     const payload = getAccessToken()?.split(".")[1];
     if (!payload) return "anonymous";
-    const subject = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))).sub;
+    const subject: unknown = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))).sub;
     return typeof subject === "string" ? subject : "anonymous";
   } catch { return "anonymous"; }
 }
 
-/** Clear only after a confirmed lifecycle boundary or an explicit new intention. */
-export function clearMentorIntakeIntentions(operations: readonly ("activate" | "request")[] = ["activate", "request"]): void {
-  const subject = currentSubject();
-  for (const operation of operations) {
-    const name = `hu7:intake:${operation}`;
-    if (memory.get(name)?.subject === subject) memory.delete(name);
-    try {
-      const storage = typeof window === "undefined" ? null : window.sessionStorage;
-      if (JSON.parse(storage?.getItem(name) ?? "null")?.subject === subject) storage?.removeItem(name);
-    } catch { /* A storage failure must not turn a confirmed operation into failure. */ }
-  }
+function storageKey(operation: MentorIntakeOperation): string {
+  return `hu7:intake:${currentSubject()}:${operation}`;
 }
 
-export async function withMentorIntakeKey<T>(operation: "activate" | "request", preferences: Preferences, submit: (key: string) => Promise<T>): Promise<T> {
-  const name = `hu7:intake:${operation}`;
-  const subject = currentSubject();
-  const fingerprint = JSON.stringify({ technicalAreaIds: [...preferences.technicalAreaIds].sort(), orientationTypeIds: [...preferences.orientationTypeIds].sort() });
-  let storage: Storage | null = null;
-  let saved = memory.get(name);
+// Recupera intenciones anteriores al cambio a idb sin generar otra petición de negocio.
+function legacyIntention(operation: MentorIntakeOperation): MentorIntakeIntention | null {
   try {
-    storage = typeof window === "undefined" ? null : window.sessionStorage;
-    const value = storage?.getItem(name);
-    if (value) saved = JSON.parse(value);
-  } catch { /* Storage may be unavailable; retain the intention in memory. */ }
-  const key = saved?.subject === subject && saved.fingerprint === fingerprint ? saved.key : crypto.randomUUID();
-  const intention = { subject, fingerprint, key };
-  memory.set(name, intention);
-  try { storage?.setItem(name, JSON.stringify(intention)); } catch { /* Memory fallback above. */ }
+    const value: unknown = JSON.parse(readSessionStorage(`hu7:intake:${operation}`) ?? "null");
+    const saved = value as Partial<LegacyMentorIntakeIntention> | null;
+    return saved?.subject === currentSubject() && typeof saved.fingerprint === "string" && typeof saved.key === "string" ? { fingerprint: saved.fingerprint, key: saved.key } : null;
+  } catch { return null; }
+}
+
+function clearLegacyIntention(operation: MentorIntakeOperation): void {
+  if (legacyIntention(operation)) removeSessionStorage(`hu7:intake:${operation}`);
+}
+
+export async function clearMentorIntakeIntentions(operations: readonly MentorIntakeOperation[] = ["activate", "request"]): Promise<void> {
+  for (const operation of operations) clearLegacyIntention(operation);
+  await Promise.all(operations.map((operation) => updateBusinessRecord(storageKey(operation), () => null)));
+}
+
+export async function withMentorIntakeKey<T>(operation: MentorIntakeOperation, preferences: MentorIntakePreferences, submit: (key: string) => Promise<T>): Promise<T> {
+  const name = storageKey(operation);
+  const fingerprint = JSON.stringify({ technicalAreaIds: [...preferences.technicalAreaIds].sort(), orientationTypeIds: [...preferences.orientationTypeIds].sort() });
+  const legacy = legacyIntention(operation);
+  const intention = await updateBusinessRecord<MentorIntakeIntention>(name, (stored) => {
+    const saved = stored ?? legacy;
+    return {
+    fingerprint,
+    key: saved?.fingerprint === fingerprint && typeof saved.key === "string" &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(saved.key)
+      ? saved.key : crypto.randomUUID(),
+    };
+  });
+  const key = intention!.key;
   const clear = () => {
-    if (memory.get(name)?.key === key) memory.delete(name);
-    try {
-      if (JSON.parse(storage?.getItem(name) ?? "null")?.key === key) storage?.removeItem(name);
-    } catch { /* Clearing storage must not turn a successful request into failure. */ }
+    clearLegacyIntention(operation);
+    return updateBusinessRecord<MentorIntakeIntention>(name, (saved) => saved?.key === key ? null : saved);
   };
   try {
     const result = await submit(key);
-    clear();
+    await clear();
     return result;
   } catch (error) {
-    // An ambiguous network/5xx result must be replayed with the same UUID,
-    // including after closing and reopening the form in this browser session.
-    if (isApiError(error) && error.response && error.response.status < 500) clear();
+    // Un resultado ambiguo se reintenta con el mismo UUID, incluso tras recargar.
+    if (isApiError(error) && error.response && error.response.status < 500) await clear();
     throw error;
   }
 }

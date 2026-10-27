@@ -1,5 +1,7 @@
 "use client";
 
+import type { DeactivateParticipationModalProps } from "../../types/deactivate-participation-modal-props.types";
+
 import Link from "next/link";
 
 import { AlertTriangle, ShieldCheck, UserRoundX, X } from "lucide-react";
@@ -12,16 +14,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-type DeactivateParticipationModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  isLoading: boolean;
-  errorMessage: string | null;
-  hasFutureAppointments: boolean;
-  areas: string[];
-  orientations: string[];
-};
 
 function SavedItems({ label, items }: { label: string; items: string[] }) {
   return (

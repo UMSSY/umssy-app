@@ -1,3 +1,4 @@
+import { REQUEST_IDS } from './mentor-catalog-test-values.js';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -215,7 +216,7 @@ describe.skipIf(!connectionString)(
         const count = await prisma.mentorParticipationRequest.count({
           where: {
             userId: userId(1),
-            status: 'PENDING',
+            statusId: REQUEST_IDS.PENDING,
           },
         });
 
@@ -253,7 +254,7 @@ describe.skipIf(!connectionString)(
         });
 
         expect(saved).not.toBeNull();
-        expect(saved?.status).toBe('CANCELLED');
+        expect(saved?.statusId).toBe(REQUEST_IDS.CANCELLED);
       });
 
       it('no permite editar solicitudes con una oferta vigente', async () => {
@@ -261,7 +262,7 @@ describe.skipIf(!connectionString)(
 
         await prisma.mentorParticipationRequest.update({
           where: { id: original.id },
-          data: { status: 'OFFERED' },
+          data: { statusId: REQUEST_IDS.OFFERED },
         });
 
         await expect(
@@ -274,7 +275,7 @@ describe.skipIf(!connectionString)(
           where: { id: original.id },
         });
 
-        expect(saved?.status).toBe('OFFERED');
+        expect(saved?.statusId).toBe(REQUEST_IDS.OFFERED);
       });
 
       it('no permite cancelar solicitudes de otro usuario', async () => {
@@ -288,7 +289,7 @@ describe.skipIf(!connectionString)(
           where: { id: original.id },
         });
 
-        expect(saved?.status).toBe('PENDING');
+        expect(saved?.statusId).toBe(REQUEST_IDS.PENDING);
       });
 
       it('incluye solicitudes canceladas en el historial', async () => {
@@ -308,7 +309,7 @@ describe.skipIf(!connectionString)(
 
         await prisma.mentorParticipationRequest.update({
           where: { id: original.id },
-          data: { status: 'EXPIRED' },
+          data: { statusId: REQUEST_IDS.EXPIRED },
         });
 
         const history = await service.findMyHistory(userId(1));
@@ -361,9 +362,7 @@ describe.skipIf(!connectionString)(
           )
             throw error;
           expect(error).toMatchObject({ statusCode: 409 });
-          return prisma.mentorParticipationRequest.findFirstOrThrow({
-            where: { userId: userId(1), status: 'PENDING' },
-          });
+          return (await service.findMyRequest(userId(1)))!;
         }
       }
 

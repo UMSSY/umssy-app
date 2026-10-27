@@ -37,47 +37,50 @@ export type MentorMailOutboxSumAggregateOutputType = {
 export type MentorMailOutboxMinAggregateOutputType = {
   id: string | null
   eventKey: string | null
-  kind: string | null
+  kindId: string | null
   userId: string | null
   recipient: string | null
-  status: string | null
+  statusId: string | null
   attempts: number | null
   availableAt: Date | null
   claimedAt: Date | null
   sentAt: Date | null
   lastError: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type MentorMailOutboxMaxAggregateOutputType = {
   id: string | null
   eventKey: string | null
-  kind: string | null
+  kindId: string | null
   userId: string | null
   recipient: string | null
-  status: string | null
+  statusId: string | null
   attempts: number | null
   availableAt: Date | null
   claimedAt: Date | null
   sentAt: Date | null
   lastError: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type MentorMailOutboxCountAggregateOutputType = {
   id: number
   eventKey: number
-  kind: number
+  kindId: number
   userId: number
   recipient: number
   payload: number
-  status: number
+  statusId: number
   attempts: number
   availableAt: number
   claimedAt: number
   sentAt: number
   lastError: number
   createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -93,47 +96,50 @@ export type MentorMailOutboxSumAggregateInputType = {
 export type MentorMailOutboxMinAggregateInputType = {
   id?: true
   eventKey?: true
-  kind?: true
+  kindId?: true
   userId?: true
   recipient?: true
-  status?: true
+  statusId?: true
   attempts?: true
   availableAt?: true
   claimedAt?: true
   sentAt?: true
   lastError?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type MentorMailOutboxMaxAggregateInputType = {
   id?: true
   eventKey?: true
-  kind?: true
+  kindId?: true
   userId?: true
   recipient?: true
-  status?: true
+  statusId?: true
   attempts?: true
   availableAt?: true
   claimedAt?: true
   sentAt?: true
   lastError?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type MentorMailOutboxCountAggregateInputType = {
   id?: true
   eventKey?: true
-  kind?: true
+  kindId?: true
   userId?: true
   recipient?: true
   payload?: true
-  status?: true
+  statusId?: true
   attempts?: true
   availableAt?: true
   claimedAt?: true
   sentAt?: true
   lastError?: true
   createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -226,17 +232,18 @@ export type MentorMailOutboxGroupByArgs<ExtArgs extends runtime.Types.Extensions
 export type MentorMailOutboxGroupByOutputType = {
   id: string
   eventKey: string
-  kind: string
+  kindId: string
   userId: string
   recipient: string
   payload: runtime.JsonValue
-  status: string
+  statusId: string
   attempts: number
   availableAt: Date
   claimedAt: Date | null
   sentAt: Date | null
   lastError: string | null
   createdAt: Date
+  updatedAt: Date
   _count: MentorMailOutboxCountAggregateOutputType | null
   _avg: MentorMailOutboxAvgAggregateOutputType | null
   _sum: MentorMailOutboxSumAggregateOutputType | null
@@ -265,35 +272,41 @@ export type MentorMailOutboxWhereInput = {
   NOT?: Prisma.MentorMailOutboxWhereInput | Prisma.MentorMailOutboxWhereInput[]
   id?: Prisma.UuidFilter<"MentorMailOutbox"> | string
   eventKey?: Prisma.StringFilter<"MentorMailOutbox"> | string
-  kind?: Prisma.StringFilter<"MentorMailOutbox"> | string
+  kindId?: Prisma.UuidFilter<"MentorMailOutbox"> | string
   userId?: Prisma.UuidFilter<"MentorMailOutbox"> | string
   recipient?: Prisma.StringFilter<"MentorMailOutbox"> | string
   payload?: Prisma.JsonFilter<"MentorMailOutbox">
-  status?: Prisma.StringFilter<"MentorMailOutbox"> | string
+  statusId?: Prisma.UuidFilter<"MentorMailOutbox"> | string
   attempts?: Prisma.IntFilter<"MentorMailOutbox"> | number
   availableAt?: Prisma.DateTimeFilter<"MentorMailOutbox"> | Date | string
   claimedAt?: Prisma.DateTimeNullableFilter<"MentorMailOutbox"> | Date | string | null
   sentAt?: Prisma.DateTimeNullableFilter<"MentorMailOutbox"> | Date | string | null
   lastError?: Prisma.StringNullableFilter<"MentorMailOutbox"> | string | null
   createdAt?: Prisma.DateTimeFilter<"MentorMailOutbox"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorMailOutbox"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  status?: Prisma.XOR<Prisma.MentorMailStatusScalarRelationFilter, Prisma.MentorMailStatusWhereInput>
+  kind?: Prisma.XOR<Prisma.MentorMailKindScalarRelationFilter, Prisma.MentorMailKindWhereInput>
 }
 
 export type MentorMailOutboxOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   eventKey?: Prisma.SortOrder
-  kind?: Prisma.SortOrder
+  kindId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   recipient?: Prisma.SortOrder
   payload?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
   availableAt?: Prisma.SortOrder
   claimedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   sentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastError?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  status?: Prisma.MentorMailStatusOrderByWithRelationInput
+  kind?: Prisma.MentorMailKindOrderByWithRelationInput
 }
 
 export type MentorMailOutboxWhereUniqueInput = Prisma.AtLeast<{
@@ -302,34 +315,38 @@ export type MentorMailOutboxWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.MentorMailOutboxWhereInput | Prisma.MentorMailOutboxWhereInput[]
   OR?: Prisma.MentorMailOutboxWhereInput[]
   NOT?: Prisma.MentorMailOutboxWhereInput | Prisma.MentorMailOutboxWhereInput[]
-  kind?: Prisma.StringFilter<"MentorMailOutbox"> | string
+  kindId?: Prisma.UuidFilter<"MentorMailOutbox"> | string
   userId?: Prisma.UuidFilter<"MentorMailOutbox"> | string
   recipient?: Prisma.StringFilter<"MentorMailOutbox"> | string
   payload?: Prisma.JsonFilter<"MentorMailOutbox">
-  status?: Prisma.StringFilter<"MentorMailOutbox"> | string
+  statusId?: Prisma.UuidFilter<"MentorMailOutbox"> | string
   attempts?: Prisma.IntFilter<"MentorMailOutbox"> | number
   availableAt?: Prisma.DateTimeFilter<"MentorMailOutbox"> | Date | string
   claimedAt?: Prisma.DateTimeNullableFilter<"MentorMailOutbox"> | Date | string | null
   sentAt?: Prisma.DateTimeNullableFilter<"MentorMailOutbox"> | Date | string | null
   lastError?: Prisma.StringNullableFilter<"MentorMailOutbox"> | string | null
   createdAt?: Prisma.DateTimeFilter<"MentorMailOutbox"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorMailOutbox"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  status?: Prisma.XOR<Prisma.MentorMailStatusScalarRelationFilter, Prisma.MentorMailStatusWhereInput>
+  kind?: Prisma.XOR<Prisma.MentorMailKindScalarRelationFilter, Prisma.MentorMailKindWhereInput>
 }, "id" | "eventKey">
 
 export type MentorMailOutboxOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   eventKey?: Prisma.SortOrder
-  kind?: Prisma.SortOrder
+  kindId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   recipient?: Prisma.SortOrder
   payload?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
   availableAt?: Prisma.SortOrder
   claimedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   sentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastError?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.MentorMailOutboxCountOrderByAggregateInput
   _avg?: Prisma.MentorMailOutboxAvgOrderByAggregateInput
   _max?: Prisma.MentorMailOutboxMaxOrderByAggregateInput
@@ -343,128 +360,134 @@ export type MentorMailOutboxScalarWhereWithAggregatesInput = {
   NOT?: Prisma.MentorMailOutboxScalarWhereWithAggregatesInput | Prisma.MentorMailOutboxScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"MentorMailOutbox"> | string
   eventKey?: Prisma.StringWithAggregatesFilter<"MentorMailOutbox"> | string
-  kind?: Prisma.StringWithAggregatesFilter<"MentorMailOutbox"> | string
+  kindId?: Prisma.UuidWithAggregatesFilter<"MentorMailOutbox"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"MentorMailOutbox"> | string
   recipient?: Prisma.StringWithAggregatesFilter<"MentorMailOutbox"> | string
   payload?: Prisma.JsonWithAggregatesFilter<"MentorMailOutbox">
-  status?: Prisma.StringWithAggregatesFilter<"MentorMailOutbox"> | string
+  statusId?: Prisma.UuidWithAggregatesFilter<"MentorMailOutbox"> | string
   attempts?: Prisma.IntWithAggregatesFilter<"MentorMailOutbox"> | number
   availableAt?: Prisma.DateTimeWithAggregatesFilter<"MentorMailOutbox"> | Date | string
   claimedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MentorMailOutbox"> | Date | string | null
   sentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MentorMailOutbox"> | Date | string | null
   lastError?: Prisma.StringNullableWithAggregatesFilter<"MentorMailOutbox"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"MentorMailOutbox"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"MentorMailOutbox"> | Date | string
 }
 
 export type MentorMailOutboxCreateInput = {
   id?: string
   eventKey: string
-  kind: string
   recipient: string
   payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: string
   attempts?: number
   availableAt?: Date | string
   claimedAt?: Date | string | null
   sentAt?: Date | string | null
   lastError?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMentorMailOutboxInput
+  status?: Prisma.MentorMailStatusCreateNestedOneWithoutMessagesInput
+  kind: Prisma.MentorMailKindCreateNestedOneWithoutMessagesInput
 }
 
 export type MentorMailOutboxUncheckedCreateInput = {
   id?: string
   eventKey: string
-  kind: string
+  kindId: string
   userId: string
   recipient: string
   payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: string
+  statusId?: string
   attempts?: number
   availableAt?: Date | string
   claimedAt?: Date | string | null
   sentAt?: Date | string | null
   lastError?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorMailOutboxUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventKey?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   recipient?: Prisma.StringFieldUpdateOperationsInput | string
   payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.StringFieldUpdateOperationsInput | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
   availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMentorMailOutboxNestedInput
+  status?: Prisma.MentorMailStatusUpdateOneRequiredWithoutMessagesNestedInput
+  kind?: Prisma.MentorMailKindUpdateOneRequiredWithoutMessagesNestedInput
 }
 
 export type MentorMailOutboxUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventKey?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  kindId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   recipient?: Prisma.StringFieldUpdateOperationsInput | string
   payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
   availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorMailOutboxCreateManyInput = {
   id?: string
   eventKey: string
-  kind: string
+  kindId: string
   userId: string
   recipient: string
   payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: string
+  statusId?: string
   attempts?: number
   availableAt?: Date | string
   claimedAt?: Date | string | null
   sentAt?: Date | string | null
   lastError?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorMailOutboxUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventKey?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   recipient?: Prisma.StringFieldUpdateOperationsInput | string
   payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.StringFieldUpdateOperationsInput | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
   availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorMailOutboxUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventKey?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  kindId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   recipient?: Prisma.StringFieldUpdateOperationsInput | string
   payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
   availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorMailOutboxListRelationFilter = {
@@ -480,17 +503,18 @@ export type MentorMailOutboxOrderByRelationAggregateInput = {
 export type MentorMailOutboxCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   eventKey?: Prisma.SortOrder
-  kind?: Prisma.SortOrder
+  kindId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   recipient?: Prisma.SortOrder
   payload?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
   availableAt?: Prisma.SortOrder
   claimedAt?: Prisma.SortOrder
   sentAt?: Prisma.SortOrder
   lastError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorMailOutboxAvgOrderByAggregateInput = {
@@ -500,31 +524,33 @@ export type MentorMailOutboxAvgOrderByAggregateInput = {
 export type MentorMailOutboxMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   eventKey?: Prisma.SortOrder
-  kind?: Prisma.SortOrder
+  kindId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   recipient?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
   availableAt?: Prisma.SortOrder
   claimedAt?: Prisma.SortOrder
   sentAt?: Prisma.SortOrder
   lastError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorMailOutboxMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   eventKey?: Prisma.SortOrder
-  kind?: Prisma.SortOrder
+  kindId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   recipient?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  statusId?: Prisma.SortOrder
   attempts?: Prisma.SortOrder
   availableAt?: Prisma.SortOrder
   claimedAt?: Prisma.SortOrder
   sentAt?: Prisma.SortOrder
   lastError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorMailOutboxSumOrderByAggregateInput = {
@@ -573,34 +599,120 @@ export type MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.MentorMailOutboxScalarWhereInput | Prisma.MentorMailOutboxScalarWhereInput[]
 }
 
+export type MentorMailOutboxCreateNestedManyWithoutStatusInput = {
+  create?: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutStatusInput, Prisma.MentorMailOutboxUncheckedCreateWithoutStatusInput> | Prisma.MentorMailOutboxCreateWithoutStatusInput[] | Prisma.MentorMailOutboxUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.MentorMailOutboxCreateOrConnectWithoutStatusInput | Prisma.MentorMailOutboxCreateOrConnectWithoutStatusInput[]
+  createMany?: Prisma.MentorMailOutboxCreateManyStatusInputEnvelope
+  connect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+}
+
+export type MentorMailOutboxUncheckedCreateNestedManyWithoutStatusInput = {
+  create?: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutStatusInput, Prisma.MentorMailOutboxUncheckedCreateWithoutStatusInput> | Prisma.MentorMailOutboxCreateWithoutStatusInput[] | Prisma.MentorMailOutboxUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.MentorMailOutboxCreateOrConnectWithoutStatusInput | Prisma.MentorMailOutboxCreateOrConnectWithoutStatusInput[]
+  createMany?: Prisma.MentorMailOutboxCreateManyStatusInputEnvelope
+  connect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+}
+
+export type MentorMailOutboxUpdateManyWithoutStatusNestedInput = {
+  create?: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutStatusInput, Prisma.MentorMailOutboxUncheckedCreateWithoutStatusInput> | Prisma.MentorMailOutboxCreateWithoutStatusInput[] | Prisma.MentorMailOutboxUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.MentorMailOutboxCreateOrConnectWithoutStatusInput | Prisma.MentorMailOutboxCreateOrConnectWithoutStatusInput[]
+  upsert?: Prisma.MentorMailOutboxUpsertWithWhereUniqueWithoutStatusInput | Prisma.MentorMailOutboxUpsertWithWhereUniqueWithoutStatusInput[]
+  createMany?: Prisma.MentorMailOutboxCreateManyStatusInputEnvelope
+  set?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  disconnect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  delete?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  connect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  update?: Prisma.MentorMailOutboxUpdateWithWhereUniqueWithoutStatusInput | Prisma.MentorMailOutboxUpdateWithWhereUniqueWithoutStatusInput[]
+  updateMany?: Prisma.MentorMailOutboxUpdateManyWithWhereWithoutStatusInput | Prisma.MentorMailOutboxUpdateManyWithWhereWithoutStatusInput[]
+  deleteMany?: Prisma.MentorMailOutboxScalarWhereInput | Prisma.MentorMailOutboxScalarWhereInput[]
+}
+
+export type MentorMailOutboxUncheckedUpdateManyWithoutStatusNestedInput = {
+  create?: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutStatusInput, Prisma.MentorMailOutboxUncheckedCreateWithoutStatusInput> | Prisma.MentorMailOutboxCreateWithoutStatusInput[] | Prisma.MentorMailOutboxUncheckedCreateWithoutStatusInput[]
+  connectOrCreate?: Prisma.MentorMailOutboxCreateOrConnectWithoutStatusInput | Prisma.MentorMailOutboxCreateOrConnectWithoutStatusInput[]
+  upsert?: Prisma.MentorMailOutboxUpsertWithWhereUniqueWithoutStatusInput | Prisma.MentorMailOutboxUpsertWithWhereUniqueWithoutStatusInput[]
+  createMany?: Prisma.MentorMailOutboxCreateManyStatusInputEnvelope
+  set?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  disconnect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  delete?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  connect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  update?: Prisma.MentorMailOutboxUpdateWithWhereUniqueWithoutStatusInput | Prisma.MentorMailOutboxUpdateWithWhereUniqueWithoutStatusInput[]
+  updateMany?: Prisma.MentorMailOutboxUpdateManyWithWhereWithoutStatusInput | Prisma.MentorMailOutboxUpdateManyWithWhereWithoutStatusInput[]
+  deleteMany?: Prisma.MentorMailOutboxScalarWhereInput | Prisma.MentorMailOutboxScalarWhereInput[]
+}
+
+export type MentorMailOutboxCreateNestedManyWithoutKindInput = {
+  create?: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutKindInput, Prisma.MentorMailOutboxUncheckedCreateWithoutKindInput> | Prisma.MentorMailOutboxCreateWithoutKindInput[] | Prisma.MentorMailOutboxUncheckedCreateWithoutKindInput[]
+  connectOrCreate?: Prisma.MentorMailOutboxCreateOrConnectWithoutKindInput | Prisma.MentorMailOutboxCreateOrConnectWithoutKindInput[]
+  createMany?: Prisma.MentorMailOutboxCreateManyKindInputEnvelope
+  connect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+}
+
+export type MentorMailOutboxUncheckedCreateNestedManyWithoutKindInput = {
+  create?: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutKindInput, Prisma.MentorMailOutboxUncheckedCreateWithoutKindInput> | Prisma.MentorMailOutboxCreateWithoutKindInput[] | Prisma.MentorMailOutboxUncheckedCreateWithoutKindInput[]
+  connectOrCreate?: Prisma.MentorMailOutboxCreateOrConnectWithoutKindInput | Prisma.MentorMailOutboxCreateOrConnectWithoutKindInput[]
+  createMany?: Prisma.MentorMailOutboxCreateManyKindInputEnvelope
+  connect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+}
+
+export type MentorMailOutboxUpdateManyWithoutKindNestedInput = {
+  create?: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutKindInput, Prisma.MentorMailOutboxUncheckedCreateWithoutKindInput> | Prisma.MentorMailOutboxCreateWithoutKindInput[] | Prisma.MentorMailOutboxUncheckedCreateWithoutKindInput[]
+  connectOrCreate?: Prisma.MentorMailOutboxCreateOrConnectWithoutKindInput | Prisma.MentorMailOutboxCreateOrConnectWithoutKindInput[]
+  upsert?: Prisma.MentorMailOutboxUpsertWithWhereUniqueWithoutKindInput | Prisma.MentorMailOutboxUpsertWithWhereUniqueWithoutKindInput[]
+  createMany?: Prisma.MentorMailOutboxCreateManyKindInputEnvelope
+  set?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  disconnect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  delete?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  connect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  update?: Prisma.MentorMailOutboxUpdateWithWhereUniqueWithoutKindInput | Prisma.MentorMailOutboxUpdateWithWhereUniqueWithoutKindInput[]
+  updateMany?: Prisma.MentorMailOutboxUpdateManyWithWhereWithoutKindInput | Prisma.MentorMailOutboxUpdateManyWithWhereWithoutKindInput[]
+  deleteMany?: Prisma.MentorMailOutboxScalarWhereInput | Prisma.MentorMailOutboxScalarWhereInput[]
+}
+
+export type MentorMailOutboxUncheckedUpdateManyWithoutKindNestedInput = {
+  create?: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutKindInput, Prisma.MentorMailOutboxUncheckedCreateWithoutKindInput> | Prisma.MentorMailOutboxCreateWithoutKindInput[] | Prisma.MentorMailOutboxUncheckedCreateWithoutKindInput[]
+  connectOrCreate?: Prisma.MentorMailOutboxCreateOrConnectWithoutKindInput | Prisma.MentorMailOutboxCreateOrConnectWithoutKindInput[]
+  upsert?: Prisma.MentorMailOutboxUpsertWithWhereUniqueWithoutKindInput | Prisma.MentorMailOutboxUpsertWithWhereUniqueWithoutKindInput[]
+  createMany?: Prisma.MentorMailOutboxCreateManyKindInputEnvelope
+  set?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  disconnect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  delete?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  connect?: Prisma.MentorMailOutboxWhereUniqueInput | Prisma.MentorMailOutboxWhereUniqueInput[]
+  update?: Prisma.MentorMailOutboxUpdateWithWhereUniqueWithoutKindInput | Prisma.MentorMailOutboxUpdateWithWhereUniqueWithoutKindInput[]
+  updateMany?: Prisma.MentorMailOutboxUpdateManyWithWhereWithoutKindInput | Prisma.MentorMailOutboxUpdateManyWithWhereWithoutKindInput[]
+  deleteMany?: Prisma.MentorMailOutboxScalarWhereInput | Prisma.MentorMailOutboxScalarWhereInput[]
+}
+
 export type MentorMailOutboxCreateWithoutUserInput = {
   id?: string
   eventKey: string
-  kind: string
   recipient: string
   payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: string
   attempts?: number
   availableAt?: Date | string
   claimedAt?: Date | string | null
   sentAt?: Date | string | null
   lastError?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
+  status?: Prisma.MentorMailStatusCreateNestedOneWithoutMessagesInput
+  kind: Prisma.MentorMailKindCreateNestedOneWithoutMessagesInput
 }
 
 export type MentorMailOutboxUncheckedCreateWithoutUserInput = {
   id?: string
   eventKey: string
-  kind: string
+  kindId: string
   recipient: string
   payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: string
+  statusId?: string
   attempts?: number
   availableAt?: Date | string
   claimedAt?: Date | string | null
   sentAt?: Date | string | null
   lastError?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorMailOutboxCreateOrConnectWithoutUserInput = {
@@ -635,77 +747,326 @@ export type MentorMailOutboxScalarWhereInput = {
   NOT?: Prisma.MentorMailOutboxScalarWhereInput | Prisma.MentorMailOutboxScalarWhereInput[]
   id?: Prisma.UuidFilter<"MentorMailOutbox"> | string
   eventKey?: Prisma.StringFilter<"MentorMailOutbox"> | string
-  kind?: Prisma.StringFilter<"MentorMailOutbox"> | string
+  kindId?: Prisma.UuidFilter<"MentorMailOutbox"> | string
   userId?: Prisma.UuidFilter<"MentorMailOutbox"> | string
   recipient?: Prisma.StringFilter<"MentorMailOutbox"> | string
   payload?: Prisma.JsonFilter<"MentorMailOutbox">
-  status?: Prisma.StringFilter<"MentorMailOutbox"> | string
+  statusId?: Prisma.UuidFilter<"MentorMailOutbox"> | string
   attempts?: Prisma.IntFilter<"MentorMailOutbox"> | number
   availableAt?: Prisma.DateTimeFilter<"MentorMailOutbox"> | Date | string
   claimedAt?: Prisma.DateTimeNullableFilter<"MentorMailOutbox"> | Date | string | null
   sentAt?: Prisma.DateTimeNullableFilter<"MentorMailOutbox"> | Date | string | null
   lastError?: Prisma.StringNullableFilter<"MentorMailOutbox"> | string | null
   createdAt?: Prisma.DateTimeFilter<"MentorMailOutbox"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorMailOutbox"> | Date | string
 }
 
-export type MentorMailOutboxCreateManyUserInput = {
+export type MentorMailOutboxCreateWithoutStatusInput = {
   id?: string
   eventKey: string
-  kind: string
   recipient: string
   payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: string
   attempts?: number
   availableAt?: Date | string
   claimedAt?: Date | string | null
   sentAt?: Date | string | null
   lastError?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutMentorMailOutboxInput
+  kind: Prisma.MentorMailKindCreateNestedOneWithoutMessagesInput
+}
+
+export type MentorMailOutboxUncheckedCreateWithoutStatusInput = {
+  id?: string
+  eventKey: string
+  kindId: string
+  userId: string
+  recipient: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  attempts?: number
+  availableAt?: Date | string
+  claimedAt?: Date | string | null
+  sentAt?: Date | string | null
+  lastError?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type MentorMailOutboxCreateOrConnectWithoutStatusInput = {
+  where: Prisma.MentorMailOutboxWhereUniqueInput
+  create: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutStatusInput, Prisma.MentorMailOutboxUncheckedCreateWithoutStatusInput>
+}
+
+export type MentorMailOutboxCreateManyStatusInputEnvelope = {
+  data: Prisma.MentorMailOutboxCreateManyStatusInput | Prisma.MentorMailOutboxCreateManyStatusInput[]
+  skipDuplicates?: boolean
+}
+
+export type MentorMailOutboxUpsertWithWhereUniqueWithoutStatusInput = {
+  where: Prisma.MentorMailOutboxWhereUniqueInput
+  update: Prisma.XOR<Prisma.MentorMailOutboxUpdateWithoutStatusInput, Prisma.MentorMailOutboxUncheckedUpdateWithoutStatusInput>
+  create: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutStatusInput, Prisma.MentorMailOutboxUncheckedCreateWithoutStatusInput>
+}
+
+export type MentorMailOutboxUpdateWithWhereUniqueWithoutStatusInput = {
+  where: Prisma.MentorMailOutboxWhereUniqueInput
+  data: Prisma.XOR<Prisma.MentorMailOutboxUpdateWithoutStatusInput, Prisma.MentorMailOutboxUncheckedUpdateWithoutStatusInput>
+}
+
+export type MentorMailOutboxUpdateManyWithWhereWithoutStatusInput = {
+  where: Prisma.MentorMailOutboxScalarWhereInput
+  data: Prisma.XOR<Prisma.MentorMailOutboxUpdateManyMutationInput, Prisma.MentorMailOutboxUncheckedUpdateManyWithoutStatusInput>
+}
+
+export type MentorMailOutboxCreateWithoutKindInput = {
+  id?: string
+  eventKey: string
+  recipient: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  attempts?: number
+  availableAt?: Date | string
+  claimedAt?: Date | string | null
+  sentAt?: Date | string | null
+  lastError?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutMentorMailOutboxInput
+  status?: Prisma.MentorMailStatusCreateNestedOneWithoutMessagesInput
+}
+
+export type MentorMailOutboxUncheckedCreateWithoutKindInput = {
+  id?: string
+  eventKey: string
+  userId: string
+  recipient: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  statusId?: string
+  attempts?: number
+  availableAt?: Date | string
+  claimedAt?: Date | string | null
+  sentAt?: Date | string | null
+  lastError?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type MentorMailOutboxCreateOrConnectWithoutKindInput = {
+  where: Prisma.MentorMailOutboxWhereUniqueInput
+  create: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutKindInput, Prisma.MentorMailOutboxUncheckedCreateWithoutKindInput>
+}
+
+export type MentorMailOutboxCreateManyKindInputEnvelope = {
+  data: Prisma.MentorMailOutboxCreateManyKindInput | Prisma.MentorMailOutboxCreateManyKindInput[]
+  skipDuplicates?: boolean
+}
+
+export type MentorMailOutboxUpsertWithWhereUniqueWithoutKindInput = {
+  where: Prisma.MentorMailOutboxWhereUniqueInput
+  update: Prisma.XOR<Prisma.MentorMailOutboxUpdateWithoutKindInput, Prisma.MentorMailOutboxUncheckedUpdateWithoutKindInput>
+  create: Prisma.XOR<Prisma.MentorMailOutboxCreateWithoutKindInput, Prisma.MentorMailOutboxUncheckedCreateWithoutKindInput>
+}
+
+export type MentorMailOutboxUpdateWithWhereUniqueWithoutKindInput = {
+  where: Prisma.MentorMailOutboxWhereUniqueInput
+  data: Prisma.XOR<Prisma.MentorMailOutboxUpdateWithoutKindInput, Prisma.MentorMailOutboxUncheckedUpdateWithoutKindInput>
+}
+
+export type MentorMailOutboxUpdateManyWithWhereWithoutKindInput = {
+  where: Prisma.MentorMailOutboxScalarWhereInput
+  data: Prisma.XOR<Prisma.MentorMailOutboxUpdateManyMutationInput, Prisma.MentorMailOutboxUncheckedUpdateManyWithoutKindInput>
+}
+
+export type MentorMailOutboxCreateManyUserInput = {
+  id?: string
+  eventKey: string
+  kindId: string
+  recipient: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  statusId?: string
+  attempts?: number
+  availableAt?: Date | string
+  claimedAt?: Date | string | null
+  sentAt?: Date | string | null
+  lastError?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorMailOutboxUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventKey?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
   recipient?: Prisma.StringFieldUpdateOperationsInput | string
   payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.StringFieldUpdateOperationsInput | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
   availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.MentorMailStatusUpdateOneRequiredWithoutMessagesNestedInput
+  kind?: Prisma.MentorMailKindUpdateOneRequiredWithoutMessagesNestedInput
 }
 
 export type MentorMailOutboxUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventKey?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  kindId?: Prisma.StringFieldUpdateOperationsInput | string
   recipient?: Prisma.StringFieldUpdateOperationsInput | string
   payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
   availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorMailOutboxUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   eventKey?: Prisma.StringFieldUpdateOperationsInput | string
-  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  kindId?: Prisma.StringFieldUpdateOperationsInput | string
   recipient?: Prisma.StringFieldUpdateOperationsInput | string
   payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
   availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MentorMailOutboxCreateManyStatusInput = {
+  id?: string
+  eventKey: string
+  kindId: string
+  userId: string
+  recipient: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  attempts?: number
+  availableAt?: Date | string
+  claimedAt?: Date | string | null
+  sentAt?: Date | string | null
+  lastError?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type MentorMailOutboxUpdateWithoutStatusInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventKey?: Prisma.StringFieldUpdateOperationsInput | string
+  recipient?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutMentorMailOutboxNestedInput
+  kind?: Prisma.MentorMailKindUpdateOneRequiredWithoutMessagesNestedInput
+}
+
+export type MentorMailOutboxUncheckedUpdateWithoutStatusInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventKey?: Prisma.StringFieldUpdateOperationsInput | string
+  kindId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  recipient?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MentorMailOutboxUncheckedUpdateManyWithoutStatusInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventKey?: Prisma.StringFieldUpdateOperationsInput | string
+  kindId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  recipient?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MentorMailOutboxCreateManyKindInput = {
+  id?: string
+  eventKey: string
+  userId: string
+  recipient: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  statusId?: string
+  attempts?: number
+  availableAt?: Date | string
+  claimedAt?: Date | string | null
+  sentAt?: Date | string | null
+  lastError?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type MentorMailOutboxUpdateWithoutKindInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventKey?: Prisma.StringFieldUpdateOperationsInput | string
+  recipient?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutMentorMailOutboxNestedInput
+  status?: Prisma.MentorMailStatusUpdateOneRequiredWithoutMessagesNestedInput
+}
+
+export type MentorMailOutboxUncheckedUpdateWithoutKindInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventKey?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  recipient?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MentorMailOutboxUncheckedUpdateManyWithoutKindInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  eventKey?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  recipient?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -713,100 +1074,119 @@ export type MentorMailOutboxUncheckedUpdateManyWithoutUserInput = {
 export type MentorMailOutboxSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   eventKey?: boolean
-  kind?: boolean
+  kindId?: boolean
   userId?: boolean
   recipient?: boolean
   payload?: boolean
-  status?: boolean
+  statusId?: boolean
   attempts?: boolean
   availableAt?: boolean
   claimedAt?: boolean
   sentAt?: boolean
   lastError?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  status?: boolean | Prisma.MentorMailStatusDefaultArgs<ExtArgs>
+  kind?: boolean | Prisma.MentorMailKindDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorMailOutbox"]>
 
 export type MentorMailOutboxSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   eventKey?: boolean
-  kind?: boolean
+  kindId?: boolean
   userId?: boolean
   recipient?: boolean
   payload?: boolean
-  status?: boolean
+  statusId?: boolean
   attempts?: boolean
   availableAt?: boolean
   claimedAt?: boolean
   sentAt?: boolean
   lastError?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  status?: boolean | Prisma.MentorMailStatusDefaultArgs<ExtArgs>
+  kind?: boolean | Prisma.MentorMailKindDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorMailOutbox"]>
 
 export type MentorMailOutboxSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   eventKey?: boolean
-  kind?: boolean
+  kindId?: boolean
   userId?: boolean
   recipient?: boolean
   payload?: boolean
-  status?: boolean
+  statusId?: boolean
   attempts?: boolean
   availableAt?: boolean
   claimedAt?: boolean
   sentAt?: boolean
   lastError?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  status?: boolean | Prisma.MentorMailStatusDefaultArgs<ExtArgs>
+  kind?: boolean | Prisma.MentorMailKindDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorMailOutbox"]>
 
 export type MentorMailOutboxSelectScalar = {
   id?: boolean
   eventKey?: boolean
-  kind?: boolean
+  kindId?: boolean
   userId?: boolean
   recipient?: boolean
   payload?: boolean
-  status?: boolean
+  statusId?: boolean
   attempts?: boolean
   availableAt?: boolean
   claimedAt?: boolean
   sentAt?: boolean
   lastError?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type MentorMailOutboxOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventKey" | "kind" | "userId" | "recipient" | "payload" | "status" | "attempts" | "availableAt" | "claimedAt" | "sentAt" | "lastError" | "createdAt", ExtArgs["result"]["mentorMailOutbox"]>
+export type MentorMailOutboxOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "eventKey" | "kindId" | "userId" | "recipient" | "payload" | "statusId" | "attempts" | "availableAt" | "claimedAt" | "sentAt" | "lastError" | "createdAt" | "updatedAt", ExtArgs["result"]["mentorMailOutbox"]>
 export type MentorMailOutboxInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  status?: boolean | Prisma.MentorMailStatusDefaultArgs<ExtArgs>
+  kind?: boolean | Prisma.MentorMailKindDefaultArgs<ExtArgs>
 }
 export type MentorMailOutboxIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  status?: boolean | Prisma.MentorMailStatusDefaultArgs<ExtArgs>
+  kind?: boolean | Prisma.MentorMailKindDefaultArgs<ExtArgs>
 }
 export type MentorMailOutboxIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  status?: boolean | Prisma.MentorMailStatusDefaultArgs<ExtArgs>
+  kind?: boolean | Prisma.MentorMailKindDefaultArgs<ExtArgs>
 }
 
 export type $MentorMailOutboxPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MentorMailOutbox"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    status: Prisma.$MentorMailStatusPayload<ExtArgs>
+    kind: Prisma.$MentorMailKindPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     eventKey: string
-    kind: string
+    kindId: string
     userId: string
     recipient: string
     payload: runtime.JsonValue
-    status: string
+    statusId: string
     attempts: number
     availableAt: Date
     claimedAt: Date | null
     sentAt: Date | null
     lastError: string | null
     createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["mentorMailOutbox"]>
   composites: {}
 }
@@ -1202,6 +1582,8 @@ readonly fields: MentorMailOutboxFieldRefs;
 export interface Prisma__MentorMailOutboxClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  status<T extends Prisma.MentorMailStatusDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MentorMailStatusDefaultArgs<ExtArgs>>): Prisma.Prisma__MentorMailStatusClient<runtime.Types.Result.GetResult<Prisma.$MentorMailStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  kind<T extends Prisma.MentorMailKindDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MentorMailKindDefaultArgs<ExtArgs>>): Prisma.Prisma__MentorMailKindClient<runtime.Types.Result.GetResult<Prisma.$MentorMailKindPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1233,17 +1615,18 @@ export interface Prisma__MentorMailOutboxClient<T, Null = never, ExtArgs extends
 export interface MentorMailOutboxFieldRefs {
   readonly id: Prisma.FieldRef<"MentorMailOutbox", 'String'>
   readonly eventKey: Prisma.FieldRef<"MentorMailOutbox", 'String'>
-  readonly kind: Prisma.FieldRef<"MentorMailOutbox", 'String'>
+  readonly kindId: Prisma.FieldRef<"MentorMailOutbox", 'String'>
   readonly userId: Prisma.FieldRef<"MentorMailOutbox", 'String'>
   readonly recipient: Prisma.FieldRef<"MentorMailOutbox", 'String'>
   readonly payload: Prisma.FieldRef<"MentorMailOutbox", 'Json'>
-  readonly status: Prisma.FieldRef<"MentorMailOutbox", 'String'>
+  readonly statusId: Prisma.FieldRef<"MentorMailOutbox", 'String'>
   readonly attempts: Prisma.FieldRef<"MentorMailOutbox", 'Int'>
   readonly availableAt: Prisma.FieldRef<"MentorMailOutbox", 'DateTime'>
   readonly claimedAt: Prisma.FieldRef<"MentorMailOutbox", 'DateTime'>
   readonly sentAt: Prisma.FieldRef<"MentorMailOutbox", 'DateTime'>
   readonly lastError: Prisma.FieldRef<"MentorMailOutbox", 'String'>
   readonly createdAt: Prisma.FieldRef<"MentorMailOutbox", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"MentorMailOutbox", 'DateTime'>
 }
 
 

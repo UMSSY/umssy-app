@@ -1,9 +1,11 @@
+import { MentorsService } from '../services/mentors.service.js';
+import { MentorMapper } from '../mappers/mentor.mapper.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 import { mentorCapacity } from '../utils/mentor-capacity.js';
 
-vi.mock('../repositories/mentor-offers.queries.js', () => ({
+vi.mock('../services/mentor-offer-allocation.service.js', () => ({
   reconcileMentorOffers: vi.fn(),
 }));
 
@@ -57,12 +59,25 @@ describe('capacidad HU-7-1', () => {
         const sql = strings.join(' ');
         queries.push(sql);
         if (sql.includes('pg_advisory_xact_lock')) return [];
-        if (sql.includes('AS eligible')) return [{ eligible, alreadyMentor }];
+        if (sql.includes('AS "isActive"'))
+          return [
+            {
+              isActive: eligible,
+              hasGraduateRole: eligible,
+              hasApprovedAccount: eligible,
+              alreadyMentor,
+            },
+          ];
         return [
           { approvedGraduates: 3, activeMentors: mentors, reservedOffers },
         ];
       },
-      userRole: { create: writes },
+      userRole: { create: writes, findFirst: vi.fn().mockResolvedValue(null) },
+      role: { findUnique: vi.fn().mockResolvedValue({ id: 'mentor-role' }) },
+      technicalArea: { findMany: vi.fn().mockResolvedValue([{ id: 'area' }]) },
+      orientationType: {
+        findMany: vi.fn().mockResolvedValue([{ id: 'orientation' }]),
+      },
       mentorTechnicalArea: { createMany: vi.fn(), deleteMany: vi.fn() },
       mentorOrientationType: { createMany: vi.fn(), deleteMany: vi.fn() },
       user: { update: vi.fn() },
@@ -85,13 +100,23 @@ describe('capacidad HU-7-1', () => {
         }
       },
     } as unknown as PrismaService;
-    return { repository: new MentorsRepository(prisma), writes, queries };
+    return {
+      repository: new MentorsService(
+        new MentorsRepository(prisma),
+        new MentorMapper(),
+      ),
+      writes,
+      queries,
+    };
   }
 
   it('rechaza la cuenta no elegible sin crear registros', async () => {
     const { repository, writes } = fixture(false);
     await expect(
-      repository.activate('user-1', 'mentor-role', ['area'], ['orientation']),
+      repository.activate('user-1', {
+        technicalAreaIds: ['area'],
+        orientationTypeIds: ['orientation'],
+      }),
     ).rejects.toMatchObject({ statusCode: 403 });
     expect(writes).not.toHaveBeenCalled();
   });
@@ -99,12 +124,10 @@ describe('capacidad HU-7-1', () => {
   it('rechaza el rol ya activo y la capacidad reservada sin crear registros', async () => {
     for (const context of [fixture(true, true), fixture(true, false, 1)]) {
       await expect(
-        context.repository.activate(
-          'user-1',
-          'mentor-role',
-          ['area'],
-          ['orientation'],
-        ),
+        context.repository.activate('user-1', {
+          technicalAreaIds: ['area'],
+          orientationTypeIds: ['orientation'],
+        }),
       ).rejects.toMatchObject({ statusCode: 409 });
       expect(context.writes).not.toHaveBeenCalled();
     }
@@ -114,7 +137,10 @@ describe('capacidad HU-7-1', () => {
     const { repository, writes, queries } = fixture();
     const results = await Promise.allSettled(
       ['user-1', 'user-2'].map((userId) =>
-        repository.activate(userId, 'mentor-role', ['area'], ['orientation']),
+        repository.activate(userId, {
+          technicalAreaIds: ['area'],
+          orientationTypeIds: ['orientation'],
+        }),
       ),
     );
     expect(

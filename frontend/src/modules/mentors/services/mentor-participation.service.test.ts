@@ -7,7 +7,7 @@ import { clearMentorIntakeIntentions } from "@/modules/mentorship/services/mento
 beforeEach(() => {
   sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ sub: crypto.randomUUID() }))}.s`);
 });
-afterEach(() => { clearMentorIntakeIntentions(); sessionStorage.clear(); vi.restoreAllMocks(); });
+afterEach(async () => { await clearMentorIntakeIntentions(); sessionStorage.clear(); vi.restoreAllMocks(); });
 
 const preferences = { technicalAreaIds: ["area-1"], orientationTypeIds: ["orientation-1"] };
 const request = { id: "request-1", userId: "jwt-user", status: "PENDING", queuedAt: "2026-10-27T12:00:00Z", createdAt: "2026-10-27T12:00:00Z", ...preferences };

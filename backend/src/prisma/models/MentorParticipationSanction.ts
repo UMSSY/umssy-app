@@ -30,6 +30,8 @@ export type MentorParticipationSanctionMinAggregateOutputType = {
   triggerAttemptId: string | null
   startedAt: Date | null
   endsAt: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type MentorParticipationSanctionMaxAggregateOutputType = {
@@ -38,6 +40,8 @@ export type MentorParticipationSanctionMaxAggregateOutputType = {
   triggerAttemptId: string | null
   startedAt: Date | null
   endsAt: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type MentorParticipationSanctionCountAggregateOutputType = {
@@ -46,6 +50,8 @@ export type MentorParticipationSanctionCountAggregateOutputType = {
   triggerAttemptId: number
   startedAt: number
   endsAt: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -56,6 +62,8 @@ export type MentorParticipationSanctionMinAggregateInputType = {
   triggerAttemptId?: true
   startedAt?: true
   endsAt?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type MentorParticipationSanctionMaxAggregateInputType = {
@@ -64,6 +72,8 @@ export type MentorParticipationSanctionMaxAggregateInputType = {
   triggerAttemptId?: true
   startedAt?: true
   endsAt?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type MentorParticipationSanctionCountAggregateInputType = {
@@ -72,6 +82,8 @@ export type MentorParticipationSanctionCountAggregateInputType = {
   triggerAttemptId?: true
   startedAt?: true
   endsAt?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -153,6 +165,8 @@ export type MentorParticipationSanctionGroupByOutputType = {
   triggerAttemptId: string | null
   startedAt: Date
   endsAt: Date
+  createdAt: Date
+  updatedAt: Date
   _count: MentorParticipationSanctionCountAggregateOutputType | null
   _min: MentorParticipationSanctionMinAggregateOutputType | null
   _max: MentorParticipationSanctionMaxAggregateOutputType | null
@@ -182,6 +196,8 @@ export type MentorParticipationSanctionWhereInput = {
   triggerAttemptId?: Prisma.UuidNullableFilter<"MentorParticipationSanction"> | string | null
   startedAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
   endsAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   triggerAttempt?: Prisma.XOR<Prisma.MentorIntakeAttemptNullableScalarRelationFilter, Prisma.MentorIntakeAttemptWhereInput> | null
 }
@@ -192,6 +208,8 @@ export type MentorParticipationSanctionOrderByWithRelationInput = {
   triggerAttemptId?: Prisma.SortOrderInput | Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   endsAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   triggerAttempt?: Prisma.MentorIntakeAttemptOrderByWithRelationInput
 }
@@ -205,6 +223,8 @@ export type MentorParticipationSanctionWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.UuidFilter<"MentorParticipationSanction"> | string
   startedAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
   endsAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   triggerAttempt?: Prisma.XOR<Prisma.MentorIntakeAttemptNullableScalarRelationFilter, Prisma.MentorIntakeAttemptWhereInput> | null
 }, "id" | "triggerAttemptId">
@@ -215,6 +235,8 @@ export type MentorParticipationSanctionOrderByWithAggregationInput = {
   triggerAttemptId?: Prisma.SortOrderInput | Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   endsAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.MentorParticipationSanctionCountOrderByAggregateInput
   _max?: Prisma.MentorParticipationSanctionMaxOrderByAggregateInput
   _min?: Prisma.MentorParticipationSanctionMinOrderByAggregateInput
@@ -229,12 +251,16 @@ export type MentorParticipationSanctionScalarWhereWithAggregatesInput = {
   triggerAttemptId?: Prisma.UuidNullableWithAggregatesFilter<"MentorParticipationSanction"> | string | null
   startedAt?: Prisma.DateTimeWithAggregatesFilter<"MentorParticipationSanction"> | Date | string
   endsAt?: Prisma.DateTimeWithAggregatesFilter<"MentorParticipationSanction"> | Date | string
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"MentorParticipationSanction"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"MentorParticipationSanction"> | Date | string
 }
 
 export type MentorParticipationSanctionCreateInput = {
   id?: string
   startedAt: Date | string
   endsAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMentorParticipationSanctionsInput
   triggerAttempt?: Prisma.MentorIntakeAttemptCreateNestedOneWithoutSanctionInput
 }
@@ -245,12 +271,16 @@ export type MentorParticipationSanctionUncheckedCreateInput = {
   triggerAttemptId?: string | null
   startedAt: Date | string
   endsAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorParticipationSanctionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMentorParticipationSanctionsNestedInput
   triggerAttempt?: Prisma.MentorIntakeAttemptUpdateOneWithoutSanctionNestedInput
 }
@@ -261,6 +291,8 @@ export type MentorParticipationSanctionUncheckedUpdateInput = {
   triggerAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorParticipationSanctionCreateManyInput = {
@@ -269,12 +301,16 @@ export type MentorParticipationSanctionCreateManyInput = {
   triggerAttemptId?: string | null
   startedAt: Date | string
   endsAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorParticipationSanctionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorParticipationSanctionUncheckedUpdateManyInput = {
@@ -283,6 +319,8 @@ export type MentorParticipationSanctionUncheckedUpdateManyInput = {
   triggerAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorParticipationSanctionListRelationFilter = {
@@ -306,6 +344,8 @@ export type MentorParticipationSanctionCountOrderByAggregateInput = {
   triggerAttemptId?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   endsAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorParticipationSanctionMaxOrderByAggregateInput = {
@@ -314,6 +354,8 @@ export type MentorParticipationSanctionMaxOrderByAggregateInput = {
   triggerAttemptId?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   endsAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorParticipationSanctionMinOrderByAggregateInput = {
@@ -322,6 +364,8 @@ export type MentorParticipationSanctionMinOrderByAggregateInput = {
   triggerAttemptId?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   endsAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorParticipationSanctionCreateNestedManyWithoutUserInput = {
@@ -402,6 +446,8 @@ export type MentorParticipationSanctionCreateWithoutUserInput = {
   id?: string
   startedAt: Date | string
   endsAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   triggerAttempt?: Prisma.MentorIntakeAttemptCreateNestedOneWithoutSanctionInput
 }
 
@@ -410,6 +456,8 @@ export type MentorParticipationSanctionUncheckedCreateWithoutUserInput = {
   triggerAttemptId?: string | null
   startedAt: Date | string
   endsAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorParticipationSanctionCreateOrConnectWithoutUserInput = {
@@ -447,12 +495,16 @@ export type MentorParticipationSanctionScalarWhereInput = {
   triggerAttemptId?: Prisma.UuidNullableFilter<"MentorParticipationSanction"> | string | null
   startedAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
   endsAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"MentorParticipationSanction"> | Date | string
 }
 
 export type MentorParticipationSanctionCreateWithoutTriggerAttemptInput = {
   id?: string
   startedAt: Date | string
   endsAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMentorParticipationSanctionsInput
 }
 
@@ -461,6 +513,8 @@ export type MentorParticipationSanctionUncheckedCreateWithoutTriggerAttemptInput
   userId: string
   startedAt: Date | string
   endsAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorParticipationSanctionCreateOrConnectWithoutTriggerAttemptInput = {
@@ -483,6 +537,8 @@ export type MentorParticipationSanctionUpdateWithoutTriggerAttemptInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMentorParticipationSanctionsNestedInput
 }
 
@@ -491,6 +547,8 @@ export type MentorParticipationSanctionUncheckedUpdateWithoutTriggerAttemptInput
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorParticipationSanctionCreateManyUserInput = {
@@ -498,12 +556,16 @@ export type MentorParticipationSanctionCreateManyUserInput = {
   triggerAttemptId?: string | null
   startedAt: Date | string
   endsAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type MentorParticipationSanctionUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   triggerAttempt?: Prisma.MentorIntakeAttemptUpdateOneWithoutSanctionNestedInput
 }
 
@@ -512,6 +574,8 @@ export type MentorParticipationSanctionUncheckedUpdateWithoutUserInput = {
   triggerAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorParticipationSanctionUncheckedUpdateManyWithoutUserInput = {
@@ -519,6 +583,8 @@ export type MentorParticipationSanctionUncheckedUpdateManyWithoutUserInput = {
   triggerAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endsAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -529,6 +595,8 @@ export type MentorParticipationSanctionSelect<ExtArgs extends runtime.Types.Exte
   triggerAttemptId?: boolean
   startedAt?: boolean
   endsAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   triggerAttempt?: boolean | Prisma.MentorParticipationSanction$triggerAttemptArgs<ExtArgs>
 }, ExtArgs["result"]["mentorParticipationSanction"]>
@@ -539,6 +607,8 @@ export type MentorParticipationSanctionSelectCreateManyAndReturn<ExtArgs extends
   triggerAttemptId?: boolean
   startedAt?: boolean
   endsAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   triggerAttempt?: boolean | Prisma.MentorParticipationSanction$triggerAttemptArgs<ExtArgs>
 }, ExtArgs["result"]["mentorParticipationSanction"]>
@@ -549,6 +619,8 @@ export type MentorParticipationSanctionSelectUpdateManyAndReturn<ExtArgs extends
   triggerAttemptId?: boolean
   startedAt?: boolean
   endsAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   triggerAttempt?: boolean | Prisma.MentorParticipationSanction$triggerAttemptArgs<ExtArgs>
 }, ExtArgs["result"]["mentorParticipationSanction"]>
@@ -559,9 +631,11 @@ export type MentorParticipationSanctionSelectScalar = {
   triggerAttemptId?: boolean
   startedAt?: boolean
   endsAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type MentorParticipationSanctionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "triggerAttemptId" | "startedAt" | "endsAt", ExtArgs["result"]["mentorParticipationSanction"]>
+export type MentorParticipationSanctionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "triggerAttemptId" | "startedAt" | "endsAt" | "createdAt" | "updatedAt", ExtArgs["result"]["mentorParticipationSanction"]>
 export type MentorParticipationSanctionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   triggerAttempt?: boolean | Prisma.MentorParticipationSanction$triggerAttemptArgs<ExtArgs>
@@ -587,6 +661,8 @@ export type $MentorParticipationSanctionPayload<ExtArgs extends runtime.Types.Ex
     triggerAttemptId: string | null
     startedAt: Date
     endsAt: Date
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["mentorParticipationSanction"]>
   composites: {}
 }
@@ -1017,6 +1093,8 @@ export interface MentorParticipationSanctionFieldRefs {
   readonly triggerAttemptId: Prisma.FieldRef<"MentorParticipationSanction", 'String'>
   readonly startedAt: Prisma.FieldRef<"MentorParticipationSanction", 'DateTime'>
   readonly endsAt: Prisma.FieldRef<"MentorParticipationSanction", 'DateTime'>
+  readonly createdAt: Prisma.FieldRef<"MentorParticipationSanction", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"MentorParticipationSanction", 'DateTime'>
 }
 
 

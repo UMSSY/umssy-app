@@ -1,3 +1,5 @@
+import { MentorMailOutboxRepository } from './repositories/mentor-mail-outbox.repository.js';
+import { MentorExitService } from './services/mentor-exit.service.js';
 import { Module } from '@nestjs/common';
 import { ProfileModule } from '../profile/profile.module.js';
 import { MentorPhotoController } from './controllers/mentor-photo.controller.js';
@@ -39,9 +41,11 @@ import { MentorMailOutboxService } from './services/mentor-mail-outbox.service.j
     MentorOffersService,
     MentorOffersWorker,
     MentorExitRepository,
+    MentorExitService,
     MentorParticipationService,
     MentorParticipationRepository,
     MentorMailOutboxService,
+    MentorMailOutboxRepository,
   ],
   exports: [MentorsService],
 })

@@ -30,7 +30,7 @@ import {
   type UpdateMentorOrientationTypesDto,
 } from '../requests/update-mentor-orientation-types.schema.js';
 import { MentorsService } from '../services/mentors.service.js';
-import { requireMentorIdempotencyKey } from '../repositories/mentor-intake-policy.js';
+import { requireMentorIdempotencyKey } from '../utils/mentor-idempotency-key.js';
 import {
   mentorDirectoryQuerySchema,
   type MentorDirectoryQuery,

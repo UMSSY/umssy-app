@@ -2,7 +2,8 @@ import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "@/modules/mentorship/services/mentorship-wizard-draft.service";
-import { mentorParticipationService, type MyMentorParticipation } from "../services/mentor-participation.service";
+import { mentorParticipationService } from "../services/mentor-participation.service";
+import type { MyMentorParticipationResponse } from "../types/my-mentor-participation-response.types";
 import { ParticipationView } from "./participation-view";
 import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import { renderToString } from "react-dom/server";
@@ -18,12 +19,12 @@ vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
   removeIndexedDb: vi.fn(async (key: string) => { drafts.delete(key); }),
 }));
 
-const active: MyMentorParticipation = {
+const active: MyMentorParticipationResponse = {
   status: "ACTIVE",
   areas: [{ id: "area-1", name: "Backend" }],
   orientations: [{ id: "orientation-1", name: "Orientación profesional" }],
 };
-const deactivated: MyMentorParticipation = { ...active, status: "DEACTIVATED" };
+const deactivated: MyMentorParticipationResponse = { ...active, status: "DEACTIVATED" };
 
 describe("ParticipationView HU-MEN-06", () => {
   beforeEach(() => {
@@ -194,7 +195,7 @@ describe("ParticipationView HU-MEN-06", () => {
   });
 
   it.each(["NEVER", "DEACTIVATED"] as const)("muestra el vencimiento real y permite reincorporarse en estado %s", async (status) => {
-    sessionStorage.setItem("hu7:intake:request", JSON.stringify({ subject: "anonymous", key: "previous-intention" }));
+    drafts.set("hu7:intake:anonymous:request", { fingerprint: "previous", key: "previous-intention" });
     vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue({ ...deactivated, status });
     vi.mocked(mentorParticipationService.getCurrent).mockResolvedValue({
       id: "expired-request", userId: "jwt-user", status: "EXPIRED",
@@ -214,7 +215,7 @@ describe("ParticipationView HU-MEN-06", () => {
       fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
       await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/mentorship"));
     }
-    expect(sessionStorage.getItem("hu7:intake:request")).toBeNull();
+    await waitFor(() => expect(drafts.has("hu7:intake:anonymous:request")).toBe(false));
   });
 
   it("permite reintentar cuando falla la consulta de participación", async () => {

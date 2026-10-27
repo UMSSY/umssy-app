@@ -1,42 +1,21 @@
+import type { MyMentorParticipationResponse } from "../types/my-mentor-participation-response.types";
+import type { MentorParticipationPreferencesPayload } from "../types/mentor-participation-preferences-payload.types";
+import type { MentorCapacityResponse } from "../types/mentor-capacity-response.types";
+import type { MentorParticipationRequestResponse } from "../types/mentor-participation-request-response.types";
 
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
-import { clearMentorIntakeIntentions, withMentorIntakeKey } from "@/modules/mentorship/services/mentor-intake-idempotency";
+import { clearMentorIntakeIntentions, withMentorIntakeKey } from "@/modules/mentorship";
 
-export type MentorParticipationRequest = {
-  id: string;
-  userId: string;
-  status: string;
-  queuedAt: string;
-  createdAt: string;
-  technicalAreaIds: string[];
-  orientationTypeIds: string[];
-  email?: string;
-  offer?: { id: string; status: string; offeredAt: string; expiresAt: string } | null;
-};
 
-export type MentorCapacity = {
-  available: number;
-  capacity: number;
-  occupied: number;
-};
 
-export type MentorParticipationPreferences = {
-  technicalAreaIds: string[];
-  orientationTypeIds: string[];
-};
 
-export type MyMentorParticipation = {
-  status: "ACTIVE" | "DEACTIVATED" | "NEVER";
-  areas: { id: string; name: string }[];
-  orientations: { id: string; name: string }[];
-};
 
 const BASE_PATH = "/mentor-participation/requests";
 
 export const mentorParticipationService = {
-  async getMyParticipation(signal?: AbortSignal): Promise<MyMentorParticipation> {
-    const response = await apiClient.get<ApiResponse<MyMentorParticipation>>(
+  async getMyParticipation(signal?: AbortSignal): Promise<MyMentorParticipationResponse> {
+    const response = await apiClient.get<ApiResponse<MyMentorParticipationResponse>>(
       "/mentors/me/participation", { signal },
     );
     const result = response.data.data;
@@ -51,42 +30,42 @@ export const mentorParticipationService = {
     }
     return result;
   },
-  async capacity(): Promise<MentorCapacity> {
-    const response = await apiClient.get<ApiResponse<MentorCapacity>>("/mentors/capacity");
+  async capacity(): Promise<MentorCapacityResponse> {
+    const response = await apiClient.get<ApiResponse<MentorCapacityResponse>>("/mentors/capacity");
     return response.data.data;
   },
 
   async confirm(offerId: string): Promise<void> {
     await apiClient.post(`/mentors/offers/${offerId}/confirm`);
-    clearMentorIntakeIntentions();
+    await clearMentorIntakeIntentions();
   },
 
   async leave(): Promise<void> {
     await apiClient.post("/mentors/me/leave");
-    clearMentorIntakeIntentions();
+    await clearMentorIntakeIntentions();
   },
-  async getCurrent(): Promise<MentorParticipationRequest | null> {
+  async getCurrent(): Promise<MentorParticipationRequestResponse | null> {
     const response = await apiClient.get<
-      ApiResponse<MentorParticipationRequest | null>
+      ApiResponse<MentorParticipationRequestResponse | null>
     >(`${BASE_PATH}/me`);
 
     return response.data.data;
   },
 
-  async getHistory(): Promise<MentorParticipationRequest[]> {
+  async getHistory(): Promise<MentorParticipationRequestResponse[]> {
     const response = await apiClient.get<
-      ApiResponse<MentorParticipationRequest[]>
+      ApiResponse<MentorParticipationRequestResponse[]>
     >(`${BASE_PATH}/me/history`);
 
     return response.data.data;
   },
 
   async create(
-    preferences: MentorParticipationPreferences,
-  ): Promise<MentorParticipationRequest> {
+    preferences: MentorParticipationPreferencesPayload,
+  ): Promise<MentorParticipationRequestResponse> {
     return withMentorIntakeKey("request", preferences, async (key) => {
     const response = await apiClient.post<
-      ApiResponse<MentorParticipationRequest>
+      ApiResponse<MentorParticipationRequestResponse>
     >(BASE_PATH, preferences, { headers: { "Idempotency-Key": key } });
 
     return response.data.data;
@@ -94,21 +73,21 @@ export const mentorParticipationService = {
   },
 
   async update(
-    preferences: MentorParticipationPreferences,
-  ): Promise<MentorParticipationRequest> {
+    preferences: MentorParticipationPreferencesPayload,
+  ): Promise<MentorParticipationRequestResponse> {
     const response = await apiClient.patch<
-      ApiResponse<MentorParticipationRequest>
+      ApiResponse<MentorParticipationRequestResponse>
     >(`${BASE_PATH}/me`, preferences);
 
     return response.data.data;
   },
 
-  async cancel(): Promise<MentorParticipationRequest> {
+  async cancel(): Promise<MentorParticipationRequestResponse> {
     const response = await apiClient.delete<
-      ApiResponse<MentorParticipationRequest>
+      ApiResponse<MentorParticipationRequestResponse>
     >(`${BASE_PATH}/me`);
 
-    clearMentorIntakeIntentions(["request"]);
+    await clearMentorIntakeIntentions(["request"]);
     return response.data.data;
   },
 };

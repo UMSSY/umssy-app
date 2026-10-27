@@ -143,10 +143,12 @@ function fixture(
           return [];
         }
 
-        if (sql.includes('AS eligible')) {
+        if (sql.includes('AS "isActive"')) {
           return [
             {
-              eligible: options.eligible ?? true,
+              isActive: options.eligible ?? true,
+              hasGraduateRole: true,
+              hasApprovedAccount: true,
               alreadyMentor: false,
             },
           ];
@@ -175,7 +177,9 @@ function fixture(
           return [
             await update({
               where: { id: request.id },
-              data: sql.includes("status = 'CANCELLED'")
+              data: sql.includes(
+                "status_id = mentor_request_status('CANCELLED')",
+              )
                 ? { status: 'CANCELLED' }
                 : preferences,
             }),
@@ -199,7 +203,10 @@ function fixture(
         .mockResolvedValue(options.validPreferences === false ? 0 : 1),
     },
     mentorParticipationRequest: {
-      findFirst,
+      findFirst: vi.fn(async (args) => {
+        const found = await findFirst(args);
+        return found ? { ...found, status: { title: found.status } } : null;
+      }),
       create,
       update,
     },
@@ -300,7 +307,11 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
         userId: 'user-1',
       },
       orderBy: [{ queuedAt: 'desc' }, { id: 'desc' }],
-      include: { offer: true, user: { select: { email: true } } },
+      include: {
+        status: true,
+        offer: { include: { status: true } },
+        user: { select: { email: true } },
+      },
     });
   });
 
