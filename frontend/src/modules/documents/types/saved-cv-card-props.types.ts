@@ -1,9 +1,15 @@
 import type { SavedCv } from "./saved-cv.types";
 
 export interface SavedCvCardProps {
-  savedCv: SavedCv | null;
+  cvs?: SavedCv[] | null;
+  totalCvs?: number;
   isLoading?: boolean;
+  loadError?: string | null;
+  isReloading?: boolean;
   isBusy?: boolean;
-  onReplace: () => void;
-  onDelete: () => void;
+  openingCvId?: string | null;
+  onView: (cv: SavedCv) => void;
+  onDelete: (cv: SavedCv) => void;
+  onOpenHistory: () => void;
+  onRetry: () => void;
 }

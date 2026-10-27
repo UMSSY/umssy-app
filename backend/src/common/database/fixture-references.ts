@@ -16,6 +16,10 @@ export async function loadFixtureReferences(
     context.setReference('event_statuses', row.title, row.id);
   for (const row of await tx.registrationStatus.findMany())
     context.setReference('registration_statuses', row.title, row.id);
+  for (const row of await tx.surveyStatus.findMany())
+    context.setReference('survey_statuses', row.title, row.id);
+  for (const row of await tx.surveyQuestionType.findMany())
+    context.setReference('survey_question_types', row.title, row.id);
   for (const row of await tx.city.findMany())
     context.setReference('cities', row.title, row.id);
   for (const row of await tx.company.findMany())

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { EducationNotFoundException } from '../exceptions/education-not-found.exception.js';
 import { EducationUpdateConflictException } from '../exceptions/education-update-conflict.exception.js';
 import { InvalidEducationDateRangeException } from '../exceptions/invalid-education-date-range.exception.js';
@@ -33,14 +34,17 @@ describe('EducationsService', () => {
     update: vi.fn(),
     delete: vi.fn(),
   };
+  const skillsAnalysis = { refreshAfterChange: vi.fn() };
   let service: EducationsService;
 
   beforeEach(() => {
     vi.resetAllMocks();
+    skillsAnalysis.refreshAfterChange.mockResolvedValue(undefined);
     service = new EducationsService(
       repository as unknown as EducationsRepository,
       new EducationMapper(),
       new EducationCatalogService(),
+      skillsAnalysis as unknown as ProfileSkillsAnalysisService,
     );
   });
 
@@ -50,6 +54,7 @@ describe('EducationsService', () => {
     expect(repository.create).toHaveBeenCalledWith(userId, data);
     expect(response.startDate).toBe('2020-01-01');
     expect(response).not.toHaveProperty('userId');
+    expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
   });
 
   it('rejects a reversed date range before creating', async () => {
@@ -57,6 +62,7 @@ describe('EducationsService', () => {
       service.create(userId, { ...data, endDate: new Date('2019-12-31') }),
     ).rejects.toBeInstanceOf(InvalidEducationDateRangeException);
     expect(repository.create).not.toHaveBeenCalled();
+    expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
   });
 
   it('accepts same-day education', async () => {
@@ -100,6 +106,7 @@ describe('EducationsService', () => {
       endDate: record.endDate,
     });
     expect(response.degree).toBe('Ingeniería Industrial');
+    expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
   });
 
   it.each([
@@ -159,6 +166,7 @@ describe('EducationsService', () => {
     repository.delete.mockResolvedValue(true);
     await expect(service.remove(userId, educationId)).resolves.toBeUndefined();
     expect(repository.delete).toHaveBeenCalledWith(educationId, userId);
+    expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
   });
 
   it('returns not found for deletion when no owned record matches', async () => {
@@ -166,6 +174,7 @@ describe('EducationsService', () => {
     await expect(service.remove(userId, educationId)).rejects.toBeInstanceOf(
       EducationNotFoundException,
     );
+    expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
   });
 
   it('uses standard domain error status codes', () => {
