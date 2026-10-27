@@ -22,6 +22,10 @@ const fields = Prisma.sql`id, user_id AS "userId", status, queued_at AS "queuedA
   created_at AS "createdAt", technical_area_ids AS "technicalAreaIds",
   orientation_type_ids AS "orientationTypeIds"`;
 
+const ATTEMPT_WINDOW_MS = 24 * 60 * 60 * 1000;
+const SANCTION_DURATION_MS = 72 * 60 * 60 * 1000;
+const MAX_ATTEMPTS = 4;
+
 @Injectable()
 export class MentorParticipationRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -50,12 +54,86 @@ export class MentorParticipationRepository {
     );
   }
 
+  private async registerAttempt(
+    tx: Prisma.TransactionClient,
+    userId: string,
+  ) {
+    const now = new Date();
+
+    const limit = await tx.mentorParticipationAttemptLimit.findUnique({
+      where: { userId },
+    });
+
+    if (limit?.blockedUntil && limit.blockedUntil > now) {
+      return {
+        result: 'SANCTIONED' as const,
+        blockedUntil: limit.blockedUntil,
+      };
+    }
+
+    const windowExpired =
+      !limit?.windowStartedAt ||
+      now.getTime() - limit.windowStartedAt.getTime() >= ATTEMPT_WINDOW_MS;
+
+    if (windowExpired || (limit?.blockedUntil && limit.blockedUntil <= now)) {
+      await tx.mentorParticipationAttemptLimit.upsert({
+        where: { userId },
+        create: {
+          userId,
+          attemptCount: 1,
+          windowStartedAt: now,
+          blockedUntil: null,
+        },
+        update: {
+          attemptCount: 1,
+          windowStartedAt: now,
+          blockedUntil: null,
+        },
+      });
+
+      return { result: 'ALLOWED' as const };
+    }
+
+    const attemptCount = limit.attemptCount + 1;
+
+    if (attemptCount > MAX_ATTEMPTS) {
+      const blockedUntil = new Date(
+        now.getTime() + SANCTION_DURATION_MS,
+      );
+
+      await tx.mentorParticipationAttemptLimit.update({
+        where: { userId },
+        data: {
+          attemptCount,
+          blockedUntil,
+        },
+      });
+
+      return {
+        result: 'SANCTIONED' as const,
+        blockedUntil,
+      };
+    }
+
+    await tx.mentorParticipationAttemptLimit.update({
+      where: { userId },
+      data: { attemptCount },
+    });
+
+    return { result: 'ALLOWED' as const };
+  }
+
   createRequest(
     userId: string,
     technicalAreaIds: string[],
     orientationTypeIds: string[],
   ) {
     return withMentorCapacityLock(this.prisma, async (tx) => {
+      const eligibility = await readMentorEligibility(tx, userId);
+      if (!eligibility.eligible || eligibility.alreadyMentor)
+        return { result: 'NOT_ELIGIBLE' as const };
+      const attempt = await this.registerAttempt(tx, userId);
+      if (attempt.result === 'SANCTIONED') return attempt;
       // Atiende la cola existente y vence ofertas antes de admitir otra solicitud.
       await reconcileMentorOffers(tx);
       const [existing] = await tx.$queryRaw<MentorParticipationRequest[]>`
@@ -69,9 +147,6 @@ export class MentorParticipationRepository {
           WHERE user_id = ${userId}::uuid AND status = 'OFFERED'
             AND expires_at > clock_timestamp()) AS exists`;
       if (offer.exists) return { result: 'OFFER_EXISTS' as const };
-      const eligibility = await readMentorEligibility(tx, userId);
-      if (!eligibility.eligible || eligibility.alreadyMentor)
-        return { result: 'NOT_ELIGIBLE' as const };
       if (
         !(await this.validatePreferences(
           tx,
@@ -95,12 +170,27 @@ export class MentorParticipationRepository {
     });
   }
 
-  async findMyRequest(userId: string) {
-    const [request] = await this.prisma.$queryRaw<MentorParticipationRequest[]>`
-      SELECT ${fields} FROM mentor_participation_requests
-      WHERE user_id = ${userId}::uuid AND status IN ('PENDING', 'OFFERED', 'ACTIVE')
-      ORDER BY queued_at DESC, id DESC LIMIT 1`;
-    return request ?? null;
+  findMyRequest(userId: string) {
+    return withMentorCapacityLock(this.prisma, async (tx) => {
+      await reconcileMentorOffers(tx);
+      const request = await tx.mentorParticipationRequest.findFirst({
+        where: { userId },
+        orderBy: [{ queuedAt: 'desc' }, { id: 'desc' }],
+        include: {
+          offer: true,
+          user: { select: { email: true } },
+        },
+      });
+      if (!request) return null;
+      // A direct activation can follow a cancelled/expired request. Its history
+      // must not hide the user's current mentor role.
+      if (!['PENDING', 'OFFERED', 'ACTIVE'].includes(request.status)) {
+        const { alreadyMentor } = await readMentorEligibility(tx, userId);
+        if (alreadyMentor) return null;
+      }
+      const { user, ...details } = request;
+      return { ...details, email: user.email };
+    });
   }
 
   findMyHistory(userId: string) {
