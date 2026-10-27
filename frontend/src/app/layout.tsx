@@ -3,6 +3,7 @@ import { Inter, Inter_Tight } from "next/font/google";
 import "./globals.css";
 import { RegisterServiceWorker } from "./register-service-worker";
 import { Providers } from "./providers";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <RegisterServiceWorker />
           {children}
+          <Toaster position="top-center" richColors />
         </Providers>
       </body>
     </html>

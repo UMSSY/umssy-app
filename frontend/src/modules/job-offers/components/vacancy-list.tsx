@@ -21,10 +21,9 @@ import { VacancyFiltersDialog } from "./vacancy-filters-dialog";
 
 interface VacancyListProps {
   scope?: JobOfferListScope;
-  onReopen?: (jobOfferId: string) => void;
 }
 
-export function VacancyList({ scope = "published", onReopen }: VacancyListProps) {
+export function VacancyList({ scope = "published" }: VacancyListProps) {
   const isHistory = scope === "history";
   const text = VACANCY_LIST_TEXT[scope];
   const [filters, setFilters] = useState<JobOfferFilters>(DEFAULT_JOB_OFFER_FILTERS);
@@ -119,14 +118,13 @@ export function VacancyList({ scope = "published", onReopen }: VacancyListProps)
           ) : null}
         </div>
       ) : (
-        <ul className="space-y-4">
+       <ul className="space-y-4">
           {offers.map((offer) => (
             <VacancyCard
               key={offer.id}
               offer={offer}
               onDetails={setSelectedOfferId}
               showStatus={isHistory}
-              onReopen={onReopen}
             />
           ))}
         </ul>

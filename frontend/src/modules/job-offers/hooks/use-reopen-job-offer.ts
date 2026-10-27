@@ -11,13 +11,18 @@ interface ReopenJobOfferVariables {
   jobOfferId: string;
 }
 
-export function useReopenJobOffer() {
+interface UseReopenJobOfferOptions {
+  onSuccess?: () => void;
+}
+
+export function useReopenJobOffer(options?: UseReopenJobOfferOptions) {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, ReopenJobOfferVariables>({
     mutationFn: ({ companyId, jobOfferId }) => reopenJobOffer(companyId, jobOfferId),
     onSuccess: () => {
       toast.success("Vacante reabierta correctamente.");
+      options?.onSuccess?.();
     },
     onError: (error) => {
       const message =
