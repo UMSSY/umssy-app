@@ -45,7 +45,7 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
     it('envía el borrador y devuelve id, código, estado pending y fecha ISO', async () => {
       const result = await service.submit('id-1');
 
-      expect(repository.submitWithGeneratedCode).toHaveBeenCalledWith('id-1');
+      expect(repository.submitWithGeneratedCode).toHaveBeenCalledWith('id-1', expect.any(Function));
       expect(result).toEqual({
         id: 'id-1',
         requestCode: 'SOL-2026-0001',
