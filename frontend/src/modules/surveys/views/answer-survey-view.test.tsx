@@ -1,9 +1,10 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { surveysService } from "../services/surveys.service";
 import { apiResponse } from "../testing/survey-fixtures";
-import type { SurveyToAnswer } from "../types/survey-answer.types";
+import type { SurveyDetail } from "../types/survey.types";
 import { AnswerSurveyView } from "./answer-survey-view";
 
 const push = vi.fn();
@@ -15,11 +16,12 @@ vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-const MOCK_SURVEY: SurveyToAnswer = {
+const MOCK_SURVEY: SurveyDetail = {
   id: "survey-123",
   title: "Encuesta de Seguimiento a Titulados",
   description: "Queremos conocer tu situación laboral actual.",
   status: "published",
+  career: null,
   academicPeriod: "II-2026",
   opensAt: "2026-10-01T00:00:00.000Z",
   closesAt: "2026-12-31T23:59:59.000Z",
@@ -60,11 +62,11 @@ describe("AnswerSurveyView", () => {
   });
 
   it("muestra el título, descripción y preguntas de la encuesta", async () => {
-    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue(
+    vi.spyOn(surveysService, "getSurvey").mockResolvedValue(
       apiResponse(MOCK_SURVEY),
     );
 
-    render(<AnswerSurveyView id="survey-123" />);
+    renderWithQuery(<AnswerSurveyView id="survey-123" />);
 
     expect(
       await screen.findByRole("heading", {
@@ -85,11 +87,11 @@ describe("AnswerSurveyView", () => {
   });
 
   it("muestra estado de error si la encuesta no se puede cargar", async () => {
-    vi.spyOn(surveysService, "getSurveyToAnswer").mockRejectedValue(
+    vi.spyOn(surveysService, "getSurvey").mockRejectedValue(
       new Error("Error de conexión"),
     );
 
-    render(<AnswerSurveyView id="survey-unknown" />);
+    renderWithQuery(<AnswerSurveyView id="survey-unknown" />);
 
     expect(
       await screen.findByRole("heading", { name: "No se pudo cargar la encuesta" }),
@@ -98,11 +100,11 @@ describe("AnswerSurveyView", () => {
   });
 
   it("muestra aviso de encuesta completada si el titulado ya respondió", async () => {
-    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue(
+    vi.spyOn(surveysService, "getSurvey").mockResolvedValue(
       apiResponse({ ...MOCK_SURVEY, hasAnswered: true }),
     );
 
-    render(<AnswerSurveyView id="survey-123" />);
+    renderWithQuery(<AnswerSurveyView id="survey-123" />);
 
     expect(
       await screen.findByRole("heading", { name: "¡Encuesta completada!" }),
@@ -110,11 +112,11 @@ describe("AnswerSurveyView", () => {
   });
 
   it("muestra aviso de encuesta caducada si ya expiró", async () => {
-    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue(
+    vi.spyOn(surveysService, "getSurvey").mockResolvedValue(
       apiResponse({ ...MOCK_SURVEY, isExpired: true }),
     );
 
-    render(<AnswerSurveyView id="survey-123" />);
+    renderWithQuery(<AnswerSurveyView id="survey-123" />);
 
     expect(
       await screen.findByRole("heading", { name: "Encuesta caducada" }),
@@ -123,11 +125,11 @@ describe("AnswerSurveyView", () => {
 
   it("valida preguntas obligatorias antes de enviar", async () => {
     const user = userEvent.setup();
-    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue(
+    vi.spyOn(surveysService, "getSurvey").mockResolvedValue(
       apiResponse(MOCK_SURVEY),
     );
 
-    render(<AnswerSurveyView id="survey-123" />);
+    renderWithQuery(<AnswerSurveyView id="survey-123" />);
 
     const submitBtn = await screen.findByRole("button", { name: /enviar respuestas/i });
     await user.click(submitBtn);
@@ -139,14 +141,14 @@ describe("AnswerSurveyView", () => {
 
   it("permite seleccionar opciones y enviar respuestas exitosamente", async () => {
     const user = userEvent.setup();
-    vi.spyOn(surveysService, "getSurveyToAnswer").mockResolvedValue(
+    vi.spyOn(surveysService, "getSurvey").mockResolvedValue(
       apiResponse(MOCK_SURVEY),
     );
     const submitSpy = vi.spyOn(surveysService, "submitAnswers").mockResolvedValue(
       apiResponse({ success: true, message: "Guardado" }),
     );
 
-    render(<AnswerSurveyView id="survey-123" />);
+    renderWithQuery(<AnswerSurveyView id="survey-123" />);
 
     const radioOption = await screen.findByText("Sí, a tiempo completo");
     await user.click(radioOption);
