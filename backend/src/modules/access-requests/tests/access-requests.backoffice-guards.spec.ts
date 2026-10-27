@@ -8,7 +8,6 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { AccessRequestsController } from '../controllers/access-requests.controller.js';
 import { AccessRequestsService } from '../services/access-requests.service.js';
-import { ApprovedAccountActivationService } from '../services/approved-account-activation.service.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 
@@ -26,7 +25,6 @@ describe('AccessRequestsController: guards compartidos del backoffice', () => {
       controllers: [AccessRequestsController],
       providers: [
         { provide: AccessRequestsService, useValue: service },
-        { provide: ApprovedAccountActivationService, useValue: { activate: vi.fn() } },
         { provide: JwtService, useValue: jwtService },
         JwtAuthGuard,
         RolesGuard,

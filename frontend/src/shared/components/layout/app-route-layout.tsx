@@ -6,7 +6,6 @@ import { SessionGate } from "@/modules/auth";
 import { getRouteRoles } from "@/shared/utils/get-route-roles";
 import { RoleGate } from "./role-gate";
 import { AppShell } from "./app-shell";
-import { ROUTE_ACCESS_FALLBACKS } from "@/shared/config/route-access-fallbacks.config";
 
 export function AppRouteLayout({ children }: AppRouteLayoutProps) {
   const pathname = usePathname();
@@ -21,8 +20,7 @@ export function AppRouteLayout({ children }: AppRouteLayoutProps) {
         contentClassName={isChat ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden" : undefined
 }
       >
-        <RoleGate allowedRoles={getRouteRoles(pathname ?? "")}
-          fallback={ROUTE_ACCESS_FALLBACKS[pathname?.replace(/\/$/, "") as keyof typeof ROUTE_ACCESS_FALLBACKS]}>{children}</RoleGate>
+        <RoleGate allowedRoles={getRouteRoles(pathname ?? "")}>{children}</RoleGate>
       </AppShell>
     </SessionGate>
   );

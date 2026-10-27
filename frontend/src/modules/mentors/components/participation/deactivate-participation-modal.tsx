@@ -1,7 +1,5 @@
 "use client";
 
-import type { DeactivateParticipationModalProps } from "../../types/deactivate-participation-modal-props.types";
-
 import Link from "next/link";
 
 import { AlertTriangle, ShieldCheck, UserRoundX, X } from "lucide-react";
@@ -14,6 +12,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+type DeactivateParticipationModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isLoading: boolean;
+  errorMessage: string | null;
+  hasFutureAppointments: boolean;
+  areas: string[];
+  orientations: string[];
+};
 
 function SavedItems({ label, items }: { label: string; items: string[] }) {
   return (
@@ -69,7 +77,7 @@ export function DeactivateParticipationModal({
                   Estado de mentor
                 </p>
                 <DialogTitle className="mt-1 text-xl font-bold tracking-tight text-ink">
-                  Pausar mentoría
+                  Desactivar participación
                 </DialogTitle>
               </div>
             </div>
@@ -87,9 +95,9 @@ export function DeactivateParticipationModal({
           </DialogHeader>
 
           <DialogDescription className="mt-4 text-[13px] leading-relaxed text-text-secondary">
-            Esta operación finaliza tu participación: perderás el rol de mentor y
-            tu cupo, y dejarás de aparecer como mentor activo en el directorio.
-            Para regresar tendrás que solicitar tu incorporación nuevamente.
+            Tu perfil dejará de aparecer como mentor disponible en el directorio
+            y no recibirás nuevas solicitudes de asesoramiento mientras tu
+            participación esté desactivada.
           </DialogDescription>
 
           <div className="mt-4 flex items-start gap-3 rounded-xl border border-border bg-surface-soft p-3.5">
@@ -100,8 +108,7 @@ export function DeactivateParticipationModal({
             />
             <div className="text-xs leading-relaxed text-text-secondary">
               Tus áreas técnicas y tipos de orientación permanecerán guardados.
-              Si vuelves a solicitar, seguirás el orden normal de la lista de espera.
-              No recuperarás automáticamente tu prioridad anterior.
+              Se liberará tu cupo y podrás solicitar la reincorporación desde este panel.
               <p className="mt-2 flex items-start gap-1.5 border-t border-border pt-2 font-medium text-ink-soft">
                 <AlertTriangle
                   aria-hidden="true"
@@ -154,7 +161,7 @@ export function DeactivateParticipationModal({
               className="h-9 gap-2 px-4 text-xs"
             >
               <UserRoundX aria-hidden="true" size={15} />
-              {isLoading ? "Procesando..." : "Confirmar salida"}
+              {isLoading ? "Procesando..." : "Desactivar participación"}
             </Button>
           </div>
         </div>
