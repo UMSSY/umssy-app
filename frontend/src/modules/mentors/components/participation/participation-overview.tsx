@@ -105,7 +105,7 @@ export function ParticipationOverview({
 
           <CardContent className="px-5 pt-3 pb-5 sm:px-6 sm:pb-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <span className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${isActive ? "bg-green-100 text-green-800" : "bg-surface-soft text-ink"}`}>
+              <span className="inline-flex rounded-full border border-border bg-surface-soft px-3 py-1 text-sm font-semibold text-ink">
                 {isActive ? "Activo" : "Desactivado"}
               </span>
               {actionEnabled && <Button type="button" variant={isActive ? "outline" : "default"} onClick={onAction}>

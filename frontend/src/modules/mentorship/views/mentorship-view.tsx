@@ -1,15 +1,16 @@
 
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { isApiError } from "@/shared/services/api-client";
-import { mentorParticipationService } from "@/modules/mentors/services/mentor-participation.service";
-import { participationErrorCode, participationErrorMessage } from "@/modules/mentors/utils/participation-error";
-import { SlotUnavailableDialog } from "@/modules/mentors/components/participation/slot-availability-preview";
+import { mentorParticipationService, participationErrorCode, participationErrorMessage, SlotUnavailableDialog, useParticipation } from "@/modules/mentors";
 import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { getAccessToken, subscribeAccessToken } from "@/shared/services/storage/access-token-storage";
 import { activateMentor } from "../services/mentor-activation.service";
 import { OrientationStep } from "../components/orientation/orientation-step";
 import { ParticipationStep } from "../components/participation/participation-step";
@@ -52,6 +53,8 @@ export function MentorshipView() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { refreshRoles } = useAuth();
+  const token = useSyncExternalStore(subscribeAccessToken, getAccessToken, () => null);
+  const participation = useParticipation(token);
 
   const {
     currentStep,
@@ -64,6 +67,7 @@ export function MentorshipView() {
     toggleTechnicalArea,
     canGoBack,
     canGoNext,
+    hasDraftStorageError,
     setState,
   } = useMentorshipWizard();
 
@@ -110,7 +114,7 @@ export function MentorshipView() {
   );
 
   const handleActivate = async () => {
-    if (inFlight.current || !wantsToParticipate) return;
+    if (inFlight.current || !wantsToParticipate || participation.state?.status === "ACTIVE") return;
 
     if (
       selectedTechnicalAreaIds.length === 0 ||
@@ -143,10 +147,10 @@ export function MentorshipView() {
         queryClient.invalidateQueries({ queryKey: ["mentors", "participation"] }),
         queryClient.invalidateQueries({ queryKey: ["mentor-participation-requests"] }),
         queryClient.invalidateQueries({ queryKey: ["mentorship", "directory"] }),
+        queryClient.invalidateQueries({ queryKey: ["mentorship", "profile"] }),
       ]);
-      clearMentorshipWizardDraft();
+      await clearMentorshipWizardDraft().catch(() => {});
       setIsActivated(true);
-      router.push("/mentors/participation?activated=1");
     } catch (error) {
       if (participationErrorCode(error) === "NO_SLOTS") {
         setUnavailableOpen(true);
@@ -205,7 +209,7 @@ export function MentorshipView() {
         technicalAreaIds: selectedTechnicalAreaIds,
         orientationTypeIds: selectedOrientationTypeIds,
       });
-      clearMentorshipWizardDraft();
+      await clearMentorshipWizardDraft().catch(() => {});
       await queryClient.invalidateQueries({ queryKey: ["mentor-participation-requests"] });
       setUnavailableOpen(false);
       router.push("/mentors/participation?registered=1");
@@ -238,6 +242,14 @@ export function MentorshipView() {
         )}
       />
     );
+  }
+
+  if (token && participation.isLoading) return <main role="status" className="p-6">Verificando tu participación...</main>;
+
+  if (token && participation.hasLoadError) return <main className="mx-auto max-w-4xl space-y-4 p-6"><p role="alert">No se pudo verificar tu participación.</p><Button type="button" onClick={participation.retry}>Reintentar</Button></main>;
+
+  if (participation.state?.status === "ACTIVE") {
+    return <main className="mx-auto max-w-4xl space-y-4 p-6"><h1 className="text-2xl font-bold text-ink">Ya se encuentra registrado como mentor</h1><p className="text-text-secondary">Tu participación está activa.</p><Link href="/mentors/participation" className={buttonVariants()}>Mi participación</Link></main>;
   }
 
   const renderStepContent = () => {
@@ -325,6 +337,7 @@ export function MentorshipView() {
   };
 
   return <>
+    {hasDraftStorageError && <p role="alert" className="rounded-lg border border-border bg-surface-soft p-4 text-sm text-text-secondary">No se pudo guardar el borrador. Tus selecciones permanecen en esta sesión.</p>}
     <MentorshipWizardShell
       currentStep={currentStep}
       canGoBack={canGoBack && !isActivating}

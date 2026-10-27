@@ -4,9 +4,16 @@ import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "@/modules/mentorship/services/mentorship-wizard-draft.service";
 import { mentorParticipationService, type MyMentorParticipation } from "../services/mentor-participation.service";
 import { ParticipationView } from "./participation-view";
+import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
+const drafts = vi.hoisted(() => new Map<string, unknown>());
 vi.mock("next/navigation", () => ({ useRouter: () => navigation }));
+vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
+  readIndexedDb: vi.fn(async (key: string) => drafts.get(key) ?? null),
+  writeIndexedDb: vi.fn(async (key: string, value: unknown) => { drafts.set(key, value); }),
+  removeIndexedDb: vi.fn(async (key: string) => { drafts.delete(key); }),
+}));
 
 const active: MyMentorParticipation = {
   status: "ACTIVE",
@@ -24,6 +31,7 @@ describe("ParticipationView HU-MEN-06", () => {
 
   afterEach(() => {
     cleanup();
+    drafts.clear();
     localStorage.clear();
     sessionStorage.clear();
     vi.restoreAllMocks();
@@ -89,7 +97,8 @@ describe("ParticipationView HU-MEN-06", () => {
     renderWithQuery(<ParticipationView />);
     fireEvent.click(await screen.findByRole("button", { name: "Activar participación" }));
     fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
-    expect(loadMentorshipWizardDraft()).toEqual({
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/mentorship"));
+    expect(await loadMentorshipWizardDraft()).toEqual({
       currentStep: 1, wantsToParticipate: true,
       selectedTechnicalAreaIds: ["area-1"], selectedOrientationTypeIds: ["orientation-1"],
     });
@@ -97,14 +106,27 @@ describe("ParticipationView HU-MEN-06", () => {
     expect(screen.getByText("Desactivado")).toBeInTheDocument();
   });
 
+  it("permite continuar sin precarga cuando falla IndexedDB", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(deactivated);
+    vi.mocked(writeIndexedDb).mockRejectedValueOnce(new Error("IndexedDB no está disponible"));
+    renderWithQuery(<ParticipationView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Activar participación" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo recuperar el borrador");
+    expect(navigation.push).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
+    expect(navigation.push).toHaveBeenCalledWith("/mentorship");
+  });
+
   it("respeta un borrador existente del wizard", async () => {
     vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(deactivated);
-    saveMentorshipWizardDraft({ currentStep: 3, wantsToParticipate: true,
+    await saveMentorshipWizardDraft({ currentStep: 3, wantsToParticipate: true,
       selectedTechnicalAreaIds: ["area-editada"], selectedOrientationTypeIds: ["orientation-1"] });
     renderWithQuery(<ParticipationView />);
     fireEvent.click(await screen.findByRole("button", { name: "Activar participación" }));
     fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
-    expect(loadMentorshipWizardDraft()?.selectedTechnicalAreaIds).toEqual(["area-editada"]);
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/mentorship"));
+    expect((await loadMentorshipWizardDraft())?.selectedTechnicalAreaIds).toEqual(["area-editada"]);
   });
 
   it("permite reintentar cuando falla la consulta de participación", async () => {
