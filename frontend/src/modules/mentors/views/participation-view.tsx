@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -15,10 +16,14 @@ import { ParticipationLoading } from "../components/participation/participation-
 import { ParticipationOverview } from "../components/participation/participation-overview";
 import { PendingParticipation } from "../components/participation/pending-participation";
 import { useParticipation } from "../hooks/use-participation";
+import { SlotOfferParticipation } from "../components/participation/slot-offer-participation";
+import { MentorExitDialog } from "../components/participation/mentor-exit-dialog";
+import { SlotAvailability } from "../components/participation/slot-availability";
 
 const getServerToken = () => null;
 
-export function ParticipationView() {
+export function ParticipationView({ registered = false }: { registered?: boolean }) {
+  const [notice, setNotice] = useState<string | null>(null);
   const token = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
@@ -30,6 +35,8 @@ export function ParticipationView() {
     queryFn: () => mentorParticipationService.getCurrent(),
     enabled: Boolean(token),
     retry: false,
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
   });
 
   if (!token || requestQuery.isPending) {
@@ -59,14 +66,33 @@ export function ParticipationView() {
   if (
     requestQuery.data?.status?.toUpperCase() === "PENDING"
   ) {
-    return (
+    return <>
+      {(notice || registered) && <p role="status">{notice ?? "Solicitud registrada correctamente"}</p>}
       <PendingParticipation
         request={requestQuery.data}
+        onCancelled={() => setNotice("Solicitud cancelada correctamente")}
       />
-    );
+    </>;
   }
 
-  return <ParticipationContent />;
+  if (requestQuery.data?.status === "OFFERED") {
+    if (!requestQuery.data.offer) return <Alert variant="destructive">No se pudo consultar la oferta. Actualiza la página.</Alert>;
+    return <SlotOfferParticipation key={requestQuery.data.offer.id} request={requestQuery.data} onConfirmed={() => setNotice("Participación confirmada correctamente")} />;
+  }
+
+  const status = requestQuery.data?.status;
+  if (status === "EXPIRED" || status === "CANCELLED" || status === "ENDED") {
+    return <main className="mx-auto max-w-7xl space-y-6">
+      <h1 className="text-2xl font-semibold">Mi participación como mentor</h1>
+      <p role="status">{status === "EXPIRED" ? "El plazo ha vencido" : status === "CANCELLED" ? "Solicitud cancelada correctamente" : "Tu participación como mentor ha finalizado"}</p>
+      <Link href="/mentorship" className="font-semibold text-accent underline">Volver a solicitar cupo</Link>
+    </main>;
+  }
+
+  return <>
+    {notice && <p role="status">{notice}</p>}
+    <ParticipationContent />
+  </>;
 }
 
 function ParticipationContent() {
@@ -97,13 +123,14 @@ function ParticipationContent() {
   }
 
   if (!state) {
-    return <ParticipationEmptyState />;
+    return <div className="space-y-6"><SlotAvailability /><ParticipationEmptyState /></div>;
   }
 
-  return (
+  return <div className="space-y-6">
     <ParticipationOverview
       areas={state.areas}
       orientations={state.orientations}
     />
-  );
+    <MentorExitDialog />
+  </div>;
 }

@@ -42,6 +42,8 @@ function fixture(
     queuedAt,
     createdAt: queuedAt,
     ...preferences,
+    user: { email: 'titulado@umssy.test' },
+    offer: null,
   };
 
   let attemptLimit: AttemptLimit | null = null;
@@ -183,14 +185,13 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
   });
 
   it('no crea otra solicitud cuando ya existe una pendiente', async () => {
-    const { service, create, request } = fixture({
+    const { service, create } = fixture({
       existingRequest: true,
     });
 
-    const result = await service.create('user-1', preferences);
-
-    expect(result.id).toBe(request.id);
-    expect(result.queuedAt).toEqual(request.queuedAt);
+    await expect(service.create('user-1', preferences)).rejects.toMatchObject({
+      statusCode: 409, data: { code: 'REQUEST_ALREADY_EXISTS' },
+    });
     expect(create).not.toHaveBeenCalled();
   });
 
@@ -204,9 +205,9 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
     expect(findFirst).toHaveBeenCalledWith({
       where: {
         userId: 'user-1',
-        status: { in: ['PENDING', 'OFFERED', 'ACTIVE'] },
       },
       orderBy: [{ queuedAt: 'desc' }, { id: 'desc' }],
+      include: { offer: true, user: { select: { email: true } } },
     });
   });
 
@@ -322,9 +323,7 @@ describe('HU7-4: limite de intentos y sanciones', () => {
     for (let attempt = 1; attempt <= 4; attempt++) {
       await expect(
         service.create('user-1', preferences),
-      ).resolves.toMatchObject({
-        id: 'request-1',
-      });
+      ).rejects.toMatchObject({ statusCode: 409 });
     }
 
     expect(getAttemptLimit()?.attemptCount).toBe(4);
@@ -337,7 +336,7 @@ describe('HU7-4: limite de intentos y sanciones', () => {
     });
 
     for (let attempt = 1; attempt <= 4; attempt++) {
-      await service.create('user-1', preferences);
+      await expect(service.create('user-1', preferences)).rejects.toMatchObject({ statusCode: 409 });
     }
 
     await expect(
@@ -359,7 +358,7 @@ describe('HU7-4: limite de intentos y sanciones', () => {
     });
 
     for (let attempt = 1; attempt <= 4; attempt++) {
-      await service.create('user-1', preferences);
+      await expect(service.create('user-1', preferences)).rejects.toMatchObject({ statusCode: 409 });
     }
 
     await expect(
@@ -384,9 +383,7 @@ describe('HU7-4: limite de intentos y sanciones', () => {
 
     await expect(
       service.create('user-1', preferences),
-    ).resolves.toMatchObject({
-      id: 'request-1',
-    });
+    ).rejects.toMatchObject({ statusCode: 409 });
 
     expect(getAttemptLimit()?.attemptCount).toBe(1);
     expect(getAttemptLimit()?.blockedUntil).toBeNull();
@@ -400,11 +397,11 @@ describe('HU7-4: limite de intentos y sanciones', () => {
       existingRequest: true,
     });
 
-    await service.create('user-1', preferences);
+    await expect(service.create('user-1', preferences)).rejects.toMatchObject({ statusCode: 409 });
 
     vi.setSystemTime(new Date('2026-10-27T12:00:00Z'));
 
-    await service.create('user-1', preferences);
+    await expect(service.create('user-1', preferences)).rejects.toMatchObject({ statusCode: 409 });
 
     expect(getAttemptLimit()?.attemptCount).toBe(1);
     expect(getAttemptLimit()?.windowStartedAt).toEqual(

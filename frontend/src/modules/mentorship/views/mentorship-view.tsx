@@ -1,11 +1,14 @@
 
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/shared/contexts/auth-context";
-import { apiClient, isApiError } from "@/shared/services/api-client";
+import { isApiError } from "@/shared/services/api-client";
+import { mentorParticipationService } from "@/modules/mentors/services/mentor-participation.service";
+import { participationErrorCode, participationErrorMessage } from "@/modules/mentors/utils/participation-error";
+import { SlotUnavailableDialog } from "@/modules/mentors/components/participation/slot-availability-preview";
 import { Button } from "@/components/ui/button";
 import { activateMentor } from "../services/mentor-activation.service";
 import { OrientationStep } from "../components/orientation/orientation-step";
@@ -17,21 +20,6 @@ import { StepTechnicalAreas } from "../components/wizard/step-technical-areas";
 import { useMentorshipCatalogs } from "../hooks/use-mentorship-catalogs";
 import { useMentorshipWizard } from "../hooks/use-mentorship-wizard";
 import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
-
-type ParticipationRequest = {
-  id: string;
-  status: string;
-  queuedAt: string;
-  technicalAreaIds: string[];
-  orientationTypeIds: string[];
-};
-
-type ParticipationResponse = {
-  statusCode: number;
-  ok: boolean;
-  detail: string;
-  data: ParticipationRequest;
-};
 
 function extractErrorMessage(error: unknown): string | null {
   if (!isApiError(error)) return null;
@@ -93,6 +81,8 @@ export function MentorshipView() {
   const [isActivating, setIsActivating] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
   const [activationError, setActivationError] = useState<string | null>(null);
+  const [unavailableOpen, setUnavailableOpen] = useState(false);
+  const inFlight = useRef(false);
 
   const canAdvance =
     currentStep === 1 ? wantsToParticipate : canGoNext;
@@ -120,7 +110,7 @@ export function MentorshipView() {
   );
 
   const handleActivate = async () => {
-    if (isActivating || !wantsToParticipate) return;
+    if (inFlight.current || !wantsToParticipate) return;
 
     if (
       selectedTechnicalAreaIds.length === 0 ||
@@ -133,6 +123,7 @@ export function MentorshipView() {
     }
 
     setIsActivating(true);
+    inFlight.current = true;
     setActivationError(null);
 
     const payload = {
@@ -141,45 +132,24 @@ export function MentorshipView() {
     };
 
     try {
-      await apiClient.post<ParticipationResponse>(
-        "/mentor-participation/requests",
-        payload,
-      );
-
+      const capacity = await mentorParticipationService.capacity();
+      if (capacity.available < 1) {
+        setUnavailableOpen(true);
+        return;
+      }
+      await activateMentor(payload);
+      await Promise.allSettled([
+        refreshRoles(),
+        queryClient.invalidateQueries({ queryKey: ["mentors", "participation"] }),
+        queryClient.invalidateQueries({ queryKey: ["mentor-participation-requests"] }),
+      ]);
       clearMentorshipWizardDraft();
-
-      await queryClient.invalidateQueries({
-        queryKey: ["mentors", "participation"],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["mentor-participation-requests"],
-      });
-
+      setIsActivated(true);
       router.push("/mentors/participation");
-      return;
     } catch (error) {
-      if (isApiError(error) && error.response?.status === 409) {
-        try {
-          await activateMentor(payload);
-          await refreshRoles();
-
-          clearMentorshipWizardDraft();
-          setIsActivated(true);
-
-          await queryClient.invalidateQueries({
-            queryKey: ["mentors", "participation"],
-          });
-
-          router.push("/mentors/participation");
-          return;
-        } catch (activationFailure) {
-          setActivationError(
-            extractErrorMessage(activationFailure) ??
-              "Hay cupos disponibles, pero no se pudo activar tu participación.",
-          );
-          return;
-        }
+      if (participationErrorCode(error) === "NO_SLOTS") {
+        setUnavailableOpen(true);
+        return;
       }
 
       if (isApiError(error)) {
@@ -200,6 +170,8 @@ export function MentorshipView() {
             message ??
               "No cumples los requisitos para solicitar participación como mentor.",
           );
+        } else if (status === 409) {
+          setActivationError(message ?? "Tu participación como mentor ya está activa.");
         } else if (status === 429) {
           setActivationError(
             message ??
@@ -217,6 +189,39 @@ export function MentorshipView() {
         );
       }
     } finally {
+      inFlight.current = false;
+      setIsActivating(false);
+    }
+  };
+
+  const handleRequest = async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setIsActivating(true);
+    setActivationError(null);
+    try {
+      await mentorParticipationService.create({
+        technicalAreaIds: selectedTechnicalAreaIds,
+        orientationTypeIds: selectedOrientationTypeIds,
+      });
+      clearMentorshipWizardDraft();
+      await queryClient.invalidateQueries({ queryKey: ["mentor-participation-requests"] });
+      setUnavailableOpen(false);
+      router.push("/mentors/participation?registered=1");
+    } catch (error) {
+      const code = participationErrorCode(error);
+      if (code === "REQUEST_ALREADY_EXISTS") {
+        await queryClient.invalidateQueries({ queryKey: ["mentor-participation-requests"] });
+        setUnavailableOpen(false);
+        router.push("/mentors/participation");
+      } else if (code === "CAPACITY_AVAILABLE") {
+        setUnavailableOpen(false);
+        setActivationError("Se liberó un cupo. Confirma nuevamente la activación para incorporarte como mentor.");
+      } else {
+        setActivationError(participationErrorMessage(error));
+      }
+    } finally {
+      inFlight.current = false;
       setIsActivating(false);
     }
   };
@@ -318,15 +323,16 @@ export function MentorshipView() {
     );
   };
 
-  return (
+  return <>
     <MentorshipWizardShell
       currentStep={currentStep}
-      canGoBack={canGoBack}
-      canAdvance={canAdvance}
+      canGoBack={canGoBack && !isActivating}
+      canAdvance={canAdvance && !isActivating}
       onBack={goBack}
       onNext={goNext}
     >
       {renderStepContent()}
     </MentorshipWizardShell>
-  );
+    <SlotUnavailableDialog open={unavailableOpen} onOpenChange={(open) => { setUnavailableOpen(open); setActivationError(null); }} isSubmitting={isActivating} error={activationError} onSubmit={() => void handleRequest()} />
+  </>;
 }

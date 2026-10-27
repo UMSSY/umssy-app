@@ -10,6 +10,14 @@ export type MentorParticipationRequest = {
   createdAt: string;
   technicalAreaIds: string[];
   orientationTypeIds: string[];
+  email?: string;
+  offer?: { id: string; status: string; offeredAt: string; expiresAt: string } | null;
+};
+
+export type MentorCapacity = {
+  available: number;
+  capacity: number;
+  occupied: number;
 };
 
 export type MentorParticipationPreferences = {
@@ -20,6 +28,18 @@ export type MentorParticipationPreferences = {
 const BASE_PATH = "/mentor-participation/requests";
 
 export const mentorParticipationService = {
+  async capacity(): Promise<MentorCapacity> {
+    const response = await apiClient.get<ApiResponse<MentorCapacity>>("/mentors/capacity");
+    return response.data.data;
+  },
+
+  async confirm(offerId: string): Promise<void> {
+    await apiClient.post(`/mentors/offers/${offerId}/confirm`);
+  },
+
+  async leave(): Promise<void> {
+    await apiClient.post("/mentors/me/leave");
+  },
   async getCurrent(): Promise<MentorParticipationRequest | null> {
     const response = await apiClient.get<
       ApiResponse<MentorParticipationRequest | null>

@@ -209,12 +209,14 @@ describe.skipIf(!connectionString)(
       });
 
       it('evita solicitudes duplicadas bajo concurrencia', async () => {
-        const results = await Promise.all([
+        const results = await Promise.allSettled([
           service.create(userId(1), preferences()),
           service.create(userId(1), preferences()),
         ]);
 
-        expect(results[0].id).toBe(results[1].id);
+        expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+        const rejected = results.find((result) => result.status === 'rejected');
+        expect(rejected && rejected.status === 'rejected' && rejected.reason).toMatchObject({ statusCode: 409, data: { code: 'REQUEST_ALREADY_EXISTS' } });
 
         const count =
           await prisma.mentorParticipationRequest.count({
@@ -367,12 +369,22 @@ describe.skipIf(!connectionString)(
     });
 
     describe('HU7-4: intentos y sanciones', () => {
+      async function countedAttempt() {
+        try {
+          return await service.create(userId(1), preferences());
+        } catch (error) {
+          if ((error as { data?: { code?: string } }).data?.code !== 'REQUEST_ALREADY_EXISTS') throw error;
+          expect(error).toMatchObject({ statusCode: 409 });
+          return prisma.mentorParticipationRequest.findFirstOrThrow({ where: { userId: userId(1), status: 'PENDING' } });
+        }
+      }
+
       it('permite cuatro intentos dentro de 24 horas', async () => {
         const requests: Awaited<ReturnType<MentorParticipationService['create']>>[] = [];
 
         for (let attempt = 0; attempt < 4; attempt += 1) {
           requests.push(
-            await service.create(userId(1), preferences()),
+            await countedAttempt(),
           );
         }
 
@@ -391,13 +403,13 @@ describe.skipIf(!connectionString)(
 
       it('devuelve HTTP 429 al quinto intento y registra la sancion', async () => {
         for (let attempt = 0; attempt < 4; attempt += 1) {
-          await service.create(userId(1), preferences());
+          await countedAttempt();
         }
 
         const before = new Date();
 
         await expect(
-          service.create(userId(1), preferences()),
+          countedAttempt(),
         ).rejects.toMatchObject({
           statusCode: 429,
         });
@@ -425,11 +437,11 @@ describe.skipIf(!connectionString)(
 
       it('rechaza nuevos intentos mientras la sancion esta vigente', async () => {
         for (let attempt = 0; attempt < 4; attempt += 1) {
-          await service.create(userId(1), preferences());
+          await countedAttempt();
         }
 
         await expect(
-          service.create(userId(1), preferences()),
+          countedAttempt(),
         ).rejects.toMatchObject({
           statusCode: 429,
         });
@@ -440,7 +452,7 @@ describe.skipIf(!connectionString)(
           });
 
         await expect(
-          service.create(userId(1), preferences()),
+          countedAttempt(),
         ).rejects.toMatchObject({
           statusCode: 429,
         });
@@ -456,11 +468,11 @@ describe.skipIf(!connectionString)(
 
       it('permite volver a intentar cuando finaliza la sancion', async () => {
         for (let attempt = 0; attempt < 4; attempt += 1) {
-          await service.create(userId(1), preferences());
+          await countedAttempt();
         }
 
         await expect(
-          service.create(userId(1), preferences()),
+          countedAttempt(),
         ).rejects.toMatchObject({
           statusCode: 429,
         });
@@ -472,10 +484,7 @@ describe.skipIf(!connectionString)(
           },
         });
 
-        const result = await service.create(
-          userId(1),
-          preferences(),
-        );
+        const result = await countedAttempt();
 
         expect(result.status).toBe('PENDING');
 
@@ -489,8 +498,8 @@ describe.skipIf(!connectionString)(
       });
 
       it('reinicia el contador despues de 24 horas', async () => {
-        await service.create(userId(1), preferences());
-        await service.create(userId(1), preferences());
+        await countedAttempt();
+        await countedAttempt();
 
         await prisma.mentorParticipationAttemptLimit.update({
           where: { userId: userId(1) },
@@ -501,7 +510,7 @@ describe.skipIf(!connectionString)(
           },
         });
 
-        await service.create(userId(1), preferences());
+        await countedAttempt();
 
         const limit =
           await prisma.mentorParticipationAttemptLimit.findUniqueOrThrow({

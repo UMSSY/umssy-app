@@ -22,6 +22,7 @@ import {
 
 type PendingParticipationProps = {
   request: MentorParticipationRequest;
+  onCancelled?: () => void;
 };
 
 function getErrorMessage(error: unknown): string {
@@ -87,6 +88,7 @@ function formatDate(value?: string): string {
 
 export function PendingParticipation({
   request,
+  onCancelled,
 }: PendingParticipationProps) {
   const queryClient = useQueryClient();
 
@@ -100,6 +102,8 @@ export function PendingParticipation({
   const [editOpen, setEditOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [openedAt, setOpenedAt] = useState(() => Date.now());
   const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
   const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -122,7 +126,7 @@ export function PendingParticipation({
   );
 
   const historyQuery = useQuery({
-    queryKey: ["mentor-participation-history"],
+    queryKey: ["mentor-participation-history", request.userId],
     queryFn: () => mentorParticipationService.getHistory(),
     enabled: historyOpen,
     retry: false,
@@ -162,6 +166,8 @@ export function PendingParticipation({
       await queryClient.invalidateQueries({
         queryKey: ["mentor-participation-history"],
       });
+      onCancelled?.();
+      setSuccessMessage("Solicitud cancelada correctamente");
     },
   });
 
@@ -217,11 +223,15 @@ export function PendingParticipation({
               <p className="text-sm text-text-secondary">
                 Tu solicitud está registrada en la lista de espera.
                 Los cupos se asignan siguiendo el orden de llegada (FIFO).
+                Ya tienes una solicitud pendiente; no necesitas enviar otra.
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => { setOpenedAt(Date.now()); setDetailsOpen(true); }}>
+              Ver más detalles
+            </Button>
             <Button variant="outline" onClick={openEdit}>
               <Pencil className="size-4" />
               Modificar solicitud
@@ -294,8 +304,20 @@ export function PendingParticipation({
         </p>
       </section>
 
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
         <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
+          <DialogTitle>Estado: Pendiente</DialogTitle>
+          <DialogDescription>Tu solicitud está en espera de un cupo. No necesitas enviar otra solicitud.</DialogDescription>
+          <span className="font-semibold">En evaluación</span>
+          <p>Fecha de registro: {formatDate(request.queuedAt)}</p>
+          <p>Tiempo transcurrido: {Math.floor(Math.max(0, openedAt - new Date(request.queuedAt).getTime()) / 3600000)} horas</p>
+          <p className="min-w-0 text-sm">Correo institucional: <span className="block truncate font-semibold" title={request.email}>{request.email ?? "Correo institucional no disponible"}</span></p>
+          <Button variant="outline" onClick={() => setDetailsOpen(false)}>Volver</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editOpen} onOpenChange={(value) => { if (!updateMutation.isPending) setEditOpen(value); }}>
+        <DialogContent showCloseButton={!updateMutation.isPending} className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
           <DialogTitle>Modificar solicitud pendiente</DialogTitle>
 
           <DialogDescription>
@@ -392,8 +414,8 @@ export function PendingParticipation({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
-        <DialogContent className="sm:max-w-lg">
+      <Dialog open={cancelOpen} onOpenChange={(value) => { if (!cancelMutation.isPending) setCancelOpen(value); }}>
+        <DialogContent showCloseButton={!cancelMutation.isPending} className="sm:max-w-lg">
           <DialogTitle>¿Cancelar solicitud de cupo?</DialogTitle>
 
           <DialogDescription>

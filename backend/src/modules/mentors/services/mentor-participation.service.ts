@@ -22,8 +22,13 @@ export class MentorParticipationService {
 
     switch (result.result) {
       case 'CREATED':
-      case 'ALREADY_EXISTS':
         return result.request;
+
+      case 'ALREADY_EXISTS':
+        throw new MentorParticipationException(
+          'Ya tienes una solicitud pendiente o una oferta vigente', 409,
+          { code: 'REQUEST_ALREADY_EXISTS' },
+        );
 
       case 'SANCTIONED':
         throw new MentorParticipationException(
@@ -47,6 +52,7 @@ export class MentorParticipationService {
         throw new MentorParticipationException(
           'Hay cupos disponibles para activacion directa',
           409,
+          { code: 'CAPACITY_AVAILABLE' },
         );
     }
   }

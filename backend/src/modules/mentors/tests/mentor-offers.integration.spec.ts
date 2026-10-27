@@ -11,6 +11,7 @@ import { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorOffersService } from '../services/mentor-offers.service.js';
 import { MentorOffersWorker } from '../services/mentor-offers-worker.service.js';
 import { MentorExitRepository } from '../repositories/mentor-exit.repository.js';
+import { MentorParticipationRepository } from '../repositories/mentor-participation.repository.js';
 
 const connectionString = process.env.HU7_TEST_DATABASE_URL;
 const schema = `hu7_offer_test_${randomBytes(6).toString('hex')}`;
@@ -101,6 +102,27 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     expect(records[0].expiresAt.getTime() - records[0].offeredAt.getTime()).toBe(24 * 3_600_000);
     expect(await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${uuid('a000', 2)}::uuid`)
       .toEqual([{ status: 'PENDING' }]);
+  });
+
+  it('expone la oferta y el correo propios y conserva el estado vencido para el frontend', async () => {
+    const participation = new MentorParticipationRepository(prisma as unknown as PrismaService);
+    const current = await participation.findMyRequest(uuid('8000', 2));
+    expect(current).toMatchObject({ status: 'OFFERED', email: 'hu7.2@example.test' });
+    expect(current?.offer?.id).toBe((await offers())[0].id);
+    if (!current?.offer) throw new Error('No se devolvió la oferta asignada');
+    expect(current.offer.expiresAt.getTime() - current.offer.offeredAt.getTime()).toBe(24 * 3_600_000);
+    await expireCurrent();
+    expect(await participation.findMyRequest(uuid('8000', 2))).toMatchObject({ status: 'EXPIRED', offer: { status: 'EXPIRED' } });
+    expect(await participation.findMyRequest(uuid('8000', 1))).toMatchObject({ status: 'OFFERED' });
+  });
+
+  it('una solicitud cerrada no oculta una activación directa posterior', async () => {
+    const participation = new MentorParticipationRepository(prisma as unknown as PrismaService);
+    await prisma.mentorParticipationRequest.updateMany({ data: { status: 'CANCELLED' } });
+    const repository = new MentorsRepository(prisma as unknown as PrismaService);
+    await repository.activate(uuid('8000', 1), mentorRoleId, [areaId], [orientationId]);
+    expect(await participation.findMyRequest(uuid('8000', 1))).toBeNull();
+    expect(await participation.findMyRequest(uuid('8000', 2))).toMatchObject({ status: 'CANCELLED' });
   });
 
   it('confirma una vez bajo concurrencia y rechaza la oferta de otro usuario', async () => {

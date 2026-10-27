@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
+import { reconcileMentorOffers } from './mentor-offers.queries.js';
 import {
   readMentorCapacity,
   readMentorEligibility,
@@ -132,6 +133,8 @@ export class MentorParticipationRepository {
         return attempt;
       }
 
+      await reconcileMentorOffers(tx);
+
       const existingRequest =
         await tx.mentorParticipationRequest.findFirst({
           where: {
@@ -185,15 +188,25 @@ export class MentorParticipationRepository {
   }
 
   findMyRequest(userId: string) {
-    return this.prisma.mentorParticipationRequest.findFirst({
-      where: {
-        userId,
-        status: { in: ['PENDING', 'OFFERED', 'ACTIVE'] },
-      },
-      orderBy: [
-        { queuedAt: 'desc' },
-        { id: 'desc' },
-      ],
+    return withMentorCapacityLock(this.prisma, async (tx) => {
+      await reconcileMentorOffers(tx);
+      const request = await tx.mentorParticipationRequest.findFirst({
+        where: { userId },
+        orderBy: [{ queuedAt: 'desc' }, { id: 'desc' }],
+        include: {
+          offer: true,
+          user: { select: { email: true } },
+        },
+      });
+      if (!request) return null;
+      // A direct activation can follow a cancelled/expired request. Its history
+      // must not hide the user's current mentor role.
+      if (!['PENDING', 'OFFERED', 'ACTIVE'].includes(request.status)) {
+        const { alreadyMentor } = await readMentorEligibility(tx, userId);
+        if (alreadyMentor) return null;
+      }
+      const { user, ...details } = request;
+      return { ...details, email: user.email };
     });
   }
 
