@@ -83,6 +83,11 @@ export type Education = Prisma.EducationModel
  */
 export type WorkExperience = Prisma.WorkExperienceModel
 /**
+ * Model RadarArea
+ * 
+ */
+export type RadarArea = Prisma.RadarAreaModel
+/**
  * Model Skill
  * 
  */
@@ -252,3 +257,8 @@ export type Message = Prisma.MessageModel
  * 
  */
 export type UserPresence = Prisma.UserPresenceModel
+/**
+ * Model PasswordResetOtp
+ * 
+ */
+export type PasswordResetOtp = Prisma.PasswordResetOtpModel

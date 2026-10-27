@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { HomeReveal } from "./home-reveal";
 import { HomeSectionHeading } from "./home-section-heading";
 import { HOME_AUDIENCES, HOME_SECTION_INNER_CLASS, HOME_SLANT_TAG_CLASS } from "../constants/home.constants";
 
@@ -7,7 +8,7 @@ export function HomeAudiences() {
     <section id="audiences" className="scroll-mt-28 bg-ink text-surface">
       <div className={HOME_SECTION_INNER_CLASS}>
         <HomeSectionHeading title={HOME_AUDIENCES.title} />
-        <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <HomeReveal className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {HOME_AUDIENCES.items.map((item) => (
             <article key={item.role} className="border-t-4 border-accent bg-surface/5 p-8">
               <h3 className={HOME_SLANT_TAG_CLASS}>{item.role}</h3>
@@ -16,7 +17,7 @@ export function HomeAudiences() {
               </ul>
             </article>
           ))}
-        </div>
+        </HomeReveal>
       </div>
     </section>
   );
