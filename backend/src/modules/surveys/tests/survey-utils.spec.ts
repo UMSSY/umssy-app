@@ -63,6 +63,7 @@ describe('Survey exceptions', () => {
   ])('%o expone su estado y el campo afectado', (exception, statusCode, data) => {
     expect(exception.statusCode).toBe(statusCode);
     expect(exception.data).toEqual(data);
+    expect(exception.code).toEqual(expect.any(String));
     expect(exception.name).toMatch(/Exception$/);
   });
 });
