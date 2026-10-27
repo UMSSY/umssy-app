@@ -6,7 +6,7 @@ import { DomainExceptionFilter } from '../filters/domain-exception.filter.js';
 
 class TestDomainException extends DomainException {
   constructor() {
-    super('Error de prueba', 418);
+    super('Error de prueba', 418, 'TEST_ERROR');
   }
 }
 
@@ -29,6 +29,7 @@ describe('DomainExceptionFilter', () => {
     expect(status).toHaveBeenCalledWith(418);
     expect(json).toHaveBeenCalledWith({
       statusCode: 418,
+      code: 'TEST_ERROR',
       data: null,
       detail: 'Error de prueba',
       ok: false,
@@ -44,6 +45,7 @@ describe('DomainExceptionFilter', () => {
     expect(status).toHaveBeenCalledWith(400);
     expect(json).toHaveBeenCalledWith({
       statusCode: 400,
+      code: 'VALIDATION_ERROR',
       data: errors,
       detail: 'email: Invalid email',
       ok: false,

@@ -11,6 +11,8 @@ export class EventRegistrationsMapper {
       endTime: entity.event.endTime,
       location: entity.event.location ?? 'Virtual',
       status: entity.status.title,
+      registeredAt: entity.registeredAt.toISOString(),
+      cancelledAt: entity.cancelledAt?.toISOString() ?? null,
     };
   }
 

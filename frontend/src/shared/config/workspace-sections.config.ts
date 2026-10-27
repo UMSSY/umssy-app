@@ -26,6 +26,7 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     id: "events", label: "Talleres", icon: CalendarDays, patterns: [/^\/events(?:\/|$)/],
     items: [
       { label: "Explorar talleres", href: "/events" },
+      { label: "Proponer taller", href: "/events/propose" },
       { label: "Mis inscripciones", href: "/events/my-passes" },
     ],
   },
