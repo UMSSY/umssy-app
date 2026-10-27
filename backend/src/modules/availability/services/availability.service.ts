@@ -25,6 +25,7 @@ import type { WeeklyRepeatResponse } from '../types/weekly-repeat-response.types
 import { weeklyOccurrences } from '../utils/weekly-occurrences.js';
 import { toCalendarDate } from '../utils/bolivia-day.js';
 import type { OwnerAvailabilityBlockResponse } from '../types/owner-availability-block-response.types.js';
+import type { AvailabilityBlockWithAppointments } from '../types/availability-block-with-appointments.types.js';
 
 @Injectable()
 export class AvailabilityService {
@@ -34,6 +35,13 @@ export class AvailabilityService {
     private readonly mentorsService: MentorsService,
     private readonly blockedDatesService: BlockedDatesService,
   ) {}
+
+  findBlockWithAppointments(
+    blockId: string,
+    client?: TransactionClient,
+  ): Promise<AvailabilityBlockWithAppointments | null> {
+    return this.availabilityRepository.findById(blockId, client);
+  }
 
   async remove(mentorId: string, blockId: string): Promise<DeletedBlockResponse> {
     const block = await this.availabilityRepository.findById(blockId);

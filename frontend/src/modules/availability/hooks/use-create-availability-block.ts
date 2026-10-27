@@ -6,7 +6,7 @@ import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { CREATE_BLOCK_ERROR } from "../constants/availability.constants";
 import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
 import { AVAILABILITY_TOAST_TEXT } from "../constants/availability-toast.constants";
-import { availabilityApi } from "../services/availability.api";
+import { availabilityApi } from "../services/availability.service";
 import { buildWeeklyRepeatToast } from "../utils/build-weekly-repeat-toast";
 import { isWeeklyRepeatResponse } from "../utils/is-weekly-repeat-response";
 import type { AvailabilityBlock } from "../types/availability-block.types";

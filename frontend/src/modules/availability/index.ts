@@ -10,7 +10,7 @@ export { useMyBlocks } from "./hooks/use-my-blocks";
 export { useCreateAvailabilityBlock } from "./hooks/use-create-availability-block";
 export { useDeleteBlock } from "./hooks/use-delete-block";
 export { useUpdateAvailabilityBlock } from "./hooks/use-update-availability-block";
-export { availabilityApi } from "./services/availability.api";
+export { availabilityApi } from "./services/availability.service";
 export { REQUEST_MENTORSHIP_TEXT } from "./constants/request-mentorship.constants";
 export type { AvailabilityBlock } from "./types/availability-block.types";
 export type { AvailabilityBlockState } from "./types/availability-block-state.types";

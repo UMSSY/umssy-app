@@ -13,4 +13,5 @@ export type { TechnicalAreaResponse } from "./types/technical-area-response.type
 export { getMentorOrientationTypes } from "./services/orientation-type.service";
 export { getTechnicalAreas } from "./services/technical-area.service";
 export { useMentorProfile } from "./hooks/use-mentor-profile";
+export { MENTORSHIP_QUERY_KEYS } from "./constants/mentorship-query-keys.constants";
 export type { OrientationTypeResponse } from "./types/orientation-type-response.types";

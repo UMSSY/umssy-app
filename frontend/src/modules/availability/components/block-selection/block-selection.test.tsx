@@ -4,14 +4,13 @@ import Link from "next/link"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { renderWithQuery } from "@/shared/testing/render-with-query"
 import { getWeekRange } from "@/shared/utils/date-time"
-import type { Appointment } from "@/modules/appointments"
+import { appointmentsApi, type Appointment } from "@/modules/appointments"
 import { BlockSelection } from "./block-selection"
 import { BLOCK_SELECTION_TEXT } from "../../constants/block-selection.constants"
 import {
   LEAVE_REQUEST_TEXT,
   REQUEST_APPOINTMENT_TEXT,
 } from "../../constants/request-appointment.constants"
-import { availabilityApi } from "../../services/availability.api"
 import type { AvailabilityBlock } from "../../types/availability-block.types"
 
 const push = vi.fn()
@@ -144,7 +143,7 @@ describe("BlockSelection", () => {
 
   it("sin tema no crea la cita y muestra el error junto al campo", async () => {
     const user = userEvent.setup()
-    const createSpy = vi.spyOn(availabilityApi, "createAppointment")
+    const createSpy = vi.spyOn(appointmentsApi, "createAppointment")
     renderSelection(vi.fn().mockResolvedValue([tuesdayBlock]))
 
     await selectTuesday(user)
@@ -157,7 +156,7 @@ describe("BlockSelection", () => {
   it("con tema confirma la cita y el horario deja de estar seleccionado", async () => {
     const user = userEvent.setup()
     const createSpy = vi
-      .spyOn(availabilityApi, "createAppointment")
+      .spyOn(appointmentsApi, "createAppointment")
       .mockResolvedValue({ id: "a1" } as Appointment)
     renderSelection(vi.fn().mockResolvedValue([tuesdayBlock]))
 
@@ -171,7 +170,7 @@ describe("BlockSelection", () => {
 
   it("con 409 marca el bloque como no disponible y permite elegir otro", async () => {
     const user = userEvent.setup()
-    vi.spyOn(availabilityApi, "createAppointment").mockRejectedValue({
+    vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue({
       isAxiosError: true,
       response: { status: 409, data: { detail: "Este horario ya fue reservado" } },
     })

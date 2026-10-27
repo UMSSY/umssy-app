@@ -9,7 +9,7 @@ import { getWeekRange, addWeeks } from "@/shared/utils/date-time";
 import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
 import { FREE_BLOCKS_STALE_TIME_MS } from "../constants/mentor-free-blocks.constants";
 import { REQUEST_MENTORSHIP_TEXT } from "../constants/request-mentorship.constants";
-import { availabilityApi } from "../services/availability.api";
+import { availabilityApi } from "../services/availability.service";
 
 export function useRequestMentorship(mentorId: string) {
   const router = useRouter();

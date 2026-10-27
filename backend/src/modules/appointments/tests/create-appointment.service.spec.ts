@@ -49,7 +49,7 @@ describe('AppointmentsService', () => {
     createAppointment: vi.fn(),
     createAppointmentHistory: vi.fn(),
   };
-  const availabilityRepository = { findById: vi.fn() };
+  const availabilityService = { findBlockWithAppointments: vi.fn() };
   const blockedDatesService = { runOnUnblockedDay: vi.fn() };
   const mentorsService = { findOne: vi.fn() };
   const user = {
@@ -66,7 +66,7 @@ describe('AppointmentsService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    availabilityRepository.findById.mockResolvedValue(block());
+    availabilityService.findBlockWithAppointments.mockResolvedValue(block());
     mentorsService.findOne.mockResolvedValue({
       id: MENTOR_ID,
       isAvailable: true,
@@ -85,7 +85,7 @@ describe('AppointmentsService', () => {
     service = new AppointmentsService(
       appointmentsRepository as never,
       new AppointmentMapper(),
-      availabilityRepository as never,
+      availabilityService as never,
       blockedDatesService as never,
       mentorsService as never,
     );
@@ -93,7 +93,7 @@ describe('AppointmentsService', () => {
 
   it('crea la cita confirmada dentro del candado del día con los datos del bloque', async () => {
     const createdBlock = block();
-    availabilityRepository.findById
+    availabilityService.findBlockWithAppointments
       .mockResolvedValueOnce(createdBlock)
       .mockResolvedValueOnce(createdBlock);
 
@@ -104,7 +104,7 @@ describe('AppointmentsService', () => {
       createdBlock.startAt,
       expect.any(Function),
     );
-    expect(availabilityRepository.findById).toHaveBeenLastCalledWith(BLOCK_ID, TX);
+    expect(availabilityService.findBlockWithAppointments).toHaveBeenLastCalledWith(BLOCK_ID, TX);
     expect(appointmentsRepository.findStatusIdByTitle).toHaveBeenCalledWith(
       AppointmentStatusTitle.CONFIRMED,
       TX,
@@ -178,7 +178,7 @@ describe('AppointmentsService', () => {
   });
 
   it('responde 404 cuando el bloque no existe', async () => {
-    availabilityRepository.findById.mockResolvedValue(null);
+    availabilityService.findBlockWithAppointments.mockResolvedValue(null);
 
     await expect(service.create(user, payload)).rejects.toThrow(
       BlockNotFoundException,
@@ -188,7 +188,7 @@ describe('AppointmentsService', () => {
   });
 
   it('responde 400 cuando el bloque ya pasó', async () => {
-    availabilityRepository.findById.mockResolvedValue(
+    availabilityService.findBlockWithAppointments.mockResolvedValue(
       block({ startAt: new Date(Date.now() - 60 * 60 * 1000) }),
     );
 
@@ -199,7 +199,7 @@ describe('AppointmentsService', () => {
   });
 
   it('responde 403 cuando el mentor intenta reservar su propio bloque', async () => {
-    availabilityRepository.findById.mockResolvedValue(
+    availabilityService.findBlockWithAppointments.mockResolvedValue(
       block({ mentorId: STUDENT_ID }),
     );
 
@@ -208,7 +208,7 @@ describe('AppointmentsService', () => {
   });
 
   it('responde 409 cuando el bloque ya tiene una cita activa', async () => {
-    availabilityRepository.findById.mockResolvedValue(
+    availabilityService.findBlockWithAppointments.mockResolvedValue(
       block({
         appointments: [
           { status: { title: AppointmentStatusTitle.CONFIRMED } },
@@ -262,7 +262,7 @@ describe('AppointmentsService', () => {
   });
 
   it('responde 409 sin crear la cita cuando otra reserva gana dentro del candado', async () => {
-    availabilityRepository.findById
+    availabilityService.findBlockWithAppointments
       .mockResolvedValueOnce(block())
       .mockResolvedValueOnce(
         block({
@@ -279,7 +279,7 @@ describe('AppointmentsService', () => {
   });
 
   it('responde 404 cuando el bloque desaparece dentro del candado', async () => {
-    availabilityRepository.findById
+    availabilityService.findBlockWithAppointments
       .mockResolvedValueOnce(block())
       .mockResolvedValueOnce(null);
 

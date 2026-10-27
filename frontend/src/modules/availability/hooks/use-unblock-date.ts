@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
 import { BLOCKED_DATE_TEXT } from "../constants/blocked-date.constants";
-import { availabilityApi } from "../services/availability.api";
+import { availabilityApi } from "../services/availability.service";
 
 export function useUnblockDate() {
   const queryClient = useQueryClient();

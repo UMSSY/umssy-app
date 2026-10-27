@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { APPOINTMENTS_QUERY_KEYS } from "../constants/appointments-query-keys.constants";
 import { APPOINTMENTS_TEXT } from "../constants/appointments.constants";
-import { appointmentsApi } from "../services/appointments.api";
+import { appointmentsApi } from "../services/appointments.service";
 import type { AppointmentScope } from "../types/appointment-scope.types";
 
 export function useAppointments(scope: AppointmentScope = "upcoming") {

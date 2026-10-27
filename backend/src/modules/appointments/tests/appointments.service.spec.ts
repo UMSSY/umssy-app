@@ -1,6 +1,6 @@
 import { Test, type TestingModule } from '@nestjs/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AvailabilityRepository } from '../../availability/repositories/availability.repository.js';
+import { AvailabilityService } from '../../availability/services/availability.service.js';
 import { BlockedDatesService } from '../../availability/services/blocked-dates.service.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { AppointmentNotFoundException } from '../exceptions/appointment-not-found.exception.js';
@@ -32,7 +32,7 @@ describe('AppointmentsService', () => {
         AppointmentsService,
         { provide: AppointmentsRepository, useValue: repository },
         { provide: AppointmentMapper, useValue: mapper },
-        { provide: AvailabilityRepository, useValue: {} },
+        { provide: AvailabilityService, useValue: {} },
         { provide: BlockedDatesService, useValue: {} },
         { provide: MentorsService, useValue: {} },
       ],
