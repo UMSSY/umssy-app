@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SocketProvider, useSocket } from '../contexts/socket-context';
 import * as accessTokenStorage from '@/shared/services/storage/access-token-storage';
 
+
 vi.mock('socket.io-client', () => ({
   io: vi.fn(() => ({
     on: vi.fn(),
@@ -12,9 +13,7 @@ vi.mock('socket.io-client', () => ({
   })),
 }));
 
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn() }),
-}));
+
 
 const TestConsumer = () => {
   const { isConnected, socket } = useSocket();
@@ -44,13 +43,12 @@ describe('SocketProvider', () => {
       </SocketProvider>
     );
 
-    
     await waitFor(() => {
       expect(screen.getByTestId('has-socket')).toHaveTextContent('Sí');
     });
   });
 
-  it('no debe conectarse si no hay token', async () => {
+  it('no debe conectarse si no hay token', () => {
     vi.spyOn(accessTokenStorage, 'getAccessToken').mockReturnValue(null);
 
     render(
