@@ -17,6 +17,10 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { UseGuards, Req } from '@nestjs/common';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { JobRecommendationsService } from '../services/job-recommendations.service.js';
+import type { JobRecommendationsResponse } from '../services/job-recommendations.service.js';
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { buildRequestValidationException } from '../../../common/utils/build-request-validation-exception.js';
 import { toApiBody } from '../../../common/utils/to-api-body.js';
@@ -39,7 +43,6 @@ const companyIdPipe = new ParseUUIDPipe({
     ]),
 });
 
-// TODO: proteger con JwtAuthGuard y el rol empresa cuando el login devuelva el companyId (Epic 1)
 @ApiTags('job-offers')
 @UsePipes(
   new StandardSchemaValidationPipe({
@@ -48,7 +51,10 @@ const companyIdPipe = new ParseUUIDPipe({
 )
 @Controller()
 export class JobOffersController {
-  constructor(private readonly jobOffersService: JobOffersService) {}
+  constructor(
+    private readonly jobOffersService: JobOffersService,
+    private readonly jobRecommendationsService: JobRecommendationsService,
+  ) {}
 
   @Get('job-offers')
   @ApiOperation({ summary: 'Lista las vacantes publicadas y vigentes para los egresados' })
@@ -74,6 +80,14 @@ export class JobOffersController {
     @Body({ schema: createJobOfferSchema }) request: CreateJobOfferRequest,
   ): Promise<JobOfferCreatedResponse> {
     return this.jobOffersService.create(companyId, request);
+  }
+
+  @Get('job-offers/recommendations')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Lista las vacantes recomendadas para el usuario autenticado' })
+  @ApiOkResponse({ description: 'Vacantes ordenadas por porcentaje de afinidad' })
+  async getRecommendations(@Req() req: any): Promise<JobRecommendationsResponse> {
+    return this.jobRecommendationsService.getRecommendations(req.user.id);
   }
 
   @Get('companies/:companyId/job-offers')
