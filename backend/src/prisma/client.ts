@@ -282,6 +282,16 @@ export type Message = Prisma.MessageModel
  */
 export type UserPresence = Prisma.UserPresenceModel
 /**
+ * Model JobApplicationStatus
+ * 
+ */
+export type JobApplicationStatus = Prisma.JobApplicationStatusModel
+/**
+ * Model JobApplication
+ * 
+ */
+export type JobApplication = Prisma.JobApplicationModel
+/**
  * Model SurveyStatus
  * 
  */

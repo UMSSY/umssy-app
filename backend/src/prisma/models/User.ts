@@ -293,6 +293,7 @@ export type UserWhereInput = {
   presence?: Prisma.XOR<Prisma.UserPresenceNullableScalarRelationFilter, Prisma.UserPresenceWhereInput> | null
   auditEvents?: Prisma.AuditEventListRelationFilter
   revertedValidations?: Prisma.DocumentValidationListRelationFilter
+  jobApplications?: Prisma.JobApplicationListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -342,6 +343,7 @@ export type UserOrderByWithRelationInput = {
   presence?: Prisma.UserPresenceOrderByWithRelationInput
   auditEvents?: Prisma.AuditEventOrderByRelationAggregateInput
   revertedValidations?: Prisma.DocumentValidationOrderByRelationAggregateInput
+  jobApplications?: Prisma.JobApplicationOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -394,6 +396,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   presence?: Prisma.XOR<Prisma.UserPresenceNullableScalarRelationFilter, Prisma.UserPresenceWhereInput> | null
   auditEvents?: Prisma.AuditEventListRelationFilter
   revertedValidations?: Prisma.DocumentValidationListRelationFilter
+  jobApplications?: Prisma.JobApplicationListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -484,6 +487,7 @@ export type UserCreateInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -532,6 +536,7 @@ export type UserUncheckedCreateInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -580,6 +585,7 @@ export type UserUpdateInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -628,6 +634,7 @@ export type UserUncheckedUpdateInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1183,6 +1190,20 @@ export type UserUpdateOneRequiredWithoutPresenceNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPresenceInput, Prisma.UserUpdateWithoutPresenceInput>, Prisma.UserUncheckedUpdateWithoutPresenceInput>
 }
 
+export type UserCreateNestedOneWithoutJobApplicationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutJobApplicationsInput, Prisma.UserUncheckedCreateWithoutJobApplicationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutJobApplicationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutJobApplicationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutJobApplicationsInput, Prisma.UserUncheckedCreateWithoutJobApplicationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutJobApplicationsInput
+  upsert?: Prisma.UserUpsertWithoutJobApplicationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutJobApplicationsInput, Prisma.UserUpdateWithoutJobApplicationsInput>, Prisma.UserUncheckedUpdateWithoutJobApplicationsInput>
+}
+
 export type UserCreateNestedOneWithoutCreatedSurveysInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedSurveysInput, Prisma.UserUncheckedCreateWithoutCreatedSurveysInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedSurveysInput
@@ -1288,6 +1309,7 @@ export type UserCreateWithoutCityInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCityInput = {
@@ -1335,6 +1357,7 @@ export type UserUncheckedCreateWithoutCityInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCityInput = {
@@ -1429,6 +1452,7 @@ export type UserCreateWithoutRolesInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRolesInput = {
@@ -1476,6 +1500,7 @@ export type UserUncheckedCreateWithoutRolesInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRolesInput = {
@@ -1539,6 +1564,7 @@ export type UserUpdateWithoutRolesInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRolesInput = {
@@ -1586,6 +1612,7 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEducationsInput = {
@@ -1633,6 +1660,7 @@ export type UserCreateWithoutEducationsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEducationsInput = {
@@ -1680,6 +1708,7 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEducationsInput = {
@@ -1743,6 +1772,7 @@ export type UserUpdateWithoutEducationsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEducationsInput = {
@@ -1790,6 +1820,7 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWorkExperiencesInput = {
@@ -1837,6 +1868,7 @@ export type UserCreateWithoutWorkExperiencesInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkExperiencesInput = {
@@ -1884,6 +1916,7 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkExperiencesInput = {
@@ -1947,6 +1980,7 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
@@ -1994,6 +2028,7 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserSkillsInput = {
@@ -2041,6 +2076,7 @@ export type UserCreateWithoutUserSkillsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserSkillsInput = {
@@ -2088,6 +2124,7 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserSkillsInput = {
@@ -2151,6 +2188,7 @@ export type UserUpdateWithoutUserSkillsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserSkillsInput = {
@@ -2198,6 +2236,7 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCertificationsInput = {
@@ -2245,6 +2284,7 @@ export type UserCreateWithoutCertificationsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCertificationsInput = {
@@ -2292,6 +2332,7 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCertificationsInput = {
@@ -2355,6 +2396,7 @@ export type UserUpdateWithoutCertificationsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCertificationsInput = {
@@ -2402,6 +2444,7 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCvFileInput = {
@@ -2449,6 +2492,7 @@ export type UserCreateWithoutCvFileInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCvFileInput = {
@@ -2496,6 +2540,7 @@ export type UserUncheckedCreateWithoutCvFileInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCvFileInput = {
@@ -2559,6 +2604,7 @@ export type UserUpdateWithoutCvFileInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCvFileInput = {
@@ -2606,6 +2652,7 @@ export type UserUncheckedUpdateWithoutCvFileInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMentorTechnicalAreasInput = {
@@ -2653,6 +2700,7 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
@@ -2700,6 +2748,7 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorTechnicalAreasInput = {
@@ -2763,6 +2812,7 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
@@ -2810,6 +2860,7 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMentorOrientationTypesInput = {
@@ -2857,6 +2908,7 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
@@ -2904,6 +2956,7 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorOrientationTypesInput = {
@@ -2967,6 +3020,7 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
@@ -3014,6 +3068,7 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAvailabilityBlocksInput = {
@@ -3061,6 +3116,7 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
@@ -3108,6 +3164,7 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAvailabilityBlocksInput = {
@@ -3171,6 +3228,7 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
@@ -3218,6 +3276,7 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutBlockedDatesInput = {
@@ -3265,6 +3324,7 @@ export type UserCreateWithoutBlockedDatesInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBlockedDatesInput = {
@@ -3312,6 +3372,7 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBlockedDatesInput = {
@@ -3375,6 +3436,7 @@ export type UserUpdateWithoutBlockedDatesInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBlockedDatesInput = {
@@ -3422,6 +3484,7 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMentorAppointmentsInput = {
@@ -3469,6 +3532,7 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
@@ -3516,6 +3580,7 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMentorAppointmentsInput = {
@@ -3568,6 +3633,7 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
@@ -3615,6 +3681,7 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStudentAppointmentsInput = {
@@ -3667,6 +3734,7 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
@@ -3714,6 +3782,7 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCancelledAppointmentsInput = {
@@ -3777,6 +3846,7 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
@@ -3824,6 +3894,7 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutStudentAppointmentsInput = {
@@ -3882,6 +3953,7 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
@@ -3929,6 +4001,7 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutCancelledAppointmentsInput = {
@@ -3987,6 +4060,7 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
@@ -4034,6 +4108,7 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAppointmentChangesInput = {
@@ -4081,6 +4156,7 @@ export type UserCreateWithoutAppointmentChangesInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAppointmentChangesInput = {
@@ -4128,6 +4204,7 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAppointmentChangesInput = {
@@ -4191,6 +4268,7 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
@@ -4238,6 +4316,7 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCreatedEventsInput = {
@@ -4285,6 +4364,7 @@ export type UserCreateWithoutCreatedEventsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedEventsInput = {
@@ -4332,6 +4412,7 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedEventsInput = {
@@ -4384,6 +4465,7 @@ export type UserCreateWithoutModeratedEventsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutModeratedEventsInput = {
@@ -4431,6 +4513,7 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutModeratedEventsInput = {
@@ -4494,6 +4577,7 @@ export type UserUpdateWithoutCreatedEventsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedEventsInput = {
@@ -4541,6 +4625,7 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutModeratedEventsInput = {
@@ -4599,6 +4684,7 @@ export type UserUpdateWithoutModeratedEventsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutModeratedEventsInput = {
@@ -4646,6 +4732,7 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEventRegistrationsInput = {
@@ -4693,6 +4780,7 @@ export type UserCreateWithoutEventRegistrationsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEventRegistrationsInput = {
@@ -4740,6 +4828,7 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEventRegistrationsInput = {
@@ -4803,6 +4892,7 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
@@ -4850,6 +4940,7 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCheckedInAttendancesInput = {
@@ -4897,6 +4988,7 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
@@ -4944,6 +5036,7 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCheckedInAttendancesInput = {
@@ -5007,6 +5100,7 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
@@ -5054,6 +5148,7 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutExportHistoriesInput = {
@@ -5101,6 +5196,7 @@ export type UserCreateWithoutExportHistoriesInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutExportHistoriesInput = {
@@ -5148,6 +5244,7 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutExportHistoriesInput = {
@@ -5211,6 +5308,7 @@ export type UserUpdateWithoutExportHistoriesInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExportHistoriesInput = {
@@ -5258,6 +5356,7 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutOpenedAccessRequestsInput = {
@@ -5305,6 +5404,7 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
@@ -5352,6 +5452,7 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutOpenedAccessRequestsInput = {
@@ -5404,6 +5505,7 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
@@ -5451,6 +5553,7 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReviewedAccessRequestsInput = {
@@ -5514,6 +5617,7 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
@@ -5561,6 +5665,7 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutReviewedAccessRequestsInput = {
@@ -5619,6 +5724,7 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
@@ -5666,6 +5772,7 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutConversationsAsUserAInput = {
@@ -5713,6 +5820,7 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
@@ -5760,6 +5868,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsUserAInput = {
@@ -5812,6 +5921,7 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
@@ -5859,6 +5969,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsUserBInput = {
@@ -5922,6 +6033,7 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
@@ -5969,6 +6081,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutConversationsAsUserBInput = {
@@ -6027,6 +6140,7 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
@@ -6074,6 +6188,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutChatParticipantsInput = {
@@ -6121,6 +6236,7 @@ export type UserCreateWithoutChatParticipantsInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutChatParticipantsInput = {
@@ -6168,6 +6284,7 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutChatParticipantsInput = {
@@ -6231,6 +6348,7 @@ export type UserUpdateWithoutChatParticipantsInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatParticipantsInput = {
@@ -6278,6 +6396,7 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutChatMessagesInput = {
@@ -6325,6 +6444,7 @@ export type UserCreateWithoutChatMessagesInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutChatMessagesInput = {
@@ -6372,6 +6492,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutChatMessagesInput = {
@@ -6435,6 +6556,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatMessagesInput = {
@@ -6482,6 +6604,7 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPresenceInput = {
@@ -6529,6 +6652,7 @@ export type UserCreateWithoutPresenceInput = {
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPresenceInput = {
@@ -6576,6 +6700,7 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPresenceInput = {
@@ -6639,6 +6764,7 @@ export type UserUpdateWithoutPresenceInput = {
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPresenceInput = {
@@ -6684,6 +6810,215 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutJobApplicationsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+}
+
+export type UserUncheckedCreateWithoutJobApplicationsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+}
+
+export type UserCreateOrConnectWithoutJobApplicationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutJobApplicationsInput, Prisma.UserUncheckedCreateWithoutJobApplicationsInput>
+}
+
+export type UserUpsertWithoutJobApplicationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutJobApplicationsInput, Prisma.UserUncheckedUpdateWithoutJobApplicationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutJobApplicationsInput, Prisma.UserUncheckedCreateWithoutJobApplicationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutJobApplicationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutJobApplicationsInput, Prisma.UserUncheckedUpdateWithoutJobApplicationsInput>
+}
+
+export type UserUpdateWithoutJobApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutJobApplicationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
 }
@@ -6733,6 +7068,7 @@ export type UserCreateWithoutCreatedSurveysInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCreatedSurveysInput = {
@@ -6780,6 +7116,7 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCreatedSurveysInput = {
@@ -6843,6 +7180,7 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
@@ -6890,6 +7228,7 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSurveyResponsesInput = {
@@ -6937,6 +7276,7 @@ export type UserCreateWithoutSurveyResponsesInput = {
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSurveyResponsesInput = {
@@ -6984,6 +7324,7 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSurveyResponsesInput = {
@@ -7047,6 +7388,7 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
@@ -7094,6 +7436,7 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditEventsInput = {
@@ -7141,6 +7484,7 @@ export type UserCreateWithoutAuditEventsInput = {
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditEventsInput = {
@@ -7188,6 +7532,7 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditEventsInput = {
@@ -7251,6 +7596,7 @@ export type UserUpdateWithoutAuditEventsInput = {
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditEventsInput = {
@@ -7298,6 +7644,7 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRevertedValidationsInput = {
@@ -7345,6 +7692,7 @@ export type UserCreateWithoutRevertedValidationsInput = {
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRevertedValidationsInput = {
@@ -7392,6 +7740,7 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRevertedValidationsInput = {
@@ -7455,6 +7804,7 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
@@ -7502,6 +7852,7 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyCityInput = {
@@ -7566,6 +7917,7 @@ export type UserUpdateWithoutCityInput = {
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCityInput = {
@@ -7613,6 +7965,7 @@ export type UserUncheckedUpdateWithoutCityInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCityInput = {
@@ -7666,6 +8019,7 @@ export type UserCountOutputType = {
   chatParticipants: number
   auditEvents: number
   revertedValidations: number
+  jobApplications: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -7697,6 +8051,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   chatParticipants?: boolean | UserCountOutputTypeCountChatParticipantsArgs
   auditEvents?: boolean | UserCountOutputTypeCountAuditEventsArgs
   revertedValidations?: boolean | UserCountOutputTypeCountRevertedValidationsArgs
+  jobApplications?: boolean | UserCountOutputTypeCountJobApplicationsArgs
 }
 
 /**
@@ -7905,6 +8260,13 @@ export type UserCountOutputTypeCountRevertedValidationsArgs<ExtArgs extends runt
   where?: Prisma.DocumentValidationWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountJobApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JobApplicationWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -7953,6 +8315,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   presence?: boolean | Prisma.User$presenceArgs<ExtArgs>
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   revertedValidations?: boolean | Prisma.User$revertedValidationsArgs<ExtArgs>
+  jobApplications?: boolean | Prisma.User$jobApplicationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -8045,6 +8408,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   presence?: boolean | Prisma.User$presenceArgs<ExtArgs>
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   revertedValidations?: boolean | Prisma.User$revertedValidationsArgs<ExtArgs>
+  jobApplications?: boolean | Prisma.User$jobApplicationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -8088,6 +8452,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     presence: Prisma.$UserPresencePayload<ExtArgs> | null
     auditEvents: Prisma.$AuditEventPayload<ExtArgs>[]
     revertedValidations: Prisma.$DocumentValidationPayload<ExtArgs>[]
+    jobApplications: Prisma.$JobApplicationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -8530,6 +8895,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   presence<T extends Prisma.User$presenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$presenceArgs<ExtArgs>>): Prisma.Prisma__UserPresenceClient<runtime.Types.Result.GetResult<Prisma.$UserPresencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   auditEvents<T extends Prisma.User$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   revertedValidations<T extends Prisma.User$revertedValidationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$revertedValidationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentValidationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  jobApplications<T extends Prisma.User$jobApplicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$jobApplicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9701,6 +10067,30 @@ export type User$revertedValidationsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.DocumentValidationScalarFieldEnum | Prisma.DocumentValidationScalarFieldEnum[]
+}
+
+/**
+ * User.jobApplications
+ */
+export type User$jobApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the JobApplication
+   */
+  select?: Prisma.JobApplicationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the JobApplication
+   */
+  omit?: Prisma.JobApplicationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JobApplicationInclude<ExtArgs> | null
+  where?: Prisma.JobApplicationWhereInput
+  orderBy?: Prisma.JobApplicationOrderByWithRelationInput | Prisma.JobApplicationOrderByWithRelationInput[]
+  cursor?: Prisma.JobApplicationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.JobApplicationScalarFieldEnum | Prisma.JobApplicationScalarFieldEnum[]
 }
 
 /**

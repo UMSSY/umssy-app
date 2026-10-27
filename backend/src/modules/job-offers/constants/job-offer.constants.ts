@@ -3,6 +3,9 @@ export const JOB_OFFER_DESCRIPTION_MAX_LENGTH = 3000;
 export const JOB_OFFER_LANGUAGES_MAX_LENGTH = 100;
 export const JOB_OFFER_MAX_POSITIONS = 500;
 export const JOB_OFFER_MAX_SKILLS = 10;
+export const JOB_OFFER_MAX_REQUIREMENTS = 10;
+export const JOB_OFFER_REQUIREMENT_MAX_LENGTH = 120;
+export const JOB_OFFER_MAX_EXPERIENCE_YEARS = 40;
 export const JOB_OFFER_MAX_SALARY = 999_999_999;
 export const JOB_OFFER_SALARY_TO_BE_AGREED = 'A convenir';
 
@@ -25,6 +28,10 @@ export const JOB_OFFER_VALIDATION_MESSAGES = {
   SKILLS_TOO_MANY: `No se pueden seleccionar mas de ${JOB_OFFER_MAX_SKILLS} habilidades`,
   INVALID_SKILL_ID: 'El identificador de la habilidad no es valido',
   INVALID_COMPANY_ID: 'El identificador de la empresa no es valido',
+  REQUIREMENT_TOO_LONG: `Cada requisito no debe exceder los ${JOB_OFFER_REQUIREMENT_MAX_LENGTH} caracteres`,
+  REQUIREMENTS_TOO_MANY: `No se pueden agregar mas de ${JOB_OFFER_MAX_REQUIREMENTS} requisitos`,
+  EXPERIENCE_NOT_INTEGER: 'Los años de experiencia deben ser un numero entero',
+  EXPERIENCE_OUT_OF_RANGE: `Los años de experiencia deben estar entre 0 y ${JOB_OFFER_MAX_EXPERIENCE_YEARS}`,
   INVALID_JOB_OFFER_ID: 'El identificador de la vacante no es valido',
   INVALID_DATE: 'La fecha debe tener el formato AAAA-MM-DD',
   DATE_RANGE_INVALID: 'La fecha inicial no puede ser mayor a la fecha final',

@@ -41,18 +41,31 @@ describe('UserSkillRepository', () => {
     });
   });
 
-  it('replaces the skills of the user in a single transaction', async () => {
+  it('replaces the skills of the user in a single transaction keeping the ones that remain', async () => {
     const records = [{ skill: { id: skillId, name: 'Python', isCustom: false } }];
     userSkill.findMany.mockResolvedValue(records);
 
     await expect(repository.replaceForUser(userId, [skillId, otherSkillId])).resolves.toBe(records);
-    expect(userSkill.deleteMany).toHaveBeenCalledWith({ where: { userId } });
+    expect(userSkill.deleteMany).toHaveBeenCalledWith({
+      where: { userId, skillId: { notIn: [skillId, otherSkillId] } },
+    });
     expect(userSkill.createMany).toHaveBeenCalledWith({
       data: [
         { userId, skillId },
         { userId, skillId: otherSkillId },
       ],
+      skipDuplicates: true,
     });
     expect(transaction).toHaveBeenCalledWith(['delete-operation', 'create-operation']);
+  });
+
+  it('removes every skill when the new list is empty', async () => {
+    userSkill.findMany.mockResolvedValue([]);
+
+    await repository.replaceForUser(userId, []);
+
+    expect(userSkill.deleteMany).toHaveBeenCalledWith({
+      where: { userId, skillId: { notIn: [] } },
+    });
   });
 });
