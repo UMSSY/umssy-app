@@ -36,6 +36,9 @@ describe("AppSidebar", () => {
     ["/mentorship/orientation", "Mentorías", "Tipos de orientación"],
     ["/backoffice/reports/history", "Reportes", "Historial de reportes"],
     ["/profile/settings", "Mi perfil", "Configuración del perfil"],
+    ["/vacancies", "Vacantes", "Todas las vacantes"],
+    ["/vacancies/recommended", "Vacantes", "Vacantes para ti"],
+    ["/vacancies/recommended/example-id", "Vacantes", "Vacantes para ti"],
     ["/backoffice/surveys/create", "Encuestas", "Crear encuesta"],
   ])("opens the current group and marks only the current destination for %s", (pathname, group, destination) => {
     route.pathname = pathname; renderSidebar();
