@@ -65,9 +65,10 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, on
         <p className="mt-1 text-sm text-text-secondary">Tipo de contrato: {offer.contractType}</p>
         {isPublished ? (
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" className="max-md:h-11" disabled>
+            <Link href={`/matching?vacancyId=${offer.id}`}
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "max-md:h-11")}>
               Ver postulantes
-            </Button>
+            </Link>
             <Link
               href={`/recruiters/job-offers/${offer.id}/edit`}
               className={cn(buttonVariants({ variant: "outline", size: "sm" }), "max-md:h-11")}
