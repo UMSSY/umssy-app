@@ -10,6 +10,8 @@ import { MentorOffersRepository } from '../repositories/mentor-offers.repository
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorOffersService } from '../services/mentor-offers.service.js';
 import { MentorOffersWorker } from '../services/mentor-offers-worker.service.js';
+import { MentorExitRepository } from '../repositories/mentor-exit.repository.js';
+import { MentorParticipationRepository } from '../repositories/mentor-participation.repository.js';
 
 const connectionString = process.env.HU7_TEST_DATABASE_URL;
 const schema = `hu7_offer_test_${randomBytes(6).toString('hex')}`;
@@ -81,6 +83,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
   }
 
   beforeEach(async () => {
+    await prisma.appointment.deleteMany();
     await prisma.$executeRaw`TRUNCATE mentor_slot_offers, mentor_participation_requests`;
     await prisma.userRole.deleteMany({ where: { roleId: mentorRoleId } });
     await prisma.mentorTechnicalArea.deleteMany();
@@ -99,6 +102,27 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     expect(records[0].expiresAt.getTime() - records[0].offeredAt.getTime()).toBe(24 * 3_600_000);
     expect(await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${uuid('a000', 2)}::uuid`)
       .toEqual([{ status: 'PENDING' }]);
+  });
+
+  it('expone la oferta y el correo propios y conserva el estado vencido para el frontend', async () => {
+    const participation = new MentorParticipationRepository(prisma as unknown as PrismaService);
+    const current = await participation.findMyRequest(uuid('8000', 2));
+    expect(current).toMatchObject({ status: 'OFFERED', email: 'hu7.2@example.test' });
+    expect(current?.offer?.id).toBe((await offers())[0].id);
+    if (!current?.offer) throw new Error('No se devolvió la oferta asignada');
+    expect(current.offer.expiresAt.getTime() - current.offer.offeredAt.getTime()).toBe(24 * 3_600_000);
+    await expireCurrent();
+    expect(await participation.findMyRequest(uuid('8000', 2))).toMatchObject({ status: 'EXPIRED', offer: { status: 'EXPIRED' } });
+    expect(await participation.findMyRequest(uuid('8000', 1))).toMatchObject({ status: 'OFFERED' });
+  });
+
+  it('una solicitud cerrada no oculta una activación directa posterior', async () => {
+    const participation = new MentorParticipationRepository(prisma as unknown as PrismaService);
+    await prisma.mentorParticipationRequest.updateMany({ data: { status: 'CANCELLED' } });
+    const repository = new MentorsRepository(prisma as unknown as PrismaService);
+    await repository.activate(uuid('8000', 1), mentorRoleId, [areaId], [orientationId]);
+    expect(await participation.findMyRequest(uuid('8000', 1))).toBeNull();
+    expect(await participation.findMyRequest(uuid('8000', 2))).toMatchObject({ status: 'CANCELLED' });
   });
 
   it('confirma una vez bajo concurrencia y rechaza la oferta de otro usuario', async () => {
@@ -144,5 +168,110 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     await expect(service.confirm(offer.userId, offer.id)).rejects.toMatchObject({ statusCode: 400 });
     expect((await offers())[0].status).toBe('OFFERED');
     expect(await prisma.userRole.count({ where: { roleId: mentorRoleId } })).toBe(0);
+  });
+
+  const exits = () => new MentorExitRepository(prisma as unknown as PrismaService);
+  async function activateFirst() {
+    await service.reconcile();
+    const [offer] = await offers();
+    await service.confirm(offer.userId, offer.id);
+    return offer;
+  }
+  async function appointment(mentorId: string, title: string, future = true) {
+    const status = await prisma.appointmentStatus.upsert({ where: { title }, create: { title }, update: {} });
+    const startAt = new Date(Date.now() + (future ? 3_600_000 : -7_200_000));
+    return prisma.appointment.create({ data: { mentorId, studentId: uuid('8000', 3),
+      statusId: status.id, startAt, endAt: new Date(startAt.getTime() + 1_800_000) } });
+  }
+
+  it.each(['PENDIENTE', 'CONFIRMADA'])('rechaza la salida por una cita futura %s sin cambiar ningún estado', async (title) => {
+    const offer = await activateFirst();
+    await appointment(offer.userId, title);
+    await expect(exits().leave(offer.userId)).rejects.toMatchObject({ statusCode: 409,
+      data: { code: 'MENTOR_HAS_FUTURE_APPOINTMENTS', agendaPath: '/mentor/availability' } });
+    expect(await prisma.userRole.count({ where: { roleId: mentorRoleId, deletedAt: null } })).toBe(1);
+    expect(await prisma.user.findUnique({ where: { id: offer.userId } })).toMatchObject({ isAvailableForMentoring: true });
+    expect(await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`)
+      .toEqual([{ status: 'ACTIVE' }]);
+    expect(await offers()).toHaveLength(1);
+  });
+
+  it('finaliza una sola vez bajo concurrencia y reasigna exactamente un cupo al siguiente FIFO', async () => {
+    const offer = await activateFirst();
+    await appointment(offer.userId, 'PENDIENTE', false);
+    await appointment(offer.userId, 'CANCELADA');
+    const results = await Promise.all([exits().leave(offer.userId), exits().leave(offer.userId)]);
+    expect(results.map(({ alreadyEnded }) => alreadyEnded).sort((a, b) => Number(a) - Number(b))).toEqual([false, true]);
+    await expect(exits().leave(offer.userId)).resolves.toMatchObject({ status: 'ENDED', alreadyEnded: true });
+    expect(await prisma.userRole.count({ where: { roleId: mentorRoleId, deletedAt: null } })).toBe(0);
+    expect(await prisma.userRole.count({ where: { roleId: mentorRoleId, deletedAt: { not: null } } })).toBe(1);
+    expect(await prisma.user.findUnique({ where: { id: offer.userId } })).toMatchObject({ isAvailableForMentoring: false });
+    expect(await prisma.mentorTechnicalArea.count()).toBe(0);
+    expect(await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`)
+      .toEqual([{ status: 'ENDED' }]);
+    expect((await offers()).filter(({ status }) => status === 'OFFERED').map(({ requestId }) => requestId)).toEqual([uuid('a000', 2)]);
+    expect(await new MentorsRepository(prisma as unknown as PrismaService).capacity()).toMatchObject({ activeMentors: 0, reservedOffers: 1, available: 0 });
+    await expect(service.confirm(offer.userId, offer.id)).rejects.toMatchObject({ statusCode: 409 });
+  });
+
+  it('al regresar conserva el historial, entra al final y revalida elegibilidad y capacidad', async () => {
+    const original = await activateFirst();
+    await exits().leave(original.userId);
+    await enqueue(4, 2, new Date().toISOString());
+    const repository = new MentorsRepository(prisma as unknown as PrismaService);
+    await expect(repository.activate(original.userId, mentorRoleId, [areaId], [orientationId])).rejects.toMatchObject({ statusCode: 409 });
+    await expireCurrent(); await service.reconcile();
+    expect((await offers()).find(({ status }) => status === 'OFFERED')?.requestId).toBe(uuid('a000', 3));
+    await prisma.user.update({ where: { id: original.userId }, data: { isActive: false } });
+    await expireCurrent(); await service.reconcile();
+    expect((await offers()).filter(({ status }) => status === 'OFFERED')).toHaveLength(0);
+    await expect(repository.activate(original.userId, mentorRoleId, [areaId], [orientationId])).rejects.toMatchObject({ statusCode: 403 });
+    await prisma.user.update({ where: { id: original.userId }, data: { isActive: true } });
+    await service.reconcile();
+    const returned = (await offers()).find(({ status }) => status === 'OFFERED')!;
+    expect(returned.requestId).toBe(uuid('a000', 4));
+    await service.confirm(original.userId, returned.id);
+    expect(await prisma.userRole.count({ where: { roleId: mentorRoleId, deletedAt: null } })).toBe(1);
+  });
+
+  it('la disponibilidad reversible conserva rol, participación y cupo', async () => {
+    const offer = await activateFirst();
+    const repository = new MentorsRepository(prisma as unknown as PrismaService);
+    await repository.updateAvailability(offer.userId, false);
+    expect(await repository.capacity()).toMatchObject({ activeMentors: 1, reservedOffers: 0, available: 0 });
+    expect(await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`)
+      .toEqual([{ status: 'ACTIVE' }]);
+    await repository.updateAvailability(offer.userId, true);
+    expect(await prisma.userRole.count({ where: { roleId: mentorRoleId, deletedAt: null } })).toBe(1);
+  });
+
+  it('revierte toda la salida si falla la reasignación del cupo', async () => {
+    const offer = await activateFirst();
+    await admin.query(`CREATE FUNCTION fail_offer() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN RAISE EXCEPTION 'Fallo de prueba al reasignar'; END $$`);
+    await admin.query(`CREATE TRIGGER fail_offer BEFORE INSERT ON mentor_slot_offers
+      FOR EACH ROW EXECUTE FUNCTION fail_offer()`);
+    try {
+      await expect(exits().leave(offer.userId)).rejects.toThrow();
+    } finally {
+      await admin.query('DROP TRIGGER fail_offer ON mentor_slot_offers');
+      await admin.query('DROP FUNCTION fail_offer()');
+    }
+    expect(await prisma.userRole.count({ where: { roleId: mentorRoleId, deletedAt: null } })).toBe(1);
+    expect(await prisma.user.findUnique({ where: { id: offer.userId } })).toMatchObject({ isAvailableForMentoring: true });
+    expect(await prisma.mentorTechnicalArea.count()).toBe(1);
+    expect(await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`)
+      .toEqual([{ status: 'ACTIVE' }]);
+    expect(await offers()).toHaveLength(1);
+  });
+
+  it('permite finalizar a un mentor previo a las solicitudes HU7 y no modifica usuarios sin rol', async () => {
+    await prisma.$executeRaw`TRUNCATE mentor_slot_offers, mentor_participation_requests`;
+    const userId = uuid('8000', 1);
+    await prisma.userRole.create({ data: { userId, roleId: mentorRoleId } });
+    await expect(exits().leave(userId)).resolves.toMatchObject({ alreadyEnded: false });
+    await expect(exits().leave(uuid('8000', 3))).resolves.toMatchObject({ alreadyEnded: true });
+    expect(await prisma.userRole.count({ where: { roleId: mentorRoleId, deletedAt: null } })).toBe(0);
+    expect(await offers()).toHaveLength(0);
   });
 });

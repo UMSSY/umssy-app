@@ -1,11 +1,12 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient } from "@/shared/services/query-client";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getMentorTechnicalAreas } from "../services/technical-areas.service";
 import { getMentorOrientationTypes } from "@/modules/mentorship/services/orientation-type.service";
+import { mentorParticipationService } from "../services/mentor-participation.service";
 import { ParticipationView } from "./participation-view";
 
 vi.mock("../services/technical-areas.service", () => ({
@@ -18,6 +19,9 @@ vi.mock("@/modules/mentorship/services/orientation-type.service", () => ({
 describe("ParticipationView", () => {
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.setItem("accessToken", "test-token");
+    vi.spyOn(mentorParticipationService, "getCurrent").mockResolvedValue(null);
+    vi.spyOn(mentorParticipationService, "capacity").mockResolvedValue({ available: 1, capacity: 2, occupied: 1 });
     vi.mocked(getMentorTechnicalAreas).mockResolvedValue([
       { id: "area-1", name: "Backend", description: null },
       { id: "area-2", name: "QA", description: null },
@@ -62,25 +66,6 @@ describe("ParticipationView", () => {
     ).toHaveAttribute("href", "/mentorship/orientation");
   });
 
-  it("habilita la simulación únicamente en desarrollo", async () => {
-    vi.stubEnv("NODE_ENV", "development");
-    render(<ParticipationView />);
-    expect(screen.getByRole("region", { name: "Disponibilidad de cupos (simulación)" })).toBeInTheDocument();
-    expect(await screen.findByText("Backend")).toBeInTheDocument();
-  });
-
-  it.each([
-    ["production", "local"],
-    ["production", "prod"],
-    ["development", "prod"],
-  ])("oculta disponibilidad simulada con NODE_ENV=%s y APP_ENV=%s", async (nodeEnv, appEnv) => {
-    vi.stubEnv("NODE_ENV", nodeEnv);
-    vi.stubEnv("NEXT_PUBLIC_APP_ENV", appEnv);
-    render(<ParticipationView />);
-    expect(screen.queryByRole("region", { name: "Disponibilidad de cupos (simulación)" })).not.toBeInTheDocument();
-    expect(await screen.findByText("Backend")).toBeInTheDocument();
-  });
-
   it("muestra la activación cuando no existe participación", async () => {
     vi.mocked(getMentorTechnicalAreas).mockRejectedValue({
       isAxiosError: true,
@@ -96,10 +81,11 @@ describe("ParticipationView", () => {
     ).toHaveAttribute("href", "/mentorship");
   });
 
-  it("muestra loading hasta que ambas peticiones terminan y comparte la cancelación", () => {
+  it("muestra loading hasta que ambas peticiones terminan y comparte la cancelación", async () => {
     vi.mocked(getMentorTechnicalAreas).mockReturnValue(new Promise(() => {}));
     const { unmount } = render(<ParticipationView />);
     expect(screen.getByText("Cargando participación...")).toBeInTheDocument();
+    await waitFor(() => expect(getMentorTechnicalAreas).toHaveBeenCalled());
     const signal = vi.mocked(getMentorTechnicalAreas).mock.calls[0][0];
     expect(signal).toBeInstanceOf(AbortSignal);
     expect(getMentorOrientationTypes).toHaveBeenCalledWith(signal);
