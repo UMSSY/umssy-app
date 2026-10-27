@@ -286,7 +286,7 @@ Se atendieron los puntos aplicables a HU7 de la [revisión de zer4c en PR1712](h
 | Estados como texto | Solicitudes, ofertas y outbox usan catálogos referenciados por UUID. También se normalizaron operación de intento y tipo de correo. Los títulos se devuelven en el JSON público para conservar el contrato; los servicios usan enums TypeScript. |
 | Auditoría y FKs | Se completaron createdAt/updatedAt, sus índices y la actualización de auditoría de escrituras SQL. La referencia opcional al intento de sanción usa SetNull. Los IDs nuevos mantienen @default(uuid()). |
 | Tipos y props mezclados con implementación | Contratos HTTP, props de componentes y contratos internos se extrajeron a types/, con un contrato por archivo y sufijos Response/Payload/Props donde corresponden. |
-| IndexedDB nativo | El wrapper compartido usa idb 8.0.4, conserva sus consumidores y añade actualización atómica de registros. Las intenciones de HU7 se guardan por usuario/operación en esta capa, con respaldo en memoria si el navegador impide persistir. |
+| IndexedDB nativo | El wrapper compartido usa la API nativa del navegador, conserva sus consumidores y añade actualización atómica de registros. Las intenciones de HU7 se guardan por usuario/operación en esta capa, con respaldo en memoria si el navegador impide persistir. |
 | PendingParticipation concentra responsabilidades | Se separaron hooks de historial, edición y cancelación, composición de estado y cuatro diálogos. Se reutiliza el parser de errores del módulo, se consume la API pública de mentorship y se usan Label de shadcn. |
 | Activación duplicada | Alta directa y confirmación comparten la misma asignación transaccional de rol, preferencias y disponibilidad. |
 | RoleGate específico de mentorías | El componente genérico recibe fallback. El contenido de mentorías vive en el módulo y se configura por ruta. |
@@ -300,7 +300,7 @@ Las claves antiguas pendientes de sessionStorage se recuperan mediante el wrappe
 
 La prueba de navegador descubrió además que el historial podía desplazar cuatro horas una fecha cuando la conexión PostgreSQL estaba en America/La_Paz. Su lectura ahora fija UTC dentro de una transacción sin tomar el bloqueo de capacidad. El frontend sigue convirtiendo a BOT únicamente al presentar la fecha. Una regresión PostgreSQL comprueba que solicitud e historial conservan el mismo instante con una conexión regional.
 
-Validación de esta corrección:
+Validación previa de PR1713, antes de sustituir el wrapper de IndexedDB:
 
 - Suite completa backend: 1.946 casos ejecutados aprobados. Las integraciones que requieren configuración local se comprobaron aparte.
 - Regresión final backend de mentorías y activación aprobada: 278 casos aprobados con PostgreSQL y SMTP locales, incluyendo 65 casos de integración. No se eliminaron escenarios para adaptar la arquitectura.
@@ -310,6 +310,8 @@ Validación de esta corrección:
 - ESLint frontend/backend: sin errores. Oxlint: sin errores; conserva advertencias previas de chat y métodos de pruebas sin enlazar.
 - La base local se respaldó fuera del repositorio. Antes y después de la conversión se compararon solicitudes, ofertas, sanciones y correo: datos conservados, cinco solicitudes y dos ofertas. No se reinicializó ni se sembró otra vez.
 
-La dependencia idb modifica frontend/package.json y su lockfile. La regla vigente de CI Files protege package.json en ramas de grupo; corresponde a DevOps incorporar/autorizar esa dependencia mediante el flujo permitido. La nueva migración y el esquema requieren revisión de Database. Se conserva la rama de grupo y no se cambian workflows, reglas ni umbrales para evitar dichas revisiones.
+En la rama de correcciones finales, la regresión dirigida de HU7 y participación pasó 24 pruebas. TypeScript de frontend, ESLint de los archivos modificados y los builds de producción de frontend y backend pasaron. La suite completa de frontend se interrumpió tras ocho timeouts en tres archivos de educación y disponibilidad mientras corría junto al build de backend; esos tres archivos pasaron aisladamente sus 63 pruebas sin paralelismo.
 
-PR1713 sigue dirigido a Epic 6. Su integración no equivale al pase de Epic 6 hacia develop en PR1712, que conserva su propia revisión y conflictos de integración.
+La API nativa de IndexedDB evita añadir dependencias o modificar archivos protegidos por CI Files. La nueva migración y el esquema requieren revisión de Database. No se cambian workflows, reglas ni umbrales.
+
+Esta corrección se propone hacia Epic 6. Su integración no equivale al pase de Epic 6 hacia develop en PR1712, que conserva su propia revisión y conflictos de integración.

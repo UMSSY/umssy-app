@@ -6,6 +6,12 @@ vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
   readIndexedDb: vi.fn(async (key: string) => records.get(key) ?? null),
   writeIndexedDb: vi.fn(async (key: string, value: unknown) => { records.set(key, value); }),
   removeIndexedDb: vi.fn(async (key: string) => { records.delete(key); }),
+  updateIndexedDb: vi.fn(async (key: string, update: (current: unknown) => unknown) => {
+    const next = update(records.get(key) ?? null);
+    if (next === null) records.delete(key);
+    else records.set(key, next);
+    return next;
+  }),
 }));
 
 const preferences = { technicalAreaIds: ["a", "b"], orientationTypeIds: ["o"] };
@@ -19,7 +25,7 @@ beforeEach(() => {
 });
 
 describe("UUID para intenciones de participación", () => {
-  it("migra el UUID previo a idb sin duplicar la intención y lo retira al completarla", async () => {
+  it("migra el UUID previo a IndexedDB sin duplicar la intención y lo retira al completarla", async () => {
     const subject = JSON.parse(atob(sessionStorage.getItem("accessToken")!.split(".")[1])).sub;
     const key = crypto.randomUUID();
     sessionStorage.setItem("hu7:intake:request", JSON.stringify({ subject, key, fingerprint: JSON.stringify(preferences) }));
