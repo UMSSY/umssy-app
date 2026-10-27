@@ -1,6 +1,7 @@
 import type { QuestionType } from "../types/survey.types";
 
 export const SURVEY_ANSWER_REDIRECT_DELAY_MS = 1500;
+export const SURVEY_ANSWER_QUESTION_ID_PREFIX = "question";
 
 export const SURVEY_ANSWER_HINTS: Readonly<Record<QuestionType, string>> = {
   single_choice: "Selecciona una opción",

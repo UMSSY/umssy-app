@@ -13,6 +13,7 @@ import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { SurveyQuestionField } from "../components/survey-question-field";
 import {
   SURVEY_ANSWER_HINTS,
+  SURVEY_ANSWER_QUESTION_ID_PREFIX as QUESTION_ID_PREFIX,
   SURVEY_ANSWER_REDIRECT_DELAY_MS,
   SURVEY_ANSWER_TEXT,
 } from "../constants/survey-answer.constants";
@@ -21,8 +22,6 @@ import { useSurveyDetail } from "../hooks/use-survey-detail";
 import { surveysService } from "../services/surveys.service";
 import type { AnswerSurveyViewProps } from "../types/survey-component-props.types";
 import { formatSurveyDate } from "../utils/format-survey-date";
-
-const QUESTION_ID_PREFIX = "question";
 
 export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
   const router = useRouter();
