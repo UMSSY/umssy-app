@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Prisma } from '../../../prisma/client.js';
+import { OTP_MAX_ATTEMPTS } from '../constants/otp.constants.js';
 import { AccountActivationRepository } from '../repositories/account-activation.repository.js';
 import { ActivationOtpRepository } from '../repositories/activation-otp.repository.js';
 
@@ -27,14 +28,41 @@ describe('ActivationOtpRepository', () => {
     );
   });
 
-  it('suma un intento de forma atómica', async () => {
+  it('reserva un intento con una sola sentencia condicionada', async () => {
     const { activationOtp, repository } = build();
 
-    await expect(repository.incrementAttempts('otp-1')).resolves.toEqual({ attempts: 1 });
+    await expect(repository.reserveAttempt('otp-1', NOW)).resolves.toEqual({ attempts: 1 });
     expect(activationOtp.update).toHaveBeenCalledWith({
-      where: { id: 'otp-1' },
+      where: { id: 'otp-1', usedAt: null, expiresAt: { gt: NOW }, attempts: { lt: OTP_MAX_ATTEMPTS } },
       data: { attempts: { increment: 1 } },
       select: { attempts: true },
+    });
+  });
+
+  it('devuelve null cuando el código ya no admite intentos', async () => {
+    const { activationOtp, repository } = build();
+    activationOtp.update.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('no existe', { code: 'P2025', clientVersion: 'test' }),
+    );
+
+    await expect(repository.reserveAttempt('otp-1', NOW)).resolves.toBeNull();
+  });
+
+  it('propaga los errores que no son de intentos agotados', async () => {
+    const { activationOtp, repository } = build();
+    activationOtp.update.mockRejectedValue(new Error('db caída'));
+
+    await expect(repository.reserveAttempt('otp-1', NOW)).rejects.toThrow('db caída');
+  });
+
+  it('devuelve el intento reservado cuando el código era correcto', async () => {
+    const { activationOtp, repository } = build();
+
+    await repository.releaseAttempt('otp-1');
+
+    expect(activationOtp.updateMany).toHaveBeenCalledWith({
+      where: { id: 'otp-1', attempts: { gt: 0 } },
+      data: { attempts: { decrement: 1 } },
     });
   });
 

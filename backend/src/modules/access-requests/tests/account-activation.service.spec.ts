@@ -42,7 +42,8 @@ function build(options: { request?: unknown; otp?: unknown; userExists?: boolean
   };
   const otpRepository = {
     findLatestByRequest: vi.fn().mockResolvedValue(otp),
-    incrementAttempts: vi.fn().mockResolvedValue({ attempts: 1 }),
+    reserveAttempt: vi.fn().mockResolvedValue({ attempts: 1 }),
+    releaseAttempt: vi.fn().mockResolvedValue(undefined),
     invalidate: vi.fn().mockResolvedValue(undefined),
     countResendsSince: vi.fn().mockResolvedValue(resends),
   };
@@ -128,7 +129,8 @@ describe('AccountActivationService.verify', () => {
     const { service, otpRepository } = build();
 
     await expect(service.verify(EMAIL, CODE, NOW)).resolves.toEqual({ valid: true, expiresAt: '2026-10-05T12:05:00.000Z' });
-    expect(otpRepository.incrementAttempts).not.toHaveBeenCalled();
+    expect(otpRepository.reserveAttempt).toHaveBeenCalledWith('otp-1', NOW);
+    expect(otpRepository.releaseAttempt).toHaveBeenCalledWith('otp-1');
   });
 
   it('con un código incorrecto suma un intento e informa cuántos quedan', async () => {
@@ -141,12 +143,13 @@ describe('AccountActivationService.verify', () => {
       statusCode: 400,
       data: { reason: 'code_invalid', remainingAttempts: 4 },
     });
-    expect(otpRepository.incrementAttempts).toHaveBeenCalledWith('otp-1');
+    expect(otpRepository.reserveAttempt).toHaveBeenCalledWith('otp-1', NOW);
+    expect(otpRepository.releaseAttempt).not.toHaveBeenCalled();
   });
 
   it('al quinto intento fallido invalida el código y bloquea', async () => {
     const { service, otpRepository } = build({ otp: otpRow({ attempts: 4 }) });
-    otpRepository.incrementAttempts.mockResolvedValue({ attempts: 5 });
+    otpRepository.reserveAttempt.mockResolvedValue({ attempts: 5 });
 
     await expect(service.verify(EMAIL, '000000', NOW)).rejects.toBeInstanceOf(ActivationAttemptsExceededException);
     expect(otpRepository.invalidate).toHaveBeenCalledWith('otp-1', NOW);
@@ -156,14 +159,14 @@ describe('AccountActivationService.verify', () => {
     const { service, otpRepository } = build({ otp: otpRow({ attempts: 5, expiresAt: NOW }) });
 
     await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(ActivationAttemptsExceededException);
-    expect(otpRepository.incrementAttempts).not.toHaveBeenCalled();
+    expect(otpRepository.reserveAttempt).not.toHaveBeenCalled();
   });
 
   it('rechaza un código vencido aunque coincida', async () => {
     const { service, otpRepository } = build({ otp: otpRow({ expiresAt: new Date(NOW.getTime() - 1) }) });
 
     await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(ActivationCodeExpiredException);
-    expect(otpRepository.incrementAttempts).not.toHaveBeenCalled();
+    expect(otpRepository.reserveAttempt).not.toHaveBeenCalled();
   });
 
   it('sin ningún código emitido pide solicitar uno nuevo', async () => {
@@ -177,6 +180,31 @@ describe('AccountActivationService.verify', () => {
 
     await expect(result).rejects.toBeInstanceOf(AccountAlreadyActivatedException);
     await expect(result).rejects.toMatchObject({ statusCode: 409, data: { reason: 'already_activated' } });
+  });
+
+  it('si no se puede reservar el intento responde bloqueado sin comparar el código', async () => {
+    const { service, otpRepository } = build();
+    otpRepository.reserveAttempt.mockResolvedValue(null);
+
+    await expect(service.verify(EMAIL, CODE, NOW)).rejects.toBeInstanceOf(ActivationAttemptsExceededException);
+    expect(otpRepository.releaseAttempt).not.toHaveBeenCalled();
+  });
+
+  it('con peticiones simultáneas solo se pueden probar 5 códigos', async () => {
+    const { service, otpRepository } = build();
+    let attempts = 0;
+    // Simula el UPDATE condicional de la base: revisar y sumar ocurre en un solo paso
+    otpRepository.reserveAttempt.mockImplementation(async () => (attempts < 5 ? { attempts: ++attempts } : null));
+
+    const results = await Promise.allSettled(
+      Array.from({ length: 12 }, (_, index) => service.verify(EMAIL, String(100000 + index), NOW)),
+    );
+
+    const reasons = results.map((result) => (result.status === 'rejected' ? result.reason : null));
+    expect(attempts).toBe(5);
+    expect(reasons.filter((reason) => reason instanceof InvalidActivationCodeException)).toHaveLength(4);
+    expect(reasons.filter((reason) => reason instanceof ActivationAttemptsExceededException)).toHaveLength(8);
+    expect(otpRepository.invalidate).toHaveBeenCalledOnce();
   });
 
   it('responde 404 cuando el correo no tiene una solicitud aprobada', async () => {

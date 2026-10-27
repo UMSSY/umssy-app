@@ -138,10 +138,16 @@ export class AccountActivationService {
     if (state !== 'ready' || !context.otp) throw new ActivationCodeExpiredException();
 
     const { otp } = context;
-    if (await bcrypt.compare(code, otp.codeHash)) return otp;
+    // El intento se reserva antes de comparar: así las peticiones simultáneas no pueden probar más de OTP_MAX_ATTEMPTS códigos
+    const reserved = await this.otpRepository.reserveAttempt(otp.id, now);
+    if (!reserved) throw new ActivationAttemptsExceededException();
 
-    const { attempts } = await this.otpRepository.incrementAttempts(otp.id);
-    const remaining = OTP_MAX_ATTEMPTS - attempts;
+    if (await bcrypt.compare(code, otp.codeHash)) {
+      await this.otpRepository.releaseAttempt(otp.id);
+      return otp;
+    }
+
+    const remaining = OTP_MAX_ATTEMPTS - reserved.attempts;
     if (remaining <= 0) {
       await this.otpRepository.invalidate(otp.id, now);
       throw new ActivationAttemptsExceededException();
