@@ -12,7 +12,7 @@ import { BlockSelection } from "../components/block-selection/block-selection";
 import { MENTOR_FREE_BLOCKS_TEXT } from "../constants/mentor-free-blocks.constants";
 import { useElementHeight } from "../hooks/use-element-height";
 import { useMentorFreeBlocks } from "../hooks/use-mentor-free-blocks";
-import { availabilityApi } from "../services/availability.api";
+import { availabilityApi } from "../services/availability.service";
 import type { MentorFreeBlocksViewProps } from "../types/mentor-free-blocks-view-props.types";
 import { formatWeekLabel } from "../utils/format-week-label";
 

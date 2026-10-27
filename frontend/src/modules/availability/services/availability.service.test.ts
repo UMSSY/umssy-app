@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { availabilityApi } from "./availability.api"
+import { availabilityApi } from "./availability.service"
 import { apiClient } from "@/shared/services/api-client"
 import type { AvailabilityBlock } from "../types/availability-block.types"
 
@@ -174,22 +174,5 @@ describe("blocked dates API", () => {
     const remove = vi.spyOn(apiClient, "delete").mockResolvedValue({})
     await availabilityApi.unblockDate("a/b&c")
     expect(remove).toHaveBeenCalledWith("/blocked-dates/a%2Fb%26c")
-  })
-})
-
-describe("createAppointment", () => {
-  beforeEach(() => {
-    vi.restoreAllMocks()
-  })
-
-  it("envía el bloque, el tema y el mensaje a /appointments", async () => {
-    const input = { blockId: "b1", orientationTypeId: "t1", message: null }
-    const appointment = { id: "a1" }
-    const post = vi.spyOn(apiClient, "post").mockResolvedValue(envelope(appointment))
-
-    const result = await availabilityApi.createAppointment(input)
-
-    expect(post).toHaveBeenCalledWith("/appointments", input)
-    expect(result).toEqual(appointment)
   })
 })

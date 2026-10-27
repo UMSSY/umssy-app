@@ -4,7 +4,7 @@ import { toast } from "sonner"
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper"
 import { useBlockDate } from "./use-block-date"
 import type { BlockedDate } from "../types/blocked-date.types"
-import { availabilityApi } from "../services/availability.api"
+import { availabilityApi } from "../services/availability.service"
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 

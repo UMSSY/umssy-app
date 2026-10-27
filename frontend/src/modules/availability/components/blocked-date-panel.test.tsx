@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
-import { availabilityApi } from "../services/availability.api";
+import { availabilityApi } from "../services/availability.service";
 import type { BlockedDate } from "../types/blocked-date.types";
 import { BlockedDatePanel } from "./blocked-date-panel";
 

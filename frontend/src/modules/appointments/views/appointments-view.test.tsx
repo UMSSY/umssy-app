@@ -8,7 +8,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { useAuth } from "@/shared/contexts/auth-context";
-import { appointmentsApi } from "../services/appointments.api";
+import { appointmentsApi } from "../services/appointments.service";
 import type { Appointment } from "../types/appointment.types";
 import { AppointmentsView } from "./appointments-view";
 

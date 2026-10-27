@@ -6,7 +6,7 @@ import { MENTORSHIP_QUERY_KEYS } from "@/modules/mentorship";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
 import { AVAILABILITY_STATUS_TOAST } from "../constants/availability-status.constants";
-import { availabilityApi } from "../services/availability.api";
+import { availabilityApi } from "../services/availability.service";
 import type { MentorAvailabilityStatus } from "../types/mentor-availability-status.types";
 
 export function useAvailabilityStatus() {

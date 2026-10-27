@@ -3,9 +3,8 @@ import { renderHook, act } from "@testing-library/react"
 import { toast } from "sonner"
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper"
 import { useCreateAppointment } from "./use-create-appointment"
-import { availabilityApi } from "../services/availability.api"
 import type { AvailabilityBlock } from "../types/availability-block.types"
-import type { Appointment } from "@/modules/appointments"
+import { appointmentsApi, type Appointment } from "@/modules/appointments"
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
@@ -35,7 +34,7 @@ describe("useCreateAppointment", () => {
 
   it("crea la cita, confirma con fecha y hora de Bolivia e invalida horarios y citas", async () => {
     const createSpy = vi
-      .spyOn(availabilityApi, "createAppointment")
+      .spyOn(appointmentsApi, "createAppointment")
       .mockResolvedValue({ id: "a1" } as Appointment)
     const queryWrapper = createQueryWrapper()
     const invalidateSpy = vi.spyOn(queryWrapper.client, "invalidateQueries")
@@ -57,7 +56,7 @@ describe("useCreateAppointment", () => {
 
   it("envía el mensaje vacío como null", async () => {
     const createSpy = vi
-      .spyOn(availabilityApi, "createAppointment")
+      .spyOn(appointmentsApi, "createAppointment")
       .mockResolvedValue({ id: "a1" } as Appointment)
 
     const { result } = renderHook(() => useCreateAppointment(vi.fn()), createQueryWrapper())
@@ -70,7 +69,7 @@ describe("useCreateAppointment", () => {
   })
 
   it("con 409 avisa que el horario ya fue reservado y marca el bloque", async () => {
-    vi.spyOn(availabilityApi, "createAppointment").mockRejectedValue(conflictError())
+    vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue(conflictError())
     const onConflict = vi.fn()
 
     const { result } = renderHook(() => useCreateAppointment(onConflict), createQueryWrapper())
@@ -83,7 +82,7 @@ describe("useCreateAppointment", () => {
   })
 
   it("con 409 usa el detail del backend si lo envía", async () => {
-    vi.spyOn(availabilityApi, "createAppointment").mockRejectedValue(
+    vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue(
       conflictError("El mentor bloqueó ese día"),
     )
 
@@ -95,7 +94,7 @@ describe("useCreateAppointment", () => {
   })
 
   it("con otros errores muestra el detail o un mensaje genérico sin marcar el bloque", async () => {
-    vi.spyOn(availabilityApi, "createAppointment")
+    vi.spyOn(appointmentsApi, "createAppointment")
       .mockRejectedValueOnce({ response: { data: { detail: "El tema de la sesión no es válido" } } })
       .mockRejectedValueOnce(new Error("Network error"))
     const onConflict = vi.fn()
@@ -112,7 +111,7 @@ describe("useCreateAppointment", () => {
 
   it("varios clics durante el envío registran una sola cita", async () => {
     let resolveCreate: (value: Appointment) => void = () => {}
-    const createSpy = vi.spyOn(availabilityApi, "createAppointment").mockReturnValue(
+    const createSpy = vi.spyOn(appointmentsApi, "createAppointment").mockReturnValue(
       new Promise<Appointment>((resolve) => {
         resolveCreate = resolve
       }),

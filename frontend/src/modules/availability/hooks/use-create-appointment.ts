@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { APPOINTMENTS_QUERY_KEYS } from "@/modules/appointments";
+import { APPOINTMENTS_QUERY_KEYS, appointmentsApi } from "@/modules/appointments";
 import { isApiError } from "@/shared/services/api-client";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
@@ -11,7 +11,6 @@ import {
   APPOINTMENT_CONFLICT_STATUS,
   REQUEST_APPOINTMENT_TEXT,
 } from "../constants/request-appointment.constants";
-import { availabilityApi } from "../services/availability.api";
 import type { AvailabilityBlock } from "../types/availability-block.types";
 import type { CreateAppointmentVariables } from "../types/create-appointment-variables.types";
 import { formatAppointmentSchedule } from "../utils/appointment-request.utils";
@@ -22,7 +21,7 @@ export function useCreateAppointment(onConflict: (block: AvailabilityBlock) => v
 
   const mutation = useMutation({
     mutationFn: ({ block, values }: CreateAppointmentVariables) =>
-      availabilityApi.createAppointment({
+      appointmentsApi.createAppointment({
         blockId: block.id,
         orientationTypeId: values.orientationTypeId,
         message: values.message.trim() || null,
