@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { InvalidWorkExperienceDateRangeException } from '../exceptions/invalid-work-experience-date-range.exception.js';
 import { WorkExperienceEndDateRequiredException } from '../exceptions/work-experience-end-date-required.exception.js';
 import { WorkExperienceNotFoundException } from '../exceptions/work-experience-not-found.exception.js';
@@ -35,13 +36,16 @@ describe('WorkExperienceService', () => {
     delete: vi.fn(),
   };
   const mapper = new WorkExperienceMapper();
+  const skillsAnalysis = { refreshAfterChange: vi.fn() };
   let service: WorkExperienceService;
 
   beforeEach(() => {
     vi.resetAllMocks();
+    skillsAnalysis.refreshAfterChange.mockResolvedValue(undefined);
     service = new WorkExperienceService(
       repository as unknown as WorkExperienceRepository,
       mapper,
+      skillsAnalysis as unknown as ProfileSkillsAnalysisService,
     );
   });
 
@@ -73,6 +77,7 @@ describe('WorkExperienceService', () => {
       isCurrent: true,
       description: null,
     });
+    expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
   });
 
   it('ignores the end date of a current job', async () => {
@@ -102,6 +107,7 @@ describe('WorkExperienceService', () => {
       }),
     ).rejects.toBeInstanceOf(WorkExperienceEndDateRequiredException);
     expect(repository.create).not.toHaveBeenCalled();
+    expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
   });
 
   it('rejects an end date earlier than the start date', async () => {
@@ -136,6 +142,7 @@ describe('WorkExperienceService', () => {
         isCurrent: record.isCurrent,
       },
     );
+    expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
   });
 
   it('fails with not found when the record to update is not from the user', async () => {
@@ -169,6 +176,7 @@ describe('WorkExperienceService', () => {
     await expect(
       service.update(userId, workExperienceId, { position: 'Lead' }),
     ).rejects.toBeInstanceOf(WorkExperienceUpdateConflictException);
+    expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
   });
 
   it('clears the end date when a job becomes current', async () => {
@@ -215,6 +223,7 @@ describe('WorkExperienceService', () => {
       service.remove(userId, workExperienceId),
     ).resolves.toBeUndefined();
     expect(repository.delete).toHaveBeenCalledWith(workExperienceId, userId);
+    expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
   });
 
   it('fails with not found when the record to delete is not from the user', async () => {
@@ -223,5 +232,6 @@ describe('WorkExperienceService', () => {
     await expect(
       service.remove(userId, workExperienceId),
     ).rejects.toBeInstanceOf(WorkExperienceNotFoundException);
+    expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
   });
 });

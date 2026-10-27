@@ -1,0 +1,10 @@
+export { NlpModule } from './nlp.module.js';
+export { ProfileSkillsAnalysisService } from './services/profile-skills-analysis.service.js';
+export { NLP_DICTIONARY_VERSION } from './constants/nlp-dictionary.constants.js';
+export type { NlpDetectedSkill } from './types/nlp-detected-skill.type.js';
+export type { NlpEvidenceRef } from './types/nlp-evidence-ref.type.js';
+export type { NlpInput } from './types/nlp-input.type.js';
+export type { NlpSourceType } from './types/nlp-source-type.type.js';
+export type { NlpTextSource } from './types/nlp-text-source.type.js';
+export type { ProfileSkillsRadarResponse } from './responses/profile-skills-radar.response.js';
+export type { ProfileSkillRadarItemResponse } from './responses/profile-skill-radar-item.response.js';
