@@ -3,6 +3,7 @@ import { Prisma } from '../../../prisma/client.js';
 import { DuplicateJobApplicationException } from '../exceptions/duplicate-job-application.exception.js';
 import { JobApplicationStatusMissingException } from '../exceptions/job-application-status-missing.exception.js';
 import { JobOfferUnavailableException } from '../exceptions/job-offer-unavailable.exception.js';
+import { JobApplicationMapper } from '../mappers/job-application.mapper.js';
 import type { JobApplicationsRepository } from '../repositories/job-applications.repository.js';
 import { JobApplicationsService } from '../services/job-applications.service.js';
 import type { JobApplicationRecord } from '../types/job-application.types.js';
@@ -47,6 +48,7 @@ describe('HU-02B T2.8 - JobApplicationsService', () => {
     repository.create.mockResolvedValue(RECORD);
     service = new JobApplicationsService(
       repository as unknown as JobApplicationsRepository,
+      new JobApplicationMapper(),
     );
   });
 

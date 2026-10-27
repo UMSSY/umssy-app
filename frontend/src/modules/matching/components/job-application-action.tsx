@@ -13,11 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { JOB_APPLICATION_MESSAGES } from "../constants/job-application.constants";
 import { useJobApplication } from "../hooks/use-job-application";
+import type { JobApplicationActionProps } from "../types/job-application-action-props.types";
 import { formatApplicationDate } from "../utils/format-application-date";
-
-interface JobApplicationActionProps {
-  jobOfferId: string;
-}
 
 export function JobApplicationAction({ jobOfferId }: JobApplicationActionProps) {
   const {

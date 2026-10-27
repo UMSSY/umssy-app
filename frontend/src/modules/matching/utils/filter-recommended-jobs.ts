@@ -1,4 +1,4 @@
-import { normalizeSearchText } from "@/modules/job-offers/utils/normalize-search-text";
+import { normalizeSearchText } from "@/shared/utils/normalize-search-text";
 import { HIGH_AFFINITY_THRESHOLD } from "../constants/job-matching.constants";
 import type { JobFeedFilters } from "../types/job-feed-filters.types";
 import type { RecommendedJob } from "../types/job-matching.types";

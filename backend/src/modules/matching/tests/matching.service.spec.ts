@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MatchingService } from '../services/matching.service.js';
 import { SkillDictionaryService } from '../../job-connect/services/skill-dictionary.service.js';
 import { SkillsClassifierService } from '../services/skills-classifier.service.js';
-import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { SkillCatalogService } from '../../skills/services/skill-catalog.service.js';
 import { NlpService } from '../services/nlp.service.js';
 import type { ExperienceSkillsRepository } from '../repositories/experience-skills.repository.js';
 import { WorkExperienceNotFoundException } from '../../work-experience/exceptions/work-experience-not-found.exception.js';
@@ -63,7 +63,7 @@ const SKILL_CATALOG = [
 
 describe('MatchingService', () => {
   let service: MatchingService;
-  let prisma: { skill: { findMany: ReturnType<typeof vi.fn> } };
+  let skillCatalog: { listCatalog: ReturnType<typeof vi.fn> };
   let repository: {
     belongsToUser: ReturnType<typeof vi.fn>;
     replaceDetected: ReturnType<typeof vi.fn>;
@@ -73,7 +73,13 @@ describe('MatchingService', () => {
     service.analyzeExperience(USER_ID, { experienceId: EXPERIENCE_ID, text });
 
   beforeEach(() => {
-    prisma = { skill: { findMany: vi.fn().mockResolvedValue(SKILL_CATALOG) } };
+    skillCatalog = {
+      listCatalog: vi
+        .fn()
+        .mockResolvedValue(
+          SKILL_CATALOG.map((skill) => ({ ...skill, isCustom: false })),
+        ),
+    };
     repository = {
       belongsToUser: vi.fn().mockResolvedValue(true),
       replaceDetected: vi.fn().mockResolvedValue(undefined),
@@ -82,7 +88,7 @@ describe('MatchingService', () => {
     service = new MatchingService(
       new SkillDictionaryService(),
       new SkillsClassifierService(),
-      prisma as unknown as PrismaService,
+      skillCatalog as unknown as SkillCatalogService,
       new NlpService(),
       repository as unknown as ExperienceSkillsRepository,
     );
@@ -124,15 +130,11 @@ describe('MatchingService', () => {
     expect(result.skills).toEqual([]);
   });
 
-  it('consulta a PostgreSQL con PrismaService solo las habilidades del catalogo', async () => {
+  it('consulta el catalogo a traves de SkillCatalogService', async () => {
     await analyze('Python');
 
-    expect(prisma.skill.findMany).toHaveBeenCalledTimes(1);
-    expect(prisma.skill.findMany).toHaveBeenCalledWith({
-      where: { isCustom: false },
-      orderBy: { name: 'asc' },
-      select: { id: true, name: true },
-    });
+    expect(skillCatalog.listCatalog).toHaveBeenCalledTimes(1);
+    expect(skillCatalog.listCatalog).toHaveBeenCalledWith({});
   });
 
   it('reconoce C++, C#, Node.js y .NET con las claves del catalogo', async () => {
@@ -148,7 +150,9 @@ describe('MatchingService', () => {
   });
 
   it('ignora una habilidad del diccionario que no esta en el catalogo', async () => {
-    prisma.skill.findMany.mockResolvedValue([SKILL_CATALOG[0]]);
+    skillCatalog.listCatalog.mockResolvedValue([
+      { ...SKILL_CATALOG[0], isCustom: false },
+    ]);
 
     const result = await analyze('Python y Scrum');
 
@@ -156,7 +160,7 @@ describe('MatchingService', () => {
   });
 
   it('responde sin habilidades cuando el catalogo esta vacio', async () => {
-    prisma.skill.findMany.mockResolvedValue([]);
+    skillCatalog.listCatalog.mockResolvedValue([]);
 
     const result = await analyze('Python');
 
@@ -164,7 +168,7 @@ describe('MatchingService', () => {
   });
 
   it('propaga el error cuando falla la consulta a la base de datos', async () => {
-    prisma.skill.findMany.mockRejectedValue(new Error('connection refused'));
+    skillCatalog.listCatalog.mockRejectedValue(new Error('connection refused'));
 
     await expect(analyze('Python')).rejects.toThrow('connection refused');
   });
@@ -175,7 +179,7 @@ describe('MatchingService', () => {
       const result = await analyze(text);
 
       expect(result.skills).toEqual([]);
-      expect(prisma.skill.findMany).not.toHaveBeenCalled();
+      expect(skillCatalog.listCatalog).not.toHaveBeenCalled();
     },
   );
 
@@ -206,7 +210,7 @@ describe('MatchingService', () => {
 
     expect(error).toBeInstanceOf(WorkExperienceNotFoundException);
     expect(error).toMatchObject({ statusCode: 404 });
-    expect(prisma.skill.findMany).not.toHaveBeenCalled();
+    expect(skillCatalog.listCatalog).not.toHaveBeenCalled();
     expect(repository.replaceDetected).not.toHaveBeenCalled();
   });
 
