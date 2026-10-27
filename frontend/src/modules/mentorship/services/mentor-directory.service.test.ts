@@ -1,3 +1,4 @@
+
 import { apiClient } from "@/shared/services/api-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getMentorDirectory } from "./mentor-directory.service";
@@ -7,31 +8,94 @@ afterEach(() => {
 });
 
 describe("getMentorDirectory", () => {
-  it.each(["http://localhost:8081/api", "https://dev.umssy.test/api/", "https://umssy.test/api"])(
-    "resuelve fotos con %s sin solicitudes por tarjeta", async (baseURL) => {
+  it.each([
+    "http://localhost:8081/api",
+    "https://dev.umssy.test/api/",
+    "https://umssy.test/api",
+  ])(
+    "resuelve fotos con %s sin solicitudes por tarjeta",
+    async (baseURL) => {
       const photoUrl = "/mentors/mentor-1/photo?v=2026-10-09";
-      const get = vi.spyOn(apiClient, "get").mockResolvedValue({ data: { data: [
-        { id: "mentor-1", fullName: "Ana", headline: null, technicalAreas: [], photoUrl,
-          education: { degree: "Ingeniería", institution: "UMSS" }, isAvailable: true,
-          orientationTypes: ["Orientación técnica"] },
-        { id: "mentor-2", fullName: "Luis", headline: null, technicalAreas: [], photoUrl: null,
-          education: null, isAvailable: false, orientationTypes: [] },
-      ] } });
+
+      const directory = {
+        items: [
+          {
+            id: "mentor-1",
+            fullName: "Ana",
+            headline: null,
+            technicalAreas: [],
+            photoUrl,
+            education: {
+              degree: "Ingeniería",
+              institution: "UMSS",
+            },
+            isAvailable: true,
+            orientationTypes: ["Orientación técnica"],
+          },
+          {
+            id: "mentor-2",
+            fullName: "Luis",
+            headline: null,
+            technicalAreas: [],
+            photoUrl: null,
+            education: null,
+            isAvailable: false,
+            orientationTypes: [],
+          },
+        ],
+        page: 1,
+        pageSize: 10,
+        totalItems: 2,
+        totalPages: 1,
+        effectiveSort: "name_asc",
+        affinityStatus: "ready",
+      };
+
+      const get = vi.spyOn(apiClient, "get").mockResolvedValue({
+        data: {
+          statusCode: 200,
+          ok: true,
+          detail: "Operación exitosa",
+          data: directory,
+        },
+      });
+
       const previousBaseURL = apiClient.defaults.baseURL;
       apiClient.defaults.baseURL = baseURL;
+
       try {
-        const result = await getMentorDirectory();
-        expect(result[0].photoUrl).toBe(`${baseURL.replace(/\/$/, "")}${photoUrl}`);
-        expect(result[0].orientationTypes).toEqual(["Orientación técnica"]);
-        expect(result[0].education).toEqual({ degree: "Ingeniería", institution: "UMSS" });
-        expect(result[1].photoUrl).toBeNull();
-        expect(result[1].orientationTypes).toEqual([]);
+        const result = await getMentorDirectory({
+          page: 1,
+          search: "",
+          area: "",
+          available: false,
+          sort: "name_asc",
+        });
+
+        const normalizedBaseURL = baseURL.replace(/\/$/, "");
+
+        expect(result.items[0]?.photoUrl).toBe(
+          `${normalizedBaseURL}${photoUrl}`,
+        );
+
+        expect(result.items[0]?.orientationTypes).toEqual([
+          "Orientación técnica",
+        ]);
+
+        expect(result.items[0]?.education).toEqual({
+          degree: "Ingeniería",
+          institution: "UMSS",
+        });
+
+        expect(result.items[1]?.photoUrl).toBeNull();
+        expect(result.items[1]?.orientationTypes).toEqual([]);
         expect(get).toHaveBeenCalledTimes(1);
       } finally {
         apiClient.defaults.baseURL = previousBaseURL;
       }
     },
   );
+
   it("returns the active mentor directory from the real API endpoint", async () => {
     const mentors = [
       {
@@ -55,19 +119,94 @@ describe("getMentorDirectory", () => {
         orientationTypes: [],
       },
     ];
+
+    const directory = {
+      items: mentors,
+      page: 1,
+      pageSize: 10,
+      totalItems: 2,
+      totalPages: 1,
+      effectiveSort: "name_asc" as const,
+      affinityStatus: "ready" as const,
+    };
+
     const signal = new AbortController().signal;
+
     const request = vi.spyOn(apiClient, "get").mockResolvedValue({
       data: {
         statusCode: 200,
         ok: true,
         detail: "Operación exitosa",
-        data: mentors,
+        data: directory,
       },
     });
 
-    const result = await getMentorDirectory(signal);
+    const params = {
+      page: 1,
+      search: "",
+      area: "",
+      available: false,
+      sort: "name_asc" as const,
+    };
 
-    expect(request).toHaveBeenCalledWith("/mentors", { signal });
-    expect(result).toEqual(mentors);
+    const result = await getMentorDirectory(params, signal);
+
+    expect(request).toHaveBeenCalledWith("/mentors/directory", {
+      params: {
+        page: 1,
+        search: undefined,
+        area: undefined,
+        available: "false",
+        sort: "name_asc",
+      },
+      signal,
+    });
+
+    expect(result).toEqual({
+      ...directory,
+      items: mentors,
+    });
+  });
+
+  it("envía affinity a la API cuando se solicita afinidad", async () => {
+    const directory = {
+      items: [],
+      page: 1,
+      pageSize: 6,
+      totalItems: 0,
+      totalPages: 0,
+      effectiveSort: "name_asc" as const,
+      affinityStatus: "no_skills" as const,
+    };
+
+    const request = vi.spyOn(apiClient, "get").mockResolvedValue({
+      data: {
+        statusCode: 200,
+        ok: true,
+        detail: "Operación exitosa",
+        data: directory,
+      },
+    });
+
+    await getMentorDirectory({
+      page: 1,
+      search: "",
+      area: "",
+      available: false,
+      sort: "affinity",
+    });
+
+    expect(request).toHaveBeenCalledExactlyOnceWith(
+      "/mentors/directory",
+      expect.objectContaining({
+        params: {
+          page: 1,
+          search: undefined,
+          area: undefined,
+          available: "false",
+          sort: "affinity",
+        },
+      }),
+    );
   });
 });

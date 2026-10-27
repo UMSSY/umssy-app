@@ -150,12 +150,17 @@ model User {
   exportHistories        AdminExportHistory[] @relation("AdminExportHistories")
   openedAccessRequests   AccessRequest[]      @relation("AccessRequestOpenedBy")
   reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
+  approvedAccessRequest  AccessRequest?       @relation("ApprovedGraduateAccount")
+  mentorSlotOffers       MentorSlotOffer[]
+  mentorParticipationRequests MentorParticipationRequest[]
 
   conversationsAsUserA Conversation[]            @relation("UserAConversations")
   conversationsAsUserB Conversation[]            @relation("UserBConversations")
   chatMessages         Message[]
   chatParticipants     ConversationParticipant[]
   presence             UserPresence?
+  auditEvents         AuditEvent[]         @relation("AuditEventActor")
+  revertedValidations DocumentValidation[] @relation("DocumentValidationRevertedBy")
 
   @@index([cityId])
   @@map("users")
@@ -682,6 +687,7 @@ model File {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   accessRequest AccessRequest?
+  auditEvents   AuditEvent[]   @relation("AuditEventEvidence")
 
   @@map("files")
 }
@@ -718,6 +724,7 @@ model AccessRequest {
   openedById      String?   @map("opened_by_id") @db.Uuid
   openedAt        DateTime? @map("opened_at") @db.Timestamptz(6)
   reviewedById    String?   @map("reviewed_by_id") @db.Uuid
+  approvedUserId  String?   @unique @map("approved_user_id") @db.Uuid
   reviewedAt      DateTime? @map("reviewed_at") @db.Timestamptz(6)
   rejectionReason String?   @map("rejection_reason") @db.VarChar(500)
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -728,9 +735,12 @@ model AccessRequest {
   documentFile File?                      @relation(fields: [documentFileId], references: [id], onDelete: SetNull)
   openedBy     User?                      @relation("AccessRequestOpenedBy", fields: [openedById], references: [id], onDelete: SetNull)
   reviewedBy   User?                      @relation("AccessRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  approvedUser User?                      @relation("ApprovedGraduateAccount", fields: [approvedUserId], references: [id], onDelete: SetNull)
   career       Career                     @relation(fields: [careerId], references: [id], onDelete: Restrict)
 
   activationOtps ActivationOtp[]
+  auditEvents        AuditEvent[]
+  documentValidation DocumentValidation?
 
   @@index([statusId])
   @@index([careerId])
@@ -738,6 +748,39 @@ model AccessRequest {
   @@index([idCardNumber])
   @@index([email])
   @@map("access_requests")
+}
+
+// Contrato persistido para las solicitudes de HU-7-2; una postulación nueva crea otro ID.
+model MentorParticipationRequest {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  status             String   @default("PENDING") @db.VarChar(20)
+  queuedAt           DateTime @default(now()) @map("queued_at") @db.Timestamptz(6)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  technicalAreaIds    String[] @map("technical_area_ids") @db.Uuid
+  orientationTypeIds String[] @map("orientation_type_ids") @db.Uuid
+
+  user  User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  offer MentorSlotOffer?
+
+  @@index([status, queuedAt, id])
+  @@map("mentor_participation_requests")
+}
+
+model MentorSlotOffer {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  status    String   @default("OFFERED") @db.VarChar(20)
+  offeredAt DateTime @default(now()) @map("offered_at") @db.Timestamptz(6)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  requestId String?  @unique @map("request_id") @db.Uuid
+  confirmedAt DateTime? @map("confirmed_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  request MentorParticipationRequest? @relation(fields: [requestId], references: [id], onDelete: Restrict)
+
+  @@index([status, expiresAt])
+  @@map("mentor_slot_offers")
 }
 
 model ActivationOtp {
@@ -836,4 +879,71 @@ model UserPresence {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_presences")
+}
+
+// HU 1.5.2 · Catálogo de acciones de auditoría (aprobada, rechazada, código enviado, etc.)
+model AuditAction {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  auditEvents AuditEvent[]
+
+  @@map("audit_actions")
+}
+
+// HU 1.5.2 · Registro de auditoría: un evento por cada hecho sobre una solicitud (solo se agrega y se lee)
+model AuditEvent {
+  id              String   @id @default(uuid()) @db.Uuid
+  number          Int      @unique @default(autoincrement())
+  accessRequestId String   @map("access_request_id") @db.Uuid
+  requestCode     String   @map("request_code") @db.VarChar(20)
+  applicantName   String   @map("applicant_name") @db.VarChar(201)
+  applicantCareer String   @map("applicant_career") @db.VarChar(100)
+  actionId        String   @map("action_id") @db.Uuid
+  actorId         String?  @map("actor_id") @db.Uuid
+  actorName       String   @map("actor_name") @db.VarChar(201)
+  actorRole       String   @map("actor_role") @db.VarChar(50)
+  detail          String?  @db.VarChar(500)
+  evidenceFileId  String?  @map("evidence_file_id") @db.Uuid
+  occurredAt      DateTime @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  accessRequest AccessRequest @relation(fields: [accessRequestId], references: [id], onDelete: Restrict)
+  action        AuditAction   @relation(fields: [actionId], references: [id], onDelete: Restrict)
+  actor         User?         @relation("AuditEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+  evidenceFile  File?         @relation("AuditEventEvidence", fields: [evidenceFileId], references: [id], onDelete: Restrict)
+
+  @@index([occurredAt(sort: Desc), number(sort: Desc)])
+  @@index([accessRequestId, occurredAt])
+  @@index([actionId])
+  @@index([actorId])
+  @@index([evidenceFileId])
+  @@map("audit_events")
+}
+
+// HU 1.5.3 · Resultado de la validación automática del documento de cada solicitud (una por solicitud)
+model DocumentValidation {
+  id              String    @id @default(uuid()) @db.Uuid
+  accessRequestId String    @unique @map("access_request_id") @db.Uuid
+  result          String    @db.VarChar(30)
+  matchScore      Int?      @map("match_score") @db.SmallInt
+  reason          String?   @db.VarChar(200)
+  fieldResults    Json?     @map("field_results")
+  queuedAt        DateTime  @default(now()) @map("queued_at") @db.Timestamptz(6)
+  readAt          DateTime? @map("read_at") @db.Timestamptz(6)
+  revertedAt      DateTime? @map("reverted_at") @db.Timestamptz(6)
+  revertedById    String?   @map("reverted_by_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  accessRequest AccessRequest @relation(fields: [accessRequestId], references: [id], onDelete: Cascade)
+  revertedBy    User?         @relation("DocumentValidationRevertedBy", fields: [revertedById], references: [id], onDelete: SetNull)
+
+  @@index([result])
+  @@index([revertedById])
+  @@map("document_validations")
 }
