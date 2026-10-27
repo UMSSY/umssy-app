@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { MENTORSHIP_QUERY_KEYS } from "@/modules/mentorship";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
 import { AVAILABILITY_STATUS_TOAST } from "../constants/availability-status.constants";
@@ -20,7 +21,7 @@ export function useAvailabilityStatus() {
     onSuccess: (status) => {
       queryClient.setQueryData(AVAILABILITY_QUERY_KEYS.status, status);
       toast.success(status.isAvailable ? AVAILABILITY_STATUS_TOAST.resumed : AVAILABILITY_STATUS_TOAST.paused);
-      return queryClient.invalidateQueries({ queryKey: AVAILABILITY_QUERY_KEYS.mentorProfile(status.mentorId) });
+      return queryClient.invalidateQueries({ queryKey: MENTORSHIP_QUERY_KEYS.profile(status.mentorId) });
     },
     onError: (error) => {
       toast.error(getApiErrorDetail(error) ?? AVAILABILITY_STATUS_TOAST.error);
