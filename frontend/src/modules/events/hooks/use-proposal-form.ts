@@ -1,20 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { profileService } from '@/modules/profile';
 import { getAccessToken, subscribeAccessToken } from '@/shared/services/storage/access-token-storage';
-import { useEventCategories } from '@/modules/event-categories/hooks/use-event-categories';
+import { useEventCategories } from '@/modules/event-categories';
 import { EMPTY_PROPOSAL } from '../constants/proposal.constants';
-import { proposalsService } from '../services/proposals.service';
+import { useCreateProposal } from './use-create-proposal';
 import { proposalDraftStorage } from '../services/proposal-draft-storage';
 import { readProposalCover } from '../utils/read-proposal-cover';
-import { getProposalError } from '../utils/proposal-error';
 import { validateProposal } from '../utils/proposal-validation';
-import type { CreatedProposal, ProposalCover, ProposalErrors, ProposalValues } from '../types/proposal.types';
+import type { CreatedProposal, ProposalCover, ProposalValues } from '../types/proposal.types';
 
 export function useProposalForm() {
-  const queryClient = useQueryClient();
   const token = useSyncExternalStore(subscribeAccessToken, getAccessToken, () => null);
   const categories = useEventCategories();
   const profile = useQuery({ queryKey: ['session-profile', token], queryFn: () => profileService.getProfile(), enabled: Boolean(token), retry: false });
@@ -24,9 +22,10 @@ export function useProposalForm() {
   const [coverBusy, setCoverBusy] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [reviewing, setReviewing] = useState(false);
-  const [pending, setPending] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [serverErrors, setServerErrors] = useState<ProposalErrors>({});
+  const creation = useCreateProposal(token, () => setReviewing(false));
+  const pending = creation.isPending;
+  const message = creation.failure?.message ?? null;
+  const serverErrors = creation.failure?.fields ?? {};
   const [created, setCreated] = useState<CreatedProposal | null>(null);
   const operation = useRef<{ key: string; token: string | null } | null>(null);
   const sending = useRef(false);
@@ -56,7 +55,7 @@ export function useProposalForm() {
   const errors = { ...(submitted ? validation : {}), ...serverErrors };
   const unavailable = !token || !tutor || profile.isError || categories.isLoading || Boolean(categories.error) || !categories.categories.length || Boolean(owner && draftOwner !== owner);
 
-  function edit() { operation.current = null; setMessage(null); setCreated(null); setServerErrors({}); }
+  function edit() { operation.current = null; creation.reset(); setCreated(null); }
   function change<K extends keyof ProposalValues>(key: K, value: ProposalValues[K]) {
     if (sending.current) return;
     edit();
@@ -64,26 +63,22 @@ export function useProposalForm() {
   }
   function changeCover(next: ProposalCover | null) { edit(); setCover(next); }
   function review() {
-    setSubmitted(true); setServerErrors({}); setMessage(null);
+    setSubmitted(true); creation.reset();
     if (unavailable || coverBusy || Object.keys(validation).length) return false;
     setReviewing(true); return true;
   }
   async function confirm() {
     if (sending.current || unavailable || coverBusy || !cover || Object.keys(validation).length) return;
-    sending.current = true; setPending(true); setMessage(null);
+    sending.current = true; creation.reset();
     if (!operation.current || operation.current.token !== token) operation.current = { key: crypto.randomUUID(), token };
     try {
-      const result = await proposalsService.create(values, cover.file, operation.current.key);
+      const result = await creation.mutateAsync({ values, cover: cover.file, operationKey: operation.current.key, accessToken: token });
       if (getAccessToken() !== token) return;
       if (owner) await proposalDraftStorage.remove(owner).catch(() => setDraftWarning('La propuesta se guardó, pero no se pudo limpiar el borrador local.'));
-      setCreated(result); setReviewing(false); setValues({ ...EMPTY_PROPOSAL }); setCover(null); setSubmitted(false); setServerErrors({}); operation.current = null;
-      void queryClient.invalidateQueries({ queryKey: ['event-proposals'] });
-      void queryClient.invalidateQueries({ queryKey: ['events'] });
-    } catch (cause) {
-      const failure = getProposalError(cause);
-      setMessage(failure.message); setServerErrors(failure.fields);
-      if (Object.keys(failure.fields).length) setReviewing(false);
-    } finally { sending.current = false; setPending(false); }
+      setCreated(result); setReviewing(false); setValues({ ...EMPTY_PROPOSAL }); setCover(null); setSubmitted(false); operation.current = null;
+    } catch {
+      return;
+    } finally { sending.current = false; }
   }
   return { values, cover, change, changeCover, coverBusy, setCoverBusy, errors, categories, profile, tutor,
     draftWarning, restoring: Boolean(owner && draftOwner !== owner), reviewing, closeReview: () => { if (!sending.current) setReviewing(false); }, review, confirm, pending, unavailable, message, created };

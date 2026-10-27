@@ -4,12 +4,12 @@ import type { CreatedProposal, ProposalValues } from '../types/proposal.types';
 import { readCount, readRecord, readString } from '../utils/response-validation';
 
 export const proposalsService = {
-  async create(values: ProposalValues, cover: File, requestId: string): Promise<CreatedProposal> {
+  async create(values: ProposalValues, cover: File, requestId: string, accessToken?: string | null): Promise<CreatedProposal> {
     const payload = new FormData();
     Object.entries(values).forEach(([key, value]) => payload.append(key, value.trim()));
     payload.append('cover', cover);
     const response = await apiClient.post<unknown>(PROPOSAL_ENDPOINT, payload, {
-      headers: { 'Idempotency-Key': requestId },
+      headers: { 'Idempotency-Key': requestId, ...(accessToken !== undefined && { Authorization: accessToken ? `Bearer ${accessToken}` : '' }) },
       timeout: 60000,
     });
     const data = readRecord(readRecord(response.data).data);
