@@ -99,6 +99,8 @@ export const ModelName = {
   ConversationParticipant: 'ConversationParticipant',
   Message: 'Message',
   UserPresence: 'UserPresence',
+  JobApplicationStatus: 'JobApplicationStatus',
+  JobApplication: 'JobApplication',
   SurveyStatus: 'SurveyStatus',
   SurveyQuestionType: 'SurveyQuestionType',
   Survey: 'Survey',
@@ -564,6 +566,9 @@ export const JobOfferScalarFieldEnum = {
   salaryRange: 'salaryRange',
   languages: 'languages',
   locationUrl: 'locationUrl',
+  requiredCareers: 'requiredCareers',
+  minExperienceYears: 'minExperienceYears',
+  otherRequirements: 'otherRequirements',
   expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -764,6 +769,29 @@ export const UserPresenceScalarFieldEnum = {
 } as const
 
 export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
+
+
+export const JobApplicationStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobApplicationStatusScalarFieldEnum = (typeof JobApplicationStatusScalarFieldEnum)[keyof typeof JobApplicationStatusScalarFieldEnum]
+
+
+export const JobApplicationScalarFieldEnum = {
+  id: 'id',
+  jobOfferId: 'jobOfferId',
+  userId: 'userId',
+  statusId: 'statusId',
+  appliedAt: 'appliedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobApplicationScalarFieldEnum = (typeof JobApplicationScalarFieldEnum)[keyof typeof JobApplicationScalarFieldEnum]
 
 
 export const SurveyStatusScalarFieldEnum = {

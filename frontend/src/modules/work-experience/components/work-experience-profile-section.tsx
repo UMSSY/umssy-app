@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ConfirmDeleteDialog } from "@/modules/profile";
+import { DetectedSkillsChips } from "@/modules/profile";
 import { FeedbackMessage } from "@/modules/profile";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
 import { WorkExperienceForm } from "../components/work-experience-form";
@@ -95,6 +96,13 @@ export function WorkExperienceProfileSection() {
   return (
     <section id="experience" className="scroll-mt-24 space-y-4" aria-label="Experiencia laboral">
       <FeedbackMessage feedback={listFeedback} />
+      {saveMutation.isAnalyzing || saveMutation.analysis ? (
+        <DetectedSkillsChips
+          isLoading={saveMutation.isAnalyzing}
+          skills={saveMutation.analysis?.skills}
+          processingTimeMs={saveMutation.analysis?.processingTimeMs}
+        />
+      ) : null}
 
         <WorkExperienceListCard
           onAdd={handleCreate}

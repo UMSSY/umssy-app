@@ -1,6 +1,6 @@
 import { HISTORY_STATUSES, PUBLISHED_STATUS } from "../constants/vacancies.constants";
 import type { JobOffer, JobOfferListScope } from "../types/job-offer.types";
-import { normalizeSearchText } from "./normalize-search-text";
+import { normalizeSearchText } from "@/shared/utils/normalize-search-text";
 
 export type ApplicantsOrder = "none" | "most" | "least";
 
