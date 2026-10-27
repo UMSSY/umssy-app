@@ -14,10 +14,10 @@ export function AppHeader({ brand }: AppHeaderProps) {
   const { roles } = useAuth();
   const { open } = useSidebar();
   return (
-    <header className="sticky top-0 z-30 flex h-app-header shrink-0 items-center gap-6 border-b border-app-header-foreground/15 bg-app-header px-6 text-app-header-foreground">
-      <div inert={open} aria-hidden={open || undefined} className="flex w-64 shrink-0 items-center gap-3">
+    <header className="sticky top-0 z-30 flex h-app-header shrink-0 items-center gap-3 border-b border-app-header-foreground/15 bg-app-header px-3 text-app-header-foreground md:gap-6 md:px-6">
+      <div inert={open} aria-hidden={open || undefined} className="flex shrink-0 items-center gap-2 md:w-64 md:gap-3">
         <SidebarToggleButton />
-        {brand ?? <Link href="/dashboard" aria-label="UMSSY, ir al inicio" className="block shrink-0 outline-offset-4"><BrandLogo variant="on-dark" className="w-40" priority /></Link>}
+        {brand ?? <Link href="/dashboard" aria-label="UMSSY, ir al inicio" className="block shrink-0 outline-offset-4"><BrandLogo variant="on-dark" className="w-24 sm:w-32 md:w-40" priority /></Link>}
       </div>
       <div className="min-w-0 flex-1"><NavigationSearch /></div>
       <div className="flex shrink-0 items-center gap-4">
