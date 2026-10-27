@@ -11,6 +11,7 @@ import { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorOffersService } from '../services/mentor-offers.service.js';
 import { MentorOffersWorker } from '../services/mentor-offers-worker.service.js';
 import { MentorExitRepository } from '../repositories/mentor-exit.repository.js';
+import { MentorExitService } from '../services/mentor-exit.service.js';
 import { MentorParticipationRepository } from '../repositories/mentor-participation.repository.js';
 
 const connectionString = process.env.HU7_TEST_DATABASE_URL;
@@ -170,7 +171,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     expect(await prisma.userRole.count({ where: { roleId: mentorRoleId } })).toBe(0);
   });
 
-  const exits = () => new MentorExitRepository(prisma as unknown as PrismaService);
+  const exits = () => new MentorExitService(new MentorExitRepository(prisma as unknown as PrismaService));
   async function activateFirst() {
     await service.reconcile();
     const [offer] = await offers();
@@ -206,7 +207,10 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     expect(await prisma.userRole.count({ where: { roleId: mentorRoleId, deletedAt: null } })).toBe(0);
     expect(await prisma.userRole.count({ where: { roleId: mentorRoleId, deletedAt: { not: null } } })).toBe(1);
     expect(await prisma.user.findUnique({ where: { id: offer.userId } })).toMatchObject({ isAvailableForMentoring: false });
-    expect(await prisma.mentorTechnicalArea.count()).toBe(0);
+    expect(await prisma.mentorTechnicalArea.findMany({ where: { mentorId: offer.userId } }))
+      .toEqual([expect.objectContaining({ technicalAreaId: areaId })]);
+    expect(await prisma.mentorOrientationType.findMany({ where: { mentorId: offer.userId } }))
+      .toEqual([expect.objectContaining({ orientationTypeId: orientationId })]);
     expect(await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`)
       .toEqual([{ status: 'ENDED' }]);
     expect((await offers()).filter(({ status }) => status === 'OFFERED').map(({ requestId }) => requestId)).toEqual([uuid('a000', 2)]);
