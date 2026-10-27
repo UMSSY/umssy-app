@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_CONDITIONS, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
 import { RegisterVacancyView } from "./register-vacancy-view";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
 const { form, publication, leaveGuard } = vi.hoisted(() => ({
   form: {
     currentStep: 1,

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { InvalidWorkExperienceDateRangeException } from '../exceptions/invalid-work-experience-date-range.exception.js';
 import { WorkExperienceEndDateRequiredException } from '../exceptions/work-experience-end-date-required.exception.js';
 import { WorkExperienceNotFoundException } from '../exceptions/work-experience-not-found.exception.js';
@@ -14,6 +15,7 @@ export class WorkExperienceService {
   constructor(
     private readonly repository: WorkExperienceRepository,
     private readonly mapper: WorkExperienceMapper,
+    private readonly skillsAnalysis: ProfileSkillsAnalysisService,
   ) {}
 
   async findAll(userId: string): Promise<WorkExperienceResponse[]> {
@@ -33,6 +35,7 @@ export class WorkExperienceService {
       endDate,
       description: request.description ?? null,
     });
+    await this.skillsAnalysis.refreshAfterChange(userId);
     return this.mapper.toResponse(record);
   }
 
@@ -68,6 +71,7 @@ export class WorkExperienceService {
       }
       throw new WorkExperienceUpdateConflictException();
     }
+    await this.skillsAnalysis.refreshAfterChange(userId);
     return this.mapper.toResponse(updated);
   }
 
@@ -76,6 +80,7 @@ export class WorkExperienceService {
     if (!deleted) {
       throw new WorkExperienceNotFoundException();
     }
+    await this.skillsAnalysis.refreshAfterChange(userId);
   }
 
   private ensureValidPeriod(

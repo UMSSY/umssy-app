@@ -1,5 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiNotFoundResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { MatchingService } from '../services/matching.service.js';
 import {
@@ -18,11 +24,13 @@ export class MatchingController {
 
   @Post(':id/skills/analysis')
   @HttpCode(HttpStatus.OK)
+  @ApiNotFoundResponse({ description: 'Work experience not found' })
   analyzeExperience(
+    @CurrentUserId() userId: string,
     @Param() params: AnalyzeExperienceParamsDto,
     @Body() body: AnalyzeExperienceBodyDto,
   ): Promise<AnalyzeExperienceResponse> {
-    return this.matchingService.analyzeExperience({
+    return this.matchingService.analyzeExperience(userId, {
       experienceId: params.id,
       text: body.text,
     });

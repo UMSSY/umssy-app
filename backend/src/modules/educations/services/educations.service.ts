@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import type { EducationInstitution } from '../types/education-institution.type.js';
 import { EducationNotFoundException } from '../exceptions/education-not-found.exception.js';
 import { EducationUpdateConflictException } from '../exceptions/education-update-conflict.exception.js';
@@ -16,6 +17,7 @@ export class EducationsService {
     private readonly repository: EducationsRepository,
     private readonly mapper: EducationMapper,
     private readonly catalogService: EducationCatalogService,
+    private readonly skillsAnalysis: ProfileSkillsAnalysisService,
   ) {}
 
   getInstitutions(): readonly EducationInstitution[] {
@@ -34,9 +36,9 @@ export class EducationsService {
   ): Promise<EducationResponse> {
     this.validateDateRange(request.startDate, request.endDate);
     const degree = this.catalogService.validateDegree(request.institution, request.degree);
-    return this.mapper.toResponse(
-      await this.repository.create(userId, { ...request, degree }),
-    );
+    const record = await this.repository.create(userId, { ...request, degree });
+    await this.skillsAnalysis.refreshAfterChange(userId);
+    return this.mapper.toResponse(record);
   }
 
   async update(
@@ -69,6 +71,7 @@ export class EducationsService {
       }
       throw new EducationUpdateConflictException();
     }
+    await this.skillsAnalysis.refreshAfterChange(userId);
     return this.mapper.toResponse(updated);
   }
 
@@ -77,6 +80,7 @@ export class EducationsService {
     if (!deleted) {
       throw new EducationNotFoundException();
     }
+    await this.skillsAnalysis.refreshAfterChange(userId);
   }
 
   private validateDateRange(
