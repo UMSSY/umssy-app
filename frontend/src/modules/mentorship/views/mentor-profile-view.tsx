@@ -66,6 +66,11 @@ export function MentorProfileView({
     );
   }
 
+  if (!mentor.fullName?.trim()) {
+    return <main className="mx-auto w-full max-w-7xl"><MentorQueryFeedback title="Perfil incompleto" description="Falta el nombre del mentor. El perfil completo todavía no está disponible." showDirectoryLink /></main>;
+  }
+  const professionalInterests = mentor.skills.filter((skill) => skill.name?.trim());
+
   return (
     <main className="bg-background">
       <div className="mx-auto w-full max-w-7xl min-w-0">
@@ -73,6 +78,10 @@ export function MentorProfileView({
           mentorName={mentor.fullName}
           returnTo={returnTo}
         />
+
+        {!mentor.workExperiences.some((experience) => experience.isCurrent && experience.position?.trim()) && (
+          <p role="status" className="mt-4 rounded-lg border border-border bg-surface-soft p-4 text-sm text-text-secondary">Perfil profesional incompleto: cargo actual no registrado.</p>
+        )}
 
         <MentorProfileHeader
           mentor={mentor}
@@ -86,6 +95,11 @@ export function MentorProfileView({
             {mentor.aboutMe && (
               <MentorAbout description={mentor.aboutMe} />
             )}
+
+            <section className="rounded-xl border border-border bg-surface p-6">
+              <h2 className="text-xl font-bold text-ink">Intereses profesionales</h2>
+              {professionalInterests.length ? <ul className="mt-3 flex flex-wrap gap-2">{professionalInterests.map((skill) => <li key={skill.id} className="rounded-md border border-border bg-surface-soft px-3 py-1 text-sm text-ink">{skill.name}</li>)}</ul> : <p className="mt-3 text-sm text-text-secondary">Sin intereses profesionales registrados</p>}
+            </section>
 
             <MentorGuidanceTypes
               key={mentor.id}

@@ -210,6 +210,13 @@ function mockDirectoryWithParams() {
 }
 
 describe("MentorDirectoryView", () => {
+  it("muestra el vacío general sin filtros ni acción innecesaria", async () => {
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(makeDirectoryPage([]));
+    render(<MentorDirectoryView />);
+    expect(await screen.findByText("No hay mentores disponibles por el momento")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Limpiar filtros" })).not.toBeInTheDocument();
+  });
+
   it("muestra el indicador mientras carga el directorio", () => {
     vi.spyOn(directoryService, "getMentorDirectory").mockImplementation(
       () => new Promise<DirectoryPage>(() => {}),
@@ -241,7 +248,7 @@ describe("MentorDirectoryView", () => {
     render(<MentorDirectoryView />);
 
     expect(
-      await screen.findByText("No hay mentores con estos filtros"),
+      await screen.findByText("No hay mentores que coincidan con tu búsqueda"),
     ).toBeInTheDocument();
 
     expect(
@@ -366,7 +373,7 @@ describe("MentorDirectoryView", () => {
     await user.keyboard(" ");
 
     expect(navigationMocks.replace).toHaveBeenCalledWith(
-      "/mentorship/mentors?page=1&available=false",
+      "/mentorship/mentors?page=1&available=true",
       { scroll: false },
     );
 
@@ -442,7 +449,7 @@ describe("MentorDirectoryView", () => {
     );
 
     expect(screen.getByText("Disponible para mentoría")).toBeInTheDocument();
-    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
+    expect(screen.getByText("No disponible")).toBeInTheDocument();
     expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
 
     expect(getProfile).toHaveBeenCalledTimes(1);
@@ -467,14 +474,14 @@ describe("MentorDirectoryView", () => {
     expect(getProfile).not.toHaveBeenCalled();
   });
 
-  it("aplica Solo disponibles por defecto y Limpiar restablece los filtros", async () => {
+  it("muestra todos los mentores por defecto y Limpiar restablece los filtros", async () => {
     mockDirectoryWithParams();
 
     const { rerender } = render(<MentorDirectoryView />);
 
     expect(
       screen.getByRole("checkbox", { name: "Solo disponibles" }),
-    ).toBeChecked();
+    ).not.toBeChecked();
 
     expect(
       await screen.findByRole("link", {
@@ -486,7 +493,7 @@ describe("MentorDirectoryView", () => {
       screen.queryByRole("link", {
         name: /Ver perfil de Carlos/,
       }),
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: "Limpiar" }),
@@ -500,15 +507,8 @@ describe("MentorDirectoryView", () => {
 
     applyNavigation(rerender);
 
-    expect(
-      await screen.findByRole("link", {
-        name: /Ver perfil de Carlos/,
-      }),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.queryByText("No disponible"),
-    ).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("link", { name: /Ver perfil de Carlos/ })).not.toBeInTheDocument());
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
 
     const searchCallsBeforeMaria =
       navigationMocks.replace.mock.calls.length;
@@ -561,7 +561,7 @@ describe("MentorDirectoryView", () => {
 
     expect(
       screen.getByRole("checkbox", { name: "Solo disponibles" }),
-    ).toBeChecked();
+    ).not.toBeChecked();
 
     expect(
       await screen.findByRole("link", {
@@ -573,7 +573,7 @@ describe("MentorDirectoryView", () => {
       screen.queryByRole("link", {
         name: /Ver perfil de Carlos/,
       }),
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
   });
 
   it("restaura búsqueda, área, orientación y disponibilidad al volver desde el perfil", async () => {

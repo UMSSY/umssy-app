@@ -84,8 +84,6 @@ export function MentorDirectoryView({
   const totalPages =
     directory?.totalPages ?? directoryState?.totalPages ?? 0;
 
-  // A-Z y Z-A respetan el orden aplicado por el backend.
-  // La afinidad utiliza el orden efectivo informado por el servidor.
   const effectiveSort: MentorSort =
     sortBy !== "affinity"
       ? sortBy
@@ -95,6 +93,7 @@ export function MentorDirectoryView({
 
   const affinityStatus =
     directory?.affinityStatus ?? directoryState?.affinityStatus;
+  const hasFilters = Boolean(search.trim() || area || orientation || isAvailableOnly);
 
   useEffect(() => {
     if (!directory && directoryState?.totalPages === undefined) {
@@ -161,7 +160,7 @@ export function MentorDirectoryView({
       search: "",
       area: "",
       orientation: "",
-      available: true,
+      available: false,
     });
   }
 
@@ -273,12 +272,14 @@ export function MentorDirectoryView({
         ) : mentors.length === 0 ? (
           <MentorQueryFeedback
             title={
-              totalItems === 0
-                ? "No hay mentores con estos filtros"
-                : "No hay mentores en esta página"
+              totalItems > 0
+                ? "No hay mentores en esta página"
+                : hasFilters
+                  ? "No hay mentores que coincidan con tu búsqueda"
+                  : "No hay mentores disponibles por el momento"
             }
-            description="Prueba otros filtros o vuelve a consultar más adelante."
-            onClearFilters={handleClearFilters}
+            description={totalItems > 0 ? "Ajustando la paginación del directorio." : hasFilters ? "Prueba con otros filtros o limpia la búsqueda." : "Vuelve a consultar más adelante."}
+            onClearFilters={hasFilters ? handleClearFilters : undefined}
           />
         ) : (
           <>
