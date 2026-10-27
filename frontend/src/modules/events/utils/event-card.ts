@@ -1,4 +1,5 @@
 import type { EventCapacityStatus, EventItem } from '../types/event.types';
+import { formatRegistrationTime } from './registration-format';
 
 export function calculateEventCapacityStatus(
   event: EventItem,
@@ -52,10 +53,12 @@ export function formatEventDate(eventDate: string): string {
 }
 
 export function formatTimeRange(startTime: string, endTime: string): string {
-  const extractHoursMinutes = (timeValue: string): string => {
-    const timeMatch = timeValue.match(/(\d{2}:\d{2})/);
-    return timeMatch ? timeMatch[1] : timeValue;
-  };
+  const start = formatRegistrationTime(startTime);
+  const end = formatRegistrationTime(endTime);
 
-  return `${extractHoursMinutes(startTime)} - ${extractHoursMinutes(endTime)}`;
+  if (start === 'Horario no disponible' || end === 'Horario no disponible') {
+    return 'Horario no disponible';
+  }
+
+  return `${start} - ${end} hrs`;
 }

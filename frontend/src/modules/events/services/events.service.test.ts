@@ -42,9 +42,10 @@ describe('eventsService', () => {
     const abortController = new AbortController();
 
     await expect(
-      eventsService.getEvents({ page: 1, limit: 50 }, abortController.signal),
+      eventsService.getEvents({ page: 1, limit: 50 }, abortController.signal, 'signed-token'),
     ).resolves.toEqual(MOCK_RESPONSE);
     expect(getSpy).toHaveBeenCalledWith('/events', {
+      headers: { Authorization: 'Bearer signed-token' },
       params: { page: 1, limit: 50 },
       signal: abortController.signal,
       timeout: 10_000,
@@ -80,10 +81,11 @@ describe('eventsService', () => {
       .spyOn(apiClient, 'get')
       .mockResolvedValue({ data: { data: detail } });
     const signal = new AbortController().signal;
-    await expect(eventsService.getEvent('event-1', signal)).resolves.toEqual(
+    await expect(eventsService.getEvent('event-1', signal, null)).resolves.toEqual(
       detail,
     );
     expect(spy).toHaveBeenCalledWith('/events/event-1', {
+      headers: { Authorization: '' },
       signal,
       timeout: 10000,
     });

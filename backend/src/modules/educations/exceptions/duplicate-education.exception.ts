@@ -3,6 +3,6 @@ import { EDUCATION_CONFLICT_STATUS, EDUCATION_DUPLICATE_MESSAGE } from '../const
 
 export class DuplicateEducationException extends DomainException {
   constructor() {
-    super(EDUCATION_DUPLICATE_MESSAGE, EDUCATION_CONFLICT_STATUS, { code: 'EDUCATION_DUPLICATE' });
+    super(EDUCATION_DUPLICATE_MESSAGE, EDUCATION_CONFLICT_STATUS, 'DUPLICATE_EDUCATION', { code: 'EDUCATION_DUPLICATE' });
   }
 }
