@@ -153,6 +153,7 @@ model User {
   approvedAccessRequest  AccessRequest?       @relation("ApprovedGraduateAccount")
   mentorSlotOffers       MentorSlotOffer[]
   mentorParticipationRequests MentorParticipationRequest[]
+  mentorParticipationAttemptLimit MentorParticipationAttemptLimit?
 
   conversationsAsUserA Conversation[]            @relation("UserAConversations")
   conversationsAsUserB Conversation[]            @relation("UserBConversations")
@@ -879,6 +880,17 @@ model UserPresence {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_presences")
+}
+
+model MentorParticipationAttemptLimit {
+  userId          String    @id @map("user_id") @db.Uuid
+  attemptCount    Int       @default(0) @map("attempt_count")
+  windowStartedAt DateTime? @map("window_started_at") @db.Timestamptz(6)
+  blockedUntil    DateTime? @map("blocked_until") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("mentor_participation_attempt_limits")
 }
 
 // HU 1.5.2 · Catálogo de acciones de auditoría (aprobada, rechazada, código enviado, etc.)
