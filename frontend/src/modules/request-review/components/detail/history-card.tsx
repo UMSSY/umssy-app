@@ -6,28 +6,51 @@ const VERDICT_LABELS: Record<string, string> = {
   rejected: "Rechazada por",
 };
 
-export function HistoryCard({ detail }: HistoryCardProps) {
+export function HistoryCard({ detail, ocrReadAt }: HistoryCardProps) {
   const { history, status } = detail;
-  const entries: Array<{ label: string; date: string | null }> = [];
+  const entries: Array<{ label: string; date: string | null; responsible?: string }> = [];
   const hasVerdict = status in VERDICT_LABELS;
 
   if (history?.submittedAt) {
-    entries.push({ label: "Solicitud enviada por la persona titulada", date: formatShortDate(history.submittedAt) });
+    entries.push({
+      label: "Solicitud enviada por la persona titulada",
+      date: formatShortDate(history.submittedAt),
+    });
+  }
+
+  // Evento de lectura OCR si está disponible (CA14)
+  if (ocrReadAt) {
+    entries.push({
+      label: "Lectura OCR del documento (Sistema)",
+      date: formatShortDate(ocrReadAt),
+      responsible: "Sistema",
+    });
   }
 
   const openedAt = history?.openedAt ?? (hasVerdict ? null : history?.reviewedAt);
   const openedBy = history?.openedBy ?? (hasVerdict ? null : history?.reviewedBy);
   if (openedAt) {
-    entries.push({ label: openedBy ? `Abierta por ${openedBy}` : "Solicitud abierta", date: formatShortDate(openedAt) });
+    entries.push({
+      label: openedBy ? `Abierta por ${openedBy}` : "Solicitud abierta",
+      date: formatShortDate(openedAt),
+    });
   }
 
   if (hasVerdict && history?.reviewedBy && history.reviewedAt) {
-    entries.push({ label: `${VERDICT_LABELS[status]} ${history.reviewedBy}`, date: formatShortDate(history.reviewedAt) });
+    entries.push({
+      label: `${VERDICT_LABELS[status]} ${history.reviewedBy}`,
+      date: formatShortDate(history.reviewedAt),
+    });
   }
+
   if (entries.length === 0) return null;
 
   return (
-    <section className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5" aria-label="Historial de esta solicitud">
+    <section
+      className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5"
+      aria-label="Historial de esta solicitud"
+      data-testid="request-history-card"
+    >
       <h2 className="text-base font-semibold text-ink">Historial de esta solicitud</h2>
       <ul className="flex flex-col gap-2">
         {entries.map((entry) => (
