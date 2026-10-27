@@ -41,6 +41,12 @@ describe("PreviewStep", () => {
     expect(screen.getByText(/Buscamos un perfil DevOps/)).toBeInTheDocument();
   });
 
+  it("en una pasantía muestra el salario como a convenir", () => {
+    renderStep({ conditions: { ...VALID_CONDITIONS, contractType: "Pasantía", salary: "" } });
+
+    expect(screen.getByText("A convenir")).toBeInTheDocument();
+  });
+
   it("muestra solo las habilidades elegidas, sin datos de ejemplo", () => {
     renderStep();
 
