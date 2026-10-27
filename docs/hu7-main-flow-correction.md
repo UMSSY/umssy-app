@@ -271,3 +271,5 @@ Validación de la sincronización:
 - TypeScript, compilaciones backend y Next.js de producción (42 páginas), ESLint y comprobación de diff: aprobados. Se conserva la advertencia previa de unbound-method en un test backend.
 - HTTP local: login, GET /mentors/me/participation, solicitud actual y capacidad responden correctamente. La cuenta de prueba conserva estado ACTIVE, sus preferencias y una ocupación de 4/4; el frontend responde 200.
 - Navegador: se verificaron la vista nueva, el botón Pausar mentoría y su confirmación; cancelar el modal conserva la participación. Los servidores locales se actualizaron sin reiniciar ni sembrar la base de datos.
+
+La primera validación remota detectó que cuatro relaciones nuevas de Prisma asumían ON UPDATE CASCADE, mientras que la migración publicada define NO ACTION. Se explicitó `onUpdate: NoAction` en el esquema y se regeneró el cliente, sin reescribir la migración. La comprobación posterior creó una base temporal independiente, aplicó todas las migraciones y ejecutó el mismo `prisma migrate diff --exit-code` del CI: no detectó diferencias. La base temporal se eliminó al terminar; la base de demostración no se modificó.

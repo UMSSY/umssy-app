@@ -907,7 +907,7 @@ model MentorIntakeAttempt {
   responseStatus Int      @map("response_status")
   responseData   Json     @map("response_data")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   sanction MentorParticipationSanction?
 
   @@unique([userId, operation, idempotencyKey], map: "mentor_intake_attempts_identity")
@@ -921,8 +921,8 @@ model MentorParticipationSanction {
   startedAt        DateTime @map("started_at") @db.Timestamptz(6)
   endsAt           DateTime @map("ends_at") @db.Timestamptz(6)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
-  triggerAttempt MentorIntakeAttempt? @relation(fields: [triggerAttemptId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  triggerAttempt MentorIntakeAttempt? @relation(fields: [triggerAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
   @@index([userId, endsAt], map: "mentor_participation_sanctions_active")
   @@map("mentor_participation_sanctions")
@@ -943,7 +943,7 @@ model MentorMailOutbox {
   lastError   String?   @map("last_error") @db.VarChar(100)
   createdAt   DateTime  @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
   @@index([status, availableAt], map: "mentor_mail_outbox_dispatch")
   @@map("mentor_mail_outbox")
