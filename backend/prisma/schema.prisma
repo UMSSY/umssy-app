@@ -847,10 +847,11 @@ model UserPresence {
 }
 
 model SurveyStatus {
-  id        String   @id @default(uuid()) @db.Uuid
-  title     String   @unique @db.VarChar(100)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   surveys Survey[]
 
@@ -858,10 +859,11 @@ model SurveyStatus {
 }
 
 model SurveyQuestionType {
-  id        String   @id @default(uuid()) @db.Uuid
-  title     String   @unique @db.VarChar(100)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   questions SurveyQuestion[]
 
@@ -941,6 +943,7 @@ model SurveyResponse {
   answers    SurveyAnswer[]
 
   @@unique([surveyId, respondentId])
+  @@index([respondentId])
   @@map("survey_responses")
 }
 
@@ -951,11 +954,14 @@ model SurveyAnswer {
   optionId   String?  @map("option_id") @db.Uuid
   textValue  String?  @map("text_value") @db.Text
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   response SurveyResponse        @relation(fields: [responseId], references: [id], onDelete: Cascade)
   question SurveyQuestion        @relation(fields: [questionId], references: [id], onDelete: Cascade)
   option   SurveyQuestionOption? @relation(fields: [optionId], references: [id], onDelete: Cascade)
 
+  @@index([responseId])
+  @@index([optionId])
   @@index([questionId, optionId])
   @@map("survey_answers")
 }

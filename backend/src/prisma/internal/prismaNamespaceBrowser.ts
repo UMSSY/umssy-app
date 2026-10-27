@@ -769,6 +769,7 @@ export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[k
 export const SurveyStatusScalarFieldEnum = {
   id: 'id',
   title: 'title',
+  description: 'description',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -779,6 +780,7 @@ export type SurveyStatusScalarFieldEnum = (typeof SurveyStatusScalarFieldEnum)[k
 export const SurveyQuestionTypeScalarFieldEnum = {
   id: 'id',
   title: 'title',
+  description: 'description',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -847,7 +849,8 @@ export const SurveyAnswerScalarFieldEnum = {
   questionId: 'questionId',
   optionId: 'optionId',
   textValue: 'textValue',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type SurveyAnswerScalarFieldEnum = (typeof SurveyAnswerScalarFieldEnum)[keyof typeof SurveyAnswerScalarFieldEnum]

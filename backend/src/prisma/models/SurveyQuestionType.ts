@@ -27,6 +27,7 @@ export type AggregateSurveyQuestionType = {
 export type SurveyQuestionTypeMinAggregateOutputType = {
   id: string | null
   title: string | null
+  description: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -34,6 +35,7 @@ export type SurveyQuestionTypeMinAggregateOutputType = {
 export type SurveyQuestionTypeMaxAggregateOutputType = {
   id: string | null
   title: string | null
+  description: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -41,6 +43,7 @@ export type SurveyQuestionTypeMaxAggregateOutputType = {
 export type SurveyQuestionTypeCountAggregateOutputType = {
   id: number
   title: number
+  description: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -50,6 +53,7 @@ export type SurveyQuestionTypeCountAggregateOutputType = {
 export type SurveyQuestionTypeMinAggregateInputType = {
   id?: true
   title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -57,6 +61,7 @@ export type SurveyQuestionTypeMinAggregateInputType = {
 export type SurveyQuestionTypeMaxAggregateInputType = {
   id?: true
   title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -64,6 +69,7 @@ export type SurveyQuestionTypeMaxAggregateInputType = {
 export type SurveyQuestionTypeCountAggregateInputType = {
   id?: true
   title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -144,6 +150,7 @@ export type SurveyQuestionTypeGroupByArgs<ExtArgs extends runtime.Types.Extensio
 export type SurveyQuestionTypeGroupByOutputType = {
   id: string
   title: string
+  description: string | null
   createdAt: Date
   updatedAt: Date
   _count: SurveyQuestionTypeCountAggregateOutputType | null
@@ -172,6 +179,7 @@ export type SurveyQuestionTypeWhereInput = {
   NOT?: Prisma.SurveyQuestionTypeWhereInput | Prisma.SurveyQuestionTypeWhereInput[]
   id?: Prisma.UuidFilter<"SurveyQuestionType"> | string
   title?: Prisma.StringFilter<"SurveyQuestionType"> | string
+  description?: Prisma.StringNullableFilter<"SurveyQuestionType"> | string | null
   createdAt?: Prisma.DateTimeFilter<"SurveyQuestionType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SurveyQuestionType"> | Date | string
   questions?: Prisma.SurveyQuestionListRelationFilter
@@ -180,6 +188,7 @@ export type SurveyQuestionTypeWhereInput = {
 export type SurveyQuestionTypeOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   questions?: Prisma.SurveyQuestionOrderByRelationAggregateInput
@@ -191,6 +200,7 @@ export type SurveyQuestionTypeWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.SurveyQuestionTypeWhereInput | Prisma.SurveyQuestionTypeWhereInput[]
   OR?: Prisma.SurveyQuestionTypeWhereInput[]
   NOT?: Prisma.SurveyQuestionTypeWhereInput | Prisma.SurveyQuestionTypeWhereInput[]
+  description?: Prisma.StringNullableFilter<"SurveyQuestionType"> | string | null
   createdAt?: Prisma.DateTimeFilter<"SurveyQuestionType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SurveyQuestionType"> | Date | string
   questions?: Prisma.SurveyQuestionListRelationFilter
@@ -199,6 +209,7 @@ export type SurveyQuestionTypeWhereUniqueInput = Prisma.AtLeast<{
 export type SurveyQuestionTypeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SurveyQuestionTypeCountOrderByAggregateInput
@@ -212,6 +223,7 @@ export type SurveyQuestionTypeScalarWhereWithAggregatesInput = {
   NOT?: Prisma.SurveyQuestionTypeScalarWhereWithAggregatesInput | Prisma.SurveyQuestionTypeScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"SurveyQuestionType"> | string
   title?: Prisma.StringWithAggregatesFilter<"SurveyQuestionType"> | string
+  description?: Prisma.StringNullableWithAggregatesFilter<"SurveyQuestionType"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SurveyQuestionType"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"SurveyQuestionType"> | Date | string
 }
@@ -219,6 +231,7 @@ export type SurveyQuestionTypeScalarWhereWithAggregatesInput = {
 export type SurveyQuestionTypeCreateInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.SurveyQuestionCreateNestedManyWithoutTypeInput
@@ -227,6 +240,7 @@ export type SurveyQuestionTypeCreateInput = {
 export type SurveyQuestionTypeUncheckedCreateInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.SurveyQuestionUncheckedCreateNestedManyWithoutTypeInput
@@ -235,6 +249,7 @@ export type SurveyQuestionTypeUncheckedCreateInput = {
 export type SurveyQuestionTypeUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.SurveyQuestionUpdateManyWithoutTypeNestedInput
@@ -243,6 +258,7 @@ export type SurveyQuestionTypeUpdateInput = {
 export type SurveyQuestionTypeUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.SurveyQuestionUncheckedUpdateManyWithoutTypeNestedInput
@@ -251,6 +267,7 @@ export type SurveyQuestionTypeUncheckedUpdateInput = {
 export type SurveyQuestionTypeCreateManyInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -258,6 +275,7 @@ export type SurveyQuestionTypeCreateManyInput = {
 export type SurveyQuestionTypeUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -265,6 +283,7 @@ export type SurveyQuestionTypeUpdateManyMutationInput = {
 export type SurveyQuestionTypeUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -272,6 +291,7 @@ export type SurveyQuestionTypeUncheckedUpdateManyInput = {
 export type SurveyQuestionTypeCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -279,6 +299,7 @@ export type SurveyQuestionTypeCountOrderByAggregateInput = {
 export type SurveyQuestionTypeMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -286,6 +307,7 @@ export type SurveyQuestionTypeMaxOrderByAggregateInput = {
 export type SurveyQuestionTypeMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -312,6 +334,7 @@ export type SurveyQuestionTypeUpdateOneRequiredWithoutQuestionsNestedInput = {
 export type SurveyQuestionTypeCreateWithoutQuestionsInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -319,6 +342,7 @@ export type SurveyQuestionTypeCreateWithoutQuestionsInput = {
 export type SurveyQuestionTypeUncheckedCreateWithoutQuestionsInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -342,6 +366,7 @@ export type SurveyQuestionTypeUpdateToOneWithWhereWithoutQuestionsInput = {
 export type SurveyQuestionTypeUpdateWithoutQuestionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -349,6 +374,7 @@ export type SurveyQuestionTypeUpdateWithoutQuestionsInput = {
 export type SurveyQuestionTypeUncheckedUpdateWithoutQuestionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -387,6 +413,7 @@ export type SurveyQuestionTypeCountOutputTypeCountQuestionsArgs<ExtArgs extends 
 export type SurveyQuestionTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   questions?: boolean | Prisma.SurveyQuestionType$questionsArgs<ExtArgs>
@@ -396,6 +423,7 @@ export type SurveyQuestionTypeSelect<ExtArgs extends runtime.Types.Extensions.In
 export type SurveyQuestionTypeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["surveyQuestionType"]>
@@ -403,6 +431,7 @@ export type SurveyQuestionTypeSelectCreateManyAndReturn<ExtArgs extends runtime.
 export type SurveyQuestionTypeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["surveyQuestionType"]>
@@ -410,11 +439,12 @@ export type SurveyQuestionTypeSelectUpdateManyAndReturn<ExtArgs extends runtime.
 export type SurveyQuestionTypeSelectScalar = {
   id?: boolean
   title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SurveyQuestionTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "createdAt" | "updatedAt", ExtArgs["result"]["surveyQuestionType"]>
+export type SurveyQuestionTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["surveyQuestionType"]>
 export type SurveyQuestionTypeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   questions?: boolean | Prisma.SurveyQuestionType$questionsArgs<ExtArgs>
   _count?: boolean | Prisma.SurveyQuestionTypeCountOutputTypeDefaultArgs<ExtArgs>
@@ -430,6 +460,7 @@ export type $SurveyQuestionTypePayload<ExtArgs extends runtime.Types.Extensions.
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     title: string
+    description: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["surveyQuestionType"]>
@@ -858,6 +889,7 @@ export interface Prisma__SurveyQuestionTypeClient<T, Null = never, ExtArgs exten
 export interface SurveyQuestionTypeFieldRefs {
   readonly id: Prisma.FieldRef<"SurveyQuestionType", 'String'>
   readonly title: Prisma.FieldRef<"SurveyQuestionType", 'String'>
+  readonly description: Prisma.FieldRef<"SurveyQuestionType", 'String'>
   readonly createdAt: Prisma.FieldRef<"SurveyQuestionType", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"SurveyQuestionType", 'DateTime'>
 }
