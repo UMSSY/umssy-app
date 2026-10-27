@@ -8,7 +8,7 @@ La rama publica código, migraciones de estructura, documentación y pruebas aut
 
 ## Origen
 
-La base es `dc51c4bb` de `feature/grupo-6-hu7-frontend-integracion`, que incluye las solicitudes y sanciones de HU7-2/HU7-4 y el backend de capacidad/ofertas. Se incorporó `9e1de927` de `feature/grupo-6-hu7-pausa-definitiva` como `0b11dda6`, resolviendo el registro conjunto de los controladores y repositorios.
+La base es `dc51c4bb` de `feature/grupo-6-hu7-frontend-integracion`, que incluye las solicitudes y sanciones de HU7-2/HU7-4 y el backend de capacidad/ofertas. Se incorporó `9e1de927` de `feature/grupo-6-hu7-pausa-definitiva` como `0b11dda6`, resolviendo el registro conjunto de los controladores y repositorios. Antes de publicar se sincronizó `epic/grupo-6-red-mentorias` en `e7ac742a`, conservando sus validaciones, inserciones FIFO con reloj PostgreSQL, filtros de mentoría y modelos de auditoría. El cliente Prisma se regeneró desde el esquema combinado. Se conservaron las suites de pruebas de ambas ramas.
 
 Los PR [#1452](https://github.com/UMSSY/umssy-app/pull/1452), [#1467](https://github.com/UMSSY/umssy-app/pull/1467), [#1476](https://github.com/UMSSY/umssy-app/pull/1476) y [#1478](https://github.com/UMSSY/umssy-app/pull/1478) describen las entregas visuales anteriores. Esta rama conecta el recorrido con la API existente y sustituye los controles y servicios de simulación. Especificación: [HU7 #1386](https://github.com/UMSSY/umssy-app/issues/1386) e [integración #1411](https://github.com/UMSSY/umssy-app/issues/1411).
 
@@ -66,4 +66,6 @@ node node_modules/vitest/vitest.mjs run src/modules/mentors --maxWorkers 2
 
 Resultados automatizados: 239 pruebas frontend en 29 archivos y 216 pruebas backend en 19 archivos, incluidas 28 pruebas transaccionales PostgreSQL. El smoke HTTP pasó con JWT firmado y verificó autenticación, cupos, persistencia, duplicados, edición, cancelación, oferta FIFO, confirmación concurrente, expiración y activación directa posterior. TypeScript backend/frontend, la compilación de producción Next.js con webpack (41 páginas generadas) y el lint de los archivos frontend modificados pasaron. El lint backend no reportó errores; conserva dos advertencias previas de métodos sin enlazar en pruebas ajenas a estos cambios.
 
-La comprobación HTTP citada se ejecutó localmente antes de excluir su script de esta publicación. Esta evidencia es automatizada y no sustituye una revisión visual de todos los mockups en escritorio y móvil. El envío de correos no forma parte de ese smoke HTTP. No se cambiaron migraciones en esta integración ni se ejecutó un despliegue.
+La comprobación HTTP citada se ejecutó localmente antes de excluir su script de esta publicación. Esta evidencia es automatizada y no sustituye una revisión visual de todos los mockups en escritorio y móvil. El envío de correos no forma parte de ese smoke HTTP. La publicación conserva la migración estructural del control de intentos; no incorpora datos de demostración ni ejecuta un despliegue.
+
+Tras sincronizar con la épica se repitieron TypeScript backend/frontend y las regresiones: 243 pruebas backend aprobadas en 21 archivos, incluidos los escenarios transaccionales PostgreSQL, y 261 pruebas frontend aprobadas en 32 archivos. Las pruebas crean únicamente sus propios esquemas temporales y no modifican la base de la demo.

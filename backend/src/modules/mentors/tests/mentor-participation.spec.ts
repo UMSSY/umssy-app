@@ -109,6 +109,18 @@ function fixture(
         }];
       }
 
+      if (sql.includes(' AS exists')) return [{ exists: false }];
+      if (sql.includes('INSERT INTO mentor_participation_requests')) {
+        return [await create({ data: { userId: 'user-1', status: 'PENDING', ...preferences } })];
+      }
+      if (sql.includes('UPDATE mentor_participation_requests')) {
+        if (!options.pending) return [];
+        return [await update({ where: { id: request.id }, data: sql.includes("status = 'CANCELLED'") ? { status: 'CANCELLED' } : preferences })];
+      }
+      if (sql.includes('FROM mentor_participation_requests')) {
+        const found = await findFirst();
+        return found ? [found] : [];
+      }
       return [];
     }),
     technicalArea: {

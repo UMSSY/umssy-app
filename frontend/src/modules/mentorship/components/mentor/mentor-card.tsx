@@ -16,6 +16,7 @@ type MentorCardProps = {
   isOwnProfile?: boolean;
   returnTo?: string;
   showAffinityBadge?: boolean;
+  selectedArea?: string;
 };
 
 function getSafeReturnTo(returnTo?: string): string | null {
@@ -54,6 +55,7 @@ export function MentorCard({
   isOwnProfile = false,
   returnTo,
   showAffinityBadge = false,
+  selectedArea,
 }: MentorCardProps) {
   const hasTechnicalAreas = mentor.technicalAreas.length > 0;
   const safeReturnTo = getSafeReturnTo(returnTo);
@@ -104,22 +106,18 @@ export function MentorCard({
           </div>
 
           <div className="ml-auto flex shrink-0 flex-col items-end gap-2">
-            <Badge
-              variant="outline"
-              className={`gap-1.5 px-2.5 whitespace-nowrap ${
-                mentor.isAvailable
-                  ? "border-availability-border bg-availability text-availability-foreground"
-                  : "border-border bg-surface-soft text-text-secondary"
-              }`}
-            >
-              <span
-                aria-hidden="true"
-                className={`size-1.5 shrink-0 rounded-full ${
-                  mentor.isAvailable ? "bg-accent" : "bg-text-secondary"
-                }`}
-              />
-              {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
-            </Badge>
+            {mentor.isAvailable ? (
+              <Badge
+                variant="outline"
+                className="gap-1.5 border-availability-border bg-availability px-2.5 whitespace-nowrap text-availability-foreground"
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 shrink-0 rounded-full bg-accent"
+                />
+                Disponible para mentoría
+              </Badge>
+            ) : null}
             {showAffinityBadge &&
               mentor.sharedInterestsCount !== undefined && (
                 <Badge variant="secondary" className="whitespace-nowrap">
@@ -139,7 +137,12 @@ export function MentorCard({
               {mentor.technicalAreas.map((area) => (
                 <li
                   key={area}
-                  className="max-w-full min-w-0 rounded-md border border-accent/15 bg-interaction px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-accent"
+                  aria-current={area === selectedArea ? "true" : undefined}
+                  className={`max-w-full min-w-0 rounded-md border bg-interaction px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-accent ${
+                    area === selectedArea
+                      ? "border-accent font-semibold ring-1 ring-accent"
+                      : "border-accent/15"
+                  }`}
                 >
                   {area}
                 </li>

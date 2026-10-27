@@ -1,4 +1,3 @@
-
 import { DomainException } from '../../../common/exceptions/domain.exception.js';
 
 export class MentorParticipationException extends DomainException {

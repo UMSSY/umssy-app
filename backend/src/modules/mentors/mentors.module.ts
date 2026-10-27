@@ -13,11 +13,11 @@ import { MentorOffersController } from './controllers/mentor-offers.controller.j
 import { MentorOffersRepository } from './repositories/mentor-offers.repository.js';
 import { MentorOffersService } from './services/mentor-offers.service.js';
 import { MentorOffersWorker } from './services/mentor-offers-worker.service.js';
+import { MentorExitController } from './controllers/mentor-exit.controller.js';
+import { MentorExitRepository } from './repositories/mentor-exit.repository.js';
 import { MentorParticipationController } from './controllers/mentor-participation.controller.js';
 import { MentorParticipationService } from './services/mentor-participation.service.js';
 import { MentorParticipationRepository } from './repositories/mentor-participation.repository.js';
-import { MentorExitController } from './controllers/mentor-exit.controller.js';
-import { MentorExitRepository } from './repositories/mentor-exit.repository.js';
 
 @Module({
   imports: [AuthModule, ProfileModule],
@@ -25,8 +25,8 @@ import { MentorExitRepository } from './repositories/mentor-exit.repository.js';
     MentorsController,
     MentorPhotoController,
     MentorOffersController,
-    MentorParticipationController,
     MentorExitController,
+    MentorParticipationController,
   ],
   providers: [
     MentorsService,
@@ -37,9 +37,9 @@ import { MentorExitRepository } from './repositories/mentor-exit.repository.js';
     MentorOffersRepository,
     MentorOffersService,
     MentorOffersWorker,
+    MentorExitRepository,
     MentorParticipationService,
     MentorParticipationRepository,
-    MentorExitRepository,
   ],
   exports: [MentorsService],
 })

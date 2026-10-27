@@ -21,6 +21,30 @@ afterEach(() => {
 });
 
 describe("MentorCard", () => {
+  it("resalta el área técnica seleccionada", () => {
+    render(<MentorCard mentor={mentor} selectedArea="APIs" />);
+    const selected = screen.getByText("APIs");
+    expect(selected).toHaveAttribute("aria-current", "true");
+    expect(selected).toHaveClass("border-accent", "font-semibold", "ring-1", "ring-accent");
+    expect(screen.getByText("Backend")).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("Backend")).toHaveClass("border-accent/15");
+  });
+
+  it("no resalta ninguna área cuando no hay selección", () => {
+    render(<MentorCard mentor={mentor} />);
+    for (const name of mentor.technicalAreas) {
+      expect(screen.getByText(name)).not.toHaveAttribute("aria-current");
+      expect(screen.getByText(name)).not.toHaveClass("ring-1");
+    }
+  });
+
+  it("no resalta nada si el mentor no tiene el área seleccionada", () => {
+    render(<MentorCard mentor={mentor} selectedArea="QA" />);
+    for (const name of mentor.technicalAreas) {
+      expect(screen.getByText(name)).not.toHaveAttribute("aria-current");
+    }
+  });
+
   it("usa iniciales sin intentar cargar una foto inexistente", () => {
     const imageLoader = vi.spyOn(window, "Image");
     render(<MentorCard mentor={mentor} />);
@@ -76,13 +100,10 @@ describe("MentorCard", () => {
     expect(header?.lastElementChild).toBe(indicators);
   });
 
-  it("omite formación ausente y muestra un estado neutral", () => {
+  it("omite formación ausente y no muestra badge de disponibilidad", () => {
     render(<MentorCard mentor={mentor} />);
     expect(screen.queryByText(/Ingeniería/)).not.toBeInTheDocument();
-    expect(screen.getByText("No disponible")).toHaveClass(
-      "border-border",
-      "text-text-secondary",
-    );
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
     expect(screen.queryByText("Disponible para mentoría")).not.toBeInTheDocument();
   });
 
@@ -93,7 +114,7 @@ describe("MentorCard", () => {
       />,
     );
     expect(screen.getByText("Orientación técnica")).toBeVisible();
-    expect(screen.getByText("No disponible")).toBeVisible();
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
   });
 
   it("muestra orientaciones reales y conserva un vacío discreto", () => {
@@ -145,7 +166,7 @@ describe("MentorCard", () => {
     expect(screen.getByText("APIs")).toBeDefined();
     expect(screen.getByText("Bases de datos")).toBeDefined();
     expect(screen.queryByText("Disponible")).toBeNull();
-    expect(screen.getByText("No disponible")).toBeVisible();
+    expect(screen.queryByText("No disponible")).toBeNull();
   });
 
   it("no fabrica un cargo cuando headline es null", () => {
@@ -232,10 +253,7 @@ describe("MentorCard", () => {
       />,
     );
     expect(screen.getByText(label)).toBeVisible();
-    expect(screen.getByText("No disponible")).toBeVisible();
-    expect(screen.getByText(label).parentElement).toBe(
-      screen.getByText("No disponible").parentElement,
-    );
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: `Ver perfil de ${mentor.fullName}` }))
       .toHaveAttribute("href", `/mentors/${mentor.id}`);
   });

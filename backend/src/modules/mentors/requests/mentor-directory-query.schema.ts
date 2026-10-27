@@ -10,6 +10,7 @@ export const mentorDirectoryQuerySchema = z
       .default(1),
     search: z.string().trim().max(100).default(''),
     area: z.string().trim().min(1).max(80).optional(),
+    orientation: z.string().trim().min(1).max(80).optional(),
     available: z
       .enum(['true', 'false'])
       .default('false')

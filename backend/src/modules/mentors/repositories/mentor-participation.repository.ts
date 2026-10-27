@@ -1,13 +1,26 @@
-
 import { Injectable } from '@nestjs/common';
-import type { Prisma } from '../../../prisma/client.js';
+import { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
-import { reconcileMentorOffers } from './mentor-offers.queries.js';
 import {
   readMentorCapacity,
   readMentorEligibility,
 } from './mentor-capacity.queries.js';
+import { reconcileMentorOffers } from './mentor-offers.queries.js';
+
+export interface MentorParticipationRequest {
+  id: string;
+  userId: string;
+  status: string;
+  queuedAt: Date;
+  createdAt: Date;
+  technicalAreaIds: string[];
+  orientationTypeIds: string[];
+}
+
+const fields = Prisma.sql`id, user_id AS "userId", status, queued_at AS "queuedAt",
+  created_at AS "createdAt", technical_area_ids AS "technicalAreaIds",
+  orientation_type_ids AS "orientationTypeIds"`;
 
 const ATTEMPT_WINDOW_MS = 24 * 60 * 60 * 1000;
 const SANCTION_DURATION_MS = 72 * 60 * 60 * 1000;
@@ -21,25 +34,20 @@ export class MentorParticipationRepository {
     tx: Prisma.TransactionClient,
     technicalAreaIds: string[],
     orientationTypeIds: string[],
-  ): Promise<boolean> {
-    if (!technicalAreaIds.length || !orientationTypeIds.length) {
+  ) {
+    if (
+      !technicalAreaIds.length ||
+      !orientationTypeIds.length ||
+      new Set(technicalAreaIds).size !== technicalAreaIds.length ||
+      new Set(orientationTypeIds).size !== orientationTypeIds.length
+    )
       return false;
-    }
-
     const [areas, orientations] = await Promise.all([
-      tx.technicalArea.count({
-        where: {
-          id: { in: technicalAreaIds },
-        },
-      }),
+      tx.technicalArea.count({ where: { id: { in: technicalAreaIds } } }),
       tx.orientationType.count({
-        where: {
-          id: { in: orientationTypeIds },
-          isActive: true,
-        },
+        where: { id: { in: orientationTypeIds }, isActive: true },
       }),
     ]);
-
     return (
       areas === technicalAreaIds.length &&
       orientations === orientationTypeIds.length
@@ -122,68 +130,43 @@ export class MentorParticipationRepository {
   ) {
     return withMentorCapacityLock(this.prisma, async (tx) => {
       const eligibility = await readMentorEligibility(tx, userId);
-
-      if (!eligibility.eligible || eligibility.alreadyMentor) {
+      if (!eligibility.eligible || eligibility.alreadyMentor)
         return { result: 'NOT_ELIGIBLE' as const };
-      }
-
       const attempt = await this.registerAttempt(tx, userId);
-
-      if (attempt.result === 'SANCTIONED') {
-        return attempt;
-      }
-
+      if (attempt.result === 'SANCTIONED') return attempt;
+      // Atiende la cola existente y vence ofertas antes de admitir otra solicitud.
       await reconcileMentorOffers(tx);
-
-      const existingRequest =
-        await tx.mentorParticipationRequest.findFirst({
-          where: {
-            userId,
-            status: { in: ['PENDING', 'OFFERED'] },
-          },
-          orderBy: [{ queuedAt: 'asc' }, { id: 'asc' }],
-        });
-
-      if (existingRequest) {
-        return {
-          result: 'ALREADY_EXISTS' as const,
-          request: existingRequest,
-        };
-      }
-
-      const valid = await this.validatePreferences(
-        tx,
-        technicalAreaIds,
-        orientationTypeIds,
-      );
-
-      if (!valid) {
-        return {
-          result: 'INVALID_PREFERENCES' as const,
-        };
-      }
-
-      const capacity = await readMentorCapacity(tx);
-
-      if (capacity.available > 0) {
-        return {
-          result: 'CAPACITY_AVAILABLE' as const,
-        };
-      }
-
-      const request = await tx.mentorParticipationRequest.create({
-        data: {
-          userId,
-          status: 'PENDING',
+      const [existing] = await tx.$queryRaw<MentorParticipationRequest[]>`
+        SELECT ${fields} FROM mentor_participation_requests
+        WHERE user_id = ${userId}::uuid AND status IN ('PENDING', 'OFFERED')
+        ORDER BY queued_at, id LIMIT 1`;
+      if (existing)
+        return { result: 'ALREADY_EXISTS' as const, request: existing };
+      const [offer] = await tx.$queryRaw<{ exists: boolean }[]>`
+        SELECT EXISTS (SELECT 1 FROM mentor_slot_offers
+          WHERE user_id = ${userId}::uuid AND status = 'OFFERED'
+            AND expires_at > clock_timestamp()) AS exists`;
+      if (offer.exists) return { result: 'OFFER_EXISTS' as const };
+      if (
+        !(await this.validatePreferences(
+          tx,
           technicalAreaIds,
           orientationTypeIds,
-        },
-      });
-
-      return {
-        result: 'CREATED' as const,
-        request,
-      };
+        ))
+      ) {
+        return { result: 'INVALID_PREFERENCES' as const };
+      }
+      const capacity = await readMentorCapacity(tx);
+      if (capacity.available > 0)
+        return { result: 'CAPACITY_AVAILABLE' as const };
+      const [request] = await tx.$queryRaw<MentorParticipationRequest[]>`
+        WITH instant AS MATERIALIZED (SELECT clock_timestamp() AS now)
+        INSERT INTO mentor_participation_requests
+          (id, user_id, status, queued_at, created_at, technical_area_ids, orientation_type_ids)
+        SELECT gen_random_uuid(), ${userId}::uuid, 'PENDING', instant.now, instant.now,
+          ARRAY[${Prisma.join(technicalAreaIds)}]::uuid[], ARRAY[${Prisma.join(orientationTypeIds)}]::uuid[]
+        FROM instant RETURNING ${fields}`;
+      return { result: 'CREATED' as const, request };
     });
   }
 
@@ -211,13 +194,9 @@ export class MentorParticipationRepository {
   }
 
   findMyHistory(userId: string) {
-    return this.prisma.mentorParticipationRequest.findMany({
-      where: { userId },
-      orderBy: [
-        { queuedAt: 'desc' },
-        { id: 'desc' },
-      ],
-    });
+    return this.prisma.$queryRaw<MentorParticipationRequest[]>`
+      SELECT ${fields} FROM mentor_participation_requests WHERE user_id = ${userId}::uuid
+      ORDER BY queued_at DESC, id DESC`;
   }
 
   updatePreferences(
@@ -226,82 +205,35 @@ export class MentorParticipationRepository {
     orientationTypeIds: string[],
   ) {
     return withMentorCapacityLock(this.prisma, async (tx) => {
-      const request =
-        await tx.mentorParticipationRequest.findFirst({
-          where: {
-            userId,
-            status: 'PENDING',
-          },
-          orderBy: [
-            { queuedAt: 'asc' },
-            { id: 'asc' },
-          ],
-        });
-
-      if (!request) {
-        return {
-          result: 'NOT_FOUND' as const,
-        };
+      const [pending] = await tx.$queryRaw<{ id: string }[]>`
+        SELECT id FROM mentor_participation_requests
+        WHERE user_id = ${userId}::uuid AND status = 'PENDING' FOR UPDATE`;
+      if (!pending) return { result: 'NOT_FOUND' as const };
+      if (
+        !(await this.validatePreferences(
+          tx,
+          technicalAreaIds,
+          orientationTypeIds,
+        ))
+      ) {
+        return { result: 'INVALID_PREFERENCES' as const };
       }
-
-      const valid = await this.validatePreferences(
-        tx,
-        technicalAreaIds,
-        orientationTypeIds,
-      );
-
-      if (!valid) {
-        return {
-          result: 'INVALID_PREFERENCES' as const,
-        };
-      }
-
-      const updated =
-        await tx.mentorParticipationRequest.update({
-          where: { id: request.id },
-          data: {
-            technicalAreaIds,
-            orientationTypeIds,
-          },
-        });
-
-      return {
-        result: 'UPDATED' as const,
-        request: updated,
-      };
+      const [request] = await tx.$queryRaw<MentorParticipationRequest[]>`
+        UPDATE mentor_participation_requests
+        SET technical_area_ids = ARRAY[${Prisma.join(technicalAreaIds)}]::uuid[],
+          orientation_type_ids = ARRAY[${Prisma.join(orientationTypeIds)}]::uuid[]
+        WHERE id = ${pending.id}::uuid RETURNING ${fields}`;
+      return { result: 'UPDATED' as const, request };
     });
   }
 
   cancelRequest(userId: string) {
     return withMentorCapacityLock(this.prisma, async (tx) => {
-      const request =
-        await tx.mentorParticipationRequest.findFirst({
-          where: {
-            userId,
-            status: 'PENDING',
-          },
-          orderBy: [
-            { queuedAt: 'asc' },
-            { id: 'asc' },
-          ],
-        });
-
-      if (!request) {
-        return {
-          result: 'NOT_FOUND' as const,
-        };
-      }
-
-      const cancelled =
-        await tx.mentorParticipationRequest.update({
-          where: { id: request.id },
-          data: { status: 'CANCELLED' },
-        });
-
-      return {
-        result: 'CANCELLED' as const,
-        request: cancelled,
-      };
+      const [request] = await tx.$queryRaw<MentorParticipationRequest[]>`
+        UPDATE mentor_participation_requests SET status = 'CANCELLED'
+        WHERE user_id = ${userId}::uuid AND status = 'PENDING' RETURNING ${fields}`;
+      if (!request) return { result: 'NOT_FOUND' as const };
+      return { result: 'CANCELLED' as const, request };
     });
   }
 }

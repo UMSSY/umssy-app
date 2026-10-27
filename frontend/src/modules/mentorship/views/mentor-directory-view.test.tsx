@@ -8,6 +8,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 import { profileService } from "@/modules/profile/services/profile.service";
 import {
   saveAccessToken,
@@ -75,7 +76,13 @@ vi.mock("../hooks/use-mentorship-catalogs", () => ({
     isTechnicalAreasLoading: false,
     isTechnicalAreasError: false,
     retryTechnicalAreas: vi.fn(),
-    orientationTypes: [],
+    orientationTypes: [
+      { id: "1", name: "Búsqueda de empleo", description: null },
+      { id: "2", name: "Orientación profesional", description: null },
+      { id: "3", name: "Preparación para entrevistas", description: null },
+      { id: "4", name: "Revisión de CV", description: null },
+      { id: "5", name: "Orientación técnica", description: null },
+    ],
     isOrientationTypesLoading: false,
     isOrientationTypesError: false,
     retryOrientationTypes: vi.fn(),
@@ -203,6 +210,87 @@ function mockDirectoryWithParams() {
 }
 
 describe("MentorDirectoryView", () => {
+  it("muestra el indicador mientras carga el directorio", () => {
+    vi.spyOn(directoryService, "getMentorDirectory").mockImplementation(
+      () => new Promise<DirectoryPage>(() => {}),
+    );
+
+    render(<MentorDirectoryView />);
+
+    expect(
+      screen.getByRole("status", {
+        name: "Cargando directorio de mentores",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("region", {
+        name: "Listado de mentores",
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("muestra el estado sin resultados y permite limpiar los filtros", async () => {
+    navigationMocks.search =
+      "?search=noexiste&area=Backend&available=false";
+
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
+      makeDirectoryPage([]),
+    );
+
+    render(<MentorDirectoryView />);
+
+    expect(
+      await screen.findByText("No hay mentores con estos filtros"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("region", {
+        name: "Listado de mentores",
+      }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Limpiar filtros",
+      }),
+    );
+
+    expect(navigationMocks.replace).toHaveBeenLastCalledWith(
+      "/mentorship/mentors?page=1",
+      { scroll: false },
+    );
+  });
+
+  it("muestra el error y Reintentar vuelve a consultar el directorio", async () => {
+    const getDirectory = vi
+      .spyOn(directoryService, "getMentorDirectory")
+      .mockRejectedValueOnce(new Error("network error"))
+      .mockResolvedValueOnce(makeDirectoryPage([mentors[0]]));
+
+    render(<MentorDirectoryView />);
+
+    expect(
+      await screen.findByRole("alert"),
+    ).toHaveTextContent("No pudimos cargar el directorio");
+
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Reintentar",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("link", {
+        name: /Ver perfil de María/,
+      }),
+    ).toBeInTheDocument();
+
+    expect(getDirectory).toHaveBeenCalledTimes(2);
+  });
+
   it("renderiza el encabezado del directorio", () => {
     vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
       makeDirectoryPage([]),
@@ -215,6 +303,82 @@ describe("MentorDirectoryView", () => {
         name: "Encuentra un mentor",
       }),
     ).toBeInTheDocument();
+  });
+
+  it("mantiene filtros accesibles, utilizables con teclado y preparados para pantallas estrechas", async () => {
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
+      makeDirectoryPage([mentors[0]]),
+    );
+
+    render(<MentorDirectoryView />);
+
+    await screen.findByRole("link", {
+      name: /Ver perfil de María/,
+    });
+
+    const filters = screen.getByRole("search", {
+      name: "Filtros de mentores",
+    });
+
+    expect(filters).toHaveClass("flex", "flex-wrap");
+
+    expect(
+      within(filters).getByRole("searchbox", {
+        name: "Buscar mentores por nombre",
+      }),
+    ).toBeVisible();
+
+    expect(
+      within(filters).getByRole("combobox", {
+        name: "Área técnica",
+      }),
+    ).toBeVisible();
+
+    expect(
+      within(filters).getByRole("combobox", {
+        name: "Orientación",
+      }),
+    ).toBeVisible();
+
+    const checkbox = within(filters).getByRole("checkbox", {
+      name: "Solo disponibles",
+    });
+
+    expect(checkbox).toBeVisible();
+
+    expect(
+      within(filters).getByRole("combobox", {
+        name: "Ordenar mentores",
+      }),
+    ).toBeVisible();
+
+    const clearButton = within(filters).getByRole("button", {
+      name: "Limpiar",
+    });
+
+    expect(clearButton).toBeVisible();
+
+    const user = userEvent.setup();
+
+    checkbox.focus();
+    expect(checkbox).toHaveFocus();
+
+    await user.keyboard(" ");
+
+    expect(navigationMocks.replace).toHaveBeenCalledWith(
+      "/mentorship/mentors?page=1&available=false",
+      { scroll: false },
+    );
+
+    clearButton.focus();
+    expect(clearButton).toHaveFocus();
+
+    await user.keyboard("{Enter}");
+
+    expect(navigationMocks.replace).toHaveBeenCalledWith(
+      "/mentorship/mentors?page=1",
+      { scroll: false },
+    );
   });
 
   it("renderiza enlaces hacia los perfiles de los mentores", async () => {
@@ -278,7 +442,7 @@ describe("MentorDirectoryView", () => {
     );
 
     expect(screen.getByText("Disponible para mentoría")).toBeInTheDocument();
-    expect(screen.getByText("No disponible")).toBeInTheDocument();
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
     expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
 
     expect(getProfile).toHaveBeenCalledTimes(1);
@@ -303,43 +467,14 @@ describe("MentorDirectoryView", () => {
     expect(getProfile).not.toHaveBeenCalled();
   });
 
-  it("combina búsqueda sin tildes, filtros de área y disponibilidad, y permite reiniciarlos", async () => {
+  it("aplica Solo disponibles por defecto y Limpiar restablece los filtros", async () => {
     mockDirectoryWithParams();
 
     const { rerender } = render(<MentorDirectoryView />);
 
-    await screen.findByRole("link", {
-      name: /Ver perfil de María/,
-    });
-
-    fireEvent.change(
-      screen.getByRole("searchbox", { name: "Buscar mentor" }),
-      { target: { value: "maria" } },
-    );
-
-    applyNavigation(rerender);
-
-    await waitFor(() => {
-      expect(
-        screen.queryByRole("link", {
-          name: /Ver perfil de Carlos/,
-        }),
-      ).not.toBeInTheDocument();
-    });
-
-    fireEvent.change(screen.getByRole("combobox", { name: "Área" }), {
-      target: { value: "Backend" },
-    });
-
-    applyNavigation(rerender);
-
-    fireEvent.click(
-      screen.getByRole("checkbox", {
-        name: "Con disponibilidad",
-      }),
-    );
-
-    applyNavigation(rerender);
+    expect(
+      screen.getByRole("checkbox", { name: "Solo disponibles" }),
+    ).toBeChecked();
 
     expect(
       await screen.findByRole("link", {
@@ -347,21 +482,20 @@ describe("MentorDirectoryView", () => {
       }),
     ).toBeInTheDocument();
 
-    fireEvent.change(
-      screen.getByRole("searchbox", { name: "Buscar mentor" }),
-      { target: { value: "noexiste" } },
-    );
-
-    applyNavigation(rerender);
+    expect(
+      screen.queryByRole("link", {
+        name: /Ver perfil de Carlos/,
+      }),
+    ).not.toBeInTheDocument();
 
     expect(
-      await screen.findByText("No hay mentores con estos filtros"),
-    ).toBeInTheDocument();
+      screen.getByRole("button", { name: "Limpiar" }),
+    ).toBeVisible();
 
     fireEvent.click(
-      screen.getAllByRole("button", {
-        name: "Limpiar filtros",
-      })[0],
+      screen.getByRole("checkbox", {
+        name: "Solo disponibles",
+      }),
     );
 
     applyNavigation(rerender);
@@ -371,6 +505,172 @@ describe("MentorDirectoryView", () => {
         name: /Ver perfil de Carlos/,
       }),
     ).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("No disponible"),
+    ).not.toBeInTheDocument();
+
+    const searchCallsBeforeMaria =
+      navigationMocks.replace.mock.calls.length;
+
+    fireEvent.change(
+      screen.getByRole("searchbox", {
+        name: "Buscar mentores por nombre",
+      }),
+      { target: { value: "maria" } },
+    );
+
+    await waitFor(() => {
+      expect(navigationMocks.replace.mock.calls.length).toBeGreaterThan(
+        searchCallsBeforeMaria,
+      );
+    });
+
+    applyNavigation(rerender);
+
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("combobox", { name: "Área técnica" }),
+    );
+    await user.click(
+      await screen.findByRole("option", { name: "Backend" }),
+    );
+
+    applyNavigation(rerender);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Limpiar" }),
+    );
+
+    applyNavigation(rerender);
+
+    expect(
+      screen.getByRole("searchbox", {
+        name: "Buscar mentores por nombre",
+      }),
+    ).toHaveValue("");
+
+    expect(
+      screen.getByRole("combobox", { name: "Área técnica" }),
+    ).toHaveTextContent("Todas");
+
+    expect(
+      screen.getByRole("combobox", { name: "Orientación" }),
+    ).toHaveTextContent("Todas");
+
+    expect(
+      screen.getByRole("checkbox", { name: "Solo disponibles" }),
+    ).toBeChecked();
+
+    expect(
+      await screen.findByRole("link", {
+        name: /Ver perfil de María/,
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("link", {
+        name: /Ver perfil de Carlos/,
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("restaura búsqueda, área, orientación y disponibilidad al volver desde el perfil", async () => {
+    navigationMocks.search =
+      "?page=2&search=maria&area=Backend&orientation=Orientaci%C3%B3n%20t%C3%A9cnica&available=false&sort=affinity";
+
+    vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
+      makeDirectoryPage(mentors, {
+        page: 2,
+        totalPages: 3,
+      }),
+    );
+
+    const view = render(<MentorDirectoryView />);
+
+    await screen.findByRole("link", {
+      name: /Ver perfil de María/,
+    });
+
+    expect(
+      screen.getByRole("searchbox", {
+        name: "Buscar mentores por nombre",
+      }),
+    ).toHaveValue("maria");
+
+    expect(
+      screen.getByRole("combobox", {
+        name: "Área técnica",
+      }),
+    ).toHaveTextContent("Backend");
+
+    expect(
+      screen.getByRole("combobox", {
+        name: "Orientación",
+      }),
+    ).toHaveTextContent("Orientación técnica");
+
+    expect(
+      screen.getByRole("checkbox", {
+        name: "Solo disponibles",
+      }),
+    ).not.toBeChecked();
+
+    const returnTo =
+      `/mentorship/mentors${new URLSearchParams(navigationMocks.search).toString() ? `?${new URLSearchParams(navigationMocks.search).toString()}` : ""}`;
+
+    const profileLink = screen.getByRole("link", {
+      name: /Ver perfil de María/,
+    });
+
+    expect(profileLink).toHaveAttribute(
+      "href",
+      `/mentors/${ownId}?returnTo=${encodeURIComponent(returnTo)}`,
+    );
+
+    view.rerender(
+      <MentorProfileNavigation
+        mentorName="María"
+        returnTo={returnTo}
+      />,
+    );
+
+    expect(
+      screen.getByRole("link", {
+        name: "Volver al directorio",
+      }),
+    ).toHaveAttribute("href", returnTo);
+
+    view.rerender(<MentorDirectoryView />);
+
+    await screen.findByRole("link", {
+      name: /Ver perfil de María/,
+    });
+
+    expect(
+      screen.getByRole("searchbox", {
+        name: "Buscar mentores por nombre",
+      }),
+    ).toHaveValue("maria");
+
+    expect(
+      screen.getByRole("combobox", {
+        name: "Área técnica",
+      }),
+    ).toHaveTextContent("Backend");
+
+    expect(
+      screen.getByRole("combobox", {
+        name: "Orientación",
+      }),
+    ).toHaveTextContent("Orientación técnica");
+
+    expect(
+      screen.getByRole("checkbox", {
+        name: "Solo disponibles",
+      }),
+    ).not.toBeChecked();
   });
 
   it("conserva los filtros y la página en el enlace al perfil", async () => {
@@ -412,9 +712,9 @@ describe("MentorDirectoryView", () => {
 
     expect(selector).toHaveValue("affinity");
 
-    expect(screen.getByRole("combobox", { name: "Área" })).toHaveValue(
-      "Backend",
-    );
+    expect(
+      screen.getByRole("combobox", { name: "Área técnica" }),
+    ).toHaveTextContent("Backend");
 
     expect(screen.getByRole("note")).toHaveTextContent(
       "todavía no está disponible",
@@ -445,9 +745,9 @@ describe("MentorDirectoryView", () => {
       screen.getByRole("combobox", { name: "Ordenar mentores" }),
     ).toHaveValue("affinity");
 
-    expect(screen.getByRole("combobox", { name: "Área" })).toHaveValue(
-      "Backend",
-    );
+    expect(
+      screen.getByRole("combobox", { name: "Área técnica" }),
+    ).toHaveTextContent("Backend");
 
     view.unmount();
 
@@ -459,9 +759,9 @@ describe("MentorDirectoryView", () => {
       screen.getByRole("combobox", { name: "Ordenar mentores" }),
     ).toHaveValue("affinity");
 
-    expect(screen.getByRole("combobox", { name: "Área" })).toHaveValue(
-      "Backend",
-    );
+    expect(
+      screen.getByRole("combobox", { name: "Área técnica" }),
+    ).toHaveTextContent("Backend");
 
     expect(navigationMocks.search).toContain("page=2");
     expect(navigationMocks.search).toContain("module=chat");
@@ -580,6 +880,7 @@ describe("MentorDirectoryView", () => {
   });
 
   it("ordena por nombre A–Z y Z–A según el parámetro solicitado", async () => {
+    navigationMocks.search = "?available=false";
     mockDirectoryWithParams();
 
     const { rerender } = render(<MentorDirectoryView />);

@@ -11,6 +11,7 @@ export interface MentorDirectoryParams {
   page: number;
   search: string;
   area: string;
+  orientation?: string;
   available: boolean;
   sort: MentorSort;
 }
@@ -26,6 +27,7 @@ export async function getMentorDirectory(
         page: params.page,
         search: params.search || undefined,
         area: params.area || undefined,
+        orientation: params.orientation || undefined,
         available: String(params.available),
         sort: params.sort,
       },

@@ -1,4 +1,3 @@
-
 import {
   Body,
   Controller,
@@ -24,9 +23,7 @@ import { MentorParticipationService } from '../services/mentor-participation.ser
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ResponseInterceptor)
 export class MentorParticipationController {
-  constructor(
-    private readonly service: MentorParticipationService,
-  ) {}
+  constructor(private readonly service: MentorParticipationService) {}
 
   @Post()
   create(

@@ -1,4 +1,3 @@
-
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
@@ -10,6 +9,7 @@ describe('MentorsRepository directory page', () => {
   const filters = {
     search: 'Ana Rojas',
     area: 'Backend',
+    orientation: 'Orientación técnica',
     available: true,
   };
 
@@ -27,9 +27,9 @@ describe('MentorsRepository directory page', () => {
 
     expect(await repository.countDirectoryMentors(filters, now)).toBe(20);
 
-    expect(
-      await repository.findDirectoryPage(filters, now, 4, 6),
-    ).toEqual([{ id: 'mentor-19', photoVersion: null }]);
+    expect(await repository.findDirectoryPage(filters, now, 4, 6)).toEqual([
+      { id: 'mentor-19', photoVersion: null },
+    ]);
 
     const where = count.mock.calls[0]?.[0].where;
 
@@ -50,36 +50,140 @@ describe('MentorsRepository directory page', () => {
           technicalArea: { name: 'Backend' },
         },
       },
+      mentorOrientationTypes: {
+        some: {
+          orientationType: {
+            name: 'Orientación técnica',
+            isActive: true,
+          },
+        },
+      },
     });
 
     expect(where.AND).toHaveLength(2);
 
-    expect(where.AND[0].OR).toContainEqual({
-      firstName: { contains: 'Ana', mode: 'insensitive' },
-    });
+    expect(where.AND[0].OR).toEqual([
+      {
+        firstName: { contains: 'Ana', mode: 'insensitive' },
+      },
+      {
+        lastName: { contains: 'Ana', mode: 'insensitive' },
+      },
+    ]);
 
-    expect(where.AND[1].OR).toContainEqual({
-      lastName: { contains: 'Rojas', mode: 'insensitive' },
-    });
+    expect(where.AND[1].OR).toEqual([
+      {
+        firstName: { contains: 'Rojas', mode: 'insensitive' },
+      },
+      {
+        lastName: { contains: 'Rojas', mode: 'insensitive' },
+      },
+    ]);
 
     expect(findMany.mock.calls[0]?.[0]).toMatchObject({
-      orderBy: [
-        { firstName: 'asc' },
-        { lastName: 'asc' },
-        { id: 'asc' },
-      ],
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
       skip: 18,
       take: 6,
     });
 
-    expect(
-      findMany.mock.calls[0]?.[0].select,
-    ).not.toHaveProperty('photoUrl');
+    expect(findMany.mock.calls[0]?.[0].select).not.toHaveProperty('photoUrl');
 
     expect(findMany.mock.calls[1]?.[0].select).toEqual({
       id: true,
       updatedAt: true,
     });
+  });
+
+  it('busca varias palabras en cualquier orden solo entre nombre y apellido', async () => {
+    const count = vi.fn().mockResolvedValue(1);
+
+    const repository = new MentorsRepository({
+      user: { count },
+    } as unknown as PrismaService);
+
+    await repository.countDirectoryMentors(
+      {
+        search: 'Rojas Ana',
+        available: false,
+      },
+      now,
+    );
+
+    const where = count.mock.calls[0]?.[0].where;
+
+    expect(where.AND).toEqual([
+      {
+        OR: [
+          {
+            firstName: {
+              contains: 'Rojas',
+              mode: 'insensitive',
+            },
+          },
+          {
+            lastName: {
+              contains: 'Rojas',
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+      {
+        OR: [
+          {
+            firstName: {
+              contains: 'Ana',
+              mode: 'insensitive',
+            },
+          },
+          {
+            lastName: {
+              contains: 'Ana',
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('no incluye titular profesional ni áreas técnicas dentro de search', async () => {
+    const count = vi.fn().mockResolvedValue(0);
+
+    const repository = new MentorsRepository({
+      user: { count },
+    } as unknown as PrismaService);
+
+    await repository.countDirectoryMentors(
+      {
+        search: 'Backend',
+        available: false,
+      },
+      now,
+    );
+
+    const searchConditions = count.mock.calls[0]?.[0].where.AND;
+
+    expect(searchConditions).toHaveLength(1);
+    expect(searchConditions[0].OR).toEqual([
+      {
+        firstName: {
+          contains: 'Backend',
+          mode: 'insensitive',
+        },
+      },
+      {
+        lastName: {
+          contains: 'Backend',
+          mode: 'insensitive',
+        },
+      },
+    ]);
+
+    expect(JSON.stringify(searchConditions)).not.toContain('headline');
+    expect(JSON.stringify(searchConditions)).not.toContain(
+      'mentorTechnicalAreas',
+    );
   });
 
   it('ordena Z-A antes de paginar y desempata por ID ascendente', async () => {
@@ -99,11 +203,7 @@ describe('MentorsRepository directory page', () => {
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderBy: [
-          { firstName: 'desc' },
-          { lastName: 'desc' },
-          { id: 'asc' },
-        ],
+        orderBy: [{ firstName: 'desc' }, { lastName: 'desc' }, { id: 'asc' }],
         skip: 6,
         take: 6,
       }),
@@ -127,11 +227,7 @@ describe('MentorsRepository directory page', () => {
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderBy: [
-          { firstName: 'desc' },
-          { lastName: 'desc' },
-          { id: 'asc' },
-        ],
+        orderBy: [{ firstName: 'desc' }, { lastName: 'desc' }, { id: 'asc' }],
         skip: 0,
         take: 2,
       }),
@@ -160,6 +256,7 @@ describe('MentorsRepository directory page', () => {
 
     expect(where).not.toHaveProperty('AND');
     expect(where).not.toHaveProperty('mentorTechnicalAreas');
+    expect(where).not.toHaveProperty('mentorOrientationTypes');
     expect(where).not.toHaveProperty('isAvailableForMentoring');
   });
 });

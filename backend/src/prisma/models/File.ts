@@ -241,6 +241,7 @@ export type FileWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"File"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"File"> | Date | string
   accessRequest?: Prisma.XOR<Prisma.AccessRequestNullableScalarRelationFilter, Prisma.AccessRequestWhereInput> | null
+  auditEvents?: Prisma.AuditEventListRelationFilter
 }
 
 export type FileOrderByWithRelationInput = {
@@ -253,6 +254,7 @@ export type FileOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   accessRequest?: Prisma.AccessRequestOrderByWithRelationInput
+  auditEvents?: Prisma.AuditEventOrderByRelationAggregateInput
 }
 
 export type FileWhereUniqueInput = Prisma.AtLeast<{
@@ -268,6 +270,7 @@ export type FileWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"File"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"File"> | Date | string
   accessRequest?: Prisma.XOR<Prisma.AccessRequestNullableScalarRelationFilter, Prisma.AccessRequestWhereInput> | null
+  auditEvents?: Prisma.AuditEventListRelationFilter
 }, "id">
 
 export type FileOrderByWithAggregationInput = {
@@ -310,6 +313,7 @@ export type FileCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accessRequest?: Prisma.AccessRequestCreateNestedOneWithoutDocumentFileInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutEvidenceFileInput
 }
 
 export type FileUncheckedCreateInput = {
@@ -322,6 +326,7 @@ export type FileUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutDocumentFileInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutEvidenceFileInput
 }
 
 export type FileUpdateInput = {
@@ -334,6 +339,7 @@ export type FileUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequest?: Prisma.AccessRequestUpdateOneWithoutDocumentFileNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutEvidenceFileNestedInput
 }
 
 export type FileUncheckedUpdateInput = {
@@ -346,6 +352,7 @@ export type FileUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutDocumentFileNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutEvidenceFileNestedInput
 }
 
 export type FileCreateManyInput = {
@@ -447,6 +454,22 @@ export type FileUpdateOneWithoutAccessRequestNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.FileUpdateToOneWithWhereWithoutAccessRequestInput, Prisma.FileUpdateWithoutAccessRequestInput>, Prisma.FileUncheckedUpdateWithoutAccessRequestInput>
 }
 
+export type FileCreateNestedOneWithoutAuditEventsInput = {
+  create?: Prisma.XOR<Prisma.FileCreateWithoutAuditEventsInput, Prisma.FileUncheckedCreateWithoutAuditEventsInput>
+  connectOrCreate?: Prisma.FileCreateOrConnectWithoutAuditEventsInput
+  connect?: Prisma.FileWhereUniqueInput
+}
+
+export type FileUpdateOneWithoutAuditEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.FileCreateWithoutAuditEventsInput, Prisma.FileUncheckedCreateWithoutAuditEventsInput>
+  connectOrCreate?: Prisma.FileCreateOrConnectWithoutAuditEventsInput
+  upsert?: Prisma.FileUpsertWithoutAuditEventsInput
+  disconnect?: Prisma.FileWhereInput | boolean
+  delete?: Prisma.FileWhereInput | boolean
+  connect?: Prisma.FileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FileUpdateToOneWithWhereWithoutAuditEventsInput, Prisma.FileUpdateWithoutAuditEventsInput>, Prisma.FileUncheckedUpdateWithoutAuditEventsInput>
+}
+
 export type FileCreateWithoutAccessRequestInput = {
   id?: string
   name: string
@@ -456,6 +479,7 @@ export type FileCreateWithoutAccessRequestInput = {
   content: runtime.Bytes
   createdAt?: Date | string
   updatedAt?: Date | string
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutEvidenceFileInput
 }
 
 export type FileUncheckedCreateWithoutAccessRequestInput = {
@@ -467,6 +491,7 @@ export type FileUncheckedCreateWithoutAccessRequestInput = {
   content: runtime.Bytes
   createdAt?: Date | string
   updatedAt?: Date | string
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutEvidenceFileInput
 }
 
 export type FileCreateOrConnectWithoutAccessRequestInput = {
@@ -494,6 +519,7 @@ export type FileUpdateWithoutAccessRequestInput = {
   content?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutEvidenceFileNestedInput
 }
 
 export type FileUncheckedUpdateWithoutAccessRequestInput = {
@@ -505,8 +531,102 @@ export type FileUncheckedUpdateWithoutAccessRequestInput = {
   content?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutEvidenceFileNestedInput
 }
 
+export type FileCreateWithoutAuditEventsInput = {
+  id?: string
+  name: string
+  extension: string
+  mimeType: string
+  size: number
+  content: runtime.Bytes
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accessRequest?: Prisma.AccessRequestCreateNestedOneWithoutDocumentFileInput
+}
+
+export type FileUncheckedCreateWithoutAuditEventsInput = {
+  id?: string
+  name: string
+  extension: string
+  mimeType: string
+  size: number
+  content: runtime.Bytes
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutDocumentFileInput
+}
+
+export type FileCreateOrConnectWithoutAuditEventsInput = {
+  where: Prisma.FileWhereUniqueInput
+  create: Prisma.XOR<Prisma.FileCreateWithoutAuditEventsInput, Prisma.FileUncheckedCreateWithoutAuditEventsInput>
+}
+
+export type FileUpsertWithoutAuditEventsInput = {
+  update: Prisma.XOR<Prisma.FileUpdateWithoutAuditEventsInput, Prisma.FileUncheckedUpdateWithoutAuditEventsInput>
+  create: Prisma.XOR<Prisma.FileCreateWithoutAuditEventsInput, Prisma.FileUncheckedCreateWithoutAuditEventsInput>
+  where?: Prisma.FileWhereInput
+}
+
+export type FileUpdateToOneWithWhereWithoutAuditEventsInput = {
+  where?: Prisma.FileWhereInput
+  data: Prisma.XOR<Prisma.FileUpdateWithoutAuditEventsInput, Prisma.FileUncheckedUpdateWithoutAuditEventsInput>
+}
+
+export type FileUpdateWithoutAuditEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.IntFieldUpdateOperationsInput | number
+  content?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accessRequest?: Prisma.AccessRequestUpdateOneWithoutDocumentFileNestedInput
+}
+
+export type FileUncheckedUpdateWithoutAuditEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  extension?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.IntFieldUpdateOperationsInput | number
+  content?: Prisma.BytesFieldUpdateOperationsInput | runtime.Bytes
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutDocumentFileNestedInput
+}
+
+
+/**
+ * Count Type FileCountOutputType
+ */
+
+export type FileCountOutputType = {
+  auditEvents: number
+}
+
+export type FileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  auditEvents?: boolean | FileCountOutputTypeCountAuditEventsArgs
+}
+
+/**
+ * FileCountOutputType without action
+ */
+export type FileCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FileCountOutputType
+   */
+  select?: Prisma.FileCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * FileCountOutputType without action
+ */
+export type FileCountOutputTypeCountAuditEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditEventWhereInput
+}
 
 
 export type FileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -519,6 +639,8 @@ export type FileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   accessRequest?: boolean | Prisma.File$accessRequestArgs<ExtArgs>
+  auditEvents?: boolean | Prisma.File$auditEventsArgs<ExtArgs>
+  _count?: boolean | Prisma.FileCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["file"]>
 
 export type FileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -557,6 +679,8 @@ export type FileSelectScalar = {
 export type FileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "extension" | "mimeType" | "size" | "content" | "createdAt" | "updatedAt", ExtArgs["result"]["file"]>
 export type FileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accessRequest?: boolean | Prisma.File$accessRequestArgs<ExtArgs>
+  auditEvents?: boolean | Prisma.File$auditEventsArgs<ExtArgs>
+  _count?: boolean | Prisma.FileCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type FileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 export type FileIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -565,6 +689,7 @@ export type $FilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "File"
   objects: {
     accessRequest: Prisma.$AccessRequestPayload<ExtArgs> | null
+    auditEvents: Prisma.$AuditEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -970,6 +1095,7 @@ readonly fields: FileFieldRefs;
 export interface Prisma__FileClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   accessRequest<T extends Prisma.File$accessRequestArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.File$accessRequestArgs<ExtArgs>>): Prisma.Prisma__AccessRequestClient<runtime.Types.Result.GetResult<Prisma.$AccessRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  auditEvents<T extends Prisma.File$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.File$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1416,6 +1542,30 @@ export type File$accessRequestArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   include?: Prisma.AccessRequestInclude<ExtArgs> | null
   where?: Prisma.AccessRequestWhereInput
+}
+
+/**
+ * File.auditEvents
+ */
+export type File$auditEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuditEvent
+   */
+  select?: Prisma.AuditEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuditEvent
+   */
+  omit?: Prisma.AuditEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEventInclude<ExtArgs> | null
+  where?: Prisma.AuditEventWhereInput
+  orderBy?: Prisma.AuditEventOrderByWithRelationInput | Prisma.AuditEventOrderByWithRelationInput[]
+  cursor?: Prisma.AuditEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuditEventScalarFieldEnum | Prisma.AuditEventScalarFieldEnum[]
 }
 
 /**
