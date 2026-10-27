@@ -1,4 +1,4 @@
-# Propuesta de PR — solo borrador local
+# Descripción preparada para PR1713
 
 **Título:** fix(mentors): completar admisión HU7 con idempotencia, sanciones y correo transaccional
 
@@ -19,16 +19,19 @@ Se mantiene el FIFO y el mecanismo existente de reservas de 24 horas, confirmaci
 - Activación aprobada: OTP válido de un solo uso, approvedUserId explícito y contraseña actual obligatoria para vincular una cuenta existente.
 - UUID de frontend conservado después de fallos de red/5xx, bloqueo inmediato de mutaciones y controles móviles accesibles.
 - Ninguna revocación automática por reducción de capacidad; una reserva vigente se confirma sin doble ocupación.
+- Sincronización con Epic 6 en da499bb6 (#1705 y #1711): conserva el panel activo/desactivado y las preferencias de HU6, reutiliza su modal para la salida definitiva de HU7 y mantiene visible el vencimiento de ofertas.
+- Las intenciones de idempotencia terminan solo ante una operación reconocida o una incorporación nueva explícita después de cerrar la anterior; recargar, reintentar o fallar una salida conserva la clave.
 - Documentación con 33 CA y requisitos adicionales: [informe](hu7-main-flow-correction.md).
 
 ## Validación
 
-- Backend: 768 pruebas unitarias/HTTP de mentorías, acceso, correo, autenticación y disponibilidad; sin fallos ni casos pendientes.
-- Frontend: ejecución completa de 767 pruebas aprobada; después de la última corrección de cierre móvil, sus 88 pruebas de layout pasaron (768 casos distintos verificados en conjunto).
+- Backend: 772 comprobaciones aprobadas. Se repitieron aisladamente los 26 contratos HTTP que el runner concurrente dejó inconclusos.
+- Frontend: ejecución completa con 3.134 aprobadas y un timeout en certificaciones. La regresión final de mentorías y ese archivo pasó sus 309 casos; en conjunto se verificaron 3.139 casos sin fallos pendientes.
 - PostgreSQL: 63 casos distintos verificados en esquemas temporales locales, incluidos concurrencia, replay, ventana móvil, reservas con capacidad reducida, migración y aprobación→OTP→login→espera.
 - SMTP local: oferta y sanción recibidas en Mailpit; los reintentos no duplican eventos.
 - TypeScript, Prisma validate, compilaciones backend y Next.js (42 páginas), ESLint sin errores. Oxlint sin errores; una advertencia existente de unbound-method en un test de controlador.
 - Las verificaciones visuales y limitaciones de entrega externa están detalladas en el informe.
+- HTTP y navegador locales: panel ACTIVE, preferencias reales, capacidad 4/4 y confirmación inequívoca de Pausar mentoría; cancelar conserva el estado.
 
 ## Migración y puesta en marcha
 

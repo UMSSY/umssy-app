@@ -2,17 +2,17 @@
 
 ## A. Resumen
 
-Rama: `feature/grupo-6-hu7-main-flow-correction`. Base: `a85e72c4` de `epic/grupo-6-red-mentorias`, obtenida antes de modificar archivos. El trabajo está aislado en otro worktree. La publicación de la rama fue autorizada después de la validación local; la apertura del PR queda a cargo del usuario. No se hizo merge ni cierre de issues.
+Rama: `feature/grupo-6-hu7-main-flow-correction`. Base inicial: `a85e72c4`; sincronizada posteriormente con `da499bb6` de `epic/grupo-6-red-mentorias` para resolver los conflictos del [PR1713](https://github.com/UMSSY/umssy-app/pull/1713). Se incorporaron las integraciones recientes #1705 y #1711 sin fusionar el PR hacia la épica ni cerrar issues.
 
 La base ya tenía capacidad del 40 %, solicitudes persistidas, FIFO determinístico, ofertas de 24 horas, confirmación, worker de expiración y salida definitiva. Se conservaron sus pruebas y las de disponibilidad reversible de Epic 7. Faltaban la ventana móvil compartida con HU3, idempotencia, metadatos completos de sanción, correo transaccional y una forma explícita de consumir la aprobación de Epic 1 para vincular al usuario.
 
 Se implementaron esas piezas y se corrigió el reingreso con preferencias residuales. El frontend conserva el UUID ante fallos de red/5xx, evita envíos simultáneos y presenta una suspensión genérica. La revisión móvil detectó un encabezado que desbordaba y confundía el sidebar de escritorio con el móvil: la corrección se limita a esos controles compartidos, sin cambiar autorización, login ni reglas de otras épicas.
 
-Referencias consultadas: [HU7 #1386](https://github.com/UMSSY/umssy-app/issues/1386), subtareas #1395, #1407, #1409, #1410, #1411, #1436–#1440 y [PR1665](https://github.com/UMSSY/umssy-app/pull/1665). [PR1478](https://github.com/UMSSY/umssy-app/pull/1478) seguía abierto al revisar; su descripción no se usó como prueba de integración. Se inspeccionó el código de la base y se conservó su interfaz integrada.
+Referencias consultadas: [HU7 #1386](https://github.com/UMSSY/umssy-app/issues/1386), subtareas #1395, #1407, #1409, #1410, #1411, #1436–#1440 y [PR1665](https://github.com/UMSSY/umssy-app/pull/1665). [PR1478](https://github.com/UMSSY/umssy-app/pull/1478) fue cerrado sin merge; las ofertas ya estaban integradas por #1665. Se inspeccionó el código actual y se conservó esa funcionalidad.
 
 ## B. Archivos
 
-No hay archivos eliminados. Los fixtures automatizados crean esquemas PostgreSQL propios; no cargan cuentas de demostración en la aplicación. No se incluyen bases, credenciales, archivos de entorno, logs, scripts de demostración ni cambios de despliegue.
+Al sincronizar se retiró el modal antiguo de salida, sustituido por el modal integrado de HU6. Los fixtures automatizados crean esquemas PostgreSQL propios; no cargan cuentas de demostración en la aplicación. No se incluyen bases, credenciales, archivos de entorno, logs, scripts de demostración ni cambios de despliegue.
 
 | Archivo nuevo o modificado | Motivo |
 |---|---|
@@ -57,7 +57,11 @@ No hay archivos eliminados. Los fixtures automatizados crean esquemas PostgreSQL
 | `backend/src/prisma/internal/prismaNamespaceBrowser.ts` | Cliente y tipos regenerados desde Prisma; sin edición semántica manual. |
 | `backend/src/prisma/models.ts` | Cliente y tipos regenerados desde Prisma; sin edición semántica manual. |
 | `backend/src/prisma/models/User.ts` | Cliente y tipos regenerados desde Prisma; sin edición semántica manual. |
-| `frontend/src/modules/mentors/components/participation/mentor-exit-dialog.tsx` | Integrar claves UUID, mensajes de suspensión o protección síncrona de envíos. |
+| `frontend/src/modules/mentors/components/participation/mentor-exit-dialog.tsx` | Retirado al sincronizar: el nuevo modal de HU6 concentra la salida definitiva sin duplicar controles. |
+| `frontend/src/modules/mentors/components/participation/deactivate-participation-modal.tsx` | Conserva el diseño nuevo, el botón Pausar mentoría y la confirmación explícita de pérdida de rol, cupo y prioridad. |
+| `frontend/src/modules/mentors/components/participation/participation-overview.tsx` | Conserva estados activo/desactivado y preferencias de HU6 con la acción Pausar mentoría de HU7. |
+| `frontend/src/modules/mentors/views/participation-view.tsx` | Compone HU6/HU7 y mantiene visible el vencimiento tanto para titulados nuevos como para exmentores. |
+| `frontend/src/modules/mentors/views/participation-view.test.tsx` | Conserva los casos de HU6 y adapta las regresiones previas de carga, errores, datos reales y vencimiento. |
 | `frontend/src/modules/mentors/components/participation/pending-participation.tsx` | Integrar claves UUID, mensajes de suspensión o protección síncrona de envíos. |
 | `frontend/src/modules/mentors/services/mentor-participation.service.ts` | Compartir transacción/política de alta; mantener elegibilidad, capacidad y FIFO. |
 | `frontend/src/modules/mentors/utils/participation-error.ts` | Integrar claves UUID, mensajes de suspensión o protección síncrona de envíos. |
@@ -140,7 +144,7 @@ Se incluyen los criterios completos de cada subtarea agrupados por comportamient
 | #1395 | Disponibilidad real, modal FIFO, Cancelar/Solicitar, cierre y desenfoque | Cumplido y verificado | Se conserva la interfaz de PR1665; se corrige encabezado responsive | mentorship-view, no-slots-available-dialog y revisión local | Cumplido y verificado |
 | #1407 | Carga, éxito/error, duplicados, pendiente, detalle, correo y sin posición FIFO | Cumplido y verificado | Se conserva consulta real y se añade bloqueo síncrono de edición/cancelación | pending-participation, pending-slot-request-dialog, my-participation-view | Cumplido y verificado |
 | #1409 | Confirmación, pérdida de prioridad, endpoint DELETE, éxito/error y estado conservado | Cumplido y verificado | Guardia inmediata evita envíos múltiples antes de renderizar carga | pending-participation; participation-fifo.integration | Cumplido y verificado |
-| #1410 | OFFERED, modal, BOT, reloj absoluto, rol activo y nueva solicitud tras vencer | Cumplido y verificado | Se conserva implementación integrada; PR1478 sigue abierto y no se importa una segunda interfaz | slot-offer-participation; my-participation-view; offers.integration | Cumplido y verificado |
+| #1410 | OFFERED, modal, BOT, reloj absoluto, rol activo y nueva solicitud tras vencer | Cumplido y verificado | Se conserva implementación integrada por #1665 y se corrige el aviso de vencimiento en la composición con HU6 | slot-offer-participation; participation-view; offers.integration | Cumplido y verificado |
 | #1411 | Servicios reales, sincronización, errores y conservación de participación existente | Parcial | UUID persistido por intención, mensaje genérico 429, navegación móvil corregida | regresión de mentorías, acceso y layout; compilación Next | Cumplido y verificado |
 | #1436 | Cuenta aprobada y vinculada; preferencias completas y catálogos válidos | Parcial | Consumo explícito del OTP de Epic1 con vínculo único y contraseña protegida | approved-account-activation.integration; esquemas y pruebas de mentoría | Cumplido y verificado |
 | #1436 | 40 % redondeado, ocupación de activos+reservas, revalidación y concurrencia | Cumplido y verificado | Se conserva advisory lock común; reingreso reemplaza preferencias antiguas | mentor-capacity; participation-fifo.integration; offers.integration | Cumplido y verificado |
@@ -153,7 +157,7 @@ Se incluyen los criterios completos de cada subtarea agrupados por comportamient
 | #1439 | Quinto 429, exactamente 72h, sin extensión ni duplicados | Parcial | Una sanción y un evento; bloqueados posteriores no cuentan ni renuevan | participation-fifo.integration: siete solicitudes concurrentes | Cumplido y verificado |
 | #1439 | MENTOR_REQUEST_SUSPENDED, sanctionEndsAt y Retry-After | Parcial | Filtro de dominio y CORS exponen Retry-After sin alterar wrapper | mentorship-response.spec por HTTP; integration de sanciones | Cumplido y verificado |
 | #1439 | GET/edición/cancelación no cuentan; solicitud y oferta anteriores siguen válidas | Cumplido y verificado | Se mantiene política fuera de consultas y confirmaciones | participation-fifo.integration: confirma reserva durante sanción | Cumplido y verificado |
-| #1440 | Citas futuras bloquean; salida revoca rol, desactiva, libera una vez y reasigna | Cumplido y verificado | Se conserva transacción; guardia frontend inmediata | mentor-exit.spec; offers.integration; mentor-exit-dialog.test | Cumplido y verificado |
+| #1440 | Citas futuras bloquean; salida revoca rol, desactiva, libera una vez y reasigna | Cumplido y verificado | Se conserva transacción, preferencias guardadas de HU6 y guardia frontend inmediata | mentor-exit.spec; offers.integration; participation-view.test | Cumplido y verificado |
 | #1440 | Regreso con requisitos/FIFO; disponibilidad reversible Epic7 independiente | Cumplido y verificado | Reingreso directo reemplaza preferencias residuales; no se altera API reversible | mentor-availability.spec; mentor-exit.spec; suites availability | Cumplido y verificado |
 | Decisiones B/E | Eventos y despacho solo a correo institucional, sin avisos de campana | No cumplido | Outbox transaccional con event_key único; proveedor existente MailService | offers.integration: eventos y despacho; Mailpit recibió oferta y sanción | Cumplido y verificado |
 | Decisiones B/E | Entrega a bandeja institucional en el despliegue | No cumplido | Integración SMTP reutilizada, configuración externa exigida en producción | Entrega local verificada; no se inspeccionaron secretos ni bandejas reales | Implementado, pendiente de verificación externa |
@@ -166,7 +170,7 @@ Se incluyen los criterios completos de cada subtarea agrupados por comportamient
 
 ### Automatizadas
 
-Resultados finales: 768 pruebas backend aprobadas, sin fallos ni casos pendientes; 767 pruebas frontend aprobadas en una ejecución completa y 88 pruebas de layout aprobadas tras la última corrección móvil (768 casos frontend distintos verificados en conjunto); 63 casos de integración distintos aprobados con PostgreSQL real. La regresión final de la identidad aprobada incluye aprobación → OTP → login JWT → creación y consulta de la solicitud pendiente, sin asignar manualmente approvedUserId.
+Validación inicial antes de sincronizar: 768 pruebas backend aprobadas, sin fallos ni casos pendientes; 767 pruebas frontend aprobadas en una ejecución completa y 88 pruebas de layout aprobadas tras la última corrección móvil (768 casos frontend distintos verificados en conjunto); 63 casos de integración distintos aprobados con PostgreSQL real. La regresión de la identidad aprobada incluye aprobación → OTP → login JWT → creación y consulta de la solicitud pendiente, sin asignar manualmente approvedUserId. La validación de la sincronización se documenta al final.
 
 ESLint backend/frontend, TypeScript de ambos proyectos, compilación backend, Prisma validate y compilación Next con 42 páginas pasaron. Oxlint no reportó errores; conserva una advertencia de método sin enlazar en un test de controlador existente. `git diff --check` pasó.
 
@@ -247,4 +251,23 @@ La salida definitiva usa las citas y estados existentes de Epic 7 y mantiene la 
 
 ## F. Pull request preparado
 
-Ver [propuesta de PR](hu7-main-flow-pr.md). El texto está preparado para que el usuario abra el PR desde esta rama hacia `epic/grupo-6-red-mentorias`.
+Ver [propuesta de PR](hu7-main-flow-pr.md) y [PR1713](https://github.com/UMSSY/umssy-app/pull/1713), abierto hacia `epic/grupo-6-red-mentorias`.
+
+## G. Sincronización con Epic 6
+
+Se resolvieron los cuatro conflictos de `da499bb6`: la sustitución de preferencias en el repositorio de mentores, sus dos fixtures de pruebas y la eliminación del modal antiguo. El reemplazo de preferencias se ejecuta una sola vez, dentro de la transacción que conserva elegibilidad, capacidad e idempotencia. Se mantuvieron los escenarios de las dos ramas.
+
+HU6 conserva áreas y orientaciones al finalizar la participación. Esos datos precargan la reincorporación, pero no conservan rol, cupo ni turno FIFO: las pruebas PostgreSQL verifican ENDED/DEACTIVATED, una única liberación, la oferta al siguiente y un regreso sujeto a capacidad y elegibilidad. La disponibilidad reversible de Epic 7 permanece independiente.
+
+La composición nueva muestra el vencimiento a usuarios NEVER y DEACTIVATED y permite volver al proceso normal de incorporación. Se mantuvo el nombre Pausar mentoría y se aclaró la pérdida definitiva de rol, cupo y prioridad en el modal reutilizado.
+
+Las claves de idempotencia se conservan ante respuestas ambiguas. Una cancelación, confirmación o salida reconocida por el servidor termina la intención correspondiente; también la termina el inicio explícito de otra incorporación después de un estado cerrado. No se reinician por recargar el formulario, consultar el estado o por una salida fallida. Esto evita reproducir el resultado antiguo al solicitar de nuevo con las mismas preferencias.
+
+Validación de la sincronización:
+
+- Backend: 772 casos aprobados en conjunto. La ejecución concurrente dejó 26 contratos HTTP inconclusos por un fallo del runner; se repitió esa suite completa de forma aislada y pasaron sus 26 casos. Ninguna prueba fue eliminada o desactivada.
+- Frontend completo: 3.134 casos aprobados y un timeout de 5 segundos en certificaciones. La regresión final de mentorías y ese archivo pasó sus 309 casos, incluyendo cuatro casos nuevos de ciclo de idempotencia. Al combinar las ejecuciones quedan 3.139 casos aprobados, sin fallos pendientes.
+- PostgreSQL: 63 casos aprobados; verifican preferencias conservadas al salir, ausencia de rol/cupo/turno conservado y regreso por FIFO, además de idempotencia, sanciones y correo.
+- TypeScript, compilaciones backend y Next.js de producción (42 páginas), ESLint y comprobación de diff: aprobados. Se conserva la advertencia previa de unbound-method en un test backend.
+- HTTP local: login, GET /mentors/me/participation, solicitud actual y capacidad responden correctamente. La cuenta de prueba conserva estado ACTIVE, sus preferencias y una ocupación de 4/4; el frontend responde 200.
+- Navegador: se verificaron la vista nueva, el botón Pausar mentoría y su confirmación; cancelar el modal conserva la participación. Los servidores locales se actualizaron sin reiniciar ni sembrar la base de datos.

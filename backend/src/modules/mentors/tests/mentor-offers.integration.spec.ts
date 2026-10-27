@@ -568,7 +568,17 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     expect(
       await prisma.user.findUnique({ where: { id: offer.userId } }),
     ).toMatchObject({ isAvailableForMentoring: false });
-    expect(await prisma.mentorTechnicalArea.count()).toBe(0);
+    expect(await prisma.mentorTechnicalArea.count()).toBe(1);
+    expect(await prisma.mentorOrientationType.count()).toBe(1);
+    expect(
+      await new MentorsRepository(
+        prisma as unknown as PrismaService,
+      ).findMyParticipation(offer.userId),
+    ).toMatchObject({
+      status: 'DEACTIVATED',
+      areas: [{ id: areaId }],
+      orientations: [{ id: orientationId }],
+    });
     expect(
       await prisma.$queryRaw`SELECT status FROM mentor_participation_requests WHERE id = ${offer.requestId}::uuid`,
     ).toEqual([{ status: 'ENDED' }]);
@@ -634,6 +644,13 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     )!;
     expect(returned.requestId).toBe(uuid('a000', 4));
     await service.confirm(original.userId, returned.id);
+    expect(await repository.findMyParticipation(original.userId)).toMatchObject(
+      {
+        status: 'ACTIVE',
+        areas: [{ id: areaId }],
+        orientations: [{ id: orientationId }],
+      },
+    );
     expect(
       await prisma.userRole.count({
         where: { roleId: mentorRoleId, deletedAt: null },

@@ -282,6 +282,24 @@ export class MentorsRepository {
     });
   }
 
+  async findMyParticipation(userId: string) {
+    const [roles, areas, orientations] = await Promise.all([
+      this.prisma.userRole.findMany({
+        where: { userId, role: { name: MENTOR_ROLE_NAME } },
+        select: { deletedAt: true, startAt: true },
+      }),
+      this.findMentorTechnicalAreas(userId),
+      this.findMentorOrientationTypes(userId),
+    ]);
+    const now = new Date();
+    const isActive = roles.some((role) => role.deletedAt === null && role.startAt <= now);
+    return {
+      status: isActive ? 'ACTIVE' as const : roles.length > 0 ? 'DEACTIVATED' as const : 'NEVER' as const,
+      areas: areas.map(({ technicalArea }) => technicalArea),
+      orientations: orientations.map(({ orientationType }) => orientationType),
+    };
+  }
+
   findMentorTechnicalAreas(userId: string) {
     return this.prisma.mentorTechnicalArea.findMany({
       where: {

@@ -11,6 +11,7 @@ import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY } from "../constants/mentorship-wizard.constants";
 import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
 import { mentorParticipationService } from "@/modules/mentors/services/mentor-participation.service";
+import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { MentorshipView } from "./mentorship-view";
 
 const integrationMocks = vi.hoisted(() => ({
@@ -20,6 +21,13 @@ const integrationMocks = vi.hoisted(() => ({
   retryOrientationTypes: vi.fn(),
   isTechnicalAreasError: false,
   isOrientationTypesError: false,
+}));
+const drafts = vi.hoisted(() => new Map<string, unknown>());
+
+vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
+  readIndexedDb: vi.fn(async (key: string) => drafts.get(key) ?? null),
+  writeIndexedDb: vi.fn(async (key: string, value: unknown) => { drafts.set(key, value); }),
+  removeIndexedDb: vi.fn(async (key: string) => { drafts.delete(key); }),
 }));
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: integrationMocks.push }) }));
@@ -74,9 +82,10 @@ beforeEach(() => {
   });
 });
 
-afterEach(() => {
+afterEach(async () => {
   cleanup();
-  clearMentorshipWizardDraft();
+  await clearMentorshipWizardDraft();
+  clearAccessToken();
   vi.unstubAllEnvs();
 });
 
@@ -105,6 +114,15 @@ async function openActivationDialog() {
 }
 
 describe("MentorshipView", () => {
+  it("reconoce al mentor activo sin ofrecer otra activación", async () => {
+    saveAccessToken("mentor-token");
+    vi.spyOn(mentorParticipationService, "getMyParticipation").mockResolvedValue({ status: "ACTIVE", areas: [], orientations: [] });
+    renderWithQuery(<MentorshipView />);
+    expect(await screen.findByRole("heading", { name: "Ya se encuentra registrado como mentor" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Mi participación" })).toHaveAttribute("href", "/mentors/participation");
+    expect(screen.queryByRole("button", { name: "Activar participación" })).not.toBeInTheDocument();
+  });
+
   it("con cupos ocupados abre el modal después de confirmar sin activar ni perder selecciones", async () => {
     vi.mocked(mentorParticipationService.capacity).mockResolvedValue({ available: 0, capacity: 2, occupied: 2 });
     vi.stubEnv("NODE_ENV", "development");
@@ -119,7 +137,7 @@ describe("MentorshipView", () => {
     fireEvent.click(within(unavailable).getByRole("button", { name: "Cancelar" }));
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(screen.getByText("Orientación profesional")).toBeInTheDocument();
-    expect(localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).not.toBeNull();
+    expect((drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null)).not.toBeNull();
     expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
   });
 
@@ -150,7 +168,8 @@ describe("MentorshipView", () => {
     const confirmation = await openActivationDialog();
     fireEvent.click(within(confirmation).getByRole("button", { name: "Aceptar" }));
     await waitFor(() => expect(integrationMocks.activateMentor).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(integrationMocks.push).toHaveBeenCalledWith("/mentors/participation"));
+    expect(await screen.findByRole("heading", { name: "Tu participación como mentor está activa" })).toBeVisible();
+    expect(integrationMocks.push).not.toHaveBeenCalled();
   });
   it("renderiza inicialmente el paso 1 con participación desmarcada", () => {
     renderWithQuery(<MentorshipView />);
@@ -630,7 +649,7 @@ describe("MentorshipView", () => {
 
     await waitFor(() => {
       expect(
-        localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY),
+        (drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null),
       ).not.toBeNull();
     });
 
@@ -653,7 +672,7 @@ describe("MentorshipView", () => {
       }),
     ).not.toBeInTheDocument();
     expect(
-      localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY),
+      (drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null),
     ).not.toBeNull();
 
     await act(async () => {
@@ -666,7 +685,7 @@ describe("MentorshipView", () => {
       }),
     ).toBeInTheDocument();
     expect(
-      localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY),
+      (drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null),
     ).toBeNull();
   });
 
@@ -680,7 +699,7 @@ describe("MentorshipView", () => {
 
     await waitFor(() => {
       expect(
-        localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY),
+        (drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null),
       ).not.toBeNull();
     });
 
@@ -699,7 +718,7 @@ describe("MentorshipView", () => {
       }),
     ).not.toBeInTheDocument();
     expect(
-      localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY),
+      (drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null),
     ).not.toBeNull();
   });
 });

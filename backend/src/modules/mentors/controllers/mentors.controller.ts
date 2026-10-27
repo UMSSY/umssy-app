@@ -62,6 +62,12 @@ export class MentorsController {
     return this.mentorsService.findMyTechnicalAreas(user.id);
   }
 
+  @Get('me/participation')
+  @UseGuards(JwtAuthGuard)
+  findMyParticipation(@CurrentUser() user: AuthenticatedUser) {
+    return this.mentorsService.findMyParticipation(user.id);
+  }
+
   @Patch('me/technical-areas')
   @UseGuards(JwtAuthGuard)
   updateMyTechnicalAreas(

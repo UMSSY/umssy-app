@@ -14,6 +14,19 @@ function currentSubject(): string {
   } catch { return "anonymous"; }
 }
 
+/** Clear only after a confirmed lifecycle boundary or an explicit new intention. */
+export function clearMentorIntakeIntentions(operations: readonly ("activate" | "request")[] = ["activate", "request"]): void {
+  const subject = currentSubject();
+  for (const operation of operations) {
+    const name = `hu7:intake:${operation}`;
+    if (memory.get(name)?.subject === subject) memory.delete(name);
+    try {
+      const storage = typeof window === "undefined" ? null : window.sessionStorage;
+      if (JSON.parse(storage?.getItem(name) ?? "null")?.subject === subject) storage?.removeItem(name);
+    } catch { /* A storage failure must not turn a confirmed operation into failure. */ }
+  }
+}
+
 export async function withMentorIntakeKey<T>(operation: "activate" | "request", preferences: Preferences, submit: (key: string) => Promise<T>): Promise<T> {
   const name = `hu7:intake:${operation}`;
   const subject = currentSubject();
