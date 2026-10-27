@@ -267,3 +267,18 @@ export type JobApplicationStatus = Prisma.JobApplicationStatusModel
  * 
  */
 export type JobApplication = Prisma.JobApplicationModel
+/**
+ * Model AuditAction
+ * 
+ */
+export type AuditAction = Prisma.AuditActionModel
+/**
+ * Model AuditEvent
+ * 
+ */
+export type AuditEvent = Prisma.AuditEventModel
+/**
+ * Model DocumentValidation
+ * 
+ */
+export type DocumentValidation = Prisma.DocumentValidationModel
