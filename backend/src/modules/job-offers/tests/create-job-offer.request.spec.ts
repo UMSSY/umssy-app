@@ -12,7 +12,7 @@ const VALID_REQUEST = {
   salaryMin: 6500,
   salaryMax: 8000,
   languages: 'Español, inglés intermedio',
-  locationUrl: 'https://maps.google.com/?q=Cochabamba',
+  locationUrl: 'https://maps.app.goo.gl/TechBolivia',
   skillIds: [randomUUID()],
 };
 
@@ -71,26 +71,40 @@ describe('createJobOfferSchema', () => {
 
   it('exige un salario mayor a 0 y un rango ordenado', () => {
     expect(firstMessage({ salaryMin: 0 })).toBe('El salario debe ser mayor a 0');
+    expect(firstMessage({ salaryMax: 1_000_000_000 })).toBe('El salario no puede tener mas de 9 digitos');
     expect(firstMessage({ salaryMin: 9000, salaryMax: 8000 })).toBe(
       'El salario minimo no puede ser mayor al salario maximo',
     );
   });
 
+  it('exige salario salvo en pasantías, donde es opcional', () => {
+    expect(firstMessage({ salaryMin: undefined, salaryMax: undefined })).toBe('Este campo es obligatorio');
+    expect(
+      parse({ contractType: 'Pasantía', salaryMin: undefined, salaryMax: undefined }).success,
+    ).toBe(true);
+    expect(firstMessage({ contractType: 'Pasantía', salaryMin: undefined })).toBe(
+      'Este campo es obligatorio',
+    );
+  });
+
   it('acepta los enlaces oficiales de Google Maps y rechaza otros', () => {
     for (const locationUrl of [
-      'https://maps.google.com/?q=x',
-      'https://www.google.com/maps/place/x',
+      'https://maps.app.goo.gl/abc?g_st=iw',
       'https://goo.gl/maps/abc',
-      'https://maps.app.goo.gl/abc',
+      'https://www.google.com/maps/place/Plaza+14+de+Septiembre/@-17.3935,-66.157,17z/data=!3m1',
+      'https://www.google.com.bo/maps/place/UMSS/@-17.39,-66.14,15.5z?entry=ttu',
     ]) {
       expect(parse({ locationUrl }).success).toBe(true);
     }
-    expect(firstMessage({ locationUrl: 'https://ejemplo.com' })).toBe(
-      'Ingresa un enlace valido de Google Maps',
-    );
-    expect(firstMessage({ locationUrl: 'http://maps.google.com/?q=x' })).toBe(
-      'Ingresa un enlace valido de Google Maps',
-    );
+    for (const locationUrl of [
+      'https://ejemplo.com',
+      'http://maps.app.goo.gl/abc',
+      'https://maps.google.com/URLnoEXISTE',
+      'https://www.google.com/maps/place/x',
+      'https://maps.app.goo.gl.evil.com/x',
+    ]) {
+      expect(firstMessage({ locationUrl })).toBe('Ingresa un enlace valido de Google Maps');
+    }
   });
 
   it('exige entre 1 y 10 habilidades con identificadores válidos', () => {

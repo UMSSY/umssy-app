@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { normalizeSearchText } from "@/shared/utils/normalize-search-text";
-import { SKILL_SEARCH_TEXT } from "../constants/vacancies.constants";
+import { FIELD_FOCUS_CLASS, SKILL_SEARCH_TEXT } from "../constants/vacancies.constants";
 import type { SkillOption } from "../types/vacancy-conditions.types";
 
 interface SkillSearchDialogProps {
@@ -89,7 +89,7 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
             id="skill-search"
             autoComplete="off"
             placeholder={SKILL_SEARCH_TEXT.placeholder}
-            className="mt-1.5"
+            className={`mt-1.5 ${FIELD_FOCUS_CLASS}`}
             value={search}
             onChange={(event) => handleSearchChange(event.target.value)}
           />
