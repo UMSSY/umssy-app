@@ -30,8 +30,8 @@ describe('capacidad HU-7-1', () => {
         return [{ approvedGraduates: 3, activeMentors: mentors, reservedOffers }];
       },
       userRole: { create: writes },
-      mentorTechnicalArea: { createMany: vi.fn() },
-      mentorOrientationType: { createMany: vi.fn() },
+      mentorTechnicalArea: { deleteMany: vi.fn(), createMany: vi.fn() },
+      mentorOrientationType: { deleteMany: vi.fn(), createMany: vi.fn() },
       user: { update: vi.fn() },
     };
     const prisma = {

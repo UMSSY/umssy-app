@@ -25,9 +25,31 @@ export type MentorParticipationPreferences = {
   orientationTypeIds: string[];
 };
 
+export type MyMentorParticipation = {
+  status: "ACTIVE" | "DEACTIVATED" | "NEVER";
+  areas: { id: string; name: string }[];
+  orientations: { id: string; name: string }[];
+};
+
 const BASE_PATH = "/mentor-participation/requests";
 
 export const mentorParticipationService = {
+  async getMyParticipation(signal?: AbortSignal): Promise<MyMentorParticipation> {
+    const response = await apiClient.get<ApiResponse<MyMentorParticipation>>(
+      "/mentors/me/participation", { signal },
+    );
+    const result = response.data.data;
+    const validItems = (items: unknown): items is { id: string; name: string }[] =>
+      Array.isArray(items) && items.every((item: unknown) =>
+        typeof item === "object" && item !== null &&
+        "id" in item && typeof item.id === "string" &&
+        "name" in item && typeof item.name === "string");
+    if (!result || !["ACTIVE", "DEACTIVATED", "NEVER"].includes(result.status) ||
+        !validItems(result.areas) || !validItems(result.orientations)) {
+      throw new Error("Respuesta de participación inválida");
+    }
+    return result;
+  },
   async capacity(): Promise<MentorCapacity> {
     const response = await apiClient.get<ApiResponse<MentorCapacity>>("/mentors/capacity");
     return response.data.data;
