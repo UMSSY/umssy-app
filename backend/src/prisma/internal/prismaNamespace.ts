@@ -445,7 +445,10 @@ export const ModelName = {
   ConversationParticipant: 'ConversationParticipant',
   Message: 'Message',
   UserPresence: 'UserPresence',
-  PasswordResetOtp: 'PasswordResetOtp'
+  PasswordResetOtp: 'PasswordResetOtp',
+  AuditAction: 'AuditAction',
+  AuditEvent: 'AuditEvent',
+  DocumentValidation: 'DocumentValidation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -461,7 +464,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence" | "passwordResetOtp"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence" | "passwordResetOtp" | "auditAction" | "auditEvent" | "documentValidation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -4091,6 +4094,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AuditAction: {
+      payload: Prisma.$AuditActionPayload<ExtArgs>
+      fields: Prisma.AuditActionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuditActionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditActionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuditActionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditActionPayload>
+        }
+        findFirst: {
+          args: Prisma.AuditActionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditActionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuditActionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditActionPayload>
+        }
+        findMany: {
+          args: Prisma.AuditActionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditActionPayload>[]
+        }
+        create: {
+          args: Prisma.AuditActionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditActionPayload>
+        }
+        createMany: {
+          args: Prisma.AuditActionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuditActionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditActionPayload>[]
+        }
+        delete: {
+          args: Prisma.AuditActionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditActionPayload>
+        }
+        update: {
+          args: Prisma.AuditActionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditActionPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuditActionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuditActionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuditActionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditActionPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuditActionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditActionPayload>
+        }
+        aggregate: {
+          args: Prisma.AuditActionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuditAction>
+        }
+        groupBy: {
+          args: Prisma.AuditActionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditActionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuditActionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditActionCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuditEvent: {
+      payload: Prisma.$AuditEventPayload<ExtArgs>
+      fields: Prisma.AuditEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuditEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuditEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEventPayload>
+        }
+        findFirst: {
+          args: Prisma.AuditEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuditEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEventPayload>
+        }
+        findMany: {
+          args: Prisma.AuditEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEventPayload>[]
+        }
+        create: {
+          args: Prisma.AuditEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEventPayload>
+        }
+        createMany: {
+          args: Prisma.AuditEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuditEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEventPayload>[]
+        }
+        delete: {
+          args: Prisma.AuditEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEventPayload>
+        }
+        update: {
+          args: Prisma.AuditEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuditEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuditEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuditEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuditEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEventPayload>
+        }
+        aggregate: {
+          args: Prisma.AuditEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuditEvent>
+        }
+        groupBy: {
+          args: Prisma.AuditEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuditEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditEventCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocumentValidation: {
+      payload: Prisma.$DocumentValidationPayload<ExtArgs>
+      fields: Prisma.DocumentValidationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentValidationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentValidationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentValidationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentValidationPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentValidationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentValidationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentValidationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentValidationPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentValidationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentValidationPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentValidationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentValidationPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentValidationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocumentValidationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentValidationPayload>[]
+        }
+        delete: {
+          args: Prisma.DocumentValidationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentValidationPayload>
+        }
+        update: {
+          args: Prisma.DocumentValidationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentValidationPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentValidationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentValidationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocumentValidationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentValidationPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocumentValidationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentValidationPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentValidationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentValidation>
+        }
+        groupBy: {
+          args: Prisma.DocumentValidationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentValidationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentValidationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentValidationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -4783,6 +5008,56 @@ export const PasswordResetOtpScalarFieldEnum = {
 export type PasswordResetOtpScalarFieldEnum = (typeof PasswordResetOtpScalarFieldEnum)[keyof typeof PasswordResetOtpScalarFieldEnum]
 
 
+export const AuditActionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AuditActionScalarFieldEnum = (typeof AuditActionScalarFieldEnum)[keyof typeof AuditActionScalarFieldEnum]
+
+
+export const AuditEventScalarFieldEnum = {
+  id: 'id',
+  number: 'number',
+  accessRequestId: 'accessRequestId',
+  requestCode: 'requestCode',
+  applicantName: 'applicantName',
+  applicantCareer: 'applicantCareer',
+  actionId: 'actionId',
+  actorId: 'actorId',
+  actorName: 'actorName',
+  actorRole: 'actorRole',
+  detail: 'detail',
+  evidenceFileId: 'evidenceFileId',
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AuditEventScalarFieldEnum = (typeof AuditEventScalarFieldEnum)[keyof typeof AuditEventScalarFieldEnum]
+
+
+export const DocumentValidationScalarFieldEnum = {
+  id: 'id',
+  accessRequestId: 'accessRequestId',
+  result: 'result',
+  matchScore: 'matchScore',
+  reason: 'reason',
+  fieldResults: 'fieldResults',
+  queuedAt: 'queuedAt',
+  readAt: 'readAt',
+  revertedAt: 'revertedAt',
+  revertedById: 'revertedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentValidationScalarFieldEnum = (typeof DocumentValidationScalarFieldEnum)[keyof typeof DocumentValidationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -5120,6 +5395,9 @@ export type GlobalOmitConfig = {
   message?: Prisma.MessageOmit
   userPresence?: Prisma.UserPresenceOmit
   passwordResetOtp?: Prisma.PasswordResetOtpOmit
+  auditAction?: Prisma.AuditActionOmit
+  auditEvent?: Prisma.AuditEventOmit
+  documentValidation?: Prisma.DocumentValidationOmit
 }
 
 /* Types for Logging */
