@@ -206,13 +206,3 @@
 @utility institutional-button {
   clip-path: polygon(0.75rem 0, 100% 0, calc(100% - 0.75rem) 100%, 0 100%);
 }
-
-/* Proposal inputs retain shared tokens, with the pale blue focus from the approved reference. */
-[data-proposal-form] :is(input:not([type="file"]), textarea, [data-slot="select-trigger"]) {
-  box-shadow: 0 1px 3px var(--color-availability);
-}
-[data-proposal-form] :is(input:not([type="file"]), textarea, [data-slot="select-trigger"]):focus-visible {
-  border-color: var(--color-availability-border);
-  box-shadow: 0 0 0 3px var(--color-availability);
-  outline-color: var(--color-availability-border);
-}

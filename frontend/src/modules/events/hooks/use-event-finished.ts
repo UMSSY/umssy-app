@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import type { EventItem } from '../types/event-item.types';
 import { formatRegistrationTime } from '../utils/registration-format';

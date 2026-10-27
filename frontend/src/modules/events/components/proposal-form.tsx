@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { LockKeyhole } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DateField } from '@/shared/components/date-field';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -29,7 +30,7 @@ export function ProposalForm() {
   });
 
   const limitMessage = (current: number, max: number) => {
-    return current === max ? <span className="ml-2 text-xs font-medium text-amber-600">Límite alcanzado</span> : null;
+    return current === max ? <span className="ml-2 text-xs font-medium text-notice-foreground">Límite alcanzado</span> : null;
   };
 
   const getMinDate = () => {
@@ -48,7 +49,7 @@ export function ProposalForm() {
     <>
       {state.created && <div role="status" className="rounded-lg border border-border bg-surface p-4 text-sm text-ink">Tu propuesta se registró correctamente y quedó en votación.</div>}
       
-      <form ref={form} noValidate aria-label="Proponer taller" aria-busy={state.pending || state.restoring} data-proposal-form className="space-y-6 rounded-lg border border-border bg-surface p-5 sm:p-8"
+      <form ref={form} noValidate aria-label="Proponer taller" aria-busy={state.pending || state.restoring} className="space-y-6 rounded-lg border border-border bg-surface p-5 sm:p-8"
         onSubmit={(event) => { event.preventDefault(); if (!state.review()) requestAnimationFrame(() => form.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()); }}>
         
         <div className="text-left text-xs text-text-secondary">
@@ -103,17 +104,16 @@ export function ProposalForm() {
           
           <div className="grid gap-6 md:grid-cols-3">
             <ProposalField id="proposal-eventDate" label="Fecha del taller" error={errors.eventDate}>
-              <Input 
-                id="proposal-eventDate" 
-                name="eventDate" 
-                type="date" 
-                required 
-                value={values.eventDate} 
-                onChange={(event) => change('eventDate', event.target.value)} 
-                className="h-11" 
+              <DateField
+                id="proposal-eventDate"
+                name="eventDate"
+                required
+                value={values.eventDate}
+                onValueChange={(value) => change('eventDate', value)}
+                className="h-11"
                 min={getMinDate()}
                 max={getMaxDate()}
-                {...feedback('eventDate')} 
+                {...feedback('eventDate')}
               />
             </ProposalField>
             <ProposalTimeField id="proposal-startTime" label="Hora de inicio" value={values.startTime} onChange={(value) => change('startTime', value)} error={errors.startTime} disabled={state.pending} />

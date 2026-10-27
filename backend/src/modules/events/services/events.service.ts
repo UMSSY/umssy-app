@@ -59,4 +59,15 @@ export class EventsService {
     if (!event) throw new EventNotFoundException(id);
     return event;
   }
+  lockEventRow(tx: Prisma.TransactionClient, eventId: string): Promise<void> {
+    return this.repository.lockEventRow(tx, eventId);
+  }
+
+  loadSupportContext(tx: Prisma.TransactionClient, eventId: string) {
+    return this.repository.loadSupportContext(tx, eventId);
+  }
+
+  publish(tx: Prisma.TransactionClient, eventId: string) {
+    return this.repository.publish(tx, eventId);
+  }
 }

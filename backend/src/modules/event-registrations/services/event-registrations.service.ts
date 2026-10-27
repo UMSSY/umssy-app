@@ -1,7 +1,7 @@
 import { PassNotFoundException } from '../exceptions/pass-not-found.exception.js';
 import type { SupportTransactionResult } from '../types/support-transaction-result.types.js';
-import { COMMUNITY_ORIGIN_TITLE, EXPIRED_STATUS_TITLE, VOTING_STATUS_TITLES } from '../../events/constants/events.constants.js';
-import { EventNotFoundException } from '../../events/exceptions/event-not-found.exception.js';
+import { COMMUNITY_ORIGIN_TITLE, EXPIRED_STATUS_TITLE, VOTING_STATUS_TITLES } from '../../events/index.js';
+import { EventNotFoundException } from '../../events/index.js';
 import { AlreadySupportedException } from '../exceptions/already-supported.exception.js';
 import { EventNotSupportableException } from '../exceptions/event-not-supportable.exception.js';
 import { ProposalExpiredException } from '../exceptions/proposal-expired.exception.js';
@@ -105,7 +105,7 @@ export class EventRegistrationsService {
   }
 
   private lockEventRow(tx: Prisma.TransactionClient, eventId: string): Promise<void> {
-    return this.repository.lockEventRow(tx, eventId);
+    return this.eventsService.lockEventRow(tx, eventId);
   }
 
   async findMine(userId: string): Promise<MyRegistrationResponse[]> {
@@ -194,7 +194,7 @@ export class EventRegistrationsService {
         (threshold !== null && threshold > 0 && supportCount >= threshold);
 
       if (published && event.statusTitle !== PUBLISHED_STATUS_TITLE) {
-        await this.repository.publish(tx, eventId);
+        await this.eventsService.publish(tx, eventId);
       }
 
       return {
@@ -207,6 +207,6 @@ export class EventRegistrationsService {
   }
 
   private loadSupportContext(tx: Prisma.TransactionClient, eventId: string): Promise<EventSupportContext | null> {
-    return this.repository.loadSupportContext(tx, eventId);
+    return this.eventsService.loadSupportContext(tx, eventId);
   }
 }

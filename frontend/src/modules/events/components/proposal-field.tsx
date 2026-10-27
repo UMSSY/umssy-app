@@ -1,14 +1,14 @@
 import type { ProposalFieldProps } from '../types/proposal-field-props.types';
-import { Label } from '@/components/ui/label';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 
 export function ProposalField({ id, label, error, required = true, children }: ProposalFieldProps) {
   return (
-    <div className="min-w-0 space-y-2">
-      <Label htmlFor={id} className="font-semibold text-ink">
+    <Field className="min-w-0" data-invalid={Boolean(error)}>
+      <FieldLabel htmlFor={id} className="font-semibold text-ink">
         {label}{required && <span aria-hidden="true" className="text-ink">*</span>}
-      </Label>
+      </FieldLabel>
       {children}
-      {error && <p id={`${id}-error`} role="alert" className="text-sm text-danger">{error}</p>}
-    </div>
+      {error && <FieldError id={`${id}-error`}>{error}</FieldError>}
+    </Field>
   );
 }

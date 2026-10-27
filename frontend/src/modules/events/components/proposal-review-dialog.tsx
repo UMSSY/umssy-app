@@ -1,3 +1,5 @@
+'use client';
+
 import type { ProposalReviewDialogProps } from '../types/proposal-review-dialog-props.types';
 import Image from 'next/image';
 import { useRef } from 'react';

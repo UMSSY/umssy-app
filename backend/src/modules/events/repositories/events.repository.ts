@@ -1,3 +1,6 @@
+import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
+import type { EventSupportContext } from '../types/event-support-context.types.js';
+import { mapSupportContext } from '../mappers/support-context.mapper.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { escapePgWildcards } from '../../../common/utils/escape-pg-wildcards.js';
@@ -140,5 +143,42 @@ export class EventsRepository {
       },
     });
     return event;
+  }
+  async lockEventRow(tx: Prisma.TransactionClient, eventId: string): Promise<void> {
+    await tx.$queryRaw`SELECT id FROM events WHERE id = ${eventId}::uuid FOR UPDATE`;
+  }
+
+  publish(tx: Prisma.TransactionClient, eventId: string) {
+    return tx.event.update({ where: { id: eventId }, data: { status: { connect: { title: PUBLISHED_STATUS_TITLE } } }, select: { id: true } });
+  }
+
+  async loadSupportContext(
+    tx: Prisma.TransactionClient,
+    eventId: string,
+  ): Promise<EventSupportContext | null> {
+    const event = await tx.event.findUnique({
+      where: { id: eventId },
+      select: {
+        id: true,
+        votingDeadline: true,
+        supportThreshold: true,
+        status: { select: { title: true } },
+        origin: { select: { title: true } },
+        _count: {
+          select: {
+            registrations: {
+              where: {
+                cancelledAt: null,
+                status: { title: REGISTRATION_STATUS_TITLES.confirmed },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!event) return null;
+
+    return mapSupportContext(event);
   }
 }

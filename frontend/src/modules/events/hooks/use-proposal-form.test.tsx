@@ -7,7 +7,7 @@ import { useProposalForm } from './use-proposal-form';
 import type { ProposalValues } from '../types/proposal.types';
 
 vi.mock('@/modules/profile', () => ({ profileService: { getProfile: vi.fn().mockResolvedValue({ firstName: 'Ana', lastName: 'López' }) } }));
-vi.mock('@/modules/event-categories/hooks/use-event-categories', () => ({ useEventCategories: () => ({ categories: [{ id: 'cat', name: 'Tecnología' }], isLoading: false, error: null, retry: vi.fn() }) }));
+vi.mock('@/modules/event-categories', () => ({ useEventCategories: () => ({ categories: [{ id: 'cat', name: 'Tecnología' }], isLoading: false, error: null, retry: vi.fn() }) }));
 vi.mock('../services/proposals.service', () => ({ proposalsService: { create: vi.fn() } }));
 const resultData = { id: 'id', status: 'voting' as const, coverUrl: '/cover.png', supportThreshold: 15, votingDeadline: '2026-11-01T16:00:00Z' };
 beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-10-24T12:00:00Z')); vi.clearAllMocks(); saveAccessToken('session'); URL.revokeObjectURL = vi.fn(); });
@@ -54,8 +54,24 @@ describe('Proposal review and submission', () => {
     vi.mocked(proposalsService.create).mockReturnValue(new Promise((done) => { resolve = done; }));
     let first!: Promise<void>;
     act(() => { first = hook.result.current.confirm(); void hook.result.current.confirm(); });
-    expect(proposalsService.create).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(proposalsService.create).toHaveBeenCalledTimes(1));
+    expect(hook.result.current.pending).toBe(true);
     await act(async () => { resolve(resultData); await first; });
+  });
+  it('shows mutation field errors and keeps entered data when validation fails', async () => {
+    const hook = await setup();
+    act(() => { hook.result.current.review(); });
+    vi.mocked(proposalsService.create).mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 400, data: { code: 'VALIDATION_ERROR', errors: [{ field: 'categoryId', message: 'Categoría no disponible' }] } },
+    });
+    await act(async () => { await hook.result.current.confirm(); });
+    await waitFor(() => expect(hook.result.current.errors.categoryId).toBe('Categoría no disponible'));
+    expect(hook.result.current.reviewing).toBe(false);
+    expect(hook.result.current.values.title).toBe('Python');
+    expect(hook.result.current.cover).not.toBeNull();
+    act(() => { hook.result.current.change('categoryId', 'cat'); });
+    expect(hook.result.current.errors.categoryId).toBeUndefined();
   });
   it('cannot review a draft without its required cover', async () => {
     const hook = await setup();
