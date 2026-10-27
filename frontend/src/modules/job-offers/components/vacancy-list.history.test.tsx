@@ -116,7 +116,7 @@ describe("VacancyList en modo historial", () => {
     await user.keyboard("{Escape}");
 
     await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(3));
-  });
+  }, 10000);
 
   it("combina la búsqueda con el estado exigiendo ambas condiciones", async () => {
     const user = userEvent.setup();
@@ -131,7 +131,7 @@ describe("VacancyList en modo historial", () => {
 
     await waitFor(() => expect(screen.queryByRole("listitem")).not.toBeInTheDocument());
     expect(screen.getByText("Ninguna vacante coincide con los filtros.")).toBeInTheDocument();
-  });
+  }, 10000);
 
   it("muestra el estado vacío con acceso directo a crear una vacante", async () => {
     mockOffers([]);

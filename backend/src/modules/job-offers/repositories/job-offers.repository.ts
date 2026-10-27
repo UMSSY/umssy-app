@@ -33,12 +33,12 @@ export class JobOffersRepository {
     status: string,
   ): Promise<JobOfferCatalogIds> {
     const [modalityRow, contractTypeRow, statusRow] = await Promise.all([
-      this.prisma.jobOfferModality.findUnique({ where: { title: modality }, select: { id: true } }),
-      this.prisma.jobOfferContractType.findUnique({
+      modality ? this.prisma.jobOfferModality.findUnique({ where: { title: modality }, select: { id: true } }) : Promise.resolve(null),
+      contractType ? this.prisma.jobOfferContractType.findUnique({
         where: { title: contractType },
         select: { id: true },
-      }),
-      this.prisma.jobOfferStatus.findUnique({ where: { title: status }, select: { id: true } }),
+      }) : Promise.resolve(null),
+      status ? this.prisma.jobOfferStatus.findUnique({ where: { title: status }, select: { id: true } }) : Promise.resolve(null),
     ]);
 
     return {
@@ -69,6 +69,7 @@ export class JobOffersRepository {
       select: JOB_OFFER_SELECT,
     });
   }
+
   findByCompany(
     companyId: string,
     filters: ListCompanyJobOffersRequest,
@@ -107,8 +108,18 @@ export class JobOffersRepository {
       where: { id: jobOfferId },
       data: {
         ...jobOffer,
-        skills: { deleteMany: {}, create: skillIds.map((skillId) => ({ skillId })) },
+        ...(skillIds && {
+          skills: { deleteMany: {}, create: skillIds.map((skillId) => ({ skillId })) },
+        }),
       },
+      select: JOB_OFFER_SELECT,
+    });
+  }
+
+  updateStatus(jobOfferId: string, statusId: string): Promise<JobOfferRecord> {
+    return this.prisma.jobOffer.update({
+      where: { id: jobOfferId },
+      data: { statusId },
       select: JOB_OFFER_SELECT,
     });
   }

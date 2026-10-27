@@ -103,6 +103,25 @@ export class JobOffersService {
     return this.jobOfferMapper.toResponse(record);
   }
 
+  async softDelete(companyId: string, jobOfferId: string): Promise<void> {
+    await this.ensureCompanyExists(companyId);
+    const existing = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
+    if (!existing) {
+      throw new JobOfferNotFoundException();
+    }
+
+    const { statusId } = await this.jobOffersRepository.findCatalogIds(
+      '',
+      '',
+      JobOfferStatus.DELETED,
+    );
+    if (!statusId) {
+      throw new JobOfferCatalogNotFoundException('estado');
+    }
+
+    await this.jobOffersRepository.updateStatus(jobOfferId, statusId);
+  }
+
   listSkillCatalog(): Promise<JobOfferSkillResponse[]> {
     return this.jobOfferSkillsService.listCatalog();
   }
