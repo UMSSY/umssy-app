@@ -82,7 +82,7 @@ describe("RequirementsStep", () => {
 
   it("actualiza la descripción conservando saltos de línea y respetando el tope", () => {
     const { updateField } = renderStep();
-    const textarea = screen.getByLabelText(/Descripcion del puesto/);
+    const textarea = screen.getByLabelText(/Descripción del puesto/);
 
     fireEvent.change(textarea, { target: { value: "Línea 1\n- Línea 2" } });
     expect(updateField).toHaveBeenLastCalledWith("description", "Línea 1\n- Línea 2");
@@ -106,7 +106,7 @@ describe("RequirementsStep", () => {
 
     expect(screen.getByText("Este campo es obligatorio")).toBeInTheDocument();
     expect(screen.getByText("Debes seleccionar al menos una habilidad requerida")).toBeInTheDocument();
-    expect(screen.getByLabelText(/Descripcion del puesto/)).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText(/Descripción del puesto/)).toHaveAttribute("aria-invalid", "true");
   });
 
   it("informa que se está cargando el catálogo", () => {
