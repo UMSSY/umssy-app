@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import type { DeactivateParticipationModalProps } from "../../types/deactivate-participation-modal-props.types";
+import type { SavedItemsProps } from "../../types/saved-items-props.types";
 
 import { AlertTriangle, ShieldCheck, UserRoundX, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,18 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-type DeactivateParticipationModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  isLoading: boolean;
-  errorMessage: string | null;
-  hasFutureAppointments: boolean;
-  areas: string[];
-  orientations: string[];
-};
-
-function SavedItems({ label, items }: { label: string; items: string[] }) {
+function SavedItems({ label, items }: SavedItemsProps) {
   return (
     <div className="flex items-start gap-3">
       <span className="w-24 shrink-0 text-xs text-text-secondary">{label}</span>
