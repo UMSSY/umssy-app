@@ -1,7 +1,12 @@
-import type { TechnicalAreaCardProps } from "../types/technical-area-card-props.types";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import type { TechnicalAreaResponse } from "@/modules/mentorship";
 
+type TechnicalAreaCardProps = {
+  area: TechnicalAreaResponse;
+  isSelected: boolean;
+  onToggle: (id: string) => void;
+};
 
 export function TechnicalAreaCard({
   area,

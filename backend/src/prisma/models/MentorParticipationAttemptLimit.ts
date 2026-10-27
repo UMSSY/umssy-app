@@ -39,8 +39,6 @@ export type MentorParticipationAttemptLimitMinAggregateOutputType = {
   attemptCount: number | null
   windowStartedAt: Date | null
   blockedUntil: Date | null
-  createdAt: Date | null
-  updatedAt: Date | null
 }
 
 export type MentorParticipationAttemptLimitMaxAggregateOutputType = {
@@ -48,8 +46,6 @@ export type MentorParticipationAttemptLimitMaxAggregateOutputType = {
   attemptCount: number | null
   windowStartedAt: Date | null
   blockedUntil: Date | null
-  createdAt: Date | null
-  updatedAt: Date | null
 }
 
 export type MentorParticipationAttemptLimitCountAggregateOutputType = {
@@ -57,8 +53,6 @@ export type MentorParticipationAttemptLimitCountAggregateOutputType = {
   attemptCount: number
   windowStartedAt: number
   blockedUntil: number
-  createdAt: number
-  updatedAt: number
   _all: number
 }
 
@@ -76,8 +70,6 @@ export type MentorParticipationAttemptLimitMinAggregateInputType = {
   attemptCount?: true
   windowStartedAt?: true
   blockedUntil?: true
-  createdAt?: true
-  updatedAt?: true
 }
 
 export type MentorParticipationAttemptLimitMaxAggregateInputType = {
@@ -85,8 +77,6 @@ export type MentorParticipationAttemptLimitMaxAggregateInputType = {
   attemptCount?: true
   windowStartedAt?: true
   blockedUntil?: true
-  createdAt?: true
-  updatedAt?: true
 }
 
 export type MentorParticipationAttemptLimitCountAggregateInputType = {
@@ -94,8 +84,6 @@ export type MentorParticipationAttemptLimitCountAggregateInputType = {
   attemptCount?: true
   windowStartedAt?: true
   blockedUntil?: true
-  createdAt?: true
-  updatedAt?: true
   _all?: true
 }
 
@@ -190,8 +178,6 @@ export type MentorParticipationAttemptLimitGroupByOutputType = {
   attemptCount: number
   windowStartedAt: Date | null
   blockedUntil: Date | null
-  createdAt: Date
-  updatedAt: Date
   _count: MentorParticipationAttemptLimitCountAggregateOutputType | null
   _avg: MentorParticipationAttemptLimitAvgAggregateOutputType | null
   _sum: MentorParticipationAttemptLimitSumAggregateOutputType | null
@@ -222,8 +208,6 @@ export type MentorParticipationAttemptLimitWhereInput = {
   attemptCount?: Prisma.IntFilter<"MentorParticipationAttemptLimit"> | number
   windowStartedAt?: Prisma.DateTimeNullableFilter<"MentorParticipationAttemptLimit"> | Date | string | null
   blockedUntil?: Prisma.DateTimeNullableFilter<"MentorParticipationAttemptLimit"> | Date | string | null
-  createdAt?: Prisma.DateTimeFilter<"MentorParticipationAttemptLimit"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"MentorParticipationAttemptLimit"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -232,8 +216,6 @@ export type MentorParticipationAttemptLimitOrderByWithRelationInput = {
   attemptCount?: Prisma.SortOrder
   windowStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   blockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -245,8 +227,6 @@ export type MentorParticipationAttemptLimitWhereUniqueInput = Prisma.AtLeast<{
   attemptCount?: Prisma.IntFilter<"MentorParticipationAttemptLimit"> | number
   windowStartedAt?: Prisma.DateTimeNullableFilter<"MentorParticipationAttemptLimit"> | Date | string | null
   blockedUntil?: Prisma.DateTimeNullableFilter<"MentorParticipationAttemptLimit"> | Date | string | null
-  createdAt?: Prisma.DateTimeFilter<"MentorParticipationAttemptLimit"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"MentorParticipationAttemptLimit"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "userId">
 
@@ -255,8 +235,6 @@ export type MentorParticipationAttemptLimitOrderByWithAggregationInput = {
   attemptCount?: Prisma.SortOrder
   windowStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   blockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
   _count?: Prisma.MentorParticipationAttemptLimitCountOrderByAggregateInput
   _avg?: Prisma.MentorParticipationAttemptLimitAvgOrderByAggregateInput
   _max?: Prisma.MentorParticipationAttemptLimitMaxOrderByAggregateInput
@@ -272,16 +250,12 @@ export type MentorParticipationAttemptLimitScalarWhereWithAggregatesInput = {
   attemptCount?: Prisma.IntWithAggregatesFilter<"MentorParticipationAttemptLimit"> | number
   windowStartedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"MentorParticipationAttemptLimit"> | Date | string | null
   blockedUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"MentorParticipationAttemptLimit"> | Date | string | null
-  createdAt?: Prisma.DateTimeWithAggregatesFilter<"MentorParticipationAttemptLimit"> | Date | string
-  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"MentorParticipationAttemptLimit"> | Date | string
 }
 
 export type MentorParticipationAttemptLimitCreateInput = {
   attemptCount?: number
   windowStartedAt?: Date | string | null
   blockedUntil?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMentorParticipationAttemptLimitInput
 }
 
@@ -290,16 +264,12 @@ export type MentorParticipationAttemptLimitUncheckedCreateInput = {
   attemptCount?: number
   windowStartedAt?: Date | string | null
   blockedUntil?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type MentorParticipationAttemptLimitUpdateInput = {
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   windowStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMentorParticipationAttemptLimitNestedInput
 }
 
@@ -308,8 +278,6 @@ export type MentorParticipationAttemptLimitUncheckedUpdateInput = {
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   windowStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorParticipationAttemptLimitCreateManyInput = {
@@ -317,16 +285,12 @@ export type MentorParticipationAttemptLimitCreateManyInput = {
   attemptCount?: number
   windowStartedAt?: Date | string | null
   blockedUntil?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type MentorParticipationAttemptLimitUpdateManyMutationInput = {
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   windowStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorParticipationAttemptLimitUncheckedUpdateManyInput = {
@@ -334,8 +298,6 @@ export type MentorParticipationAttemptLimitUncheckedUpdateManyInput = {
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   windowStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorParticipationAttemptLimitNullableScalarRelationFilter = {
@@ -348,8 +310,6 @@ export type MentorParticipationAttemptLimitCountOrderByAggregateInput = {
   attemptCount?: Prisma.SortOrder
   windowStartedAt?: Prisma.SortOrder
   blockedUntil?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorParticipationAttemptLimitAvgOrderByAggregateInput = {
@@ -361,8 +321,6 @@ export type MentorParticipationAttemptLimitMaxOrderByAggregateInput = {
   attemptCount?: Prisma.SortOrder
   windowStartedAt?: Prisma.SortOrder
   blockedUntil?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorParticipationAttemptLimitMinOrderByAggregateInput = {
@@ -370,8 +328,6 @@ export type MentorParticipationAttemptLimitMinOrderByAggregateInput = {
   attemptCount?: Prisma.SortOrder
   windowStartedAt?: Prisma.SortOrder
   blockedUntil?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
 }
 
 export type MentorParticipationAttemptLimitSumOrderByAggregateInput = {
@@ -414,16 +370,12 @@ export type MentorParticipationAttemptLimitCreateWithoutUserInput = {
   attemptCount?: number
   windowStartedAt?: Date | string | null
   blockedUntil?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type MentorParticipationAttemptLimitUncheckedCreateWithoutUserInput = {
   attemptCount?: number
   windowStartedAt?: Date | string | null
   blockedUntil?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type MentorParticipationAttemptLimitCreateOrConnectWithoutUserInput = {
@@ -446,16 +398,12 @@ export type MentorParticipationAttemptLimitUpdateWithoutUserInput = {
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   windowStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MentorParticipationAttemptLimitUncheckedUpdateWithoutUserInput = {
   attemptCount?: Prisma.IntFieldUpdateOperationsInput | number
   windowStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   blockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -465,8 +413,6 @@ export type MentorParticipationAttemptLimitSelect<ExtArgs extends runtime.Types.
   attemptCount?: boolean
   windowStartedAt?: boolean
   blockedUntil?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorParticipationAttemptLimit"]>
 
@@ -475,8 +421,6 @@ export type MentorParticipationAttemptLimitSelectCreateManyAndReturn<ExtArgs ext
   attemptCount?: boolean
   windowStartedAt?: boolean
   blockedUntil?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorParticipationAttemptLimit"]>
 
@@ -485,8 +429,6 @@ export type MentorParticipationAttemptLimitSelectUpdateManyAndReturn<ExtArgs ext
   attemptCount?: boolean
   windowStartedAt?: boolean
   blockedUntil?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mentorParticipationAttemptLimit"]>
 
@@ -495,11 +437,9 @@ export type MentorParticipationAttemptLimitSelectScalar = {
   attemptCount?: boolean
   windowStartedAt?: boolean
   blockedUntil?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
 }
 
-export type MentorParticipationAttemptLimitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "attemptCount" | "windowStartedAt" | "blockedUntil" | "createdAt" | "updatedAt", ExtArgs["result"]["mentorParticipationAttemptLimit"]>
+export type MentorParticipationAttemptLimitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "attemptCount" | "windowStartedAt" | "blockedUntil", ExtArgs["result"]["mentorParticipationAttemptLimit"]>
 export type MentorParticipationAttemptLimitInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -520,8 +460,6 @@ export type $MentorParticipationAttemptLimitPayload<ExtArgs extends runtime.Type
     attemptCount: number
     windowStartedAt: Date | null
     blockedUntil: Date | null
-    createdAt: Date
-    updatedAt: Date
   }, ExtArgs["result"]["mentorParticipationAttemptLimit"]>
   composites: {}
 }
@@ -950,8 +888,6 @@ export interface MentorParticipationAttemptLimitFieldRefs {
   readonly attemptCount: Prisma.FieldRef<"MentorParticipationAttemptLimit", 'Int'>
   readonly windowStartedAt: Prisma.FieldRef<"MentorParticipationAttemptLimit", 'DateTime'>
   readonly blockedUntil: Prisma.FieldRef<"MentorParticipationAttemptLimit", 'DateTime'>
-  readonly createdAt: Prisma.FieldRef<"MentorParticipationAttemptLimit", 'DateTime'>
-  readonly updatedAt: Prisma.FieldRef<"MentorParticipationAttemptLimit", 'DateTime'>
 }
 
 

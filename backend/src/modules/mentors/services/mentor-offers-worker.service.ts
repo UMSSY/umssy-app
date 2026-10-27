@@ -1,12 +1,5 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-  Optional,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { MentorOffersService } from './mentor-offers.service.js';
-import { MentorMailOutboxService } from './mentor-mail-outbox.service.js';
 
 @Injectable()
 export class MentorOffersWorker implements OnModuleInit, OnModuleDestroy {
@@ -14,16 +7,11 @@ export class MentorOffersWorker implements OnModuleInit, OnModuleDestroy {
   private timer?: ReturnType<typeof setInterval>;
   private running = false;
 
-  constructor(
-    private readonly offers: MentorOffersService,
-    @Optional() private readonly outbox?: MentorMailOutboxService,
-  ) {}
+  constructor(private readonly offers: MentorOffersService) {}
 
   onModuleInit() {
     if (process.env.NODE_ENV === 'test') return;
-    this.timer = setInterval(() => {
-      void this.tick();
-    }, 15_000);
+    this.timer = setInterval(() => { void this.tick(); }, 15_000);
     this.timer.unref();
     void this.tick();
   }
@@ -37,11 +25,9 @@ export class MentorOffersWorker implements OnModuleInit, OnModuleDestroy {
     this.running = true;
     try {
       await this.offers.reconcile();
-      await this.outbox?.dispatch();
-    } catch {
-      this.logger.error(
-        'No se pudo completar la reconciliación o el despacho de correo de mentoría',
-      );
+    } catch (error) {
+      this.logger.error('No se pudieron vencer y reasignar las ofertas de mentoría',
+        error instanceof Error ? error.stack : String(error));
     } finally {
       this.running = false;
     }

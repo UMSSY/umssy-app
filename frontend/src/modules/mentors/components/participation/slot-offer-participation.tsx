@@ -1,7 +1,5 @@
 "use client";
 
-import type { SlotOfferParticipationProps } from "../../types/slot-offer-participation-props.types";
-
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -9,10 +7,14 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { PageHeading } from "@/shared/components/layout/page-heading";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { useOfferCountdown } from "../../hooks/use-offer-countdown";
-import { mentorParticipationService } from "../../services/mentor-participation.service";
+import { mentorParticipationService, type MentorParticipationRequest } from "../../services/mentor-participation.service";
 import { participationErrorMessage } from "../../utils/participation-error";
 
-export function SlotOfferParticipation({ request, onConfirmed, showHeading = true }: SlotOfferParticipationProps) {
+export function SlotOfferParticipation({ request, onConfirmed, showHeading = true }: {
+  request: MentorParticipationRequest;
+  onConfirmed: () => void;
+  showHeading?: boolean;
+}) {
   const offer = request.offer!;
   const countdown = useOfferCountdown(offer.expiresAt);
   const client = useQueryClient();
@@ -23,7 +25,7 @@ export function SlotOfferParticipation({ request, onConfirmed, showHeading = tru
   const confirmation = useMutation({
     mutationFn: () => mentorParticipationService.confirm(offer.id),
     onSuccess: async () => {
-      // Actualiza la participación aunque falle la consulta de roles de sesión.
+      // Reconcile the participation view even if refreshing session roles fails.
       await Promise.allSettled([
         refreshRoles(),
         client.invalidateQueries({ queryKey: ["mentors", "participation"] }),
@@ -48,7 +50,7 @@ export function SlotOfferParticipation({ request, onConfirmed, showHeading = tru
   async function confirm() {
     if (inFlight.current || countdown.expired || Date.now() >= new Date(offer.expiresAt).getTime()) return;
     inFlight.current = true;
-    try { await confirmation.mutateAsync(); } catch { /* El estado de la mutación conserva el error para mostrarlo. */ }
+    try { await confirmation.mutateAsync(); } catch { /* Render mutation error below. */ }
     finally { inFlight.current = false; }
   }
 
