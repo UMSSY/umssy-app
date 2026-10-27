@@ -68,7 +68,7 @@ export function DocumentDropzone() {
         </span>
         <div className="flex flex-col gap-1">
           <p className="text-base font-semibold text-ink">Arrastra tu documento aquí o elige un archivo.</p>
-          <p className="text-[12.5px] text-text-secondary">JPG, PNG o PDF. Máximo 10 MB.</p>
+          <p className="text-xs text-text-secondary">JPG, PNG o PDF. Máximo 10 MB.</p>
         </div>
 
         <Input
@@ -97,7 +97,7 @@ export function DocumentDropzone() {
         {isUploading ? (
           <div className="flex w-full max-w-sm flex-col gap-2" role="status">
             <Progress value={documentState.progress} aria-label="Progreso de la subida" />
-            <p className="text-[12.5px] text-text-secondary">{`Subiendo... ${documentState.progress}%`}</p>
+            <p className="text-xs text-text-secondary">{`Subiendo... ${documentState.progress}%`}</p>
           </div>
         ) : null}
       </div>

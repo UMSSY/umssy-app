@@ -152,7 +152,7 @@ describe("PersonalDataForm", () => {
     expect(screen.getByRole("group", { name: "Identidad" })).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "Contacto" })).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "Datos complementarios" })).toBeInTheDocument();
-    expect(screen.getByText("Carrera")).toHaveClass("text-[12.5px]");
+    expect(screen.getByText("Carrera")).toHaveClass("text-xs");
     expect(container.innerHTML).not.toMatch(/2xl:/);
   });
 

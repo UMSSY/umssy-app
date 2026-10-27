@@ -25,7 +25,7 @@ export function DocumentPreviewCard() {
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-ink">{fileName}</p>
-          <p className="text-[12.5px] text-text-secondary">{formatFileSize(documentState.fileSize ?? 0)}</p>
+          <p className="text-xs text-text-secondary">{formatFileSize(documentState.fileSize ?? 0)}</p>
         </div>
         <p className="flex items-center gap-1.5 text-sm font-semibold text-ink">
           <CircleCheck aria-hidden="true" className="size-4" />

@@ -30,7 +30,7 @@ export function IdCardField() {
         />
 
         <div className="w-24 shrink-0">
-          <Label htmlFor="idCardIssuedIn" className="mb-1.5 text-[12.5px] font-semibold text-ink">
+          <Label htmlFor="idCardIssuedIn" className="mb-1.5 text-xs font-semibold text-ink">
             Expedido
             <RequiredMark />
           </Label>

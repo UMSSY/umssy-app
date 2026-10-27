@@ -59,9 +59,9 @@ export function ReviewStep() {
       />
 
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5">
-        <p className="text-[12.5px] font-semibold text-text-secondary">Tu código de solicitud</p>
+        <p className="text-xs font-semibold text-text-secondary">Tu código de solicitud</p>
         <p className="text-3xl font-extrabold tracking-wide text-ink">{submission.requestCode}</p>
-        <p className="text-[12.5px] text-text-secondary">
+        <p className="text-xs text-text-secondary">
           Guárdalo: lo necesitarás para consultar el estado de tu solicitud.
         </p>
         <p className={cn("text-sm font-semibold", isRejected ? "text-danger" : "text-ink")}>
@@ -100,7 +100,7 @@ export function ReviewStep() {
                 {stage.label}
                 <span className="sr-only">{`: ${STATE_TEXT[stage.state]}`}</span>
               </p>
-              <p className="text-[12.5px] text-text-secondary">{stage.detail}</p>
+              <p className="text-xs text-text-secondary">{stage.detail}</p>
             </div>
           </li>
         ))}
