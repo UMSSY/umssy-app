@@ -34,7 +34,7 @@ También atiende las observaciones aplicables a HU7 de [zer4c en la integración
 - Conversión de datos anteriores comprobada con FKs y unicidad. Base local respaldada; sus cinco solicitudes y dos ofertas se conservaron.
 - Navegador: solicitud pendiente, historial con la misma fecha BOT, preferencias precargadas y confirmación de cancelación, manteniendo la solicitud existente.
 
-Evidencia y limitaciones: [informe de HU7](docs/hu7-main-flow-correction.md), secciones G y H.
+Evidencia y limitaciones: [informe de HU7](https://github.com/UMSSY/umssy-app/blob/dba82a388609348f4c47c32a340409fbfc899365/docs/hu7-main-flow-correction.md), secciones G y H.
 
 ## Migración y revisiones requeridas
 
