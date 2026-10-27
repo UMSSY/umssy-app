@@ -288,9 +288,6 @@ export type UserWhereInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferListRelationFilter
   mentorParticipationRequests?: Prisma.MentorParticipationRequestListRelationFilter
   mentorParticipationAttemptLimit?: Prisma.XOR<Prisma.MentorParticipationAttemptLimitNullableScalarRelationFilter, Prisma.MentorParticipationAttemptLimitWhereInput> | null
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptListRelationFilter
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionListRelationFilter
-  mentorMailOutbox?: Prisma.MentorMailOutboxListRelationFilter
   conversationsAsUserA?: Prisma.ConversationListRelationFilter
   conversationsAsUserB?: Prisma.ConversationListRelationFilter
   chatMessages?: Prisma.MessageListRelationFilter
@@ -342,9 +339,6 @@ export type UserOrderByWithRelationInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferOrderByRelationAggregateInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestOrderByRelationAggregateInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitOrderByWithRelationInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptOrderByRelationAggregateInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionOrderByRelationAggregateInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxOrderByRelationAggregateInput
   conversationsAsUserA?: Prisma.ConversationOrderByRelationAggregateInput
   conversationsAsUserB?: Prisma.ConversationOrderByRelationAggregateInput
   chatMessages?: Prisma.MessageOrderByRelationAggregateInput
@@ -399,9 +393,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   mentorSlotOffers?: Prisma.MentorSlotOfferListRelationFilter
   mentorParticipationRequests?: Prisma.MentorParticipationRequestListRelationFilter
   mentorParticipationAttemptLimit?: Prisma.XOR<Prisma.MentorParticipationAttemptLimitNullableScalarRelationFilter, Prisma.MentorParticipationAttemptLimitWhereInput> | null
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptListRelationFilter
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionListRelationFilter
-  mentorMailOutbox?: Prisma.MentorMailOutboxListRelationFilter
   conversationsAsUserA?: Prisma.ConversationListRelationFilter
   conversationsAsUserB?: Prisma.ConversationListRelationFilter
   chatMessages?: Prisma.MessageListRelationFilter
@@ -494,9 +485,6 @@ export type UserCreateInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -547,9 +535,6 @@ export type UserUncheckedCreateInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -600,9 +585,6 @@ export type UserUpdateInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -653,9 +635,6 @@ export type UserUncheckedUpdateInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -1276,48 +1255,6 @@ export type UserUpdateOneRequiredWithoutMentorParticipationAttemptLimitNestedInp
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMentorParticipationAttemptLimitInput, Prisma.UserUpdateWithoutMentorParticipationAttemptLimitInput>, Prisma.UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput>
 }
 
-export type UserCreateNestedOneWithoutMentorIntakeAttemptsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedCreateWithoutMentorIntakeAttemptsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorIntakeAttemptsInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutMentorIntakeAttemptsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedCreateWithoutMentorIntakeAttemptsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorIntakeAttemptsInput
-  upsert?: Prisma.UserUpsertWithoutMentorIntakeAttemptsInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMentorIntakeAttemptsInput, Prisma.UserUpdateWithoutMentorIntakeAttemptsInput>, Prisma.UserUncheckedUpdateWithoutMentorIntakeAttemptsInput>
-}
-
-export type UserCreateNestedOneWithoutMentorParticipationSanctionsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedCreateWithoutMentorParticipationSanctionsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorParticipationSanctionsInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutMentorParticipationSanctionsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedCreateWithoutMentorParticipationSanctionsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorParticipationSanctionsInput
-  upsert?: Prisma.UserUpsertWithoutMentorParticipationSanctionsInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMentorParticipationSanctionsInput, Prisma.UserUpdateWithoutMentorParticipationSanctionsInput>, Prisma.UserUncheckedUpdateWithoutMentorParticipationSanctionsInput>
-}
-
-export type UserCreateNestedOneWithoutMentorMailOutboxInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorMailOutboxInput, Prisma.UserUncheckedCreateWithoutMentorMailOutboxInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorMailOutboxInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutMentorMailOutboxNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorMailOutboxInput, Prisma.UserUncheckedCreateWithoutMentorMailOutboxInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorMailOutboxInput
-  upsert?: Prisma.UserUpsertWithoutMentorMailOutboxInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMentorMailOutboxInput, Prisma.UserUpdateWithoutMentorMailOutboxInput>, Prisma.UserUncheckedUpdateWithoutMentorMailOutboxInput>
-}
-
 export type UserCreateNestedOneWithoutAuditEventsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutAuditEventsInput, Prisma.UserUncheckedCreateWithoutAuditEventsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutAuditEventsInput
@@ -1390,9 +1327,6 @@ export type UserCreateWithoutCityInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -1442,9 +1376,6 @@ export type UserUncheckedCreateWithoutCityInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -1541,9 +1472,6 @@ export type UserCreateWithoutRolesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -1593,9 +1521,6 @@ export type UserUncheckedCreateWithoutRolesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -1661,9 +1586,6 @@ export type UserUpdateWithoutRolesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -1713,9 +1635,6 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -1765,9 +1684,6 @@ export type UserCreateWithoutEducationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -1817,9 +1733,6 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -1885,9 +1798,6 @@ export type UserUpdateWithoutEducationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -1937,9 +1847,6 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -1989,9 +1896,6 @@ export type UserCreateWithoutWorkExperiencesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2041,9 +1945,6 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2109,9 +2010,6 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2161,9 +2059,6 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2213,9 +2108,6 @@ export type UserCreateWithoutUserSkillsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2265,9 +2157,6 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2333,9 +2222,6 @@ export type UserUpdateWithoutUserSkillsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2385,9 +2271,6 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2437,9 +2320,6 @@ export type UserCreateWithoutCertificationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2489,9 +2369,6 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2557,9 +2434,6 @@ export type UserUpdateWithoutCertificationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2609,9 +2483,6 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2661,9 +2532,6 @@ export type UserCreateWithoutCvFileInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2713,9 +2581,6 @@ export type UserUncheckedCreateWithoutCvFileInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2781,9 +2646,6 @@ export type UserUpdateWithoutCvFileInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2833,9 +2695,6 @@ export type UserUncheckedUpdateWithoutCvFileInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2885,9 +2744,6 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2937,9 +2793,6 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3005,9 +2858,6 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3057,9 +2907,6 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3109,9 +2956,6 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3161,9 +3005,6 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3229,9 +3070,6 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3281,9 +3119,6 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3333,9 +3168,6 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3385,9 +3217,6 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3453,9 +3282,6 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3505,9 +3331,6 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3557,9 +3380,6 @@ export type UserCreateWithoutBlockedDatesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3609,9 +3429,6 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3677,9 +3494,6 @@ export type UserUpdateWithoutBlockedDatesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3729,9 +3543,6 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3781,9 +3592,6 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3833,9 +3641,6 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3890,9 +3695,6 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3942,9 +3744,6 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3999,9 +3798,6 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4051,9 +3847,6 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4119,9 +3912,6 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4171,9 +3961,6 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4234,9 +4021,6 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4286,9 +4070,6 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4349,9 +4130,6 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4401,9 +4179,6 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4453,9 +4228,6 @@ export type UserCreateWithoutAppointmentChangesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4505,9 +4277,6 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4573,9 +4342,6 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4625,9 +4391,6 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4677,9 +4440,6 @@ export type UserCreateWithoutCreatedEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4729,9 +4489,6 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4786,9 +4543,6 @@ export type UserCreateWithoutModeratedEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4838,9 +4592,6 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4906,9 +4657,6 @@ export type UserUpdateWithoutCreatedEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4958,9 +4706,6 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5021,9 +4766,6 @@ export type UserUpdateWithoutModeratedEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5073,9 +4815,6 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5125,9 +4864,6 @@ export type UserCreateWithoutEventRegistrationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5177,9 +4913,6 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5245,9 +4978,6 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5297,9 +5027,6 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5349,9 +5076,6 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5401,9 +5125,6 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5469,9 +5190,6 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5521,9 +5239,6 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5573,9 +5288,6 @@ export type UserCreateWithoutExportHistoriesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5625,9 +5337,6 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5693,9 +5402,6 @@ export type UserUpdateWithoutExportHistoriesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5745,9 +5451,6 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5797,9 +5500,6 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5849,9 +5549,6 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5906,9 +5603,6 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5958,9 +5652,6 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -6015,9 +5706,6 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -6067,9 +5755,6 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -6135,9 +5820,6 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -6187,9 +5869,6 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -6250,9 +5929,6 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -6302,9 +5978,6 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -6365,9 +6038,6 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -6417,9 +6087,6 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -6469,9 +6136,6 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -6521,9 +6185,6 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -6589,9 +6250,6 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -6641,9 +6299,6 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -6693,9 +6348,6 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -6745,9 +6397,6 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -6813,9 +6462,6 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -6865,9 +6511,6 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -6918,9 +6561,6 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
@@ -6970,9 +6610,6 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
@@ -7027,9 +6664,6 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
@@ -7079,9 +6713,6 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
@@ -7147,9 +6778,6 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
@@ -7199,9 +6827,6 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
@@ -7262,9 +6887,6 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
@@ -7314,9 +6936,6 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
@@ -7366,9 +6985,6 @@ export type UserCreateWithoutChatParticipantsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -7418,9 +7034,6 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -7486,9 +7099,6 @@ export type UserUpdateWithoutChatParticipantsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -7538,9 +7148,6 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -7590,9 +7197,6 @@ export type UserCreateWithoutChatMessagesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
@@ -7642,9 +7246,6 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
@@ -7710,9 +7311,6 @@ export type UserUpdateWithoutChatMessagesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
@@ -7762,9 +7360,6 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
@@ -7814,9 +7409,6 @@ export type UserCreateWithoutPresenceInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -7866,9 +7458,6 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -7934,9 +7523,6 @@ export type UserUpdateWithoutPresenceInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -7986,9 +7572,6 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -8037,9 +7620,6 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -8089,9 +7669,6 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -8157,9 +7734,6 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -8209,681 +7783,6 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
-  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
-  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
-  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
-  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
-  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
-  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
-  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
-}
-
-export type UserCreateWithoutMentorIntakeAttemptsInput = {
-  id?: string
-  firstName: string
-  lastName: string
-  email: string
-  password?: string | null
-  isActive?: boolean
-  isAvailableForMentoring?: boolean
-  photoUrl?: runtime.Bytes | null
-  phone?: string | null
-  personalEmail?: string | null
-  headline?: string | null
-  aboutMe?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  city?: Prisma.CityCreateNestedOneWithoutUsersInput
-  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
-  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
-  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
-  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
-  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
-  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
-  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
-  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
-  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
-  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
-  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
-  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
-  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
-  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
-  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
-  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
-  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
-  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
-  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
-  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
-  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
-  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
-  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
-  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
-  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
-  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
-}
-
-export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
-  id?: string
-  firstName: string
-  lastName: string
-  email: string
-  password?: string | null
-  isActive?: boolean
-  isAvailableForMentoring?: boolean
-  photoUrl?: runtime.Bytes | null
-  cityId?: string | null
-  phone?: string | null
-  personalEmail?: string | null
-  headline?: string | null
-  aboutMe?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
-  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
-  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
-  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
-  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
-  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
-  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
-  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
-  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
-  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
-  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
-  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
-  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
-  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
-  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
-  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
-  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
-  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
-  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
-  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
-  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
-  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
-  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
-  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
-  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
-  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
-}
-
-export type UserCreateOrConnectWithoutMentorIntakeAttemptsInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedCreateWithoutMentorIntakeAttemptsInput>
-}
-
-export type UserUpsertWithoutMentorIntakeAttemptsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedUpdateWithoutMentorIntakeAttemptsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedCreateWithoutMentorIntakeAttemptsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutMentorIntakeAttemptsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedUpdateWithoutMentorIntakeAttemptsInput>
-}
-
-export type UserUpdateWithoutMentorIntakeAttemptsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  firstName?: Prisma.StringFieldUpdateOperationsInput | string
-  lastName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
-  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
-  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
-  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
-  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
-  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
-  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
-  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
-  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
-  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
-  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
-  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
-  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
-  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
-  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
-  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
-  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
-  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
-  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
-  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
-  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
-  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
-  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
-  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
-  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
-  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
-  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
-}
-
-export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  firstName?: Prisma.StringFieldUpdateOperationsInput | string
-  lastName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
-  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
-  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
-  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
-  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
-  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
-  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
-  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
-  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
-  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
-  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
-  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
-  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
-  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
-  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
-  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
-  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
-  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
-  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
-  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
-  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
-  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
-  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
-  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
-  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
-  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
-}
-
-export type UserCreateWithoutMentorParticipationSanctionsInput = {
-  id?: string
-  firstName: string
-  lastName: string
-  email: string
-  password?: string | null
-  isActive?: boolean
-  isAvailableForMentoring?: boolean
-  photoUrl?: runtime.Bytes | null
-  phone?: string | null
-  personalEmail?: string | null
-  headline?: string | null
-  aboutMe?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  city?: Prisma.CityCreateNestedOneWithoutUsersInput
-  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
-  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
-  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
-  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
-  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
-  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
-  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
-  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
-  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
-  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
-  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
-  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
-  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
-  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
-  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
-  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
-  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
-  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
-  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
-  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
-  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
-  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
-  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
-  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
-  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
-  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
-}
-
-export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
-  id?: string
-  firstName: string
-  lastName: string
-  email: string
-  password?: string | null
-  isActive?: boolean
-  isAvailableForMentoring?: boolean
-  photoUrl?: runtime.Bytes | null
-  cityId?: string | null
-  phone?: string | null
-  personalEmail?: string | null
-  headline?: string | null
-  aboutMe?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
-  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
-  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
-  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
-  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
-  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
-  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
-  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
-  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
-  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
-  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
-  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
-  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
-  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
-  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
-  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
-  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
-  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
-  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
-  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
-  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
-  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
-  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
-  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
-  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
-  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
-}
-
-export type UserCreateOrConnectWithoutMentorParticipationSanctionsInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedCreateWithoutMentorParticipationSanctionsInput>
-}
-
-export type UserUpsertWithoutMentorParticipationSanctionsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedUpdateWithoutMentorParticipationSanctionsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedCreateWithoutMentorParticipationSanctionsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutMentorParticipationSanctionsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedUpdateWithoutMentorParticipationSanctionsInput>
-}
-
-export type UserUpdateWithoutMentorParticipationSanctionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  firstName?: Prisma.StringFieldUpdateOperationsInput | string
-  lastName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
-  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
-  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
-  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
-  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
-  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
-  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
-  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
-  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
-  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
-  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
-  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
-  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
-  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
-  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
-  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
-  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
-  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
-  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
-  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
-  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
-  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
-  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
-  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
-  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
-  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
-  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
-}
-
-export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  firstName?: Prisma.StringFieldUpdateOperationsInput | string
-  lastName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
-  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
-  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
-  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
-  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
-  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
-  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
-  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
-  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
-  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
-  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
-  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
-  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
-  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
-  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
-  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
-  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
-  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
-  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
-  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
-  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
-  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
-  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
-  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
-  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
-  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
-}
-
-export type UserCreateWithoutMentorMailOutboxInput = {
-  id?: string
-  firstName: string
-  lastName: string
-  email: string
-  password?: string | null
-  isActive?: boolean
-  isAvailableForMentoring?: boolean
-  photoUrl?: runtime.Bytes | null
-  phone?: string | null
-  personalEmail?: string | null
-  headline?: string | null
-  aboutMe?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  city?: Prisma.CityCreateNestedOneWithoutUsersInput
-  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
-  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
-  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
-  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
-  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
-  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
-  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
-  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
-  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
-  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
-  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
-  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
-  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
-  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
-  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
-  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
-  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
-  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
-  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
-  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
-  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
-  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
-  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
-  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
-  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
-}
-
-export type UserUncheckedCreateWithoutMentorMailOutboxInput = {
-  id?: string
-  firstName: string
-  lastName: string
-  email: string
-  password?: string | null
-  isActive?: boolean
-  isAvailableForMentoring?: boolean
-  photoUrl?: runtime.Bytes | null
-  cityId?: string | null
-  phone?: string | null
-  personalEmail?: string | null
-  headline?: string | null
-  aboutMe?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
-  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
-  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
-  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
-  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
-  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
-  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
-  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
-  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
-  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
-  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
-  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
-  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
-  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
-  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
-  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
-  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
-  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
-  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
-  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
-  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
-  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
-  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
-  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
-  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
-}
-
-export type UserCreateOrConnectWithoutMentorMailOutboxInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutMentorMailOutboxInput, Prisma.UserUncheckedCreateWithoutMentorMailOutboxInput>
-}
-
-export type UserUpsertWithoutMentorMailOutboxInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutMentorMailOutboxInput, Prisma.UserUncheckedUpdateWithoutMentorMailOutboxInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutMentorMailOutboxInput, Prisma.UserUncheckedCreateWithoutMentorMailOutboxInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutMentorMailOutboxInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutMentorMailOutboxInput, Prisma.UserUncheckedUpdateWithoutMentorMailOutboxInput>
-}
-
-export type UserUpdateWithoutMentorMailOutboxInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  firstName?: Prisma.StringFieldUpdateOperationsInput | string
-  lastName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
-  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
-  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
-  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
-  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
-  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
-  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
-  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
-  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
-  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
-  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
-  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
-  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
-  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
-  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
-  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
-  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
-  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
-  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
-  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
-  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
-  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
-  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
-  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
-  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
-  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
-}
-
-export type UserUncheckedUpdateWithoutMentorMailOutboxInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  firstName?: Prisma.StringFieldUpdateOperationsInput | string
-  lastName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
-  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
-  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
-  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
-  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
-  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
-  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
-  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
-  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
-  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
-  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
-  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
-  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
-  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
-  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
-  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
-  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
-  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
-  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
-  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
-  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
-  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -8934,9 +7833,6 @@ export type UserCreateWithoutAuditEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -8986,9 +7882,6 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -9054,9 +7947,6 @@ export type UserUpdateWithoutAuditEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -9106,9 +7996,6 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -9158,9 +8045,6 @@ export type UserCreateWithoutRevertedValidationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -9210,9 +8094,6 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -9278,9 +8159,6 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -9330,9 +8208,6 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -9398,9 +8273,6 @@ export type UserUpdateWithoutCityInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -9450,9 +8322,6 @@ export type UserUncheckedUpdateWithoutCityInput = {
   mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
   mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
-  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
-  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
-  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -9507,9 +8376,6 @@ export type UserCountOutputType = {
   reviewedAccessRequests: number
   mentorSlotOffers: number
   mentorParticipationRequests: number
-  mentorIntakeAttempts: number
-  mentorParticipationSanctions: number
-  mentorMailOutbox: number
   conversationsAsUserA: number
   conversationsAsUserB: number
   chatMessages: number
@@ -9541,9 +8407,6 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   reviewedAccessRequests?: boolean | UserCountOutputTypeCountReviewedAccessRequestsArgs
   mentorSlotOffers?: boolean | UserCountOutputTypeCountMentorSlotOffersArgs
   mentorParticipationRequests?: boolean | UserCountOutputTypeCountMentorParticipationRequestsArgs
-  mentorIntakeAttempts?: boolean | UserCountOutputTypeCountMentorIntakeAttemptsArgs
-  mentorParticipationSanctions?: boolean | UserCountOutputTypeCountMentorParticipationSanctionsArgs
-  mentorMailOutbox?: boolean | UserCountOutputTypeCountMentorMailOutboxArgs
   conversationsAsUserA?: boolean | UserCountOutputTypeCountConversationsAsUserAArgs
   conversationsAsUserB?: boolean | UserCountOutputTypeCountConversationsAsUserBArgs
   chatMessages?: boolean | UserCountOutputTypeCountChatMessagesArgs
@@ -9719,27 +8582,6 @@ export type UserCountOutputTypeCountMentorParticipationRequestsArgs<ExtArgs exte
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountMentorIntakeAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.MentorIntakeAttemptWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountMentorParticipationSanctionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.MentorParticipationSanctionWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountMentorMailOutboxArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.MentorMailOutboxWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
 export type UserCountOutputTypeCountConversationsAsUserAArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ConversationWhereInput
 }
@@ -9822,9 +8664,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   mentorSlotOffers?: boolean | Prisma.User$mentorSlotOffersArgs<ExtArgs>
   mentorParticipationRequests?: boolean | Prisma.User$mentorParticipationRequestsArgs<ExtArgs>
   mentorParticipationAttemptLimit?: boolean | Prisma.User$mentorParticipationAttemptLimitArgs<ExtArgs>
-  mentorIntakeAttempts?: boolean | Prisma.User$mentorIntakeAttemptsArgs<ExtArgs>
-  mentorParticipationSanctions?: boolean | Prisma.User$mentorParticipationSanctionsArgs<ExtArgs>
-  mentorMailOutbox?: boolean | Prisma.User$mentorMailOutboxArgs<ExtArgs>
   conversationsAsUserA?: boolean | Prisma.User$conversationsAsUserAArgs<ExtArgs>
   conversationsAsUserB?: boolean | Prisma.User$conversationsAsUserBArgs<ExtArgs>
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
@@ -9919,9 +8758,6 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   mentorSlotOffers?: boolean | Prisma.User$mentorSlotOffersArgs<ExtArgs>
   mentorParticipationRequests?: boolean | Prisma.User$mentorParticipationRequestsArgs<ExtArgs>
   mentorParticipationAttemptLimit?: boolean | Prisma.User$mentorParticipationAttemptLimitArgs<ExtArgs>
-  mentorIntakeAttempts?: boolean | Prisma.User$mentorIntakeAttemptsArgs<ExtArgs>
-  mentorParticipationSanctions?: boolean | Prisma.User$mentorParticipationSanctionsArgs<ExtArgs>
-  mentorMailOutbox?: boolean | Prisma.User$mentorMailOutboxArgs<ExtArgs>
   conversationsAsUserA?: boolean | Prisma.User$conversationsAsUserAArgs<ExtArgs>
   conversationsAsUserB?: boolean | Prisma.User$conversationsAsUserBArgs<ExtArgs>
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
@@ -9967,9 +8803,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     mentorSlotOffers: Prisma.$MentorSlotOfferPayload<ExtArgs>[]
     mentorParticipationRequests: Prisma.$MentorParticipationRequestPayload<ExtArgs>[]
     mentorParticipationAttemptLimit: Prisma.$MentorParticipationAttemptLimitPayload<ExtArgs> | null
-    mentorIntakeAttempts: Prisma.$MentorIntakeAttemptPayload<ExtArgs>[]
-    mentorParticipationSanctions: Prisma.$MentorParticipationSanctionPayload<ExtArgs>[]
-    mentorMailOutbox: Prisma.$MentorMailOutboxPayload<ExtArgs>[]
     conversationsAsUserA: Prisma.$ConversationPayload<ExtArgs>[]
     conversationsAsUserB: Prisma.$ConversationPayload<ExtArgs>[]
     chatMessages: Prisma.$MessagePayload<ExtArgs>[]
@@ -10414,9 +9247,6 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   mentorSlotOffers<T extends Prisma.User$mentorSlotOffersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorSlotOffersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorSlotOfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mentorParticipationRequests<T extends Prisma.User$mentorParticipationRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorParticipationRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorParticipationRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mentorParticipationAttemptLimit<T extends Prisma.User$mentorParticipationAttemptLimitArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorParticipationAttemptLimitArgs<ExtArgs>>): Prisma.Prisma__MentorParticipationAttemptLimitClient<runtime.Types.Result.GetResult<Prisma.$MentorParticipationAttemptLimitPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  mentorIntakeAttempts<T extends Prisma.User$mentorIntakeAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorIntakeAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorIntakeAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  mentorParticipationSanctions<T extends Prisma.User$mentorParticipationSanctionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorParticipationSanctionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorParticipationSanctionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  mentorMailOutbox<T extends Prisma.User$mentorMailOutboxArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorMailOutboxArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorMailOutboxPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversationsAsUserA<T extends Prisma.User$conversationsAsUserAArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationsAsUserAArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversationsAsUserB<T extends Prisma.User$conversationsAsUserBArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationsAsUserBArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   chatMessages<T extends Prisma.User$chatMessagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -11470,78 +10300,6 @@ export type User$mentorParticipationAttemptLimitArgs<ExtArgs extends runtime.Typ
    */
   include?: Prisma.MentorParticipationAttemptLimitInclude<ExtArgs> | null
   where?: Prisma.MentorParticipationAttemptLimitWhereInput
-}
-
-/**
- * User.mentorIntakeAttempts
- */
-export type User$mentorIntakeAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the MentorIntakeAttempt
-   */
-  select?: Prisma.MentorIntakeAttemptSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the MentorIntakeAttempt
-   */
-  omit?: Prisma.MentorIntakeAttemptOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.MentorIntakeAttemptInclude<ExtArgs> | null
-  where?: Prisma.MentorIntakeAttemptWhereInput
-  orderBy?: Prisma.MentorIntakeAttemptOrderByWithRelationInput | Prisma.MentorIntakeAttemptOrderByWithRelationInput[]
-  cursor?: Prisma.MentorIntakeAttemptWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.MentorIntakeAttemptScalarFieldEnum | Prisma.MentorIntakeAttemptScalarFieldEnum[]
-}
-
-/**
- * User.mentorParticipationSanctions
- */
-export type User$mentorParticipationSanctionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the MentorParticipationSanction
-   */
-  select?: Prisma.MentorParticipationSanctionSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the MentorParticipationSanction
-   */
-  omit?: Prisma.MentorParticipationSanctionOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.MentorParticipationSanctionInclude<ExtArgs> | null
-  where?: Prisma.MentorParticipationSanctionWhereInput
-  orderBy?: Prisma.MentorParticipationSanctionOrderByWithRelationInput | Prisma.MentorParticipationSanctionOrderByWithRelationInput[]
-  cursor?: Prisma.MentorParticipationSanctionWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.MentorParticipationSanctionScalarFieldEnum | Prisma.MentorParticipationSanctionScalarFieldEnum[]
-}
-
-/**
- * User.mentorMailOutbox
- */
-export type User$mentorMailOutboxArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the MentorMailOutbox
-   */
-  select?: Prisma.MentorMailOutboxSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the MentorMailOutbox
-   */
-  omit?: Prisma.MentorMailOutboxOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.MentorMailOutboxInclude<ExtArgs> | null
-  where?: Prisma.MentorMailOutboxWhereInput
-  orderBy?: Prisma.MentorMailOutboxOrderByWithRelationInput | Prisma.MentorMailOutboxOrderByWithRelationInput[]
-  cursor?: Prisma.MentorMailOutboxWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.MentorMailOutboxScalarFieldEnum | Prisma.MentorMailOutboxScalarFieldEnum[]
 }
 
 /**

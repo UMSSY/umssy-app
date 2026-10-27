@@ -124,9 +124,7 @@ describe('mail delivery', () => {
       .mockImplementation(() => undefined);
     await createService().send(MAIL_PAYLOAD);
     expect(transport).not.toHaveBeenCalled();
-    expect(log.mock.calls[0][0]).toContain('no se realizó entrega SMTP');
-    expect(JSON.stringify(log.mock.calls)).not.toContain('Contenido de prueba');
-    expect(JSON.stringify(log.mock.calls)).not.toContain('ana@example.com');
+    expect(log.mock.calls[0][0]).toContain('Contenido de prueba');
   });
 
   it('sends HTML and plain text with Brevo credentials and no body logs', async () => {

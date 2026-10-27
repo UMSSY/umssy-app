@@ -273,21 +273,6 @@ export type UserPresence = Prisma.UserPresenceModel
  */
 export type MentorParticipationAttemptLimit = Prisma.MentorParticipationAttemptLimitModel
 /**
- * Model MentorIntakeAttempt
- *
- */
-export type MentorIntakeAttempt = Prisma.MentorIntakeAttemptModel
-/**
- * Model MentorParticipationSanction
- *
- */
-export type MentorParticipationSanction = Prisma.MentorParticipationSanctionModel
-/**
- * Model MentorMailOutbox
- *
- */
-export type MentorMailOutbox = Prisma.MentorMailOutboxModel
-/**
  * Model AuditAction
  *
  */
@@ -302,28 +287,3 @@ export type AuditEvent = Prisma.AuditEventModel
  *
  */
 export type DocumentValidation = Prisma.DocumentValidationModel
-/**
- * Model MentorRequestStatus
- *
- */
-export type MentorRequestStatus = Prisma.MentorRequestStatusModel
-/**
- * Model MentorOfferStatus
- *
- */
-export type MentorOfferStatus = Prisma.MentorOfferStatusModel
-/**
- * Model MentorMailStatus
- *
- */
-export type MentorMailStatus = Prisma.MentorMailStatusModel
-/**
- * Model MentorIntakeOperation
- *
- */
-export type MentorIntakeOperation = Prisma.MentorIntakeOperationModel
-/**
- * Model MentorMailKind
- *
- */
-export type MentorMailKind = Prisma.MentorMailKindModel

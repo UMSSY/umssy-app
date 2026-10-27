@@ -1,4 +1,3 @@
-import { ApprovedAccountActivationRepository } from './repositories/approved-account-activation.repository.js';
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module.js';
 import { FilesModule } from '../files/files.module.js';
@@ -8,13 +7,11 @@ import { AccessRequestsRepository } from './repositories/access-requests.reposit
 import { ActivationOtpRepository } from './repositories/activation-otp.repository.js';
 import { RejectionNotificationService } from './services/rejection-notification.service.js';
 import { ActivationOtpService } from './services/activation-otp.service.js';
-import { InstitutionalMailSender } from './mail/institutional-mail-sender.js';
-import { MailModule } from '../mail/mail.module.js';
-import { ApprovedAccountActivationService } from './services/approved-account-activation.service.js';
+import { ConsoleMailSender } from './mail/console-mail-sender.js';
 import { MAIL_SENDER } from './mail/mail-sender.js';
 
 @Module({
-  imports: [AuthModule, FilesModule, MailModule],
+  imports: [AuthModule, FilesModule],
   controllers: [AccessRequestsController],
   providers: [
     AccessRequestsService,
@@ -22,9 +19,7 @@ import { MAIL_SENDER } from './mail/mail-sender.js';
     ActivationOtpRepository,
     ActivationOtpService,
     RejectionNotificationService,
-    { provide: MAIL_SENDER, useClass: InstitutionalMailSender },
-    ApprovedAccountActivationService,
-    ApprovedAccountActivationRepository,
+    { provide: MAIL_SENDER, useClass: ConsoleMailSender },
   ],
   exports: [AccessRequestsService],
 })
