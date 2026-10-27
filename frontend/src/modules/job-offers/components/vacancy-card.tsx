@@ -25,10 +25,9 @@ interface VacancyCardProps {
   offer: JobOffer;
   onDetails: (id: string) => void;
   showStatus?: boolean;
-  onReopen?: (id: string) => void;
 }
 
-export function VacancyCard({ offer, onDetails, showStatus = false, onReopen }: VacancyCardProps) {
+export function VacancyCard({ offer, onDetails, showStatus = false}: VacancyCardProps) {
   const isPublished = offer.status === PUBLISHED_STATUS;
   const isClosed = offer.status === CLOSED_STATUS;
   const isDeleted = offer.status === DELETED_STATUS;
@@ -86,7 +85,6 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen }: 
               <ReopenVacancyButton
                 jobOffer={offer}
                 companyId={companyId}
-                onReopened={onReopen}
               />
             ) : null}
           </div>

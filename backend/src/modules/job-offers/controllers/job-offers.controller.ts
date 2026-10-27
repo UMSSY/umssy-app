@@ -30,8 +30,6 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { buildRequestValidationException } from '../../../common/utils/build-request-validation-exception.js';
 import { toApiBody } from '../../../common/utils/to-api-body.js';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
-import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import {
   JOB_OFFER_SORT_FIELDS,
   JOB_OFFER_SORT_ORDERS,
@@ -178,18 +176,15 @@ export class JobOffersController {
     return this.jobOffersService.update(companyId, jobOfferId, request);
   }
 
-  @Patch('job-offers/:jobOfferId/reopen')
+  @Patch('companies/:companyId/job-offers/:id/reopen')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('empresa')
-  @ApiOperation({ summary: 'Reabre una vacante cerrada o pausada de la empresa autenticada' })
+  @ApiOperation({ summary: 'Reabre una vacante cerrada o pausada de la empresa' })
   @ApiNoContentResponse({ description: 'Vacante reabierta exitosamente' })
-  @ApiNotFoundResponse({ description: 'La vacante no existe o no pertenece a la empresa' })
   async reopen(
-    @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
-    @CurrentUser() user: AuthenticatedUser,
+    @Param('companyId', companyIdPipe) companyId: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<void> {
-    // TODO(Epic 1): reemplazar user.id por el companyId real de la sesión.
-    const companyId = user.id;
-    await this.jobOffersService.reopen(jobOfferId, companyId);
+    await this.jobOffersService.reopen(id, companyId);
   }
 }

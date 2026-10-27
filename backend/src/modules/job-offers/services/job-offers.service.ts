@@ -54,20 +54,22 @@ export class JobOffersService {
   }
 
   async reopen(id: string, companyId: string): Promise<void> {
-    await this.ensureCompanyExists(companyId);
-
     const offer = await this.jobOffersRepository.findById(id);
 
-    // Se usa CompanyNotFoundException para no revelar la existencia de la oferta a otras empresas.
     if (!offer || offer.company.id !== companyId) {
       throw new CompanyNotFoundException();
     }
 
-    const reopenableStatuses: JobOfferStatus[] = [
-      JobOfferStatus.CLOSED,
+    const statusTitle = offer.status.title?.toLowerCase() ?? '';
+    const reopenableStatuses = [
+      JobOfferStatus.CLOSED.toLowerCase(),
+      'cerrada',
+      'closed',
+      'archivada',
+      'pausada',
     ];
 
-    if (!reopenableStatuses.includes(offer.status.title as JobOfferStatus)) {
+    if (!reopenableStatuses.includes(statusTitle)) {
       throw new JobOfferNotReopenableException();
     }
 
