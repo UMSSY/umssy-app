@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
-import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
+import { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
 import { NLP_DICTIONARY_VERSION } from '../constants/nlp-dictionary.constants.js';
 import { NLP_LOG_EVENTS } from '../constants/nlp-processing.constants.js';
 import { ProfileSkillsRadarMapper } from '../mappers/profile-skills-radar.mapper.js';
 import { ProfileSkillResultsRepository } from '../repositories/profile-skill-results.repository.js';
-import { ProfileSkillSourcesRepository } from '../repositories/profile-skill-sources.repository.js';
+import { ProfileSkillSourcesService } from './profile-skill-sources.service.js';
 import type { ProfileSkillsAnalysisResponse } from '../responses/profile-skills-analysis.response.js';
 import type { ProfileSkillsRadarResponse } from '../responses/profile-skills-radar.response.js';
 import type { NlpAnalysisOutcome } from '../types/nlp-analysis-outcome.type.js';
@@ -18,11 +18,12 @@ export class ProfileSkillsAnalysisService {
   private readonly logger = new Logger(ProfileSkillsAnalysisService.name);
 
   constructor(
-    private readonly sources: ProfileSkillSourcesRepository,
+    private readonly sources: ProfileSkillSourcesService,
     private readonly results: ProfileSkillResultsRepository,
     private readonly detection: SkillDetectionService,
     private readonly validation: SkillValidationService,
     private readonly mapper: ProfileSkillsRadarMapper,
+    private readonly skills: SkillAnalysisService,
   ) {}
 
   async refreshAfterChange(userId: string): Promise<void> {
@@ -35,14 +36,14 @@ export class ProfileSkillsAnalysisService {
   }
 
   async analyzeNow(userId: string): Promise<ProfileSkillsAnalysisResponse> {
-    await this.ensureProfileExists(userId);
+    await this.sources.ensureProfileExists(userId);
     const state = await this.results.ensureState(userId, new Date());
     const outcome = await this.process(userId, state.inputRevision);
     return this.mapper.toAnalysisResponse(await this.readSnapshot(userId), outcome);
   }
 
   async getRadarSnapshot(userId: string): Promise<ProfileSkillsRadarResponse> {
-    await this.ensureProfileExists(userId);
+    await this.sources.ensureProfileExists(userId);
     return this.readSnapshot(userId);
   }
 
@@ -66,9 +67,9 @@ export class ProfileSkillsAnalysisService {
       const published = await this.results.publish(
         userId,
         revision,
-        detection.accepted,
         NLP_DICTIONARY_VERSION,
         new Date(),
+        (context) => this.skills.reconcileDetected(userId, detection.accepted, context),
       );
       outcome.status = published ? 'ready' : 'stale';
       this.write('log', published ? NLP_LOG_EVENTS.finished : NLP_LOG_EVENTS.stale, {
@@ -107,15 +108,9 @@ export class ProfileSkillsAnalysisService {
   private async readSnapshot(userId: string): Promise<ProfileSkillsRadarResponse> {
     const [state, rows] = await Promise.all([
       this.results.findState(userId),
-      this.results.findProfileSkillRows(userId),
+      this.skills.findProfileSkillRows(userId),
     ]);
     return this.mapper.toRadarResponse(userId, state, rows);
-  }
-
-  private async ensureProfileExists(userId: string): Promise<void> {
-    if (!(await this.sources.userExists(userId))) {
-      throw new ProfileNotFoundException();
-    }
   }
 
   private write(level: 'log' | 'error', event: string, fields: Record<string, unknown>): void {

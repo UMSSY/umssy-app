@@ -1,8 +1,10 @@
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
+import type { SkillAnalysisService } from '../services/skill-analysis.service.js';
 import { Logger } from '@nestjs/common';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileSkillsRadarMapper } from '../../nlp/mappers/profile-skills-radar.mapper.js';
 import type { ProfileSkillResultsRepository } from '../../nlp/repositories/profile-skill-results.repository.js';
-import type { ProfileSkillSourcesRepository } from '../../nlp/repositories/profile-skill-sources.repository.js';
+import type { ProfileSkillSourcesService } from '../../nlp/services/profile-skill-sources.service.js';
 import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { SkillDetectionService } from '../../nlp/services/skill-detection.service.js';
 import { SkillValidationService } from '../../nlp/services/skill-validation.service.js';
@@ -11,7 +13,7 @@ import type { NlpDetectedSkill } from '../../nlp/types/nlp-detected-skill.type.j
 import type { NlpTextSource } from '../../nlp/types/nlp-text-source.type.js';
 import type { ProfileSkillProcessingState } from '../../nlp/types/profile-skill-processing-state.type.js';
 import type { ProfileSkillRow } from '../../nlp/types/profile-skill-row.type.js';
-import { planSkillReconciliation } from '../../nlp/utils/plan-skill-reconciliation.js';
+import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
 import type { ProfileRepository } from '../../profile/repositories/profile.repository.js';
 import { DuplicateSkillException } from '../exceptions/duplicate-skill.exception.js';
 import { SkillNotFoundException } from '../exceptions/skill-not-found.exception.js';
@@ -72,7 +74,6 @@ class InMemoryProfileSkills {
 
   readonly results = {
     findState: async () => this.state,
-    findProfileSkillRows: async () => [...this.rows],
     registerSourceChange: async (_userId: string, now: Date) => {
       this.state = {
         userId,
@@ -92,25 +93,16 @@ class InMemoryProfileSkills {
     publish: async (
       _userId: string,
       revision: number,
-      detected: readonly NlpDetectedSkill[],
       dictionaryVersion: string,
       now: Date,
+      reconcile: (context: TransactionContext) => Promise<boolean>,
     ) => {
       const hook = this.beforePublish;
       this.beforePublish = undefined;
       await hook?.();
       if (!this.state || this.state.inputRevision !== revision) return null;
 
-      const plan = planSkillReconciliation(this.rows, detected);
-      this.rows = this.rows
-        .filter((row) => !plan.deleteIds.includes(row.id))
-        .map((row) => {
-          const update = plan.updates.find((candidate) => candidate.id === row.id);
-          return update ? { ...row, evidenceRefs: update.evidenceRefs, isHighRelevance: update.isHighRelevance } : row;
-        });
-      for (const create of plan.creates) this.addRow(create.skillId, 'nlp', create.evidenceRefs);
-
-      const changed = plan.creates.length + plan.updates.length + plan.deleteIds.length > 0;
+      const changed = await reconcile({} as TransactionContext);
       const isFirstResult = this.state.processedRevision === null;
       this.state = {
         ...this.state,
@@ -121,6 +113,23 @@ class InMemoryProfileSkills {
         resultVersion: this.state.resultVersion + (changed || isFirstResult ? 1 : 0),
       };
       return { state: this.state, changed };
+    },
+  };
+
+  readonly skills = {
+    findProfileSkillRows: async () => [...this.rows],
+    reconcileDetected: async (_userId: string, detected: readonly NlpDetectedSkill[]) => {
+      const plan = planSkillReconciliation(this.rows, detected);
+      this.rows = this.rows
+        .filter((row) => !plan.deleteIds.includes(row.id))
+        .map((row) => {
+          const update = plan.updates.find((candidate) => candidate.id === row.id);
+          return update ? { ...row, evidenceRefs: update.evidenceRefs, isHighRelevance: update.isHighRelevance } : row;
+        });
+      for (const create of plan.creates) this.addRow(create.skillId, 'nlp', create.evidenceRefs);
+
+      const changed = plan.creates.length + plan.updates.length + plan.deleteIds.length > 0;
+      return changed;
     },
   };
 
@@ -152,16 +161,17 @@ describe('Skill changes sent to the radar', () => {
     textSources = [{ id: 'w1', type: 'work-experience', text: 'Microservicios con Docker y Python' }];
     detection = new SkillDetectionService();
     const sources = {
-      userExists: vi.fn().mockResolvedValue(true),
+      ensureProfileExists: vi.fn().mockResolvedValue(undefined),
       findTextSources: vi.fn(async () => textSources),
       findCatalog: vi.fn().mockResolvedValue(catalog),
     };
     analysis = new ProfileSkillsAnalysisService(
-      sources as unknown as ProfileSkillSourcesRepository,
+      sources as unknown as ProfileSkillSourcesService,
       store.results as unknown as ProfileSkillResultsRepository,
       detection,
       new SkillValidationService(),
       new ProfileSkillsRadarMapper(),
+      store.skills as unknown as SkillAnalysisService,
     );
     const skillRepository = {
       findByIds: async (ids: string[]) =>

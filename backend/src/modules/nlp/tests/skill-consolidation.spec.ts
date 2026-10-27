@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { NlpDetectedSkill } from '../types/nlp-detected-skill.type.js';
 import type { ProfileSkillRow } from '../types/profile-skill-row.type.js';
 import { parseEvidenceRefs } from '../utils/parse-evidence-refs.js';
-import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
+import { planSkillReconciliation } from '../../skills/utils/plan-skill-reconciliation.js';
 import { sortEvidenceRefs } from '../utils/sort-evidence-refs.js';
 
 const row = (overrides: Partial<ProfileSkillRow>): ProfileSkillRow => ({

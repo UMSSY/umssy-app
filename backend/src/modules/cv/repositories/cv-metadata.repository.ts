@@ -47,6 +47,7 @@ export class CvMetadataRepository {
       FROM users u
       LEFT JOIN user_cv_file c ON c.user_id = u.id AND ${visibleCvCondition}
       WHERE u.id = ${userId}::uuid
+      GROUP BY u.id
     `);
 
     return rows[0]?.total ?? null;

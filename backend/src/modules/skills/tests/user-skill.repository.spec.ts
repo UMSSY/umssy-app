@@ -87,4 +87,24 @@ describe('UserSkillRepository', () => {
     });
     expect(tx.userSkill.createMany).not.toHaveBeenCalled();
   });
+
+  it('clears the manual list while preserving detected skills and evidence', async () => {
+    tx.userSkill.findMany.mockResolvedValue([
+      { id: 'row-manual', skillId, source: 'manual', evidenceRefs: [] },
+      { id: 'row-supported', skillId: otherSkillId, source: 'manual', evidenceRefs: [{ type: 'education', id: 'e1' }] },
+      { id: 'row-detected', skillId: detectedSkillId, source: 'nlp', evidenceRefs: [{ type: 'work-experience', id: 'w1' }] },
+    ]);
+    userSkill.findMany.mockResolvedValue([]);
+
+    await expect(repository.replaceForUser(userId, [])).resolves.toEqual([]);
+
+    expect(tx.userSkill.deleteMany).toHaveBeenCalledExactlyOnceWith({
+      where: { userId, id: { in: ['row-manual'] } },
+    });
+    expect(tx.userSkill.updateMany).toHaveBeenCalledExactlyOnceWith({
+      where: { userId, id: { in: ['row-supported'] } },
+      data: { source: 'nlp' },
+    });
+    expect(tx.userSkill.createMany).not.toHaveBeenCalled();
+  });
 });

@@ -65,7 +65,14 @@ describe('CvMetadataRepository', () => {
       const { text: sql, values } = lastQuery();
       expect(values).toEqual([userId]);
       expect(sql).toContain('count(c.id)::int');
+      expect(sql).toContain('GROUP BY u.id');
       expect(sql).toContain('cv_pdf_data IS NOT NULL AND cv_uploaded_at IS NOT NULL');
+    });
+
+    it('returns zero when the user exists without visible cvs', async () => {
+      queryRaw.mockResolvedValue([{ total: 0 }]);
+
+      await expect(repository.countByUserId(userId)).resolves.toBe(0);
     });
 
     it('returns null when the user does not exist', async () => {

@@ -262,3 +262,63 @@ export type Message = Prisma.MessageModel
  * 
  */
 export type UserPresence = Prisma.UserPresenceModel
+/**
+ * Model JobApplicationStatus
+ * 
+ */
+export type JobApplicationStatus = Prisma.JobApplicationStatusModel
+/**
+ * Model JobApplication
+ * 
+ */
+export type JobApplication = Prisma.JobApplicationModel
+/**
+ * Model SurveyStatus
+ * 
+ */
+export type SurveyStatus = Prisma.SurveyStatusModel
+/**
+ * Model SurveyQuestionType
+ * 
+ */
+export type SurveyQuestionType = Prisma.SurveyQuestionTypeModel
+/**
+ * Model Survey
+ * 
+ */
+export type Survey = Prisma.SurveyModel
+/**
+ * Model SurveyQuestion
+ * 
+ */
+export type SurveyQuestion = Prisma.SurveyQuestionModel
+/**
+ * Model SurveyQuestionOption
+ * 
+ */
+export type SurveyQuestionOption = Prisma.SurveyQuestionOptionModel
+/**
+ * Model SurveyResponse
+ * 
+ */
+export type SurveyResponse = Prisma.SurveyResponseModel
+/**
+ * Model SurveyAnswer
+ * 
+ */
+export type SurveyAnswer = Prisma.SurveyAnswerModel
+/**
+ * Model AuditAction
+ * 
+ */
+export type AuditAction = Prisma.AuditActionModel
+/**
+ * Model AuditEvent
+ * 
+ */
+export type AuditEvent = Prisma.AuditEventModel
+/**
+ * Model DocumentValidation
+ * 
+ */
+export type DocumentValidation = Prisma.DocumentValidationModel

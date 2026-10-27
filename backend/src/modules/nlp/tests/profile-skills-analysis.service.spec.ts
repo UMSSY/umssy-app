@@ -4,7 +4,9 @@ import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-f
 import { NLP_DICTIONARY_VERSION } from '../constants/nlp-dictionary.constants.js';
 import { ProfileSkillsRadarMapper } from '../mappers/profile-skills-radar.mapper.js';
 import type { ProfileSkillResultsRepository } from '../repositories/profile-skill-results.repository.js';
-import type { ProfileSkillSourcesRepository } from '../repositories/profile-skill-sources.repository.js';
+import type { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
+import type { ProfileSkillSourcesService } from '../services/profile-skill-sources.service.js';
 import { ProfileSkillsAnalysisService } from '../services/profile-skills-analysis.service.js';
 import { SkillDetectionService } from '../services/skill-detection.service.js';
 import { SkillValidationService } from '../services/skill-validation.service.js';
@@ -13,7 +15,7 @@ import type { NlpDetectedSkill } from '../types/nlp-detected-skill.type.js';
 import type { NlpTextSource } from '../types/nlp-text-source.type.js';
 import type { ProfileSkillProcessingState } from '../types/profile-skill-processing-state.type.js';
 import type { ProfileSkillRow } from '../types/profile-skill-row.type.js';
-import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
+import { planSkillReconciliation } from '../../skills/utils/plan-skill-reconciliation.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const catalog: NlpCatalogSkill[] = [
@@ -69,10 +71,7 @@ class InMemoryResults {
     if (this.state && this.state.inputRevision === revision) this.state = { ...this.state, status: 'error', updatedAt: now };
   };
 
-  publish = async (_userId: string, revision: number, detected: readonly NlpDetectedSkill[], dictionaryVersion: string, now: Date) => {
-    this.publishCalls += 1;
-    this.beforePublish?.();
-    if (!this.state || this.state.inputRevision !== revision) return null;
+  reconcileDetected = async (_userId: string, detected: readonly NlpDetectedSkill[]) => {
     const plan = planSkillReconciliation(this.rows, detected);
     this.rows = this.rows.filter((row) => !plan.deleteIds.includes(row.id));
     for (const update of plan.updates) {
@@ -86,6 +85,14 @@ class InMemoryResults {
       });
     }
     const changed = plan.creates.length + plan.updates.length + plan.deleteIds.length > 0;
+    return changed;
+  };
+
+  publish = async (_userId: string, revision: number, dictionaryVersion: string, now: Date, reconcile: (context: TransactionContext) => Promise<boolean>) => {
+    this.publishCalls += 1;
+    this.beforePublish?.();
+    if (!this.state || this.state.inputRevision !== revision) return null;
+    const changed = await reconcile({} as TransactionContext);
     const first = this.state.processedRevision === null;
     this.state = {
       ...this.state, status: 'ready', processedRevision: revision, dictionaryVersion, updatedAt: now,
@@ -98,7 +105,7 @@ class InMemoryResults {
 describe('ProfileSkillsAnalysisService', () => {
   let results: InMemoryResults;
   let textSources: NlpTextSource[];
-  let sources: { userExists: ReturnType<typeof vi.fn>; findTextSources: ReturnType<typeof vi.fn>; findCatalog: ReturnType<typeof vi.fn> };
+  let sources: { ensureProfileExists: ReturnType<typeof vi.fn>; findTextSources: ReturnType<typeof vi.fn>; findCatalog: ReturnType<typeof vi.fn> };
   let detection: SkillDetectionService;
   let service: ProfileSkillsAnalysisService;
   let logs: string[];
@@ -109,17 +116,18 @@ describe('ProfileSkillsAnalysisService', () => {
     results = new InMemoryResults();
     textSources = [{ id: 'w1', type: 'work-experience', text: 'Microservicios con Docker y Python; no usé Kubernetes' }];
     sources = {
-      userExists: vi.fn().mockResolvedValue(true),
+      ensureProfileExists: vi.fn().mockResolvedValue(undefined),
       findTextSources: vi.fn(async () => textSources),
       findCatalog: vi.fn().mockResolvedValue(catalog),
     };
     detection = new SkillDetectionService();
     service = new ProfileSkillsAnalysisService(
-      sources as unknown as ProfileSkillSourcesRepository,
+      sources as unknown as ProfileSkillSourcesService,
       results as unknown as ProfileSkillResultsRepository,
       detection,
       new SkillValidationService(),
       new ProfileSkillsRadarMapper(),
+      results as unknown as SkillAnalysisService,
     );
     logs = [];
     vi.spyOn(Logger.prototype, 'log').mockImplementation((message: unknown) => { logs.push(String(message)); });
@@ -272,7 +280,7 @@ describe('ProfileSkillsAnalysisService', () => {
   });
 
   it('answers 404 when the profile does not exist', async () => {
-    sources.userExists.mockResolvedValue(false);
+    sources.ensureProfileExists.mockRejectedValue(new ProfileNotFoundException());
 
     await expect(service.getRadarSnapshot(userId)).rejects.toBeInstanceOf(ProfileNotFoundException);
     await expect(service.analyzeNow(userId)).rejects.toBeInstanceOf(ProfileNotFoundException);
