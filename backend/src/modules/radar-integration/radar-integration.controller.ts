@@ -12,7 +12,7 @@ export class RadarIntegrationController {
   constructor(private readonly svc:RadarIntegrationService){}
   @Get('me') me(@CurrentUserId() user:string){return this.svc.myRadar(user);}
   @Post('me/cv-rescan') rescan(@CurrentUserId() user:string){return this.svc.rescanCurrentCv(user);}
-  @Post('me/recalculate') recalculate(@CurrentUserId() user:string){return this.svc.recalculate(user,user);}
+  @Post('me/recalculate') recalculate(@CurrentUserId() user:string){return this.svc.retry(user);}
   @Get('admin/queue') queue(@CurrentUserId() admin:string){return this.svc.queue(admin);}
   @Patch('admin/reviews/:kind/:id') decision(@CurrentUserId() admin:string,@Param('kind') kind:string,@Param('id',new ParseUUIDPipe()) id:string,@Body() body:{decision?:string}){
     if(!body||typeof body.decision!=='string')throw new BadRequestException('Falta decisión');

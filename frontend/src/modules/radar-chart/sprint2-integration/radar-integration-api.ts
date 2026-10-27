@@ -12,7 +12,7 @@ export const RADAR_AXES=[
 ] as const;
 export type AxisId=(typeof RADAR_AXES)[number]['id'];
 export type Scores=Record<AxisId,number>;
-export interface IntegrationRadar {userId:string;status:string;version:number;rubricVersion:string;updatedAt:string|null;scores:Scores;average:number;variation:number|null;pending:number;hasPending:boolean;evidence:Record<string,{id:string;name:string}[]>}
+export interface IntegrationRadar {dictionaryVersion?:string|null;userId:string;status:string;version:number;rubricVersion:string;updatedAt:string|null;scores:Scores;average:number;variation:number|null;pending:number;hasPending:boolean;evidence:Record<string,{id:string;name:string}[]>;sourceRevision:number|null;inputRevision:number;processingStatus:'ready'|'pending'|'error';skills:{id:string;name:string;areaId:string|null;isHighRelevance:boolean;evidenceRefs:{type:string;id:string}[]}[]}
 export interface ReviewRow {id:string;userId:string;userName:string;type:'cv'|'skill';title:string;status:string;date:string;extractionStatus?:string;extractedCharacters?:number;areaId?:string;evidenceRefs?:unknown}
 export interface RealVacancy {id:string;title:string;companyId:string;description?:string}
 export interface CandidateRow {applicationId:string;userId:string;name:string;headline:string;email:string|null;phone:string|null;appliedAt:string;state:string;canViewCv:boolean;version:number|null;scores:Scores|null;evidence:Record<string,{id:string;name:string}[]>;comparison:{match:number;gaps:Scores}|null;skills:string[]}
@@ -23,6 +23,7 @@ const root='/radar-integration';
 const extract=<T,>(r:{data:ApiResponse<T>})=>r.data.data;
 export const radarIntegrationApi={
   me:async()=>extract(await apiClient.get<ApiResponse<IntegrationRadar>>(`${root}/me`)),
+  recalculate:async()=>extract(await apiClient.post<ApiResponse<IntegrationRadar>>(`${root}/me/recalculate`)),
   rescanCurrentCv:async()=>extract(await apiClient.post<ApiResponse<{cvId:string;submitted:boolean}>>(`${root}/me/cv-rescan`)),
   reviews:async()=>extract(await apiClient.get<ApiResponse<ReviewRow[]>>(`${root}/admin/queue`)),
   decision:async(kind:string,id:string,decision:string)=>extract(await apiClient.patch<ApiResponse<IntegrationRadar>>(`${root}/admin/reviews/${kind}/${id}`,{decision})),

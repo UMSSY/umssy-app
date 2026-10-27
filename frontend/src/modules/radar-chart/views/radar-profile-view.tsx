@@ -13,7 +13,7 @@ import { useLiveRadar } from "../sprint2/use-live-radar";
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short" };
 
 export function RadarProfileView() {
-  const { data, loading, error, variation, refresh } = useLiveRadar();
+  const { data, loading, error, variation, retry, retrying } = useLiveRadar();
   const [selectedArea, setSelectedArea] = useState<AreaId | null>(null);
   const areas = data?.areas ?? [];
 
@@ -27,7 +27,7 @@ export function RadarProfileView() {
       {error ? (
         <div role="alert" className="rounded-lg border border-border bg-surface p-5">
           <p>{error}</p>
-          <Button type="button" variant="outline" className="mt-2" onClick={() => { void refresh(); }}>Reintentar</Button>
+          <Button type="button" variant="outline" className="mt-2" disabled={retrying} onClick={() => { void retry(); }}>{retrying ? 'Actualizando...' : 'Reintentar'}</Button>
           {data ? <p className="mt-2 text-xs text-text-secondary">Se conserva la última instantánea disponible.</p> : null}
         </div>
       ) : null}
@@ -37,11 +37,11 @@ export function RadarProfileView() {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-ink">Mi perfil profesional</h2>
-                <p className="text-xs text-text-secondary">Radar personal autenticado · Identificador {data.userId}</p>
+                <p className="text-xs text-text-secondary">Competencias y evidencias de tu perfil</p>
               </div>
               <div className="text-right text-xs text-text-secondary">
-                <p role="status" className="font-semibold text-ink">{data.status === "ready" ? (data.approved.length ? "Publicado" : "Sin evidencias aprobadas") : data.status === "pending" ? "Actualización pendiente" : "Análisis con error"}</p>
-                <p>Versión NLP {data.version} · Rúbrica {data.rubric}</p>
+                <p role="status" className="font-semibold text-ink">{data.status === "ready" ? (data.approved.length ? "Publicado" : "Sin evidencias aprobadas") : data.status === "pending" ? (data.processingStatus === "pending" ? "Actualización en curso" : "Pendiente de revisión") : "Análisis con error"}</p>
+                <p>Versión del radar {data.version} · Rúbrica {data.rubric}</p>
                 <p>Última actualización: {data.updatedAt ? new Date(data.updatedAt).toLocaleString("es-BO", DATE_FORMAT) : "Sin actualización"}</p>
               </div>
             </div>
@@ -52,7 +52,7 @@ export function RadarProfileView() {
             <div className="rounded-lg border border-border bg-surface p-5"><b className="text-2xl">{data.keywordCount}</b><p className="text-xs">Habilidades aprobadas</p><p className="text-xs text-text-secondary">{data.highRelevanceCount} de alta relevancia</p></div>
             <div className="rounded-lg border border-border bg-surface p-5"><b className="text-2xl">{data.pendingCount}</b><p className="text-xs">Habilidades pendientes</p></div>
           </div>
-          {data.approved.length === 0 ? (
+          {data.approved.length === 0 && areas.every(area => area.score === 0) ? (
             <p className="rounded-lg border border-border bg-surface-soft p-4 text-sm text-text-secondary">Todavía no tienes habilidades aprobadas. El radar conserva sus seis ejes en 0/10. <Link href="/profile/documents" className="underline">Completar documentación y CV</Link>.</p>
           ) : null}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">

@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common';
+import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileSkillsRadarMapper } from '../../nlp/mappers/profile-skills-radar.mapper.js';
 import type { ProfileSkillResultsRepository } from '../../nlp/repositories/profile-skill-results.repository.js';
@@ -162,6 +163,7 @@ describe('Skill changes sent to the radar', () => {
       detection,
       new SkillValidationService(),
       new ProfileSkillsRadarMapper(),
+      new ProfileSkillsEvents(),
     );
     const skillRepository = {
       findByIds: async (ids: string[]) =>

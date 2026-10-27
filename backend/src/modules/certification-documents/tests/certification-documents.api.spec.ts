@@ -1,3 +1,4 @@
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import type { INestApplication } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
@@ -58,6 +59,8 @@ describe('Certification documents API', () => {
             roles: [{ role: { name: 'titulado' } }],
           }),
         } })
+      .overrideProvider(ProfileSkillsAnalysisService)
+      .useValue({refreshAfterChange: vi.fn().mockResolvedValue(undefined)})
       .overrideProvider(JwtService)
       .useValue(jwt)
       .overrideProvider(CertificationsRepository)
@@ -132,6 +135,7 @@ describe('Certification documents API', () => {
     expect(documentsRepository.save).toHaveBeenCalledWith(
       certificationId,
       pdfBytes,
+      expect.objectContaining({documentFileName:"certificate.pdf", documentSizeBytes:pdfBytes.length, documentUploadedAt:expect.any(Date)}),
     );
 
     const downloaded = await request(app.getHttpServer())

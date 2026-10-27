@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
+import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import { NLP_DICTIONARY_VERSION } from '../constants/nlp-dictionary.constants.js';
 import { NLP_LOG_EVENTS } from '../constants/nlp-processing.constants.js';
@@ -23,6 +24,7 @@ export class ProfileSkillsAnalysisService {
     private readonly detection: SkillDetectionService,
     private readonly validation: SkillValidationService,
     private readonly mapper: ProfileSkillsRadarMapper,
+    private readonly events: ProfileSkillsEvents,
   ) {}
 
   async refreshAfterChange(userId: string): Promise<void> {
@@ -71,6 +73,13 @@ export class ProfileSkillsAnalysisService {
         new Date(),
       );
       outcome.status = published ? 'ready' : 'stale';
+      if (published) {
+        await this.events.published({
+          userId,
+          inputRevision: published.state.inputRevision,
+          resultVersion: published.state.resultVersion,
+        });
+      }
       this.write('log', published ? NLP_LOG_EVENTS.finished : NLP_LOG_EVENTS.stale, {
         correlationId,
         userId,

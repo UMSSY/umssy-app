@@ -6,6 +6,7 @@ import { ReviewQueueView } from "@/modules/radar-chart";
 
 const { route } = vi.hoisted(() => ({ route: { pathname: "/profile" } }));
 
+vi.mock("@/modules/radar-chart/sprint2-integration/radar-integration-api", () => ({ radarIntegrationApi: { reviews: vi.fn().mockResolvedValue([]) } }));
 const replace = vi.fn();
 vi.mock("next/navigation", () => ({
   usePathname: () => route.pathname,
@@ -75,7 +76,7 @@ describe("AppRouteLayout", () => {
 
     expect(screen.getAllByTestId("app-shell")).toHaveLength(1);
     expect(screen.getByTestId("app-shell")).toContainElement(
-      screen.getByRole("heading", { name: "Revisión de radares" }),
+      screen.getByRole("heading", { name: "Revisión documental y de radares" }),
     );
   });
 

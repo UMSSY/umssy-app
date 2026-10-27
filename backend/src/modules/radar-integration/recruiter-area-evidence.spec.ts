@@ -1,3 +1,4 @@
+import { ProfileSkillsEvents } from '../../common/profile-skills/profile-skills-events.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import { RadarIntegrationService } from './radar-integration.service.js';
 import type { PrismaService } from '../../common/prisma/prisma.service.js';
@@ -14,7 +15,7 @@ function build(rawResults:unknown[][]){
     workExperience:{findMany:vi.fn().mockResolvedValue([])},
   };
   for(const result of rawResults)db.$queryRaw.mockResolvedValueOnce(result);
-  return {db,service:new RadarIntegrationService(db as unknown as PrismaService,{} as ProfileSkillsAnalysisService)};
+  return {db,service:new RadarIntegrationService(db as unknown as PrismaService,{} as ProfileSkillsAnalysisService,new ProfileSkillsEvents())};
 }
 
 describe('Detalle documental autorizado para HU4',()=>{

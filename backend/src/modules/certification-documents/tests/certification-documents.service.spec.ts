@@ -1,3 +1,4 @@
+import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EmptyFileException } from '../../../common/exceptions/empty-file.exception.js';
 import { FileTooLargeException } from '../../../common/exceptions/file-too-large.exception.js';
@@ -69,6 +70,7 @@ describe('CertificationDocumentsService', () => {
       new FileValidationService(),
       new CertificationMapper(),
       new CertificationDocumentMapper(),
+      { refreshAfterChange: vi.fn().mockResolvedValue(undefined) } as unknown as ProfileSkillsAnalysisService,
     );
   });
 
@@ -90,6 +92,7 @@ describe('CertificationDocumentsService', () => {
       expect(documentsRepository.save).toHaveBeenCalledWith(
         certificationId,
         Buffer.from(bytes),
+        expect.objectContaining({ documentFileName: "certificate.pdf", documentSizeBytes: bytes.length, documentUploadedAt: expect.any(Date) }),
       );
       expect(result).toMatchObject({ id: certificationId, hasDocument: true });
       expect(result).not.toHaveProperty('userId');

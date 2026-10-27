@@ -50,6 +50,9 @@ export class ProfileSkillsRadarMapper {
     const isNlp = row.source === USER_SKILL_SOURCES.nlp;
     const nameCheck = validateSkillName(row.skill.name);
     if ((isNlp && !isCurrent) || !nameCheck.isValid) return [];
+    const evidenceRefs = parseEvidenceRefs(row.evidenceRefs);
+    // An approval is historical; it does not keep a deleted source active.
+    if (isNlp && evidenceRefs.length === 0) return [];
 
     return [{
       id: row.skillId,
@@ -59,7 +62,7 @@ export class ProfileSkillsRadarMapper {
       areaId: row.skill.areaId,
       verificationStatus: row.verificationStatus,
       isHighRelevance: isCurrent && row.isHighRelevance,
-      evidenceRefs: isCurrent ? parseEvidenceRefs(row.evidenceRefs) : [],
+      evidenceRefs: isCurrent ? evidenceRefs : [],
     }];
   }
 

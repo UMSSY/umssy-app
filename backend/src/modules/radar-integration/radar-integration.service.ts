@@ -1,16 +1,33 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { ProfileSkillsEvents, type ProfileSkillsPublished } from '../../common/profile-skills/profile-skills-events.service.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
 import { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-analysis.service.js';
 import { recruiterContactProjection } from './recruiter-consent.js';
 import { AREA_IDS, emptyScores, matchRadar, RUBRIC_VERSION, scoreVerifiedSkills, type Scores } from './radar-scoring.js';
 
 type CvReview = { cv_id:string;user_id:string;extraction_status:string;review_status:string;submitted_at:Date;cv_file_name:string|null;extracted_chars:number };
-type SnapshotRow = { user_id:string;version:number;rubric_version:string;fingerprint:string;scores:Scores;evidence:Record<string,{id:string;name:string}[]>;average_score:string|number;created_at:Date };
+type PublishedSkill = {id:string;name:string;areaId:string|null;isHighRelevance:boolean;evidenceRefs:{type:string;id:string}[]};
+type SnapshotRow = { user_id:string;version:number;rubric_version:string;fingerprint:string;scores:Scores;evidence:Record<string,{id:string;name:string}[]>;average_score:string|number;created_at:Date;source_revision:number|null;skills:PublishedSkill[] };
 type ApplicationRow = {id:string;job_offer_id:string;user_id:string;state:string;applied_at:Date;consent_to_recruiter:boolean;consent_to_cv:boolean;consent_to_contact:boolean};
 
 @Injectable()
-export class RadarIntegrationService {
-  constructor(private readonly prisma:PrismaService,private readonly nlp:ProfileSkillsAnalysisService){}
+export class RadarIntegrationService implements OnModuleInit, OnModuleDestroy {
+  private unsubscribe?: () => void;
+  constructor(private readonly prisma:PrismaService,private readonly nlp:ProfileSkillsAnalysisService,private readonly events:ProfileSkillsEvents){}
+
+  onModuleInit():void {
+    this.unsubscribe=this.events.subscribe(publication=>this.recalculate(publication.userId,null,publication).then(()=>undefined));
+  }
+
+  onModuleDestroy():void { this.unsubscribe?.(); }
+
+  async retry(userId:string){
+    const analysis=await this.nlp.analyzeNow(userId);
+    if(analysis.status!=='ready')throw new ConflictException('El análisis sigue pendiente o falló; puedes reintentarlo.');
+    // Also supports callers that run before the module lifecycle has subscribed.
+    await this.recalculate(userId,userId);
+    return this.myRadar(userId);
+  }
 
   private async requireRole(id:string,role:string):Promise<void>{
     const match=await this.prisma.userRole.findFirst({where:{userId:id,deletedAt:null,role:{name:role}},select:{id:true}});
@@ -76,16 +93,29 @@ export class RadarIntegrationService {
     await this.recalculate(userId,userId);
   }
   // Inmutable e idempotente por titular; no se publica un snapshot parcial.
-  async recalculate(userId:string,actorId:string|null){
+  async recalculate(userId:string,actorId:string|null,publication?:ProfileSkillsPublished){
+    let revision=publication?.inputRevision??0;
+    let attemptStartedAt=new Date();
     try{
       return await this.prisma.$transaction(async tx=>{
-        await tx.$queryRaw<{ locked: number }[]>`SELECT 1 AS locked FROM pg_advisory_xact_lock(hashtext(${userId}))`;
+        const lock=await tx.$queryRaw<{ locked:number;started_at:Date }[]>`SELECT 1 AS locked,clock_timestamp() AS started_at FROM pg_advisory_xact_lock(hashtext(${userId}))`;
+        attemptStartedAt=lock[0]?.started_at??attemptStartedAt;
+        // Lock the source state so a new publication cannot interleave with this snapshot.
+        const states=await tx.$queryRaw<{input_revision:number;processed_revision:number|null;status:string}[]>`
+          SELECT input_revision,processed_revision,status FROM profile_skill_processing_states
+          WHERE user_id=${userId}::uuid FOR SHARE`;
+        const state=states[0];
+        revision=state?.input_revision??0;
+        if(state&&(state.status!=='ready'||state.processed_revision!==revision)){
+          throw new ConflictException('El análisis del perfil aún no está actualizado.');
+        }
+        if(publication&&publication.inputRevision!==revision)return null;
         const [rows,docs,experiences,educations,certifications]=await Promise.all([
           tx.userSkill.findMany({where:{userId,verificationStatus:'approved'},select:{skillId:true,source:true,isHighRelevance:true,evidenceRefs:true,skill:{select:{name:true,areaId:true}}}}),
           tx.$queryRaw<{cv_id:string;review_status:string;extraction_status:string}[]>`SELECT cv_id,review_status,extraction_status FROM radar_cv_evidence WHERE user_id=${userId}::uuid`,
           tx.workExperience.findMany({where:{userId},select:{id:true}}),
           tx.education.findMany({where:{userId},select:{id:true}}),
-          tx.certification.findMany({where:{userId},select:{id:true}}),
+          tx.certification.findMany({where:{userId,documentUrl:{not:null}},select:{id:true}}),
         ]);
         const cvApproved=new Set(docs.filter(d=>d.review_status==='approved'&&d.extraction_status==='ready').map(d=>d.cv_id));
         const living:Record<string,Set<string>>={
@@ -103,33 +133,62 @@ export class RadarIntegrationService {
             return [{type,id}];
           }).sort((a,b)=>`${a.type}:${a.id}`.localeCompare(`${b.type}:${b.id}`));
           if(r.source==='nlp'&&!valid.length)return [];
-          if(refs.length&&!valid.length)return [];
-          return [{id:r.skillId,name:r.skill.name,areaId:r.skill.areaId,isHighRelevance:r.isHighRelevance,evidenceRefs:valid}];
+          if(!AREA_IDS.some(id=>id===r.skill.areaId))return [];
+          return [{id:r.skillId,name:r.skill.name,areaId:r.skill.areaId,isHighRelevance:r.isHighRelevance&&valid.length>0,evidenceRefs:valid}];
         });
         const calculated=scoreVerifiedSkills(accepted);
-        const last=await tx.$queryRaw<SnapshotRow[]>`SELECT * FROM radar_score_snapshots WHERE user_id=${userId}::uuid ORDER BY version DESC LIMIT 1`;
-        if(last[0]?.fingerprint===calculated.fingerprint)return this.snapshotResponse(last[0]);
+        const last=await this.storedSnapshots(tx,userId,1);
+        if(last[0]?.fingerprint===calculated.fingerprint){
+          await tx.$executeRaw`INSERT INTO radar_audit_events (user_id,actor_id,event_type,details,occurred_at)
+            VALUES (${userId}::uuid,${actorId}::uuid,'radar.synchronized',${JSON.stringify({version:last[0].version,sourceRevision:revision,skills:accepted})}::jsonb,clock_timestamp())`;
+          return this.snapshotResponse({...last[0],source_revision:revision,skills:accepted});
+        }
         const version=(last[0]?.version??0)+1;
         const inserted=await tx.$queryRaw<SnapshotRow[]>`INSERT INTO radar_score_snapshots (user_id,version,rubric_version,fingerprint,scores,evidence,average_score)
           VALUES (${userId}::uuid,${version},${RUBRIC_VERSION},${calculated.fingerprint},${JSON.stringify(calculated.scores)}::jsonb,${JSON.stringify(calculated.evidence)}::jsonb,${calculated.average}) RETURNING *`;
-        await tx.$executeRaw`INSERT INTO radar_audit_events (user_id,actor_id,event_type,details) VALUES (${userId}::uuid,${actorId}::uuid,'radar.published',${JSON.stringify({version,rubric:RUBRIC_VERSION})}::jsonb)`;
-        return this.snapshotResponse(inserted[0],last[0]);
+        await tx.$executeRaw`INSERT INTO radar_audit_events (user_id,actor_id,event_type,details,occurred_at) VALUES (${userId}::uuid,${actorId}::uuid,'radar.published',${JSON.stringify({version,rubric:RUBRIC_VERSION,sourceRevision:revision,skills:accepted})}::jsonb,clock_timestamp())`;
+        return this.snapshotResponse({...inserted[0],source_revision:revision,skills:accepted},last[0]);
       });
     }catch(error){
       // La transaccion descarta el resultado fallido; el registro se intenta por separado.
-      try{await this.audit(userId,actorId,'radar.recalculation_failed',null,{});}catch{}
+      try{
+        await this.prisma.$executeRaw`INSERT INTO radar_audit_events (user_id,actor_id,event_type,details,occurred_at)
+          SELECT ${userId}::uuid,${actorId}::uuid,'radar.recalculation_failed',${JSON.stringify({revision})}::jsonb,clock_timestamp()
+          WHERE NOT EXISTS (SELECT 1 FROM radar_audit_events WHERE user_id=${userId}::uuid
+            AND event_type IN ('radar.published','radar.synchronized')
+            AND (details->>'sourceRevision')::integer>=${revision} AND occurred_at>=${attemptStartedAt}::timestamptz)`;
+      }catch{}
       throw error;
     }
   }
-  private snapshotResponse(row:SnapshotRow,previous?:SnapshotRow){return {userId:row.user_id,status:'published' as const,version:row.version,rubricVersion:row.rubric_version,updatedAt:row.created_at,scores:row.scores,average:Number(row.average_score),variation:previous?Number((Number(row.average_score)-Number(previous.average_score)).toFixed(2)):null,evidence:row.evidence};}
+  private storedSnapshots(client:Pick<PrismaService,'$queryRaw'>,userId:string,limit:number){
+    return client.$queryRaw<SnapshotRow[]>`
+      SELECT s.*,(a.details->>'sourceRevision')::integer AS source_revision,COALESCE(a.details->'skills','[]'::jsonb) AS skills
+      FROM radar_score_snapshots s
+      LEFT JOIN LATERAL (SELECT details FROM radar_audit_events WHERE user_id=s.user_id
+        AND event_type IN ('radar.published','radar.synchronized') AND details->>'version'=s.version::text
+        AND details ? 'skills' ORDER BY occurred_at DESC,id DESC LIMIT 1) a ON TRUE
+      WHERE s.user_id=${userId}::uuid ORDER BY s.version DESC LIMIT ${limit}`;
+  }
+  private snapshotResponse(row:SnapshotRow,previous?:SnapshotRow){return {userId:row.user_id,status:'published' as const,version:row.version,sourceRevision:row.source_revision,rubricVersion:row.rubric_version,updatedAt:row.created_at,scores:row.scores,average:Number(row.average_score),variation:previous?Number((Number(row.average_score)-Number(previous.average_score)).toFixed(2)):null,evidence:row.evidence,skills:row.skills};}
   async myRadar(userId:string){
-    const [rows,pendingDocs,pendingSkills]=await Promise.all([
-      this.prisma.$queryRaw<SnapshotRow[]>`SELECT * FROM radar_score_snapshots WHERE user_id=${userId}::uuid ORDER BY version DESC LIMIT 2`,
+    const [rows,pendingDocs,pendingSkills,states,attempts]=await Promise.all([
+      this.storedSnapshots(this.prisma,userId,2),
       this.prisma.$queryRaw<{count:bigint}[]>`SELECT COUNT(*)::bigint AS count FROM radar_cv_evidence WHERE user_id=${userId}::uuid AND review_status='pending'`,
       this.prisma.userSkill.count({where:{userId,verificationStatus:'pending'}}),
+      this.prisma.profileSkillProcessingState.findUnique({where:{userId},select:{status:true,inputRevision:true,processedRevision:true,dictionaryVersion:true}}),
+      this.prisma.$queryRaw<{source_revision:number|null;status:string}[]>`
+        SELECT COALESCE((details->>'sourceRevision')::integer,(details->>'revision')::integer) AS source_revision,
+          CASE WHEN event_type='radar.recalculation_failed' THEN 'error' ELSE 'ready' END AS status
+        FROM radar_audit_events WHERE user_id=${userId}::uuid
+          AND event_type IN ('radar.published','radar.synchronized','radar.recalculation_failed')
+        ORDER BY occurred_at DESC,id DESC LIMIT 1`,
     ]);
     const last=rows[0];const prev=rows[1];const p=Number(pendingDocs[0]?.count??0)+pendingSkills;
-    return { ...(last?this.snapshotResponse(last,prev):{userId,status:'empty',version:0,rubricVersion:RUBRIC_VERSION,updatedAt:null,scores:emptyScores(),average:0,variation:null,evidence:Object.fromEntries(AREA_IDS.map(id=>[id,[]]))}),pending:p,hasPending:p>0};
+    const sourceRevision=states?.inputRevision??0;
+    const failed=states?.status==='error'||(attempts[0]?.status==='error'&&attempts[0].source_revision===sourceRevision);
+    const updating=(!!last&&last.source_revision===null)||(!!states&&(states.status!=='ready'||states.processedRevision!==sourceRevision||last?.source_revision!==sourceRevision));
+    return { ...(last?this.snapshotResponse(last,prev):{userId,status:'empty',version:0,sourceRevision:null,rubricVersion:RUBRIC_VERSION,updatedAt:null,scores:emptyScores(),average:0,variation:null,evidence:Object.fromEntries(AREA_IDS.map(id=>[id,[]])),skills:[]}),pending:p,hasPending:p>0,processingStatus:failed?'error':updating?'pending':'ready',inputRevision:sourceRevision,dictionaryVersion:states?.dictionaryVersion??null};
   }
   async queue(adminId:string){
     await this.requireRole(adminId,'administrativo');
@@ -144,20 +203,30 @@ export class RadarIntegrationService {
     if(!['approved','rejected','revoked'].includes(action))throw new BadRequestException('Decisión inválida');
     if(kind==='cv'){
       const rows=await this.prisma.$queryRaw<{user_id:string;review_status:string}[]>`UPDATE radar_cv_evidence SET review_status=${action},reviewer_id=${adminId}::uuid,decided_at=now() WHERE cv_id=${id}::uuid AND review_status<>${action} RETURNING user_id,review_status`;
-      if(!rows.length)throw new BadRequestException('CV inexistente o decisión repetida');
+      if(!rows.length){
+        const existing=await this.prisma.$queryRaw<{user_id:string}[]>`SELECT user_id FROM radar_cv_evidence WHERE cv_id=${id}::uuid`;
+        if(!existing.length)throw new NotFoundException('CV inexistente');
+        return this.recalculateAfterDecision(existing[0].user_id,adminId);
+      }
       await this.audit(rows[0].user_id,adminId,`cv.${action}`,id);
-      if(action==='rejected'||action==='revoked')await this.nlp.refreshAfterChange(rows[0].user_id);
-      return this.recalculate(rows[0].user_id,adminId);
+      await this.nlp.refreshAfterChange(rows[0].user_id);
+      return this.recalculateAfterDecision(rows[0].user_id,adminId);
     }
     if(kind==='skill'){
       const old=await this.prisma.userSkill.findUnique({where:{id},select:{userId:true,verificationStatus:true}});
       if(!old)throw new NotFoundException('Habilidad no encontrada');
-      if(old.verificationStatus===action)throw new BadRequestException('Sin cambios');
-      await this.prisma.userSkill.update({where:{id},data:{verificationStatus:action}});
-      await this.audit(old.userId,adminId,`skill.${action}`,id);
-      return this.recalculate(old.userId,adminId);
+      const changed=await this.prisma.userSkill.updateMany({where:{id,verificationStatus:{not:action}},data:{verificationStatus:action}});
+      if(changed.count)await this.audit(old.userId,adminId,`skill.${action}`,id);
+      return this.recalculateAfterDecision(old.userId,adminId);
     }
     throw new BadRequestException('Tipo de evidencia desconocido');
+  }
+  private async recalculateAfterDecision(userId:string,actorId:string){
+    try{await this.recalculate(userId,actorId);}catch{
+      // The decision is already saved. Report the recoverable processing state
+      // instead of telling the reviewer that their decision was not saved.
+    }
+    return this.myRadar(userId);
   }
   async downloadForAdmin(adminId:string,cvId:string){
     await this.requireRole(adminId,'administrativo');

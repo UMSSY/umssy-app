@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { apiClient } from '@/shared/services/api-client';
 import type { ApiResponse } from '@/shared/types/api-response.types';
+import { certificationsService } from '@/modules/certifications/services/certifications.service';
 import type { AreaId } from '../types/area-detail.types';
 import { RADAR_AXIS_NAMES, type RadarBridgeView } from './types';
 import { RadarAreaDetailsDialog, type AreaEvidenceDetails } from './radar-area-details-dialog';
@@ -55,6 +56,21 @@ export function RadarEvidencePanel({radar,selected,onClose}:Props){
   const ranking=[...radar.areas].sort((a,b)=>b.score-a.score||a.id.localeCompare(b.id));
   const position=ranking.findIndex(a=>a.id===selected)+1;
   const label=RADAR_AXIS_NAMES.find(a=>a.id===selected)?.name??selected;
-  async function openPdf(id:string){try{const response=await apiClient.get<Blob>(`/profile/me/cvs/${id}/file`,{responseType:'blob'});const url=URL.createObjectURL(response.data);window.open(url,'_blank','noopener,noreferrer');setTimeout(()=>URL.revokeObjectURL(url),60000);}catch{setError('No se pudo abrir el CV relacionado.');}}
-  return <RadarAreaDetailsDialog areaName={label} position={position} score={score} globalAverage={radar.average} evidence={evidence} loading={loading} error={error} onRetry={()=>setRevision(n=>n+1)} onClose={onClose} subtitle="Información aprobada asociada a la puntuación publicada" footer={cvRefs.map(id=><Button key={id} variant="outline" size="sm" onClick={()=>void openPdf(id)}>Abrir CV relacionado</Button>)}/>;
+  async function openDocument(id:string,kind:'cv'|'certification'){
+    // Open synchronously so browsers do not block a window after the HTTP request.
+    const target=window.open('about:blank','_blank');
+    if(target)target.opener=null;
+    try{
+      const blob=kind==='cv'
+        ?(await apiClient.get<Blob>(`/profile/me/cvs/${id}/file`,{responseType:'blob'})).data
+        :await certificationsService.getDocument(id);
+      if(!blob)throw new Error('Documento no disponible');
+      const url=URL.createObjectURL(blob);
+      if(target)target.location.href=url;
+      else {const link=document.createElement('a');link.href=url;link.download=kind==='cv'?'curriculum.pdf':'respaldo';link.click();}
+      setTimeout(()=>URL.revokeObjectURL(url),60000);
+    }catch{target?.close();setError('No se pudo abrir el documento relacionado.');}
+  }
+  const attachments=documents.certifications.filter(c=>c.hasDocument&&refs.has(`certification:${c.id}`));
+  return <RadarAreaDetailsDialog areaName={label} position={position} score={score} globalAverage={radar.average} evidence={evidence} loading={loading} error={error} onRetry={()=>setRevision(n=>n+1)} onClose={onClose} subtitle="Información aprobada asociada a la puntuación publicada" footer={<div className="flex flex-col gap-2">{cvRefs.map(id=><Button key={id} variant="outline" size="sm" onClick={()=>void openDocument(id,'cv')}>Abrir CV relacionado</Button>)}{attachments.map(c=><Button key={c.id} variant="outline" size="sm" onClick={()=>void openDocument(c.id,'certification')}>Abrir respaldo de {c.name}</Button>)}</div>}/>;
 }
