@@ -282,6 +282,41 @@ export type Message = Prisma.MessageModel
  */
 export type UserPresence = Prisma.UserPresenceModel
 /**
+ * Model SurveyStatus
+ * 
+ */
+export type SurveyStatus = Prisma.SurveyStatusModel
+/**
+ * Model SurveyQuestionType
+ * 
+ */
+export type SurveyQuestionType = Prisma.SurveyQuestionTypeModel
+/**
+ * Model Survey
+ * 
+ */
+export type Survey = Prisma.SurveyModel
+/**
+ * Model SurveyQuestion
+ * 
+ */
+export type SurveyQuestion = Prisma.SurveyQuestionModel
+/**
+ * Model SurveyQuestionOption
+ * 
+ */
+export type SurveyQuestionOption = Prisma.SurveyQuestionOptionModel
+/**
+ * Model SurveyResponse
+ * 
+ */
+export type SurveyResponse = Prisma.SurveyResponseModel
+/**
+ * Model SurveyAnswer
+ * 
+ */
+export type SurveyAnswer = Prisma.SurveyAnswerModel
+/**
  * Model AuditAction
  * 
  */

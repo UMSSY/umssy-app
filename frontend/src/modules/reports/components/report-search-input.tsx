@@ -5,7 +5,7 @@ import type { ReportSearchInputProps } from "../types/report-search-input-props.
 
 export function ReportSearchInput({ value, onChange, label }: ReportSearchInputProps) {
   return (
-    <div className="relative w-full sm:w-96">
+    <div className="relative w-full min-w-0 sm:max-w-96 sm:min-w-56 sm:flex-1">
       <Search
         className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-text-secondary"
         aria-hidden="true"
