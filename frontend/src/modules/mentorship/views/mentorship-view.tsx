@@ -142,10 +142,11 @@ export function MentorshipView() {
         refreshRoles(),
         queryClient.invalidateQueries({ queryKey: ["mentors", "participation"] }),
         queryClient.invalidateQueries({ queryKey: ["mentor-participation-requests"] }),
+        queryClient.invalidateQueries({ queryKey: ["mentorship", "directory"] }),
       ]);
       clearMentorshipWizardDraft();
       setIsActivated(true);
-      router.push("/mentors/participation");
+      router.push("/mentors/participation?activated=1");
     } catch (error) {
       if (participationErrorCode(error) === "NO_SLOTS") {
         setUnavailableOpen(true);

@@ -36,9 +36,7 @@ export class MentorExitRepository {
         UPDATE mentor_participation_requests SET status = 'ENDED'
         WHERE user_id = ${userId}::uuid AND status = 'ACTIVE'`;
       await tx.user.update({ where: { id: userId }, data: { isAvailableForMentoring: false } });
-      // Un regreso selecciona de nuevo sus preferencias; no reutiliza el alta anterior.
-      await tx.mentorTechnicalArea.deleteMany({ where: { mentorId: userId } });
-      await tx.mentorOrientationType.deleteMany({ where: { mentorId: userId } });
+      // Las preferencias pertenecen al usuario y se reutilizan al regresar.
       await reconcileMentorOffers(tx);
       return { id: userId, status: 'ENDED' as const, alreadyEnded: false };
     });

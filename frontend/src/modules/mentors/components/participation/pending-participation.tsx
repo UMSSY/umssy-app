@@ -23,6 +23,7 @@ import {
 type PendingParticipationProps = {
   request: MentorParticipationRequest;
   onCancelled?: () => void;
+  showHeading?: boolean;
 };
 
 function getErrorMessage(error: unknown): string {
@@ -89,6 +90,7 @@ function formatDate(value?: string): string {
 export function PendingParticipation({
   request,
   onCancelled,
+  showHeading = true,
 }: PendingParticipationProps) {
   const queryClient = useQueryClient();
 
@@ -192,10 +194,10 @@ export function PendingParticipation({
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6">
-      <PageHeading
+      {showHeading && <PageHeading
         title="Mi participación como mentor"
         description="Consulta y administra tu solicitud de participación en la red de mentorías."
-      />
+      />}
 
       {successMessage && (
         <div

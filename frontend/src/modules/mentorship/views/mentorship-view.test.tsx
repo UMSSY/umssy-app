@@ -150,7 +150,7 @@ describe("MentorshipView", () => {
     const confirmation = await openActivationDialog();
     fireEvent.click(within(confirmation).getByRole("button", { name: "Aceptar" }));
     await waitFor(() => expect(integrationMocks.activateMentor).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(integrationMocks.push).toHaveBeenCalledWith("/mentors/participation"));
+    await waitFor(() => expect(integrationMocks.push).toHaveBeenCalledWith("/mentors/participation?activated=1"));
   });
   it("renderiza inicialmente el paso 1 con participación desmarcada", () => {
     renderWithQuery(<MentorshipView />);

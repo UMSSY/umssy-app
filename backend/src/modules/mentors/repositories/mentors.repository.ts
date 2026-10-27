@@ -265,6 +265,24 @@ export class MentorsRepository {
     });
   }
 
+  async findMyParticipation(userId: string) {
+    const [roles, areas, orientations] = await Promise.all([
+      this.prisma.userRole.findMany({
+        where: { userId, role: { name: MENTOR_ROLE_NAME } },
+        select: { deletedAt: true, startAt: true },
+      }),
+      this.findMentorTechnicalAreas(userId),
+      this.findMentorOrientationTypes(userId),
+    ]);
+    const now = new Date();
+    const isActive = roles.some((role) => role.deletedAt === null && role.startAt <= now);
+    return {
+      status: isActive ? 'ACTIVE' as const : roles.length > 0 ? 'DEACTIVATED' as const : 'NEVER' as const,
+      areas: areas.map(({ technicalArea }) => technicalArea),
+      orientations: orientations.map(({ orientationType }) => orientationType),
+    };
+  }
+
   findMentorTechnicalAreas(userId: string) {
     return this.prisma.mentorTechnicalArea.findMany({
       where: {
@@ -456,6 +474,10 @@ export class MentorsRepository {
           deletedAt: null,
         },
       });
+
+      // El wizard puede cambiar la selección conservada durante la salida.
+      await transaction.mentorTechnicalArea.deleteMany({ where: { mentorId: userId } });
+      await transaction.mentorOrientationType.deleteMany({ where: { mentorId: userId } });
 
       await transaction.mentorTechnicalArea.createMany({
         data: technicalAreaIds.map((technicalAreaId) => ({

@@ -169,6 +169,10 @@ export class MentorsService {
     return this.mentorMapper.toTechnicalAreasResponse(relations);
   }
 
+  findMyParticipation(userId: string) {
+    return this.mentorsRepository.findMyParticipation(userId);
+  }
+
   async updateMyTechnicalAreas(
     userId: string,
     data: UpdateMentorTechnicalAreasDto,

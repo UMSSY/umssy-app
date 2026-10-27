@@ -10,9 +10,10 @@ import { useOfferCountdown } from "../../hooks/use-offer-countdown";
 import { mentorParticipationService, type MentorParticipationRequest } from "../../services/mentor-participation.service";
 import { participationErrorMessage } from "../../utils/participation-error";
 
-export function SlotOfferParticipation({ request, onConfirmed }: {
+export function SlotOfferParticipation({ request, onConfirmed, showHeading = true }: {
   request: MentorParticipationRequest;
   onConfirmed: () => void;
+  showHeading?: boolean;
 }) {
   const offer = request.offer!;
   const countdown = useOfferCountdown(offer.expiresAt);
@@ -54,7 +55,7 @@ export function SlotOfferParticipation({ request, onConfirmed }: {
   }
 
   return <main className="mx-auto max-w-7xl space-y-6">
-    <PageHeading title="Mi participación como mentor" />
+    {showHeading && <PageHeading title="Mi participación como mentor" />}
     <section className="space-y-4 rounded-lg border border-border bg-surface p-6">
       <h2 className="text-xl font-semibold text-ink">{countdown.expired ? "Plazo vencido" : "Cupo ofrecido"}</h2>
       <p>Fecha y hora límite: {deadline} BOT (UTC-4)</p>
