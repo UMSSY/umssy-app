@@ -72,6 +72,7 @@ See [.env.example](.env.example) for SMTP credentials, sender and optional logo 
 - Production (Brevo): `MAIL_TRANSPORT=smtp`, a verified sender and an SMTP key
   (not an API key). For port 587, use `SMTP_SECURE=false` and `SMTP_REQUIRE_TLS=true`.
 - Fonts, colors and branding: `src/modules/mail/mjml/layout.mjml` and `header.mjml`.
+- Full guide (workflow, templates, local testing, Gmail): [docs/email.md](docs/email.md).
 
 ## Database Migrations
 
