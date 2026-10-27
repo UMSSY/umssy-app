@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, House, Inbox, MessageCircle, Radar, UserRound, Users } from "lucide-react";
+import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, ClipboardList, House, Inbox, MessageCircle, Radar, UserRound, Users } from "lucide-react";
 import type { WorkspaceSectionProps } from "@/shared/types/workspace-section-props.types";
 
 export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
@@ -44,6 +44,14 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Historial de reportes", href: "/backoffice/reports/history" },
     ],
   },
+  // Va antes de "requests", que abarca todo /backoffice.
+  {
+    id: "surveys", label: "Encuestas", icon: ClipboardList, patterns: [/^\/backoffice\/surveys(?:\/|$)/],
+    items: [
+      { label: "Encuestas", href: "/backoffice/surveys" },
+      { label: "Crear encuesta", href: "/backoffice/surveys/create" },
+    ],
+  },
   { id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [] },
   { id: "radar-review", label: "Revisión de radares", icon: Radar, patterns: [/^\/affinity-radar\/review-queue\/?$/], items: [] },
   {
@@ -58,5 +66,5 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     ],
   },
   { id: "chat", label: "Chat", icon: MessageCircle, patterns: [/^\/chat(?:\/|$)/], items: [] },
-  { id: "home", label: "Inicio", icon: House, patterns: [/^\/dashboard\/?$/], items: [] },
+  { id: "home", label: "Inicio", icon: House, patterns: [/^\/dashboard\/?$/, /^\/surveys(?:\/|$)/], items: [] },
 ];

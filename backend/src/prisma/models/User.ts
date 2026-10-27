@@ -284,6 +284,8 @@ export type UserWhereInput = {
   exportHistories?: Prisma.AdminExportHistoryListRelationFilter
   openedAccessRequests?: Prisma.AccessRequestListRelationFilter
   reviewedAccessRequests?: Prisma.AccessRequestListRelationFilter
+  createdSurveys?: Prisma.SurveyListRelationFilter
+  surveyResponses?: Prisma.SurveyResponseListRelationFilter
   conversationsAsUserA?: Prisma.ConversationListRelationFilter
   conversationsAsUserB?: Prisma.ConversationListRelationFilter
   chatMessages?: Prisma.MessageListRelationFilter
@@ -332,6 +334,8 @@ export type UserOrderByWithRelationInput = {
   exportHistories?: Prisma.AdminExportHistoryOrderByRelationAggregateInput
   openedAccessRequests?: Prisma.AccessRequestOrderByRelationAggregateInput
   reviewedAccessRequests?: Prisma.AccessRequestOrderByRelationAggregateInput
+  createdSurveys?: Prisma.SurveyOrderByRelationAggregateInput
+  surveyResponses?: Prisma.SurveyResponseOrderByRelationAggregateInput
   conversationsAsUserA?: Prisma.ConversationOrderByRelationAggregateInput
   conversationsAsUserB?: Prisma.ConversationOrderByRelationAggregateInput
   chatMessages?: Prisma.MessageOrderByRelationAggregateInput
@@ -383,6 +387,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   exportHistories?: Prisma.AdminExportHistoryListRelationFilter
   openedAccessRequests?: Prisma.AccessRequestListRelationFilter
   reviewedAccessRequests?: Prisma.AccessRequestListRelationFilter
+  createdSurveys?: Prisma.SurveyListRelationFilter
+  surveyResponses?: Prisma.SurveyResponseListRelationFilter
   conversationsAsUserA?: Prisma.ConversationListRelationFilter
   conversationsAsUserB?: Prisma.ConversationListRelationFilter
   chatMessages?: Prisma.MessageListRelationFilter
@@ -472,6 +478,8 @@ export type UserCreateInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -519,6 +527,8 @@ export type UserUncheckedCreateInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -566,6 +576,8 @@ export type UserUpdateInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -613,6 +625,8 @@ export type UserUncheckedUpdateInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -1190,6 +1204,34 @@ export type UserUpdateOneRequiredWithoutJobApplicationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutJobApplicationsInput, Prisma.UserUpdateWithoutJobApplicationsInput>, Prisma.UserUncheckedUpdateWithoutJobApplicationsInput>
 }
 
+export type UserCreateNestedOneWithoutCreatedSurveysInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedSurveysInput, Prisma.UserUncheckedCreateWithoutCreatedSurveysInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedSurveysInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCreatedSurveysNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedSurveysInput, Prisma.UserUncheckedCreateWithoutCreatedSurveysInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedSurveysInput
+  upsert?: Prisma.UserUpsertWithoutCreatedSurveysInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCreatedSurveysInput, Prisma.UserUpdateWithoutCreatedSurveysInput>, Prisma.UserUncheckedUpdateWithoutCreatedSurveysInput>
+}
+
+export type UserCreateNestedOneWithoutSurveyResponsesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSurveyResponsesInput, Prisma.UserUncheckedCreateWithoutSurveyResponsesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSurveyResponsesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSurveyResponsesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSurveyResponsesInput, Prisma.UserUncheckedCreateWithoutSurveyResponsesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSurveyResponsesInput
+  upsert?: Prisma.UserUpsertWithoutSurveyResponsesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSurveyResponsesInput, Prisma.UserUpdateWithoutSurveyResponsesInput>, Prisma.UserUncheckedUpdateWithoutSurveyResponsesInput>
+}
+
 export type UserCreateNestedOneWithoutAuditEventsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutAuditEventsInput, Prisma.UserUncheckedCreateWithoutAuditEventsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutAuditEventsInput
@@ -1258,6 +1300,8 @@ export type UserCreateWithoutCityInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -1304,6 +1348,8 @@ export type UserUncheckedCreateWithoutCityInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -1397,6 +1443,8 @@ export type UserCreateWithoutRolesInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -1443,6 +1491,8 @@ export type UserUncheckedCreateWithoutRolesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -1505,6 +1555,8 @@ export type UserUpdateWithoutRolesInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -1551,6 +1603,8 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -1597,6 +1651,8 @@ export type UserCreateWithoutEducationsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -1643,6 +1699,8 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -1705,6 +1763,8 @@ export type UserUpdateWithoutEducationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -1751,6 +1811,8 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -1797,6 +1859,8 @@ export type UserCreateWithoutWorkExperiencesInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -1843,6 +1907,8 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -1905,6 +1971,8 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -1951,6 +2019,8 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -1997,6 +2067,8 @@ export type UserCreateWithoutUserSkillsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2043,6 +2115,8 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2105,6 +2179,8 @@ export type UserUpdateWithoutUserSkillsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2151,6 +2227,8 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2197,6 +2275,8 @@ export type UserCreateWithoutCertificationsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2243,6 +2323,8 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2305,6 +2387,8 @@ export type UserUpdateWithoutCertificationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2351,6 +2435,8 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2397,6 +2483,8 @@ export type UserCreateWithoutCvFileInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2443,6 +2531,8 @@ export type UserUncheckedCreateWithoutCvFileInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2505,6 +2595,8 @@ export type UserUpdateWithoutCvFileInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2551,6 +2643,8 @@ export type UserUncheckedUpdateWithoutCvFileInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2597,6 +2691,8 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2643,6 +2739,8 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2705,6 +2803,8 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2751,6 +2851,8 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2797,6 +2899,8 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -2843,6 +2947,8 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -2905,6 +3011,8 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -2951,6 +3059,8 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -2997,6 +3107,8 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3043,6 +3155,8 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3105,6 +3219,8 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3151,6 +3267,8 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3197,6 +3315,8 @@ export type UserCreateWithoutBlockedDatesInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3243,6 +3363,8 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3305,6 +3427,8 @@ export type UserUpdateWithoutBlockedDatesInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3351,6 +3475,8 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3397,6 +3523,8 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3443,6 +3571,8 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3494,6 +3624,8 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3540,6 +3672,8 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3591,6 +3725,8 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -3637,6 +3773,8 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -3699,6 +3837,8 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3745,6 +3885,8 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3802,6 +3944,8 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3848,6 +3992,8 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3905,6 +4051,8 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -3951,6 +4099,8 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -3997,6 +4147,8 @@ export type UserCreateWithoutAppointmentChangesInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4043,6 +4195,8 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4105,6 +4259,8 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4151,6 +4307,8 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4197,6 +4355,8 @@ export type UserCreateWithoutCreatedEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4243,6 +4403,8 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4294,6 +4456,8 @@ export type UserCreateWithoutModeratedEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4340,6 +4504,8 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4402,6 +4568,8 @@ export type UserUpdateWithoutCreatedEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4448,6 +4616,8 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4505,6 +4675,8 @@ export type UserUpdateWithoutModeratedEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4551,6 +4723,8 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4597,6 +4771,8 @@ export type UserCreateWithoutEventRegistrationsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4643,6 +4819,8 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4705,6 +4883,8 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4751,6 +4931,8 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4797,6 +4979,8 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -4843,6 +5027,8 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -4905,6 +5091,8 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -4951,6 +5139,8 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -4997,6 +5187,8 @@ export type UserCreateWithoutExportHistoriesInput = {
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5043,6 +5235,8 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5105,6 +5299,8 @@ export type UserUpdateWithoutExportHistoriesInput = {
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5151,6 +5347,8 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5197,6 +5395,8 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5243,6 +5443,8 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5294,6 +5496,8 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -5340,6 +5544,8 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -5402,6 +5608,8 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5448,6 +5656,8 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5505,6 +5715,8 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -5551,6 +5763,8 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -5598,6 +5812,8 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
@@ -5644,6 +5860,8 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
@@ -5695,6 +5913,8 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
@@ -5741,6 +5961,8 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
@@ -5803,6 +6025,8 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
@@ -5849,6 +6073,8 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
@@ -5906,6 +6132,8 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
@@ -5952,6 +6180,8 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
@@ -5998,6 +6228,8 @@ export type UserCreateWithoutChatParticipantsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -6044,6 +6276,8 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -6106,6 +6340,8 @@ export type UserUpdateWithoutChatParticipantsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -6152,6 +6388,8 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -6198,6 +6436,8 @@ export type UserCreateWithoutChatMessagesInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
@@ -6244,6 +6484,8 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
@@ -6306,6 +6548,8 @@ export type UserUpdateWithoutChatMessagesInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
@@ -6352,6 +6596,8 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
@@ -6398,6 +6644,8 @@ export type UserCreateWithoutPresenceInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -6444,6 +6692,8 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -6506,6 +6756,8 @@ export type UserUpdateWithoutPresenceInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -6552,6 +6804,8 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -6598,6 +6852,8 @@ export type UserCreateWithoutJobApplicationsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -6644,6 +6900,8 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -6706,6 +6964,8 @@ export type UserUpdateWithoutJobApplicationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -6752,6 +7012,8 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -6759,6 +7021,422 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+}
+
+export type UserCreateWithoutCreatedSurveysInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCreatedSurveysInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCreatedSurveysInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedSurveysInput, Prisma.UserUncheckedCreateWithoutCreatedSurveysInput>
+}
+
+export type UserUpsertWithoutCreatedSurveysInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCreatedSurveysInput, Prisma.UserUncheckedUpdateWithoutCreatedSurveysInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedSurveysInput, Prisma.UserUncheckedCreateWithoutCreatedSurveysInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCreatedSurveysInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCreatedSurveysInput, Prisma.UserUncheckedUpdateWithoutCreatedSurveysInput>
+}
+
+export type UserUpdateWithoutCreatedSurveysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSurveyResponsesInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSurveyResponsesInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSurveyResponsesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSurveyResponsesInput, Prisma.UserUncheckedCreateWithoutSurveyResponsesInput>
+}
+
+export type UserUpsertWithoutSurveyResponsesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSurveyResponsesInput, Prisma.UserUncheckedUpdateWithoutSurveyResponsesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSurveyResponsesInput, Prisma.UserUncheckedCreateWithoutSurveyResponsesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSurveyResponsesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSurveyResponsesInput, Prisma.UserUncheckedUpdateWithoutSurveyResponsesInput>
+}
+
+export type UserUpdateWithoutSurveyResponsesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAuditEventsInput = {
@@ -6798,6 +7476,8 @@ export type UserCreateWithoutAuditEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -6844,6 +7524,8 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -6906,6 +7588,8 @@ export type UserUpdateWithoutAuditEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -6952,6 +7636,8 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -6998,6 +7684,8 @@ export type UserCreateWithoutRevertedValidationsInput = {
   exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
@@ -7044,6 +7732,8 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
   conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
@@ -7106,6 +7796,8 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -7152,6 +7844,8 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -7214,6 +7908,8 @@ export type UserUpdateWithoutCityInput = {
   exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
@@ -7260,6 +7956,8 @@ export type UserUncheckedUpdateWithoutCityInput = {
   exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
   openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
   reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
   conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
@@ -7313,6 +8011,8 @@ export type UserCountOutputType = {
   exportHistories: number
   openedAccessRequests: number
   reviewedAccessRequests: number
+  createdSurveys: number
+  surveyResponses: number
   conversationsAsUserA: number
   conversationsAsUserB: number
   chatMessages: number
@@ -7343,6 +8043,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   exportHistories?: boolean | UserCountOutputTypeCountExportHistoriesArgs
   openedAccessRequests?: boolean | UserCountOutputTypeCountOpenedAccessRequestsArgs
   reviewedAccessRequests?: boolean | UserCountOutputTypeCountReviewedAccessRequestsArgs
+  createdSurveys?: boolean | UserCountOutputTypeCountCreatedSurveysArgs
+  surveyResponses?: boolean | UserCountOutputTypeCountSurveyResponsesArgs
   conversationsAsUserA?: boolean | UserCountOutputTypeCountConversationsAsUserAArgs
   conversationsAsUserB?: boolean | UserCountOutputTypeCountConversationsAsUserBArgs
   chatMessages?: boolean | UserCountOutputTypeCountChatMessagesArgs
@@ -7505,6 +8207,20 @@ export type UserCountOutputTypeCountReviewedAccessRequestsArgs<ExtArgs extends r
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountCreatedSurveysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SurveyWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSurveyResponsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SurveyResponseWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountConversationsAsUserAArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ConversationWhereInput
 }
@@ -7590,6 +8306,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   exportHistories?: boolean | Prisma.User$exportHistoriesArgs<ExtArgs>
   openedAccessRequests?: boolean | Prisma.User$openedAccessRequestsArgs<ExtArgs>
   reviewedAccessRequests?: boolean | Prisma.User$reviewedAccessRequestsArgs<ExtArgs>
+  createdSurveys?: boolean | Prisma.User$createdSurveysArgs<ExtArgs>
+  surveyResponses?: boolean | Prisma.User$surveyResponsesArgs<ExtArgs>
   conversationsAsUserA?: boolean | Prisma.User$conversationsAsUserAArgs<ExtArgs>
   conversationsAsUserB?: boolean | Prisma.User$conversationsAsUserBArgs<ExtArgs>
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
@@ -7681,6 +8399,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   exportHistories?: boolean | Prisma.User$exportHistoriesArgs<ExtArgs>
   openedAccessRequests?: boolean | Prisma.User$openedAccessRequestsArgs<ExtArgs>
   reviewedAccessRequests?: boolean | Prisma.User$reviewedAccessRequestsArgs<ExtArgs>
+  createdSurveys?: boolean | Prisma.User$createdSurveysArgs<ExtArgs>
+  surveyResponses?: boolean | Prisma.User$surveyResponsesArgs<ExtArgs>
   conversationsAsUserA?: boolean | Prisma.User$conversationsAsUserAArgs<ExtArgs>
   conversationsAsUserB?: boolean | Prisma.User$conversationsAsUserBArgs<ExtArgs>
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
@@ -7723,6 +8443,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     exportHistories: Prisma.$AdminExportHistoryPayload<ExtArgs>[]
     openedAccessRequests: Prisma.$AccessRequestPayload<ExtArgs>[]
     reviewedAccessRequests: Prisma.$AccessRequestPayload<ExtArgs>[]
+    createdSurveys: Prisma.$SurveyPayload<ExtArgs>[]
+    surveyResponses: Prisma.$SurveyResponsePayload<ExtArgs>[]
     conversationsAsUserA: Prisma.$ConversationPayload<ExtArgs>[]
     conversationsAsUserB: Prisma.$ConversationPayload<ExtArgs>[]
     chatMessages: Prisma.$MessagePayload<ExtArgs>[]
@@ -8164,6 +8886,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   exportHistories<T extends Prisma.User$exportHistoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$exportHistoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminExportHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   openedAccessRequests<T extends Prisma.User$openedAccessRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$openedAccessRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviewedAccessRequests<T extends Prisma.User$reviewedAccessRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewedAccessRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccessRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdSurveys<T extends Prisma.User$createdSurveysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdSurveysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SurveyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  surveyResponses<T extends Prisma.User$surveyResponsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$surveyResponsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SurveyResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversationsAsUserA<T extends Prisma.User$conversationsAsUserAArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationsAsUserAArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversationsAsUserB<T extends Prisma.User$conversationsAsUserBArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationsAsUserBArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   chatMessages<T extends Prisma.User$chatMessagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -9132,6 +9856,54 @@ export type User$reviewedAccessRequestsArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.AccessRequestScalarFieldEnum | Prisma.AccessRequestScalarFieldEnum[]
+}
+
+/**
+ * User.createdSurveys
+ */
+export type User$createdSurveysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Survey
+   */
+  select?: Prisma.SurveySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Survey
+   */
+  omit?: Prisma.SurveyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SurveyInclude<ExtArgs> | null
+  where?: Prisma.SurveyWhereInput
+  orderBy?: Prisma.SurveyOrderByWithRelationInput | Prisma.SurveyOrderByWithRelationInput[]
+  cursor?: Prisma.SurveyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SurveyScalarFieldEnum | Prisma.SurveyScalarFieldEnum[]
+}
+
+/**
+ * User.surveyResponses
+ */
+export type User$surveyResponsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SurveyResponse
+   */
+  select?: Prisma.SurveyResponseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SurveyResponse
+   */
+  omit?: Prisma.SurveyResponseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SurveyResponseInclude<ExtArgs> | null
+  where?: Prisma.SurveyResponseWhereInput
+  orderBy?: Prisma.SurveyResponseOrderByWithRelationInput | Prisma.SurveyResponseOrderByWithRelationInput[]
+  cursor?: Prisma.SurveyResponseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SurveyResponseScalarFieldEnum | Prisma.SurveyResponseScalarFieldEnum[]
 }
 
 /**

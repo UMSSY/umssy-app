@@ -1,7 +1,11 @@
 import { z } from 'zod';
 import { paginationSchema } from '../../../common/utils/pagination.js';
 import { REPORT_TYPES } from '../types/generated-report.types.js';
-import { ALL_FILTER_VALUE, searchSchema } from './report-users.schema.js';
+import {
+  ALL_FILTER_VALUE,
+  searchSchema,
+  snapshotAtSchema,
+} from './report-users.schema.js';
 
 const reportTypeSchema = z
   .union([z.literal(ALL_FILTER_VALUE), z.enum(REPORT_TYPES)])
@@ -11,6 +15,7 @@ const reportTypeSchema = z
 export const reportHistoryQuerySchema = paginationSchema.extend({
   reportType: reportTypeSchema,
   search: searchSchema,
+  snapshotAt: snapshotAtSchema,
 });
 
 export type ReportHistoryQuery = z.infer<typeof reportHistoryQuerySchema>;
