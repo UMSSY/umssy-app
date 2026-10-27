@@ -1,25 +1,21 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { JOB_OFFER_FIXTURE } from "../testing/job-offer-fixture";
 import { VacanciesView } from "./vacancies-view";
 
+vi.mock("@/shared/services/api-client", () => ({ apiClient: { get: vi.fn(async () => ({ data: { data: [JOB_OFFER_FIXTURE] } })) } }));
+vi.mock("@/modules/radar-chart/sprint2-integration/radar-integration-api", () => ({ radarIntegrationApi: { applications: vi.fn().mockResolvedValue([]) } }));
 afterEach(cleanup);
 
-describe("VacanciesView", () => {
-  it("permite recuperar los resultados desde una búsqueda sin coincidencias", () => {
+describe("VacanciesView from the API", () => {
+  it("recovers the list when a search is cleared", async () => {
     render(<VacanciesView />);
-    const initialLinks = screen.getAllByRole("link", { name: /^Ver detalles de / });
-    const searchInput = screen.getByRole("searchbox", { name: /Buscar vacantes/ });
-
-    fireEvent.change(searchInput, { target: { value: "vacante-sin-coincidencias" } });
-
-    expect(screen.getByRole("heading", { name: "No se encontraron vacantes" })).toBeVisible();
-    expect(screen.getByRole("status")).toHaveTextContent("0 vacantes encontradas");
-    expect(screen.queryByRole("link", { name: /^Ver detalles de / })).toBeNull();
-
-    fireEvent.click(screen.getByRole("button", { name: "Limpiar búsqueda" }));
-
-    expect(searchInput).toHaveValue("");
-    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })).toHaveLength(initialLinks.length);
-    expect(screen.queryByRole("button", { name: "Limpiar búsqueda" })).toBeNull();
+    await screen.findByRole("heading", { name: JOB_OFFER_FIXTURE.title });
+    const search = screen.getByRole("searchbox", { name: "Buscar cargo, empresa o tecnología" });
+    fireEvent.change(search, { target: { value: "no-match" } });
+    expect(screen.getByText("No hay vacantes publicadas que coincidan con tu búsqueda.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Detalles y postulación" })).not.toBeInTheDocument();
+    fireEvent.change(search, { target: { value: "" } });
+    expect(screen.getByRole("button", { name: "Detalles y postulación" })).toBeInTheDocument();
   });
 });

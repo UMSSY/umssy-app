@@ -1,3 +1,4 @@
+import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
 import { Logger } from '@nestjs/common';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
@@ -120,6 +121,7 @@ describe('ProfileSkillsAnalysisService', () => {
       detection,
       new SkillValidationService(),
       new ProfileSkillsRadarMapper(),
+      new ProfileSkillsEvents(),
     );
     logs = [];
     vi.spyOn(Logger.prototype, 'log').mockImplementation((message: unknown) => { logs.push(String(message)); });

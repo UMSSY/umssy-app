@@ -30,6 +30,7 @@ export interface Epic2RadarSource {
   skills: Epic2Skill[];
 }
 export interface RadarBridgeView {
+  processingStatus?: 'ready' | 'pending' | 'error';
   userId: string;
   status: Epic2RadarSource["status"];
   version: number;
@@ -42,5 +43,5 @@ export interface RadarBridgeView {
   keywordCount: number;
   highRelevanceCount: number;
   /** A stable rubric marker: provisional, NOT yet agreed with PO. */
-  rubric: "epic3-provisional-1";
+  rubric: string;
 }

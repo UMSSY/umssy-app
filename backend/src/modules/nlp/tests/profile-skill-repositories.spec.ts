@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { CertificationsRepository } from '../../certifications/repositories/certifications.repository.js';
+import type { RadarEvidenceSourcesRepository } from '../../radar-integration/radar-evidence-sources.repository.js';
 import type { ProfileRepository } from '../../profile/repositories/profile.repository.js';
 import type { WorkExperienceRepository } from '../../work-experience/repositories/work-experience.repository.js';
 import type { EducationsRepository } from '../../educations/repositories/educations.repository.js';
@@ -17,8 +19,8 @@ const now = new Date('2026-10-23T12:00:00.000Z');
 
 describe('ProfileSkillSourcesRepository', () => {
   const prisma = {
-    $queryRaw: vi.fn(),
-    certification: { findMany: vi.fn() },
+    findCurrentCvText: vi.fn(),
+    findManyByUserId: vi.fn(),
   };
   const profileRepository = { userExists: vi.fn() };
   const workExperienceRepository = { findTextSources: vi.fn() };
@@ -26,17 +28,18 @@ describe('ProfileSkillSourcesRepository', () => {
   const skillRepository = { findNlpCatalog: vi.fn() };
 
   const repository = new ProfileSkillSourcesRepository(
-    prisma as unknown as PrismaService,
     profileRepository as unknown as ProfileRepository,
     workExperienceRepository as unknown as WorkExperienceRepository,
     educationsRepository as unknown as EducationsRepository,
     skillRepository as unknown as SkillRepository,
+    prisma as unknown as CertificationsRepository,
+    prisma as unknown as RadarEvidenceSourcesRepository,
   );
 
   beforeEach(() => {
     vi.resetAllMocks();
-    prisma.$queryRaw.mockResolvedValue([]);
-    prisma.certification.findMany.mockResolvedValue([]);
+    prisma.findCurrentCvText.mockResolvedValue([]);
+    prisma.findManyByUserId.mockResolvedValue([]);
   });
 
   it('checks that the user exists', async () => {

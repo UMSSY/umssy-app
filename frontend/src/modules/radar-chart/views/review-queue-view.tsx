@@ -27,7 +27,7 @@ export function ReviewQueueView(){
     if(!item||busy)return;
     if(!window.confirm(`¿Confirmar ${action==='approved'?'aprobación':action==='rejected'?'rechazo':'revocación'} de ${item.title}?`))return;
     setBusy(true);
-    try{const [kind,id]=item.id.split(':');await radarIntegrationApi.decision(kind,id,action);await load();setSelected(null);}catch{setError('No se pudo guardar la decisión. Reintenta.');}finally{setBusy(false);}
+    try{const [kind,id]=item.id.split(':');const result=await radarIntegrationApi.decision(kind,id,action);await load();setSelected(null);setNotice(result.processingStatus==='error'?'La decisión se guardó, pero la publicación del radar falló. El titular puede reintentar la actualización desde su radar.':'');}catch{setError('No se pudo guardar la decisión. Reintenta.');}finally{setBusy(false);}
   }
   async function reprocess(){
     if(!item||item.type!=='cv'||busy)return;

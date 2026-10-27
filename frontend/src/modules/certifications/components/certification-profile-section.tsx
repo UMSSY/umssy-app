@@ -43,7 +43,6 @@ export function CertificationProfileSection() {
   });
   const certificationDocument = useCertificationDocument();
   const saveCertification = useSaveCertification({
-    applyDocumentChange: certificationDocument.applyDocumentChange,
     onPersisted: () => {
       void reload();
     },
@@ -70,14 +69,12 @@ export function CertificationProfileSection() {
 
   const openEditForm = (certification: Certification) => {
     clearFeedback();
-    saveCertification.reset();
     setIsCreating(false);
     setEditing(certification);
     startNewFormVersion();
   };
 
   const closeForm = () => {
-    saveCertification.reset();
     setEditing(null);
     setIsCreating(false);
     startNewFormVersion();
@@ -85,7 +82,6 @@ export function CertificationProfileSection() {
 
   const openCreateForm = () => {
     clearFeedback();
-    saveCertification.reset();
     setEditing(null);
     setIsCreating(true);
     startNewFormVersion();
@@ -132,7 +128,7 @@ export function CertificationProfileSection() {
     if (!certification?.hasDocument) {
       return undefined;
     }
-    return certificationDocument.uploadedInfo[certification.id]?.fileName ?? DEFAULT_DOCUMENT_TITLE;
+    return certification.document?.fileName ?? certificationDocument.uploadedInfo[certification.id]?.fileName ?? DEFAULT_DOCUMENT_TITLE;
   };
 
   const renderAddButton = (className: string) => (

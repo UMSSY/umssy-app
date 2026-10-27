@@ -34,7 +34,7 @@ const mockHook = vi.mocked(useLiveRadar);
 function setRadar(override: Partial<ReturnType<typeof useLiveRadar>> = {}) {
   mockHook.mockReturnValue({
     data: mapEpic2Radar(source), loading: false, error: null, variation: null,
-    refresh: vi.fn().mockResolvedValue(undefined), ...override,
+    refresh: vi.fn().mockResolvedValue(undefined), retry: vi.fn().mockResolvedValue(undefined), retrying: false, ...override,
   });
 }
 
@@ -53,9 +53,9 @@ describe("Radar personal integrado con Épica 2", () => {
   it("abre el detalle del eje seleccionado y permite cerrarlo", () => {
     render(<RadarProfileView />);
     fireEvent.click(screen.getByRole("button", { name: "Ver detalle de QA" }));
-    expect(screen.getByRole("region", { name: "Evidencias de QA" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle" }));
-    expect(screen.queryByRole("region", { name: "Evidencias de QA" })).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "QA" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle del área" }));
+    expect(screen.queryByRole("dialog", { name: "QA" })).not.toBeInTheDocument();
   });
 
   it("muestra error y reintento sin representar un fallo como cero competencias", () => {

@@ -28,7 +28,7 @@ export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownP
       <h2 id={titleId} className="font-heading text-lg font-semibold tracking-tight text-ink">
         Desglose por área
       </h2>
-      <p className="mt-1 text-xs text-text-secondary">Puntuaciones NLP tokenizadas</p>
+      <p className="mt-1 text-xs text-text-secondary">Puntuaciones de habilidades aprobadas</p>
 
       <ul className="mt-5 flex flex-col gap-4">
         {areas.map((area) => {

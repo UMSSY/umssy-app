@@ -20,9 +20,7 @@ export function MatchingView(){
   const [selectedId,setSelectedId]=useState<string>('');
   const [selectedArea,setSelectedArea]=useState<AxisId|null>(null);
   const [showProfile,setShowProfile]=useState(false);
-  const [detail,setDetail]=useState<AreaEvidenceDetails>(EMPTY_AREA_EVIDENCE);
-  const [detailLoading,setDetailLoading]=useState(false);
-  const [detailError,setDetailError]=useState('');
+  const [detail,setDetail]=useState<{applicationId:string;areaId:AxisId;evidence:AreaEvidenceDetails;error:string}|null>(null);
   const [detailRevision,setDetailRevision]=useState(0);
   const [busy,setBusy]=useState(false);
   const [loading,setLoading]=useState(true);
@@ -54,14 +52,13 @@ export function MatchingView(){
     if(!selectedArea||!applicationId)return;
     let active=true;
     void radarIntegrationApi.applicantAreaEvidence(applicationId,selectedArea)
-      .then(result=>{if(active)setDetail(result)})
-      .catch(()=>{if(active)setDetailError('No se pudieron cargar las evidencias autorizadas de esta área.')})
-      .finally(()=>{if(active)setDetailLoading(false)});
+      .then(result=>{if(active)setDetail({applicationId,areaId:selectedArea,evidence:result,error:''})})
+      .catch(()=>{if(active)setDetail({applicationId,areaId:selectedArea,evidence:EMPTY_AREA_EVIDENCE,error:'No se pudieron cargar las evidencias autorizadas de esta área.'})});
     return ()=>{active=false};
   },[applicationId,selectedArea,detailRevision]);
   const target=data?.vacancy.target;
   const graph=RADAR_AXES.map(a=>({axis:a.name,id:a.id,postulante:selected?.scores?.[a.id]??0,objetivo:target?.[a.id]??0}));
-  function openArea(area:AxisId){setDetail(EMPTY_AREA_EVIDENCE);setDetailLoading(true);setDetailError('');setSelectedArea(area);}
+  function openArea(area:AxisId){setDetail(null);setSelectedArea(area);}
   function chooseVacancy(v:RealVacancy){setLoading(true);setData(null);setVacancyId(v.id);setSelectedId('');setSelectedArea(null);setShowProfile(false);setVacancyOpen(false);setVacancySearch('');setSearch('');}
   async function decision(c:CandidateRow,action:'hired'|'rejected'){if(busy||!window.confirm(`${action==='hired'?'Contratar':'Rechazar'} a ${c.name}?`))return;setBusy(true);try{await radarIntegrationApi.decide(c.applicationId,action);await loadCandidates();}catch{setError('No se pudo registrar la decisión.');}finally{setBusy(false);}}
   async function viewCV(c:CandidateRow){try{const blob=await radarIntegrationApi.recruiterCv(c.applicationId);const u=URL.createObjectURL(blob);window.open(u,'_blank','noopener,noreferrer');setTimeout(()=>URL.revokeObjectURL(u),60000);}catch{setError('El archivo no existe o el postulante no autorizó su consulta.');}}
@@ -83,7 +80,7 @@ export function MatchingView(){
     <div className="grid min-h-[540px] gap-4 lg:grid-cols-[290px_minmax(0,1fr)]">
       <section className="rounded-lg border border-border bg-surface p-4">
         <h2 className="mb-3 font-semibold">Postulantes · {data?.vacancy.title??'Sin selección'}</h2>
-        <Input type="search" aria-label="Buscar postulante" placeholder="Buscar postulante" value={search} onChange={e=>setSearch(e.target.value)} />
+        <Input type="search" aria-label="Buscar postulante" placeholder="Buscar postulante" value={search} onChange={e=>{setSearch(e.target.value);setSelectedArea(null);setDetail(null);}} />
         <p className="my-3 text-xs text-text-secondary">{candidates.length} candidato(s) · ordenados por compatibilidad publicada</p>
         <div className="max-h-[65vh] space-y-2 overflow-y-auto">
           {candidates.map(c=><Button key={c.applicationId} variant="outline" onClick={()=>{setSelectedId(c.applicationId);setSelectedArea(null);setShowProfile(false)}} className={`h-auto w-full flex-col items-stretch gap-1 p-3 text-left whitespace-normal ${selected?.applicationId===c.applicationId?'border-accent bg-surface-soft':''}`}>
@@ -103,22 +100,22 @@ export function MatchingView(){
             <div className="mt-4 h-[340px] w-full"><ResponsiveContainer width="100%" height="100%"><RadarChart data={graph} outerRadius="65%" accessibilityLayer={false}>
               <PolarGrid stroke="#dce3e9" /><PolarAngleAxis dataKey="axis" tick={({x,y,index,textAnchor})=>{const a=RADAR_AXES[index];return a?<g role="button" tabIndex={0} onClick={()=>openArea(a.id)} onKeyDown={e=>{if(e.key==='Enter')openArea(a.id)}} className="cursor-pointer"><text x={x} y={y} textAnchor={textAnchor} fontSize="12" fill="#173648" fontWeight={selectedArea===a.id?800:400}>{a.name}</text></g>:<g/>}}/><PolarRadiusAxis domain={[0,10]} angle={90} tickCount={6}/>
               <Radar name="Vacante" dataKey="objetivo" stroke="#334155" fill="none" strokeDasharray="5 5" strokeWidth={2} isAnimationActive={false} dot={false}/>
-              <Radar name="Postulante" dataKey="postulante" stroke="#e11d48" fill="#e11d48" fillOpacity={0.13} strokeWidth={2} isAnimationActive={false}
+              <Radar name="Postulante" dataKey="postulante" stroke="var(--color-accent)" fill="var(--color-accent)" fillOpacity={0.13} strokeWidth={2} isAnimationActive={false}
                 dot={({cx,cy,index})=>{const axis=RADAR_AXES[index];return axis?<g key={axis.id} data-testid={`candidate-radar-dot-${axis.id}`} role="button" tabIndex={0}
                   aria-label={`Ver evidencias de ${axis.name}`} className="cursor-pointer outline-none"
                   onClick={()=>openArea(axis.id)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openArea(axis.id)}}}>
                     <circle cx={cx} cy={cy} r={16} fill="transparent" pointerEvents="all"/>
-                    <circle cx={cx} cy={cy} r={5} fill="#e11d48" stroke="#ffffff" strokeWidth={1.5} pointerEvents="none"/>
+                    <circle cx={cx} cy={cy} r={5} fill="var(--color-accent)" stroke="#ffffff" strokeWidth={1.5} pointerEvents="none"/>
                   </g>:<g/>}}/>
             </RadarChart></ResponsiveContainer></div>
-            <p className="text-center text-xs text-text-secondary">— Perfil objetivo (línea discontinua) · <span className="text-red-600">● Postulante</span>. Selecciona un eje o punto para ver evidencias.</p>
+            <p className="text-center text-xs text-text-secondary">— Perfil objetivo (línea discontinua) · <span className="text-accent">● Postulante</span>. Selecciona un eje o punto para ver evidencias.</p>
             {selectedArea&&<RadarAreaDetailsDialog
               areaName={RADAR_AXES.find(a=>a.id===selectedArea)?.name??selectedArea}
               position={[...RADAR_AXES].sort((a,b)=>(selected.scores?.[b.id]??0)-(selected.scores?.[a.id]??0)||a.name.localeCompare(b.name)).findIndex(a=>a.id===selectedArea)+1}
               score={selected.scores[selectedArea]}
               globalAverage={RADAR_AXES.reduce((sum,a)=>sum+(selected.scores?.[a.id]??0),0)/6}
-              evidence={detail} loading={detailLoading} error={detailError}
-              onRetry={()=>{setDetail(EMPTY_AREA_EVIDENCE);setDetailLoading(true);setDetailError('');setDetailRevision(n=>n+1);}} onClose={()=>setSelectedArea(null)}
+              evidence={detail?.applicationId===applicationId&&detail.areaId===selectedArea?detail.evidence:EMPTY_AREA_EVIDENCE} loading={detail?.applicationId!==applicationId||detail.areaId!==selectedArea} error={detail?.applicationId===applicationId&&detail.areaId===selectedArea?detail.error:''}
+              onRetry={()=>{setDetail(null);setDetailRevision(n=>n+1);}} onClose={()=>setSelectedArea(null)}
               subtitle={`Información relevante del candidato seleccionado: ${selected.name}`}
             />}
             <h3 className="mt-6 font-semibold">Brecha por área</h3>

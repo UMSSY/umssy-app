@@ -1,3 +1,4 @@
+import type { CertificationDocumentsService } from '../../certification-documents/services/certification-documents.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
 import { CertificationMapper } from '../mappers/certification.mapper.js';
@@ -55,6 +56,7 @@ describe('CertificationsService', () => {
       documentsRepository as unknown as CertificationDocumentsRepository,
       new CertificationMapper(),
       { refreshAfterChange: vi.fn().mockResolvedValue(undefined) } as unknown as ProfileSkillsAnalysisService,
+      {} as CertificationDocumentsService,
     );
   });
 

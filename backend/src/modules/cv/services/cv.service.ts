@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CV_VALIDATION_RULES } from '../constants/cv.constants.js';
 import { CvNotFoundException } from '../exceptions/cv-not-found.exception.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
@@ -16,6 +16,7 @@ import { FileValidationService } from '../../../common/services/file-validation.
 
 @Injectable()
 export class CvService {
+  private readonly logger = new Logger(CvService.name);
   constructor(
     private readonly cvMetadataRepository: CvMetadataRepository,
     private readonly cvFileStorage: CvFileStorage,
@@ -65,7 +66,11 @@ export class CvService {
       this.cvMapper.toStoredFileName(file?.originalname),
     );
 
-    await this.radarIntegration.ingestCv(userId, cvId, validatedFile.buffer);
+    try {
+      await this.radarIntegration.ingestCv(userId, cvId, validatedFile.buffer);
+    } catch {
+      this.logger.error(JSON.stringify({ event: 'cv.analysis_failed', userId, cvId }));
+    }
     const record = await this.cvMetadataRepository.findByIdForUser(userId, cvId);
     return record ? this.cvMapper.toResponse(record) : null;
   }
@@ -76,7 +81,11 @@ export class CvService {
     if (!isRemoved) {
       throw new CvNotFoundException();
     }
-    await this.radarIntegration.cvRemoved(userId, cvId);
+    try {
+      await this.radarIntegration.cvRemoved(userId, cvId);
+    } catch {
+      this.logger.error(JSON.stringify({ event: 'cv.removal_refresh_failed', userId, cvId }));
+    }
   }
 
   private async readDownload(

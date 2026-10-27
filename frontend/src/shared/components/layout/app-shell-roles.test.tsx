@@ -42,7 +42,7 @@ describe("shared app shell across roles and routes", () => {
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
     expect(screen.getAllByRole("banner")).toHaveLength(1);
     expect(screen.getAllByRole("main")).toHaveLength(1);
-    expect(screen.getByRole("main").parentElement).toHaveClass("px-12", "py-10");
+    expect(screen.getByRole("main").parentElement).toHaveClass("px-4", "py-6", "lg:px-12", "lg:py-10");
     expect(screen.getByRole("button", { name: "Cerrar barra lateral" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Cerrar sesión" })).toHaveClass("text-brand-red", "hover:bg-brand-soft");
     const user = userEvent.setup();

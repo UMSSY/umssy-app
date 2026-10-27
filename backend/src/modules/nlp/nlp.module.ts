@@ -1,6 +1,9 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
+import { ProfileSkillsEventsModule } from '../../common/profile-skills/profile-skills-events.module.js';
+import { CertificationSourcesModule } from '../certifications/certification-sources.module.js';
+import { RadarEvidenceSourcesModule } from '../radar-integration/radar-evidence-sources.module.js';
 import { ProfileModule } from '../profile/profile.module.js';
 import { WorkExperienceModule } from '../work-experience/work-experience.module.js';
 import { EducationsModule } from '../educations/educations.module.js';
@@ -16,6 +19,9 @@ import { SkillValidationService } from './services/skill-validation.service.js';
 @Module({
   imports: [
     PrismaModule,
+    ProfileSkillsEventsModule,
+    CertificationSourcesModule,
+    RadarEvidenceSourcesModule,
     JwtAuthModule,
     ProfileModule,
     forwardRef(() => WorkExperienceModule),
