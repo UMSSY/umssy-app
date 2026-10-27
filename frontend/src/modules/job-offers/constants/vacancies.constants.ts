@@ -1,17 +1,21 @@
 export const MODALITIES = ["Presencial", "Remoto", "Híbrido"] as const;
 export const CONTRACT_TYPES = ["Tiempo completo", "Medio tiempo", "Pasantía"] as const;
+export const INTERNSHIP_CONTRACT_TYPE = "Pasantía";
+export const SALARY_TO_BE_AGREED = "A convenir";
+export const FIELD_FOCUS_CLASS = "focus-visible:border-ink focus-visible:ring-ink/20";
 
 export const MAX_TITLE_CHARS = 60;
 export const MAX_LANGUAGES_CHARS = 100;
 export const MAX_DESCRIPTION_CHARS = 3000;
 export const MAX_VACANCIES = 500;
+export const MAX_SALARY_DIGITS = 9;
 export const MAX_SKILLS = 10;
 export const DESCRIPTION_PREVIEW_CHARS = 125;
 
 export const TITLE_ALLOWED_REGEX = /^[a-zA-Z0-9\sÁÉÍÓÚÜÑáéíóúüñ]+$/;
 export const TITLE_DISALLOWED_CHARS_REGEX = /[^a-zA-Z0-9\sÁÉÍÓÚÜÑáéíóúüñ]/g;
 export const GOOGLE_MAPS_LINK_REGEX =
-  /^https:\/\/(maps\.google\.com\/|www\.google\.com\/maps|goo\.gl\/maps\/|maps\.app\.goo\.gl\/)/;
+  /^https:\/\/(?:maps\.app\.goo\.gl\/[\w-]+|goo\.gl\/maps\/[\w-]+|(?:www\.)?google\.com(?:\.[a-z]{2})?\/maps\/place\/[^/\s?#]+\/@-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?,\d+(?:\.\d+)?[zm])(?:[/?#]\S*)?$/;
 
 export const EDITING_KEYS = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Home", "End"];
 
@@ -75,8 +79,61 @@ export const PUBLISHED_DIALOG_TEXT = {
   confirm: "Aceptar",
 } as const;
 
+export const PUBLISHED_STATUS = "Publicada";
+
+export const CLOSED_STATUS = "Cerrada";
+export const DELETED_STATUS = "Eliminada";
+export const HISTORY_STATUSES: readonly string[] = [PUBLISHED_STATUS, CLOSED_STATUS, DELETED_STATUS];
+
+export const NEW_JOB_OFFER_ROUTE = "/recruiters/job-offers/new";
+
+export const STATUS_LABELS: Record<string, string> = {
+  [PUBLISHED_STATUS]: "Activa",
+  [CLOSED_STATUS]: "Cerrada",
+  [DELETED_STATUS]: "Eliminada",
+};
+
+export const STATUS_BADGE_CLASSES: Record<string, string> = {
+  [PUBLISHED_STATUS]: "bg-green-100 text-green-800",
+  [CLOSED_STATUS]: "bg-muted text-text-secondary",
+  [DELETED_STATUS]: "bg-destructive/10 text-destructive",
+};
+
+export const STATUS_FILTER_OPTIONS = [
+  { value: "", label: "Todas" },
+  { value: PUBLISHED_STATUS, label: "Activas" },
+  { value: CLOSED_STATUS, label: "Cerradas" },
+  { value: DELETED_STATUS, label: "Eliminadas" },
+] as const;
+
+export const HISTORY_SKELETON_ROWS = 3;
+
+export const VACANCY_LIST_TEXT = {
+  published: {
+    ariaLabel: "Mis vacantes publicadas",
+    loading: "Cargando vacantes...",
+    loadError: "No se pudieron cargar tus vacantes.",
+    empty: "Aún no has publicado vacantes.",
+    noMatches: "Ninguna vacante coincide con los filtros.",
+    noSearchMatches: "Ninguna vacante coincide con los filtros.",
+  },
+  history: {
+    ariaLabel: "Historial de vacantes",
+    loading: "Cargando historial de vacantes...",
+    loadError: "Error al cargar el historial. Inténtelo más tarde.",
+    empty: "Aún no tienes vacantes en tu historial",
+    noMatches: "Ninguna vacante coincide con los filtros.",
+    noSearchMatches: "No se encontraron vacantes que coincidan con la búsqueda",
+  },
+} as const;
+
 export const JOB_OFFERS_QUERY_KEYS = {
   skillCatalog: ["job-offers", "skill-catalog"] as const,
+  company: (companyId: string | null) => ["job-offers", "company", companyId] as const,
+  companyOffers: (companyId: string | null, params?: object) =>
+    ["job-offers", "company", companyId, params] as const,
+  companyOfferDetails: (companyId: string | null, jobOfferId: string | null) =>
+    ["job-offers", "company", companyId, "details", jobOfferId] as const,
 };
 
 export const DEFAULT_COMPANY_ID = "a0000000-0000-4000-8000-000000000001";
