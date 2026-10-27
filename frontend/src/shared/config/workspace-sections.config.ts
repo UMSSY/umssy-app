@@ -32,6 +32,7 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     id: "company", label: "Empresas", icon: Building2, patterns: [/^\/(?:recruiters|matching)(?:\/|$)/, /^\/area-detail(?:-interaction)?-preview\/?$/],
     items: [
       { label: "Portal de empresa", href: "/recruiters" },
+      { label: "Historial", href: "/recruiters/history" },
       { label: "Publicar vacante", href: "/recruiters/job-offers/new" },
       { label: "Buscar candidatos", href: "/matching" },
     ],
