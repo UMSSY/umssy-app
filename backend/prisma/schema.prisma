@@ -878,6 +878,8 @@ model JobApplication {
   @@index([userId])
   @@index([statusId])
   @@map("job_applications")
+}
+
 // HU 1.5.2 · Catálogo de acciones de auditoría (aprobada, rechazada, código enviado, etc.)
 model AuditAction {
   id          String   @id @default(uuid()) @db.Uuid
