@@ -16,6 +16,12 @@ vi.mock("../services/work-experience.service", () => ({
   },
 }));
 
+vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
+  skillsAnalysisService: {
+    analyzeExperience: vi.fn().mockResolvedValue({ experienceId: "experience-1", skills: [], processingTimeMs: 0 }),
+  },
+}));
+
 const CURRENT_JOB: WorkExperienceItem = {
   id: "experience-1",
   companyName: "Synapse Labs",

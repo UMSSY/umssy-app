@@ -57,6 +57,7 @@ function buildUser(
     identifier: `IDENT-${id}`,
     documentType: userType === 'empresa' ? null : 'academic_diploma',
     registeredAt,
+    listedAt: registeredAt,
     registrationStatus,
     rejectionReason: registrationStatus === 'REJECTED' ? 'Sin documento' : null,
   };

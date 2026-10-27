@@ -14,5 +14,6 @@ import { WorkExperienceService } from './services/work-experience.service.js';
     WorkExperienceRepository,
     WorkExperienceMapper,
   ],
+  exports: [WorkExperienceService],
 })
 export class WorkExperienceModule {}
