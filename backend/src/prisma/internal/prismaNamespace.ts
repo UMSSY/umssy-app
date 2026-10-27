@@ -5413,6 +5413,10 @@ export type EventCategoryScalarFieldEnum = (typeof EventCategoryScalarFieldEnum)
 
 
 export const EventScalarFieldEnum = {
+  coverData: 'coverData',
+  coverMimeType: 'coverMimeType',
+  proposalKey: 'proposalKey',
+  proposalHash: 'proposalHash',
   id: 'id',
   title: 'title',
   description: 'description',

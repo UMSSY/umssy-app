@@ -9,6 +9,15 @@ afterEach(() => {
 });
 
 describe('EventsSearchInput', () => {
+  it('recorta entradas extensas incluso cuando el cambio supera maxLength', () => {
+    const onChange = vi.fn();
+    render(<EventsSearchInput value="" onChange={onChange} />);
+    fireEvent.change(screen.getByRole('searchbox'), {
+      target: { value: 'a'.repeat(70) },
+    });
+    expect(onChange).toHaveBeenCalledWith('a'.repeat(50));
+  });
+
   it('muestra el valor y el placeholder correctamente', () => {
     render(
       <EventsSearchInput
@@ -42,7 +51,7 @@ describe('EventsSearchInput', () => {
     expect(handleChange).toHaveBeenCalledWith('Data Science');
   });
 
-  it('limita el buscador a 150 caracteres', () => {
+  it('limita el buscador a 50 caracteres', () => {
     render(
       <EventsSearchInput
         value=""
@@ -52,6 +61,6 @@ describe('EventsSearchInput', () => {
 
     const input = screen.getByPlaceholderText('Buscar taller...');
 
-    expect(input).toHaveAttribute('maxlength', '150');
+    expect(input).toHaveAttribute('maxlength', '50');
   });
 });
