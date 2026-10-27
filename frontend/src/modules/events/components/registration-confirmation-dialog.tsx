@@ -1,3 +1,5 @@
+'use client';
+
 import type { RegistrationConfirmationDialogProps } from '../types/registration-confirmation-dialog-props.types';
 import { useRef } from "react";
 import { Loader2 } from "lucide-react";

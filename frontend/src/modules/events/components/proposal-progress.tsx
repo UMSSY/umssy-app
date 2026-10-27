@@ -1,3 +1,4 @@
+import { Progress } from '@/components/ui/progress';
 import type { ProposalProgressProps } from '../types/proposal-progress-props.types';
 
 
@@ -16,21 +17,13 @@ export function ProposalProgress({ event, isExpired = false }: ProposalProgressP
     <div className="space-y-1.5 text-xs">
       <div className="flex items-center justify-between gap-2 font-semibold text-ink">
         <span>{count} de {threshold} apoyos</span>
-        <span className="text-orange-700">{percent}%</span>
+        <span className="text-notice-foreground">{percent}%</span>
       </div>
-      <div
-        role="progressbar"
+      <Progress
+        value={percent}
         aria-label={`Apoyos para ${event.title}`}
-        aria-valuenow={percent}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        className="h-2 overflow-hidden rounded-full bg-surface-soft"
-      >
-        <div
-          className="h-full rounded-full bg-orange-500 transition-[width]"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
+        className="[&_[data-slot=progress-indicator]]:bg-notice-foreground [&_[data-slot=progress-track]]:h-2"
+      />
       <p className="text-text-secondary">
         {isExpired
           ? 'Fecha límite superada · vencida automáticamente'
