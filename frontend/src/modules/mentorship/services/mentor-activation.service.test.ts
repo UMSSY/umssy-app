@@ -2,7 +2,18 @@ import { apiClient } from "@/shared/services/api-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { activateMentor } from "./mentor-activation.service";
 
+const records = vi.hoisted(() => new Map<string, unknown>());
+vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
+  updateIndexedDb: vi.fn(async (key: string, update: (current: unknown) => unknown) => {
+    const next = update(records.get(key) ?? null);
+    if (next === null) records.delete(key);
+    else records.set(key, next);
+    return next;
+  }),
+}));
+
 afterEach(() => {
+  records.clear();
   vi.restoreAllMocks();
 });
 

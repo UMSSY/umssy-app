@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { withMentorIntakeKey } from "./mentor-intake-idempotency";
+import { clearMentorIntakeIntentions, withMentorIntakeKey } from "./mentor-intake-idempotency";
+import { updateIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 
 const records = vi.hoisted(() => new Map<string, unknown>());
 vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
@@ -19,12 +20,66 @@ const networkFailure = { isAxiosError: true };
 const serverFailure = { isAxiosError: true, response: { status: 503 } };
 
 beforeEach(() => {
+  vi.clearAllMocks();
   records.clear();
   sessionStorage.clear();
   sessionStorage.setItem("accessToken", `header.${btoa(JSON.stringify({ sub: crypto.randomUUID() }))}.signature`);
 });
 
 describe("UUID para intenciones de participación", () => {
+  it("no envía HTTP si no se puede guardar la clave de forma persistente", async () => {
+    vi.mocked(updateIndexedDb).mockRejectedValueOnce(new Error("QuotaExceededError"));
+    const submit = vi.fn();
+    await expect(withMentorIntakeKey("request", preferences, submit)).rejects.toThrow("almacenamiento persistente");
+    expect(submit).not.toHaveBeenCalled();
+    expect(records.size).toBe(0);
+  });
+
+  it("un fallo de almacenamiento durante el reintento conserva la intención durable", async () => {
+    const first = vi.fn(async (key: string) => { expect(key).toHaveLength(36); throw networkFailure; });
+    await expect(withMentorIntakeKey("request", preferences, first)).rejects.toEqual(networkFailure);
+    const saved = [...records.values()];
+    vi.mocked(updateIndexedDb).mockRejectedValueOnce(new Error("SecurityError"));
+    const retry = vi.fn();
+    await expect(withMentorIntakeKey("request", preferences, retry)).rejects.toThrow("almacenamiento persistente");
+    expect(retry).not.toHaveBeenCalled();
+    expect([...records.values()]).toEqual(saved);
+    vi.resetModules();
+    const reloaded = await import("./mentor-intake-idempotency");
+    await reloaded.withMentorIntakeKey("request", preferences, retry);
+    expect(retry).toHaveBeenCalledWith(first.mock.calls[0][0]);
+  });
+
+  it("conserva el UUID ante un timeout HTTP ambiguo", async () => {
+    const timeout = { isAxiosError: true, response: { status: 408 } };
+    const submit = vi.fn(async (key: string) => { expect(key).toHaveLength(36); throw timeout; });
+    await expect(withMentorIntakeKey("activate", preferences, submit)).rejects.toEqual(timeout);
+    const retry = vi.fn(async (key: string) => key);
+    await withMentorIntakeKey("activate", preferences, retry);
+    expect(retry).toHaveBeenCalledWith(submit.mock.calls[0][0]);
+  });
+
+  it("explica un fallo al limpiar una operación confirmada y conserva su UUID", async () => {
+    const submit = vi.fn(async (key: string) => {
+      vi.mocked(updateIndexedDb).mockRejectedValueOnce(new Error("SecurityError"));
+      return key;
+    });
+    await expect(withMentorIntakeKey("request", preferences, submit)).rejects.toThrow("El servidor confirmó la operación");
+    expect(records.size).toBe(1);
+    const retry = vi.fn(async (key: string) => key);
+    await withMentorIntakeKey("request", preferences, retry);
+    expect(retry).toHaveBeenCalledWith(submit.mock.calls[0][0]);
+  });
+
+  it("no elimina la clave heredada si falla su limpieza persistente", async () => {
+    const subject = JSON.parse(atob(sessionStorage.getItem("accessToken")!.split(".")[1])).sub;
+    const legacy = JSON.stringify({ subject, key: crypto.randomUUID(), fingerprint: JSON.stringify(preferences) });
+    sessionStorage.setItem("hu7:intake:request", legacy);
+    vi.mocked(updateIndexedDb).mockRejectedValueOnce(new Error("SecurityError"));
+    await expect(clearMentorIntakeIntentions(["request"])).rejects.toThrow("almacenamiento persistente");
+    expect(sessionStorage.getItem("hu7:intake:request")).toBe(legacy);
+  });
+
   it("migra el UUID previo a IndexedDB sin duplicar la intención y lo retira al completarla", async () => {
     const subject = JSON.parse(atob(sessionStorage.getItem("accessToken")!.split(".")[1])).sub;
     const key = crypto.randomUUID();

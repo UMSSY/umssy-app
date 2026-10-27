@@ -186,9 +186,7 @@ export function MentorshipView() {
           );
         }
       } else {
-        setActivationError(
-          "No fue posible conectar con el servidor. Comprueba tu conexión e intenta nuevamente.",
-        );
+        setActivationError(participationErrorMessage(error));
       }
     } finally {
       inFlight.current = false;

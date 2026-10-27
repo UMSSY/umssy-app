@@ -97,7 +97,7 @@ export function ParticipationOverview({
                 {isActive ? "Activo" : "Desactivado"}
               </span>
               {actionEnabled && <Button type="button" variant={isActive ? "outline" : "default"} onClick={onAction}>
-                {isActive ? "Pausar mentoría" : "Activar participación"}
+                {isActive ? "Desactivar participación" : "Activar participación"}
               </Button>}
             </div>
           </CardContent>

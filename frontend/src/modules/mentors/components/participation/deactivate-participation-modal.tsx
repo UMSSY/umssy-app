@@ -1,6 +1,7 @@
 "use client";
 
 import type { DeactivateParticipationModalProps } from "../../types/deactivate-participation-modal-props.types";
+import type { SavedParticipationItemsProps } from "../../types/saved-participation-items-props.types";
 
 import Link from "next/link";
 
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 
 
-function SavedItems({ label, items }: { label: string; items: string[] }) {
+function SavedItems({ label, items }: SavedParticipationItemsProps) {
   return (
     <div className="flex items-start gap-3">
       <span className="w-24 shrink-0 text-xs text-text-secondary">{label}</span>
@@ -69,7 +70,7 @@ export function DeactivateParticipationModal({
                   Estado de mentor
                 </p>
                 <DialogTitle className="mt-1 text-xl font-bold tracking-tight text-ink">
-                  Pausar mentoría
+                  Desactivar participación
                 </DialogTitle>
               </div>
             </div>

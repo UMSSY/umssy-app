@@ -2,7 +2,7 @@ import type { MentorAdmissionFacts } from '../types/mentor-admission-facts.types
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
 import type { MentorTransaction } from '../types/mentor-transaction.types.js';
-import type { MentorCapacityCounts } from '../types/mentor-capacity.types.js';
+import { readMentorCapacityCounts } from './mentor-capacity.queries.js';
 import type { MentorCachedAttempt } from '../types/mentor-cached-attempt.types.js';
 import type { MentorIntakeOutcome } from '../types/mentor-intake-outcome.types.js';
 
@@ -20,25 +20,8 @@ export abstract class MentorTransactionRepository {
     return withMentorCapacityLock(this.prisma, action);
   }
 
-  async capacityCounts(tx: MentorTransaction = this.prisma) {
-    const [counts] = await tx.$queryRaw<MentorCapacityCounts[]>`
-    WITH instant AS (SELECT clock_timestamp() AS now)
-    SELECT
-      (SELECT count(*)::int FROM users u WHERE u.is_active = true
-        AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id
-          WHERE ur.user_id = u.id AND r.name = 'titulado' AND ur.deleted_at IS NULL
-            AND ur.start_at <= (SELECT now FROM instant))
-        AND EXISTS (SELECT 1 FROM access_requests ar
-          JOIN access_request_statuses s ON s.id = ar.status_id
-          WHERE ar.approved_user_id = u.id AND s.title = 'approved')) AS "approvedGraduates",
-      (SELECT count(*)::int FROM users u WHERE u.is_active = true
-        AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id
-          WHERE ur.user_id = u.id AND r.name = 'mentor' AND ur.deleted_at IS NULL
-            AND ur.start_at <= (SELECT now FROM instant))) AS "activeMentors",
-      (SELECT count(*)::int FROM mentor_slot_offers
-        WHERE status_id = mentor_offer_status('OFFERED') AND expires_at > (SELECT now FROM instant)) AS "reservedOffers"
-  `;
-    return counts;
+  capacityCounts(tx: MentorTransaction = this.prisma) {
+    return readMentorCapacityCounts(tx);
   }
 
   async admissionFacts(

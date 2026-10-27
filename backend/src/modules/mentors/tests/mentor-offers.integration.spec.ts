@@ -8,7 +8,6 @@ import { MentorMapper } from '../mappers/mentor.mapper.js';
 import { MentorParticipationService } from '../services/mentor-participation.service.js';
 import { MentorMailOutboxRepository } from '../repositories/mentor-mail-outbox.repository.js';
 import { MentorExitService } from '../services/mentor-exit.service.js';
-// HU7_TEST_DATABASE_URL debe apuntar a PostgreSQL local. Cada ejecución crea y elimina su propio esquema.
 import {
   afterAll,
   beforeAll,

@@ -1,9 +1,8 @@
-// Base local exclusiva de esta prueba, con migraciones aplicadas:
-// pnpm exec tsx src/modules/mentors/seeds/mentor-capacity.seed.ts [--full]
 import { pathToFileURL } from 'node:url';
 import { createSeedClient, loadSeedEnv } from '../../../common/database/seed-client.js';
 import { hashSeedPassword } from '../../users/seeds/users.seed.js';
-import { readMentorCapacity } from '../repositories/mentor-capacity.queries.js';
+import { readMentorCapacityCounts } from '../repositories/mentor-capacity.queries.js';
+import { mentorCapacity } from '../utils/mentor-capacity.js';
 
 async function main() {
   const env = loadSeedEnv();
@@ -50,7 +49,7 @@ async function main() {
           VALUES (${offerId}::uuid, '14360000-0000-4000-8000-000000000001'::uuid,
             clock_timestamp(), clock_timestamp() + interval '24 hours')`;
       }
-      return readMentorCapacity(tx);
+      return mentorCapacity(await readMentorCapacityCounts(tx));
     });
     process.stdout.write(`${JSON.stringify(capacity)}\n`);
   } finally {

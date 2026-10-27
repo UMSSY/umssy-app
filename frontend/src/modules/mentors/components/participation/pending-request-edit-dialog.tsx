@@ -100,7 +100,7 @@ export function PendingRequestEditDialog({ state }: PendingRequestDialogProps) {
                 isTechnicalAreasLoading ||
                 isOrientationTypesLoading
               }
-              onClick={() => void runOperation(() => updateMutation.mutateAsync())}
+              onClick={() => runOperation((onSettled) => updateMutation.mutate(undefined, { onSettled }))}
             >
               {updateMutation.isPending ? "Guardando..." : "Guardar cambios"}
             </Button>

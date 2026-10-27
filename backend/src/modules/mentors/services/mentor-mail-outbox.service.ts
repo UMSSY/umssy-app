@@ -2,15 +2,11 @@ import { MentorMailKindCode } from '../types/mentor-mail-kind.enum.js';
 import { Injectable } from '@nestjs/common';
 import { MentorMailOutboxRepository } from '../repositories/mentor-mail-outbox.repository.js';
 import { MailService } from '../../mail/services/mail.service.js';
+import type { MentorMailDeliveryFailure } from '../types/mentor-mail-delivery-failure.types.js';
 
 function safeToRetry(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
-  const failure = error as {
-    code?: string;
-    command?: string;
-    responseCode?: number;
-    message?: string;
-  };
+  const failure = error as MentorMailDeliveryFailure;
   return (
     ['EAUTH', 'EDNS', 'ECONNECTION', 'EENVELOPE'].includes(
       failure.code ?? '',
@@ -29,9 +25,7 @@ export class MentorMailOutboxService {
   ) {}
 
   async dispatch() {
-    // El transporte de consola no acredita entrega: conserva el evento pendiente.
     if (!this.mail.isSmtpConfigured()) return;
-    // Una entrega SMTP ambigua requiere conciliación antes de autorizar un reenvío.
     await this.repository.quarantineInterrupted();
     for (let index = 0; index < 10; index++) {
       const message = await this.repository.claim();
@@ -88,7 +82,6 @@ export class MentorMailOutboxService {
         } else await this.uncertain(message.id, 'SMTP_DELIVERY_UNCERTAIN');
         continue;
       }
-      // Si falla la escritura tras aceptar SMTP, conserva SENDING para conciliar la entrega.
       await this.repository.sent(message.id);
     }
   }

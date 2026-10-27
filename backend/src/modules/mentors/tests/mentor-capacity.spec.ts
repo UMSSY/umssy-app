@@ -83,7 +83,6 @@ describe('capacidad HU-7-1', () => {
       user: { update: vi.fn() },
     };
     const prisma = {
-      // Simula el bloqueo de PostgreSQL; el segundo lector ve la escritura del primero.
       $transaction: async <T>(
         operation: (transaction: typeof tx) => Promise<T>,
       ) => {

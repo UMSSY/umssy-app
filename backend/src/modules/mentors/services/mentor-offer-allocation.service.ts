@@ -2,7 +2,6 @@ import type { MentorTransactionRepository } from '../repositories/mentor-transac
 import type { MentorTransaction } from '../types/mentor-transaction.types.js';
 import { mentorCapacity } from '../utils/mentor-capacity.js';
 
-// La decisión de cuántos cupos ofrecer usa el mismo bloqueo que la admisión.
 export async function reconcileMentorOffers(
   repository: MentorTransactionRepository,
   tx: MentorTransaction,

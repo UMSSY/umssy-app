@@ -13,6 +13,7 @@ import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.
 import { mentorParticipationService } from "@/modules/mentors/services/mentor-participation.service";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { MentorshipView } from "./mentorship-view";
+import { BusinessRecordStorageError } from "@/shared/services/storage/business-record-storage-error";
 
 const integrationMocks = vi.hoisted(() => ({
   activateMentor: vi.fn(),
@@ -114,6 +115,17 @@ async function openActivationDialog() {
 }
 
 describe("MentorshipView", () => {
+  it("muestra el fallo de persistencia al intentar activar y conserva el formulario", async () => {
+    integrationMocks.activateMentor.mockRejectedValueOnce(new BusinessRecordStorageError(new Error("SecurityError")));
+    renderWithQuery(<MentorshipView />);
+    advanceToConfirmation();
+    const confirmation = await openActivationDialog();
+    fireEvent.click(within(confirmation).getByRole("button", { name: "Aceptar" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("almacenamiento persistente");
+    expect(integrationMocks.push).not.toHaveBeenCalled();
+    expect(screen.getByText("Backend")).toBeInTheDocument();
+  });
+
   it("reconoce al mentor activo sin ofrecer otra activación", async () => {
     saveAccessToken("mentor-token");
     vi.spyOn(mentorParticipationService, "getMyParticipation").mockResolvedValue({ status: "ACTIVE", areas: [], orientations: [] });

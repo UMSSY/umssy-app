@@ -27,7 +27,6 @@ export class MentorOffersService {
   async confirm(userId: string, offerId: string) {
     const result = await this.repository.withLock(
       async (tx): Promise<MentorOfferConfirmation> => {
-        // Confirma el vencimiento antes de devolver el rechazo fuera de la transacción.
         await reconcileMentorOffers(this.repository, tx);
         const offer = await this.repository.findForUpdate(tx, userId, offerId);
         if (!offer) throw new MentorOfferException('Oferta no encontrada', 404);

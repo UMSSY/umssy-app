@@ -19,10 +19,11 @@ import { DeactivateParticipationModal } from "../components/participation/deacti
 import { useParticipation } from "../hooks/use-participation";
 import { participationErrorCode, participationErrorMessage } from "../utils/participation-error";
 import { clearMentorIntakeIntentions, loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "@/modules/mentorship";
+import type { ParticipationViewProps } from "../types/participation-view-props.types";
 
 const getServerToken = () => null;
 
-export function ParticipationView({ registered = false, activated = false }: { registered?: boolean; activated?: boolean }) {
+export function ParticipationView({ registered = false, activated = false }: ParticipationViewProps) {
   const router = useRouter();
   const client = useQueryClient();
   const { refreshRoles } = useAuth();
@@ -105,7 +106,14 @@ export function ParticipationView({ registered = false, activated = false }: { r
         ? <SlotOfferParticipation key={currentRequest.offer.id} request={currentRequest} showHeading={!hasHistory} onConfirmed={() => { void refreshRoles(); void client.invalidateQueries({ queryKey: ["mentors", "participation"] }); void client.invalidateQueries({ queryKey: ["mentorship", "directory"] }); void client.invalidateQueries({ queryKey: ["mentorship", "profile"] }); setNotice("Participación activada correctamente"); }} />
         : <Alert variant="destructive">No se pudo consultar la oferta. Actualiza la página.</Alert>)}
     {!isActive && !hasHistory && !["PENDING", "OFFERED"].includes(currentRequest?.status ?? "") &&
-      <div className="space-y-6"><SlotAvailability /><ParticipationEmptyState onStart={hasClosedRequest ? () => clearMentorIntakeIntentions() : undefined} /></div>}
+      <div className="space-y-6"><SlotAvailability /><ParticipationEmptyState onStart={hasClosedRequest ? (event) => {
+        event.preventDefault();
+        if (inFlight.current) return;
+        inFlight.current = true;
+        setError(null);
+        void clearMentorIntakeIntentions().then(() => router.push("/mentorship"), setError).finally(() => { inFlight.current = false; });
+      } : undefined} /></div>}
+    {error !== null && modal === null && <Alert variant="destructive">{participationErrorMessage(error)}</Alert>}
     {!isActive && hasClosedRequest &&
       <p role="status">{currentRequest?.status === "EXPIRED" ? "El plazo ha vencido." : currentRequest?.status === "CANCELLED" ? "La solicitud fue cancelada." : "Tu participación como mentor ha finalizado."} Puedes revisar las condiciones vigentes en el proceso de incorporación.</p>}
     <DeactivateParticipationModal
@@ -119,28 +127,37 @@ export function ParticipationView({ registered = false, activated = false }: { r
       isOpen={modal === "activate"} onClose={() => setModal(null)}
       onConfirm={() => {
         void (async () => {
-          clearMentorIntakeIntentions();
-          if (hasDraftStorageError) {
-            setModal(null);
-            router.push("/mentorship");
-            return;
-          }
+          if (inFlight.current) return;
+          inFlight.current = true;
+          setSubmitting(true);
+          setError(null);
           try {
-            const draft = await loadMentorshipWizardDraft();
-            if (!draft) await saveMentorshipWizardDraft({
-              currentStep: 1,
-              wantsToParticipate: true,
-              selectedTechnicalAreaIds: state.areas.map((area) => area.id),
-              selectedOrientationTypeIds: state.orientations.map((orientation) => orientation.id),
-            });
+            await clearMentorIntakeIntentions();
+            if (!hasDraftStorageError) {
+              try {
+                const draft = await loadMentorshipWizardDraft();
+                if (!draft) await saveMentorshipWizardDraft({
+                  currentStep: 1,
+                  wantsToParticipate: true,
+                  selectedTechnicalAreaIds: state.areas.map((area) => area.id),
+                  selectedOrientationTypeIds: state.orientations.map((orientation) => orientation.id),
+                });
+              } catch {
+                setHasDraftStorageError(true);
+                return;
+              }
+            }
             setModal(null);
             router.push("/mentorship");
-          } catch {
-            setHasDraftStorageError(true);
+          } catch (failure) {
+            setError(failure);
+          } finally {
+            inFlight.current = false;
+            setSubmitting(false);
           }
         })();
       }}
-      isLoading={false} errorMessage={hasDraftStorageError ? "No se pudo recuperar el borrador. Puedes continuar y seleccionar tus preferencias nuevamente." : null}
+      isLoading={submitting} errorMessage={error ? participationErrorMessage(error) : hasDraftStorageError ? "No se pudo recuperar el borrador. Puedes continuar y seleccionar tus preferencias nuevamente." : null}
     />
   </div>;
 }

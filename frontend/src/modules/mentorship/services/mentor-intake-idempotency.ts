@@ -1,6 +1,7 @@
 import { isApiError } from "@/shared/services/api-client";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { updateBusinessRecord } from "@/shared/services/storage/business-record-storage";
+import { BusinessRecordStorageError } from "@/shared/services/storage/business-record-storage-error";
 import { readSessionStorage, removeSessionStorage } from "@/shared/services/storage/browser-session-storage";
 import type { MentorIntakePreferences } from "../types/mentor-intake-preferences.types";
 import type { MentorIntakeIntention } from "../types/mentor-intake-intention.types";
@@ -20,7 +21,6 @@ function storageKey(operation: MentorIntakeOperation): string {
   return `hu7:intake:${currentSubject()}:${operation}`;
 }
 
-// Recupera intenciones anteriores al cambio a IndexedDB sin generar otra petición de negocio.
 function legacyIntention(operation: MentorIntakeOperation): MentorIntakeIntention | null {
   try {
     const value: unknown = JSON.parse(readSessionStorage(`hu7:intake:${operation}`) ?? "null");
@@ -34,8 +34,8 @@ function clearLegacyIntention(operation: MentorIntakeOperation): void {
 }
 
 export async function clearMentorIntakeIntentions(operations: readonly MentorIntakeOperation[] = ["activate", "request"]): Promise<void> {
-  for (const operation of operations) clearLegacyIntention(operation);
   await Promise.all(operations.map((operation) => updateBusinessRecord(storageKey(operation), () => null)));
+  for (const operation of operations) clearLegacyIntention(operation);
 }
 
 export async function withMentorIntakeKey<T>(operation: MentorIntakeOperation, preferences: MentorIntakePreferences, submit: (key: string) => Promise<T>): Promise<T> {
@@ -52,17 +52,21 @@ export async function withMentorIntakeKey<T>(operation: MentorIntakeOperation, p
     };
   });
   const key = intention!.key;
-  const clear = () => {
+  const clear = async () => {
+    await updateBusinessRecord<MentorIntakeIntention>(name, (saved) => saved?.key === key ? null : saved);
     clearLegacyIntention(operation);
-    return updateBusinessRecord<MentorIntakeIntention>(name, (saved) => saved?.key === key ? null : saved);
   };
+  let result: T;
   try {
-    const result = await submit(key);
-    await clear();
-    return result;
+    result = await submit(key);
   } catch (error) {
-    // Un resultado ambiguo se reintenta con el mismo UUID, incluso tras recargar.
-    if (isApiError(error) && error.response && error.response.status < 500) await clear();
+    if (isApiError(error) && error.response && error.response.status >= 400 && error.response.status < 500 && error.response.status !== 408) await clear();
     throw error;
   }
+  try {
+    await clear();
+  } catch (cause) {
+    throw new BusinessRecordStorageError(cause, "El servidor confirmó la operación, pero no se pudo actualizar su clave guardada. Habilita el almacenamiento del navegador y consulta Mi participación antes de volver a solicitar.");
+  }
+  return result;
 }

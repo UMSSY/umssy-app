@@ -4,7 +4,18 @@ import { mentorParticipationService } from "./mentor-participation.service";
 import { activateMentor } from "@/modules/mentorship/services/mentor-activation.service";
 import { clearMentorIntakeIntentions } from "@/modules/mentorship/services/mentor-intake-idempotency";
 
+const records = vi.hoisted(() => new Map<string, unknown>());
+vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
+  updateIndexedDb: vi.fn(async (key: string, update: (current: unknown) => unknown) => {
+    const next = update(records.get(key) ?? null);
+    if (next === null) records.delete(key);
+    else records.set(key, next);
+    return next;
+  }),
+}));
+
 beforeEach(() => {
+  records.clear();
   sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ sub: crypto.randomUUID() }))}.s`);
 });
 afterEach(async () => { await clearMentorIntakeIntentions(); sessionStorage.clear(); vi.restoreAllMocks(); });

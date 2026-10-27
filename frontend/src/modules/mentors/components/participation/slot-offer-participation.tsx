@@ -23,7 +23,6 @@ export function SlotOfferParticipation({ request, onConfirmed, showHeading = tru
   const confirmation = useMutation({
     mutationFn: () => mentorParticipationService.confirm(offer.id),
     onSuccess: async () => {
-      // Actualiza la participación aunque falle la consulta de roles de sesión.
       await Promise.allSettled([
         refreshRoles(),
         client.invalidateQueries({ queryKey: ["mentors", "participation"] }),
@@ -45,11 +44,10 @@ export function SlotOfferParticipation({ request, onConfirmed, showHeading = tru
     hourCycle: "h23", timeZone: "America/La_Paz",
   }).format(new Date(offer.expiresAt));
 
-  async function confirm() {
+  function confirm() {
     if (inFlight.current || countdown.expired || Date.now() >= new Date(offer.expiresAt).getTime()) return;
     inFlight.current = true;
-    try { await confirmation.mutateAsync(); } catch { /* El estado de la mutación conserva el error para mostrarlo. */ }
-    finally { inFlight.current = false; }
+    confirmation.mutate(undefined, { onSettled: () => { inFlight.current = false; } });
   }
 
   return <main className="mx-auto max-w-7xl space-y-6">

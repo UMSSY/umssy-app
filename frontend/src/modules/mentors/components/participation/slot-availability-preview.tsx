@@ -2,14 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import type { SlotUnavailableDialogProps } from "../../types/slot-unavailable-dialog-props.types";
 
-export function SlotUnavailableDialog({ open, onOpenChange, isSubmitting, error, onSubmit }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  isSubmitting: boolean;
-  error: string | null;
-  onSubmit: () => void;
-}) {
+export function SlotUnavailableDialog({ open, onOpenChange, isSubmitting, error, onSubmit }: SlotUnavailableDialogProps) {
   return <Dialog open={open} onOpenChange={(value) => { if (!isSubmitting) onOpenChange(value); }}>
     <DialogContent showCloseButton={!isSubmitting} aria-busy={isSubmitting} className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
       <DialogTitle>No hay cupos disponibles</DialogTitle>

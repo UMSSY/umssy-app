@@ -24,7 +24,6 @@ export class ApprovedAccountActivationService {
       const existing = await this.repository.findUser(tx, request.email);
       if (request.approvedUserId && request.approvedUserId !== existing?.id)
         return false;
-      // Vincular una cuenta existente exige su contraseña actual; el OTP no la reemplaza.
       if (
         existing &&
         (!existing.isActive ||

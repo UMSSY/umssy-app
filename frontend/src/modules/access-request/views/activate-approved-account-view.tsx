@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandLogo } from "@/shared/components/layout/brand-logo";
 import { apiClient, isApiError } from "@/shared/services/api-client";
+import type { ActivateApprovedAccountViewProps } from "../types/activate-approved-account-view-props.types";
 
-export function ActivateApprovedAccountView({ requestId }: { requestId: string }) {
+export function ActivateApprovedAccountView({ requestId }: ActivateApprovedAccountViewProps) {
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);

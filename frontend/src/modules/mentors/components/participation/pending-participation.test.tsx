@@ -44,6 +44,22 @@ afterEach(() => {
 });
 
 describe("Participación pendiente HU7-2", () => {
+  it("bloquea la edición duplicada y permite reintentar después de mostrar el error", async () => {
+    const update = vi.spyOn(participationService.mentorParticipationService, "update")
+      .mockRejectedValueOnce(new Error("Network"))
+      .mockResolvedValueOnce(pendingRequest);
+    renderWithQuery(<PendingParticipation request={pendingRequest} />);
+    fireEvent.click(screen.getByRole("button", { name: "Modificar solicitud" }));
+    const save = screen.getByRole("button", { name: "Guardar cambios" });
+    fireEvent.click(save);
+    fireEvent.click(save);
+    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo completar");
+    expect(update).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    await waitFor(() => expect(update).toHaveBeenCalledTimes(2));
+    expect(await screen.findByRole("status")).toHaveTextContent("Conservas tu fecha original");
+  });
+
   it("muestra la solicitud pendiente y sus preferencias", () => {
     renderWithQuery(
       <PendingParticipation request={pendingRequest} />,

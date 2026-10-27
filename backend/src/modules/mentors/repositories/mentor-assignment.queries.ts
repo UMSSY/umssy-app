@@ -1,4 +1,5 @@
 import type { MentorTransaction } from '../types/mentor-transaction.types.js';
+import type { MentorActivationResult } from '../types/mentor-activation-result.types.js';
 
 export async function assignMentorParticipation(
   tx: MentorTransaction,
@@ -6,7 +7,7 @@ export async function assignMentorParticipation(
   roleId: string,
   technicalAreaIds: string[],
   orientationTypeIds: string[],
-) {
+): Promise<MentorActivationResult> {
   await tx.userRole.create({ data: { userId, roleId, deletedAt: null } });
   await tx.mentorTechnicalArea.deleteMany({ where: { mentorId: userId } });
   await tx.mentorOrientationType.deleteMany({ where: { mentorId: userId } });

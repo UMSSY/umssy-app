@@ -5,7 +5,7 @@ import { loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "@/modules/
 import { mentorParticipationService } from "../services/mentor-participation.service";
 import type { MyMentorParticipationResponse } from "../types/my-mentor-participation-response.types";
 import { ParticipationView } from "./participation-view";
-import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
+import { updateIndexedDb, writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import { renderToString } from "react-dom/server";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient } from "@/shared/services/query-client";
@@ -17,6 +17,12 @@ vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
   readIndexedDb: vi.fn(async (key: string) => drafts.get(key) ?? null),
   writeIndexedDb: vi.fn(async (key: string, value: unknown) => { drafts.set(key, value); }),
   removeIndexedDb: vi.fn(async (key: string) => { drafts.delete(key); }),
+  updateIndexedDb: vi.fn(async (key: string, update: (current: unknown) => unknown) => {
+    const next = update(drafts.get(key) ?? null);
+    if (next === null) drafts.delete(key);
+    else drafts.set(key, next);
+    return next;
+  }),
 }));
 
 const active: MyMentorParticipationResponse = {
@@ -47,7 +53,7 @@ describe("ParticipationView HU-MEN-06", () => {
     expect(await screen.findByText("Activo")).toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Editar áreas técnicas" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Pausar mentoría" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Desactivar participación" })).toBeInTheDocument();
   });
 
   it("conserva preferencias y oculta acciones de edición al desactivar", async () => {
@@ -64,10 +70,10 @@ describe("ParticipationView HU-MEN-06", () => {
     vi.mocked(mentorParticipationService.getMyParticipation)
       .mockResolvedValueOnce(active).mockResolvedValue(deactivated);
     renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Pausar mentoría" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Desactivar participación" }));
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
     expect(leave).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Pausar mentoría" }));
+    fireEvent.click(screen.getByRole("button", { name: "Desactivar participación" }));
     expect(screen.getByRole("dialog")).toHaveTextContent("perderás el rol de mentor");
     expect(screen.getByRole("dialog")).toHaveTextContent("No recuperarás automáticamente tu prioridad anterior");
     fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Confirmar salida" }));
@@ -81,7 +87,7 @@ describe("ParticipationView HU-MEN-06", () => {
       response: { status: 409, data: { message: "Resuelve las citas futuras", data: { code: "MENTOR_HAS_FUTURE_APPOINTMENTS" } } },
     });
     renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Pausar mentoría" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Desactivar participación" }));
     fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Confirmar salida" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Resuelve las citas futuras");
     expect(screen.getByRole("link", { name: "Resolver mis citas en la agenda" })).toBeInTheDocument();
@@ -91,7 +97,7 @@ describe("ParticipationView HU-MEN-06", () => {
   it("bloquea el doble envío de desactivación", async () => {
     const leave = vi.spyOn(mentorParticipationService, "leave").mockImplementation(() => new Promise<void>(() => {}));
     renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Pausar mentoría" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Desactivar participación" }));
     const confirm = within(screen.getByRole("dialog")).getByRole("button", { name: "Confirmar salida" });
     fireEvent.click(confirm);
     fireEvent.click(confirm);
@@ -121,7 +127,34 @@ describe("ParticipationView HU-MEN-06", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo recuperar el borrador");
     expect(navigation.push).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
-    expect(navigation.push).toHaveBeenCalledWith("/mentorship");
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/mentorship"));
+  });
+
+  it("impide reincorporarse si no puede limpiar la intención persistente", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(deactivated);
+    vi.mocked(updateIndexedDb).mockRejectedValueOnce(new Error("SecurityError"));
+    renderWithQuery(<ParticipationView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Activar participación" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("almacenamiento persistente");
+    expect(navigation.push).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/mentorship"));
+  });
+
+  it("mantiene visible el error de almacenamiento al iniciar otra solicitud tras vencer", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue({ status: "NEVER", areas: [], orientations: [] });
+    vi.mocked(mentorParticipationService.getCurrent).mockResolvedValue({
+      id: "expired-request", userId: "jwt-user", status: "EXPIRED",
+      queuedAt: "2026-10-01T12:00:00Z", createdAt: "2026-10-01T12:00:00Z",
+      technicalAreaIds: [], orientationTypeIds: [],
+    });
+    vi.spyOn(mentorParticipationService, "capacity").mockResolvedValue({ available: 1, capacity: 2, occupied: 1 });
+    vi.mocked(updateIndexedDb).mockRejectedValueOnce(new Error("SecurityError"));
+    renderWithQuery(<ParticipationView />);
+    fireEvent.click(await screen.findByRole("link", { name: "Participa como mentor" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("almacenamiento persistente");
+    expect(navigation.push).not.toHaveBeenCalled();
   });
 
   it("respeta un borrador existente del wizard", async () => {

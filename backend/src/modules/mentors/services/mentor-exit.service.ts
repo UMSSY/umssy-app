@@ -19,7 +19,6 @@ export class MentorExitService {
         };
       if (await this.repository.lockAndReadAppointments(tx, userId))
         throw new MentorExitAppointmentsException();
-      // Las preferencias permanecen; el rol, el cupo y la prioridad anterior se pierden.
       await this.repository.endParticipation(tx, userId);
       await reconcileMentorOffers(this.repository, tx);
       return {

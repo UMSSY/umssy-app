@@ -10,11 +10,10 @@ import type { PendingParticipationProps } from "../types/pending-participation-p
 
 export function usePendingParticipation({ request, onCancelled }: PendingParticipationProps) {
   const operationInFlight = useRef(false);
-  async function runOperation(operation: () => Promise<unknown>) {
+  function runOperation(operation: (onSettled: () => void) => void) {
     if (operationInFlight.current) return;
     operationInFlight.current = true;
-    try { await operation(); } catch { /* La mutación conserva el error para presentarlo en el diálogo. */ }
-    finally { operationInFlight.current = false; }
+    operation(() => { operationInFlight.current = false; });
   }
 
   const {

@@ -149,7 +149,6 @@ describe.skipIf(!connectionString)(
         new ActivationOtpRepository(db()),
         mail,
       );
-      // These dependencies are unused by the existing approval operation.
       const service = new AccessRequestsService(
         new AccessRequestsRepository(db()),
         {} as never,
@@ -193,8 +192,6 @@ describe.skipIf(!connectionString)(
         ).sub,
       ).toBe(user.id);
       expect(session.roles).toContain('titulado');
-      // With only one approved and linked graduate there are no slots, rather
-      // than an eligibility rejection or an inferred email match.
       await expect(
         new MentorsService(
           new MentorsRepository(db()),

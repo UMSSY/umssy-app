@@ -35,7 +35,7 @@ export function PendingRequestCancelDialog({ state }: PendingRequestDialogProps)
             <Button
               variant="brand"
               disabled={cancelMutation.isPending}
-              onClick={() => void runOperation(() => cancelMutation.mutateAsync())}
+              onClick={() => runOperation((onSettled) => cancelMutation.mutate(undefined, { onSettled }))}
             >
               {cancelMutation.isPending
                 ? "Cancelando..."

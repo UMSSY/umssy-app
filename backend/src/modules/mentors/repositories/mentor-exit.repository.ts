@@ -18,7 +18,6 @@ export class MentorExitRepository extends MentorTransactionRepository {
   }
 
   async lockAndReadAppointments(tx: MentorTransaction, userId: string) {
-    // Impide reservas concurrentes entre la comprobación y la revocación del rol.
     await tx.$executeRaw`LOCK TABLE appointments IN SHARE MODE`;
     const [appointments] = await tx.$queryRaw<{ blocked: boolean }[]>`
       SELECT EXISTS (SELECT 1 FROM appointments a JOIN appointment_statuses s ON s.id = a.status_id

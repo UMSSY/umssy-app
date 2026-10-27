@@ -21,7 +21,8 @@ import type { UpdateMentorOrientationTypesDto } from '../requests/update-mentor-
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MentorAffinityService } from './mentor-affinity.service.js';
-import type { Prisma } from '../../../prisma/client.js';
+import type { MentorTransaction } from '../types/mentor-transaction.types.js';
+import type { MentorActivationResult } from '../types/mentor-activation-result.types.js';
 
 const DIRECTORY_PAGE_SIZE = 6 as const;
 
@@ -226,8 +227,8 @@ export class MentorsService {
     userId: string,
     data: ActivateMentorDto,
     key?: string,
-    tx?: Prisma.TransactionClient,
-  ): Promise<{ id: string }> {
+    tx?: MentorTransaction,
+  ): Promise<MentorActivationResult> {
     if (key)
       return withMentorIntake(
         this.mentorsRepository,

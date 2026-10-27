@@ -2,7 +2,7 @@ import { MentorIntakeOperationCode } from '../types/mentor-intake-operation.enum
 import { requireMentorIdempotencyKey } from '../utils/mentor-idempotency-key.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { DomainException } from '../../../common/exceptions/domain.exception.js';
-import type { Prisma } from '../../../prisma/client.js';
+import type { MentorTransaction } from '../types/mentor-transaction.types.js';
 import type { MentorTransactionRepository } from '../repositories/mentor-transaction.repository.js';
 import { MentorParticipationException } from '../exceptions/mentor-participation.exception.js';
 import type { MentorIntakePreferences as Preferences } from '../types/mentor-intake-preferences.types.js';
@@ -25,14 +25,13 @@ function responseAt(outcome: Outcome, now: Date): Outcome {
     : outcome;
 }
 
-// Ambas rutas comparten bloqueo, ventana móvil y resultados idempotentes.
 export async function withMentorIntake<T>(
   repository: MentorTransactionRepository,
   userId: string,
   operation: MentorIntakeOperationCode.ACTIVATE | MentorIntakeOperationCode.REQUEST,
   key: string,
   preferences: Preferences,
-  action: (tx: Prisma.TransactionClient) => Promise<T>,
+  action: (tx: MentorTransaction) => Promise<T>,
 ): Promise<T> {
   key = requireMentorIdempotencyKey(key);
   const payloadHash = createHash('sha256')
@@ -76,7 +75,6 @@ export async function withMentorIntake<T>(
       try {
         result = { status: 201, data: await action(tx) };
       } catch (error) {
-        // Los rechazos de negocio cuentan; las fallas técnicas revierten todas las escrituras.
         if (!(error instanceof DomainException) || error.statusCode >= 500)
           throw error;
         result = {
