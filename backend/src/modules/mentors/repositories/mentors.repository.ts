@@ -13,6 +13,7 @@ import {
 } from './mentor-capacity.queries.js';
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
+import { withMentorIntake } from './mentor-intake-policy.js';
 
 const directorySelect = {
   id: true,
@@ -47,6 +48,22 @@ type MentorDirectorySort = 'name_asc' | 'name_desc';
 @Injectable()
 export class MentorsRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  withIntake<T>(
+    userId: string,
+    key: string,
+    preferences: { technicalAreaIds: string[]; orientationTypeIds: string[] },
+    action: (tx: Prisma.TransactionClient) => Promise<T>,
+  ) {
+    return withMentorIntake(
+      this.prisma,
+      userId,
+      'ACTIVATE',
+      key,
+      preferences,
+      action,
+    );
+  }
 
   findMentorRole() {
     return this.prisma.role.findUnique({
@@ -440,8 +457,9 @@ export class MentorsRepository {
     roleId: string,
     technicalAreaIds: string[],
     orientationTypeIds: string[],
+    tx?: Prisma.TransactionClient,
   ) {
-    return withMentorCapacityLock(this.prisma, async (transaction) => {
+    const activate = async (transaction: Prisma.TransactionClient) => {
       await reconcileMentorOffers(transaction);
       const eligibility = await readMentorEligibility(transaction, userId);
       if (!eligibility.eligible) throw new MentorEligibilityException();
@@ -457,6 +475,14 @@ export class MentorsRepository {
         },
       });
 
+      // A former mentor may retain preferences from an earlier participation.
+      // Re-entry always uses the newly submitted selections.
+      await transaction.mentorTechnicalArea.deleteMany({
+        where: { mentorId: userId },
+      });
+      await transaction.mentorOrientationType.deleteMany({
+        where: { mentorId: userId },
+      });
       await transaction.mentorTechnicalArea.createMany({
         data: technicalAreaIds.map((technicalAreaId) => ({
           mentorId: userId,
@@ -481,7 +507,8 @@ export class MentorsRepository {
       });
 
       return { id: userId };
-    });
+    };
+    return tx ? activate(tx) : withMentorCapacityLock(this.prisma, activate);
   }
 
   updateAvailability(userId: string, isAvailable: boolean) {

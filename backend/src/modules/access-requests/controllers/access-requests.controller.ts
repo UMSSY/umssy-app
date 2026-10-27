@@ -1,4 +1,18 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Res,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
@@ -8,12 +22,24 @@ import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
-import { rejectAccessRequestSchema, type RejectAccessRequestDto } from '../requests/reject-access-request.schema.js';
-import { listAccessRequestsQuerySchema, type ListAccessRequestsQuery } from '../requests/list-access-requests.schema.js';
+import {
+  rejectAccessRequestSchema,
+  type RejectAccessRequestDto,
+} from '../requests/reject-access-request.schema.js';
+import {
+  listAccessRequestsQuerySchema,
+  type ListAccessRequestsQuery,
+} from '../requests/list-access-requests.schema.js';
 import { DocumentUploadInterceptor } from '../interceptors/document-upload.interceptor.js';
 import { AccessRequestsService } from '../services/access-requests.service.js';
-import { createAccessRequestSchema, type CreateAccessRequestDto } from '../requests/create-access-request.schema.js';
-import { attachDocumentSchema, type AttachDocumentDto } from '../requests/attach-document.schema.js';
+import {
+  createAccessRequestSchema,
+  type CreateAccessRequestDto,
+} from '../requests/create-access-request.schema.js';
+import {
+  attachDocumentSchema,
+  type AttachDocumentDto,
+} from '../requests/attach-document.schema.js';
 import type { UploadedDocumentFile } from '../types/uploaded-file.types.js';
 import {
   requestStatusParamsSchema,
@@ -21,8 +47,17 @@ import {
   type RequestStatusParams,
   type RequestStatusQuery,
 } from '../requests/request-status.schema.js';
-import { updateAccessRequestSchema, type UpdateAccessRequestDto } from '../requests/update-access-request.schema.js';
+import {
+  updateAccessRequestSchema,
+  type UpdateAccessRequestDto,
+} from '../requests/update-access-request.schema.js';
 import { BACKOFFICE_ROLE } from '../constants/backoffice.constants.js';
+import { ApprovedAccountActivationService } from '../services/approved-account-activation.service.js';
+import {
+  activateApprovedAccountSchema,
+  type ActivateApprovedAccountDto,
+} from '../requests/activate-approved-account.schema.js';
+import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
 
 interface DocumentResponse {
   set: (headers: Record<string, string>) => unknown;
@@ -30,17 +65,38 @@ interface DocumentResponse {
 }
 
 const uuidPipe = new ParseUUIDPipe({
-  exceptionFactory: () => new RequestValidationException([{ field: 'id', message: 'El identificador de la solicitud no es válido' }]),
+  exceptionFactory: () =>
+    new RequestValidationException([
+      { field: 'id', message: 'El identificador de la solicitud no es válido' },
+    ]),
 });
 
 @Controller('access-requests')
 export class AccessRequestsController {
-  constructor(private readonly accessRequestsService: AccessRequestsService) {}
+  constructor(
+    private readonly accessRequestsService: AccessRequestsService,
+    private readonly accountActivation?: ApprovedAccountActivationService,
+  ) {}
+
+  @Post(':id/activate')
+  @UseInterceptors(ResponseInterceptor)
+  activateApprovedAccount(
+    @Param('id', uuidPipe) id: string,
+    @Body(new ZodValidationPipe(activateApprovedAccountSchema))
+    body: ActivateApprovedAccountDto,
+  ) {
+    if (!this.accountActivation)
+      throw new Error('Account activation service is unavailable');
+    return this.accountActivation.activate(id, body);
+  }
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(BACKOFFICE_ROLE)
-  list(@Query(new ZodValidationPipe(listAccessRequestsQuerySchema)) query: ListAccessRequestsQuery) {
+  list(
+    @Query(new ZodValidationPipe(listAccessRequestsQuerySchema))
+    query: ListAccessRequestsQuery,
+  ) {
     return this.accessRequestsService.list(query);
   }
 
@@ -53,8 +109,10 @@ export class AccessRequestsController {
 
   @Get('status/:code')
   getStatus(
-    @Param(new ZodValidationPipe(requestStatusParamsSchema)) params: RequestStatusParams,
-    @Query(new ZodValidationPipe(requestStatusQuerySchema)) query: RequestStatusQuery,
+    @Param(new ZodValidationPipe(requestStatusParamsSchema))
+    params: RequestStatusParams,
+    @Query(new ZodValidationPipe(requestStatusQuerySchema))
+    query: RequestStatusQuery,
   ) {
     return this.accessRequestsService.getStatus(params.code, query.email);
   }
@@ -62,7 +120,10 @@ export class AccessRequestsController {
   @Get(':id/document')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(BACKOFFICE_ROLE)
-  async getDocument(@Param('id', uuidPipe) id: string, @Res() response: DocumentResponse): Promise<void> {
+  async getDocument(
+    @Param('id', uuidPipe) id: string,
+    @Res() response: DocumentResponse,
+  ): Promise<void> {
     const file = await this.accessRequestsService.getDocument(id);
     response.set({
       'Content-Type': file.mimeType,
@@ -75,14 +136,20 @@ export class AccessRequestsController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(BACKOFFICE_ROLE)
-  getDetail(@Param('id', uuidPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
+  getDetail(
+    @Param('id', uuidPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.accessRequestsService.getDetail(id, user.id);
   }
 
   @Patch(':id/approve')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(BACKOFFICE_ROLE)
-  approve(@Param('id', uuidPipe) id: string, @CurrentUser() user: AuthenticatedUser) {
+  approve(
+    @Param('id', uuidPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.accessRequestsService.approve(id, user.id);
   }
 
@@ -91,19 +158,27 @@ export class AccessRequestsController {
   @Roles(BACKOFFICE_ROLE)
   reject(
     @Param('id', uuidPipe) id: string,
-    @Body(new ZodValidationPipe(rejectAccessRequestSchema)) body: RejectAccessRequestDto,
+    @Body(new ZodValidationPipe(rejectAccessRequestSchema))
+    body: RejectAccessRequestDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.accessRequestsService.reject(id, user.id, body.reason);
   }
 
   @Post()
-  create(@Body(new ZodValidationPipe(createAccessRequestSchema)) body: CreateAccessRequestDto) {
+  create(
+    @Body(new ZodValidationPipe(createAccessRequestSchema))
+    body: CreateAccessRequestDto,
+  ) {
     return this.accessRequestsService.create(body);
   }
 
   @Patch(':id')
-  update(@Param('id', uuidPipe) id: string, @Body(new ZodValidationPipe(updateAccessRequestSchema)) body: UpdateAccessRequestDto) {
+  update(
+    @Param('id', uuidPipe) id: string,
+    @Body(new ZodValidationPipe(updateAccessRequestSchema))
+    body: UpdateAccessRequestDto,
+  ) {
     return this.accessRequestsService.update(id, body);
   }
 
@@ -113,13 +188,19 @@ export class AccessRequestsController {
   }
 
   @Post(':id/document')
-  @UseInterceptors(DocumentUploadInterceptor, FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE_BYTES } }))
+  @UseInterceptors(
+    DocumentUploadInterceptor,
+    FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE_BYTES } }),
+  )
   attachDocument(
     @Param('id', uuidPipe) id: string,
     @UploadedFile() file: UploadedDocumentFile | undefined,
     @Body(new ZodValidationPipe(attachDocumentSchema)) body: AttachDocumentDto,
   ) {
-    return this.accessRequestsService.attachDocument(id, { file, documentType: body.documentType });
+    return this.accessRequestsService.attachDocument(id, {
+      file,
+      documentType: body.documentType,
+    });
   }
 
   @Post(':id/submit')

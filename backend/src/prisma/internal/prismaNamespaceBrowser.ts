@@ -102,6 +102,9 @@ export const ModelName = {
   Message: 'Message',
   UserPresence: 'UserPresence',
   MentorParticipationAttemptLimit: 'MentorParticipationAttemptLimit',
+  MentorIntakeAttempt: 'MentorIntakeAttempt',
+  MentorParticipationSanction: 'MentorParticipationSanction',
+  MentorMailOutbox: 'MentorMailOutbox',
   AuditAction: 'AuditAction',
   AuditEvent: 'AuditEvent',
   DocumentValidation: 'DocumentValidation'
@@ -799,6 +802,51 @@ export const MentorParticipationAttemptLimitScalarFieldEnum = {
 export type MentorParticipationAttemptLimitScalarFieldEnum = (typeof MentorParticipationAttemptLimitScalarFieldEnum)[keyof typeof MentorParticipationAttemptLimitScalarFieldEnum]
 
 
+export const MentorIntakeAttemptScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  operation: 'operation',
+  idempotencyKey: 'idempotencyKey',
+  payloadHash: 'payloadHash',
+  occurredAt: 'occurredAt',
+  counted: 'counted',
+  responseStatus: 'responseStatus',
+  responseData: 'responseData'
+} as const
+
+export type MentorIntakeAttemptScalarFieldEnum = (typeof MentorIntakeAttemptScalarFieldEnum)[keyof typeof MentorIntakeAttemptScalarFieldEnum]
+
+
+export const MentorParticipationSanctionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  triggerAttemptId: 'triggerAttemptId',
+  startedAt: 'startedAt',
+  endsAt: 'endsAt'
+} as const
+
+export type MentorParticipationSanctionScalarFieldEnum = (typeof MentorParticipationSanctionScalarFieldEnum)[keyof typeof MentorParticipationSanctionScalarFieldEnum]
+
+
+export const MentorMailOutboxScalarFieldEnum = {
+  id: 'id',
+  eventKey: 'eventKey',
+  kind: 'kind',
+  userId: 'userId',
+  recipient: 'recipient',
+  payload: 'payload',
+  status: 'status',
+  attempts: 'attempts',
+  availableAt: 'availableAt',
+  claimedAt: 'claimedAt',
+  sentAt: 'sentAt',
+  lastError: 'lastError',
+  createdAt: 'createdAt'
+} as const
+
+export type MentorMailOutboxScalarFieldEnum = (typeof MentorMailOutboxScalarFieldEnum)[keyof typeof MentorMailOutboxScalarFieldEnum]
+
+
 export const AuditActionScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -863,6 +911,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -11,6 +11,7 @@ import { participationErrorCode, participationErrorMessage } from "../../utils/p
 
 export function MentorExitDialog() {
   const [open, setOpen] = useState(false);
+  const inFlight = useRef(false);
   const client = useQueryClient();
   const { refreshRoles } = useAuth();
   const leave = useMutation({
@@ -24,6 +25,13 @@ export function MentorExitDialog() {
       setOpen(false);
     },
   });
+  async function confirmExit() {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    try { await leave.mutateAsync(); }
+    catch { /* The mutation renders the error and preserves the current role. */ }
+    finally { inFlight.current = false; }
+  }
   return <>
     <Button variant="outline" onClick={() => { leave.reset(); setOpen(true); }}>Pausar mentoría</Button>
     <Dialog open={open} onOpenChange={(value) => { if (!leave.isPending) setOpen(value); }}>
@@ -36,7 +44,7 @@ export function MentorExitDialog() {
         </div>}
         <footer className="flex flex-wrap justify-end gap-3">
           <Button variant="outline" disabled={leave.isPending} onClick={() => setOpen(false)}>Volver</Button>
-          <Button disabled={leave.isPending} onClick={() => leave.mutate()}>{leave.isPending ? "Finalizando..." : "Confirmar salida"}</Button>
+          <Button disabled={leave.isPending} onClick={() => void confirmExit()}>{leave.isPending ? "Finalizando..." : "Confirmar salida"}</Button>
         </footer>
       </DialogContent>
     </Dialog>

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CalendarDays, Clock, History, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 import { PageHeading } from "@/shared/components/layout/page-heading";
 import { useMentorshipCatalogs } from "@/modules/mentorship/hooks/use-mentorship-catalogs";
 import { isApiError } from "@/shared/services/api-client";
+import { participationErrorMessage } from "../../utils/participation-error";
 import {
   mentorParticipationService,
   type MentorParticipationRequest,
@@ -46,7 +47,7 @@ function getErrorMessage(error: unknown): string {
     }
 
     if (status === 429) {
-      return "Has superado el límite de intentos. Se ha aplicado una sanción temporal de 72 horas.";
+      return participationErrorMessage(error);
     }
 
     const body = error.response?.data;
@@ -91,6 +92,13 @@ export function PendingParticipation({
   onCancelled,
 }: PendingParticipationProps) {
   const queryClient = useQueryClient();
+  const operationInFlight = useRef(false);
+  async function runOperation(operation: () => Promise<unknown>) {
+    if (operationInFlight.current) return;
+    operationInFlight.current = true;
+    try { await operation(); } catch { /* Render the corresponding mutation error. */ }
+    finally { operationInFlight.current = false; }
+  }
 
   const {
     technicalAreas,
@@ -406,7 +414,7 @@ export function PendingParticipation({
                 isTechnicalAreasLoading ||
                 isOrientationTypesLoading
               }
-              onClick={() => updateMutation.mutate()}
+              onClick={() => void runOperation(() => updateMutation.mutateAsync())}
             >
               {updateMutation.isPending ? "Guardando..." : "Guardar cambios"}
             </Button>
@@ -441,7 +449,7 @@ export function PendingParticipation({
             <Button
               variant="brand"
               disabled={cancelMutation.isPending}
-              onClick={() => cancelMutation.mutate()}
+              onClick={() => void runOperation(() => cancelMutation.mutateAsync())}
             >
               {cancelMutation.isPending
                 ? "Cancelando..."

@@ -1,6 +1,7 @@
 
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
+import { withMentorIntakeKey } from "@/modules/mentorship/services/mentor-intake-idempotency";
 
 export type MentorParticipationRequest = {
   id: string;
@@ -59,11 +60,13 @@ export const mentorParticipationService = {
   async create(
     preferences: MentorParticipationPreferences,
   ): Promise<MentorParticipationRequest> {
+    return withMentorIntakeKey("request", preferences, async (key) => {
     const response = await apiClient.post<
       ApiResponse<MentorParticipationRequest>
-    >(BASE_PATH, preferences);
+    >(BASE_PATH, preferences, { headers: { "Idempotency-Key": key } });
 
     return response.data.data;
+    });
   },
 
   async update(

@@ -32,6 +32,20 @@ beforeEach(() => {
 afterEach(() => { cleanup(); sessionStorage.clear(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("shared app shell across roles and routes", () => {
+  it("abre y cierra el menú móvil con botón y Escape aunque el escritorio conserve su sidebar expandido", async () => {
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+    route.pathname = "/mentors/participation";
+    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ sub: "user", roleTag: "titulado" }))}.s`);
+    renderWithQuery(<AppRouteLayout><main>Mi participación</main></AppRouteLayout>);
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Abrir menú" }));
+    expect(await screen.findByRole("dialog", { name: "Sidebar" })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Cerrar barra lateral" }));
+    expect(screen.queryByRole("dialog", { name: "Sidebar" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Abrir menú" }));
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog", { name: "Sidebar" })).not.toBeInTheDocument();
+  });
   it.each(ROUTES)("keeps the same chrome and red logout for %s at %s", async (role, pathname) => {
     route.pathname = pathname;
     sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ sub: "user", roleTag: role }))}.s`);

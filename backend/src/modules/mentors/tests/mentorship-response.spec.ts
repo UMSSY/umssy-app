@@ -10,6 +10,7 @@ import { MentorsController } from '../controllers/mentors.controller.js';
 import { MentorsService } from '../services/mentors.service.js';
 import { MentorNotFoundException } from '../exceptions/mentor-not-found.exception.js';
 import { AlreadyMentorException } from '../exceptions/already-mentor.exception.js';
+import { MentorParticipationException } from '../exceptions/mentor-participation.exception.js';
 import { TechnicalAreasController } from '../../technical-areas/controllers/technical-areas.controller.js';
 import { TechnicalAreasService } from '../../technical-areas/services/technical-areas.service.js';
 import { OrientationTypesController } from '../../orientation-types/controllers/orientation-types.controller.js';
@@ -190,6 +191,7 @@ describe('Mentorship Standard Response HTTP', () => {
   it('POST /api/mentors/activate conserva HTTP 201', async () => {
     await request(server)
       .post('/api/mentors/activate')
+      .set('Idempotency-Key', '11111111-1111-4111-8111-111111111111')
       .send(activationPayload)
       .expect(201)
       .expect({
@@ -202,7 +204,41 @@ describe('Mentorship Standard Response HTTP', () => {
     expect(mentorsService.activate).toHaveBeenCalledWith(
       userId,
       activationPayload,
+      '11111111-1111-4111-8111-111111111111',
     );
+  });
+
+  it.each([undefined, 'no-es-uuid'])(
+    'exige Idempotency-Key UUID: %s',
+    async (key) => {
+      const previousCalls = mentorsService.activate.mock.calls.length;
+      const operation = request(server).post('/api/mentors/activate');
+      if (key) operation.set('Idempotency-Key', key);
+      const response = await operation.send(activationPayload).expect(400);
+      expect(response.body.data.code).toBe('INVALID_IDEMPOTENCY_KEY');
+      expect(mentorsService.activate).toHaveBeenCalledTimes(previousCalls);
+    },
+  );
+
+  it('devuelve metadatos y Retry-After para una suspensión sin alterar el wrapper', async () => {
+    const endsAt = '2026-10-30T12:00:00.000Z';
+    const error = new MentorParticipationException('Suspensión temporal', 429, {
+      code: 'MENTOR_REQUEST_SUSPENDED',
+      sanctionEndsAt: endsAt,
+    });
+    error.retryAfterSeconds = 259200;
+    mentorsService.activate.mockRejectedValueOnce(error);
+    const response = await request(server)
+      .post('/api/mentors/activate')
+      .set('Idempotency-Key', '11111111-1111-4111-8111-111111111111')
+      .send(activationPayload)
+      .expect(429)
+      .expect('Retry-After', '259200');
+    expect(response.body).toMatchObject({
+      ok: false,
+      statusCode: 429,
+      data: { code: 'MENTOR_REQUEST_SUSPENDED', sanctionEndsAt: endsAt },
+    });
   });
 
   it.each([
@@ -235,6 +271,7 @@ describe('Mentorship Standard Response HTTP', () => {
 
     await request(server)
       .post('/api/mentors/activate')
+      .set('Idempotency-Key', '11111111-1111-4111-8111-111111111111')
       .send(activationPayload)
       .expect(409)
       .expect({

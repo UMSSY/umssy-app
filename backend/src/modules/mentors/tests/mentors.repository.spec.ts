@@ -3,7 +3,9 @@ import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 
-vi.mock('../repositories/mentor-offers.queries.js', () => ({ reconcileMentorOffers: vi.fn() }));
+vi.mock('../repositories/mentor-offers.queries.js', () => ({
+  reconcileMentorOffers: vi.fn(),
+}));
 
 describe('MentorsRepository', () => {
   it('no consulta metadatos de fotos si el directorio está vacío', async () => {
@@ -22,10 +24,13 @@ describe('MentorsRepository', () => {
     }));
     const updatedAt = new Date('2026-10-09T12:00:00.000Z');
 
-    const findMany = vi.fn().mockResolvedValueOnce(records).mockResolvedValueOnce([
-      { id: 'mentor-0', updatedAt },
-      { id: 'mentor-19', updatedAt },
-    ]);
+    const findMany = vi
+      .fn()
+      .mockResolvedValueOnce(records)
+      .mockResolvedValueOnce([
+        { id: 'mentor-0', updatedAt },
+        { id: 'mentor-19', updatedAt },
+      ]);
 
     const repository = new MentorsRepository({
       user: { findMany },
@@ -263,11 +268,7 @@ describe('MentorsRepository', () => {
           },
         },
       },
-      orderBy: [
-        { firstName: 'asc' },
-        { lastName: 'asc' },
-        { id: 'asc' },
-      ],
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
     });
 
     expect(result).toEqual(
@@ -354,13 +355,23 @@ describe('MentorsRepository', () => {
     });
 
     const transaction = {
-      $queryRaw: vi.fn().mockResolvedValueOnce([])
+      $queryRaw: vi
+        .fn()
+        .mockResolvedValueOnce([])
         .mockResolvedValueOnce([{ eligible: true, alreadyMentor: false }])
-        .mockResolvedValueOnce([{ approvedGraduates: 5, activeMentors: 0, reservedOffers: 0 }]),
+        .mockResolvedValueOnce([
+          { approvedGraduates: 5, activeMentors: 0, reservedOffers: 0 },
+        ]),
       $executeRaw: vi.fn(),
       userRole: { create: createUserRole },
-      mentorTechnicalArea: { createMany: createTechnicalAreas },
-      mentorOrientationType: { createMany: createOrientationTypes },
+      mentorTechnicalArea: {
+        createMany: createTechnicalAreas,
+        deleteMany: vi.fn(),
+      },
+      mentorOrientationType: {
+        createMany: createOrientationTypes,
+        deleteMany: vi.fn(),
+      },
       user: { update: updateUser },
     };
 
@@ -409,13 +420,23 @@ describe('MentorsRepository', () => {
     const createOrientationTypes = vi.fn();
 
     const transaction = {
-      $queryRaw: vi.fn().mockResolvedValueOnce([])
+      $queryRaw: vi
+        .fn()
+        .mockResolvedValueOnce([])
         .mockResolvedValueOnce([{ eligible: true, alreadyMentor: false }])
-        .mockResolvedValueOnce([{ approvedGraduates: 5, activeMentors: 0, reservedOffers: 0 }]),
+        .mockResolvedValueOnce([
+          { approvedGraduates: 5, activeMentors: 0, reservedOffers: 0 },
+        ]),
       $executeRaw: vi.fn(),
       userRole: { create: createUserRole },
-      mentorTechnicalArea: { createMany: createTechnicalAreas },
-      mentorOrientationType: { createMany: createOrientationTypes },
+      mentorTechnicalArea: {
+        createMany: createTechnicalAreas,
+        deleteMany: vi.fn(),
+      },
+      mentorOrientationType: {
+        createMany: createOrientationTypes,
+        deleteMany: vi.fn(),
+      },
     };
 
     const $transaction = vi.fn(async (callback) => callback(transaction));

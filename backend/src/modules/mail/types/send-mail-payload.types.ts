@@ -4,4 +4,5 @@ export interface SendMailPayload {
   text: string;
   mjml: string;
   values?: Record<string, string>;
+  messageId?: string;
 }

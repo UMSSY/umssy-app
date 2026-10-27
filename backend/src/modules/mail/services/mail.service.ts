@@ -29,6 +29,10 @@ export class MailService {
     }
   }
 
+  isSmtpConfigured(): boolean {
+    return Boolean(this.transporter);
+  }
+
   async send(message: SendMailPayload): Promise<void> {
     const { to, subject, text } = message;
     const html = await this.templates.render(message.mjml, {
@@ -37,10 +41,13 @@ export class MailService {
       logoUrl: this.config.MAIL_LOGO_URL,
     });
     if (!this.transporter) {
-      this.logger.log(`[Correo local] Para: ${to}. ${subject}. ${text}`);
+      this.logger.log(
+        'Correo preparado con transporte local; no se realizó entrega SMTP.',
+      );
       return;
     }
     const result = await this.transporter.sendMail({
+      ...(message.messageId ? { messageId: message.messageId } : {}),
       from: {
         name: this.config.MAIL_FROM_NAME,
         address: this.config.MAIL_FROM_ADDRESS,

@@ -7,6 +7,7 @@ import {
   readMentorEligibility,
 } from './mentor-capacity.queries.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
+import { withMentorIntake } from './mentor-intake-policy.js';
 
 export interface MentorParticipationRequest {
   id: string;
@@ -21,10 +22,6 @@ export interface MentorParticipationRequest {
 const fields = Prisma.sql`id, user_id AS "userId", status, queued_at AS "queuedAt",
   created_at AS "createdAt", technical_area_ids AS "technicalAreaIds",
   orientation_type_ids AS "orientationTypeIds"`;
-
-const ATTEMPT_WINDOW_MS = 24 * 60 * 60 * 1000;
-const SANCTION_DURATION_MS = 72 * 60 * 60 * 1000;
-const MAX_ATTEMPTS = 4;
 
 @Injectable()
 export class MentorParticipationRepository {
@@ -54,86 +51,32 @@ export class MentorParticipationRepository {
     );
   }
 
-  private async registerAttempt(
-    tx: Prisma.TransactionClient,
+  withIntake<T>(
     userId: string,
+    key: string,
+    preferences: { technicalAreaIds: string[]; orientationTypeIds: string[] },
+    action: (tx: Prisma.TransactionClient) => Promise<T>,
   ) {
-    const now = new Date();
-
-    const limit = await tx.mentorParticipationAttemptLimit.findUnique({
-      where: { userId },
-    });
-
-    if (limit?.blockedUntil && limit.blockedUntil > now) {
-      return {
-        result: 'SANCTIONED' as const,
-        blockedUntil: limit.blockedUntil,
-      };
-    }
-
-    const windowExpired =
-      !limit?.windowStartedAt ||
-      now.getTime() - limit.windowStartedAt.getTime() >= ATTEMPT_WINDOW_MS;
-
-    if (windowExpired || (limit?.blockedUntil && limit.blockedUntil <= now)) {
-      await tx.mentorParticipationAttemptLimit.upsert({
-        where: { userId },
-        create: {
-          userId,
-          attemptCount: 1,
-          windowStartedAt: now,
-          blockedUntil: null,
-        },
-        update: {
-          attemptCount: 1,
-          windowStartedAt: now,
-          blockedUntil: null,
-        },
-      });
-
-      return { result: 'ALLOWED' as const };
-    }
-
-    const attemptCount = limit.attemptCount + 1;
-
-    if (attemptCount > MAX_ATTEMPTS) {
-      const blockedUntil = new Date(
-        now.getTime() + SANCTION_DURATION_MS,
-      );
-
-      await tx.mentorParticipationAttemptLimit.update({
-        where: { userId },
-        data: {
-          attemptCount,
-          blockedUntil,
-        },
-      });
-
-      return {
-        result: 'SANCTIONED' as const,
-        blockedUntil,
-      };
-    }
-
-    await tx.mentorParticipationAttemptLimit.update({
-      where: { userId },
-      data: { attemptCount },
-    });
-
-    return { result: 'ALLOWED' as const };
+    return withMentorIntake(
+      this.prisma,
+      userId,
+      'REQUEST',
+      key,
+      preferences,
+      action,
+    );
   }
 
   createRequest(
     userId: string,
     technicalAreaIds: string[],
     orientationTypeIds: string[],
+    transaction?: Prisma.TransactionClient,
   ) {
-    return withMentorCapacityLock(this.prisma, async (tx) => {
+    const create = async (tx: Prisma.TransactionClient) => {
       const eligibility = await readMentorEligibility(tx, userId);
       if (!eligibility.eligible || eligibility.alreadyMentor)
         return { result: 'NOT_ELIGIBLE' as const };
-      const attempt = await this.registerAttempt(tx, userId);
-      if (attempt.result === 'SANCTIONED') return attempt;
       // Atiende la cola existente y vence ofertas antes de admitir otra solicitud.
       await reconcileMentorOffers(tx);
       const [existing] = await tx.$queryRaw<MentorParticipationRequest[]>`
@@ -167,7 +110,10 @@ export class MentorParticipationRepository {
           ARRAY[${Prisma.join(technicalAreaIds)}]::uuid[], ARRAY[${Prisma.join(orientationTypeIds)}]::uuid[]
         FROM instant RETURNING ${fields}`;
       return { result: 'CREATED' as const, request };
-    });
+    };
+    return transaction
+      ? create(transaction)
+      : withMentorCapacityLock(this.prisma, create);
   }
 
   findMyRequest(userId: string) {

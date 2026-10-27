@@ -18,13 +18,14 @@ async function bootstrap(): Promise<void> {
 
   app.enableCors({
     origin: corsOrigins,
-    exposedHeaders: ['Content-Disposition'],
+    exposedHeaders: ['Content-Disposition', 'Retry-After'],
   });
   app.setGlobalPrefix('api');
 
   const config = buildSwaggerConfig();
 
-  const documentFactory = () => cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
+  const documentFactory = () =>
+    cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
   SwaggerModule.setup('docs', app, documentFactory, {
     swaggerOptions: { persistAuthorization: true },
   });

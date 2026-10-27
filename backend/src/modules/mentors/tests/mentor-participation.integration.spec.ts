@@ -1,14 +1,6 @@
-
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import pg from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../../../prisma/client.js';
@@ -38,9 +30,7 @@ describe.skipIf(!connectionString)(
     beforeAll(async () => {
       const url = new URL(connectionString!);
 
-      if (
-        !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)
-      ) {
+      if (!['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) {
         throw new Error('Solo se permite PostgreSQL local');
       }
 
@@ -182,6 +172,7 @@ describe.skipIf(!connectionString)(
 
     beforeEach(async () => {
       await prisma.mentorParticipationAttemptLimit.deleteMany();
+      await prisma.$executeRaw`TRUNCATE mentor_mail_outbox, mentor_participation_sanctions, mentor_intake_attempts`;
       await prisma.mentorParticipationRequest.deleteMany();
     });
 
@@ -192,17 +183,13 @@ describe.skipIf(!connectionString)(
 
     describe('HU7-2: solicitudes FIFO', () => {
       it('crea una solicitud pendiente cuando no hay cupos', async () => {
-        const result = await service.create(
-          userId(1),
-          preferences(),
-        );
+        const result = await service.create(userId(1), preferences());
 
         expect(result.status).toBe('PENDING');
 
-        const saved =
-          await prisma.mentorParticipationRequest.findMany({
-            where: { userId: userId(1) },
-          });
+        const saved = await prisma.mentorParticipationRequest.findMany({
+          where: { userId: userId(1) },
+        });
 
         expect(saved).toHaveLength(1);
         expect(saved[0].id).toBe(result.id);
@@ -214,26 +201,29 @@ describe.skipIf(!connectionString)(
           service.create(userId(1), preferences()),
         ]);
 
-        expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+        expect(
+          results.filter((result) => result.status === 'fulfilled'),
+        ).toHaveLength(1);
         const rejected = results.find((result) => result.status === 'rejected');
-        expect(rejected && rejected.status === 'rejected' && rejected.reason).toMatchObject({ statusCode: 409, data: { code: 'REQUEST_ALREADY_EXISTS' } });
+        expect(
+          rejected && rejected.status === 'rejected' && rejected.reason,
+        ).toMatchObject({
+          statusCode: 409,
+          data: { code: 'REQUEST_ALREADY_EXISTS' },
+        });
 
-        const count =
-          await prisma.mentorParticipationRequest.count({
-            where: {
-              userId: userId(1),
-              status: 'PENDING',
-            },
-          });
+        const count = await prisma.mentorParticipationRequest.count({
+          where: {
+            userId: userId(1),
+            status: 'PENDING',
+          },
+        });
 
         expect(count).toBe(1);
       });
 
       it('mantiene la posicion FIFO al modificar preferencias', async () => {
-        const original = await service.create(
-          userId(1),
-          preferences(),
-        );
+        const original = await service.create(userId(1), preferences());
 
         const updated = await service.updatePreferences(
           userId(1),
@@ -243,39 +233,31 @@ describe.skipIf(!connectionString)(
         expect(updated.id).toBe(original.id);
         expect(updated.queuedAt).toEqual(original.queuedAt);
 
-        const saved =
-          await prisma.mentorParticipationRequest.findUnique({
-            where: { id: original.id },
-          });
+        const saved = await prisma.mentorParticipationRequest.findUnique({
+          where: { id: original.id },
+        });
 
         expect(saved?.queuedAt).toEqual(original.queuedAt);
       });
 
       it('cancela una solicitud sin eliminar su historial', async () => {
-        const original = await service.create(
-          userId(1),
-          preferences(),
-        );
+        const original = await service.create(userId(1), preferences());
 
         const cancelled = await service.cancel(userId(1));
 
         expect(cancelled.id).toBe(original.id);
         expect(cancelled.status).toBe('CANCELLED');
 
-        const saved =
-          await prisma.mentorParticipationRequest.findUnique({
-            where: { id: original.id },
-          });
+        const saved = await prisma.mentorParticipationRequest.findUnique({
+          where: { id: original.id },
+        });
 
         expect(saved).not.toBeNull();
         expect(saved?.status).toBe('CANCELLED');
       });
 
       it('no permite editar solicitudes con una oferta vigente', async () => {
-        const original = await service.create(
-          userId(1),
-          preferences(),
-        );
+        const original = await service.create(userId(1), preferences());
 
         await prisma.mentorParticipationRequest.update({
           where: { id: original.id },
@@ -288,39 +270,29 @@ describe.skipIf(!connectionString)(
           statusCode: 404,
         });
 
-        const saved =
-          await prisma.mentorParticipationRequest.findUnique({
-            where: { id: original.id },
-          });
+        const saved = await prisma.mentorParticipationRequest.findUnique({
+          where: { id: original.id },
+        });
 
         expect(saved?.status).toBe('OFFERED');
       });
 
       it('no permite cancelar solicitudes de otro usuario', async () => {
-        const original = await service.create(
-          userId(1),
-          preferences(),
-        );
+        const original = await service.create(userId(1), preferences());
 
-        await expect(
-          service.cancel(userId(2)),
-        ).rejects.toMatchObject({
+        await expect(service.cancel(userId(2))).rejects.toMatchObject({
           statusCode: 404,
         });
 
-        const saved =
-          await prisma.mentorParticipationRequest.findUnique({
-            where: { id: original.id },
-          });
+        const saved = await prisma.mentorParticipationRequest.findUnique({
+          where: { id: original.id },
+        });
 
         expect(saved?.status).toBe('PENDING');
       });
 
       it('incluye solicitudes canceladas en el historial', async () => {
-        const original = await service.create(
-          userId(1),
-          preferences(),
-        );
+        const original = await service.create(userId(1), preferences());
 
         await service.cancel(userId(1));
 
@@ -332,10 +304,7 @@ describe.skipIf(!connectionString)(
       });
 
       it('incluye solicitudes vencidas en el historial', async () => {
-        const original = await service.create(
-          userId(1),
-          preferences(),
-        );
+        const original = await service.create(userId(1), preferences());
 
         await prisma.mentorParticipationRequest.update({
           where: { id: original.id },
@@ -350,15 +319,9 @@ describe.skipIf(!connectionString)(
       });
 
       it('no muestra solicitudes de otros usuarios en el historial', async () => {
-        const first = await service.create(
-          userId(1),
-          preferences(),
-        );
+        const first = await service.create(userId(1), preferences());
 
-        const second = await service.create(
-          userId(2),
-          preferences(),
-        );
+        const second = await service.create(userId(2), preferences());
 
         const history = await service.findMyHistory(userId(1));
 
@@ -369,33 +332,56 @@ describe.skipIf(!connectionString)(
     });
 
     describe('HU7-4: intentos y sanciones', () => {
+      async function policyState() {
+        const now = new Date();
+        const recent = await prisma.mentorIntakeAttempt.findMany({
+          where: {
+            userId: userId(1),
+            counted: true,
+            occurredAt: { gt: new Date(now.getTime() - 86400000) },
+          },
+          orderBy: { occurredAt: 'asc' },
+        });
+        const sanction = await prisma.mentorParticipationSanction.findFirst({
+          where: { userId: userId(1), endsAt: { gt: now } },
+        });
+        return {
+          attemptCount: recent.length,
+          windowStartedAt: recent[0]?.occurredAt ?? null,
+          blockedUntil: sanction?.endsAt ?? null,
+        };
+      }
       async function countedAttempt() {
         try {
-          return await service.create(userId(1), preferences());
+          return await service.create(userId(1), preferences(), randomUUID());
         } catch (error) {
-          if ((error as { data?: { code?: string } }).data?.code !== 'REQUEST_ALREADY_EXISTS') throw error;
+          if (
+            (error as { data?: { code?: string } }).data?.code !==
+            'REQUEST_ALREADY_EXISTS'
+          )
+            throw error;
           expect(error).toMatchObject({ statusCode: 409 });
-          return prisma.mentorParticipationRequest.findFirstOrThrow({ where: { userId: userId(1), status: 'PENDING' } });
+          return prisma.mentorParticipationRequest.findFirstOrThrow({
+            where: { userId: userId(1), status: 'PENDING' },
+          });
         }
       }
 
       it('permite cuatro intentos dentro de 24 horas', async () => {
-        const requests: Awaited<ReturnType<MentorParticipationService['create']>>[] = [];
+        const requests: Awaited<
+          ReturnType<MentorParticipationService['create']>
+        >[] = [];
 
         for (let attempt = 0; attempt < 4; attempt += 1) {
-          requests.push(
-            await countedAttempt(),
-          );
+          requests.push(await countedAttempt());
         }
 
         expect(requests).toHaveLength(4);
-        expect(requests.every((request) => request.id === requests[0].id))
-          .toBe(true);
+        expect(requests.every((request) => request.id === requests[0].id)).toBe(
+          true,
+        );
 
-        const limit =
-          await prisma.mentorParticipationAttemptLimit.findUnique({
-            where: { userId: userId(1) },
-          });
+        const limit = await policyState();
 
         expect(limit?.attemptCount).toBe(4);
         expect(limit?.blockedUntil).toBeNull();
@@ -408,18 +394,13 @@ describe.skipIf(!connectionString)(
 
         const before = new Date();
 
-        await expect(
-          countedAttempt(),
-        ).rejects.toMatchObject({
+        await expect(countedAttempt()).rejects.toMatchObject({
           statusCode: 429,
         });
 
         const after = new Date();
 
-        const limit =
-          await prisma.mentorParticipationAttemptLimit.findUnique({
-            where: { userId: userId(1) },
-          });
+        const limit = await policyState();
 
         expect(limit?.attemptCount).toBe(5);
         expect(limit?.blockedUntil).not.toBeNull();
@@ -440,27 +421,17 @@ describe.skipIf(!connectionString)(
           await countedAttempt();
         }
 
-        await expect(
-          countedAttempt(),
-        ).rejects.toMatchObject({
+        await expect(countedAttempt()).rejects.toMatchObject({
           statusCode: 429,
         });
 
-        const original =
-          await prisma.mentorParticipationAttemptLimit.findUniqueOrThrow({
-            where: { userId: userId(1) },
-          });
+        const original = await policyState();
 
-        await expect(
-          countedAttempt(),
-        ).rejects.toMatchObject({
+        await expect(countedAttempt()).rejects.toMatchObject({
           statusCode: 429,
         });
 
-        const current =
-          await prisma.mentorParticipationAttemptLimit.findUniqueOrThrow({
-            where: { userId: userId(1) },
-          });
+        const current = await policyState();
 
         expect(current.attemptCount).toBe(5);
         expect(current.blockedUntil).toEqual(original.blockedUntil);
@@ -471,27 +442,22 @@ describe.skipIf(!connectionString)(
           await countedAttempt();
         }
 
-        await expect(
-          countedAttempt(),
-        ).rejects.toMatchObject({
+        await expect(countedAttempt()).rejects.toMatchObject({
           statusCode: 429,
         });
 
-        await prisma.mentorParticipationAttemptLimit.update({
-          where: { userId: userId(1) },
-          data: {
-            blockedUntil: new Date(Date.now() - 1000),
-          },
+        await prisma.$executeRaw`WITH instant AS (SELECT clock_timestamp() AS now)
+          UPDATE mentor_participation_sanctions SET started_at = instant.now - interval '72 hours 1 second',
+            ends_at = instant.now - interval '1 second' FROM instant`;
+        await prisma.mentorIntakeAttempt.updateMany({
+          data: { occurredAt: new Date(Date.now() - 73 * 3600000) },
         });
 
         const result = await countedAttempt();
 
         expect(result.status).toBe('PENDING');
 
-        const limit =
-          await prisma.mentorParticipationAttemptLimit.findUniqueOrThrow({
-            where: { userId: userId(1) },
-          });
+        const limit = await policyState();
 
         expect(limit.attemptCount).toBe(1);
         expect(limit.blockedUntil).toBeNull();
@@ -501,21 +467,13 @@ describe.skipIf(!connectionString)(
         await countedAttempt();
         await countedAttempt();
 
-        await prisma.mentorParticipationAttemptLimit.update({
-          where: { userId: userId(1) },
-          data: {
-            windowStartedAt: new Date(
-              Date.now() - 25 * 60 * 60 * 1000,
-            ),
-          },
+        await prisma.mentorIntakeAttempt.updateMany({
+          data: { occurredAt: new Date(Date.now() - 25 * 3600000) },
         });
 
         await countedAttempt();
 
-        const limit =
-          await prisma.mentorParticipationAttemptLimit.findUniqueOrThrow({
-            where: { userId: userId(1) },
-          });
+        const limit = await policyState();
 
         expect(limit.attemptCount).toBe(1);
         expect(limit.blockedUntil).toBeNull();

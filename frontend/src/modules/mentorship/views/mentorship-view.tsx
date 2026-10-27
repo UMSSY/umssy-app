@@ -173,10 +173,7 @@ export function MentorshipView() {
         } else if (status === 409) {
           setActivationError(message ?? "Tu participación como mentor ya está activa.");
         } else if (status === 429) {
-          setActivationError(
-            message ??
-              "Has superado el límite de cuatro intentos en 24 horas. Tu participación está bloqueada temporalmente durante 72 horas.",
-          );
+          setActivationError(participationErrorMessage(error));
         } else {
           setActivationError(
             message ??

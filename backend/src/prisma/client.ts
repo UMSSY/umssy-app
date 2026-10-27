@@ -297,6 +297,21 @@ export type UserPresence = Prisma.UserPresenceModel
  */
 export type MentorParticipationAttemptLimit = Prisma.MentorParticipationAttemptLimitModel
 /**
+ * Model MentorIntakeAttempt
+ *
+ */
+export type MentorIntakeAttempt = Prisma.MentorIntakeAttemptModel
+/**
+ * Model MentorParticipationSanction
+ *
+ */
+export type MentorParticipationSanction = Prisma.MentorParticipationSanctionModel
+/**
+ * Model MentorMailOutbox
+ *
+ */
+export type MentorMailOutbox = Prisma.MentorMailOutboxModel
+/**
  * Model AuditAction
  *
  */

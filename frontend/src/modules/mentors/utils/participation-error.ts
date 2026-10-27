@@ -7,6 +7,7 @@ export function participationErrorCode(error: unknown): string | undefined {
 
 export function participationErrorMessage(error: unknown): string {
   if (isApiError(error)) {
+    if (error.response?.status === 429) return "Tu capacidad para solicitar participación como mentor ha sido suspendida temporalmente. Recibirás más información en tu correo institucional.";
     if (error.response?.status === 401) return "Tu sesión ha caducado. Inicia sesión nuevamente.";
     const body = error.response?.data;
     if (typeof body?.detail === "string") return body.detail;

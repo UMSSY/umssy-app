@@ -8,6 +8,16 @@ export class DomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainException, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
 
+    if (
+      'retryAfterSeconds' in exception &&
+      typeof exception.retryAfterSeconds === 'number'
+    ) {
+      response.setHeader(
+        'Retry-After',
+        String(Math.max(0, Math.ceil(exception.retryAfterSeconds))),
+      );
+    }
+
     response.status(exception.statusCode).json({
       statusCode: exception.statusCode,
       data: exception.data,
