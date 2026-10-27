@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Hourglass, Info, ListOrdered, LoaderCircle, Lock, Send, X } from "lucide-react";
 import { useSlotRequestPreview } from "../../hooks/use-slot-request-preview";
 import type { SlotRequestScenario } from "../../services/slot-request-preview.service";
-import { PendingParticipation } from "./pending-participation";
 import { SlotCancellationFeedback } from "./slot-cancellation-feedback";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +19,7 @@ export function SlotAvailabilityPreview() {
   const preview = useSlotRequestPreview();
   const [available, setAvailable] = useState(false);
   const [open, setOpen] = useState(false);
-  if (preview.request) return <PendingParticipation />;
+  if (preview.request) return null;
   if (preview.notice === "cancelled") return <SlotCancellationFeedback />;
   return (
     <section aria-label="Disponibilidad de cupos (simulación)" className="mb-6 rounded-lg border border-border bg-surface p-5 sm:p-6">

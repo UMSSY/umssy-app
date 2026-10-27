@@ -1,17 +1,11 @@
-"use client";
 
-import { useAuth } from "@/shared/contexts/auth-context";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { SlotUnavailableDialog } from "@/modules/mentors/components/participation/slot-availability-preview";
-import { ParticipationOverview } from "@/modules/mentors/components/participation/participation-overview";
-import { PendingParticipation } from "@/modules/mentors/components/participation/pending-participation";
-import { useSlotRequestPreview } from "@/modules/mentors/hooks/use-slot-request-preview";
-import { SlotCancellationFeedback } from "@/modules/mentors/components/participation/slot-cancellation-feedback";
-import { isApiError } from "@/shared/services/api-client";
-
+import { useAuth } from "@/shared/contexts/auth-context";
+import { apiClient, isApiError } from "@/shared/services/api-client";
 import { Button } from "@/components/ui/button";
 import { activateMentor } from "../services/mentor-activation.service";
 import { OrientationStep } from "../components/orientation/orientation-step";
@@ -24,15 +18,53 @@ import { useMentorshipCatalogs } from "../hooks/use-mentorship-catalogs";
 import { useMentorshipWizard } from "../hooks/use-mentorship-wizard";
 import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
 
+type ParticipationRequest = {
+  id: string;
+  status: string;
+  queuedAt: string;
+  technicalAreaIds: string[];
+  orientationTypeIds: string[];
+};
+
+type ParticipationResponse = {
+  statusCode: number;
+  ok: boolean;
+  detail: string;
+  data: ParticipationRequest;
+};
+
+function extractErrorMessage(error: unknown): string | null {
+  if (!isApiError(error)) return null;
+
+  const body = error.response?.data;
+
+  if (!body || typeof body !== "object") return null;
+
+  const record = body as Record<string, unknown>;
+
+  if (typeof record.detail === "string" && record.detail) {
+    return record.detail;
+  }
+
+  if (typeof record.message === "string" && record.message) {
+    return record.message;
+  }
+
+  if (
+    Array.isArray(record.message) &&
+    record.message.every((item) => typeof item === "string")
+  ) {
+    return record.message.join(". ");
+  }
+
+  return null;
+}
+
 export function MentorshipView() {
-  const slotRequestPreview = useSlotRequestPreview();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const isAvailabilitySimulation = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_APP_ENV !== "prod";
-  const [simulatedSlotsAvailable, setSimulatedSlotsAvailable] = useState(false);
-  const [isUnavailableOpen, setIsUnavailableOpen] = useState(false);
-  const [isSimulatedActive, setIsSimulatedActive] = useState(false);
   const { refreshRoles } = useAuth();
+
   const {
     currentStep,
     selectedTechnicalAreaIds,
@@ -66,15 +98,15 @@ export function MentorshipView() {
     currentStep === 1 ? wantsToParticipate : canGoNext;
 
   const handleParticipationChange = (value: boolean) => {
-    setState((prev) => ({
-      ...prev,
+    setState((previous) => ({
+      ...previous,
       wantsToParticipate: value,
     }));
   };
 
   const handleOrientationChange = (ids: string[]) => {
-    setState((prev) => ({
-      ...prev,
+    setState((previous) => ({
+      ...previous,
       selectedOrientationTypeIds: ids,
     }));
   };
@@ -88,62 +120,100 @@ export function MentorshipView() {
   );
 
   const handleActivate = async () => {
-    if (isActivating) {
-      return;
-    }
+    if (isActivating || !wantsToParticipate) return;
 
-    // Both development scenarios are local previews; never persist activation.
-    if (isAvailabilitySimulation) {
-      if (simulatedSlotsAvailable) {
-        setIsSimulatedActive(true);
-      } else {
-        setIsUnavailableOpen(true);
-      }
+    if (
+      selectedTechnicalAreaIds.length === 0 ||
+      selectedOrientationTypeIds.length === 0
+    ) {
+      setActivationError(
+        "Selecciona al menos un área técnica y un tipo de orientación.",
+      );
       return;
     }
 
     setIsActivating(true);
     setActivationError(null);
 
+    const payload = {
+      technicalAreaIds: selectedTechnicalAreaIds,
+      orientationTypeIds: selectedOrientationTypeIds,
+    };
+
     try {
-      await activateMentor({
-        technicalAreaIds: selectedTechnicalAreaIds,
-        orientationTypeIds: selectedOrientationTypeIds,
-      });
-      await refreshRoles();
+      await apiClient.post<ParticipationResponse>(
+        "/mentor-participation/requests",
+        payload,
+      );
 
       clearMentorshipWizardDraft();
-      setIsActivated(true);
-      void queryClient.invalidateQueries({ queryKey: ["mentors", "participation"] });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["mentors", "participation"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["mentor-participation-requests"],
+      });
+
       router.push("/mentors/participation");
+      return;
     } catch (error) {
+      if (isApiError(error) && error.response?.status === 409) {
+        try {
+          await activateMentor(payload);
+          await refreshRoles();
+
+          clearMentorshipWizardDraft();
+          setIsActivated(true);
+
+          await queryClient.invalidateQueries({
+            queryKey: ["mentors", "participation"],
+          });
+
+          router.push("/mentors/participation");
+          return;
+        } catch (activationFailure) {
+          setActivationError(
+            extractErrorMessage(activationFailure) ??
+              "Hay cupos disponibles, pero no se pudo activar tu participación.",
+          );
+          return;
+        }
+      }
+
       if (isApiError(error)) {
         const status = error.response?.status;
+        const message = extractErrorMessage(error);
 
         if (status === 400) {
           setActivationError(
-            "La información seleccionada no es válida. Revisa tu configuración e inténtalo nuevamente.",
+            message ??
+              "Las preferencias seleccionadas no son válidas.",
           );
         } else if (status === 401) {
           setActivationError(
-            "Tu sesión ya no es válida. Inicia sesión nuevamente para activar tu participación.",
+            "Tu sesión ya no es válida. Inicia sesión nuevamente.",
           );
-        } else if (status === 409) {
+        } else if (status === 403) {
           setActivationError(
-            "Tu participación como mentor ya está activa.",
+            message ??
+              "No cumples los requisitos para solicitar participación como mentor.",
           );
-        } else if (status === 500) {
+        } else if (status === 429) {
           setActivationError(
-            "Ocurrió un problema en el servidor. Intenta nuevamente más tarde.",
+            message ??
+              "Has superado el límite de cuatro intentos en 24 horas. Tu participación está bloqueada temporalmente durante 72 horas.",
           );
         } else {
           setActivationError(
-            "No se pudo activar tu participación. Intenta nuevamente.",
+            message ??
+              "No se pudo procesar tu solicitud. Intenta nuevamente.",
           );
         }
       } else {
         setActivationError(
-          "No se pudo activar tu participación. Intenta nuevamente.",
+          "No fue posible conectar con el servidor. Comprueba tu conexión e intenta nuevamente.",
         );
       }
     } finally {
@@ -151,26 +221,12 @@ export function MentorshipView() {
     }
   };
 
-  if (slotRequestPreview.request) return <PendingParticipation />;
-  if (slotRequestPreview.notice === "cancelled") return <SlotCancellationFeedback />;
-
-  if (isAvailabilitySimulation && isSimulatedActive) {
-    return (
-      <div className="space-y-6">
-        <section aria-label="Activación simulada" className="space-y-3 rounded-lg border border-border bg-surface-soft p-4">
-          <p role="status" className="text-sm font-semibold text-ink">Participación activa (simulación de desarrollo)</p>
-          <p className="text-sm text-text-secondary">Esta vista es temporal. No se ha activado tu cuenta ni guardado la participación en el servidor. Al recargar se vuelve al formulario.</p>
-          <Button variant="outline" onClick={() => setIsSimulatedActive(false)}>Volver al formulario y probar otro escenario</Button>
-        </section>
-        <ParticipationOverview areas={selectedTechnicalAreas.map((area) => area.name)} orientations={selectedOrientationTypes.map((orientation) => orientation.name)} />
-      </div>
-    );
-  }
-
   if (isActivated) {
     return (
       <MentorshipActivatedSummary
-        technicalAreaNames={selectedTechnicalAreas.map((area) => area.name)}
+        technicalAreaNames={selectedTechnicalAreas.map(
+          (area) => area.name,
+        )}
         orientationLabels={selectedOrientationTypes.map(
           (orientation) => orientation.name,
         )}
@@ -195,7 +251,7 @@ export function MentorshipView() {
 
       if (isTechnicalAreasError) {
         return (
-          <div>
+          <div className="space-y-3">
             <p>No se pudieron cargar las áreas técnicas.</p>
             <Button type="button" onClick={retryTechnicalAreas}>
               Reintentar
@@ -224,7 +280,7 @@ export function MentorshipView() {
 
       if (isOrientationTypesError) {
         return (
-          <div>
+          <div className="space-y-3">
             <p>No se pudieron cargar los tipos de orientación.</p>
             <Button type="button" onClick={retryOrientationTypes}>
               Reintentar
@@ -248,27 +304,16 @@ export function MentorshipView() {
 
     return (
       <>
-      {isAvailabilitySimulation && (
-        <section aria-label="Simulación de disponibilidad" className="mb-6 space-y-3 rounded-lg border border-border bg-surface-soft p-4">
-          <p className="text-sm font-semibold text-ink">Disponibilidad simulada para desarrollo</p>
-          <p className="text-xs text-text-secondary">Elige el escenario antes de confirmar. La disponibilidad y la activación son simuladas: ninguna opción activa tu cuenta ni guarda la participación en el servidor.</p>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" aria-pressed={!simulatedSlotsAvailable} onClick={() => setSimulatedSlotsAvailable(false)}>Simular cupos ocupados</Button>
-            <Button variant="outline" size="sm" aria-pressed={simulatedSlotsAvailable} onClick={() => setSimulatedSlotsAvailable(true)}>Simular cupos disponibles</Button>
-          </div>
-          <p role="status" className="text-sm text-accent">{simulatedSlotsAvailable ? "Hay cupos disponibles (simulación)" : "Todos los cupos están ocupados (simulación)"}</p>
-        </section>
-      )}
-      <ConfirmationStep
-        wantsToParticipate={wantsToParticipate}
-        selectedTechnicalAreas={selectedTechnicalAreas}
-        selectedOrientationTypes={selectedOrientationTypes}
-        isActivating={isActivating}
-        activationError={activationError}
-        onEditTechnicalAreas={() => goToStep(2)}
-        onEditOrientationTypes={() => goToStep(3)}
-        onActivate={handleActivate}
-      />
+        <ConfirmationStep
+          wantsToParticipate={wantsToParticipate}
+          selectedTechnicalAreas={selectedTechnicalAreas}
+          selectedOrientationTypes={selectedOrientationTypes}
+          isActivating={isActivating}
+          activationError={activationError}
+          onEditTechnicalAreas={() => goToStep(2)}
+          onEditOrientationTypes={() => goToStep(3)}
+          onActivate={handleActivate}
+        />
       </>
     );
   };
@@ -282,7 +327,6 @@ export function MentorshipView() {
       onNext={goNext}
     >
       {renderStepContent()}
-      <SlotUnavailableDialog open={isUnavailableOpen} onOpenChange={setIsUnavailableOpen} areas={selectedTechnicalAreas.map((area) => area.name)} orientations={selectedOrientationTypes.map((orientation) => orientation.name)} />
     </MentorshipWizardShell>
   );
 }

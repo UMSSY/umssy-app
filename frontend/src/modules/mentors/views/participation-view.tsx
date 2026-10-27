@@ -1,28 +1,72 @@
+
 "use client";
 
+import { useSyncExternalStore } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { useParticipation } from "../hooks/use-participation";
+import {
+  getAccessToken,
+  subscribeAccessToken,
+} from "@/shared/services/storage/access-token-storage";
+import { mentorParticipationService } from "../services/mentor-participation.service";
 import { ParticipationEmptyState } from "../components/participation/participation-empty-state";
 import { ParticipationLoading } from "../components/participation/participation-loading";
 import { ParticipationOverview } from "../components/participation/participation-overview";
-import { SlotAvailabilityPreview } from "../components/participation/slot-availability-preview";
 import { PendingParticipation } from "../components/participation/pending-participation";
-import { useSlotRequestPreview } from "../hooks/use-slot-request-preview";
-import { SlotCancellationFeedback } from "../components/participation/slot-cancellation-feedback";
+import { useParticipation } from "../hooks/use-participation";
+
+const getServerToken = () => null;
 
 export function ParticipationView() {
-  const preview = useSlotRequestPreview();
-  const showAvailabilityPreview = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_APP_ENV !== "prod";
-  if (preview.request) return <PendingParticipation />;
-  if (preview.notice === "cancelled") return <SlotCancellationFeedback />;
-
-  return (
-    <>
-      {showAvailabilityPreview && <SlotAvailabilityPreview />}
-      <ParticipationContent />
-    </>
+  const token = useSyncExternalStore(
+    subscribeAccessToken,
+    getAccessToken,
+    getServerToken,
   );
+
+  const requestQuery = useQuery({
+    queryKey: ["mentor-participation-requests", token],
+    queryFn: () => mentorParticipationService.getCurrent(),
+    enabled: Boolean(token),
+    retry: false,
+  });
+
+  if (!token || requestQuery.isPending) {
+    return <ParticipationLoading />;
+  }
+
+  if (requestQuery.isError) {
+    return (
+      <main className="mx-auto w-full max-w-7xl">
+        <Alert
+          variant="destructive"
+          className="mx-auto max-w-5xl"
+        >
+          <p>No se pudo consultar tu solicitud de participación.</p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void requestQuery.refetch()}
+          >
+            Reintentar
+          </Button>
+        </Alert>
+      </main>
+    );
+  }
+
+  if (
+    requestQuery.data?.status?.toUpperCase() === "PENDING"
+  ) {
+    return (
+      <PendingParticipation
+        request={requestQuery.data}
+      />
+    );
+  }
+
+  return <ParticipationContent />;
 }
 
 function ParticipationContent() {
@@ -31,14 +75,15 @@ function ParticipationContent() {
   if (hasLoadError) {
     return (
       <main className="mx-auto w-full max-w-7xl">
-        <Alert variant="destructive" className="mx-auto max-w-5xl">
+        <Alert
+          variant="destructive"
+          className="mx-auto max-w-5xl"
+        >
           <p>No se pudo cargar tu participación como mentor.</p>
           <Button
             type="button"
             variant="outline"
-            onClick={() => {
-              retry();
-            }}
+            onClick={retry}
           >
             Reintentar
           </Button>
