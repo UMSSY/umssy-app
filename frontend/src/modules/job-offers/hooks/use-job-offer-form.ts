@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { JobOfferDetailsResponse } from "../types/job-offer.types";
+import { formatSalaryInput } from "../utils/format-salary-input";
+import { getCurrentCompany } from "../utils/get-current-company";
+import { useJobOfferDetails } from "./use-job-offer-details";
 import type {
     Modality,
     UpdateVacancyField,
@@ -29,6 +33,37 @@ const INITIAL_CONDITIONS: VacancyConditions = {
     skills: [],
 };
 
+function toConditions(offer: JobOfferDetailsResponse): VacancyConditions {
+    return {
+        title: offer.title,
+        modality: offer.modality,
+        mapsLink: offer.locationUrl,
+        contractType: offer.contractType,
+        category: offer.category,
+        vacancyCount: String(offer.positionsAvailable),
+        salary: formatSalaryInput(offer.salaryRange, ""),
+        languages: offer.languages,
+        description: offer.description,
+        skills: offer.skills,
+    };
+}
+
+const STEP_PARAM = "paso";
+const LAST_STEP = 3;
+
+function readStepFromUrl(): number {
+    const step = Number(new URLSearchParams(window.location.search).get(STEP_PARAM));
+    return Number.isInteger(step) && step >= 1 && step <= LAST_STEP ? step : 1;
+}
+
+function writeStepToUrl(step: number, mode: "push" | "replace") {
+    const url = new URL(window.location.href);
+    if (step > 1) url.searchParams.set(STEP_PARAM, String(step));
+    else url.searchParams.delete(STEP_PARAM);
+    if (mode === "push") window.history.pushState(null, "", url);
+    else window.history.replaceState(null, "", url);
+}
+
 function focusField(field: keyof VacancyConditions) {
     const element = document.getElementById(field);
     if (!element) return;
@@ -36,10 +71,30 @@ function focusField(field: keyof VacancyConditions) {
     element.focus();
 }
 
-export function useJobOfferForm() {
+export function useJobOfferForm(jobOfferId?: string) {
     const [currentStep, setCurrentStep] = useState(1);
     const [conditions, setConditions] = useState<VacancyConditions>(INITIAL_CONDITIONS);
     const [errors, setErrors] = useState<VacancyErrors>({});
+
+    // Modo edición: se reutiliza el hook de detalles (misma clave de caché y mismo endpoint).
+    const details = useJobOfferDetails(jobOfferId ? getCurrentCompany().id : null, jobOfferId ?? null);
+    const baseline = details.offer ? toConditions(details.offer) : null;
+    const [loadedOffer, setLoadedOffer] = useState(details.offer);
+    if (details.offer !== loadedOffer) {
+        setLoadedOffer(details.offer);
+        if (details.offer) setConditions(toConditions(details.offer));
+    }
+
+    useEffect(() => {
+        if (readStepFromUrl() > 1) writeStepToUrl(1, "replace");
+        const handlePopState = () => setCurrentStep(readStepFromUrl());
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, []);
+
+    useEffect(() => {
+        if (currentStep > readStepFromUrl()) writeStepToUrl(currentStep, "push");
+    }, [currentStep]);
 
     function clearError(field: keyof VacancyConditions) {
         setErrors((prev) => {
@@ -89,11 +144,12 @@ export function useJobOfferForm() {
     }
 
     function goNext() {
-        setCurrentStep((step) => Math.min(step + 1, 3));
+        setCurrentStep((step) => Math.min(step + 1, LAST_STEP));
     }
 
     function goBack() {
         setCurrentStep((step) => Math.max(step - 1, 1));
+        if (readStepFromUrl() > 1) window.history.back();
     }
 
     function handleContinue() {
@@ -114,14 +170,18 @@ export function useJobOfferForm() {
         goNext();
     }
 
-    const hasUnsavedChanges = (Object.keys(INITIAL_CONDITIONS) as (keyof VacancyConditions)[]).some(
-        (field) => !isFieldEmpty(field, conditions),
-    );
+    // En edición se compara contra la vacante cargada; en alta, contra el formulario vacío.
+    const hasUnsavedChanges = baseline
+        ? JSON.stringify(conditions) !== JSON.stringify(baseline)
+        : (Object.keys(INITIAL_CONDITIONS) as (keyof VacancyConditions)[]).some(
+              (field) => !isFieldEmpty(field, conditions),
+          );
 
     function reset() {
-        setConditions(INITIAL_CONDITIONS);
+        setConditions(baseline ?? INITIAL_CONDITIONS);
         setErrors({});
         setCurrentStep(1);
+        writeStepToUrl(1, "replace");
     }
 
     return {
@@ -129,6 +189,8 @@ export function useJobOfferForm() {
         conditions,
         errors,
         hasUnsavedChanges,
+        isLoading: Boolean(jobOfferId) && details.status === "loading",
+        loadError: jobOfferId ? details.errorMessage : null,
         updateField,
         selectModality,
         validateField,

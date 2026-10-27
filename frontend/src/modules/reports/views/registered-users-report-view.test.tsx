@@ -259,7 +259,7 @@ describe("RegisteredUsersReportView", () => {
     await user.click(screen.getByRole("button", { name: "Página 2" }));
     await screen.findByText("Mostrando 11-20 de 24 usuarios");
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 2, limit: 10, userType: undefined, period: "I-2025", search: "",
+      page: 2, limit: 10, userType: undefined, period: "I-2025", search: "", snapshotAt: expect.any(String),
     });
 
     const requestCount = vi.mocked(reportsService.getRegisteredUsers).mock.calls.length;
@@ -291,7 +291,7 @@ describe("RegisteredUsersReportView", () => {
     await user.click(screen.getByRole("button", { name: "Página 20" }));
     expect(await screen.findByText("Mostrando 191-200 de 200 usuarios", undefined, SLOW_UI_TIMEOUT)).toBeDefined();
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 20, limit: 10, userType: "empresa", period: "I-2025", search: "",
+      page: 20, limit: 10, userType: "empresa", period: "I-2025", search: "", snapshotAt: expect.any(String),
     });
     expect(screen.queryByRole("button", { name: "Página 10" })).toBeNull();
     expect(screen.getByRole("button", { name: "Página siguiente" })).toBeDisabled();
@@ -299,7 +299,7 @@ describe("RegisteredUsersReportView", () => {
     await user.click(screen.getByRole("button", { name: "Página anterior" }));
     expect(await screen.findByText("Mostrando 181-190 de 200 usuarios", undefined, SLOW_UI_TIMEOUT)).toBeDefined();
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 19, limit: 10, userType: "empresa", period: "I-2025", search: "",
+      page: 19, limit: 10, userType: "empresa", period: "I-2025", search: "", snapshotAt: expect.any(String),
     });
   }, SLOW_TEST_TIMEOUT_MS);
 

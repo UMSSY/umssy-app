@@ -7,7 +7,7 @@ export interface CreateJobOfferPayload {
   contractType: ContractType;
   category: string;
   positionsAvailable: number;
-  salaryMin: number;
+  salaryMin?: number;
   salaryMax?: number;
   languages: string;
   locationUrl: string;
@@ -32,3 +32,32 @@ export interface CurrentCompany {
   name: string;
   initials: string;
 }
+export interface JobOfferDetailsResponse {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  modality: Modality;
+  contractType: ContractType;
+  status: string;
+  positionsAvailable: number;
+  salaryRange: string;
+  languages: string;
+  locationUrl: string;
+  expiresAt: string | null;
+  createdAt: string;
+  company: {
+    id: string;
+    name: string;
+  };
+  skills: Array<{
+    id: string;
+    name: string;
+  }>;
+}
+
+export interface JobOffer extends JobOfferDetailsResponse {
+  applicantsCount: number;
+}
+
+export type JobOfferListScope = "published" | "history";
