@@ -8,7 +8,7 @@ export function PersonalDataIntro() {
         description="La carrera verifica cada solicitud con tu documento académico. Así la comunidad reúne solo a titulados reales de Ingeniería de Sistemas e Informática."
       />
 
-      <p className="text-[12.5px] text-text-secondary">
+      <p className="text-xs text-text-secondary">
         <span aria-hidden="true" className="text-accent">
           *
         </span>{" "}

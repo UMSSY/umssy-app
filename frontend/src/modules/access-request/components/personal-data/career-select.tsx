@@ -13,7 +13,7 @@ export function CareerSelect() {
 
   return (
     <div className="md:col-span-2">
-      <Label htmlFor="career" className="mb-1.5 text-[12.5px] font-semibold text-ink">
+      <Label htmlFor="career" className="mb-1.5 text-xs font-semibold text-ink">
         Carrera
         <RequiredMark />
       </Label>

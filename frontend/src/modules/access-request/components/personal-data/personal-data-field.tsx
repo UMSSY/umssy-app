@@ -22,7 +22,7 @@ export function PersonalDataField({
 
   return (
     <div className={className}>
-      <Label htmlFor={id} className="mb-1.5 text-[12.5px] font-semibold text-ink">
+      <Label htmlFor={id} className="mb-1.5 text-xs font-semibold text-ink">
         {label}
         {isRequired ? <RequiredMark /> : null}
       </Label>
@@ -61,7 +61,7 @@ export function PersonalDataField({
         )}
       </div>
       {help ? (
-        <p id={helpId} className="mt-1.5 text-[12.5px] text-text-secondary">
+        <p id={helpId} className="mt-1.5 text-xs text-text-secondary">
           {help}
         </p>
       ) : null}

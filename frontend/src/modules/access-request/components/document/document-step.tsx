@@ -40,7 +40,7 @@ export function DocumentStep() {
         />
 
         <div>
-          <Label htmlFor="documentType" className="mb-1.5 text-[12.5px] font-semibold text-ink">
+          <Label htmlFor="documentType" className="mb-1.5 text-xs font-semibold text-ink">
             Tipo de documento
             <RequiredMark />
           </Label>
@@ -110,7 +110,7 @@ export function DocumentStep() {
             </li>
           ))}
         </ul>
-        <p className="mt-4 flex gap-2 border-t border-border pt-3 text-[12.5px] text-text-secondary">
+        <p className="mt-4 flex gap-2 border-t border-border pt-3 text-xs text-text-secondary">
           <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
           Si tu documento es rechazado, recibirás el motivo por correo y podrás subir otro.
         </p>

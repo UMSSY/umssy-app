@@ -21,7 +21,7 @@ function buildFields(detail: ReviewDetail): ContrastField[] {
   ];
 }
 
-const HEAD_CLASS = "h-9 px-4 text-[12.5px] font-semibold text-text-secondary";
+const HEAD_CLASS = "h-9 px-4 text-xs font-semibold text-text-secondary";
 
 // TODO: reemplazar la captura manual por el valor leído del documento cuando exista la lectura automática
 export function DataContrastPanel({ detail }: DataContrastPanelProps) {
