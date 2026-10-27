@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { WorkExperienceAnalysisSourceResponse } from '../responses/work-experience-analysis-source.response.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { isRecordNotFoundError } from '../../../common/utils/map-record-not-found.js';
 import type { WorkExperiencePeriodSnapshot } from '../types/work-experience-period-snapshot.type.js';
@@ -21,6 +22,14 @@ const workExperienceSelect = {
 @Injectable()
 export class WorkExperienceRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  findAnalysisSources(userId: string): Promise<WorkExperienceAnalysisSourceResponse[]> {
+    return this.prisma.workExperience.findMany({
+      where: { userId },
+      orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
+      select: { id: true, position: true, description: true },
+    });
+  }
 
   findManyByUserId(userId: string): Promise<WorkExperienceRecord[]> {
     return this.prisma.workExperience.findMany({

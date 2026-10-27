@@ -110,6 +110,18 @@ describe("reportsService.getRejectedUsers", () => {
     });
   });
 
+  it("envía el tipo de usuario cuando hay filtro", async () => {
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({ data: {} });
+
+    await reportsService.getRejectedUsers({ page: 1, limit: 10, userType: "empresa", search: "" });
+
+    expect(getSpy).toHaveBeenCalledWith("/reports/rejected-users", {
+      params: { page: 1, limit: 10, userType: "empresa", search: undefined },
+      signal: undefined,
+      timeout: 10_000,
+    });
+  });
+
   it("no envía la búsqueda cuando está vacía", async () => {
     const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({ data: {} });
 
@@ -172,6 +184,17 @@ describe("reportsService.exportRejectedUsersCsv", () => {
       responseType: "blob",
     });
     expect(result).toEqual({ file, fileName: "usuarios-rechazados-2026-10-03.csv" });
+  });
+
+  it("descarga el CSV con el filtro de tipo de usuario", async () => {
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({ data: new Blob([]), headers: {} });
+
+    await reportsService.exportRejectedUsersCsv({ userType: "estudiante", search: "" });
+
+    expect(getSpy).toHaveBeenCalledWith("/reports/rejected-users/export", {
+      params: { userType: "estudiante", search: undefined },
+      responseType: "blob",
+    });
   });
 
   it("no envía la búsqueda vacía y usa un nombre por defecto", async () => {

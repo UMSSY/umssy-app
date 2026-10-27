@@ -7,6 +7,7 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { EducationsModule } from '../educations.module.js';
 import { EducationsRepository } from '../repositories/educations.repository.js';
 
@@ -69,6 +70,8 @@ describe('EducationsController', () => {
       .useValue(jwt)
       .overrideProvider(EducationsRepository)
       .useValue(repository)
+      .overrideProvider(ProfileSkillsAnalysisService)
+      .useValue({ refreshAfterChange: vi.fn().mockResolvedValue(undefined) })
       .compile();
 
     app = moduleRef.createNestApplication();
