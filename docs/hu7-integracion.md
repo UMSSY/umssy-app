@@ -1,6 +1,10 @@
 # HU7: integración backend y frontend
 
-Rama local: `codex/hu7-integracion-completa`. Fecha: 26/10/2026.
+Rama de integración: `feacture/epic-6-hu7-backend-and-frontend-integration`. Fecha: 26/10/2026.
+
+## Alcance de la publicación
+
+La rama publica código, migraciones de estructura, documentación y pruebas automatizadas. Las cuentas de demostración, bases PostgreSQL, scripts para preparar la demo, archivos de entorno y logs quedan exclusivamente en localhost, fuera del repositorio. El script de comprobación HTTP que crea una base temporal tampoco se publica; sus resultados se conservan como evidencia de la validación local. Los fixtures dentro de las pruebas automatizadas no cargan datos en la aplicación desplegada.
 
 ## Origen
 
@@ -58,9 +62,8 @@ Desde `backend`, apuntando a una instancia local de pruebas:
 $env:HU7_TEST_DATABASE_URL='postgresql://postgres@127.0.0.1:5434/postgres'
 node node_modules/typescript/bin/tsc -p tsconfig.build.json
 node node_modules/vitest/vitest.mjs run src/modules/mentors --maxWorkers 2
-node scripts/hu7-integration-smoke.mjs
 ```
 
 Resultados automatizados: 239 pruebas frontend en 29 archivos y 216 pruebas backend en 19 archivos, incluidas 28 pruebas transaccionales PostgreSQL. El smoke HTTP pasó con JWT firmado y verificó autenticación, cupos, persistencia, duplicados, edición, cancelación, oferta FIFO, confirmación concurrente, expiración y activación directa posterior. TypeScript backend/frontend, la compilación de producción Next.js con webpack (41 páginas generadas) y el lint de los archivos frontend modificados pasaron. El lint backend no reportó errores; conserva dos advertencias previas de métodos sin enlazar en pruebas ajenas a estos cambios.
 
-Esta evidencia es automatizada y no sustituye una revisión visual de todos los mockups en escritorio y móvil. El envío de correos no forma parte de este smoke HTTP. No se cambiaron migraciones en esta integración ni se ejecutó un despliegue.
+La comprobación HTTP citada se ejecutó localmente antes de excluir su script de esta publicación. Esta evidencia es automatizada y no sustituye una revisión visual de todos los mockups en escritorio y móvil. El envío de correos no forma parte de ese smoke HTTP. No se cambiaron migraciones en esta integración ni se ejecutó un despliegue.
