@@ -113,6 +113,11 @@ export type Certification = Prisma.CertificationModel
  */
 export type UserCvFile = Prisma.UserCvFileModel
 /**
+ * Model ProfileSkillProcessingState
+ * 
+ */
+export type ProfileSkillProcessingState = Prisma.ProfileSkillProcessingStateModel
+/**
  * Model TechnicalArea
  * 
  */

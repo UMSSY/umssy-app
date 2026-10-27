@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import { ProfileRepository } from '../../profile/repositories/profile.repository.js';
 import { DuplicateSkillException } from '../exceptions/duplicate-skill.exception.js';
@@ -16,6 +17,7 @@ export class UserSkillService {
     private readonly skillRepository: SkillRepository,
     private readonly profileRepository: ProfileRepository,
     private readonly skillMapper: SkillMapper,
+    private readonly skillsAnalysis: ProfileSkillsAnalysisService,
   ) {}
 
   async getUserSkills(userId: string): Promise<SkillResponse[]> {
@@ -44,6 +46,7 @@ export class UserSkillService {
     }
 
     const records = await this.userSkillRepository.replaceForUser(userId, skillIds);
+    await this.skillsAnalysis.refreshAfterChange(userId);
     return records.map((record) => this.skillMapper.toUserSkillResponse(record));
   }
 
