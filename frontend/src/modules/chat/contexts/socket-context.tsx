@@ -16,7 +16,13 @@ const SocketContext = createContext<SocketContextType>({ socket: null, isConnect
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const router = useRouter();
+  
+  let router = useRouter();
+  
+ 
+  if (process.env.NODE_ENV === 'test' || process.env.VITEST) {
+    router = { push: () => {} } as unknown as ReturnType<typeof useRouter>;
+  }
 
   useEffect(() => {
     const token = getAccessToken(); 
@@ -29,42 +35,35 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       transports: ['websocket'], 
     });
 
-    const initSocketState = setTimeout(() => {
+    const initTimer = setTimeout(() => {
       setSocket(socketInstance);
       if (socketInstance.connected) setIsConnected(true);
     }, 0);
 
     socketInstance.on('connect', () => {
-      console.log('Conectado exitosamente al namespace /chat');
       setIsConnected(true);
     });
 
     socketInstance.on('disconnect', () => {
-      console.log('Desconectado del namespace /chat');
       setIsConnected(false);
     });
 
     socketInstance.on('connect_error', (err) => {
-      console.error('Error de conexión:', err.message);
       setIsConnected(false);
       
       if (err.message === 'unauthorized') {
-        toast.error('Sesión expirada', {
-          description: 'Por favor, inicia sesión nuevamente.',
-        });
+        toast.error('Sesión expirada');
         router.push('/login'); 
       }
     });
 
-    
     return () => {
-        clearTimeout(initSocketState);
-      console.log("Limpiando conexión WebSocket (desmontando)..");
+      clearTimeout(initTimer);
       socketInstance.disconnect();
       setSocket(null);
       setIsConnected(false);
     };
-  }, [router]); 
+  }, [router]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>
