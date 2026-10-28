@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ACTIVE_APPOINTMENT_STATUSES } from '../constants/appointment-status.constants.js';
-import { BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE } from '../constants/block-query.constants.js';
+import {
+  BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE,
+  BLOCK_WITH_APPOINTMENT_DETAIL_INCLUDE,
+} from '../constants/block-query.constants.js';
 import { AvailabilityRepository } from '../repositories/availability.repository.js';
 
 describe('AvailabilityRepository', () => {
@@ -8,8 +11,9 @@ describe('AvailabilityRepository', () => {
   const findUnique = vi.fn();
   const update = vi.fn();
   const deleteBlock = vi.fn();
+  const create = vi.fn();
   const prisma = {
-    availabilityBlock: { findMany, findUnique, update, delete: deleteBlock },
+    availabilityBlock: { findMany, findUnique, update, delete: deleteBlock, create },
   };
   let repository: AvailabilityRepository;
 
@@ -18,8 +22,28 @@ describe('AvailabilityRepository', () => {
     repository = new AvailabilityRepository(prisma as any);
   });
 
+  describe('create', () => {
+    const startAt = new Date('2026-11-02T13:00:00Z');
+    const endAt = new Date('2026-11-02T14:00:00Z');
+
+    it('guarda un bloque individual sin datos de serie', async () => {
+      await repository.create('mentor-1', startAt, endAt);
+      expect(create).toHaveBeenCalledWith({ data: { mentorId: 'mentor-1', startAt, endAt } });
+    });
+
+    it('persiste los metadatos de serie dentro del cliente transaccional', async () => {
+      const txCreate = vi.fn().mockResolvedValue({ id: 'block-1' });
+      const series = { seriesId: '11111111-1111-4111-8111-111111111111', repeatUntil: new Date('2026-11-23') };
+      await expect(repository.create('mentor-1', startAt, endAt, {
+        availabilityBlock: { create: txCreate },
+      } as never, series)).resolves.toEqual({ id: 'block-1' });
+      expect(txCreate).toHaveBeenCalledWith({ data: { mentorId: 'mentor-1', startAt, endAt, ...series } });
+      expect(create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('findMentorBlocksInRange', () => {
-    it('busca los bloques del mentor dentro del rango, ordenados e incluyendo solo citas activas', async () => {
+    it('busca los bloques del mentor dentro del rango, ordenados y con el detalle de sus citas activas', async () => {
       const from = new Date('2026-10-05T04:00:00.000Z');
       const to = new Date('2026-10-12T04:00:00.000Z');
       findMany.mockResolvedValue([]);
@@ -29,7 +53,19 @@ describe('AvailabilityRepository', () => {
       expect(findMany).toHaveBeenCalledWith({
         where: { mentorId: 'mentor-1', startAt: { gte: from, lt: to } },
         orderBy: { startAt: 'asc' },
-        include: BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE,
+        include: BLOCK_WITH_APPOINTMENT_DETAIL_INCLUDE,
+      });
+    });
+
+    it('trae de cada cita activa solo quién reservó y el tema, sin otros datos personales', () => {
+      expect(BLOCK_WITH_APPOINTMENT_DETAIL_INCLUDE.appointments).toEqual({
+        where: { status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } } },
+        select: {
+          id: true,
+          status: { select: { title: true } },
+          student: { select: { id: true, firstName: true, lastName: true } },
+          orientationType: { select: { id: true, name: true } },
+        },
       });
     });
 
@@ -42,7 +78,10 @@ describe('AvailabilityRepository', () => {
   });
 
   describe('findMentorFreeBlocksInRange', () => {
-    it('busca solo los bloques sin cita pendiente ni confirmada dentro del rango', async () => {
+    it('ocupa el bloque con citas confirmadas y heredadas, nunca con canceladas ni completadas', () => {
+      expect(ACTIVE_APPOINTMENT_STATUSES).toEqual(['CONFIRMED', 'CONFIRMADA', 'PENDIENTE']);
+    });
+    it('busca solo los bloques sin cita confirmada dentro del rango', async () => {
       const from = new Date('2026-10-05T04:00:00.000Z');
       const to = new Date('2026-10-12T04:00:00.000Z');
       findMany.mockResolvedValue([]);
@@ -110,6 +149,30 @@ describe('AvailabilityRepository', () => {
       update.mockRejectedValue(dbError);
 
       await expect(repository.update('block-1', data)).rejects.toBe(dbError);
+    });
+  });
+
+  describe('con el cliente de una transacción', () => {
+    const tx = { availabilityBlock: { create: vi.fn(), update: vi.fn() } };
+    const data = { startAt: new Date('2026-10-10T14:00:00Z'), endAt: new Date('2026-10-10T14:30:00Z') };
+
+    it('crea el bloque con la transacción que recibe', async () => {
+      await repository.create('mentor-1', data.startAt, data.endAt, tx as never);
+
+      expect(tx.availabilityBlock.create).toHaveBeenCalledWith({
+        data: { mentorId: 'mentor-1', startAt: data.startAt, endAt: data.endAt },
+      });
+    });
+
+    it('edita el bloque con la transacción que recibe', async () => {
+      await repository.update('block-1', data, tx as never);
+
+      expect(tx.availabilityBlock.update).toHaveBeenCalledWith({
+        where: { id: 'block-1' },
+        data,
+        include: BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE,
+      });
+      expect(update).not.toHaveBeenCalled();
     });
   });
 

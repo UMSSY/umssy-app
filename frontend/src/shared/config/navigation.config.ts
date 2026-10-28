@@ -14,7 +14,7 @@ function getSectionItems(sectionId: string) {
 export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Inicio", icon: House, href: "/dashboard", roles: getRouteRoles("/dashboard") },
   { label: "Mi perfil", icon: UserRound, activePathPatterns: [/^\/profile(?:\/|$)/], children: getSectionItems("profile") },
-  { label: "Mentorías", icon: Users, activePathPatterns: [/^\/(?:mentorship|mentors|mentor)(?:\/|$)/], children: getSectionItems("mentorship") },
+  { label: "Mentorías", icon: Users, activePathPatterns: [/^\/(?:mentorship|mentors|mentor|appointments)(?:\/|$)/], children: getSectionItems("mentorship") },
   { label: "Talleres y eventos", icon: CalendarDays, activePathPatterns: [/^\/events(?:\/|$)/], children: getSectionItems("events") },
   { label: "Vacantes", icon: BriefcaseBusiness, activePathPatterns: [/^\/vacancies(?:\/|$)/], children: getSectionItems("vacancies") },
   { label: "Mensajes", icon: MessageCircle, href: "/chat", roles: getRouteRoles("/chat") },
