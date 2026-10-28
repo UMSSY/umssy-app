@@ -31,10 +31,10 @@ describe("ReplaceCvDialog", () => {
   it("shows the current cv and the name and size of the selected file", async () => {
     renderDialog();
 
-    const dialog = await screen.findByRole("alertdialog", { name: "¿Reemplazar tu CV?" });
+    const dialog = await screen.findByRole("alertdialog", { name: "¿Subir una nueva versión?" });
 
     expect(dialog).toHaveAccessibleDescription(
-      "Se reemplazará CV_Valeria_Quispe.pdf por el archivo seleccionado. El archivo anterior se eliminará.",
+      "El archivo seleccionado será tu CV vigente. CV_Valeria_Quispe.pdf pasará al historial.",
     );
     expect(screen.getByText("CV_Nuevo.pdf · 1.2 MB")).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -44,7 +44,7 @@ describe("ReplaceCvDialog", () => {
     renderDialog({ currentFileName: "   " });
 
     expect(await screen.findByRole("alertdialog")).toHaveAccessibleDescription(
-      "Se reemplazará tu CV actual por el archivo seleccionado. El archivo anterior se eliminará.",
+      "El archivo seleccionado será tu CV vigente. Tu CV actual pasará al historial.",
     );
   });
 
@@ -54,16 +54,16 @@ describe("ReplaceCvDialog", () => {
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 
-  it("confirms the replacement with the selected file", async () => {
+  it("confirms the new version with the selected file", async () => {
     const file = createPdf();
     const { onConfirm, user } = renderDialog({ file });
 
-    await user.click(await screen.findByRole("button", { name: "Reemplazar" }));
+    await user.click(await screen.findByRole("button", { name: "Subir" }));
 
     expect(onConfirm).toHaveBeenCalledWith(file);
   });
 
-  it("cancels the replacement", async () => {
+  it("cancels the new version", async () => {
     const { onCancel, onConfirm, user } = renderDialog();
 
     await user.click(await screen.findByRole("button", { name: "Cancelar" }));
@@ -72,10 +72,10 @@ describe("ReplaceCvDialog", () => {
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-  it("shows the spinner and disables both actions while replacing", async () => {
+  it("shows the spinner and disables both actions while uploading", async () => {
     renderDialog({ isReplacing: true });
 
-    const replacingButton = await screen.findByRole("button", { name: "Reemplazando..." });
+    const replacingButton = await screen.findByRole("button", { name: "Subiendo..." });
 
     expect(replacingButton).toBeDisabled();
     expect(replacingButton.querySelector("svg.lucide-loader-circle")).toBeInTheDocument();

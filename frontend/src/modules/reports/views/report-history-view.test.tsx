@@ -104,7 +104,7 @@ describe("ReportHistoryView", () => {
     expect(screen.queryByText(FIRST_PAGE_REPORT)).toBeNull();
     expect(getColumnHeaders()).toEqual(COLUMN_HEADERS);
     expect(getBodyRows()).toHaveLength(2);
-    expect(reportsService.getReportHistory).toHaveBeenLastCalledWith({ page: 2, limit: 10, search: "" });
+    expect(reportsService.getReportHistory).toHaveBeenLastCalledWith({ page: 2, limit: 10, search: "", snapshotAt: expect.any(String) });
     expect(screen.getByRole("button", { name: "Página 2" }).getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("button", { name: "Página siguiente" }).hasAttribute("disabled")).toBe(true);
 

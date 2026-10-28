@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { ProfileRepository } from '../../profile/repositories/profile.repository.js';
 import { DuplicateSkillException } from '../exceptions/duplicate-skill.exception.js';
@@ -23,16 +24,19 @@ describe('UserSkillService', () => {
     replaceForUser: ReturnType<typeof vi.fn>;
   };
   let profileRepository: { findByUserId: ReturnType<typeof vi.fn> };
+  let skillsAnalysis: { refreshAfterChange: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     skillRepository = { findByIds: vi.fn() };
     userSkillRepository = { findByUserId: vi.fn(), replaceForUser: vi.fn() };
     profileRepository = { findByUserId: vi.fn().mockResolvedValue({ id: userId }) };
+    skillsAnalysis = { refreshAfterChange: vi.fn().mockResolvedValue(undefined) };
     service = new UserSkillService(
       userSkillRepository as unknown as UserSkillRepository,
       skillRepository as unknown as SkillRepository,
       profileRepository as unknown as ProfileRepository,
       new SkillMapper(),
+      skillsAnalysis as unknown as ProfileSkillsAnalysisService,
     );
   });
 
@@ -61,6 +65,11 @@ describe('UserSkillService', () => {
         service.updateUserSkills(userId, { skillIds: [pythonId, sqlId] }),
       ).resolves.toEqual([python, sql]);
       expect(userSkillRepository.replaceForUser).toHaveBeenCalledWith(userId, [pythonId, sqlId]);
+      expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledOnce();
+      expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
+      expect(skillsAnalysis.refreshAfterChange.mock.invocationCallOrder[0]).toBeGreaterThan(
+        userSkillRepository.replaceForUser.mock.invocationCallOrder[0],
+      );
     });
 
     it('allows removing every skill with an empty list', async () => {
@@ -69,6 +78,17 @@ describe('UserSkillService', () => {
 
       await expect(service.updateUserSkills(userId, { skillIds: [] })).resolves.toEqual([]);
       expect(userSkillRepository.replaceForUser).toHaveBeenCalledWith(userId, []);
+      expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
+    });
+
+    it('does not analyse the skills when the list cannot be saved', async () => {
+      skillRepository.findByIds.mockResolvedValue([python]);
+      userSkillRepository.replaceForUser.mockRejectedValue(new Error('Database unavailable'));
+
+      await expect(service.updateUserSkills(userId, { skillIds: [pythonId] })).rejects.toThrow(
+        'Database unavailable',
+      );
+      expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
     });
 
     it('rejects the same skill twice', async () => {
@@ -76,6 +96,7 @@ describe('UserSkillService', () => {
         service.updateUserSkills(userId, { skillIds: [pythonId, pythonId] }),
       ).rejects.toBeInstanceOf(DuplicateSkillException);
       expect(userSkillRepository.replaceForUser).not.toHaveBeenCalled();
+      expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
     });
 
     it('rejects a skill that does not exist', async () => {
@@ -85,6 +106,7 @@ describe('UserSkillService', () => {
         service.updateUserSkills(userId, { skillIds: [pythonId, sqlId] }),
       ).rejects.toBeInstanceOf(SkillNotFoundException);
       expect(userSkillRepository.replaceForUser).not.toHaveBeenCalled();
+      expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
     });
 
     it('fails when the user does not exist', async () => {
@@ -94,6 +116,7 @@ describe('UserSkillService', () => {
         service.updateUserSkills(userId, { skillIds: [pythonId] }),
       ).rejects.toBeInstanceOf(ProfileNotFoundException);
       expect(skillRepository.findByIds).not.toHaveBeenCalled();
+      expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
     });
   });
 });
