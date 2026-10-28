@@ -76,7 +76,7 @@ describe("VacancyList en modo historial", () => {
     expect(screen.getByRole("button", { name: "Diseñador Gráfico" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Ingeniero Backend" })).not.toBeInTheDocument();
     expect(getOffers).toHaveBeenCalledTimes(1);
-    expect(getOffers.mock.calls[0][1]).toMatchObject({ search: undefined });
+    expect(getOffers.mock.calls[0][1]).not.toHaveProperty("search");
   });
 
   it("muestra el mensaje de búsqueda sin resultados y se restablece al limpiar", async () => {

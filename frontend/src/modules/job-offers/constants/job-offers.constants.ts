@@ -159,7 +159,7 @@ export const DELETE_JOB_OFFER_TEXT = {
 
 export const REOPEN_JOB_OFFER_TEXT = {
   title: "¿Estás seguro de reabrir esta vacante?",
-  description: "volverá a estar activa y a recibir postulaciones con los mismos datos.",
+  description: "se publicará de nuevo con la fecha de hoy y los mismos datos, y volverá a recibir postulaciones.",
   cancel: "Cancelar",
   confirm: "Reabrir",
   busy: "Reabriendo...",

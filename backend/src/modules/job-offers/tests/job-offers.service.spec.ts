@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   CompanyNotFoundException,
   JobOfferCatalogNotFoundException,
@@ -70,6 +70,7 @@ function createRepository() {
     update: vi.fn().mockResolvedValue(RECORD),
     findStatusId: vi.fn().mockResolvedValue('status-deleted'),
     updateStatus: vi.fn().mockResolvedValue(RECORD),
+    reopen: vi.fn().mockResolvedValue(RECORD),
   };
 }
 
@@ -389,15 +390,21 @@ describe('JobOffersService', () => {
     beforeEach(() => {
       repository.findByCompanyAndId.mockResolvedValue(CLOSED_RECORD);
       repository.findStatusId.mockResolvedValue('status-published');
-      repository.updateStatus.mockResolvedValue(RECORD);
     });
 
-    it('cambia el estado de una vacante cerrada a Publicada sin tocar sus datos', async () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('la publica de nuevo con la fecha de hoy sin tocar sus datos', async () => {
+      const today = new Date('2026-10-28T14:00:00.000Z');
+      vi.useFakeTimers({ now: today });
+
       const result = await service.reopen('company-1', 'offer-1');
 
       expect(repository.findByCompanyAndId).toHaveBeenCalledWith('company-1', 'offer-1');
       expect(repository.findStatusId).toHaveBeenCalledWith('Publicada');
-      expect(repository.updateStatus).toHaveBeenCalledWith('offer-1', 'status-published');
+      expect(repository.reopen).toHaveBeenCalledWith('offer-1', 'status-published', today);
       expect(repository.update).not.toHaveBeenCalled();
       expect(result.status).toBe('Publicada');
     });
@@ -410,7 +417,7 @@ describe('JobOffersService', () => {
         await expect(service.reopen('company-1', 'offer-1')).rejects.toBeInstanceOf(
           JobOfferNotReopenableException,
         );
-        expect(repository.updateStatus).not.toHaveBeenCalled();
+        expect(repository.reopen).not.toHaveBeenCalled();
       },
     );
 
@@ -420,7 +427,7 @@ describe('JobOffersService', () => {
       await expect(service.reopen('company-1', 'offer-1')).rejects.toBeInstanceOf(
         JobOfferNotFoundException,
       );
-      expect(repository.updateStatus).not.toHaveBeenCalled();
+      expect(repository.reopen).not.toHaveBeenCalled();
     });
 
     it('rechaza una empresa inexistente sin buscar la vacante', async () => {
@@ -438,7 +445,7 @@ describe('JobOffersService', () => {
       await expect(service.reopen('company-1', 'offer-1')).rejects.toBeInstanceOf(
         JobOfferCatalogNotFoundException,
       );
-      expect(repository.updateStatus).not.toHaveBeenCalled();
+      expect(repository.reopen).not.toHaveBeenCalled();
     });
   });
 });

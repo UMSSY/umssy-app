@@ -124,6 +124,15 @@ export class JobOffersRepository {
     });
   }
 
+  // La fecha de publicación que se muestra es createdAt, por eso al reabrir se renueva.
+  reopen(jobOfferId: string, statusId: string, publishedAt: Date): Promise<JobOfferRecord> {
+    return this.prisma.jobOffer.update({
+      where: { id: jobOfferId },
+      data: { statusId, createdAt: publishedAt },
+      select: JOB_OFFER_SELECT,
+    });
+  }
+
   updateStatus(jobOfferId: string, statusId: string): Promise<JobOfferRecord> {
     return this.prisma.jobOffer.update({
       where: { id: jobOfferId },

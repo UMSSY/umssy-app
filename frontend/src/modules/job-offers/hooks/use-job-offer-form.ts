@@ -77,10 +77,12 @@ export function useJobOfferForm(jobOfferId?: string) {
     // Modo edición: se reutiliza el hook de detalles (misma clave de caché y mismo endpoint).
     const details = useJobOfferDetails(jobOfferId ? getCurrentCompany().id : null, jobOfferId ?? null);
     const baseline = details.offer ? toConditions(details.offer) : null;
-    const [loadedOffer, setLoadedOffer] = useState(details.offer);
-    if (details.offer !== loadedOffer) {
-        setLoadedOffer(details.offer);
-        if (details.offer) setConditions(toConditions(details.offer));
+    // Los datos se copian al formulario una sola vez por vacante, también cuando ya estaban en caché
+    // (por ejemplo, tras abrir su detalle en el listado), y no se pisan si la consulta se repite.
+    const [loadedOfferId, setLoadedOfferId] = useState<string | null>(null);
+    if (details.offer && details.offer.id !== loadedOfferId) {
+        setLoadedOfferId(details.offer.id);
+        setConditions(toConditions(details.offer));
     }
 
     useEffect(() => {

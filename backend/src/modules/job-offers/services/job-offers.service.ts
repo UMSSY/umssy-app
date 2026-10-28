@@ -121,7 +121,7 @@ export class JobOffersService {
     await this.jobOffersRepository.updateStatus(jobOfferId, statusId);
   }
 
-  // Reabre una vacante cerrada conservando todos sus datos; solo cambia su estado a Publicada.
+  // Reabre una vacante cerrada conservando sus datos: pasa a Publicada con la fecha de hoy.
   async reopen(companyId: string, jobOfferId: string): Promise<JobOfferResponse> {
     await this.ensureCompanyExists(companyId);
     const existing = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
@@ -131,7 +131,7 @@ export class JobOffersService {
     const statusId = await this.jobOffersRepository.findStatusId(JobOfferStatus.PUBLISHED);
     if (!statusId) throw new JobOfferCatalogNotFoundException('estado');
 
-    const record = await this.jobOffersRepository.updateStatus(jobOfferId, statusId);
+    const record = await this.jobOffersRepository.reopen(jobOfferId, statusId, new Date());
     return this.jobOfferMapper.toResponse(record);
   }
 
