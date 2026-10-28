@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Check, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -10,8 +11,11 @@ import {
 import { PageHeading } from "@/shared/components/layout";
 
 type ParticipationOverviewProps = {
+  isActive: boolean;
   areas: string[];
   orientations: string[];
+  onAction: () => void;
+  actionEnabled?: boolean;
 };
 
 type ParticipationPreferencesCardProps = {
@@ -19,6 +23,7 @@ type ParticipationPreferencesCardProps = {
   editHref: string;
   editLabel: string;
   items: string[];
+  isEditable: boolean;
 };
 
 function ParticipationPreferencesCard({
@@ -26,6 +31,7 @@ function ParticipationPreferencesCard({
   editHref,
   editLabel,
   items,
+  isEditable,
 }: ParticipationPreferencesCardProps) {
   return (
     <Card className="gap-0 overflow-visible rounded-lg border border-border bg-surface py-0 text-base shadow-none ring-0">
@@ -39,7 +45,7 @@ function ParticipationPreferencesCard({
             {title}
           </CardTitle>
 
-          <Link
+          {isEditable && <Link
             href={editHref}
             className={buttonVariants({
                variant: "outline",
@@ -48,7 +54,7 @@ function ParticipationPreferencesCard({
 })}
           >
             <Pencil size={14} /> {editLabel}
-          </Link>
+          </Link>}
         </div>
       </CardHeader>
 
@@ -57,11 +63,12 @@ function ParticipationPreferencesCard({
           {items.map((item) => (
             <span
               key={item}
-              className="rounded-md bg-surface-soft px-3 py-1.5 text-xs text-ink"
+                className="max-w-full rounded-md bg-surface-soft px-3 py-1.5 text-xs break-words text-ink"
             >
               {item}
             </span>
           ))}
+          {items.length === 0 && <span className="text-sm text-text-secondary">Sin configuración</span>}
         </div>
       </CardContent>
     </Card>
@@ -69,14 +76,17 @@ function ParticipationPreferencesCard({
 }
 
 export function ParticipationOverview({
+  isActive,
   areas,
   orientations,
+  onAction,
+  actionEnabled = true,
 }: ParticipationOverviewProps) {
   return (
-    <main className="min-h-full bg-background">
+    <section className="min-h-full bg-background">
       <div className="mx-auto max-w-7xl space-y-6">
         <div>
-          <PageHeading title="Mi participación como mentor" description="Gestiona tus áreas técnicas y tipos de orientación." actions={<Link href="/mentor/availability" className={buttonVariants()}>Gestionar disponibilidad</Link>} />
+          <PageHeading title="Mi participación como mentor" description="Consulta tu estado y tus preferencias guardadas." actions={isActive ? <Link href="/mentor/availability" className={buttonVariants()}>Gestionar disponibilidad</Link> : undefined} />
         </div>
 
         <Card className="gap-0 overflow-visible rounded-lg border border-border bg-surface py-0 text-base shadow-none ring-0">
@@ -88,15 +98,20 @@ export function ParticipationOverview({
             >
               Estado de participación
             </CardTitle>
-            <p className="mt-1 text-sm text-text-secondary">
-              Tu perfil puede aparecer como mentor disponible en el directorio.
-            </p>
+            <p className="mt-1 text-sm text-text-secondary">{isActive
+              ? "Tu participación está vigente. Tu perfil puede aparecer en el directorio de mentores."
+              : "Tu participación está desactivada y tu perfil no aparece en el directorio. Para regresar deberás completar la incorporación y validar los cupos disponibles."}</p>
           </CardHeader>
 
           <CardContent className="px-5 pt-3 pb-5 sm:px-6 sm:pb-6">
-            <span className="inline-flex items-center gap-1 bg-transparent p-0 text-sm font-semibold text-ink-soft">
-              <Check size={13} /> Activo
-            </span>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <span className="inline-flex rounded-full border border-border bg-surface-soft px-3 py-1 text-sm font-semibold text-ink">
+                {isActive ? "Activo" : "Desactivado"}
+              </span>
+              {actionEnabled && <Button type="button" variant={isActive ? "outline" : "default"} onClick={onAction}>
+                {isActive ? "Desactivar participación" : "Activar participación"}
+              </Button>}
+            </div>
           </CardContent>
         </Card>
 
@@ -106,6 +121,7 @@ export function ParticipationOverview({
           editHref="/mentors/participation/technical-areas"
           editLabel="Editar áreas técnicas"
           items={areas}
+          isEditable={isActive}
         />
 
         <ParticipationPreferencesCard
@@ -113,9 +129,10 @@ export function ParticipationOverview({
           editHref="/mentorship/orientation"
           editLabel="Editar tipos de orientación"
           items={orientations}
+          isEditable={isActive}
         />
         </div>
       </div>
-    </main>
+    </section>
   );
 }

@@ -1,7 +1,10 @@
 "use client";
 
+import { createElement } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Server } from "lucide-react";
+import { CheckCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { resolveTechnicalAreaIcon } from "../../utils/technical-area-icon";
 import type { TechnicalAreaResponse } from "../../types/technical-area-response.types";
 
 type TechnicalAreaCardProps = {
@@ -19,31 +22,18 @@ export function TechnicalAreaCard({
     <Button
       type="button"
       onClick={() => onToggle(area.id)}
-      className={[
-        "flex w-full flex-col items-start gap-3 rounded-lg border p-4 text-left transition-colors",
-        isSelected
-          ? "border-accent bg-interaction"
-          : "border-border bg-surface hover:border-slate-300",
-      ].join(" ")}
+      className={cn("flex w-full flex-col items-start gap-3 rounded-lg border p-4 text-left transition-colors", isSelected ? "border-accent bg-interaction" : "border-border bg-surface hover:border-border-strong")}
       aria-pressed={isSelected}
     >
       <div className="flex w-full items-start justify-between">
         <div
-          className={[
-            "flex h-10 w-10 items-center justify-center rounded-md",
-            isSelected ? "bg-accent text-white" : "bg-white text-text-secondary",
-          ].join(" ")}
+          className={cn("flex size-10 items-center justify-center rounded-md", isSelected ? "bg-accent text-white" : "bg-surface text-text-secondary")}
         >
-          <Server className="size-5" aria-hidden />
+          {createElement(resolveTechnicalAreaIcon(area.name), { className: "size-5", "aria-hidden": true })}
         </div>
 
         <div
-          className={[
-            "flex h-5 w-5 items-center justify-center rounded border",
-            isSelected
-              ? "border-accent bg-accent text-white"
-              : "border-slate-300 bg-white",
-          ].join(" ")}
+          className={cn("flex size-5 items-center justify-center rounded border", isSelected ? "border-accent bg-accent text-white" : "border-border bg-surface")}
         >
           {isSelected && (
             <CheckCircle className="size-3.5" strokeWidth={3} aria-hidden />
