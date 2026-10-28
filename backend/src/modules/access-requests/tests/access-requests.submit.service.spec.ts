@@ -25,11 +25,12 @@ describe('AccessRequestsService: envío y consulta de estado', () => {
   const repository = { findById: vi.fn(), findActiveDuplicates: vi.fn(), submitWithGeneratedCode: vi.fn(), findByRequestCode: vi.fn() };
   const authService = { existsByEmail: vi.fn() };
   const filesService = { delete: vi.fn() };
+  const documentReading = { scheduleReading: vi.fn() };
   let service: AccessRequestsService;
 
   beforeEach(() => {
     vi.resetAllMocks();
-    service = new AccessRequestsService(repository as any, authService as any, filesService as any);
+    service = new AccessRequestsService(repository as any, authService as any, filesService as any, {} as any, {} as any, {} as any, {} as any, documentReading as any);
     repository.findById.mockResolvedValue(draft());
     authService.existsByEmail.mockResolvedValue(false);
     repository.findActiveDuplicates.mockResolvedValue([]);

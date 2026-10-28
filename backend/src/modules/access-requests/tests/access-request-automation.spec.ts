@@ -46,12 +46,14 @@ describe('AccessRequestsService.submit: cola de lectura OCR', () => {
     const auth = { existsByEmail: vi.fn().mockResolvedValue(false) };
     const recorder = { record: vi.fn().mockResolvedValue({}) };
     const validations = { queue: vi.fn().mockResolvedValue({}) };
-    const service = new AccessRequestsService(repository as any, auth as any, {} as any, {} as any, {} as any, recorder as any, validations as any);
+    const documentReading = { scheduleReading: vi.fn() };
+    const service = new AccessRequestsService(repository as any, auth as any, {} as any, {} as any, {} as any, recorder as any, validations as any, documentReading as any);
 
     await service.submit('req-1');
 
     expect(recorder.record).toHaveBeenCalledWith(expect.objectContaining({ action: 'submitted' }), tx);
     expect(validations.queue).toHaveBeenCalledWith('req-1', tx);
+    expect(documentReading.scheduleReading).toHaveBeenCalledWith('req-1');
   });
 });
 

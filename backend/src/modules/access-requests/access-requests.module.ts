@@ -17,6 +17,8 @@ import { MailServiceSender } from './mail/mail-service-sender.js';
 import { MAIL_SENDER } from './mail/mail-sender.js';
 import { DocumentValidationRepository } from './repositories/document-validation.repository.js';
 import { AutomaticValidationService } from './services/automatic-validation.service.js';
+import { DocumentReadingService } from './services/document-reading.service.js';
+import { DocumentTextExtractorService } from './services/document-text-extractor.service.js';
 
 @Module({
   imports: [AuthModule, FilesModule, MailModule, AuditEventsModule],
@@ -31,6 +33,8 @@ import { AutomaticValidationService } from './services/automatic-validation.serv
     RejectionNotificationService,
     DocumentValidationRepository,
     AutomaticValidationService,
+    DocumentTextExtractorService,
+    DocumentReadingService,
     { provide: MAIL_SENDER, useClass: MailServiceSender },
   ],
   exports: [AccessRequestsService, AutomaticValidationService],

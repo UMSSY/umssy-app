@@ -16,6 +16,7 @@ import { ActivationOtpService } from './activation-otp.service.js';
 import { decodeUploadFileName } from '../helpers/decode-upload-file-name.js';
 import { RejectionNotificationService } from './rejection-notification.service.js';
 import { DocumentValidationRepository } from '../repositories/document-validation.repository.js';
+import { DocumentReadingService } from './document-reading.service.js';
 import {
   AccessRequestNotEditableException,
   ActiveAccessRequestExistsException,
@@ -61,6 +62,7 @@ export class AccessRequestsService {
     private readonly rejectionNotificationService: RejectionNotificationService,
     private readonly auditEventRecorder: AuditEventRecorderService,
     private readonly documentValidationRepository: DocumentValidationRepository,
+    private readonly documentReading: DocumentReadingService,
   ) {}
 
   private readonly logger = new Logger(AccessRequestsService.name);
@@ -192,6 +194,8 @@ export class AccessRequestsService {
       await this.auditEventRecorder.record(toSubmittedAuditEvent(source), tx);
       await this.documentValidationRepository.queue(source.id, tx);
     });
+    // Lectura OCR del documento real, fuera de la transacción para no demorar la respuesta (HU 1.5.1)
+    this.documentReading.scheduleReading(submitted.id);
     return {
       id: submitted.id,
       requestCode: submitted.requestCode,
