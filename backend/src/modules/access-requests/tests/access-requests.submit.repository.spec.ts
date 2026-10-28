@@ -194,16 +194,26 @@ describe('AccessRequestsRepository: envío y consulta de estado', () => {
   });
 
   describe('findByRequestCode', () => {
-    it('filtra por código y correo sin distinguir mayúsculas y no selecciona contenido ni datos personales', async () => {
+    it('filtra por código y correo y selecciona solo los nombres y metadatos permitidos', async () => {
       const { accessRequest, repository } = build();
       accessRequest.findFirst.mockResolvedValue(null);
 
       await repository.findByRequestCode('SOL-2026-0001', 'ana@umss.edu.bo');
 
       const args = accessRequest.findFirst.mock.calls[0][0];
-      expect(args.where).toEqual({ requestCode: 'SOL-2026-0001', email: { equals: 'ana@umss.edu.bo', mode: 'insensitive' } });
+
+      expect(args.where).toEqual({
+        requestCode: 'SOL-2026-0001',
+        email: {
+          equals: 'ana@umss.edu.bo',
+          mode: 'insensitive',
+        },
+      });
+
       expect(args.select).toEqual({
         requestCode: true,
+        firstName: true,
+        lastName: true,
         submittedAt: true,
         reviewedAt: true,
         rejectionReason: true,
@@ -211,9 +221,18 @@ describe('AccessRequestsRepository: envío y consulta de estado', () => {
         documentType: { select: { title: true } },
         documentFile: { select: { size: true, mimeType: true } },
       });
-      for (const forbidden of ['content', 'idCardNumber', 'sisCode', 'phone', 'email', 'firstName', 'lastName', 'birthDate']) {
+
+      for (const forbidden of [
+        'content',
+        'idCardNumber',
+        'sisCode',
+        'phone',
+        'email',
+        'birthDate',
+      ]) {
         expect(args.select).not.toHaveProperty(forbidden);
       }
+
       expect(args.select.documentFile.select).not.toHaveProperty('content');
     });
   });
