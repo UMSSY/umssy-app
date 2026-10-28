@@ -1,17 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { UserSkillRepository, profileSkillRowSelect } from '../../skills/repositories/user-skill.repository.js';
 import { NLP_PROCESSING_STATUSES } from '../constants/nlp-processing.constants.js';
-import type { NlpDetectedSkill } from '../types/nlp-detected-skill.type.js';
 import type { NlpPublishResult } from '../types/nlp-publish-result.type.js';
 import type { ProfileSkillProcessingState } from '../types/profile-skill-processing-state.type.js';
-import type { ProfileSkillRow } from '../types/profile-skill-row.type.js';
-import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
 import { toErrorCode } from '../utils/to-error-code.js';
 
 const UNIQUE_CONSTRAINT_VIOLATION = 'P2002';
-
-export { profileSkillRowSelect };
 
 export const processingStateSelect = {
   userId: true,
@@ -25,20 +20,13 @@ export const processingStateSelect = {
 
 @Injectable()
 export class ProfileSkillResultsRepository {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly userSkillRepository: UserSkillRepository,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   findState(userId: string): Promise<ProfileSkillProcessingState | null> {
     return this.prisma.profileSkillProcessingState.findUnique({
       where: { userId },
       select: processingStateSelect,
     });
-  }
-
-  findProfileSkillRows(userId: string): Promise<ProfileSkillRow[]> {
-    return this.userSkillRepository.findProfileSkillRows(userId);
   }
 
   async registerSourceChange(userId: string, now: Date): Promise<ProfileSkillProcessingState> {
@@ -76,9 +64,9 @@ export class ProfileSkillResultsRepository {
   publish(
     userId: string,
     revision: number,
-    detected: readonly NlpDetectedSkill[],
     dictionaryVersion: string,
     now: Date,
+    reconcileSkills: (context: TransactionContext) => Promise<boolean>,
   ): Promise<NlpPublishResult | null> {
     return this.prisma.$transaction(async (tx) => {
       const claimed = await tx.profileSkillProcessingState.updateMany({
@@ -91,12 +79,7 @@ export class ProfileSkillResultsRepository {
         where: { userId },
         select: { processedRevision: true },
       });
-      const rows = await this.userSkillRepository.findProfileSkillRows(userId, tx);
-      const plan = planSkillReconciliation(rows, detected);
-
-      await this.userSkillRepository.applyReconciliationPlan(userId, plan, tx);
-
-      const changed = plan.creates.length + plan.updates.length + plan.deleteIds.length > 0;
+      const changed = await reconcileSkills({ client: tx });
       const isFirstResult = previous?.processedRevision === null;
       const state = await tx.profileSkillProcessingState.update({
         where: { userId },

@@ -1,12 +1,1 @@
-export interface ProfileSkillRow {
-  id: string;
-  skillId: string;
-  source: string;
-  verificationStatus: string;
-  isHighRelevance: boolean;
-  evidenceRefs: unknown;
-  skill: {
-    name: string;
-    areaId: string | null;
-  };
-}
+export type { ProfileSkillRowResponse as ProfileSkillRow } from '../../skills/responses/profile-skill-row.response.js';

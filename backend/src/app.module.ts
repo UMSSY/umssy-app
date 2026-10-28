@@ -1,3 +1,4 @@
+import { SurveysModule } from './modules/surveys/surveys.module.js';
 import { Module } from '@nestjs/common';
 import { MailModule } from './modules/mail/index.js';
 import { ConfigModule } from '@nestjs/config';
@@ -59,6 +60,7 @@ import { RadarIntegrationModule } from './modules/radar-integration/radar-integr
     JobOffersModule,
     NlpModule,
     RadarIntegrationModule,
+    SurveysModule,
 
   ],
   controllers: [AppController],

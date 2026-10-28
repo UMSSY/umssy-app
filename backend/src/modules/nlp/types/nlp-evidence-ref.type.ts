@@ -1,6 +1,1 @@
-import type { NlpSourceType } from './nlp-source-type.type.js';
-
-export interface NlpEvidenceRef {
-  type: NlpSourceType;
-  id: string;
-}
+export type { SkillEvidenceRefPayload as NlpEvidenceRef } from '../../skills/types/skill-evidence-ref-payload.type.js';

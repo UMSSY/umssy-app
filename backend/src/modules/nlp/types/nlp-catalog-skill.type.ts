@@ -1,5 +1,1 @@
-export interface NlpCatalogSkill {
-  id: string;
-  name: string;
-  areaId: string | null;
-}
+export type { SkillAnalysisCatalogResponse as NlpCatalogSkill } from '../../skills/responses/skill-analysis-catalog.response.js';

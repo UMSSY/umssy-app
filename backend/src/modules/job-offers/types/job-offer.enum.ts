@@ -1,9 +1,7 @@
 export enum JobOfferStatus {
-  DRAFT = 'Borrador',
   PUBLISHED = 'Publicada',
-  PAUSED = 'Pausada',
   CLOSED = 'Cerrada',
-  ARCHIVED = 'Archivada',
+  DELETED = 'Eliminada',
 }
 
 export enum JobOfferModality {

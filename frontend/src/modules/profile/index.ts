@@ -4,6 +4,7 @@ export { ProfileOverviewView } from "./views/profile-overview-view";
 export { ProfileSettingsView } from "./views/profile-settings-view";
 
 export { ConfirmDeleteDialog } from "./components/confirm-delete-dialog";
+export { DetectedSkillsChips } from "./components/detected-skills-chips";
 export { FeedbackMessage } from "./components/feedback-message";
 export { FormField } from "./components/form-field";
 export { ProfilePageLayout } from "./components/profile-page-layout";
