@@ -7,7 +7,7 @@ export class ApplicationsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findByUserId(userId: string, query: FindApplicationsQueryDto) {
-    const { status, sortBy, sortOrder = 'desc' } = query;
+    const { status, sortBy, sortOrder } = query;
 
     const whereClause: any = { userId };
     
