@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
@@ -17,6 +17,7 @@ import type { AuthenticatedUser } from '../../../common/types/authenticated-user
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import {
+  CREATE_BLOCK_DOCS,
   DELETE_BLOCK_DOCS,
   FIND_MY_BLOCKS_DOCS,
   UPDATE_BLOCK_DOCS,
@@ -28,6 +29,8 @@ import { UpdateBlockDto } from '../requests/update-block.request.js';
 import { AvailabilityService } from '../services/availability.service.js';
 import type { AvailabilityBlockResponse } from '../types/availability-block-response.types.js';
 import type { DeletedBlockResponse } from '../types/deleted-block-response.types.js';
+import type { WeeklyRepeatResponse } from '../types/weekly-repeat-response.types.js';
+import type { OwnerAvailabilityBlockResponse } from '../types/owner-availability-block-response.types.js';
 
 @Controller('availability-blocks')
 @ApiBearerAuth()
@@ -37,24 +40,26 @@ export class AvailabilityController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
-  @ApiOperation({ summary: 'Crea un bloque de disponibilidad del mentor en sesión y lo devuelve como libre (201, guardado en UTC)' })
+  @ApiOperation({ summary: CREATE_BLOCK_DOCS.summary, description: CREATE_BLOCK_DOCS.description })
+  @ApiCreatedResponse({ description: CREATE_BLOCK_DOCS.createdResponse })
+  @ApiBadRequestResponse({ description: CREATE_BLOCK_DOCS.badRequestResponse })
   create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() body: CreateBlockDto,
-  ): Promise<AvailabilityBlockResponse> {
+  ): Promise<AvailabilityBlockResponse | WeeklyRepeatResponse> {
     return this.availabilityService.create(user.id, body);
   }
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
-  @ApiOperation({ summary: FIND_MY_BLOCKS_DOCS.summary })
+  @ApiOperation({ summary: FIND_MY_BLOCKS_DOCS.summary, description: FIND_MY_BLOCKS_DOCS.description })
   @ApiQuery({ name: 'from', description: FIND_MY_BLOCKS_DOCS.fromDescription })
   @ApiQuery({ name: 'to', description: FIND_MY_BLOCKS_DOCS.toDescription })
   findMyBlocks(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: WeekQueryDto,
-  ): Promise<AvailabilityBlockResponse[]> {
+  ): Promise<OwnerAvailabilityBlockResponse[]> {
     return this.availabilityService.findMyBlocks(user.id, query);
   }
 
