@@ -15,23 +15,73 @@ export class ConnectionRequestRepository {
   async findPendingRequest(senderId: string, receiverId: string) {
     return this.prisma.connectionRequest.findFirst({
       where: {
-        senderId,
-        receiverId,
+        OR: [
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId },
+        ],
         status: { title: 'PENDING' },
       },
     });
   }
 
-  async create(senderId: string, receiverId: string, statusId: string) {
-    return this.prisma.connectionRequest.create({
-      data: { senderId, receiverId, statusId },
+  async findAcceptedRequest(senderId: string, receiverId: string) {
+    return this.prisma.connectionRequest.findFirst({
+      where: {
+        OR: [
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId },
+        ],
+        status: { title: 'ACCEPTED' },
+      },
     });
   }
 
-  async updateStatus(requestId: string, statusId: string) {
-    return this.prisma.connectionRequest.update({
+  async findSentByUser(senderId: string) {
+    return this.prisma.connectionRequest.findMany({
+      where: { senderId },
+      include: { status: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findReceivedByUser(receiverId: string) {
+    return this.prisma.connectionRequest.findMany({
+      where: { receiverId },
+      include: { status: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findById(requestId: string) {
+    return this.prisma.connectionRequest.findUnique({
       where: { id: requestId },
-      data: { statusId },
+      include: { status: true },
+    });
+  }
+
+  async create(
+    senderId: string,
+    receiverId: string,
+    statusId: string,
+  ) {
+    return this.prisma.connectionRequest.create({
+      data: {
+        senderId,
+        receiverId,
+        statusId,
+      },
+    });
+  }
+
+  async updatePendingStatus(requestId: string, statusId: string) {
+    return this.prisma.connectionRequest.updateMany({
+      where: {
+        id: requestId,
+        status: { title: 'PENDING' },
+      },
+      data: {
+        statusId,
+      },
     });
   }
 }
