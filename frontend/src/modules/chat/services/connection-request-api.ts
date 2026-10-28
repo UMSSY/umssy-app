@@ -55,3 +55,23 @@ export async function getReceivedConnectionRequests(): Promise<
 
   return unwrapResponse(response.data);
 }
+
+export async function acceptConnectionRequest(
+  requestId: string,
+): Promise<ConnectionRequest> {
+  const response = await apiClient.patch<
+    ApiResponse<ConnectionRequest>
+  >(`/chat/connection-requests/${requestId}/accept`);
+
+  return unwrapResponse(response.data);
+}
+
+export async function rejectConnectionRequest(
+  requestId: string,
+): Promise<ConnectionRequest> {
+  const response = await apiClient.patch<
+    ApiResponse<ConnectionRequest>
+  >(`/chat/connection-requests/${requestId}/reject`);
+
+  return unwrapResponse(response.data);
+}

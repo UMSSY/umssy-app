@@ -18,6 +18,7 @@ import { useConversations } from "../hooks/use-conversations";
 import { useMessages, messagesQueryKey } from "../hooks/use-messages";
 import { useSendConnectionRequest } from "../hooks/use-send-connection-request";
 import { useReceivedConnectionRequests } from "../hooks/use-received-connection-requests";
+import { useRespondConnectionRequest } from "../hooks/use-respond-connection-request";
 
 import { ConversationList } from "./conversation-list";
 import { ConnectionRequestDetail } from "./connection-request-detail";
@@ -55,6 +56,9 @@ export function ChatWorkspace({
   const [requestSuccess, setRequestSuccess] =
     useState<string | null>(null);
 
+  const [responseError, setResponseError] =
+    useState<string | null>(null);
+
   const [isSendingLocally, setIsSendingLocally] =
     useState(false);
 
@@ -64,11 +68,15 @@ export function ChatWorkspace({
   const ui = useMessagingUi();
 
   const isSending = ui?.isSending ?? isSendingLocally;
+
   const setIsSending =
     ui?.setIsSending ?? setIsSendingLocally;
 
   const queryClient = useQueryClient();
+
   const sendRequestMutation = useSendConnectionRequest();
+
+  const respondRequestMutation = useRespondConnectionRequest();
 
   const {
     data: receivedRequests = [],
@@ -121,11 +129,13 @@ export function ChatWorkspace({
 
   const handleBackToList = () => {
     setSelectedRequestId(null);
+    setResponseError(null);
     clearSelectedConversation();
   };
 
   const handleSelectChat = (conversation: Conversation) => {
     setSelectedRequestId(null);
+    setResponseError(null);
     handleSelectConversation(conversation);
   };
 
@@ -133,6 +143,8 @@ export function ChatWorkspace({
     request: ConnectionRequest,
   ) => {
     clearSelectedConversation();
+    setResponseError(null);
+    setRequestSuccess(null);
     setSelectedRequestId(request.id);
   };
 
@@ -176,6 +188,7 @@ export function ChatWorkspace({
     }
 
     const contact = selectedContactForRequest;
+
     setRequestError(null);
 
     try {
@@ -204,6 +217,44 @@ export function ChatWorkspace({
     setRequestError(null);
   };
 
+  const handleRespondConnectionRequest = async (
+    action: "accept" | "reject",
+  ) => {
+    if (
+      !selectedRequestId ||
+      respondRequestMutation.isPending
+    ) {
+      return;
+    }
+
+    const requestId = selectedRequestId;
+
+    setResponseError(null);
+    setRequestSuccess(null);
+
+    try {
+      await respondRequestMutation.mutateAsync({
+        requestId,
+        action,
+      });
+
+      setSelectedRequestId(null);
+      clearSelectedConversation();
+
+      setRequestSuccess(
+        action === "accept"
+          ? "Solicitud de conexión aceptada correctamente."
+          : "Solicitud de conexión rechazada correctamente.",
+      );
+    } catch (error) {
+      setResponseError(
+        error instanceof Error
+          ? error.message
+          : "No se pudo responder a la solicitud de conexión.",
+      );
+    }
+  };
+
   const handleSendMessage = async (
     content: string,
   ): Promise<void> => {
@@ -214,6 +265,7 @@ export function ChatWorkspace({
     }
 
     const conversationId = selectedId;
+
     setIsSending(true);
 
     try {
@@ -307,6 +359,15 @@ export function ChatWorkspace({
           <ConnectionRequestDetail
             request={selectedRequest}
             onBack={handleBackToList}
+            onAccept={() => {
+              void handleRespondConnectionRequest("accept");
+            }}
+            onReject={() => {
+              void handleRespondConnectionRequest("reject");
+            }}
+            isResponding={respondRequestMutation.isPending}
+            responseError={responseError}
+            isCompact={isCompact}
           />
         ) : selectedConversation ? (
           <ChatRoom

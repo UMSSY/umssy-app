@@ -1,21 +1,30 @@
 
 "use client";
 
-import { ArrowLeft, UserRound } from "lucide-react";
+import { ArrowLeft, Check, UserRound, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
 import type { ConnectionRequest } from "../types/connection-request.types";
 import { getInitials } from "../utils/date-formatter";
 
 interface ConnectionRequestDetailProps {
   request: ConnectionRequest;
   onBack: () => void;
+  onAccept: () => void;
+  onReject: () => void;
+  isResponding?: boolean;
+  responseError?: string | null;
+  isCompact?: boolean;
 }
 
 export function ConnectionRequestDetail({
   request,
   onBack,
+  onAccept,
+  onReject,
+  isResponding = false,
+  responseError = null,
+  isCompact = false,
 }: ConnectionRequestDetailProps) {
   const sender = request.sender;
 
@@ -32,7 +41,7 @@ export function ConnectionRequestDetail({
           size="icon"
           onClick={onBack}
           aria-label="Volver a la lista de chats"
-          className="md:hidden"
+          className={isCompact ? "" : "md:hidden"}
         >
           <ArrowLeft className="size-5" />
         </Button>
@@ -83,6 +92,38 @@ export function ConnectionRequestDetail({
           <p className="mt-5 text-xs text-text-secondary">
             Solicitud pendiente de respuesta
           </p>
+
+          {responseError && (
+            <p
+              role="alert"
+              className="mt-4 text-sm text-red-600"
+            >
+              {responseError}
+            </p>
+          )}
+
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button
+              type="button"
+              onClick={onAccept}
+              disabled={isResponding}
+              className="gap-2"
+            >
+              <Check className="size-4" />
+              {isResponding ? "Procesando..." : "Aceptar"}
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onReject}
+              disabled={isResponding}
+              className="gap-2"
+            >
+              <X className="size-4" />
+              Rechazar
+            </Button>
+          </div>
         </div>
       </div>
     </section>

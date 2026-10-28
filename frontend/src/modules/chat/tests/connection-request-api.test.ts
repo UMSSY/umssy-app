@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const apiMocks = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
+  patch: vi.fn(),
 }));
 
 vi.mock('@/shared/services/api-client', () => ({
@@ -14,6 +15,8 @@ import {
   sendConnectionRequest,
   getSentConnectionRequests,
   getReceivedConnectionRequests,
+  acceptConnectionRequest,
+  rejectConnectionRequest,
 } from '../services/connection-request-api';
 
 const request = {
@@ -106,5 +109,87 @@ describe('Connection Request API', () => {
     await expect(
       sendConnectionRequest({ receiverId: 'user-2' }),
     ).rejects.toThrow('Ya existe una solicitud pendiente');
+  });
+
+  it('acepta una solicitud de conexión', async () => {
+    const acceptedRequest = {
+      ...request,
+      statusId: 'status-accepted',
+      status: {
+        id: 'status-accepted',
+        title: 'ACCEPTED' as const,
+      },
+    };
+
+    apiMocks.patch.mockResolvedValue({
+      data: {
+        statusCode: 200,
+        data: acceptedRequest,
+      },
+    });
+
+    const result = await acceptConnectionRequest('request-1');
+
+    expect(apiMocks.patch).toHaveBeenCalledWith(
+      '/chat/connection-requests/request-1/accept',
+    );
+
+    expect(result).toEqual(acceptedRequest);
+    expect(result.status?.title).toBe('ACCEPTED');
+  });
+
+  it('rechaza una solicitud de conexión', async () => {
+    const rejectedRequest = {
+      ...request,
+      statusId: 'status-rejected',
+      status: {
+        id: 'status-rejected',
+        title: 'REJECTED' as const,
+      },
+    };
+
+    apiMocks.patch.mockResolvedValue({
+      data: {
+        statusCode: 200,
+        data: rejectedRequest,
+      },
+    });
+
+    const result = await rejectConnectionRequest('request-1');
+
+    expect(apiMocks.patch).toHaveBeenCalledWith(
+      '/chat/connection-requests/request-1/reject',
+    );
+
+    expect(result).toEqual(rejectedRequest);
+    expect(result.status?.title).toBe('REJECTED');
+  });
+
+  it('propaga errores del backend al aceptar una solicitud', async () => {
+    apiMocks.patch.mockRejectedValue(
+      new Error('La solicitud ya fue respondida'),
+    );
+
+    await expect(
+      acceptConnectionRequest('request-1'),
+    ).rejects.toThrow('La solicitud ya fue respondida');
+  });
+
+  it('admite respuestas sin envoltura al rechazar', async () => {
+    const rejectedRequest = {
+      ...request,
+      status: {
+        id: 'status-rejected',
+        title: 'REJECTED' as const,
+      },
+    };
+
+    apiMocks.patch.mockResolvedValue({
+      data: rejectedRequest,
+    });
+
+    const result = await rejectConnectionRequest('request-1');
+
+    expect(result).toEqual(rejectedRequest);
   });
 });
