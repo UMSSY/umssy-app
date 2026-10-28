@@ -1,5 +1,9 @@
 # Corrección HU-MEN-06 / HU-MEN-07
 
+Este informe registra la entrega `f072d484`. La auditoría posterior y las
+correcciones H1–H5 están en [la validación final](hu6-hu7-final-validation.md),
+incluida la revisión pendiente de Database y el destino de integración Epic6.
+
 Fecha: 28/10/2026. Rama local: `fix/grupo-6-hu6-hu7-regresion`.
 Base verificada de `origin/develop`: `8f1abc4a8ba1c6941f071695bb0eb2fed695bb28`
 (merge #1712). No se creó PR ni se publicó la rama: la instrucción actual del solicitante pide solamente commit local.
