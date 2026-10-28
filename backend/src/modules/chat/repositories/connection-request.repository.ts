@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
@@ -46,9 +45,38 @@ export class ConnectionRequestRepository {
 
   async findReceivedByUser(receiverId: string) {
     return this.prisma.connectionRequest.findMany({
-      where: { receiverId },
-      include: { status: true },
-      orderBy: { createdAt: 'desc' },
+      where: {
+        receiverId,
+        status: {
+          title: 'PENDING',
+        },
+      },
+      select: {
+        id: true,
+        senderId: true,
+        receiverId: true,
+        statusId: true,
+        createdAt: true,
+        updatedAt: true,
+        status: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        sender: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            headline: true,
+            isActive: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -59,11 +87,7 @@ export class ConnectionRequestRepository {
     });
   }
 
-  async create(
-    senderId: string,
-    receiverId: string,
-    statusId: string,
-  ) {
+  async create(senderId: string, receiverId: string, statusId: string) {
     return this.prisma.connectionRequest.create({
       data: {
         senderId,
