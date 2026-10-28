@@ -11,6 +11,53 @@ const getMessages = (payload: unknown): string[] => {
 };
 
 describe('createBlockSchema', () => {
+  const weekly = {
+    startAt: '2026-10-10T19:00:00Z',
+    endAt: '2026-10-10T20:00:00Z',
+    repeatWeekly: true,
+    repeatUntil: '2026-10-31',
+  };
+
+  it.each(['2026-10-10', '2026-10-31', '2027-01-02'])(
+    'acepta fin inclusivo hasta las %s (12 semanas desde el bloque)',
+    (repeatUntil) => expect(getMessages({ ...weekly, repeatUntil })).toEqual([]),
+  );
+
+  it.each(['2026-10-09', '2027-01-03'])(
+    'rechaza fin fuera de rango: %s',
+    (repeatUntil) => expect(getMessages({ ...weekly, repeatUntil })).toContain(MSG.repeatUntilOutOfRange),
+  );
+
+  it.each(['2026-02-30', '31/10/2026', '2026-10-31T00:00:00Z', '', null])(
+    'rechaza fecha final inválida: %s',
+    (repeatUntil) => expect(schema.safeParse({ ...weekly, repeatUntil }).success).toBe(false),
+  );
+
+  it('exige fecha final al repetir', () => {
+    expect(getMessages({ ...weekly, repeatUntil: undefined })).toContain(MSG.repeatUntilRequired);
+  });
+
+  it.each([false, undefined])('rechaza fecha final sin repetición: %s', (repeatWeekly) => {
+    expect(getMessages({ ...weekly, repeatWeekly })).toContain(MSG.repeatNotEnabled);
+  });
+
+  it('acepta desactivar la repetición sin fecha final', () => {
+    expect(getMessages({ ...weekly, repeatWeekly: false, repeatUntil: undefined })).toEqual([]);
+  });
+
+  it('rechaza booleanos enviados como texto', () => {
+    expect(schema.safeParse({ ...weekly, repeatWeekly: 'true' }).success).toBe(false);
+  });
+
+  it('compara con el día de Bolivia aunque el fin esté en el siguiente día UTC', () => {
+    expect(getMessages({
+      startAt: '2026-10-11T00:00:00Z',
+      endAt: '2026-10-11T01:00:00Z',
+      repeatWeekly: true,
+      repeatUntil: '2026-10-10',
+    })).toEqual([]);
+  });
+
   it('acepta un bloque futuro válido (15:00 a 16:00 Bolivia)', () => {
     const result = schema.safeParse({
       startAt: '2026-10-10T19:00:00Z',
