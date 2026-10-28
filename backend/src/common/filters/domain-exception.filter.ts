@@ -1,8 +1,11 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 import type { Response } from 'express';
+import { ZodValidationException } from 'nestjs-zod';
 import { RequestValidationException } from '../exceptions/request-validation.exception.js';
 import { DomainException } from '../exceptions/domain.exception.js';
 import { HTTP_ERRORS } from '../constants/http-errors.constants.js';
+import { buildRequestValidationException } from '../utils/build-request-validation-exception.js';
+import type { ValidationIssue } from '../types/validation-issue.type.js';
 
 @Catch()
 export class DomainExceptionFilter implements ExceptionFilter {
@@ -10,6 +13,11 @@ export class DomainExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
+
+    if (exception instanceof ZodValidationException) {
+      const error = exception.getZodError() as { issues: readonly ValidationIssue[] };
+      exception = buildRequestValidationException(error.issues);
+    }
 
     if (!(exception instanceof DomainException)) {
       const statusCode = exception instanceof HttpException ? exception.getStatus() : 500;

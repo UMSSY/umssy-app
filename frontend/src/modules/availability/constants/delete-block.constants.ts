@@ -2,7 +2,6 @@ import type { AvailabilityBlockState } from "../types/availability-block-state.t
 
 export const STATE_LABELS: Record<AvailabilityBlockState, string> = {
   free: "BLOQUE LIBRE",
-  pending: "BLOQUE PENDIENTE",
   confirmed: "BLOQUE CONFIRMADO",
 };
 
