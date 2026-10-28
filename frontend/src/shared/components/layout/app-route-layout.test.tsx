@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AppRouteLayout as AppLayout } from "./app-route-layout";
+import AppLayout from "@/app/(app)/layout";
 import { ReviewQueueView } from "@/modules/radar-chart";
 
 const { route } = vi.hoisted(() => ({ route: { pathname: "/profile" } }));
@@ -19,6 +19,15 @@ vi.mock("./app-shell", () => ({
 }));
 
 describe("AppRouteLayout", () => {
+  it("muestra el camino de incorporación al titulado sin rol mentor", () => {
+    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado", roles: ["titulado"] }))}.s`);
+    route.pathname = "/mentors/participation/technical-areas";
+    render(<AppLayout><p>editor de áreas</p></AppLayout>);
+    expect(screen.queryByText("editor de áreas")).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("participación activa");
+    expect(screen.getByRole("link", { name: "Iniciar incorporación" })).toHaveAttribute("href", "/mentorship");
+  });
+
   beforeEach(() => sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado", roles: ["titulado", "mentor", "empresa", "administrativo", "estudiante"] }))}.s`));
   afterEach(() => {
     cleanup();
