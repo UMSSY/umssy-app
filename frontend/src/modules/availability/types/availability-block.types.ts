@@ -1,4 +1,5 @@
 import type { AvailabilityBlockState } from "./availability-block-state.types";
+import type { BlockAppointment } from "./block-appointment.types";
 
 export interface AvailabilityBlock {
   id: string;
@@ -8,4 +9,5 @@ export interface AvailabilityBlock {
   state: AvailabilityBlockState;
   createdAt: string;
   updatedAt: string;
+  appointment?: BlockAppointment | null;
 }
