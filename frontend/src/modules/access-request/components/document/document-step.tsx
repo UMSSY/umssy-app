@@ -11,18 +11,13 @@ import { DocumentDropzone } from "./document-dropzone";
 import { DocumentPreviewCard } from "./document-preview-card";
 import { FieldError } from "../personal-data/field-error";
 import { RequiredMark } from "../personal-data/required-mark";
+import { DOCUMENT_RECOMMENDATIONS } from "../../constants/document-recommendations.constants";
 
 const DOCUMENT_TYPE_OPTIONS: ReadonlyArray<{ value: DocumentType; label: string }> = [
   { value: "academic_diploma", label: "Diploma académico" },
   { value: "national_title", label: "Título en provisión nacional" },
 ];
 
-const RECOMMENDATIONS = [
-  "Documento completo, sin recortes ni partes tapadas.",
-  "Nombre y número del documento legibles.",
-  "Imagen con buena luz, sin reflejos ni sombras.",
-  "Documento original, no una copia.",
-];
 
 export function DocumentStep() {
   const { values, status, document: documentState, hasDocument, submitError, goToStep, selectDocumentType, submitRequest } =
@@ -104,7 +99,7 @@ export function DocumentStep() {
       <aside className="h-fit rounded-xl border border-border bg-surface p-5">
         <h2 className="text-base font-bold text-ink 2xl:text-lg">Para que tu solicitud se apruebe sin demoras</h2>
         <ul className="mt-3 flex flex-col gap-2.5">
-          {RECOMMENDATIONS.map((tip) => (
+          {DOCUMENT_RECOMMENDATIONS.map((tip) => (
             <li key={tip} className="flex gap-2 text-[13.5px] text-ink 2xl:text-base">
               <Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
               {tip}

@@ -1,4 +1,12 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AccessRequestProvider } from "../../contexts/access-request-context";
@@ -7,9 +15,13 @@ import type { ApiResult } from "../../types/access-request.types";
 import { PersonalDataForm } from "../personal-data/personal-data-form";
 import { PublicHeader } from "./public-header";
 
-const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+const { push } = vi.hoisted(() => ({
+  push: vi.fn(),
+}));
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
 
 vi.mock("../../services/access-request.service", () => ({
   accessRequestService: {
@@ -23,15 +35,21 @@ const create = vi.mocked(accessRequestService.createAccessRequest);
 
 const SUBMIT_NAME = "Continuar al siguiente paso";
 
-// React escucha en la raíz: para ver el defaultPrevented final hay que observar el clic más arriba, en document
+// Observa la cancelación después del manejador de React y evita navegar en jsdom.
 function watchPrevented() {
   const state = { prevented: false };
+
   const listener = (event: Event) => {
     state.prevented = event.defaultPrevented;
     event.preventDefault();
   };
+
   document.addEventListener("click", listener);
-  return { state, stop: () => document.removeEventListener("click", listener) };
+
+  return {
+    state,
+    stop: () => document.removeEventListener("click", listener),
+  };
 }
 
 function renderPage() {
@@ -44,13 +62,18 @@ function renderPage() {
 }
 
 function type(label: RegExp, value: string) {
-  fireEvent.change(screen.getByLabelText(label), { target: { value } });
+  fireEvent.change(screen.getByLabelText(label), {
+    target: { value },
+  });
 }
 
 async function pick(name: string, option: string) {
   const user = userEvent.setup();
+
   await user.click(screen.getByRole("combobox", { name }));
-  await user.click(await screen.findByRole("option", { name: option }));
+  await user.click(
+    await screen.findByRole("option", { name: option }),
+  );
 }
 
 async function fillValidForm() {
@@ -61,6 +84,7 @@ async function fillValidForm() {
   type(/^Correo electrónico/, "ana@umss.edu.bo");
   type(/^Fecha de nacimiento/, "2000-05-10");
   type(/^Año de titulación/, "2019");
+
   await pick("Expedido", "LP");
   await pick("Carrera", "Licenciatura en Ingeniería de Sistemas");
 }
@@ -70,14 +94,22 @@ describe("PublicHeader", () => {
     push.mockReset();
     create.mockReset();
   });
+
   afterEach(() => cleanup());
 
   it("muestra ¿Ya tienes cuenta? y un enlace Iniciar sesión hacia /login", () => {
     renderPage();
 
     const header = screen.getByRole("banner");
-    expect(within(header).getByText(/¿Ya tienes cuenta\?/)).toBeInTheDocument();
-    const link = within(header).getByRole("link", { name: "Iniciar sesión" });
+
+    const link = within(header).getByRole("link", {
+      name: "Iniciar sesión",
+    });
+
+    expect(
+      within(header).getByText(/¿Ya tienes cuenta\?/),
+    ).toBeInTheDocument();
+
     expect(link).toHaveAttribute("href", "/login");
     expect(header).toHaveClass("justify-between");
   });
@@ -85,13 +117,20 @@ describe("PublicHeader", () => {
   it("sin datos el clic no abre el diálogo ni llama a push (navega el Link)", async () => {
     const user = userEvent.setup();
     renderPage();
-    const link = screen.getByRole("link", { name: "Iniciar sesión" });
-    const { state, stop } = watchPrevented();
 
-    await user.click(link);
-    stop();
+    const link = screen.getByRole("link", {
+      name: "Iniciar sesión",
+    });
 
-    expect(state.prevented).toBe(false);
+    const watcher = watchPrevented();
+
+    try {
+      await user.click(link);
+    } finally {
+      watcher.stop();
+    }
+
+    expect(watcher.state.prevented).toBe(false);
     expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(push).not.toHaveBeenCalled();
   });
@@ -101,13 +140,40 @@ describe("PublicHeader", () => {
     renderPage();
     type(/^Nombres/, "Ana");
 
-    await user.click(screen.getByRole("link", { name: "Iniciar sesión" }));
+    await user.click(
+      screen.getByRole("link", {
+        name: "Iniciar sesión",
+      }),
+    );
 
     const dialog = await screen.findByRole("alertdialog");
-    expect(within(dialog).getByText("¿Salir del formulario?")).toBeInTheDocument();
-    expect(within(dialog).getByText("Si sales, se perderán los datos ingresados")).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: "Cancelar" })).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: "Salir" })).toHaveClass("bg-primary", "text-primary-foreground", "hover:bg-brand-hover");
+
+    expect(
+      within(dialog).getByText("¿Salir del formulario?"),
+    ).toBeInTheDocument();
+
+    expect(
+      within(dialog).getByText(
+        "Si sales, se perderán los datos ingresados",
+      ),
+    ).toBeInTheDocument();
+
+    expect(
+      within(dialog).getByRole("button", {
+        name: "Cancelar",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      within(dialog).getByRole("button", {
+        name: "Salir",
+      }),
+    ).toHaveClass(
+      "bg-primary",
+      "text-primary-foreground",
+      "hover:bg-brand-hover",
+    );
+
     expect(push).not.toHaveBeenCalled();
   });
 
@@ -115,13 +181,20 @@ describe("PublicHeader", () => {
     const user = userEvent.setup();
     renderPage();
     type(/^Nombres/, "Ana");
-    const link = screen.getByRole("link", { name: "Iniciar sesión" });
-    const { state, stop } = watchPrevented();
 
-    await user.click(link);
-    stop();
+    const link = screen.getByRole("link", {
+      name: "Iniciar sesión",
+    });
 
-    expect(state.prevented).toBe(true);
+    const watcher = watchPrevented();
+
+    try {
+      await user.click(link);
+    } finally {
+      watcher.stop();
+    }
+
+    expect(watcher.state.prevented).toBe(true);
   });
 
   it("un campo solo con espacios cuenta como vacío y no abre el diálogo", async () => {
@@ -129,8 +202,19 @@ describe("PublicHeader", () => {
     renderPage();
     type(/^Nombres/, "   ");
 
-    await user.click(screen.getByRole("link", { name: "Iniciar sesión" }));
+    const watcher = watchPrevented();
 
+    try {
+      await user.click(
+        screen.getByRole("link", {
+          name: "Iniciar sesión",
+        }),
+      );
+    } finally {
+      watcher.stop();
+    }
+
+    expect(watcher.state.prevented).toBe(false);
     expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(push).not.toHaveBeenCalled();
   });
@@ -139,62 +223,144 @@ describe("PublicHeader", () => {
     const user = userEvent.setup();
     renderPage();
     await fillValidForm();
-    await user.click(screen.getByRole("link", { name: "Iniciar sesión" }));
+
+    await user.click(
+      screen.getByRole("link", {
+        name: "Iniciar sesión",
+      }),
+    );
+
     const dialog = await screen.findByRole("alertdialog");
 
-    await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+    await user.click(
+      within(dialog).getByRole("button", {
+        name: "Cancelar",
+      }),
+    );
 
-    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    await waitFor(() => {
+      expect(screen.queryByRole("alertdialog")).toBeNull();
+    });
+
     expect(push).not.toHaveBeenCalled();
-    expect(screen.getByLabelText(/^Nombres/)).toHaveValue("Ana María");
-    expect(screen.getByLabelText(/^Correo electrónico/)).toHaveValue("ana@umss.edu.bo");
+
+    expect(
+      screen.getByLabelText(/^Nombres/),
+    ).toHaveValue("Ana María");
+
+    expect(
+      screen.getByLabelText(/^Correo electrónico/),
+    ).toHaveValue("ana@umss.edu.bo");
   });
 
   it("Salir llama a push('/login') una vez y cierra el diálogo", async () => {
     const user = userEvent.setup();
     renderPage();
     type(/^Nombres/, "Ana");
-    await user.click(screen.getByRole("link", { name: "Iniciar sesión" }));
+
+    await user.click(
+      screen.getByRole("link", {
+        name: "Iniciar sesión",
+      }),
+    );
+
     const dialog = await screen.findByRole("alertdialog");
 
-    await user.click(within(dialog).getByRole("button", { name: "Salir" }));
+    await user.click(
+      within(dialog).getByRole("button", {
+        name: "Salir",
+      }),
+    );
 
     expect(push).toHaveBeenCalledTimes(1);
     expect(push).toHaveBeenCalledWith("/login");
-    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+
+    await waitFor(() => {
+      expect(screen.queryByRole("alertdialog")).toBeNull();
+    });
   });
 
   it("mientras se envía el clic no abre el diálogo ni llama a push", async () => {
     let resolve!: (value: ApiResult<{ id: string }>) => void;
-    create.mockReturnValue(new Promise((done) => (resolve = done)));
+
+    create.mockReturnValue(
+      new Promise<ApiResult<{ id: string }>>((done) => {
+        resolve = done;
+      }),
+    );
+
     const user = userEvent.setup();
     renderPage();
     await fillValidForm();
-    await user.click(screen.getByRole("button", { name: SUBMIT_NAME }));
-    await screen.findByRole("button", { name: "Guardando..." });
-    const link = screen.getByRole("link", { name: "Iniciar sesión" });
-    const { state, stop } = watchPrevented();
 
-    await user.click(link);
-    stop();
+    await user.click(
+      screen.getByRole("button", {
+        name: SUBMIT_NAME,
+      }),
+    );
 
-    expect(state.prevented).toBe(true);
+    await screen.findByRole("button", {
+      name: "Guardando...",
+    });
+
+    const link = screen.getByRole("link", {
+      name: "Iniciar sesión",
+    });
+
+    const watcher = watchPrevented();
+
+    try {
+      await user.click(link);
+    } finally {
+      watcher.stop();
+    }
+
+    expect(watcher.state.prevented).toBe(true);
     expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(push).not.toHaveBeenCalled();
 
-    await act(async () => resolve({ ok: true, data: { id: "draft-1" } }));
+    await act(async () => {
+      resolve({
+        ok: true,
+        data: { id: "draft-1" },
+      });
+    });
   });
 
   it("no usa el término egresado en los textos nuevos", async () => {
     const user = userEvent.setup();
     renderPage();
     type(/^Nombres/, "Ana");
+
     const header = screen.getByRole("banner");
 
-    await user.click(screen.getByRole("link", { name: "Iniciar sesión" }));
+    await user.click(
+      screen.getByRole("link", {
+        name: "Iniciar sesión",
+      }),
+    );
+
     const dialog = await screen.findByRole("alertdialog");
 
     expect(header.textContent).not.toMatch(/egres/i);
     expect(dialog.textContent).not.toMatch(/egres/i);
+  });
+
+  it("no muestra el enlace provisional Mi solicitud en la cabecera", () => {
+    renderPage();
+
+    const header = screen.getByRole("banner");
+
+    expect(
+      within(header).queryByRole("link", {
+        name: "Mi solicitud",
+      }),
+    ).not.toBeInTheDocument();
+
+    expect(
+      within(header).getByRole("link", {
+        name: "Iniciar sesión",
+      }),
+    ).toHaveAttribute("href", "/login");
   });
 });
