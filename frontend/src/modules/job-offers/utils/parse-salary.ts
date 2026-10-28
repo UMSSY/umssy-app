@@ -1,9 +1,4 @@
-export interface ParsedSalary {
-  min: number | null;
-  max: number | null;
-  isIncomplete: boolean;
-}
-
+import type { ParsedSalary } from "../types/parsed-salary.types";
 export function parseSalary(value: string): ParsedSalary {
   const cleaned = value.replace(/[^\d-]/g, "");
   if (cleaned === "") {

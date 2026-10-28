@@ -48,7 +48,7 @@ describe('createJobOfferSchema', () => {
 
   it('valida el título: longitud y caracteres', () => {
     expect(firstMessage({ title: 'a'.repeat(61) })).toMatch(/60/);
-    expect(firstMessage({ title: 'Dev@' })).toMatch(/alfanumericos/);
+    expect(firstMessage({ title: 'Dev@' })).toMatch(/alfanuméricos/);
     expect(parse({ title: 'Ingeniero Peña' }).success).toBe(true);
   });
 
@@ -58,22 +58,22 @@ describe('createJobOfferSchema', () => {
   });
 
   it('solo acepta las modalidades y tipos de contrato del catálogo', () => {
-    expect(firstMessage({ modality: 'Hibrido' })).toBe('Modalidad invalida');
-    expect(firstMessage({ contractType: 'Pasantia' })).toBe('Tipo de contrato invalido');
+    expect(firstMessage({ modality: 'Hibrido' })).toBe('Modalidad inválida');
+    expect(firstMessage({ contractType: 'Pasantia' })).toBe('Tipo de contrato inválido');
     expect(parse({ modality: 'Remoto', contractType: 'Pasantía' }).success).toBe(true);
   });
 
   it('exige entre 1 y 500 vacantes enteras', () => {
     expect(firstMessage({ positionsAvailable: 0 })).toBe('Debe ser al menos 1');
     expect(firstMessage({ positionsAvailable: 501 })).toMatch(/500/);
-    expect(firstMessage({ positionsAvailable: 1.5 })).toBe('Debe ser un numero entero');
+    expect(firstMessage({ positionsAvailable: 1.5 })).toBe('Debe ser un número entero');
   });
 
   it('exige un salario mayor a 0 y un rango ordenado', () => {
     expect(firstMessage({ salaryMin: 0 })).toBe('El salario debe ser mayor a 0');
-    expect(firstMessage({ salaryMax: 1_000_000_000 })).toBe('El salario no puede tener mas de 9 digitos');
+    expect(firstMessage({ salaryMax: 1_000_000_000 })).toBe('El salario no puede tener más de 9 dígitos');
     expect(firstMessage({ salaryMin: 9000, salaryMax: 8000 })).toBe(
-      'El salario minimo no puede ser mayor al salario maximo',
+      'El salario mínimo no puede ser mayor al salario máximo',
     );
   });
 
@@ -103,14 +103,14 @@ describe('createJobOfferSchema', () => {
       'https://www.google.com/maps/place/x',
       'https://maps.app.goo.gl.evil.com/x',
     ]) {
-      expect(firstMessage({ locationUrl })).toBe('Ingresa un enlace valido de Google Maps');
+      expect(firstMessage({ locationUrl })).toBe('Ingresa un enlace válido de Google Maps');
     }
   });
 
   it('exige entre 1 y 10 habilidades con identificadores válidos', () => {
     expect(firstMessage({ skillIds: [] })).toBe('Debes seleccionar al menos una habilidad requerida');
     expect(firstMessage({ skillIds: Array.from({ length: 11 }, () => randomUUID()) })).toMatch(/10/);
-    expect(firstMessage({ skillIds: ['Docker'] })).toBe('El identificador de la habilidad no es valido');
+    expect(firstMessage({ skillIds: ['Docker'] })).toBe('El identificador de la habilidad no es válido');
   });
 
   it('los requisitos de carrera, experiencia y otros son opcionales', () => {
@@ -136,7 +136,7 @@ describe('createJobOfferSchema', () => {
 
   it('valida los años mínimos de experiencia: entero entre 0 y 40', () => {
     expect(parse({ minExperienceYears: 0 }).success).toBe(true);
-    expect(firstMessage({ minExperienceYears: 1.5 })).toBe('Los años de experiencia deben ser un numero entero');
+    expect(firstMessage({ minExperienceYears: 1.5 })).toBe('Los años de experiencia deben ser un número entero');
     expect(firstMessage({ minExperienceYears: -1 })).toMatch(/entre 0 y 40/);
     expect(firstMessage({ minExperienceYears: 41 })).toMatch(/entre 0 y 40/);
   });

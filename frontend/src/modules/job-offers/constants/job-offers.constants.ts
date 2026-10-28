@@ -2,6 +2,7 @@ export const MODALITIES = ["Presencial", "Remoto", "Híbrido"] as const;
 export const CONTRACT_TYPES = ["Tiempo completo", "Medio tiempo", "Pasantía"] as const;
 export const INTERNSHIP_CONTRACT_TYPE = "Pasantía";
 export const SALARY_TO_BE_AGREED = "A convenir";
+export const NOT_SPECIFIED_TEXT = "No especificado";
 export const FIELD_FOCUS_CLASS = "focus-visible:border-ink focus-visible:ring-ink/20";
 
 export const MAX_TITLE_CHARS = 60;
@@ -73,11 +74,26 @@ export const LEAVE_DIALOG_TEXT = {
   confirm: "Salir",
 } as const;
 
-export const PUBLISHED_DIALOG_TEXT = {
-  title: "Vacante publicada",
-  description: "Tu vacante se publicó correctamente.",
-  confirm: "Aceptar",
+export const EDIT_DISCARD_DIALOG_TEXT = {
+  title: "¿Descartar los cambios?",
+  description: "Los cambios no guardados se perderán y la vacante conservará sus datos originales.",
+  cancel: "Seguir editando",
+  confirm: "Descartar",
 } as const;
+
+export const EDIT_LEAVE_DIALOG_TEXT = {
+  title: "¿Salir sin guardar?",
+  description: "Los cambios no guardados se perderán si abandonas la pantalla.",
+  cancel: "Quedarme",
+  confirm: "Salir",
+} as const;
+
+export const EDIT_MESSAGES = {
+  success: "Vacante actualizada correctamente",
+  error: "No se pudo guardar la edición. Inténtelo más tarde",
+} as const;
+
+export const RECRUITERS_HOME_ROUTE = "/recruiters";
 
 export const PUBLISHED_STATUS = "Publicada";
 
@@ -113,9 +129,9 @@ export const VACANCY_LIST_TEXT = {
     ariaLabel: "Mis vacantes publicadas",
     loading: "Cargando vacantes...",
     loadError: "No se pudieron cargar tus vacantes.",
-    empty: "Aún no has publicado vacantes.",
+    empty: "Aún no tienes vacantes publicadas",
     noMatches: "Ninguna vacante coincide con los filtros.",
-    noSearchMatches: "Ninguna vacante coincide con los filtros.",
+    noSearchMatches: "No se encontraron vacantes que coincidan con la búsqueda",
   },
   history: {
     ariaLabel: "Historial de vacantes",
@@ -127,14 +143,30 @@ export const VACANCY_LIST_TEXT = {
   },
 } as const;
 
-export const JOB_OFFERS_QUERY_KEYS = {
-  skillCatalog: ["job-offers", "skill-catalog"] as const,
-  company: (companyId: string | null) => ["job-offers", "company", companyId] as const,
-  companyOffers: (companyId: string | null, params?: object) =>
-    ["job-offers", "company", companyId, params] as const,
-  companyOfferDetails: (companyId: string | null, jobOfferId: string | null) =>
-    ["job-offers", "company", companyId, "details", jobOfferId] as const,
-};
+export const JOB_OFFERS_PAGE_SIZE = 10;
+
+export const TOAST_OPTIONS = { position: "top-center", duration: 5000 } as const;
+
+export const DELETE_JOB_OFFER_TEXT = {
+  title: "¿Estás seguro de eliminar esta vacante?",
+  description: "dejará de ser visible para los candidatos y pasará al historial como eliminada.",
+  cancel: "Cancelar",
+  confirm: "Eliminar",
+  busy: "Eliminando...",
+  success: "Vacante eliminada correctamente",
+  error: "No se pudo eliminar la vacante. Intente nuevamente",
+} as const;
+
+export const REOPEN_JOB_OFFER_TEXT = {
+  title: "¿Estás seguro de reabrir esta vacante?",
+  description: "volverá a estar activa y a recibir postulaciones con los mismos datos.",
+  cancel: "Cancelar",
+  confirm: "Reabrir",
+  busy: "Reabriendo...",
+  success: "Vacante reabierta correctamente",
+  error: "No se pudo reabrir la vacante. Intente nuevamente",
+  notReopenable: "La vacante ya no está cerrada, por eso no se puede reabrir.",
+} as const;
 
 export const DEFAULT_COMPANY_ID = "a0000000-0000-4000-8000-000000000001";
 export const DEFAULT_COMPANY_NAME = "TechBolivia S.R.L.";

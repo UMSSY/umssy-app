@@ -16,7 +16,9 @@ describe("VacancyCard", () => {
   afterEach(() => cleanup());
 
   it("muestra los datos obligatorios de la vacante", () => {
-    renderCard({ offer: buildJobOffer({ applicantsCount: 12 }) });
+    renderCard({
+      offer: buildJobOffer({ applicantsCount: 12, createdAt: "2026-10-12T14:00:00.000Z" }),
+    });
 
     expect(screen.getByRole("button", { name: "Desarrolladora Frontend" })).toBeInTheDocument();
     expect(screen.getByText(/Publicado: 12\/10\/2026/)).toBeInTheDocument();

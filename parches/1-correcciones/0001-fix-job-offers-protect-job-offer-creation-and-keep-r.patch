@@ -1,0 +1,687 @@
+From a9b32abd9f0b172a6a6ceb8ad19e47d4e132c5d3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Nicol=C3=A1s=20Melgarejo?=
+ <nicolasmelgarejogamboa@gmail.com>
+Date: Tue, 27 Oct 2026 23:16:37 -0400
+Subject: [PATCH 1/4] fix(job-offers): protect job offer creation and keep
+ requirements on edit
+
+- Require session and company role to publish a job offer.
+- Validate edits with a schema that keeps unsent requirements unchanged.
+- Look up the deleted status through a dedicated repository method.
+- Remove the debug log from the delete endpoint.
+- Add accents to the validation messages shown to the user.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011QxL82Ke4t6ycKgAsKG13W
+---
+ .../constants/job-offer.constants.ts          |  34 ++---
+ .../controllers/job-offers.controller.ts      |  13 +-
+ .../repositories/job-offers.repository.ts     |   8 ++
+ .../requests/create-job-offer.request.ts      | 133 +++++++++---------
+ .../requests/update-job-offer.request.ts      |  14 ++
+ .../job-offers/services/job-offers.service.ts |  40 ++++--
+ .../tests/create-job-offer.request.spec.ts    |  18 +--
+ .../tests/job-offers.controller.spec.ts       |   8 ++
+ .../tests/job-offers.repository.spec.ts       |  11 ++
+ .../tests/job-offers.service.spec.ts          |  47 +++++++
+ .../tests/update-job-offer.request.spec.ts    |  60 ++++++++
+ .../types/update-job-offer-data.type.ts       |   8 +-
+ 12 files changed, 288 insertions(+), 106 deletions(-)
+ create mode 100644 backend/src/modules/job-offers/requests/update-job-offer.request.ts
+ create mode 100644 backend/src/modules/job-offers/tests/update-job-offer.request.spec.ts
+
+diff --git a/backend/src/modules/job-offers/constants/job-offer.constants.ts b/backend/src/modules/job-offers/constants/job-offer.constants.ts
+index 32b3d9da..d6ad515a 100644
+--- a/backend/src/modules/job-offers/constants/job-offer.constants.ts
++++ b/backend/src/modules/job-offers/constants/job-offer.constants.ts
+@@ -11,33 +11,33 @@ export const JOB_OFFER_SALARY_TO_BE_AGREED = 'A convenir';
+ 
+ export const JOB_OFFER_VALIDATION_MESSAGES = {
+   REQUIRED_FIELD: 'Este campo es obligatorio',
+-  TITLE_TOO_LONG: `El titulo del puesto no debe exceder los ${JOB_OFFER_TITLE_MAX_LENGTH} caracteres`,
+-  TITLE_INVALID_CHARACTERS: 'Solo se permiten caracteres alfanumericos y espacios',
+-  DESCRIPTION_TOO_LONG: `La descripcion no debe exceder los ${JOB_OFFER_DESCRIPTION_MAX_LENGTH} caracteres`,
+-  INVALID_MODALITY: 'Modalidad invalida',
+-  INVALID_CONTRACT_TYPE: 'Tipo de contrato invalido',
+-  POSITIONS_NOT_INTEGER: 'Debe ser un numero entero',
++  TITLE_TOO_LONG: `El título del puesto no debe exceder los ${JOB_OFFER_TITLE_MAX_LENGTH} caracteres`,
++  TITLE_INVALID_CHARACTERS: 'Solo se permiten caracteres alfanuméricos y espacios',
++  DESCRIPTION_TOO_LONG: `La descripción no debe exceder los ${JOB_OFFER_DESCRIPTION_MAX_LENGTH} caracteres`,
++  INVALID_MODALITY: 'Modalidad inválida',
++  INVALID_CONTRACT_TYPE: 'Tipo de contrato inválido',
++  POSITIONS_NOT_INTEGER: 'Debe ser un número entero',
+   POSITIONS_TOO_FEW: 'Debe ser al menos 1',
+-  POSITIONS_TOO_MANY: `El numero maximo de vacantes por publicacion es ${JOB_OFFER_MAX_POSITIONS}`,
++  POSITIONS_TOO_MANY: `El número máximo de vacantes por publicación es ${JOB_OFFER_MAX_POSITIONS}`,
+   SALARY_NOT_POSITIVE: 'El salario debe ser mayor a 0',
+-  SALARY_TOO_HIGH: 'El salario no puede tener mas de 9 digitos',
+-  SALARY_RANGE_INVALID: 'El salario minimo no puede ser mayor al salario maximo',
++  SALARY_TOO_HIGH: 'El salario no puede tener más de 9 dígitos',
++  SALARY_RANGE_INVALID: 'El salario mínimo no puede ser mayor al salario máximo',
+   LANGUAGES_TOO_LONG: `Los idiomas no deben exceder los ${JOB_OFFER_LANGUAGES_MAX_LENGTH} caracteres`,
+-  INVALID_LOCATION_URL: 'Ingresa un enlace valido de Google Maps',
++  INVALID_LOCATION_URL: 'Ingresa un enlace válido de Google Maps',
+   SKILLS_REQUIRED: 'Debes seleccionar al menos una habilidad requerida',
+-  SKILLS_TOO_MANY: `No se pueden seleccionar mas de ${JOB_OFFER_MAX_SKILLS} habilidades`,
+-  INVALID_SKILL_ID: 'El identificador de la habilidad no es valido',
+-  INVALID_COMPANY_ID: 'El identificador de la empresa no es valido',
++  SKILLS_TOO_MANY: `No se pueden seleccionar más de ${JOB_OFFER_MAX_SKILLS} habilidades`,
++  INVALID_SKILL_ID: 'El identificador de la habilidad no es válido',
++  INVALID_COMPANY_ID: 'El identificador de la empresa no es válido',
+   REQUIREMENT_TOO_LONG: `Cada requisito no debe exceder los ${JOB_OFFER_REQUIREMENT_MAX_LENGTH} caracteres`,
+-  REQUIREMENTS_TOO_MANY: `No se pueden agregar mas de ${JOB_OFFER_MAX_REQUIREMENTS} requisitos`,
+-  EXPERIENCE_NOT_INTEGER: 'Los años de experiencia deben ser un numero entero',
++  REQUIREMENTS_TOO_MANY: `No se pueden agregar más de ${JOB_OFFER_MAX_REQUIREMENTS} requisitos`,
++  EXPERIENCE_NOT_INTEGER: 'Los años de experiencia deben ser un número entero',
+   EXPERIENCE_OUT_OF_RANGE: `Los años de experiencia deben estar entre 0 y ${JOB_OFFER_MAX_EXPERIENCE_YEARS}`,
+-  INVALID_JOB_OFFER_ID: 'El identificador de la vacante no es valido',
++  INVALID_JOB_OFFER_ID: 'El identificador de la vacante no es válido',
+   INVALID_DATE: 'La fecha debe tener el formato AAAA-MM-DD',
+   DATE_RANGE_INVALID: 'La fecha inicial no puede ser mayor a la fecha final',
+   INVALID_SORT_BY: 'Solo se puede ordenar por fecha o por postulantes',
+   INVALID_SORT_ORDER: 'El orden debe ser ascendente o descendente',
+-  SEARCH_TOO_LONG: `La busqueda no debe exceder los ${JOB_OFFER_TITLE_MAX_LENGTH} caracteres`,
++  SEARCH_TOO_LONG: `La búsqueda no debe exceder los ${JOB_OFFER_TITLE_MAX_LENGTH} caracteres`,
+ } as const;
+ 
+ export const JOB_OFFER_SORT_FIELDS = ['createdAt', 'applicants'] as const;
+diff --git a/backend/src/modules/job-offers/controllers/job-offers.controller.ts b/backend/src/modules/job-offers/controllers/job-offers.controller.ts
+index dd38ee82..5af06947 100644
+--- a/backend/src/modules/job-offers/controllers/job-offers.controller.ts
++++ b/backend/src/modules/job-offers/controllers/job-offers.controller.ts
+@@ -40,6 +40,10 @@ import {
+   createJobOfferSchema,
+   type CreateJobOfferRequest,
+ } from '../requests/create-job-offer.request.js';
++import {
++  updateJobOfferSchema,
++  type UpdateJobOfferRequest,
++} from '../requests/update-job-offer.request.js';
+ import {
+   listCompanyJobOffersSchema,
+   type ListCompanyJobOffersRequest,
+@@ -90,6 +94,8 @@ export class JobOffersController {
+   }
+ 
+   @Post('companies/:companyId/job-offers')
++  @UseGuards(JwtAuthGuard, RolesGuard)
++  @Roles('empresa')
+   @HttpCode(HttpStatus.CREATED)
+   @ApiOperation({ summary: 'Publica una nueva vacante de la empresa' })
+   @ApiBody(toApiBody(createJobOfferSchema))
+@@ -165,18 +171,18 @@ export class JobOffersController {
+   @UseGuards(JwtAuthGuard, RolesGuard)
+   @Roles('empresa')
+   @ApiOperation({ summary: 'Edita una vacante de la empresa' })
+-  @ApiBody(toApiBody(createJobOfferSchema))
++  @ApiBody(toApiBody(updateJobOfferSchema))
+   @ApiOkResponse({ description: 'Vacante actualizada' })
+   @ApiNotFoundResponse({ description: 'La vacante no existe o no pertenece a la empresa' })
+   update(
+     @Param('companyId', companyIdPipe) companyId: string,
+     @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
+-    @Body({ schema: createJobOfferSchema }) request: CreateJobOfferRequest,
++    @Body({ schema: updateJobOfferSchema }) request: UpdateJobOfferRequest,
+   ): Promise<JobOfferResponse> {
+     return this.jobOffersService.update(companyId, jobOfferId, request);
+   }
+ 
+- @Delete('companies/:companyId/job-offers/:jobOfferId')
++  @Delete('companies/:companyId/job-offers/:jobOfferId')
+   @UseGuards(JwtAuthGuard, RolesGuard)
+   @Roles('empresa')
+   @HttpCode(HttpStatus.NO_CONTENT)
+@@ -187,7 +193,6 @@ export class JobOffersController {
+     @Param('companyId', companyIdPipe) companyId: string,
+     @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
+   ): Promise<void> {
+-    console.log('>>> [BACKEND] Petición DELETE recibida:', { companyId, jobOfferId });
+     return this.jobOffersService.softDelete(companyId, jobOfferId);
+   }
+ }
+\ No newline at end of file
+diff --git a/backend/src/modules/job-offers/repositories/job-offers.repository.ts b/backend/src/modules/job-offers/repositories/job-offers.repository.ts
+index 2234777b..c7b8881d 100644
+--- a/backend/src/modules/job-offers/repositories/job-offers.repository.ts
++++ b/backend/src/modules/job-offers/repositories/job-offers.repository.ts
+@@ -48,6 +48,14 @@ export class JobOffersRepository {
+     };
+   }
+ 
++  async findStatusId(status: JobOfferStatus): Promise<string | null> {
++    const row = await this.prisma.jobOfferStatus.findUnique({
++      where: { title: status },
++      select: { id: true },
++    });
++    return row?.id ?? null;
++  }
++
+   create(data: CreateJobOfferData): Promise<JobOfferCreatedRecord> {
+     const { skillIds, ...jobOffer } = data;
+     return this.prisma.jobOffer.create({
+diff --git a/backend/src/modules/job-offers/requests/create-job-offer.request.ts b/backend/src/modules/job-offers/requests/create-job-offer.request.ts
+index 5fe329be..7c3c44b2 100644
+--- a/backend/src/modules/job-offers/requests/create-job-offer.request.ts
++++ b/backend/src/modules/job-offers/requests/create-job-offer.request.ts
+@@ -19,71 +19,74 @@ const salarySchema = z
+   .min(1, MESSAGES.SALARY_NOT_POSITIVE)
+   .max(JOB_OFFER_MAX_SALARY, MESSAGES.SALARY_TOO_HIGH);
+ 
+-export const createJobOfferSchema = z
+-  .object({
+-    title: z
+-      .string()
+-      .trim()
+-      .min(1, MESSAGES.REQUIRED_FIELD)
+-      .max(JOB_OFFER_TITLE_MAX_LENGTH, MESSAGES.TITLE_TOO_LONG)
+-      .regex(/^[a-zA-Z0-9\sÁÉÍÓÚÜÑáéíóúüñ]+$/, MESSAGES.TITLE_INVALID_CHARACTERS),
+-    description: z
+-      .string()
+-      .trim()
+-      .min(1, MESSAGES.REQUIRED_FIELD)
+-      .max(JOB_OFFER_DESCRIPTION_MAX_LENGTH, MESSAGES.DESCRIPTION_TOO_LONG),
+-    modality: z.enum(JobOfferModality, { message: MESSAGES.INVALID_MODALITY }),
+-    contractType: z.enum(JobOfferContractType, { message: MESSAGES.INVALID_CONTRACT_TYPE }),
+-    category: z.string().trim().min(1, MESSAGES.REQUIRED_FIELD),
+-    positionsAvailable: z
+-      .number()
+-      .int(MESSAGES.POSITIONS_NOT_INTEGER)
+-      .min(1, MESSAGES.POSITIONS_TOO_FEW)
+-      .max(JOB_OFFER_MAX_POSITIONS, MESSAGES.POSITIONS_TOO_MANY),
+-    salaryMin: salarySchema.optional(),
+-    salaryMax: salarySchema.optional(),
+-    languages: z
+-      .string()
+-      .trim()
+-      .min(1, MESSAGES.REQUIRED_FIELD)
+-      .max(JOB_OFFER_LANGUAGES_MAX_LENGTH, MESSAGES.LANGUAGES_TOO_LONG),
+-    locationUrl: z
+-      .string()
+-      .trim()
+-      .min(1, MESSAGES.REQUIRED_FIELD)
+-      .regex(
+-        /^https:\/\/(?:maps\.app\.goo\.gl\/[\w-]+|goo\.gl\/maps\/[\w-]+|(?:www\.)?google\.com(?:\.[a-z]{2})?\/maps\/place\/[^/\s?#]+\/@-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?,\d+(?:\.\d+)?[zm])(?:[/?#]\S*)?$/,
+-        MESSAGES.INVALID_LOCATION_URL,
+-      ),
+-    skillIds: z
+-      .array(z.uuid(MESSAGES.INVALID_SKILL_ID))
+-      .min(1, MESSAGES.SKILLS_REQUIRED)
+-      .max(JOB_OFFER_MAX_SKILLS, MESSAGES.SKILLS_TOO_MANY),
+-    requiredCareers: z
+-      .array(z.string().trim().min(1).max(JOB_OFFER_REQUIREMENT_MAX_LENGTH, MESSAGES.REQUIREMENT_TOO_LONG))
+-      .max(JOB_OFFER_MAX_REQUIREMENTS, MESSAGES.REQUIREMENTS_TOO_MANY)
+-      .default([]),
+-    minExperienceYears: z
+-      .number()
+-      .int(MESSAGES.EXPERIENCE_NOT_INTEGER)
+-      .min(0, MESSAGES.EXPERIENCE_OUT_OF_RANGE)
+-      .max(JOB_OFFER_MAX_EXPERIENCE_YEARS, MESSAGES.EXPERIENCE_OUT_OF_RANGE)
+-      .optional(),
+-    otherRequirements: z
+-      .array(z.string().trim().min(1).max(JOB_OFFER_REQUIREMENT_MAX_LENGTH, MESSAGES.REQUIREMENT_TOO_LONG))
+-      .max(JOB_OFFER_MAX_REQUIREMENTS, MESSAGES.REQUIREMENTS_TOO_MANY)
+-      .default([]),
++const requirementListSchema = z
++  .array(z.string().trim().min(1).max(JOB_OFFER_REQUIREMENT_MAX_LENGTH, MESSAGES.REQUIREMENT_TOO_LONG))
++  .max(JOB_OFFER_MAX_REQUIREMENTS, MESSAGES.REQUIREMENTS_TOO_MANY);
++
++export const jobOfferFieldsSchema = z.object({
++  title: z
++    .string()
++    .trim()
++    .min(1, MESSAGES.REQUIRED_FIELD)
++    .max(JOB_OFFER_TITLE_MAX_LENGTH, MESSAGES.TITLE_TOO_LONG)
++    .regex(/^[a-zA-Z0-9\sÁÉÍÓÚÜÑáéíóúüñ]+$/, MESSAGES.TITLE_INVALID_CHARACTERS),
++  description: z
++    .string()
++    .trim()
++    .min(1, MESSAGES.REQUIRED_FIELD)
++    .max(JOB_OFFER_DESCRIPTION_MAX_LENGTH, MESSAGES.DESCRIPTION_TOO_LONG),
++  modality: z.enum(JobOfferModality, { message: MESSAGES.INVALID_MODALITY }),
++  contractType: z.enum(JobOfferContractType, { message: MESSAGES.INVALID_CONTRACT_TYPE }),
++  category: z.string().trim().min(1, MESSAGES.REQUIRED_FIELD),
++  positionsAvailable: z
++    .number()
++    .int(MESSAGES.POSITIONS_NOT_INTEGER)
++    .min(1, MESSAGES.POSITIONS_TOO_FEW)
++    .max(JOB_OFFER_MAX_POSITIONS, MESSAGES.POSITIONS_TOO_MANY),
++  salaryMin: salarySchema.optional(),
++  salaryMax: salarySchema.optional(),
++  languages: z
++    .string()
++    .trim()
++    .min(1, MESSAGES.REQUIRED_FIELD)
++    .max(JOB_OFFER_LANGUAGES_MAX_LENGTH, MESSAGES.LANGUAGES_TOO_LONG),
++  locationUrl: z
++    .string()
++    .trim()
++    .min(1, MESSAGES.REQUIRED_FIELD)
++    .regex(
++      /^https:\/\/(?:maps\.app\.goo\.gl\/[\w-]+|goo\.gl\/maps\/[\w-]+|(?:www\.)?google\.com(?:\.[a-z]{2})?\/maps\/place\/[^/\s?#]+\/@-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?,\d+(?:\.\d+)?[zm])(?:[/?#]\S*)?$/,
++      MESSAGES.INVALID_LOCATION_URL,
++    ),
++  skillIds: z
++    .array(z.uuid(MESSAGES.INVALID_SKILL_ID))
++    .min(1, MESSAGES.SKILLS_REQUIRED)
++    .max(JOB_OFFER_MAX_SKILLS, MESSAGES.SKILLS_TOO_MANY),
++  requiredCareers: requirementListSchema.optional(),
++  minExperienceYears: z
++    .number()
++    .int(MESSAGES.EXPERIENCE_NOT_INTEGER)
++    .min(0, MESSAGES.EXPERIENCE_OUT_OF_RANGE)
++    .max(JOB_OFFER_MAX_EXPERIENCE_YEARS, MESSAGES.EXPERIENCE_OUT_OF_RANGE)
++    .optional(),
++  otherRequirements: requirementListSchema.optional(),
++});
++
++type SalaryFields = Pick<z.infer<typeof jobOfferFieldsSchema>, 'contractType' | 'salaryMin' | 'salaryMax'>;
++
++export const hasRequiredSalary = (data: SalaryFields): boolean =>
++  data.salaryMin !== undefined ||
++  (data.contractType === JobOfferContractType.INTERNSHIP && data.salaryMax === undefined);
++
++export const hasValidSalaryRange = (data: SalaryFields): boolean =>
++  data.salaryMin === undefined || data.salaryMax === undefined || data.salaryMin <= data.salaryMax;
++
++export const createJobOfferSchema = jobOfferFieldsSchema
++  .extend({
++    requiredCareers: requirementListSchema.default([]),
++    otherRequirements: requirementListSchema.default([]),
+   })
+-  .refine(
+-    (data) =>
+-      data.salaryMin !== undefined ||
+-      (data.contractType === JobOfferContractType.INTERNSHIP && data.salaryMax === undefined),
+-    { path: ['salaryMin'], message: MESSAGES.REQUIRED_FIELD },
+-  )
+-  .refine(
+-    (data) =>
+-      data.salaryMin === undefined || data.salaryMax === undefined || data.salaryMin <= data.salaryMax,
+-    { path: ['salaryMin'], message: MESSAGES.SALARY_RANGE_INVALID },
+-  );
++  .refine(hasRequiredSalary, { path: ['salaryMin'], message: MESSAGES.REQUIRED_FIELD })
++  .refine(hasValidSalaryRange, { path: ['salaryMin'], message: MESSAGES.SALARY_RANGE_INVALID });
+ 
+ export type CreateJobOfferRequest = z.infer<typeof createJobOfferSchema>;
+diff --git a/backend/src/modules/job-offers/requests/update-job-offer.request.ts b/backend/src/modules/job-offers/requests/update-job-offer.request.ts
+new file mode 100644
+index 00000000..9a0ac41b
+--- /dev/null
++++ b/backend/src/modules/job-offers/requests/update-job-offer.request.ts
+@@ -0,0 +1,14 @@
++import type { z } from 'zod';
++import { JOB_OFFER_VALIDATION_MESSAGES as MESSAGES } from '../constants/job-offer.constants.js';
++import {
++  hasRequiredSalary,
++  hasValidSalaryRange,
++  jobOfferFieldsSchema,
++} from './create-job-offer.request.js';
++
++// En la edición los requisitos que no se envían se conservan, por eso no tienen valor por defecto.
++export const updateJobOfferSchema = jobOfferFieldsSchema
++  .refine(hasRequiredSalary, { path: ['salaryMin'], message: MESSAGES.REQUIRED_FIELD })
++  .refine(hasValidSalaryRange, { path: ['salaryMin'], message: MESSAGES.SALARY_RANGE_INVALID });
++
++export type UpdateJobOfferRequest = z.infer<typeof updateJobOfferSchema>;
+diff --git a/backend/src/modules/job-offers/services/job-offers.service.ts b/backend/src/modules/job-offers/services/job-offers.service.ts
+index b504d7e5..d10ffcf9 100644
+--- a/backend/src/modules/job-offers/services/job-offers.service.ts
++++ b/backend/src/modules/job-offers/services/job-offers.service.ts
+@@ -7,6 +7,7 @@ import {
+ import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
+ import { JobOffersRepository } from '../repositories/job-offers.repository.js';
+ import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
++import type { UpdateJobOfferRequest } from '../requests/update-job-offer.request.js';
+ import {
+   DEFAULT_COMPANY_JOB_OFFERS_FILTERS,
+   type ListCompanyJobOffersRequest,
+@@ -17,6 +18,7 @@ import type {
+   JobOfferSkillResponse,
+ } from '../responses/job-offer.response.js';
+ import { JobOfferStatus } from '../types/job-offer.enum.js';
++import type { UpdateJobOfferData } from '../types/update-job-offer-data.type.js';
+ import { formatSalaryRange } from '../utils/format-salary-range.js';
+ import { JobOfferSkillsService } from './job-offer-skills.service.js';
+ 
+@@ -80,7 +82,7 @@ export class JobOffersService {
+   async update(
+     companyId: string,
+     jobOfferId: string,
+-    request: CreateJobOfferRequest,
++    request: UpdateJobOfferRequest,
+   ): Promise<JobOfferResponse> {
+     await this.ensureCompanyExists(companyId);
+     const existing = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
+@@ -98,7 +100,7 @@ export class JobOffersService {
+     const record = await this.jobOffersRepository.update(jobOfferId, {
+       modalityId,
+       contractTypeId,
+-      ...this.toOfferFields(request),
++      ...this.toUpdateFields(request),
+     });
+     return this.jobOfferMapper.toResponse(record);
+   }
+@@ -110,11 +112,7 @@ export class JobOffersService {
+       throw new JobOfferNotFoundException();
+     }
+ 
+-    const { statusId } = await this.jobOffersRepository.findCatalogIds(
+-      '',
+-      '',
+-      JobOfferStatus.DELETED,
+-    );
++    const statusId = await this.jobOffersRepository.findStatusId(JobOfferStatus.DELETED);
+     if (!statusId) {
+       throw new JobOfferCatalogNotFoundException('estado');
+     }
+@@ -127,6 +125,31 @@ export class JobOffersService {
+   }
+ 
+   private toOfferFields(request: CreateJobOfferRequest) {
++    return {
++      ...this.toBaseFields(request),
++      requiredCareers: request.requiredCareers,
++      minExperienceYears: request.minExperienceYears ?? null,
++      otherRequirements: request.otherRequirements,
++    };
++  }
++
++  // Los requisitos que la edición no envía se omiten para conservar los valores guardados.
++  private toUpdateFields(
++    request: UpdateJobOfferRequest,
++  ): Omit<UpdateJobOfferData, 'modalityId' | 'contractTypeId'> {
++    return {
++      ...this.toBaseFields(request),
++      ...(request.requiredCareers !== undefined && { requiredCareers: request.requiredCareers }),
++      ...(request.minExperienceYears !== undefined && {
++        minExperienceYears: request.minExperienceYears,
++      }),
++      ...(request.otherRequirements !== undefined && {
++        otherRequirements: request.otherRequirements,
++      }),
++    };
++  }
++
++  private toBaseFields(request: UpdateJobOfferRequest) {
+     return {
+       title: request.title,
+       description: request.description,
+@@ -135,9 +158,6 @@ export class JobOffersService {
+       salaryRange: formatSalaryRange(request.salaryMin, request.salaryMax),
+       languages: request.languages,
+       locationUrl: request.locationUrl,
+-      requiredCareers: request.requiredCareers,
+-      minExperienceYears: request.minExperienceYears ?? null,
+-      otherRequirements: request.otherRequirements,
+       skillIds: request.skillIds,
+     };
+   }
+diff --git a/backend/src/modules/job-offers/tests/create-job-offer.request.spec.ts b/backend/src/modules/job-offers/tests/create-job-offer.request.spec.ts
+index d115d9e6..819ab466 100644
+--- a/backend/src/modules/job-offers/tests/create-job-offer.request.spec.ts
++++ b/backend/src/modules/job-offers/tests/create-job-offer.request.spec.ts
+@@ -48,7 +48,7 @@ describe('createJobOfferSchema', () => {
+ 
+   it('valida el título: longitud y caracteres', () => {
+     expect(firstMessage({ title: 'a'.repeat(61) })).toMatch(/60/);
+-    expect(firstMessage({ title: 'Dev@' })).toMatch(/alfanumericos/);
++    expect(firstMessage({ title: 'Dev@' })).toMatch(/alfanuméricos/);
+     expect(parse({ title: 'Ingeniero Peña' }).success).toBe(true);
+   });
+ 
+@@ -58,22 +58,22 @@ describe('createJobOfferSchema', () => {
+   });
+ 
+   it('solo acepta las modalidades y tipos de contrato del catálogo', () => {
+-    expect(firstMessage({ modality: 'Hibrido' })).toBe('Modalidad invalida');
+-    expect(firstMessage({ contractType: 'Pasantia' })).toBe('Tipo de contrato invalido');
++    expect(firstMessage({ modality: 'Hibrido' })).toBe('Modalidad inválida');
++    expect(firstMessage({ contractType: 'Pasantia' })).toBe('Tipo de contrato inválido');
+     expect(parse({ modality: 'Remoto', contractType: 'Pasantía' }).success).toBe(true);
+   });
+ 
+   it('exige entre 1 y 500 vacantes enteras', () => {
+     expect(firstMessage({ positionsAvailable: 0 })).toBe('Debe ser al menos 1');
+     expect(firstMessage({ positionsAvailable: 501 })).toMatch(/500/);
+-    expect(firstMessage({ positionsAvailable: 1.5 })).toBe('Debe ser un numero entero');
++    expect(firstMessage({ positionsAvailable: 1.5 })).toBe('Debe ser un número entero');
+   });
+ 
+   it('exige un salario mayor a 0 y un rango ordenado', () => {
+     expect(firstMessage({ salaryMin: 0 })).toBe('El salario debe ser mayor a 0');
+-    expect(firstMessage({ salaryMax: 1_000_000_000 })).toBe('El salario no puede tener mas de 9 digitos');
++    expect(firstMessage({ salaryMax: 1_000_000_000 })).toBe('El salario no puede tener más de 9 dígitos');
+     expect(firstMessage({ salaryMin: 9000, salaryMax: 8000 })).toBe(
+-      'El salario minimo no puede ser mayor al salario maximo',
++      'El salario mínimo no puede ser mayor al salario máximo',
+     );
+   });
+ 
+@@ -103,14 +103,14 @@ describe('createJobOfferSchema', () => {
+       'https://www.google.com/maps/place/x',
+       'https://maps.app.goo.gl.evil.com/x',
+     ]) {
+-      expect(firstMessage({ locationUrl })).toBe('Ingresa un enlace valido de Google Maps');
++      expect(firstMessage({ locationUrl })).toBe('Ingresa un enlace válido de Google Maps');
+     }
+   });
+ 
+   it('exige entre 1 y 10 habilidades con identificadores válidos', () => {
+     expect(firstMessage({ skillIds: [] })).toBe('Debes seleccionar al menos una habilidad requerida');
+     expect(firstMessage({ skillIds: Array.from({ length: 11 }, () => randomUUID()) })).toMatch(/10/);
+-    expect(firstMessage({ skillIds: ['Docker'] })).toBe('El identificador de la habilidad no es valido');
++    expect(firstMessage({ skillIds: ['Docker'] })).toBe('El identificador de la habilidad no es válido');
+   });
+ 
+   it('los requisitos de carrera, experiencia y otros son opcionales', () => {
+@@ -136,7 +136,7 @@ describe('createJobOfferSchema', () => {
+ 
+   it('valida los años mínimos de experiencia: entero entre 0 y 40', () => {
+     expect(parse({ minExperienceYears: 0 }).success).toBe(true);
+-    expect(firstMessage({ minExperienceYears: 1.5 })).toBe('Los años de experiencia deben ser un numero entero');
++    expect(firstMessage({ minExperienceYears: 1.5 })).toBe('Los años de experiencia deben ser un número entero');
+     expect(firstMessage({ minExperienceYears: -1 })).toMatch(/entre 0 y 40/);
+     expect(firstMessage({ minExperienceYears: 41 })).toMatch(/entre 0 y 40/);
+   });
+diff --git a/backend/src/modules/job-offers/tests/job-offers.controller.spec.ts b/backend/src/modules/job-offers/tests/job-offers.controller.spec.ts
+index ac3fd7f8..8bb2f40e 100644
+--- a/backend/src/modules/job-offers/tests/job-offers.controller.spec.ts
++++ b/backend/src/modules/job-offers/tests/job-offers.controller.spec.ts
+@@ -32,6 +32,14 @@ describe('JobOffersController', () => {
+     expect(service.create).toHaveBeenCalledWith('company-1', request);
+   });
+ 
++  it('exige sesión y rol empresa para publicar una vacante', () => {
++    const handler = Object.getOwnPropertyDescriptor(JobOffersController.prototype, 'create')?.value;
++    if (!handler) throw new Error('No se encontró el handler de publicación');
++
++    expect(Reflect.getMetadata('__guards__', handler)).toEqual([JwtAuthGuard, RolesGuard]);
++    expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(['empresa']);
++  });
++
+   it('delega los listados y el catálogo en el servicio', async () => {
+     const { controller, service } = createController();
+ 
+diff --git a/backend/src/modules/job-offers/tests/job-offers.repository.spec.ts b/backend/src/modules/job-offers/tests/job-offers.repository.spec.ts
+index 6acded8f..8673553c 100644
+--- a/backend/src/modules/job-offers/tests/job-offers.repository.spec.ts
++++ b/backend/src/modules/job-offers/tests/job-offers.repository.spec.ts
+@@ -48,6 +48,17 @@ describe('JobOffersRepository', () => {
+     });
+   });
+ 
++  it('busca el id de un estado por su título', async () => {
++    prisma.jobOfferStatus.findUnique.mockResolvedValueOnce({ id: 'status-1' }).mockResolvedValueOnce(null);
++
++    expect(await repository.findStatusId(JobOfferStatus.DELETED)).toBe('status-1');
++    expect(await repository.findStatusId(JobOfferStatus.CLOSED)).toBeNull();
++    expect(prisma.jobOfferStatus.findUnique).toHaveBeenCalledWith({
++      where: { title: 'Eliminada' },
++      select: { id: true },
++    });
++  });
++
+   it('devuelve todos los ids en null si los catálogos no están sembrados', async () => {
+     prisma.jobOfferModality.findUnique.mockResolvedValue(null);
+     prisma.jobOfferContractType.findUnique.mockResolvedValue({ id: 'contract-1' });
+diff --git a/backend/src/modules/job-offers/tests/job-offers.service.spec.ts b/backend/src/modules/job-offers/tests/job-offers.service.spec.ts
+index 78f50940..f7436e14 100644
+--- a/backend/src/modules/job-offers/tests/job-offers.service.spec.ts
++++ b/backend/src/modules/job-offers/tests/job-offers.service.spec.ts
+@@ -7,6 +7,7 @@ import {
+ import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
+ import type { JobOffersRepository } from '../repositories/job-offers.repository.js';
+ import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
++import type { UpdateJobOfferRequest } from '../requests/update-job-offer.request.js';
+ import type { JobOfferSkillsService } from '../services/job-offer-skills.service.js';
+ import { JobOffersService } from '../services/job-offers.service.js';
+ import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
+@@ -66,6 +67,8 @@ function createRepository() {
+     findByCompanyAndId: vi.fn().mockResolvedValue(RECORD),
+     findHistoryByCompanyAndId: vi.fn().mockResolvedValue(RECORD),
+     update: vi.fn().mockResolvedValue(RECORD),
++    findStatusId: vi.fn().mockResolvedValue('status-deleted'),
++    updateStatus: vi.fn().mockResolvedValue(RECORD),
+   };
+ }
+ 
+@@ -277,6 +280,23 @@ describe('JobOffersService', () => {
+       expect(response.id).toBe('offer-1');
+     });
+ 
++    it('conserva los requisitos guardados cuando la edición no los envía', async () => {
++      const request: UpdateJobOfferRequest = {
++        ...REQUEST,
++        requiredCareers: undefined,
++        minExperienceYears: undefined,
++        otherRequirements: undefined,
++      };
++
++      await service.update('company-1', 'offer-1', request);
++
++      const data = repository.update.mock.calls[0][1] as Record<string, unknown>;
++      expect(data).not.toHaveProperty('requiredCareers');
++      expect(data).not.toHaveProperty('minExperienceYears');
++      expect(data).not.toHaveProperty('otherRequirements');
++      expect(data.title).toBe('DevOps Senior');
++    });
++
+     it('rechaza una empresa inexistente sin tocar la vacante', async () => {
+       repository.companyExists.mockResolvedValue(false);
+ 
+@@ -335,4 +355,31 @@ describe('JobOffersService', () => {
+     });
+ 
+   });
++  describe('softDelete', () => {
++    it('marca la vacante como Eliminada sin borrarla', async () => {
++      await service.softDelete('company-1', 'offer-1');
++
++      expect(repository.findByCompanyAndId).toHaveBeenCalledWith('company-1', 'offer-1');
++      expect(repository.findStatusId).toHaveBeenCalledWith('Eliminada');
++      expect(repository.updateStatus).toHaveBeenCalledWith('offer-1', 'status-deleted');
++    });
++
++    it('rechaza una vacante inexistente, ya eliminada o de otra empresa', async () => {
++      repository.findByCompanyAndId.mockResolvedValue(null);
++
++      await expect(service.softDelete('company-1', 'offer-1')).rejects.toBeInstanceOf(
++        JobOfferNotFoundException,
++      );
++      expect(repository.updateStatus).not.toHaveBeenCalled();
++    });
++
++    it('falla si el estado Eliminada no está en el catálogo', async () => {
++      repository.findStatusId.mockResolvedValue(null);
++
++      await expect(service.softDelete('company-1', 'offer-1')).rejects.toBeInstanceOf(
++        JobOfferCatalogNotFoundException,
++      );
++      expect(repository.updateStatus).not.toHaveBeenCalled();
++    });
++  });
+ });
+diff --git a/backend/src/modules/job-offers/tests/update-job-offer.request.spec.ts b/backend/src/modules/job-offers/tests/update-job-offer.request.spec.ts
+new file mode 100644
+index 00000000..db3274b0
+--- /dev/null
++++ b/backend/src/modules/job-offers/tests/update-job-offer.request.spec.ts
+@@ -0,0 +1,60 @@
++import { randomUUID } from 'node:crypto';
++import { describe, expect, it } from 'vitest';
++import { updateJobOfferSchema } from '../requests/update-job-offer.request.js';
++
++const VALID_REQUEST = {
++  title: 'DevOps Senior',
++  description: 'Buscamos un perfil DevOps con Docker y Kubernetes.',
++  modality: 'Híbrido',
++  contractType: 'Tiempo completo',
++  category: 'Tecnología',
++  positionsAvailable: 2,
++  salaryMin: 6500,
++  salaryMax: 8000,
++  languages: 'Español, inglés intermedio',
++  locationUrl: 'https://maps.app.goo.gl/TechBolivia',
++  skillIds: [randomUUID()],
++};
++
++describe('updateJobOfferSchema', () => {
++  it('no rellena los requisitos que la edición no envía', () => {
++    const result = updateJobOfferSchema.parse(VALID_REQUEST);
++
++    expect(result.requiredCareers).toBeUndefined();
++    expect(result.minExperienceYears).toBeUndefined();
++    expect(result.otherRequirements).toBeUndefined();
++  });
++
++  it('conserva los requisitos cuando la edición sí los envía', () => {
++    const result = updateJobOfferSchema.parse({
++      ...VALID_REQUEST,
++      requiredCareers: ['Ingeniería de Sistemas'],
++      minExperienceYears: 2,
++      otherRequirements: [],
++    });
++
++    expect(result.requiredCareers).toEqual(['Ingeniería de Sistemas']);
++    expect(result.minExperienceYears).toBe(2);
++    expect(result.otherRequirements).toEqual([]);
++  });
++
++  it('aplica las mismas reglas de salario que la publicación', () => {
++    const invertedRange = updateJobOfferSchema.safeParse({
++      ...VALID_REQUEST,
++      salaryMin: 9000,
++      salaryMax: 8000,
++    });
++    const missingSalary = updateJobOfferSchema.safeParse({
++      ...VALID_REQUEST,
++      salaryMin: undefined,
++      salaryMax: undefined,
++    });
++
++    expect(invertedRange.success ? undefined : invertedRange.error.issues[0].message).toBe(
++      'El salario mínimo no puede ser mayor al salario máximo',
++    );
++    expect(missingSalary.success ? undefined : missingSalary.error.issues[0].message).toBe(
++      'Este campo es obligatorio',
++    );
++  });
++});
+diff --git a/backend/src/modules/job-offers/types/update-job-offer-data.type.ts b/backend/src/modules/job-offers/types/update-job-offer-data.type.ts
+index 54a4d1c1..7e3b482d 100644
+--- a/backend/src/modules/job-offers/types/update-job-offer-data.type.ts
++++ b/backend/src/modules/job-offers/types/update-job-offer-data.type.ts
+@@ -1,3 +1,9 @@
+ import type { CreateJobOfferData } from './create-job-offer-data.type.js';
+ 
+-export type UpdateJobOfferData = Omit<CreateJobOfferData, 'companyId' | 'statusId'>;
++type OptionalRequirementFields = 'requiredCareers' | 'minExperienceYears' | 'otherRequirements';
++
++export type UpdateJobOfferData = Omit<
++  CreateJobOfferData,
++  'companyId' | 'statusId' | OptionalRequirementFields
++> &
++  Partial<Pick<CreateJobOfferData, OptionalRequirementFields>>;
+-- 
+2.43.0
+

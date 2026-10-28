@@ -1,7 +1,4 @@
-interface FieldErrorProps {
-  fieldId: string;
-  message?: string;
-}
+import type { FieldErrorProps } from "../types/field-error-props.types";
 
 export function FieldError({ fieldId, message }: FieldErrorProps) {
   if (!message) return null;

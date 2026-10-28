@@ -10,11 +10,9 @@ function renderStep(overrides: Partial<React.ComponentProps<typeof PreviewStep>>
     conditions: VALID_CONDITIONS,
     company: COMPANY,
     isSubmitting: false,
-    isPublished: false,
     error: null,
     onPrevious: vi.fn(),
     onConfirm: vi.fn(),
-    onFinish: vi.fn(),
     ...overrides,
   };
   render(<PreviewStep {...props} />);
@@ -120,14 +118,14 @@ describe("PreviewStep", () => {
     expect(screen.getByRole("button", { name: "Confirmar publicación" })).toBeEnabled();
   });
 
-  it("muestra el mensaje de éxito y reinicia el formulario al aceptar", () => {
-    const { onFinish } = renderStep({ isPublished: true });
+  it("en la edición muestra Confirmar edición y Guardando... mientras guarda", () => {
+    const { onConfirm } = renderStep({ isEditMode: true });
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar edición" }));
+    expect(onConfirm).toHaveBeenCalledOnce();
 
-    expect(screen.getByText("Vacante publicada")).toBeInTheDocument();
-    expect(screen.getByText("Tu vacante se publicó correctamente.")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
-
-    expect(onFinish).toHaveBeenCalledOnce();
+    cleanup();
+    renderStep({ isEditMode: true, isSubmitting: true });
+    expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
   });
 
   it("muestra un nombre de habilidad por cada elemento seleccionado", () => {

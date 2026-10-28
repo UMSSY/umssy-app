@@ -1,0 +1,1536 @@
+From 1db430fa13358d5000e98488ccf462f4c2c47724 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Nicol=C3=A1s=20Melgarejo?=
+ <nicolasmelgarejogamboa@gmail.com>
+Date: Tue, 27 Oct 2026 23:32:49 -0400
+Subject: [PATCH 4/4] fix(job-offers): meet the edit and details acceptance
+ criteria
+
+- Show a success toast and return to the list after saving an edit (HU4-8).
+- Use edit-specific texts in the discard, leave and error messages (HU4-9, HU4-11).
+- Show a spinner on the busy step button and 44 px buttons on mobile (HU4-23, HU4-30).
+- Title the details pop-up "Detalle de Vacante" with fixed header and footer (HU5-1, HU5-16).
+- Share the four 2 x 2 highlight blocks between the preview and the details pop-up (HU5-3, HU5-11).
+- Close the details pop-up and show a toast when it fails to load (HU5-19).
+- Remove the unused published dialog from the preview step.
+- Share the Google Maps validation, use cn() and theme tokens instead of fixed values.
+- Stack the company portal layout on small screens.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011QxL82Ke4t6ycKgAsKG13W
+---
+ .../components/information-step.tsx           |  43 ++--
+ .../components/job-offer-details-dialog.tsx   | 201 +++++++++---------
+ .../components/job-offer-highlights.tsx       |  15 ++
+ .../components/preview-step.test.tsx          |  16 +-
+ .../job-offers/components/preview-step.tsx    |  44 ++--
+ .../components/requirements-step.tsx          |  15 +-
+ .../components/skill-search-dialog.tsx        |   5 +-
+ .../job-offers/components/step-actions.tsx    |  25 ++-
+ .../components/vacancy-list.test.tsx          |  85 +++++---
+ .../constants/job-offers.constants.ts         |  24 ++-
+ .../job-offers/hooks/use-job-offer-details.ts |   2 +-
+ .../job-offers/hooks/use-publish-job-offer.ts |  11 +-
+ .../types/job-offer-highlights-props.types.ts |   6 +
+ .../types/preview-step-props.types.ts         |   2 -
+ .../job-offers/types/publish-mode.types.ts    |   1 +
+ .../types/step-actions-props.types.ts         |   1 +
+ .../use-publish-job-offer-options.types.ts    |   3 +
+ .../utils/format-vacancy-count.test.ts        |  13 ++
+ .../job-offers/utils/format-vacancy-count.ts  |   3 +
+ .../job-offers/utils/to-publish-error.test.ts |   9 +
+ .../job-offers/utils/to-publish-error.ts      |  15 +-
+ .../job-offers/utils/validate-vacancy.ts      |   9 +-
+ ...register-vacancy-view.integration.test.tsx |  10 +-
+ .../views/register-vacancy-view.test.tsx      |  62 +++++-
+ .../views/register-vacancy-view.tsx           |  74 ++++---
+ .../recruiters/views/recruiters-home-view.tsx |   4 +-
+ 26 files changed, 438 insertions(+), 260 deletions(-)
+ create mode 100644 frontend/src/modules/job-offers/components/job-offer-highlights.tsx
+ create mode 100644 frontend/src/modules/job-offers/types/job-offer-highlights-props.types.ts
+ create mode 100644 frontend/src/modules/job-offers/types/publish-mode.types.ts
+ create mode 100644 frontend/src/modules/job-offers/types/use-publish-job-offer-options.types.ts
+ create mode 100644 frontend/src/modules/job-offers/utils/format-vacancy-count.test.ts
+ create mode 100644 frontend/src/modules/job-offers/utils/format-vacancy-count.ts
+
+diff --git a/frontend/src/modules/job-offers/components/information-step.tsx b/frontend/src/modules/job-offers/components/information-step.tsx
+index a2ef2187..1ed0c731 100644
+--- a/frontend/src/modules/job-offers/components/information-step.tsx
++++ b/frontend/src/modules/job-offers/components/information-step.tsx
+@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input";
+ import { Label } from "@/components/ui/label";
+ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
++import { cn } from "@/lib/utils";
+ import {
+   CONTRACT_TYPES,
+   EDITING_KEYS,
+   FIELD_FOCUS_CLASS,
+-  GOOGLE_MAPS_LINK_REGEX,
+   INTERNSHIP_CONTRACT_TYPE,
+   MAX_LANGUAGES_CHARS,
+   MAX_TITLE_CHARS,
+@@ -22,6 +22,7 @@ import {
+ } from "../constants/job-offers.constants";
+ import { countDigits, findCaretAfterDigits, formatSalaryInput } from "../utils/format-salary-input";
+ import type { Modality } from "../types/modality.types";
++import { getMapsLinkError } from "../utils/validate-vacancy";
+ import { FieldError } from "./field-error";
+ import { StepActions } from "./step-actions";
+ import type { InformationStepProps } from "../types/information-step-props.types";
+@@ -89,24 +90,22 @@ export function InformationStep({
+   const vacancyCountMessage =
+     errors.vacancyCount ??
+     (Number(conditions.vacancyCount) > MAX_VACANCIES ? VACANCY_MESSAGES.maxVacancies : undefined);
++  // El enlace se valida mientras se escribe para avisar en tiempo real (HU4-13).
+   const mapsLinkMessage =
+-    errors.mapsLink ??
+-    (conditions.mapsLink.trim() && !GOOGLE_MAPS_LINK_REGEX.test(conditions.mapsLink.trim())
+-      ? VACANCY_MESSAGES.invalidMapsLink
+-      : undefined);
++    errors.mapsLink ?? (conditions.mapsLink.trim() ? getMapsLinkError(conditions.mapsLink) : undefined);
+ 
+   return (
+     <div className="rounded-lg border border-border bg-surface">
+       <div className="border-b border-border px-6 py-4">
+         <h2 className="text-lg font-bold text-ink">
+-          Informacion y condiciones de la oferta
++          Información y condiciones de la oferta
+         </h2>
+       </div>
+ 
+       <div className="grid grid-cols-1 gap-x-8 gap-y-5 p-6 md:grid-cols-2">
+         <div className="md:col-span-2">
+           <div className="flex justify-between">
+-            <Label htmlFor="title" className="text-[12.5px] font-semibold">
++            <Label htmlFor="title" className="text-xs font-semibold">
+               Título del puesto <span className="text-ink-soft">*</span>
+             </Label>
+             <span className="text-xs text-text-secondary">{conditions.title.length}/{MAX_TITLE_CHARS}</span>
+@@ -114,7 +113,7 @@ export function InformationStep({
+           <Input 
+             id="title" 
+             placeholder="Desarrollador Backend" 
+-            className={`mt-1.5 ${FIELD_FOCUS_CLASS}`} 
++            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
+             value={conditions.title} 
+             onChange={handleTitleChange}
+             onKeyDown={handleTitleKeyDown}
+@@ -126,7 +125,7 @@ export function InformationStep({
+         </div>
+ 
+         <div>
+-          <Label className="text-[12.5px] font-semibold">
++          <Label className="text-xs font-semibold">
+             Modalidad  <span className="text-ink-soft">*</span>
+           </Label>
+           <ToggleGroup
+@@ -144,7 +143,7 @@ export function InformationStep({
+                 key={modality}
+                 value={modality}
+                 variant="outline"
+-                className="h-auto w-full rounded-md px-3 py-2 text-sm font-semibold text-ink data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-white"
++                className="h-auto w-full rounded-md px-3 py-2 text-sm font-semibold text-ink data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-surface"
+               >
+                 {modality}
+               </ToggleGroupItem>
+@@ -154,13 +153,13 @@ export function InformationStep({
+         </div>
+ 
+         <div>
+-          <Label htmlFor="mapsLink" className="text-[12.5px] font-semibold">
++          <Label htmlFor="mapsLink" className="text-xs font-semibold">
+             Enlace de Google Maps <span className="text-ink-soft">*</span>
+           </Label>
+           <Input
+             id="mapsLink"
+             placeholder="https://maps.app.goo.gl/..."
+-            className={`mt-1.5 ${FIELD_FOCUS_CLASS}`}
++            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
+             value={conditions.mapsLink} 
+             onChange={(event) => updateField("mapsLink" , event.target.value)}
+             aria-invalid={Boolean(mapsLinkMessage)}
+@@ -171,11 +170,11 @@ export function InformationStep({
+ 
+         <h3 className="mt-3 border-t border-border pt-6 text-sm font-semibold text-ink md:col-span-2">Condiciones del puesto</h3>
+         <div>
+-          <Label htmlFor="contractType" className="text-[12.5px] font-semibold">
++          <Label htmlFor="contractType" className="text-xs font-semibold">
+             Tipo de contrato <span className="text-ink-soft">*</span>
+           </Label>
+           <Select value={conditions.contractType} onValueChange={handleContractTypeChange}>
+-            <SelectTrigger id="contractType" className={`mt-1.5 w-full ${FIELD_FOCUS_CLASS}`}>
++            <SelectTrigger id="contractType" className={cn("mt-1.5 w-full", FIELD_FOCUS_CLASS)}>
+               <SelectValue  placeholder="Selecciona una opción" />
+             </SelectTrigger>
+             <SelectContent>
+@@ -190,13 +189,13 @@ export function InformationStep({
+         </div>
+ 
+         <div>
+-          <Label htmlFor="category" className="text-[12.5px] font-semibold">
++          <Label htmlFor="category" className="text-xs font-semibold">
+             Categoría <span className="text-ink-soft">*</span>
+           </Label>
+           <Input 
+             id="category" 
+             placeholder="Tecnología" 
+-            className={`mt-1.5 ${FIELD_FOCUS_CLASS}`} 
++            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
+             value={conditions.category} 
+             onChange={(event) => updateField("category", event.target.value)} 
+             aria-invalid={Boolean(errors.category)}
+@@ -206,13 +205,13 @@ export function InformationStep({
+         </div>
+ 
+         <div>
+-          <Label htmlFor="vacancyCount" className="text-[12.5px] font-semibold">
++          <Label htmlFor="vacancyCount" className="text-xs font-semibold">
+             Número de vacantes <span className="text-ink-soft">*</span>
+           </Label>
+           <Input 
+             id="vacancyCount" 
+             placeholder="1" 
+-            className={`mt-1.5 ${FIELD_FOCUS_CLASS}`} 
++            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
+             value={conditions.vacancyCount} 
+             onChange={handleVacancyChange}
+             onKeyDown={handleNumberKeyDown}
+@@ -224,14 +223,14 @@ export function InformationStep({
+         </div>
+ 
+         <div>
+-          <Label htmlFor="salary" className="text-[12.5px] font-semibold">
++          <Label htmlFor="salary" className="text-xs font-semibold">
+             Salario {!isInternship && <span className="text-ink-soft">*</span>}
+           </Label>
+           <Input 
+             id="salary" 
+             ref={salaryInputRef}
+             placeholder={isInternship ? SALARY_TO_BE_AGREED : "Bs 6.500 - 8.000"} 
+-            className={`mt-1.5 ${FIELD_FOCUS_CLASS}`} 
++            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
+             value={conditions.salary} 
+             disabled={isInternship}
+             onChange={handleSalaryChange}
+@@ -243,13 +242,13 @@ export function InformationStep({
+         </div>
+ 
+         <div>
+-          <Label htmlFor="languages" className="text-[12.5px] font-semibold">
++          <Label htmlFor="languages" className="text-xs font-semibold">
+             Idiomas <span className="text-ink-soft">*</span>
+           </Label>
+           <Input 
+             id="languages" 
+             placeholder="Español, inglés intermedio" 
+-            className={`mt-1.5 ${FIELD_FOCUS_CLASS}`}
++            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
+             value={conditions.languages} 
+             onChange={(event) => updateField("languages", event.target.value)} 
+             maxLength={MAX_LANGUAGES_CHARS}
+diff --git a/frontend/src/modules/job-offers/components/job-offer-details-dialog.tsx b/frontend/src/modules/job-offers/components/job-offer-details-dialog.tsx
+index 3aec8c08..b5e6ad2d 100644
+--- a/frontend/src/modules/job-offers/components/job-offer-details-dialog.tsx
++++ b/frontend/src/modules/job-offers/components/job-offer-details-dialog.tsx
+@@ -1,28 +1,27 @@
+ "use client";
+ 
+ import { ExternalLink, X } from "lucide-react";
+-import type { ReactNode } from "react";
++import { useEffect } from "react";
++import { toast } from "sonner";
+ import { Button } from "@/components/ui/button";
+ import {
+   Dialog,
+   DialogClose,
+   DialogContent,
+   DialogDescription,
+-  DialogHeader,
+   DialogTitle,
+ } from "@/components/ui/dialog";
+-import { GOOGLE_MAPS_LINK_REGEX } from "../constants/job-offers.constants";
++import {
++  GOOGLE_MAPS_LINK_REGEX,
++  NOT_SPECIFIED_TEXT,
++  TOAST_OPTIONS,
++} from "../constants/job-offers.constants";
+ import { useJobOfferDetails } from "../hooks/use-job-offer-details";
+ import type { JobOfferDetailsDialogProps } from "../types/job-offer-details-dialog-props.types";
++import { formatVacancyCount } from "../utils/format-vacancy-count";
++import { JobOfferHighlights } from "./job-offer-highlights";
+ 
+-function DetailField({ label, children }: { label: string; children: ReactNode }) {
+-  return (
+-    <div className="min-w-0">
+-      <dt className="text-xs font-medium text-text-secondary">{label}</dt>
+-      <dd className="mt-1 text-sm break-words text-ink">{children}</dd>
+-    </div>
+-  );
+-}
++const SECTION_TITLE_CLASSES = "mb-1 text-sm font-semibold text-ink";
+ 
+ function getSafeMapsUrl(value: string): string | null {
+   const url = value.trim();
+@@ -34,114 +33,118 @@ export function JobOfferDetailsDialog({
+   jobOfferId,
+   onClose,
+ }: JobOfferDetailsDialogProps) {
+-  const { offer, status, errorMessage, reload } = useJobOfferDetails(companyId, jobOfferId);
++  const { offer, status, errorMessage } = useJobOfferDetails(companyId, jobOfferId);
+   const safeMapsUrl = offer ? getSafeMapsUrl(offer.locationUrl) : null;
+ 
++  // Si la vacante no se puede cargar se avisa y se vuelve a la lista sin dejar el pop-up abierto.
++  useEffect(() => {
++    if (status !== "error") return;
++    toast.error(errorMessage, TOAST_OPTIONS);
++    onClose();
++  }, [status, errorMessage, onClose]);
++
+   return (
+-    <Dialog open onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
++    <Dialog open={status !== "error"} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+       <DialogContent
+         showCloseButton={false}
+-        className="max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] overflow-y-auto p-5 sm:max-w-3xl sm:p-7"
++        className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 p-0 sm:max-w-2xl"
+       >
+-        <DialogClose
+-          render={
+-            <Button
+-              variant="ghost"
+-              size="icon"
+-              className="absolute top-3 right-3 min-h-11 min-w-11"
+-              aria-label="Cerrar detalles de vacante"
+-            />
+-          }
+-        >
+-          <X aria-hidden="true" />
+-        </DialogClose>
+-        {status === "loading" ? (
+-          <div role="status" className="space-y-4 py-8 text-sm text-text-secondary">
+-            Cargando detalles de la vacante...
+-          </div>
+-        ) : status === "error" ? (
+-          <section className="space-y-4 py-6" role="alert">
+-            <DialogHeader>
+-              <DialogTitle className="text-xl font-semibold text-ink">
+-                No se pudo abrir la vacante
+-              </DialogTitle>
+-              <DialogDescription>{errorMessage}</DialogDescription>
+-            </DialogHeader>
+-            <Button type="button" variant="outline" className="min-h-11" onClick={reload}>
+-              Reintentar
+-            </Button>
+-          </section>
+-        ) : offer ? (
+-          <>
+-            <DialogHeader className="border-b border-border pr-10 pb-4">
+-              <DialogTitle className="text-xl font-bold text-accent sm:text-2xl">
+-                {offer.title}
+-              </DialogTitle>
+-              <DialogDescription>{offer.company.name}</DialogDescription>
+-            </DialogHeader>
+-            <dl aria-label="Detalles de la vacante" className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+-              <DetailField label="Modalidad">{offer.modality || "No especificado"}</DetailField>
+-              <DetailField label="Tipo de contrato">{offer.contractType || "No especificado"}</DetailField>
+-              <DetailField label="Número de vacantes">
+-                {offer.positionsAvailable ?? "No especificado"}
+-              </DetailField>
+-              <DetailField label="Idiomas">{offer.languages || "No especificado"}</DetailField>
+-              <DetailField label="Ubicación en Google Maps">
++        <header className="flex items-center justify-between gap-4 border-b border-border px-5 py-3">
++          <DialogTitle className="text-lg font-bold text-ink">Detalle de Vacante</DialogTitle>
++          <DialogClose
++            render={
++              <Button
++                variant="ghost"
++                size="icon"
++                className="min-h-11 min-w-11"
++                aria-label="Cerrar detalles de vacante"
++              />
++            }
++          >
++            <X aria-hidden="true" />
++          </DialogClose>
++        </header>
++
++        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-4">
++          {offer ? (
++            <>
++              <div>
++                <h3 className="text-xl font-extrabold break-words text-accent sm:text-2xl">
++                  {offer.title}
++                </h3>
++                <DialogDescription>{offer.company.name}</DialogDescription>
++                <p className="mt-1 text-sm font-bold text-ink-soft">
++                  {offer.category || NOT_SPECIFIED_TEXT}
++                </p>
++              </div>
++
++              <JobOfferHighlights
++                modality={offer.modality}
++                contractType={offer.contractType}
++                vacancies={formatVacancyCount(offer.positionsAvailable)}
++                salary={offer.salaryRange || NOT_SPECIFIED_TEXT}
++              />
++
++              <p className="text-sm leading-relaxed break-words whitespace-pre-line text-ink-soft">
++                {offer.description}
++              </p>
++
++              <section className="border-t border-border pt-4">
++                <h4 className={SECTION_TITLE_CLASSES}>Idiomas</h4>
++                <p className="text-sm text-text-secondary">{offer.languages || NOT_SPECIFIED_TEXT}</p>
++              </section>
++
++              <section className="border-t border-border pt-4">
++                <h4 className={SECTION_TITLE_CLASSES}>Ubicación</h4>
+                 {offer.locationUrl ? (
+                   safeMapsUrl ? (
+                     <a
+                       href={safeMapsUrl}
+                       target="_blank"
+                       rel="noopener noreferrer"
+-                      className="inline-flex min-h-11 items-center gap-2 text-accent underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2"
++                      className="inline-flex min-h-11 items-center gap-2 text-sm text-accent underline underline-offset-4 hover:text-ink hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-2"
+                     >
+                       Abrir ubicación
+                       <ExternalLink aria-hidden="true" className="size-4 shrink-0" />
+                     </a>
+                   ) : (
+-                    "Enlace no disponible"
++                    <p className="text-sm text-text-secondary">Enlace no disponible</p>
+                   )
+                 ) : (
+-                  "No especificado"
++                  <p className="text-sm text-text-secondary">{NOT_SPECIFIED_TEXT}</p>
+                 )}
+-              </DetailField>
+-              <DetailField label="Categoría">{offer.category || "No especificado"}</DetailField>
+-              <DetailField label="Salario">{offer.salaryRange || "No especificado"}</DetailField>
+-            </dl>
+-            <section aria-labelledby="job-offer-description" className="border-t border-border pt-4">
+-              <h2 id="job-offer-description" className="mb-2 font-semibold text-ink">
+-                Descripción del puesto
+-              </h2>
+-              <p className="max-w-prose text-sm leading-relaxed break-words whitespace-pre-line text-ink-soft">
+-                {offer.description}
+-              </p>
+-            </section>
+-            <section aria-labelledby="job-offer-skills" className="border-t border-border pt-4">
+-              <h2 id="job-offer-skills" className="mb-3 font-semibold text-ink">
+-                Habilidades técnicas
+-              </h2>
+-              {offer.skills.length > 0 ? (
+-                <ul className="flex flex-wrap gap-2">
+-                  {offer.skills.map((skill) => (
+-                    <li
+-                      key={skill.id}
+-                      className="rounded-md bg-interaction px-3 py-2 text-sm text-ink"
+-                    >
+-                      {skill.name}
+-                    </li>
+-                  ))}
+-                </ul>
+-              ) : (
+-                <p className="text-sm text-text-secondary">No se especificaron habilidades.</p>
+-              )}
+-            </section>
+-            <div className="flex justify-end border-t border-border pt-4">
+-              <Button type="button" variant="outline" className="min-h-11" onClick={onClose}>
+-                Cerrar
+-              </Button>
+-            </div>
+-          </>
+-        ) : null}
++              </section>
++
++              <section className="border-t border-border pt-4">
++                <h4 className="mb-3 text-sm font-semibold text-ink">Habilidades técnicas</h4>
++                {offer.skills.length > 0 ? (
++                  <ul aria-label="Habilidades técnicas" className="flex flex-wrap gap-2">
++                    {offer.skills.map((skill) => (
++                      <li
++                        key={skill.id}
++                        className="rounded-full bg-interaction px-4 py-1.5 text-sm font-semibold text-ink-soft"
++                      >
++                        {skill.name}
++                      </li>
++                    ))}
++                  </ul>
++                ) : (
++                  <p className="text-sm text-text-secondary">No se especificaron habilidades.</p>
++                )}
++              </section>
++            </>
++          ) : (
++            <p role="status" className="py-8 text-sm text-text-secondary">
++              Cargando detalles de la vacante...
++            </p>
++          )}
++        </div>
++
++        <footer className="flex justify-end border-t border-border px-5 py-3">
++          <Button type="button" variant="outline" className="min-h-11" onClick={onClose}>
++            Cerrar
++          </Button>
++        </footer>
+       </DialogContent>
+     </Dialog>
+   );
+diff --git a/frontend/src/modules/job-offers/components/job-offer-highlights.tsx b/frontend/src/modules/job-offers/components/job-offer-highlights.tsx
+new file mode 100644
+index 00000000..b7b230d2
+--- /dev/null
++++ b/frontend/src/modules/job-offers/components/job-offer-highlights.tsx
+@@ -0,0 +1,15 @@
++import type { JobOfferHighlightsProps } from "../types/job-offer-highlights-props.types";
++
++const HIGHLIGHT_CLASSES = "rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft";
++
++// Los cuatro datos principales de la vacante en una cuadrícula de 2 x 2 (vista previa y detalles).
++export function JobOfferHighlights({ modality, contractType, vacancies, salary }: JobOfferHighlightsProps) {
++  return (
++    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
++      <div className={HIGHLIGHT_CLASSES}>{modality}</div>
++      <div className={HIGHLIGHT_CLASSES}>{contractType}</div>
++      <div className={HIGHLIGHT_CLASSES}>{vacancies}</div>
++      <div className={HIGHLIGHT_CLASSES}>{salary}</div>
++    </div>
++  );
++}
+diff --git a/frontend/src/modules/job-offers/components/preview-step.test.tsx b/frontend/src/modules/job-offers/components/preview-step.test.tsx
+index 53d28b97..566a1c24 100644
+--- a/frontend/src/modules/job-offers/components/preview-step.test.tsx
++++ b/frontend/src/modules/job-offers/components/preview-step.test.tsx
+@@ -10,11 +10,9 @@ function renderStep(overrides: Partial<React.ComponentProps<typeof PreviewStep>>
+     conditions: VALID_CONDITIONS,
+     company: COMPANY,
+     isSubmitting: false,
+-    isPublished: false,
+     error: null,
+     onPrevious: vi.fn(),
+     onConfirm: vi.fn(),
+-    onFinish: vi.fn(),
+     ...overrides,
+   };
+   render(<PreviewStep {...props} />);
+@@ -120,14 +118,14 @@ describe("PreviewStep", () => {
+     expect(screen.getByRole("button", { name: "Confirmar publicación" })).toBeEnabled();
+   });
+ 
+-  it("muestra el mensaje de éxito y reinicia el formulario al aceptar", () => {
+-    const { onFinish } = renderStep({ isPublished: true });
+-
+-    expect(screen.getByText("Vacante publicada")).toBeInTheDocument();
+-    expect(screen.getByText("Tu vacante se publicó correctamente.")).toBeInTheDocument();
+-    fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
++  it("en la edición muestra Confirmar edición y Guardando... mientras guarda", () => {
++    const { onConfirm } = renderStep({ isEditMode: true });
++    fireEvent.click(screen.getByRole("button", { name: "Confirmar edición" }));
++    expect(onConfirm).toHaveBeenCalledOnce();
+ 
+-    expect(onFinish).toHaveBeenCalledOnce();
++    cleanup();
++    renderStep({ isEditMode: true, isSubmitting: true });
++    expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
+   });
+ 
+   it("muestra un nombre de habilidad por cada elemento seleccionado", () => {
+diff --git a/frontend/src/modules/job-offers/components/preview-step.tsx b/frontend/src/modules/job-offers/components/preview-step.tsx
+index 18739c3d..1dd4fa75 100644
+--- a/frontend/src/modules/job-offers/components/preview-step.tsx
++++ b/frontend/src/modules/job-offers/components/preview-step.tsx
+@@ -7,12 +7,12 @@ import { Separator } from "@/components/ui/separator";
+ import {
+   DESCRIPTION_PREVIEW_CHARS,
+   INTERNSHIP_CONTRACT_TYPE,
+-  PUBLISHED_DIALOG_TEXT,
+   SALARY_TO_BE_AGREED,
+ } from "../constants/job-offers.constants";
+-import { ConfirmDialog } from "./confirm-dialog";
++import { JobOfferHighlights } from "./job-offer-highlights";
+ import { StepActions } from "./step-actions";
+ import type { PreviewStepProps } from "../types/preview-step-props.types";
++import { formatVacancyCount } from "../utils/format-vacancy-count";
+ 
+ function formatDescription(description: string, isExpanded: boolean): string {
+   const text = description.trim();
+@@ -24,17 +24,18 @@ export function PreviewStep({
+   conditions,
+   company,
+   isSubmitting,
+-  isPublished,
+   error,
+   isEditMode,
+   onPrevious,
+   onConfirm,
+-  onFinish,
+ }: PreviewStepProps) {
+   const [isExpanded, setIsExpanded] = useState(false);
+   const canExpand = conditions.description.trim().length > DESCRIPTION_PREVIEW_CHARS;
+   const mapsLink = conditions.mapsLink.trim();
+ 
++  const confirmLabel = isEditMode ? "Confirmar edición" : "Confirmar publicación";
++  const busyLabel = isEditMode ? "Guardando..." : "Publicando...";
++
+   const isInternship = conditions.contractType === INTERNSHIP_CONTRACT_TYPE;
+   const displaySalary =
+     isInternship || !conditions.salary.trim()
+@@ -47,9 +48,9 @@ export function PreviewStep({
+         Revisa tu publicación
+       </h3>
+ 
+-      <div className="mx-auto max-w-3xl rounded-lg border border-border bg-white p-8 shadow-none">
++      <div className="mx-auto max-w-3xl rounded-lg border border-border bg-surface p-8 shadow-none">
+         <div className="mb-6 flex items-center gap-4">
+-          <div className="flex size-[50px] items-center justify-center rounded-lg bg-ink text-lg font-bold tracking-wider text-white">
++          <div className="flex size-12 items-center justify-center rounded-lg bg-ink text-lg font-bold tracking-wider text-surface">
+             {company.initials}
+           </div>
+           <div>
+@@ -63,19 +64,13 @@ export function PreviewStep({
+           <p className="mt-1 text-sm font-bold text-ink-soft">{conditions.category}</p>
+         </div>
+ 
+-        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+-          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
+-            {conditions.modality}
+-          </div>
+-          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
+-            {conditions.contractType}
+-          </div>
+-          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
+-            {conditions.vacancyCount} {conditions.vacancyCount === "1" ? "vacante" : "vacantes"}
+-          </div>
+-          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
+-            {displaySalary}
+-          </div>
++        <div className="mb-6">
++          <JobOfferHighlights
++            modality={conditions.modality ?? ""}
++            contractType={conditions.contractType}
++            vacancies={formatVacancyCount(conditions.vacancyCount)}
++            salary={displaySalary}
++          />
+         </div>
+ 
+         <p className="mb-6 text-sm leading-relaxed break-words whitespace-pre-line text-text-secondary">
+@@ -143,21 +138,14 @@ export function PreviewStep({
+ 
+       <StepActions
+         secondaryLabel="Anterior"
++        showPreviousIcon
+         primaryVariant="brand"
+-        primaryLabel={isSubmitting ? (isEditMode ? "Guardando..." : "Publicando...") : (isEditMode ? "Confirmar edición" : "Confirmar publicación")}
++        primaryLabel={isSubmitting ? busyLabel : confirmLabel}
+         onSecondary={onPrevious}
+         onPrimary={onConfirm}
+         isBusy={isSubmitting}
+         className="mx-auto mt-8 max-w-3xl"
+       />
+-
+-      <ConfirmDialog
+-        isOpen={isPublished}
+-        title={PUBLISHED_DIALOG_TEXT.title}
+-        description={PUBLISHED_DIALOG_TEXT.description}
+-        confirmLabel={PUBLISHED_DIALOG_TEXT.confirm}
+-        onConfirm={onFinish}
+-      />
+     </div>
+   );
+ }
+\ No newline at end of file
+diff --git a/frontend/src/modules/job-offers/components/requirements-step.tsx b/frontend/src/modules/job-offers/components/requirements-step.tsx
+index 2d8f8ee0..055c60e3 100644
+--- a/frontend/src/modules/job-offers/components/requirements-step.tsx
++++ b/frontend/src/modules/job-offers/components/requirements-step.tsx
+@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
+ import { Label } from "@/components/ui/label";
+ import { Textarea } from "@/components/ui/textarea";
+ import { Toggle } from "@/components/ui/toggle";
++import { cn } from "@/lib/utils";
+ import {
+   FIELD_FOCUS_CLASS,
+   MAX_DESCRIPTION_CHARS,
+@@ -52,12 +53,12 @@ export function RequirementsStep({
+   return (
+     <div className="rounded-lg border border-border bg-surface">
+       <div className="flex items-center gap-3 border-b border-border px-6 py-4">
+-        <h2 className="text-[16px] font-bold text-ink">Requisitos técnicos</h2>
++        <h2 className="text-base font-bold text-ink">Requisitos técnicos</h2>
+       </div>
+ 
+       <div className="p-6">
+         <div className="mb-8">
+-          <Label htmlFor="description" className="mb-2 text-[12.5px] font-semibold text-ink">
++          <Label htmlFor="description" className="mb-2 text-xs font-semibold text-ink">
+             Descripción del puesto <span className="text-ink-soft">*</span>
+           </Label>
+           <Textarea
+@@ -68,11 +69,14 @@ export function RequirementsStep({
+             placeholder="Buscamos un desarrollador backend..."
+             aria-invalid={Boolean(errors.description)}
+             aria-describedby={errors.description ? "description-error" : undefined}
+-            className={`min-h-[120px] bg-white p-4 text-sm whitespace-pre-wrap text-ink ${FIELD_FOCUS_CLASS}`}
++            className={cn("min-h-30 bg-surface p-4 text-sm whitespace-pre-wrap text-ink", FIELD_FOCUS_CLASS)}
+           />
+           <div className="mt-1 flex justify-end">
+             <span
+-              className={`text-xs font-medium ${conditions.description.length >= MAX_DESCRIPTION_CHARS ? "text-danger" : "text-text-secondary"}`}
++              className={cn(
++                "text-xs font-medium",
++                conditions.description.length >= MAX_DESCRIPTION_CHARS ? "text-danger" : "text-text-secondary",
++              )}
+             >
+               {conditions.description.length}/{MAX_DESCRIPTION_CHARS}
+             </span>
+@@ -112,7 +116,7 @@ export function RequirementsStep({
+                     pressed={selected}
+                     disabled={!selected && isSkillLimitReached}
+                     onPressedChange={() => toggleSkill(skill)}
+-                    className="h-auto rounded-full px-4 py-1.5 text-sm font-medium text-text-secondary data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-white"
++                    className="h-auto rounded-full px-4 py-1.5 text-sm font-medium text-text-secondary data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-surface"
+                   >
+                     {skill.name}
+                   </Toggle>
+@@ -136,6 +140,7 @@ export function RequirementsStep({
+ 
+       <StepActions
+         secondaryLabel="Anterior"
++        showPreviousIcon
+         primaryLabel="Continuar"
+         onSecondary={onPrevious}
+         onPrimary={onContinue}
+diff --git a/frontend/src/modules/job-offers/components/skill-search-dialog.tsx b/frontend/src/modules/job-offers/components/skill-search-dialog.tsx
+index 27204dda..5387211a 100644
+--- a/frontend/src/modules/job-offers/components/skill-search-dialog.tsx
++++ b/frontend/src/modules/job-offers/components/skill-search-dialog.tsx
+@@ -15,6 +15,7 @@ import {
+ } from "@/components/ui/dialog";
+ import { Input } from "@/components/ui/input";
+ import { Label } from "@/components/ui/label";
++import { cn } from "@/lib/utils";
+ import { normalizeSearchText } from "@/shared/utils/normalize-search-text";
+ import { FIELD_FOCUS_CLASS, SKILL_SEARCH_TEXT } from "../constants/job-offers.constants";
+ import type { SkillOption } from "../types/skill-option.types";
+@@ -76,14 +77,14 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
+         </DialogHeader>
+ 
+         <div>
+-          <Label htmlFor="skill-search" className="text-[12.5px] font-semibold">
++          <Label htmlFor="skill-search" className="text-xs font-semibold">
+             {SKILL_SEARCH_TEXT.label} <span className="text-ink-soft">*</span>
+           </Label>
+           <Input
+             id="skill-search"
+             autoComplete="off"
+             placeholder={SKILL_SEARCH_TEXT.placeholder}
+-            className={`mt-1.5 ${FIELD_FOCUS_CLASS}`}
++            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
+             value={search}
+             onChange={(event) => handleSearchChange(event.target.value)}
+           />
+diff --git a/frontend/src/modules/job-offers/components/step-actions.tsx b/frontend/src/modules/job-offers/components/step-actions.tsx
+index c8b3d1ac..0e4993d7 100644
+--- a/frontend/src/modules/job-offers/components/step-actions.tsx
++++ b/frontend/src/modules/job-offers/components/step-actions.tsx
+@@ -1,12 +1,15 @@
++import { ArrowLeft, ArrowRight, LoaderCircle } from "lucide-react";
+ import { Button } from "@/components/ui/button";
+-import { ArrowLeft, ArrowRight } from "lucide-react";
+ import { cn } from "@/lib/utils";
+ import type { StepActionsProps } from "../types/step-actions-props.types";
+ 
++const ACTION_BUTTON_CLASSES = "group h-auto px-6 py-2.5 text-sm font-semibold max-md:min-h-11";
++
+ export function StepActions({
+   secondaryLabel,
+   primaryLabel,
+   primaryVariant = "default",
++  showPreviousIcon = false,
+   onSecondary,
+   onPrimary,
+   isBusy = false,
+@@ -19,9 +22,15 @@ export function StepActions({
+         variant="outline"
+         onClick={onSecondary}
+         disabled={isBusy}
+-        className="group h-auto px-6 py-2.5 text-sm font-semibold text-ink"
++        className={cn(ACTION_BUTTON_CLASSES, "text-ink")}
+       >
+-        {secondaryLabel === "Anterior" ? <ArrowLeft aria-hidden="true" className="transition-transform duration-150 group-hover:-translate-x-0.5" /> : null}{secondaryLabel}
++        {showPreviousIcon ? (
++          <ArrowLeft
++            aria-hidden="true"
++            className="transition-transform duration-150 group-hover:-translate-x-0.5"
++          />
++        ) : null}
++        {secondaryLabel}
+       </Button>
+       <Button
+         type="button"
+@@ -29,10 +38,16 @@ export function StepActions({
+         onClick={onPrimary}
+         disabled={isBusy}
+         aria-busy={isBusy}
+-        className="group h-auto px-6 py-2.5 text-sm font-semibold"
++        className={ACTION_BUTTON_CLASSES}
+       >
++        {isBusy ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null}
+         {primaryLabel}
+-        {!isBusy ? <ArrowRight aria-hidden="true" className="transition-transform duration-150 group-hover:translate-x-0.5" /> : null}
++        {!isBusy ? (
++          <ArrowRight
++            aria-hidden="true"
++            className="transition-transform duration-150 group-hover:translate-x-0.5"
++          />
++        ) : null}
+       </Button>
+     </div>
+   );
+diff --git a/frontend/src/modules/job-offers/components/vacancy-list.test.tsx b/frontend/src/modules/job-offers/components/vacancy-list.test.tsx
+index ef40b05d..4dac963a 100644
+--- a/frontend/src/modules/job-offers/components/vacancy-list.test.tsx
++++ b/frontend/src/modules/job-offers/components/vacancy-list.test.tsx
+@@ -1,5 +1,6 @@
+-import { act, cleanup, screen, waitFor } from "@testing-library/react";
++import { act, cleanup, screen, waitFor, within } from "@testing-library/react";
+ import userEvent from "@testing-library/user-event";
++import { toast } from "sonner";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { renderWithQuery } from "@/shared/testing/render-with-query";
+ import { jobOffersService } from "../services/job-offers.service";
+@@ -7,6 +8,7 @@ import type { JobOffer } from "../types/job-offer.types";
+ import { useCompanyJobOffers } from "../hooks/use-company-job-offers";
+ import { VacancyList } from "./vacancy-list";
+ 
++vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+ vi.mock("../hooks/use-company-job-offers", () => ({
+   useCompanyJobOffers: vi.fn(),
+ }));
+@@ -69,7 +71,7 @@ describe("VacancyList details", () => {
+     vi.restoreAllMocks();
+   });
+ 
+-  it("opens details for the selected vacancy and renders all HU5 fields", async () => {
++  it("abre el detalle con su encabezado y todos los campos de HU5", async () => {
+     const user = userEvent.setup();
+     const getDetails = vi
+       .spyOn(jobOffersService, "getByCompanyAndId")
+@@ -78,21 +80,23 @@ describe("VacancyList details", () => {
+     renderWithQuery(<VacancyList />);
+     await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
+ 
+-    expect(await screen.findByRole("heading", { name: "Ingeniero Backend" })).toBeInTheDocument();
++    const dialog = await screen.findByRole("dialog");
++    expect(within(dialog).getByRole("heading", { name: "Detalle de Vacante" })).toBeInTheDocument();
++    expect(await within(dialog).findByRole("heading", { name: "Ingeniero Backend" })).toBeInTheDocument();
+     expect(getDetails).toHaveBeenCalledWith(COMPANY_ID, "offer-2");
+-    expect(screen.getByText("Híbrido")).toBeInTheDocument();
+-    expect(screen.getByText("Pasantía")).toBeInTheDocument();
+-    expect(screen.getByText("2")).toBeInTheDocument();
+-    expect(screen.getByText("Español, Inglés")).toBeInTheDocument();
+-    expect(screen.getByRole("link", { name: "Abrir ubicación" })).toHaveAttribute(
++    expect(within(dialog).getByText("Sistemas")).toBeInTheDocument();
++    expect(within(dialog).getByText("Híbrido")).toBeInTheDocument();
++    expect(within(dialog).getByText("Pasantía")).toBeInTheDocument();
++    expect(within(dialog).getByText("2 vacantes")).toBeInTheDocument();
++    expect(within(dialog).getByText("A convenir")).toBeInTheDocument();
++    expect(within(dialog).getByText("Español, Inglés")).toBeInTheDocument();
++    expect(within(dialog).getByRole("link", { name: "Abrir ubicación" })).toHaveAttribute(
+       "rel",
+       "noopener noreferrer",
+     );
+-    expect(screen.getByText("Sistemas")).toBeInTheDocument();
+-    expect(screen.getByText("A convenir")).toBeInTheDocument();
+-    expect(screen.getByText("Backend")).toBeInTheDocument();
+-    expect(screen.getByText("TypeScript")).toBeInTheDocument();
+-    expect(screen.getByText("PostgreSQL")).toBeInTheDocument();
++    expect(within(dialog).getByText("Backend")).toBeInTheDocument();
++    expect(within(dialog).getByText("TypeScript")).toBeInTheDocument();
++    expect(within(dialog).getByText("PostgreSQL")).toBeInTheDocument();
+ 
+     await user.keyboard("{Escape}");
+     await waitFor(() =>
+@@ -100,6 +104,18 @@ describe("VacancyList details", () => {
+     );
+   });
+ 
++  it("cierra el detalle con el botón Cerrar del pie", async () => {
++    const user = userEvent.setup();
++    vi.spyOn(jobOffersService, "getByCompanyAndId").mockResolvedValue(OFFERS[1]);
++
++    renderWithQuery(<VacancyList />);
++    await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
++    await screen.findByText("TypeScript");
++
++    await user.click(screen.getByRole("button", { name: "Cerrar" }));
++    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
++  });
++
+   it("shows loading, then loads the selected vacancy", async () => {
+     const user = userEvent.setup();
+     let resolveDetails!: (offer: JobOffer) => void;
+@@ -118,31 +134,38 @@ describe("VacancyList details", () => {
+     expect(await screen.findByText("TypeScript")).toBeInTheDocument();
+   });
+ 
+-  it("shows a Spanish error and allows retrying the details request", async () => {
++  it("si el detalle no se puede cargar avisa con una notificación y no deja el pop-up abierto", async () => {
+     const user = userEvent.setup();
+-    const getDetails = vi
+-      .spyOn(jobOffersService, "getByCompanyAndId")
+-      .mockRejectedValueOnce({
+-        response: { data: { detail: "La vacante no existe o no pertenece a la empresa." } },
+-      })
+-      .mockRejectedValueOnce(new Error("Technical error"))
+-      .mockResolvedValueOnce(OFFERS[1]);
++    vi.spyOn(jobOffersService, "getByCompanyAndId").mockRejectedValueOnce({
++      response: { data: { detail: "La vacante no existe o no pertenece a la empresa." } },
++    });
+ 
+     renderWithQuery(<VacancyList />);
+     await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
+ 
+-    expect(
+-      await screen.findByText("La vacante no existe o no pertenece a la empresa."),
+-    ).toBeInTheDocument();
+-    await user.click(screen.getByRole("button", { name: "Reintentar" }));
++    await waitFor(() =>
++      expect(toast.error).toHaveBeenCalledWith("La vacante no existe o no pertenece a la empresa.", {
++        position: "top-center",
++        duration: 5000,
++      }),
++    );
++    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
++    expect(screen.getByRole("button", { name: "Ingeniero Backend" })).toBeInTheDocument();
++  });
+ 
+-    expect(
+-      await screen.findByText("No se pudieron cargar los detalles de la vacante."),
+-    ).toBeInTheDocument();
+-    await user.click(screen.getByRole("button", { name: "Reintentar" }));
++  it("usa un mensaje genérico si el servidor no explica el error", async () => {
++    const user = userEvent.setup();
++    vi.spyOn(jobOffersService, "getByCompanyAndId").mockRejectedValueOnce(new Error("Technical error"));
+ 
+-    expect(await screen.findByText("TypeScript")).toBeInTheDocument();
+-    expect(getDetails).toHaveBeenCalledTimes(3);
++    renderWithQuery(<VacancyList />);
++    await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
++
++    await waitFor(() =>
++      expect(toast.error).toHaveBeenCalledWith("No se pudo cargar la información de la vacante.", {
++        position: "top-center",
++        duration: 5000,
++      }),
++    );
+   });
+ 
+   it("renders empty optional fields and handles an extensive description", async () => {
+diff --git a/frontend/src/modules/job-offers/constants/job-offers.constants.ts b/frontend/src/modules/job-offers/constants/job-offers.constants.ts
+index a5af9d3f..1b5f67c7 100644
+--- a/frontend/src/modules/job-offers/constants/job-offers.constants.ts
++++ b/frontend/src/modules/job-offers/constants/job-offers.constants.ts
+@@ -2,6 +2,7 @@ export const MODALITIES = ["Presencial", "Remoto", "Híbrido"] as const;
+ export const CONTRACT_TYPES = ["Tiempo completo", "Medio tiempo", "Pasantía"] as const;
+ export const INTERNSHIP_CONTRACT_TYPE = "Pasantía";
+ export const SALARY_TO_BE_AGREED = "A convenir";
++export const NOT_SPECIFIED_TEXT = "No especificado";
+ export const FIELD_FOCUS_CLASS = "focus-visible:border-ink focus-visible:ring-ink/20";
+ 
+ export const MAX_TITLE_CHARS = 60;
+@@ -73,12 +74,27 @@ export const LEAVE_DIALOG_TEXT = {
+   confirm: "Salir",
+ } as const;
+ 
+-export const PUBLISHED_DIALOG_TEXT = {
+-  title: "Vacante publicada",
+-  description: "Tu vacante se publicó correctamente.",
+-  confirm: "Aceptar",
++export const EDIT_DISCARD_DIALOG_TEXT = {
++  title: "¿Descartar los cambios?",
++  description: "Los cambios no guardados se perderán y la vacante conservará sus datos originales.",
++  cancel: "Seguir editando",
++  confirm: "Descartar",
++} as const;
++
++export const EDIT_LEAVE_DIALOG_TEXT = {
++  title: "¿Salir sin guardar?",
++  description: "Los cambios no guardados se perderán si abandonas la pantalla.",
++  cancel: "Quedarme",
++  confirm: "Salir",
+ } as const;
+ 
++export const EDIT_MESSAGES = {
++  success: "Vacante actualizada correctamente",
++  error: "No se pudo guardar la edición. Inténtelo más tarde",
++} as const;
++
++export const RECRUITERS_HOME_ROUTE = "/recruiters";
++
+ export const PUBLISHED_STATUS = "Publicada";
+ 
+ export const CLOSED_STATUS = "Cerrada";
+diff --git a/frontend/src/modules/job-offers/hooks/use-job-offer-details.ts b/frontend/src/modules/job-offers/hooks/use-job-offer-details.ts
+index b7d2adb6..1c15423d 100644
+--- a/frontend/src/modules/job-offers/hooks/use-job-offer-details.ts
++++ b/frontend/src/modules/job-offers/hooks/use-job-offer-details.ts
+@@ -5,7 +5,7 @@ import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
+ import { JOB_OFFERS_QUERY_KEYS } from "../constants/job-offers-query-keys.constants";
+ import { jobOffersService } from "../services/job-offers.service";
+ 
+-const JOB_OFFER_DETAILS_ERROR = "No se pudieron cargar los detalles de la vacante.";
++const JOB_OFFER_DETAILS_ERROR = "No se pudo cargar la información de la vacante.";
+ 
+ export function useJobOfferDetails(companyId: string | null, jobOfferId: string | null) {
+   const query = useQuery({
+diff --git a/frontend/src/modules/job-offers/hooks/use-publish-job-offer.ts b/frontend/src/modules/job-offers/hooks/use-publish-job-offer.ts
+index 82cdc305..8d45c983 100644
+--- a/frontend/src/modules/job-offers/hooks/use-publish-job-offer.ts
++++ b/frontend/src/modules/job-offers/hooks/use-publish-job-offer.ts
+@@ -13,6 +13,7 @@ import { toJobOfferPayload } from "../utils/to-job-offer-payload";
+ import { toPublishError } from "../utils/to-publish-error";
+ import { validateInformation, validateRequirements } from "../utils/validate-vacancy";
+ import type { PublishStatus } from "../types/publish-status.types";
++import type { UsePublishJobOfferOptions } from "../types/use-publish-job-offer-options.types";
+ 
+ interface PublishVariables {
+   companyId: string;
+@@ -24,7 +25,7 @@ function hasErrors(conditions: VacancyConditions): boolean {
+   return Object.keys(found).length > 0;
+ }
+ 
+-export function usePublishJobOffer(jobOfferId?: string) {
++export function usePublishJobOffer(jobOfferId?: string, options: UsePublishJobOfferOptions = {}) {
+   const [localError, setLocalError] = useState<PublishError | null>(null);
+   const queryClient = useQueryClient();
+ 
+@@ -38,8 +39,10 @@ export function usePublishJobOffer(jobOfferId?: string) {
+     },
+     networkMode: "always",
+     // La raíz de la empresa cubre el listado y los detalles de sus vacantes.
+-    onSuccess: (_data, { companyId }) =>
+-      queryClient.invalidateQueries({ queryKey: JOB_OFFERS_QUERY_KEYS.company(companyId) }),
++    onSuccess: (_data, { companyId }) => {
++      options.onSuccess?.();
++      return queryClient.invalidateQueries({ queryKey: JOB_OFFERS_QUERY_KEYS.company(companyId) });
++    },
+   });
+ 
+   const submit = async (conditions: VacancyConditions): Promise<void> => {
+@@ -69,7 +72,7 @@ export function usePublishJobOffer(jobOfferId?: string) {
+     mutation.reset();
+   };
+ 
+-  const error = localError ?? (mutation.isError ? toPublishError(mutation.error) : null);
++  const error = localError ?? (mutation.isError ? toPublishError(mutation.error, jobOfferId ? "edit" : "publish") : null);
+   const status: PublishStatus = mutation.isPending
+     ? "submitting"
+     : mutation.isSuccess
+diff --git a/frontend/src/modules/job-offers/types/job-offer-highlights-props.types.ts b/frontend/src/modules/job-offers/types/job-offer-highlights-props.types.ts
+new file mode 100644
+index 00000000..26a993da
+--- /dev/null
++++ b/frontend/src/modules/job-offers/types/job-offer-highlights-props.types.ts
+@@ -0,0 +1,6 @@
++export interface JobOfferHighlightsProps {
++  modality: string;
++  contractType: string;
++  vacancies: string;
++  salary: string;
++}
+diff --git a/frontend/src/modules/job-offers/types/preview-step-props.types.ts b/frontend/src/modules/job-offers/types/preview-step-props.types.ts
+index 8effad29..aebc8e88 100644
+--- a/frontend/src/modules/job-offers/types/preview-step-props.types.ts
++++ b/frontend/src/modules/job-offers/types/preview-step-props.types.ts
+@@ -6,10 +6,8 @@ export interface PreviewStepProps {
+   conditions: VacancyConditions;
+   company: CurrentCompany;
+   isSubmitting: boolean;
+-  isPublished: boolean;
+   error: PublishError | null;
+   isEditMode?: boolean;
+   onPrevious: () => void;
+   onConfirm: () => void;
+-  onFinish: () => void;
+ }
+diff --git a/frontend/src/modules/job-offers/types/publish-mode.types.ts b/frontend/src/modules/job-offers/types/publish-mode.types.ts
+new file mode 100644
+index 00000000..36b06f3f
+--- /dev/null
++++ b/frontend/src/modules/job-offers/types/publish-mode.types.ts
+@@ -0,0 +1 @@
++export type PublishMode = "publish" | "edit";
+diff --git a/frontend/src/modules/job-offers/types/step-actions-props.types.ts b/frontend/src/modules/job-offers/types/step-actions-props.types.ts
+index 26b3bb5d..478f1f20 100644
+--- a/frontend/src/modules/job-offers/types/step-actions-props.types.ts
++++ b/frontend/src/modules/job-offers/types/step-actions-props.types.ts
+@@ -5,6 +5,7 @@ export interface StepActionsProps {
+   secondaryLabel: string;
+   primaryLabel: ReactNode;
+   primaryVariant?: ComponentProps<typeof Button>["variant"];
++  showPreviousIcon?: boolean;
+   onSecondary: () => void;
+   onPrimary: () => void;
+   isBusy?: boolean;
+diff --git a/frontend/src/modules/job-offers/types/use-publish-job-offer-options.types.ts b/frontend/src/modules/job-offers/types/use-publish-job-offer-options.types.ts
+new file mode 100644
+index 00000000..603e17c9
+--- /dev/null
++++ b/frontend/src/modules/job-offers/types/use-publish-job-offer-options.types.ts
+@@ -0,0 +1,3 @@
++export interface UsePublishJobOfferOptions {
++  onSuccess?: () => void;
++}
+diff --git a/frontend/src/modules/job-offers/utils/format-vacancy-count.test.ts b/frontend/src/modules/job-offers/utils/format-vacancy-count.test.ts
+new file mode 100644
+index 00000000..f4826180
+--- /dev/null
++++ b/frontend/src/modules/job-offers/utils/format-vacancy-count.test.ts
+@@ -0,0 +1,13 @@
++import { describe, expect, it } from "vitest";
++import { formatVacancyCount } from "./format-vacancy-count";
++
++describe("formatVacancyCount", () => {
++  it("usa el singular para una sola vacante", () => {
++    expect(formatVacancyCount(1)).toBe("1 vacante");
++    expect(formatVacancyCount("1")).toBe("1 vacante");
++  });
++
++  it("usa el plural para varias vacantes", () => {
++    expect(formatVacancyCount(2)).toBe("2 vacantes");
++  });
++});
+diff --git a/frontend/src/modules/job-offers/utils/format-vacancy-count.ts b/frontend/src/modules/job-offers/utils/format-vacancy-count.ts
+new file mode 100644
+index 00000000..f608fc6c
+--- /dev/null
++++ b/frontend/src/modules/job-offers/utils/format-vacancy-count.ts
+@@ -0,0 +1,3 @@
++export function formatVacancyCount(count: number | string): string {
++  return `${count} ${Number(count) === 1 ? "vacante" : "vacantes"}`;
++}
+diff --git a/frontend/src/modules/job-offers/utils/to-publish-error.test.ts b/frontend/src/modules/job-offers/utils/to-publish-error.test.ts
+index 745d24e3..d1b91c65 100644
+--- a/frontend/src/modules/job-offers/utils/to-publish-error.test.ts
++++ b/frontend/src/modules/job-offers/utils/to-publish-error.test.ts
+@@ -49,4 +49,13 @@ describe("toPublishError", () => {
+     });
+     expect(toPublishError(new Error("boom")).kind).toBe("server");
+   });
++  it("en la edición usa el mensaje acordado ante un corte de red o un error del servidor", () => {
++    const message = "No se pudo guardar la edición. Inténtelo más tarde";
++
++    expect(toPublishError(new AxiosError("Network Error", "ERR_NETWORK"), "edit")).toMatchObject({
++      kind: "network",
++      message,
++    });
++    expect(toPublishError(responseError(500, {}), "edit")).toMatchObject({ kind: "server", message });
++  });
+ });
+diff --git a/frontend/src/modules/job-offers/utils/to-publish-error.ts b/frontend/src/modules/job-offers/utils/to-publish-error.ts
+index 1133301b..4df359b2 100644
+--- a/frontend/src/modules/job-offers/utils/to-publish-error.ts
++++ b/frontend/src/modules/job-offers/utils/to-publish-error.ts
+@@ -1,6 +1,7 @@
+ import { isApiError as isAxiosError } from "@/shared/services/api-client";
+-import { PUBLISH_MESSAGES } from "../constants/job-offers.constants";
++import { EDIT_MESSAGES, PUBLISH_MESSAGES } from "../constants/job-offers.constants";
+ import type { PublishError } from "../types/publish-error.types";
++import type { PublishMode } from "../types/publish-mode.types";
+ 
+ interface ErrorBody {
+   data?: unknown;
+@@ -20,12 +21,16 @@ function readDetails(body: ErrorBody | undefined): string[] {
+   return typeof body?.detail === "string" && body.detail.length > 0 ? [body.detail] : [];
+ }
+ 
+-export function toPublishError(error: unknown): PublishError {
++export function toPublishError(error: unknown, mode: PublishMode = "publish"): PublishError {
++  // En la edición un corte de red y un error del servidor comparten el mensaje acordado con QA.
++  const isEdit = mode === "edit";
++  const serverMessage = isEdit ? EDIT_MESSAGES.error : PUBLISH_MESSAGES.server;
++  const networkMessage = isEdit ? EDIT_MESSAGES.error : PUBLISH_MESSAGES.network;
+   if (!isAxiosError(error)) {
+-    return { kind: "server", message: PUBLISH_MESSAGES.server, details: [] };
++    return { kind: "server", message: serverMessage, details: [] };
+   }
+   if (!error.response) {
+-    return { kind: "network", message: PUBLISH_MESSAGES.network, details: [] };
++    return { kind: "network", message: networkMessage, details: [] };
+   }
+ 
+   const { status, data } = error.response;
+@@ -38,5 +43,5 @@ export function toPublishError(error: unknown): PublishError {
+   if (status === 401 || status === 403) {
+     return { kind: "session", message: PUBLISH_MESSAGES.session, details: [] };
+   }
+-  return { kind: "server", message: PUBLISH_MESSAGES.server, details: [] };
++  return { kind: "server", message: serverMessage, details: [] };
+ }
+diff --git a/frontend/src/modules/job-offers/utils/validate-vacancy.ts b/frontend/src/modules/job-offers/utils/validate-vacancy.ts
+index bbefdff7..c05c47d6 100644
+--- a/frontend/src/modules/job-offers/utils/validate-vacancy.ts
++++ b/frontend/src/modules/job-offers/utils/validate-vacancy.ts
+@@ -30,6 +30,10 @@ export function isFieldEmpty(field: keyof VacancyConditions, conditions: Vacancy
+   return (conditions[field] as string).trim() === "";
+ }
+ 
++export function getMapsLinkError(value: string): string | undefined {
++  return GOOGLE_MAPS_LINK_REGEX.test(value.trim()) ? undefined : VACANCY_MESSAGES.invalidMapsLink;
++}
++
+ function validateSalary(value: string): string | undefined {
+   const salary = parseSalary(value);
+   if (salary.isIncomplete) return VACANCY_MESSAGES.salaryIncomplete;
+@@ -64,8 +68,9 @@ export function validateInformation(conditions: VacancyConditions): VacancyError
+     errors.title = "Solo se permiten caracteres alfanuméricos y espacios";
+   }
+ 
+-  if (!errors.mapsLink && !GOOGLE_MAPS_LINK_REGEX.test(conditions.mapsLink.trim())) {
+-    errors.mapsLink = VACANCY_MESSAGES.invalidMapsLink;
++  if (!errors.mapsLink) {
++    const message = getMapsLinkError(conditions.mapsLink);
++    if (message) errors.mapsLink = message;
+   }
+ 
+   if (!errors.vacancyCount) {
+diff --git a/frontend/src/modules/job-offers/views/register-vacancy-view.integration.test.tsx b/frontend/src/modules/job-offers/views/register-vacancy-view.integration.test.tsx
+index 134f44c3..4ea88208 100644
+--- a/frontend/src/modules/job-offers/views/register-vacancy-view.integration.test.tsx
++++ b/frontend/src/modules/job-offers/views/register-vacancy-view.integration.test.tsx
+@@ -1,5 +1,6 @@
+ import { AxiosError, type AxiosResponse } from "axios";
+ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
++import { toast } from "sonner";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { apiClient } from "@/shared/services/api-client";
+ import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
+@@ -9,6 +10,7 @@ import { RegisterVacancyView } from "./register-vacancy-view";
+ 
+ const push = vi.fn();
+ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
++vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+ vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+   ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
+ vi.mock("@/components/ui/select", () => ({
+@@ -227,7 +229,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
+     expect(push).toHaveBeenCalledWith("/profile");
+   });
+ 
+-  it("edita una vacante existente: carga sus datos, guarda con PUT y confirma la actualización", async () => {
++  it("edita una vacante existente: carga sus datos, guarda con PUT, avisa y vuelve al listado", async () => {
+     const OFFER = {
+       ...EXPECTED_PAYLOAD,
+       id: "offer-1",
+@@ -258,7 +260,11 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
+     await screen.findByText("Revisa tu publicación");
+     click("Confirmar edición");
+ 
+-    expect(await screen.findByText("Vacante actualizada")).toBeInTheDocument();
++    await waitFor(() => expect(push).toHaveBeenCalledWith("/recruiters"));
++    expect(toast.success).toHaveBeenCalledWith("Vacante actualizada correctamente", {
++      position: "top-center",
++      duration: 5000,
++    });
+     expect(apiClient.put).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`, EXPECTED_PAYLOAD);
+     expect(apiClient.post).not.toHaveBeenCalled();
+   });
+diff --git a/frontend/src/modules/job-offers/views/register-vacancy-view.test.tsx b/frontend/src/modules/job-offers/views/register-vacancy-view.test.tsx
+index 66cfaacb..75d76454 100644
+--- a/frontend/src/modules/job-offers/views/register-vacancy-view.test.tsx
++++ b/frontend/src/modules/job-offers/views/register-vacancy-view.test.tsx
+@@ -1,10 +1,17 @@
+ import { Button as TestButton } from "@/components/ui/button";
+ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
++import { toast } from "sonner";
+ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ import { EMPTY_CONDITIONS, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
+ import { RegisterVacancyView } from "./register-vacancy-view";
+ 
+-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
++const { push, publishOptions } = vi.hoisted(() => ({
++  push: vi.fn(),
++  publishOptions: { current: undefined as { onSuccess?: () => void } | undefined },
++}));
++
++vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
++vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+ 
+ const { form, publication, leaveGuard } = vi.hoisted(() => ({
+   form: {
+@@ -41,7 +48,12 @@ const useLeaveGuard = vi.fn((isActive: boolean) => {
+ });
+ 
+ vi.mock("../hooks/use-job-offer-form", () => ({ useJobOfferForm: () => form }));
+-vi.mock("../hooks/use-publish-job-offer", () => ({ usePublishJobOffer: () => publication }));
++vi.mock("../hooks/use-publish-job-offer", () => ({
++  usePublishJobOffer: (_jobOfferId?: string, options?: { onSuccess?: () => void }) => {
++    publishOptions.current = options;
++    return publication;
++  },
++}));
+ vi.mock("../hooks/use-leave-guard", () => ({ useLeaveGuard: (isActive: boolean) => useLeaveGuard(isActive) }));
+ vi.mock("../components/vacancy-stepper", () => ({
+   VacancyStepper: ({ currentStep }: { currentStep: number }) => <div data-testid="stepper">Paso {currentStep}</div>,
+@@ -66,18 +78,14 @@ vi.mock("../components/preview-step", () => ({
+   PreviewStep: (props: {
+     onPrevious: () => void;
+     onConfirm: () => void;
+-    onFinish: () => void;
+     isSubmitting: boolean;
+-    isPublished: boolean;
+     company: { name: string };
+   }) => (
+     <div data-testid="preview-step">
+       <span>{props.isSubmitting ? "enviando" : "libre"}</span>
+-      <span>{props.isPublished ? "publicada" : "pendiente"}</span>
+       <span>{props.company.name}</span>
+       <TestButton onClick={props.onPrevious}>Anterior</TestButton>
+       <TestButton onClick={props.onConfirm}>Confirmar</TestButton>
+-      <TestButton onClick={props.onFinish}>Aceptar</TestButton>
+     </div>
+   ),
+ }));
+@@ -214,4 +222,46 @@ describe("RegisterVacancyView", () => {
+ 
+     expect(form.goBack).toHaveBeenCalledOnce();
+   });
++  it("al publicar una vacante nueva no redirige ni notifica desde la vista", () => {
++    setStep(3, VALID_CONDITIONS, true);
++    render(<RegisterVacancyView />);
++
++    expect(publishOptions.current?.onSuccess).toBeUndefined();
++  });
++
++  it("al guardar una edición avisa con una notificación y vuelve al listado", () => {
++    setStep(3, VALID_CONDITIONS, true);
++    render(<RegisterVacancyView jobOfferId="offer-1" />);
++
++    publishOptions.current?.onSuccess?.();
++
++    expect(toast.success).toHaveBeenCalledWith("Vacante actualizada correctamente", {
++      position: "top-center",
++      duration: 5000,
++    });
++    expect(push).toHaveBeenCalledWith("/recruiters");
++  });
++
++  it("en la edición los diálogos hablan de cambios no guardados", () => {
++    setStep(1, VALID_CONDITIONS, true);
++    leaveGuard.isLeaveDialogOpen = true;
++    render(<RegisterVacancyView jobOfferId="offer-1" />);
++
++    expect(screen.getByText("¿Salir sin guardar?")).toBeInTheDocument();
++    expect(screen.getByText("Los cambios no guardados se perderán si abandonas la pantalla.")).toBeInTheDocument();
++  });
++
++  it("al descartar una edición vuelve al listado", () => {
++    setStep(1, VALID_CONDITIONS, true);
++    render(<RegisterVacancyView jobOfferId="offer-1" />);
++
++    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
++    expect(
++      screen.getByText("Los cambios no guardados se perderán y la vacante conservará sus datos originales."),
++    ).toBeInTheDocument();
++    fireEvent.click(screen.getByRole("button", { name: "Descartar" }));
++
++    expect(form.reset).toHaveBeenCalledOnce();
++    expect(push).toHaveBeenCalledWith("/recruiters");
++  });
+ });
+diff --git a/frontend/src/modules/job-offers/views/register-vacancy-view.tsx b/frontend/src/modules/job-offers/views/register-vacancy-view.tsx
+index f4974c01..b207936c 100644
+--- a/frontend/src/modules/job-offers/views/register-vacancy-view.tsx
++++ b/frontend/src/modules/job-offers/views/register-vacancy-view.tsx
+@@ -3,25 +3,36 @@
+ import { LoaderCircle } from "lucide-react";
+ import Link from "next/link";
+ import { useRouter } from "next/navigation";
++import { useState } from "react";
++import { toast } from "sonner";
+ import { Button, buttonVariants } from "@/components/ui/button";
+ import { PageHeading } from "@/shared/components/layout";
+-import { useState } from "react";
+ import { ConfirmDialog } from "../components/confirm-dialog";
+ import { InformationStep } from "../components/information-step";
+ import { PreviewStep } from "../components/preview-step";
+ import { RequirementsStep } from "../components/requirements-step";
+ import { VacancyStepper } from "../components/vacancy-stepper";
+-import { DISCARD_DIALOG_TEXT, LEAVE_DIALOG_TEXT } from "../constants/job-offers.constants";
++import {
++  DISCARD_DIALOG_TEXT,
++  EDIT_DISCARD_DIALOG_TEXT,
++  EDIT_LEAVE_DIALOG_TEXT,
++  EDIT_MESSAGES,
++  LEAVE_DIALOG_TEXT,
++  RECRUITERS_HOME_ROUTE,
++  TOAST_OPTIONS,
++} from "../constants/job-offers.constants";
+ import { useJobOfferForm } from "../hooks/use-job-offer-form";
+ import { useLeaveGuard } from "../hooks/use-leave-guard";
+ import { usePublishJobOffer } from "../hooks/use-publish-job-offer";
+-import { getCurrentCompany } from "../utils/get-current-company";
+ import type { RegisterVacancyViewProps } from "../types/register-vacancy-view-props.types";
++import { getCurrentCompany } from "../utils/get-current-company";
+ 
+ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
+   const isEditMode = !!jobOfferId;
+   const company = getCurrentCompany();
+   const router = useRouter();
++  const discardText = isEditMode ? EDIT_DISCARD_DIALOG_TEXT : DISCARD_DIALOG_TEXT;
++  const leaveText = isEditMode ? EDIT_LEAVE_DIALOG_TEXT : LEAVE_DIALOG_TEXT;
+ 
+   const {
+     currentStep,
+@@ -39,7 +50,15 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
+     reset,
+   } = useJobOfferForm(jobOfferId);
+ 
+-  const publication = usePublishJobOffer(jobOfferId);
++  // Al guardar una edición se avisa con una notificación y se vuelve al listado de vacantes.
++  const publication = usePublishJobOffer(jobOfferId, {
++    onSuccess: isEditMode
++      ? () => {
++          toast.success(EDIT_MESSAGES.success, TOAST_OPTIONS);
++          router.push(RECRUITERS_HOME_ROUTE);
++        }
++      : undefined,
++  });
+   const leaveGuard = useLeaveGuard(hasUnsavedChanges && !publication.isSuccess);
+   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
+ 
+@@ -47,7 +66,7 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
+     if (hasUnsavedChanges) {
+       setIsDiscardDialogOpen(true);
+     } else {
+-      router.push("/recruiters");
++      router.push(RECRUITERS_HOME_ROUTE);
+     }
+   };
+ 
+@@ -55,7 +74,7 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
+     setIsDiscardDialogOpen(false);
+     publication.reset();
+     reset();
+-    router.push("/recruiters");
++    router.push(RECRUITERS_HOME_ROUTE);
+   };
+ 
+   const handleFinish = () => {
+@@ -76,28 +95,23 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
+     return (
+       <main className="mx-auto w-full max-w-7xl space-y-4 py-10" role="alert">
+         <p className="text-sm text-ink">{loadError}</p>
+-        <Link href="/recruiters" className={buttonVariants({ variant: "outline" })}>
++        <Link href={RECRUITERS_HOME_ROUTE} className={buttonVariants({ variant: "outline" })}>
+           Volver a mi empresa
+         </Link>
+       </main>
+     );
+   }
+ 
+-  if (publication.isSuccess) {
++  if (publication.isSuccess && !isEditMode) {
+     return (
+       <main className="mx-auto w-full max-w-7xl space-y-6">
+-        <PageHeading 
+-          title={isEditMode ? "Vacante actualizada" : "Vacante publicada"} 
+-          description={isEditMode ? "La oferta se actualizó correctamente." : "La oferta se registró correctamente."} 
+-        />
++        <PageHeading title="Vacante publicada" description="La oferta se registró correctamente." />
+         <section className="max-w-2xl rounded-lg border border-border bg-surface p-6">
+           <h2 className="text-lg font-semibold">{conditions.title}</h2>
+           <p className="mt-2 text-sm text-text-secondary">{conditions.modality} · {conditions.contractType}</p>
+           <div className="mt-6 flex gap-3 border-t border-border pt-5">
+-            <Link href="/recruiters" className={buttonVariants()}>Volver a mi empresa</Link>
+-            {!isEditMode && (
+-              <Button variant="outline" onClick={handleFinish}>Publicar otra vacante</Button>
+-            )}
++            <Link href={RECRUITERS_HOME_ROUTE} className={buttonVariants()}>Volver a mi empresa</Link>
++            <Button variant="outline" onClick={handleFinish}>Publicar otra vacante</Button>
+           </div>
+         </section>
+       </main>
+@@ -106,10 +120,10 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
+ 
+   return (
+     <main className="mx-auto w-full max-w-7xl">
+-      <PageHeading 
+-        className="mb-6" 
+-        title={isEditMode ? "Editar vacante" : "Publicar vacante"} 
+-        description={isEditMode ? "Actualiza la información, requisitos y revisa la oferta antes de guardarla." : "Define la oferta, agrega los requisitos y revisa la publicación antes de confirmarla."} 
++      <PageHeading
++        className="mb-6"
++        title={isEditMode ? "Editar vacante" : "Publicar vacante"}
++        description={isEditMode ? "Actualiza la información, requisitos y revisa la oferta antes de guardarla." : "Define la oferta, agrega los requisitos y revisa la publicación antes de confirmarla."}
+       />
+ 
+       <div className="space-y-6">
+@@ -143,12 +157,10 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
+               conditions={conditions}
+               company={company}
+               isSubmitting={publication.isSubmitting}
+-              isPublished={publication.isSuccess}
+               error={publication.error}
+               onPrevious={goBack}
+               isEditMode={isEditMode}
+               onConfirm={() => void publication.submit(conditions)}
+-              onFinish={handleFinish}
+             />
+           )}
+         </div>
+@@ -156,23 +168,23 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
+ 
+       <ConfirmDialog
+         isOpen={isDiscardDialogOpen}
+-        title={DISCARD_DIALOG_TEXT.title}
+-        description={DISCARD_DIALOG_TEXT.description}
+-        confirmLabel={DISCARD_DIALOG_TEXT.confirm}
+-        cancelLabel={DISCARD_DIALOG_TEXT.cancel}
++        title={discardText.title}
++        description={discardText.description}
++        confirmLabel={discardText.confirm}
++        cancelLabel={discardText.cancel}
+         onConfirm={handleDiscard}
+         onCancel={() => setIsDiscardDialogOpen(false)}
+       />
+ 
+       <ConfirmDialog
+         isOpen={leaveGuard.isLeaveDialogOpen}
+-        title={LEAVE_DIALOG_TEXT.title}
+-        description={LEAVE_DIALOG_TEXT.description}
+-        confirmLabel={LEAVE_DIALOG_TEXT.confirm}
+-        cancelLabel={LEAVE_DIALOG_TEXT.cancel}
++        title={leaveText.title}
++        description={leaveText.description}
++        confirmLabel={leaveText.confirm}
++        cancelLabel={leaveText.cancel}
+         onConfirm={leaveGuard.confirmLeave}
+         onCancel={leaveGuard.cancelLeave}
+       />
+     </main>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/frontend/src/modules/recruiters/views/recruiters-home-view.tsx b/frontend/src/modules/recruiters/views/recruiters-home-view.tsx
+index 043ba65b..82feb891 100644
+--- a/frontend/src/modules/recruiters/views/recruiters-home-view.tsx
++++ b/frontend/src/modules/recruiters/views/recruiters-home-view.tsx
+@@ -18,8 +18,8 @@ export function RecruitersHomeView() {
+           </Link>
+         }
+       />
+-      <div className="grid grid-cols-3 items-start gap-8">
+-        <div className="col-span-2 min-w-0 space-y-6">
++      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
++        <div className="min-w-0 space-y-6 lg:col-span-2">
+           <VacancyList />
+           <section className="rounded-lg border border-border bg-surface">
+             <header className="border-b border-border px-5 py-4">
+-- 
+2.43.0
+

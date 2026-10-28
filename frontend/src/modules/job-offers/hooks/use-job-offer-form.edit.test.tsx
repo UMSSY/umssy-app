@@ -4,7 +4,7 @@ import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/acc
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper";
 import { jobOffersService } from "../services/job-offers.service";
 import { buildSessionToken, COMPANY_ID, DOCKER } from "../testing/vacancy-fixtures";
-import type { JobOfferDetailsResponse } from "../types/job-offer.types";
+import type { JobOfferDetailsResponse } from "../types/job-offer-details-response.types";
 import { useJobOfferForm } from "./use-job-offer-form";
 
 vi.mock("../services/job-offers.service", () => ({ jobOffersService: { getByCompanyAndId: vi.fn() } }));

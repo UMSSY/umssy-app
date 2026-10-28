@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { JobOfferDetailsResponse } from "../types/job-offer.types";
+import type { JobOfferDetailsResponse } from "../types/job-offer-details-response.types";
 import { formatSalaryInput } from "../utils/format-salary-input";
 import { getCurrentCompany } from "../utils/get-current-company";
 import { useJobOfferDetails } from "./use-job-offer-details";
-import type {
-    Modality,
-    UpdateVacancyField,
-    VacancyConditions,
-    VacancyErrors,
-} from "../types/vacancy-conditions.types";
+import type { VacancyConditions } from "../types/vacancy-conditions.types";
+import type { Modality } from "../types/modality.types";
+import type { UpdateVacancyField } from "../types/update-vacancy-field.types";
+import type { VacancyErrors } from "../types/vacancy-errors.types";
 import {
     INFORMATION_FIELDS_ORDER,
     isFieldEmpty,

@@ -1,0 +1,246 @@
+From 1acc94826fbe4ac0a4c9b8d0c5339a267d49fc1d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Nicol=C3=A1s=20Melgarejo?=
+ <nicolasmelgarejogamboa@gmail.com>
+Date: Tue, 27 Oct 2026 23:34:00 -0400
+Subject: [PATCH 1/2] feat(job-offers): add endpoint to reopen a closed job
+ offer
+
+- PATCH companies/:companyId/job-offers/:jobOfferId/reopen, restricted to the company role.
+- Only closed offers can be reopened; any other status answers 409 (HU6-13, HU6-27).
+- Keeps every field of the offer and only switches its status to Publicada (HU6-10).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011QxL82Ke4t6ycKgAsKG13W
+---
+ .../controllers/job-offers.controller.ts      | 16 +++++
+ .../modules/job-offers/exceptions/index.ts    |  1 +
+ .../job-offer-not-reopenable.exception.ts     |  7 +++
+ .../job-offers/services/job-offers.service.ts | 15 +++++
+ .../tests/job-offers.controller.spec.ts       | 31 ++++++++++
+ .../tests/job-offers.service.spec.ts          | 59 +++++++++++++++++++
+ 6 files changed, 129 insertions(+)
+ create mode 100644 backend/src/modules/job-offers/exceptions/job-offer-not-reopenable.exception.ts
+
+diff --git a/backend/src/modules/job-offers/controllers/job-offers.controller.ts b/backend/src/modules/job-offers/controllers/job-offers.controller.ts
+index 5af06947..41b0ba7d 100644
+--- a/backend/src/modules/job-offers/controllers/job-offers.controller.ts
++++ b/backend/src/modules/job-offers/controllers/job-offers.controller.ts
+@@ -6,6 +6,7 @@ import {
+   HttpCode,
+   HttpStatus,
+   Param,
++  Patch,
+   ParseUUIDPipe,
+   Post,
+   Put,
+@@ -16,6 +17,7 @@ import {
+ } from '@nestjs/common';
+ import {
+   ApiBody,
++  ApiConflictResponse,
+   ApiCreatedResponse,
+   ApiNoContentResponse,
+   ApiNotFoundResponse,
+@@ -182,6 +184,20 @@ export class JobOffersController {
+     return this.jobOffersService.update(companyId, jobOfferId, request);
+   }
+ 
++  @Patch('companies/:companyId/job-offers/:jobOfferId/reopen')
++  @UseGuards(JwtAuthGuard, RolesGuard)
++  @Roles('empresa')
++  @ApiOperation({ summary: 'Reabre una vacante cerrada de la empresa' })
++  @ApiOkResponse({ description: 'Vacante reabierta con estado Publicada' })
++  @ApiNotFoundResponse({ description: 'La vacante no existe o no pertenece a la empresa' })
++  @ApiConflictResponse({ description: 'La vacante no está cerrada' })
++  reopen(
++    @Param('companyId', companyIdPipe) companyId: string,
++    @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
++  ): Promise<JobOfferResponse> {
++    return this.jobOffersService.reopen(companyId, jobOfferId);
++  }
++
+   @Delete('companies/:companyId/job-offers/:jobOfferId')
+   @UseGuards(JwtAuthGuard, RolesGuard)
+   @Roles('empresa')
+diff --git a/backend/src/modules/job-offers/exceptions/index.ts b/backend/src/modules/job-offers/exceptions/index.ts
+index 847d9f0d..856e1bd0 100644
+--- a/backend/src/modules/job-offers/exceptions/index.ts
++++ b/backend/src/modules/job-offers/exceptions/index.ts
+@@ -2,5 +2,6 @@ export { CompanyNotFoundException } from './company-not-found.exception.js';
+ export { DuplicateJobOfferSkillsException } from './duplicate-job-offer-skills.exception.js';
+ export { JobOfferCatalogNotFoundException } from './job-offer-catalog-not-found.exception.js';
+ export { JobOfferNotFoundException } from './job-offer-not-found.exception.js';
++export { JobOfferNotReopenableException } from './job-offer-not-reopenable.exception.js';
+ export { JobOfferSkillNotFoundException } from './job-offer-skill-not-found.exception.js';
+ export { TooManyJobOfferSkillsException } from './too-many-job-offer-skills.exception.js';
+diff --git a/backend/src/modules/job-offers/exceptions/job-offer-not-reopenable.exception.ts b/backend/src/modules/job-offers/exceptions/job-offer-not-reopenable.exception.ts
+new file mode 100644
+index 00000000..d7d1fb75
+--- /dev/null
++++ b/backend/src/modules/job-offers/exceptions/job-offer-not-reopenable.exception.ts
+@@ -0,0 +1,7 @@
++import { DomainException } from '../../../common/exceptions/domain.exception.js';
++
++export class JobOfferNotReopenableException extends DomainException {
++  constructor() {
++    super('Solo se pueden reabrir vacantes cerradas.', 409, 'JOB_OFFER_NOT_REOPENABLE');
++  }
++}
+diff --git a/backend/src/modules/job-offers/services/job-offers.service.ts b/backend/src/modules/job-offers/services/job-offers.service.ts
+index d10ffcf9..87d5e876 100644
+--- a/backend/src/modules/job-offers/services/job-offers.service.ts
++++ b/backend/src/modules/job-offers/services/job-offers.service.ts
+@@ -3,6 +3,7 @@ import {
+   CompanyNotFoundException,
+   JobOfferCatalogNotFoundException,
+   JobOfferNotFoundException,
++  JobOfferNotReopenableException,
+ } from '../exceptions/index.js';
+ import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
+ import { JobOffersRepository } from '../repositories/job-offers.repository.js';
+@@ -120,6 +121,20 @@ export class JobOffersService {
+     await this.jobOffersRepository.updateStatus(jobOfferId, statusId);
+   }
+ 
++  // Reabre una vacante cerrada conservando todos sus datos; solo cambia su estado a Publicada.
++  async reopen(companyId: string, jobOfferId: string): Promise<JobOfferResponse> {
++    await this.ensureCompanyExists(companyId);
++    const existing = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
++    if (!existing) throw new JobOfferNotFoundException();
++    if (existing.status.title !== JobOfferStatus.CLOSED) throw new JobOfferNotReopenableException();
++
++    const statusId = await this.jobOffersRepository.findStatusId(JobOfferStatus.PUBLISHED);
++    if (!statusId) throw new JobOfferCatalogNotFoundException('estado');
++
++    const record = await this.jobOffersRepository.updateStatus(jobOfferId, statusId);
++    return this.jobOfferMapper.toResponse(record);
++  }
++
+   listSkillCatalog(): Promise<JobOfferSkillResponse[]> {
+     return this.jobOfferSkillsService.listCatalog();
+   }
+diff --git a/backend/src/modules/job-offers/tests/job-offers.controller.spec.ts b/backend/src/modules/job-offers/tests/job-offers.controller.spec.ts
+index 8bb2f40e..73f8d61d 100644
+--- a/backend/src/modules/job-offers/tests/job-offers.controller.spec.ts
++++ b/backend/src/modules/job-offers/tests/job-offers.controller.spec.ts
+@@ -15,6 +15,7 @@ function createController() {
+     listByCompany: vi.fn().mockResolvedValue([]),
+     getByCompanyAndId: vi.fn().mockResolvedValue({ id: 'offer-1' }),
+     update: vi.fn().mockResolvedValue({ id: 'offer-1' }),
++    reopen: vi.fn().mockResolvedValue({ id: 'offer-1', status: 'Publicada' }),
+     listSkillCatalog: vi.fn().mockResolvedValue([{ id: 'skill-1', name: 'Docker' }]),
+   };
+   return { controller: new JobOffersController(service as unknown as JobOffersService), service };
+@@ -149,4 +150,34 @@ describe('JobOffersController', () => {
+     expect(Reflect.getMetadata('__guards__', handler)).toEqual([JwtAuthGuard, RolesGuard]);
+     expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(['empresa']);
+   });
++  it('delega la reapertura de una vacante de la empresa', async () => {
++    const { controller, service } = createController();
++
++    await expect(controller.reopen('company-1', 'offer-1')).resolves.toEqual({
++      id: 'offer-1',
++      status: 'Publicada',
++    });
++    expect(service.reopen).toHaveBeenCalledWith('company-1', 'offer-1');
++  });
++
++  it('exige sesión y rol empresa para reabrir una vacante', () => {
++    const handler = Object.getOwnPropertyDescriptor(JobOffersController.prototype, 'reopen')?.value;
++    if (!handler) throw new Error('No se encontró el handler de reapertura');
++
++    expect(Reflect.getMetadata('__guards__', handler)).toEqual([JwtAuthGuard, RolesGuard]);
++    expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(['empresa']);
++  });
++
++  it('rechaza un id de vacante que no es UUID al reabrir', async () => {
++    const paramTypes = Reflect.getMetadata('__routeArguments__', JobOffersController, 'reopen') as Record<
++      string,
++      { data?: string; pipes: { transform: (value: string, metadata: object) => Promise<string> }[] }
++    >;
++    const jobOfferIdParam = Object.values(paramTypes).find((param) => param.data === 'jobOfferId');
++    const [pipe] = jobOfferIdParam?.pipes ?? [];
++
++    await expect(pipe.transform('no-es-uuid', { type: 'param', data: 'jobOfferId' })).rejects.toBeInstanceOf(
++      RequestValidationException,
++    );
++  });
+ });
+diff --git a/backend/src/modules/job-offers/tests/job-offers.service.spec.ts b/backend/src/modules/job-offers/tests/job-offers.service.spec.ts
+index f7436e14..99c3a4e2 100644
+--- a/backend/src/modules/job-offers/tests/job-offers.service.spec.ts
++++ b/backend/src/modules/job-offers/tests/job-offers.service.spec.ts
+@@ -3,6 +3,7 @@ import {
+   CompanyNotFoundException,
+   JobOfferCatalogNotFoundException,
+   JobOfferNotFoundException,
++  JobOfferNotReopenableException,
+ } from '../exceptions/index.js';
+ import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
+ import type { JobOffersRepository } from '../repositories/job-offers.repository.js';
+@@ -382,4 +383,62 @@ describe('JobOffersService', () => {
+       expect(repository.updateStatus).not.toHaveBeenCalled();
+     });
+   });
++  describe('reopen', () => {
++    const CLOSED_RECORD: JobOfferRecord = { ...RECORD, status: { title: 'Cerrada' } };
++
++    beforeEach(() => {
++      repository.findByCompanyAndId.mockResolvedValue(CLOSED_RECORD);
++      repository.findStatusId.mockResolvedValue('status-published');
++      repository.updateStatus.mockResolvedValue(RECORD);
++    });
++
++    it('cambia el estado de una vacante cerrada a Publicada sin tocar sus datos', async () => {
++      const result = await service.reopen('company-1', 'offer-1');
++
++      expect(repository.findByCompanyAndId).toHaveBeenCalledWith('company-1', 'offer-1');
++      expect(repository.findStatusId).toHaveBeenCalledWith('Publicada');
++      expect(repository.updateStatus).toHaveBeenCalledWith('offer-1', 'status-published');
++      expect(repository.update).not.toHaveBeenCalled();
++      expect(result.status).toBe('Publicada');
++    });
++
++    it.each(['Publicada', 'Eliminada', 'Borrador'])(
++      'rechaza reabrir una vacante en estado %s',
++      async (status) => {
++        repository.findByCompanyAndId.mockResolvedValue({ ...RECORD, status: { title: status } });
++
++        await expect(service.reopen('company-1', 'offer-1')).rejects.toBeInstanceOf(
++          JobOfferNotReopenableException,
++        );
++        expect(repository.updateStatus).not.toHaveBeenCalled();
++      },
++    );
++
++    it('rechaza una vacante inexistente o de otra empresa', async () => {
++      repository.findByCompanyAndId.mockResolvedValue(null);
++
++      await expect(service.reopen('company-1', 'offer-1')).rejects.toBeInstanceOf(
++        JobOfferNotFoundException,
++      );
++      expect(repository.updateStatus).not.toHaveBeenCalled();
++    });
++
++    it('rechaza una empresa inexistente sin buscar la vacante', async () => {
++      repository.companyExists.mockResolvedValue(false);
++
++      await expect(service.reopen('company-1', 'offer-1')).rejects.toBeInstanceOf(
++        CompanyNotFoundException,
++      );
++      expect(repository.findByCompanyAndId).not.toHaveBeenCalled();
++    });
++
++    it('falla si el estado Publicada no está en el catálogo', async () => {
++      repository.findStatusId.mockResolvedValue(null);
++
++      await expect(service.reopen('company-1', 'offer-1')).rejects.toBeInstanceOf(
++        JobOfferCatalogNotFoundException,
++      );
++      expect(repository.updateStatus).not.toHaveBeenCalled();
++    });
++  });
+ });
+-- 
+2.43.0
+

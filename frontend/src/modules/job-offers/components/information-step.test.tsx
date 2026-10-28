@@ -3,7 +3,8 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_CONDITIONS } from "../testing/vacancy-fixtures";
-import type { UpdateVacancyField, VacancyConditions } from "../types/vacancy-conditions.types";
+import type { VacancyConditions } from "../types/vacancy-conditions.types";
+import type { UpdateVacancyField } from "../types/update-vacancy-field.types";
 import { InformationStep } from "./information-step";
 
 vi.mock("@/components/ui/select", () => ({

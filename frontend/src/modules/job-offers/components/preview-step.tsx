@@ -7,25 +7,12 @@ import { Separator } from "@/components/ui/separator";
 import {
   DESCRIPTION_PREVIEW_CHARS,
   INTERNSHIP_CONTRACT_TYPE,
-  PUBLISHED_DIALOG_TEXT,
   SALARY_TO_BE_AGREED,
-} from "../constants/vacancies.constants";
-import type { CurrentCompany, PublishError } from "../types/job-offer.types";
-import type { VacancyConditions } from "../types/vacancy-conditions.types";
-import { ConfirmDialog } from "./confirm-dialog";
+} from "../constants/job-offers.constants";
+import { JobOfferHighlights } from "./job-offer-highlights";
 import { StepActions } from "./step-actions";
-
-interface PreviewStepProps {
-  conditions: VacancyConditions;
-  company: CurrentCompany;
-  isSubmitting: boolean;
-  isPublished: boolean;
-  error: PublishError | null;
-  isEditMode?: boolean;
-  onPrevious: () => void;
-  onConfirm: () => void;
-  onFinish: () => void;
-}
+import type { PreviewStepProps } from "../types/preview-step-props.types";
+import { formatVacancyCount } from "../utils/format-vacancy-count";
 
 function formatDescription(description: string, isExpanded: boolean): string {
   const text = description.trim();
@@ -37,16 +24,17 @@ export function PreviewStep({
   conditions,
   company,
   isSubmitting,
-  isPublished,
   error,
   isEditMode,
   onPrevious,
   onConfirm,
-  onFinish,
 }: PreviewStepProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const canExpand = conditions.description.trim().length > DESCRIPTION_PREVIEW_CHARS;
   const mapsLink = conditions.mapsLink.trim();
+
+  const confirmLabel = isEditMode ? "Confirmar edición" : "Confirmar publicación";
+  const busyLabel = isEditMode ? "Guardando..." : "Publicando...";
 
   const isInternship = conditions.contractType === INTERNSHIP_CONTRACT_TYPE;
   const displaySalary =
@@ -60,9 +48,9 @@ export function PreviewStep({
         Revisa tu publicación
       </h3>
 
-      <div className="mx-auto max-w-3xl rounded-lg border border-border bg-white p-8 shadow-none">
+      <div className="mx-auto max-w-3xl rounded-lg border border-border bg-surface p-8 shadow-none">
         <div className="mb-6 flex items-center gap-4">
-          <div className="flex size-[50px] items-center justify-center rounded-lg bg-ink text-lg font-bold tracking-wider text-white">
+          <div className="flex size-12 items-center justify-center rounded-lg bg-ink text-lg font-bold tracking-wider text-surface">
             {company.initials}
           </div>
           <div>
@@ -76,19 +64,13 @@ export function PreviewStep({
           <p className="mt-1 text-sm font-bold text-ink-soft">{conditions.category}</p>
         </div>
 
-        <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
-            {conditions.modality}
-          </div>
-          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
-            {conditions.contractType}
-          </div>
-          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
-            {conditions.vacancyCount} {conditions.vacancyCount === "1" ? "vacante" : "vacantes"}
-          </div>
-          <div className="rounded-md bg-surface-soft px-4 py-2.5 text-sm font-medium text-ink-soft">
-            {displaySalary}
-          </div>
+        <div className="mb-6">
+          <JobOfferHighlights
+            modality={conditions.modality ?? ""}
+            contractType={conditions.contractType}
+            vacancies={formatVacancyCount(conditions.vacancyCount)}
+            salary={displaySalary}
+          />
         </div>
 
         <p className="mb-6 text-sm leading-relaxed break-words whitespace-pre-line text-text-secondary">
@@ -156,20 +138,13 @@ export function PreviewStep({
 
       <StepActions
         secondaryLabel="Anterior"
+        showPreviousIcon
         primaryVariant="brand"
-        primaryLabel={isSubmitting ? (isEditMode ? "Guardando..." : "Publicando...") : (isEditMode ? "Confirmar edición" : "Confirmar publicación")}
+        primaryLabel={isSubmitting ? busyLabel : confirmLabel}
         onSecondary={onPrevious}
         onPrimary={onConfirm}
         isBusy={isSubmitting}
         className="mx-auto mt-8 max-w-3xl"
-      />
-
-      <ConfirmDialog
-        isOpen={isPublished}
-        title={PUBLISHED_DIALOG_TEXT.title}
-        description={PUBLISHED_DIALOG_TEXT.description}
-        confirmLabel={PUBLISHED_DIALOG_TEXT.confirm}
-        onConfirm={onFinish}
       />
     </div>
   );

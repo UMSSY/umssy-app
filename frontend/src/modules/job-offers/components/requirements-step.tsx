@@ -5,31 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
+import { cn } from "@/lib/utils";
 import {
   FIELD_FOCUS_CLASS,
   MAX_DESCRIPTION_CHARS,
   MAX_SKILLS,
   SKILLS_CATALOG_MESSAGES,
   VACANCY_MESSAGES,
-} from "../constants/vacancies.constants";
+} from "../constants/job-offers.constants";
 import { useSkillsCatalog } from "../hooks/use-skills-catalog";
-import type {
-  SkillOption,
-  UpdateVacancyField,
-  VacancyConditions,
-  VacancyErrors,
-} from "../types/vacancy-conditions.types";
+import type { SkillOption } from "../types/skill-option.types";
 import { FieldError } from "./field-error";
 import { SkillSearchDialog } from "./skill-search-dialog";
 import { StepActions } from "./step-actions";
-
-interface RequirementsStepProps {
-  conditions: VacancyConditions;
-  errors: VacancyErrors;
-  updateField: UpdateVacancyField;
-  onPrevious: () => void;
-  onContinue: () => void;
-}
+import type { RequirementsStepProps } from "../types/requirements-step-props.types";
 
 export function RequirementsStep({
   conditions,
@@ -64,12 +53,12 @@ export function RequirementsStep({
   return (
     <div className="rounded-lg border border-border bg-surface">
       <div className="flex items-center gap-3 border-b border-border px-6 py-4">
-        <h2 className="text-[16px] font-bold text-ink">Requisitos técnicos</h2>
+        <h2 className="text-base font-bold text-ink">Requisitos técnicos</h2>
       </div>
 
       <div className="p-6">
         <div className="mb-8">
-          <Label htmlFor="description" className="mb-2 text-[12.5px] font-semibold text-ink">
+          <Label htmlFor="description" className="mb-2 text-xs font-semibold text-ink">
             Descripción del puesto <span className="text-ink-soft">*</span>
           </Label>
           <Textarea
@@ -80,11 +69,14 @@ export function RequirementsStep({
             placeholder="Buscamos un desarrollador backend..."
             aria-invalid={Boolean(errors.description)}
             aria-describedby={errors.description ? "description-error" : undefined}
-            className={`min-h-[120px] bg-white p-4 text-sm whitespace-pre-wrap text-ink ${FIELD_FOCUS_CLASS}`}
+            className={cn("min-h-30 bg-surface p-4 text-sm whitespace-pre-wrap text-ink", FIELD_FOCUS_CLASS)}
           />
           <div className="mt-1 flex justify-end">
             <span
-              className={`text-xs font-medium ${conditions.description.length >= MAX_DESCRIPTION_CHARS ? "text-danger" : "text-text-secondary"}`}
+              className={cn(
+                "text-xs font-medium",
+                conditions.description.length >= MAX_DESCRIPTION_CHARS ? "text-danger" : "text-text-secondary",
+              )}
             >
               {conditions.description.length}/{MAX_DESCRIPTION_CHARS}
             </span>
@@ -124,7 +116,7 @@ export function RequirementsStep({
                     pressed={selected}
                     disabled={!selected && isSkillLimitReached}
                     onPressedChange={() => toggleSkill(skill)}
-                    className="h-auto rounded-full px-4 py-1.5 text-sm font-medium text-text-secondary data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-white"
+                    className="h-auto rounded-full px-4 py-1.5 text-sm font-medium text-text-secondary data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-surface"
                   >
                     {skill.name}
                   </Toggle>
@@ -148,6 +140,7 @@ export function RequirementsStep({
 
       <StepActions
         secondaryLabel="Anterior"
+        showPreviousIcon
         primaryLabel="Continuar"
         onSecondary={onPrevious}
         onPrimary={onContinue}

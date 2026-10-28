@@ -15,6 +15,7 @@ function createController() {
     listByCompany: vi.fn().mockResolvedValue([]),
     getByCompanyAndId: vi.fn().mockResolvedValue({ id: 'offer-1' }),
     update: vi.fn().mockResolvedValue({ id: 'offer-1' }),
+    reopen: vi.fn().mockResolvedValue({ id: 'offer-1', status: 'Publicada' }),
     listSkillCatalog: vi.fn().mockResolvedValue([{ id: 'skill-1', name: 'Docker' }]),
   };
   return { controller: new JobOffersController(service as unknown as JobOffersService), service };
@@ -30,6 +31,14 @@ describe('JobOffersController', () => {
       createdAt: '2026-10-12T00:00:00.000Z',
     });
     expect(service.create).toHaveBeenCalledWith('company-1', request);
+  });
+
+  it('exige sesión y rol empresa para publicar una vacante', () => {
+    const handler = Object.getOwnPropertyDescriptor(JobOffersController.prototype, 'create')?.value;
+    if (!handler) throw new Error('No se encontró el handler de publicación');
+
+    expect(Reflect.getMetadata('__guards__', handler)).toEqual([JwtAuthGuard, RolesGuard]);
+    expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(['empresa']);
   });
 
   it('delega los listados y el catálogo en el servicio', async () => {
@@ -140,5 +149,35 @@ describe('JobOffersController', () => {
 
     expect(Reflect.getMetadata('__guards__', handler)).toEqual([JwtAuthGuard, RolesGuard]);
     expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(['empresa']);
+  });
+  it('delega la reapertura de una vacante de la empresa', async () => {
+    const { controller, service } = createController();
+
+    await expect(controller.reopen('company-1', 'offer-1')).resolves.toEqual({
+      id: 'offer-1',
+      status: 'Publicada',
+    });
+    expect(service.reopen).toHaveBeenCalledWith('company-1', 'offer-1');
+  });
+
+  it('exige sesión y rol empresa para reabrir una vacante', () => {
+    const handler = Object.getOwnPropertyDescriptor(JobOffersController.prototype, 'reopen')?.value;
+    if (!handler) throw new Error('No se encontró el handler de reapertura');
+
+    expect(Reflect.getMetadata('__guards__', handler)).toEqual([JwtAuthGuard, RolesGuard]);
+    expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(['empresa']);
+  });
+
+  it('rechaza un id de vacante que no es UUID al reabrir', async () => {
+    const paramTypes = Reflect.getMetadata('__routeArguments__', JobOffersController, 'reopen') as Record<
+      string,
+      { data?: string; pipes: { transform: (value: string, metadata: object) => Promise<string> }[] }
+    >;
+    const jobOfferIdParam = Object.values(paramTypes).find((param) => param.data === 'jobOfferId');
+    const [pipe] = jobOfferIdParam?.pipes ?? [];
+
+    await expect(pipe.transform('no-es-uuid', { type: 'param', data: 'jobOfferId' })).rejects.toBeInstanceOf(
+      RequestValidationException,
+    );
   });
 });

@@ -2,10 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
-import { JOB_OFFERS_QUERY_KEYS } from "../constants/vacancies.constants";
+import { JOB_OFFERS_QUERY_KEYS } from "../constants/job-offers-query-keys.constants";
 import { jobOffersService } from "../services/job-offers.service";
 
-const JOB_OFFER_DETAILS_ERROR = "No se pudieron cargar los detalles de la vacante.";
+const JOB_OFFER_DETAILS_ERROR = "No se pudo cargar la información de la vacante.";
 
 export function useJobOfferDetails(companyId: string | null, jobOfferId: string | null) {
   const query = useQuery({

@@ -48,6 +48,14 @@ export class JobOffersRepository {
     };
   }
 
+  async findStatusId(status: JobOfferStatus): Promise<string | null> {
+    const row = await this.prisma.jobOfferStatus.findUnique({
+      where: { title: status },
+      select: { id: true },
+    });
+    return row?.id ?? null;
+  }
+
   create(data: CreateJobOfferData): Promise<JobOfferCreatedRecord> {
     const { skillIds, ...jobOffer } = data;
     return this.prisma.jobOffer.create({

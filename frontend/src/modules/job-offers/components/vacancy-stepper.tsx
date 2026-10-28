@@ -1,5 +1,5 @@
 import { WorkflowSteps } from "@/shared/components/layout/workflow-steps";
-interface VacancyStepperProps { currentStep: number; }
+import type { VacancyStepperProps } from "../types/vacancy-stepper-props.types";
 const VACANCY_STEPS = [
   { id: 1, label: "Información y condiciones" },
   { id: 2, label: "Descripción y requisitos" },

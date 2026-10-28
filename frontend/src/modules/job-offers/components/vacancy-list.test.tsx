@@ -1,5 +1,6 @@
-import { act, cleanup, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { jobOffersService } from "../services/job-offers.service";
@@ -7,6 +8,7 @@ import type { JobOffer } from "../types/job-offer.types";
 import { useCompanyJobOffers } from "../hooks/use-company-job-offers";
 import { VacancyList } from "./vacancy-list";
 
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("../hooks/use-company-job-offers", () => ({
   useCompanyJobOffers: vi.fn(),
 }));
@@ -69,7 +71,7 @@ describe("VacancyList details", () => {
     vi.restoreAllMocks();
   });
 
-  it("opens details for the selected vacancy and renders all HU5 fields", async () => {
+  it("abre el detalle con su encabezado y todos los campos de HU5", async () => {
     const user = userEvent.setup();
     const getDetails = vi
       .spyOn(jobOffersService, "getByCompanyAndId")
@@ -78,26 +80,40 @@ describe("VacancyList details", () => {
     renderWithQuery(<VacancyList />);
     await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
 
-    expect(await screen.findByRole("heading", { name: "Ingeniero Backend" })).toBeInTheDocument();
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByRole("heading", { name: "Detalle de Vacante" })).toBeInTheDocument();
+    expect(await within(dialog).findByRole("heading", { name: "Ingeniero Backend" })).toBeInTheDocument();
     expect(getDetails).toHaveBeenCalledWith(COMPANY_ID, "offer-2");
-    expect(screen.getByText("Híbrido")).toBeInTheDocument();
-    expect(screen.getByText("Pasantía")).toBeInTheDocument();
-    expect(screen.getByText("2")).toBeInTheDocument();
-    expect(screen.getByText("Español, Inglés")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Abrir ubicación" })).toHaveAttribute(
+    expect(within(dialog).getByText("Sistemas")).toBeInTheDocument();
+    expect(within(dialog).getByText("Híbrido")).toBeInTheDocument();
+    expect(within(dialog).getByText("Pasantía")).toBeInTheDocument();
+    expect(within(dialog).getByText("2 vacantes")).toBeInTheDocument();
+    expect(within(dialog).getByText("A convenir")).toBeInTheDocument();
+    expect(within(dialog).getByText("Español, Inglés")).toBeInTheDocument();
+    expect(within(dialog).getByRole("link", { name: "Abrir ubicación" })).toHaveAttribute(
       "rel",
       "noopener noreferrer",
     );
-    expect(screen.getByText("Sistemas")).toBeInTheDocument();
-    expect(screen.getByText("A convenir")).toBeInTheDocument();
-    expect(screen.getByText("Backend")).toBeInTheDocument();
-    expect(screen.getByText("TypeScript")).toBeInTheDocument();
-    expect(screen.getByText("PostgreSQL")).toBeInTheDocument();
+    expect(within(dialog).getByText("Backend")).toBeInTheDocument();
+    expect(within(dialog).getByText("TypeScript")).toBeInTheDocument();
+    expect(within(dialog).getByText("PostgreSQL")).toBeInTheDocument();
 
     await user.keyboard("{Escape}");
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
     );
+  });
+
+  it("cierra el detalle con el botón Cerrar del pie", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(jobOffersService, "getByCompanyAndId").mockResolvedValue(OFFERS[1]);
+
+    renderWithQuery(<VacancyList />);
+    await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
+    await screen.findByText("TypeScript");
+
+    await user.click(screen.getByRole("button", { name: "Cerrar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 
   it("shows loading, then loads the selected vacancy", async () => {
@@ -118,31 +134,38 @@ describe("VacancyList details", () => {
     expect(await screen.findByText("TypeScript")).toBeInTheDocument();
   });
 
-  it("shows a Spanish error and allows retrying the details request", async () => {
+  it("si el detalle no se puede cargar avisa con una notificación y no deja el pop-up abierto", async () => {
     const user = userEvent.setup();
-    const getDetails = vi
-      .spyOn(jobOffersService, "getByCompanyAndId")
-      .mockRejectedValueOnce({
-        response: { data: { detail: "La vacante no existe o no pertenece a la empresa." } },
-      })
-      .mockRejectedValueOnce(new Error("Technical error"))
-      .mockResolvedValueOnce(OFFERS[1]);
+    vi.spyOn(jobOffersService, "getByCompanyAndId").mockRejectedValueOnce({
+      response: { data: { detail: "La vacante no existe o no pertenece a la empresa." } },
+    });
 
     renderWithQuery(<VacancyList />);
     await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
 
-    expect(
-      await screen.findByText("La vacante no existe o no pertenece a la empresa."),
-    ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Reintentar" }));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("La vacante no existe o no pertenece a la empresa.", {
+        position: "top-center",
+        duration: 5000,
+      }),
+    );
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "Ingeniero Backend" })).toBeInTheDocument();
+  });
 
-    expect(
-      await screen.findByText("No se pudieron cargar los detalles de la vacante."),
-    ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Reintentar" }));
+  it("usa un mensaje genérico si el servidor no explica el error", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(jobOffersService, "getByCompanyAndId").mockRejectedValueOnce(new Error("Technical error"));
 
-    expect(await screen.findByText("TypeScript")).toBeInTheDocument();
-    expect(getDetails).toHaveBeenCalledTimes(3);
+    renderWithQuery(<VacancyList />);
+    await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("No se pudo cargar la información de la vacante.", {
+        position: "top-center",
+        duration: 5000,
+      }),
+    );
   });
 
   it("renders empty optional fields and handles an extensive description", async () => {
