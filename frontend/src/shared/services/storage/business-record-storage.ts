@@ -1,7 +1,7 @@
 import { updateIndexedDb } from "./browser-indexed-db";
 
-// The read/write transaction also serializes competing tabs. If durable storage
-// is unavailable, stop before HTTP rather than lose a key after a timeout.
+// La transacción serializa también otras pestañas. Si falla la persistencia,
+// se detiene el envío para conservar la identidad del próximo reintento.
 export function updateBusinessRecord<T>(
   key: string,
   update: (current: T | null) => T | null,

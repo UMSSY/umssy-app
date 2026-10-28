@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import {
   cleanup,
   fireEvent,
@@ -17,6 +18,8 @@ import {
 } from "../services/mentor-participation.service";
 import { ParticipationView } from "./participation-view";
 import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
+
+vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
 const drafts = vi.hoisted(() => new Map<string, unknown>());
@@ -239,16 +242,17 @@ describe("ParticipationView HU-MEN-06", () => {
   });
 
   it("muestra un éxito confirmado durante cuatro segundos y permite cerrarlo", async () => {
-    const timer = vi.spyOn(window, "setTimeout");
     renderWithQuery(<ParticipationView activated />);
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      "Participación activada correctamente",
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith(
+        "Participación activada correctamente",
+        {
+          id: "mentor-participation-feedback",
+          duration: 4000,
+          closeButton: true,
+        },
+      ),
     );
-    expect(timer).toHaveBeenCalledWith(expect.any(Function), 4000);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Cerrar notificación" }),
-    );
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("un fallo HU7 no oculta el mentor activo ni impide su salida HU6", async () => {

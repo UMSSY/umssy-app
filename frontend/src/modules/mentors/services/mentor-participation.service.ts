@@ -1,7 +1,7 @@
 import {
   clearMentorIntakeIntentions,
   withMentorIntakeKey,
-} from "@/modules/mentorship/services/mentor-intake-idempotency";
+} from "@/shared/services/mentor-intake-idempotency";
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 

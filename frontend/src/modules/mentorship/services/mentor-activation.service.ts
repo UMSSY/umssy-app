@@ -2,7 +2,7 @@ import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { ActivateMentorPayload } from "../types/activate-mentor-payload.types";
 import type { ActivateMentorResponse } from "../types/activate-mentor-response.types";
-import { withMentorIntakeKey } from "./mentor-intake-idempotency";
+import { withMentorIntakeKey } from "@/shared/services/mentor-intake-idempotency";
 
 export async function activateMentor(
   payload: ActivateMentorPayload,

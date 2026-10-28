@@ -5,10 +5,10 @@ import {
   readSessionStorage,
   removeSessionStorage,
 } from "@/shared/services/storage/browser-session-storage";
-import type { MentorIntakePreferences } from "../types/mentor-intake-preferences.types";
-import type { MentorIntakeIntention } from "../types/mentor-intake-intention.types";
-import type { MentorIntakeOperation } from "../types/mentor-intake-operation.types";
-import type { LegacyMentorIntakeIntention } from "../types/legacy-mentor-intake-intention.types";
+import type { MentorIntakePreferences } from "@/shared/types/mentor-intake-preferences.types";
+import type { MentorIntakeIntention } from "@/shared/types/mentor-intake-intention.types";
+import type { MentorIntakeOperation } from "@/shared/types/mentor-intake-operation.types";
+import type { LegacyMentorIntakeIntention } from "@/shared/types/legacy-mentor-intake-intention.types";
 
 function currentSubject(): string {
   try {

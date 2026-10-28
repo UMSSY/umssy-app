@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -70,8 +71,11 @@ export function ParticipationView({
 
   useEffect(() => {
     if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(null), 4000);
-    return () => window.clearTimeout(timer);
+    toast.success(notice, {
+      id: "mentor-participation-feedback",
+      duration: 4000,
+      closeButton: true,
+    });
   }, [notice]);
 
   const deactivate = async () => {
@@ -128,21 +132,6 @@ export function ParticipationView({
             Reintentar solicitud
           </Button>
         </Alert>
-      )}
-      {notice && (
-        <div
-          role="status"
-          className="flex flex-wrap items-center gap-3 rounded-lg border p-3"
-        >
-          <span>{notice}</span>
-          <Button
-            variant="ghost"
-            onClick={() => setNotice(null)}
-            aria-label="Cerrar notificación"
-          >
-            ×
-          </Button>
-        </div>
       )}
       {(isActive || hasHistory) && (
         <ParticipationOverview
