@@ -6,20 +6,31 @@ import {
   OnGatewayInit,
   WebSocketGateway,
   WebSocketServer,
+  SubscribeMessage,
+  ConnectedSocket,
+  MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../../../common/services/session.service.js';
 import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
+import { MessageService } from '../services/message.service.js';
+
+interface SocketMessagePayload {
+  conversationId?: string;
+  content?: string;
+}
 
 @WebSocketGateway({
   namespace: '/chat',
   cors: {
-    origin: '*', 
+    origin: '*',
   },
 })
-export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -30,36 +41,45 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private readonly sessionService: SessionService,
     private readonly chatService: ChatService,
     private readonly userPresenceService: UserPresenceService,
+    private readonly messageService: MessageService,
   ) {}
 
   afterInit(server: Server) {
     server.use(async (socket: Socket, next) => {
       try {
         const token = socket.handshake.auth?.token;
-        console.log("[Socket] Intento de conexión. Token recibido:", token ? "SÍ" : "NO");
+        console.log(
+          '[Socket] Intento de conexión. Token recibido:',
+          token ? 'SÍ' : 'NO',
+        );
 
         if (!token) {
           return next(new Error('unauthorized'));
         }
 
         const payload = await this.jwtService.verifyAsync(token);
-        console.log("[Socket] Token válido. Payload:", payload);
+        console.log('[Socket] Token válido. Payload:', payload);
 
-        const user = await this.sessionService.getAuthenticatedUser(payload.sub);
+        const user = await this.sessionService.getAuthenticatedUser(
+          payload.sub,
+        );
+
         if (!user) {
-            console.log("[Socket] Usuario no encontrado en la DB");
+          console.log('[Socket] Usuario no encontrado en la DB');
           return next(new Error('unauthorized'));
         }
 
         socket.data.user = user;
-        console.log("[Socket] Usuario autenticado:", user.id);
+        console.log('[Socket] Usuario autenticado:', user.id);
         next();
       } catch (error) {
         this.logger.warn(
-          `Intento de conexión rechazado: ${error instanceof Error ? error.message : String(error)}`,
+          `Intento de conexión rechazado: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
         );
         console.log(
-          "[Socket] Error en handshake:",
+          '[Socket] Error en handshake:',
           error instanceof Error ? error.message : String(error),
         );
         next(new Error('unauthorized'));
@@ -69,24 +89,27 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   async handleConnection(client: Socket) {
     const user = client.data.user;
+
     if (!user) {
       client.disconnect();
       return;
     }
 
     try {
-      const conversationIds = await this.chatService.getActiveConversationIds(user.id);
+      const conversationIds =
+        await this.chatService.getActiveConversationIds(user.id);
+
       for (const convId of conversationIds) {
         await client.join(convId);
       }
 
       await this.userPresenceService.markOnline(user.id);
-      
-     
       this.server.emit('presence:online', { userId: user.id });
-
     } catch (error) {
-      this.logger.error(`Error inicializando socket para el usuario ${user.id}`, error);
+      this.logger.error(
+        `Error inicializando socket para el usuario ${user.id}`,
+        error instanceof Error ? error.stack : String(error),
+      );
     }
   }
 
@@ -94,8 +117,109 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const user = client.data.user;
     if (!user) return;
 
-    
-    await this.userPresenceService.markOffline(user.id);
-    this.server.emit('presence:offline', { userId: user.id, lastSeenAt: new Date() });
+    try {
+      await this.userPresenceService.markOffline(user.id);
+      this.server.emit('presence:offline', {
+        userId: user.id,
+        lastSeenAt: new Date(),
+      });
+    } catch (error) {
+      this.logger.error(
+        'Error actualizando la presencia del usuario',
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
+
+  // NUEVO: unirse a una conversación seleccionada.
+  @SubscribeMessage('conversation:join')
+  async joinConversation(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: SocketMessagePayload,
+  ) {
+    const user = client.data.user;
+
+    if (!user || typeof body?.conversationId !== 'string') {
+      return {
+        ok: false,
+        error: 'Datos de conversación inválidos',
+      };
+    }
+
+    try {
+      const conversationIds =
+        await this.chatService.getActiveConversationIds(user.id);
+
+      if (!conversationIds.includes(body.conversationId)) {
+        return {
+          ok: false,
+          error: 'No tienes acceso a esta conversación',
+        };
+      }
+
+      await client.join(body.conversationId);
+      return { ok: true };
+    } catch (error) {
+      this.logger.error(
+        'Error al unirse a la conversación',
+        error instanceof Error ? error.stack : String(error),
+      );
+
+      return {
+        ok: false,
+        error: 'No se pudo abrir la conversación',
+      };
+    }
+  }
+
+  // NUEVO: enviar y distribuir mensajes en tiempo real.
+  @SubscribeMessage('message:send')
+  async sendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: SocketMessagePayload,
+  ) {
+    const user = client.data.user;
+
+    if (
+      !user ||
+      typeof body?.conversationId !== 'string' ||
+      typeof body?.content !== 'string'
+    ) {
+      return {
+        ok: false,
+        error: 'Datos del mensaje inválidos',
+      };
+    }
+
+    try {
+      const message = await this.messageService.send({
+        conversationId: body.conversationId,
+        senderId: user.id,
+        content: body.content,
+      });
+
+      this.server
+        .to(body.conversationId)
+        .emit('message:new', message);
+
+      return {
+        ok: true,
+        message,
+      };
+    } catch (error) {
+      this.logger.warn(
+        `No se pudo enviar mensaje: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+
+      return {
+        ok: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'No se pudo enviar el mensaje',
+      };
+    }
   }
 }
