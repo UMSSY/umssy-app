@@ -46,7 +46,10 @@ export function PublicHeader() {
 
   return (
     <>
-      <RequestAccessHeader onLinkClick={handleLinkClick} />
+      <RequestAccessHeader
+        appearance="onboarding"
+        onLinkClick={handleLinkClick}
+      />
 
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
@@ -61,7 +64,7 @@ export function PublicHeader() {
           <AlertDialogFooter>
             <AlertDialogCancel
               type="button"
-              className="h-10 rounded-md px-5 text-sm 2xl:h-12"
+              className="h-11 rounded-md px-5 text-sm"
             >
               Cancelar
             </AlertDialogCancel>
@@ -69,7 +72,7 @@ export function PublicHeader() {
             <AlertDialogAction
               type="button"
               onClick={handleLeave}
-              className="h-10 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover 2xl:h-12"
+              className="h-11 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
             >
               Salir
             </AlertDialogAction>

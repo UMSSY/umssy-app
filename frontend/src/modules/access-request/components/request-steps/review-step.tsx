@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Check, Hourglass } from "lucide-react";
 import { cn } from "cn";
+import { PageHeading } from "@/shared/components/layout/page-heading";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
 import { formatSubmissionDate } from "../../utils/format-submission-date";
 import type { StageState, Stage } from "../../types/review-step.types";
@@ -63,8 +64,8 @@ export function ReviewStep() {
 
   return (
     <div className="flex w-full flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        {isRejected ? (
+      {isRejected ? (
+        <div className="flex flex-col gap-2">
           <p className="text-sm text-text-secondary">
             Solicitud de acceso
             <span aria-hidden="true"> / </span>
@@ -72,18 +73,17 @@ export function ReviewStep() {
               Revisión de la carrera
             </span>
           </p>
-        ) : null}
 
-        <h1 className="text-3xl font-extrabold tracking-tight text-ink 2xl:text-4xl">
-          Revisión de la carrera
-        </h1>
-
-        {!isRejected ? (
-          <p className="max-w-155 text-base text-text-secondary 2xl:text-lg">
-            {`Estamos revisando tu solicitud. Te avisaremos a ${values.email.trim()} cuando tengamos novedades.`}
-          </p>
-        ) : null}
-      </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-ink 2xl:text-4xl">
+            Revisión de la carrera
+          </h1>
+        </div>
+      ) : (
+        <PageHeading
+          title="Revisión de la carrera"
+          description={`Estamos revisando tu solicitud. Te avisaremos a ${values.email.trim()} cuando tengamos novedades.`}
+        />
+      )}
 
       {isRejected ? (
         <RequestStatusDetails
@@ -95,20 +95,20 @@ export function ReviewStep() {
           rejectionReason={submission.rejectionReason}
         />
       ) : (
-        <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-5">
-          <p className="text-[12.5px] font-semibold text-text-secondary 2xl:text-base">
+        <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-5">
+          <p className="text-xs font-semibold text-text-secondary">
             Tu código de solicitud
           </p>
 
-          <p className="text-3xl font-extrabold tracking-wide text-ink 2xl:text-4xl">
+          <p className="text-3xl font-extrabold tracking-wide text-ink">
             {submission.requestCode}
           </p>
 
-          <p className="text-[12.5px] text-text-secondary 2xl:text-base">
+          <p className="text-xs text-text-secondary">
             Guárdalo: lo necesitarás para consultar el estado de tu solicitud.
           </p>
 
-          <p className="text-sm font-semibold text-ink 2xl:text-base">
+          <p className="text-sm font-semibold text-ink">
             {`Estado: ${statusLabel}`}
           </p>
         </div>
@@ -117,7 +117,7 @@ export function ReviewStep() {
       {!isRejected ? (
         <ol
           aria-label="Línea de tiempo de la solicitud"
-          className="flex flex-col rounded-xl border border-border bg-surface p-5"
+          className="flex flex-col rounded-lg border border-border bg-surface p-5"
         >
           {stages.map((stage, index) => (
             <li
@@ -160,7 +160,7 @@ export function ReviewStep() {
               <div className="pb-2">
                 <p
                   className={cn(
-                    "text-sm font-semibold 2xl:text-base",
+                    "text-sm font-semibold",
                     stage.state === "current"
                       ? "text-ink"
                       : "text-ink-soft",
@@ -172,7 +172,7 @@ export function ReviewStep() {
                   </span>
                 </p>
 
-                <p className="text-[12.5px] text-text-secondary 2xl:text-base">
+                <p className="text-xs text-text-secondary">
                   {stage.detail}
                 </p>
               </div>

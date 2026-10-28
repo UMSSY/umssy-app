@@ -280,7 +280,9 @@ describe("PublicHeader", () => {
     });
   });
 
-  it("mientras se envía el clic no abre el diálogo ni llama a push", async () => {
+  it.each(["Iniciar sesión", "Ir al inicio de UMSSY"])(
+    "mientras se envía bloquea el enlace %s sin abrir el diálogo ni llamar a push",
+    async (linkName) => {
     let resolve!: (value: ApiResult<{ id: string }>) => void;
 
     create.mockReturnValue(
@@ -304,7 +306,7 @@ describe("PublicHeader", () => {
     });
 
     const link = screen.getByRole("link", {
-      name: "Iniciar sesión",
+      name: linkName,
     });
 
     const watcher = watchPrevented();
@@ -325,7 +327,8 @@ describe("PublicHeader", () => {
         data: { id: "draft-1" },
       });
     });
-  });
+    },
+  );
 
   it("no usa el término egresado en los textos nuevos", async () => {
     const user = userEvent.setup();
@@ -363,4 +366,53 @@ describe("PublicHeader", () => {
       }),
     ).toHaveAttribute("href", "/login");
   });
+  it("el logo permite volver al inicio sin datos y conserva la cabecera actual del formulario", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    const link = screen.getByRole("link", { name: "Ir al inicio de UMSSY" });
+    const watcher = watchPrevented();
+
+    expect(link).toHaveAttribute("href", "/");
+    expect(screen.getByRole("banner")).toHaveClass("sticky", "top-0", "bg-ink");
+
+    try {
+      await user.click(link);
+    } finally {
+      watcher.stop();
+    }
+
+    expect(watcher.state.prevented).toBe(false);
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("el logo confirma la salida con datos, permite cancelar y conserva el destino al salir", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    type(/^Nombres/, "Ana");
+    const link = screen.getByRole("link", { name: "Ir al inicio de UMSSY" });
+    const watcher = watchPrevented();
+
+    try {
+      await user.click(link);
+    } finally {
+      watcher.stop();
+    }
+
+    expect(watcher.state.prevented).toBe(true);
+    let dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(screen.getByLabelText(/^Nombres/)).toHaveValue("Ana");
+    expect(push).not.toHaveBeenCalled();
+
+    await user.click(link);
+    dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: "Salir" }));
+
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(push).toHaveBeenCalledWith("/");
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+  });
+
 });

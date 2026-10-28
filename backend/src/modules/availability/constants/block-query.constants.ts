@@ -7,3 +7,15 @@ export const BLOCK_WITH_ACTIVE_APPOINTMENTS_INCLUDE = {
     select: { status: { select: { title: true } } },
   },
 } satisfies Prisma.AvailabilityBlockInclude;
+
+export const BLOCK_WITH_APPOINTMENT_DETAIL_INCLUDE = {
+  appointments: {
+    where: { status: { title: { in: ACTIVE_APPOINTMENT_STATUSES } } },
+    select: {
+      id: true,
+      status: { select: { title: true } },
+      student: { select: { id: true, firstName: true, lastName: true } },
+      orientationType: { select: { id: true, name: true } },
+    },
+  },
+} satisfies Prisma.AvailabilityBlockInclude;
