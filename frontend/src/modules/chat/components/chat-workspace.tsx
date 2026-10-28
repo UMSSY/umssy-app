@@ -8,15 +8,19 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { useMessagingUi } from "../contexts/messaging-ui-context";
+
 import type { ChatWorkspaceProps } from "../types/chat-workspace-props.types";
 import type { Conversation } from "../types/conversation.types";
+import type { ConnectionRequest } from "../types/connection-request.types";
 import type { User } from "../types/user.types";
 
 import { useConversations } from "../hooks/use-conversations";
 import { useMessages, messagesQueryKey } from "../hooks/use-messages";
 import { useSendConnectionRequest } from "../hooks/use-send-connection-request";
+import { useReceivedConnectionRequests } from "../hooks/use-received-connection-requests";
 
 import { ConversationList } from "./conversation-list";
+import { ConnectionRequestDetail } from "./connection-request-detail";
 import { EmptyChatState } from "./empty-chat-state";
 import { ContactSearchModal } from "./contact-search-modal";
 import { ChatRoom } from "./chat-room";
@@ -34,24 +38,44 @@ export function ChatWorkspace({
 }: ChatWorkspaceProps) {
   const currentUserId = getCurrentSessionUserId();
 
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] =
+    useState(false);
 
-  const [selectedContactForRequest, setSelectedContactForRequest] =
-    useState<User | null>(null);
+  const [
+    selectedContactForRequest,
+    setSelectedContactForRequest,
+  ] = useState<User | null>(null);
 
-  const [requestError, setRequestError] = useState<string | null>(null);
-  const [requestSuccess, setRequestSuccess] = useState<string | null>(null);
+  const [selectedRequestId, setSelectedRequestId] =
+    useState<string | null>(null);
 
-  const [isSendingLocally, setIsSendingLocally] = useState(false);
-  const [dismissedError, setDismissedError] = useState(false);
+  const [requestError, setRequestError] =
+    useState<string | null>(null);
+
+  const [requestSuccess, setRequestSuccess] =
+    useState<string | null>(null);
+
+  const [isSendingLocally, setIsSendingLocally] =
+    useState(false);
+
+  const [dismissedError, setDismissedError] =
+    useState(false);
 
   const ui = useMessagingUi();
 
   const isSending = ui?.isSending ?? isSendingLocally;
-  const setIsSending = ui?.setIsSending ?? setIsSendingLocally;
+  const setIsSending =
+    ui?.setIsSending ?? setIsSendingLocally;
 
   const queryClient = useQueryClient();
   const sendRequestMutation = useSendConnectionRequest();
+
+  const {
+    data: receivedRequests = [],
+    isLoading: isLoadingRequests,
+    isError: isRequestsError,
+    refetch: retryRequests,
+  } = useReceivedConnectionRequests();
 
   const {
     conversations,
@@ -81,16 +105,35 @@ export function ChatWorkspace({
     isError: isMessagesError,
     isFetchNextPageError,
     refetch: retryMessages,
-  } = useMessages(selectedId);
+  } = useMessages(selectedRequestId ? null : selectedId);
 
-  const showConnectionDialog = isError && !dismissedError;
+  const selectedRequest =
+    receivedRequests.find(
+      (request) => request.id === selectedRequestId,
+    ) ?? null;
+
+  const hasSelectedItem = Boolean(
+    selectedRequest || selectedId,
+  );
+
+  const showConnectionDialog =
+    isError && !dismissedError;
 
   const handleBackToList = () => {
+    setSelectedRequestId(null);
     clearSelectedConversation();
   };
 
   const handleSelectChat = (conversation: Conversation) => {
+    setSelectedRequestId(null);
     handleSelectConversation(conversation);
+  };
+
+  const handleSelectRequest = (
+    request: ConnectionRequest,
+  ) => {
+    clearSelectedConversation();
+    setSelectedRequestId(request.id);
   };
 
   const handleStartNewChat = () => {
@@ -102,7 +145,9 @@ export function ChatWorkspace({
     setIsSearchModalOpen(true);
   };
 
-  const handleStartChatWithContact = (contactUser: User) => {
+  const handleStartChatWithContact = (
+    contactUser: User,
+  ) => {
     if (activeFilter !== "all") {
       setActiveFilter("all");
     }
@@ -115,7 +160,7 @@ export function ChatWorkspace({
       findExistingConversationByContact(contactUser.id);
 
     if (existingConversation) {
-      handleSelectConversation(existingConversation);
+      handleSelectChat(existingConversation);
       return;
     }
 
@@ -131,7 +176,6 @@ export function ChatWorkspace({
     }
 
     const contact = selectedContactForRequest;
-
     setRequestError(null);
 
     try {
@@ -163,14 +207,13 @@ export function ChatWorkspace({
   const handleSendMessage = async (
     content: string,
   ): Promise<void> => {
-    if (!selectedId || isSending) {
+    if (!selectedId || selectedRequestId || isSending) {
       throw new Error(
         "No hay una conversación seleccionada o ya se está enviando un mensaje.",
       );
     }
 
     const conversationId = selectedId;
-
     setIsSending(true);
 
     try {
@@ -210,7 +253,7 @@ export function ChatWorkspace({
         className={cn(
           "h-full shrink-0 overflow-hidden",
           isCompact ? "w-full" : "w-80",
-          selectedId
+          hasSelectedItem
             ? isCompact
               ? "hidden"
               : "hidden md:block"
@@ -220,18 +263,28 @@ export function ChatWorkspace({
         {isCompact && isError ? (
           <ChatErrorState
             message="No pudimos cargar tus conversaciones."
-            onRetry={() => void handleRetryConversations()}
+            onRetry={() => {
+              void handleRetryConversations();
+            }}
           />
         ) : (
           <ConversationList
             conversations={conversations}
+            connectionRequests={receivedRequests}
             selectedId={selectedId}
+            selectedRequestId={selectedRequestId}
             isLoading={isLoading}
             isError={isError}
+            isLoadingRequests={isLoadingRequests}
+            isRequestsError={isRequestsError}
+            onRetryRequests={() => {
+              void retryRequests();
+            }}
             hasMore={hasMore}
             activeFilter={activeFilter}
             searchQuery={searchQuery}
             onSelectConversation={handleSelectChat}
+            onSelectRequest={handleSelectRequest}
             onFilterChange={setActiveFilter}
             onSearchChange={setSearchQuery}
             onLoadMore={loadMore}
@@ -243,14 +296,19 @@ export function ChatWorkspace({
       <main
         className={cn(
           "h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface",
-          !selectedId
-            ? isCompact
+          hasSelectedItem
+            ? "flex"
+            : isCompact
               ? "hidden"
-              : "hidden md:flex"
-            : "flex",
+              : "hidden md:flex",
         )}
       >
-        {selectedConversation ? (
+        {selectedRequest ? (
+          <ConnectionRequestDetail
+            request={selectedRequest}
+            onBack={handleBackToList}
+          />
+        ) : selectedConversation ? (
           <ChatRoom
             isCompact={isCompact}
             key={selectedConversation.id}
