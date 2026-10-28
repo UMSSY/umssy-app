@@ -5,4 +5,5 @@ export interface TimeSelectProps {
   invalid?: boolean;
   describedBy?: string;
   disabled?: boolean;
+  isOptionHidden?: (time: string) => boolean;
 }

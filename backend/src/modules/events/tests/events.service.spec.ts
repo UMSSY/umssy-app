@@ -1,3 +1,4 @@
+import { EventsRepository } from '../repositories/events.repository.js';
 import { EventNotFoundException } from '../exceptions/event-not-found.exception.js';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { EventsService } from '../services/events.service.js';
@@ -16,7 +17,11 @@ function buildRecord(): EventWithRelations {
     statusId: 'status-1',
     instructorName: null,
     modalityId: 'modality-1',
-    category: { id: 'cat-1', name: 'Tecnologia' },
+    supportThreshold: null,
+    votingDeadline: null,
+    status: { title: 'Publicado' },
+    origin: { title: 'Institucional' },
+    category: { id: 'cat-1', namee: 'Tecnologia' },
     _count: { registrations: 3 },
   };
 }
@@ -30,7 +35,10 @@ describe('EventsService', () => {
 
   beforeEach(() => {
     repositoryMock = { findAndCount: vi.fn(), findById: vi.fn() };
-    service = new EventsService(repositoryMock as never);
+    service = new EventsService(new EventsRepository({} as never));
+    vi.spyOn(service, 'findAndCount').mockImplementation(repositoryMock.findAndCount);
+    vi.spyOn(service, 'findById').mockImplementation(repositoryMock.findById);
+    vi.spyOn(service, 'expireOverdueProposals').mockResolvedValue(0);
   });
 
   it('returns formatted list with offset, totalPages and items', async () => {
@@ -79,6 +87,7 @@ describe('EventsService', () => {
       statusId: 'status-uuid',
       isPublishedOnly: false,
       search: 'workshop',
+      userId: undefined,
       skip: 10,
       take: 5,
     });
@@ -106,6 +115,7 @@ describe('EventsService', () => {
       statusId: undefined,
       isPublishedOnly: true,
       search: 'Node',
+      userId: undefined,
       skip: 10,
       take: 10,
     });
@@ -134,6 +144,16 @@ describe('EventsService', () => {
     repositoryMock.findById.mockResolvedValue(null);
     await expect(service.findOne('missing')).rejects.toBeInstanceOf(
       EventNotFoundException,
+    );
+  });
+
+  it('passes the authenticated userId to the repository on list', async () => {
+    repositoryMock.findAndCount.mockResolvedValue({ items: [], total: 0 });
+
+    await service.findAll({ page: 1, limit: 10 }, 'user-1');
+
+    expect(repositoryMock.findAndCount).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'user-1' }),
     );
   });
 });

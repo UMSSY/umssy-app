@@ -51,7 +51,7 @@ export class ProfileService {
     return this.cityCatalogService.listCities();
   }
 
-  private async ensureProfileExists(userId: string): Promise<void> {
+  async ensureProfileExists(userId: string): Promise<void> {
     const record = await this.profileRepository.findByUserId(userId);
 
     if (!record) {

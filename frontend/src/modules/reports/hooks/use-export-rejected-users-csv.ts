@@ -4,12 +4,13 @@ import { useCallback } from "react";
 import { REJECTED_USERS_CSV_FALLBACK_NAME } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
 import type { AcademicPeriod } from "../types/registered-user.types";
+import type { RoleTag } from "@/modules/auth";
 import { useExportReportCsv } from "./use-export-report-csv";
 
-export function useExportRejectedUsersCsv(period?: AcademicPeriod, search?: string) {
+export function useExportRejectedUsersCsv(userType?: RoleTag, period?: AcademicPeriod, search?: string) {
   const exportReport = useCallback(
-    () => reportsService.exportRejectedUsersCsv({ period, search }),
-    [period, search],
+    () => reportsService.exportRejectedUsersCsv({ userType, period, search }),
+    [userType, period, search],
   );
 
   return useExportReportCsv(exportReport, REJECTED_USERS_CSV_FALLBACK_NAME);

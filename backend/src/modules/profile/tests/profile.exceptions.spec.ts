@@ -32,6 +32,7 @@ describe('profile exceptions', () => {
     expect(status).toHaveBeenCalledWith(404);
     expect(json).toHaveBeenCalledWith({
       statusCode: 404,
+      code: 'PROFILE_NOT_FOUND',
       data: null,
       detail: 'User profile not found',
       ok: false,

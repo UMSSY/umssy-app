@@ -30,6 +30,7 @@ describe('toAccessRequestListItem', () => {
       documentType: 'academic_diploma',
       submittedAt: '2026-10-05T12:00:00.000Z',
       status: 'pending',
+      validation: null,
     });
     expect(Object.keys(item)).not.toContain('idCardNumber');
   });

@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
+import { AuditEventsModule } from '../audit-events/audit-events.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { FilesModule } from '../files/files.module.js';
 import { MailModule } from '../mail/mail.module.js';
 import { AccessRequestsController } from './controllers/access-requests.controller.js';
+import { AccessRequestAutomationController } from './controllers/access-request-automation.controller.js';
 import { AccountActivationController } from './controllers/account-activation.controller.js';
 import { AccessRequestsService } from './services/access-requests.service.js';
 import { AccountActivationService } from './services/account-activation.service.js';
@@ -13,10 +15,12 @@ import { RejectionNotificationService } from './services/rejection-notification.
 import { ActivationOtpService } from './services/activation-otp.service.js';
 import { MailServiceSender } from './mail/mail-service-sender.js';
 import { MAIL_SENDER } from './mail/mail-sender.js';
+import { DocumentValidationRepository } from './repositories/document-validation.repository.js';
+import { AutomaticValidationService } from './services/automatic-validation.service.js';
 
 @Module({
-  imports: [AuthModule, FilesModule, MailModule],
-  controllers: [AccessRequestsController, AccountActivationController],
+  imports: [AuthModule, FilesModule, MailModule, AuditEventsModule],
+  controllers: [AccessRequestAutomationController, AccessRequestsController, AccountActivationController],
   providers: [
     AccessRequestsService,
     AccessRequestsRepository,
@@ -25,8 +29,10 @@ import { MAIL_SENDER } from './mail/mail-sender.js';
     ActivationOtpRepository,
     ActivationOtpService,
     RejectionNotificationService,
+    DocumentValidationRepository,
+    AutomaticValidationService,
     { provide: MAIL_SENDER, useClass: MailServiceSender },
   ],
-  exports: [AccessRequestsService],
+  exports: [AccessRequestsService, AutomaticValidationService],
 })
 export class AccessRequestsModule {}

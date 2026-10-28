@@ -184,7 +184,7 @@ describe('AccessRequestsService: detalle y documento', () => {
 
     const detail = await service.getDetail('id-1', 'admin-1');
 
-    expect(repository.markInReview).toHaveBeenCalledWith('id-1', 'admin-1');
+    expect(repository.markInReview).toHaveBeenCalledWith('id-1', 'admin-1', expect.any(Function));
     expect(detail.status).toBe('in_review');
     expect(detail.history.reviewedBy).toBe('Bo Admin');
   });

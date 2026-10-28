@@ -11,3 +11,4 @@ export * from './request-code-generation.exception.js';
 export * from './request-document-not-found.exception.js';
 export * from './request-not-in-review.exception.js';
 export * from './activation.exceptions.js';
+export * from './approval-not-revertible.exception.js';

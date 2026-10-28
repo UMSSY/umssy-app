@@ -2,6 +2,7 @@ import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { skillsAnalysisService } from "@/modules/matching/services/skills-analysis.service";
 import { workExperienceService } from "../services/work-experience.service";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
 import type { WorkExperiencePayload } from "../types/work-experience-payload.types";
@@ -13,6 +14,12 @@ vi.mock("../services/work-experience.service", () => ({
     createWorkExperience: vi.fn(),
     updateWorkExperience: vi.fn(),
     deleteWorkExperience: vi.fn(),
+  },
+}));
+
+vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
+  skillsAnalysisService: {
+    analyzeExperience: vi.fn().mockResolvedValue({ experienceId: "experience-1", skills: [], processingTimeMs: 0 }),
   },
 }));
 
@@ -153,5 +160,47 @@ describe("WorkExperienceView flow", () => {
     expect(workExperienceService.createWorkExperience).toHaveBeenCalledTimes(1);
     expect(screen.getByText("Asistente de laboratorio")).toBeInTheDocument();
     expect(screen.queryByText("Practicante")).not.toBeInTheDocument();
+  }, 20_000);
+
+  it("shows the detected skills with the analysis time after saving (AC-01.8)", async () => {
+    vi.mocked(skillsAnalysisService.analyzeExperience).mockResolvedValueOnce({
+      experienceId: "experience-1",
+      skills: [
+        { id: "skill-1", name: "Python" },
+        { id: "skill-2", name: "Scrum" },
+      ],
+      processingTimeMs: 420,
+    });
+    const user = userEvent.setup();
+    render(<WorkExperienceView />);
+    await screen.findByText("Aún no registraste experiencia laboral.");
+
+    await addExperience(user, {
+      companyName: "Synapse Labs",
+      position: "Desarrolladora web junior",
+      startDate: "2025-03-01",
+    });
+
+    expect(await screen.findByText("Habilidades detectadas automáticamente")).toBeInTheDocument();
+    expect(screen.getByText("Python")).toBeInTheDocument();
+    expect(screen.getByText("Scrum")).toBeInTheDocument();
+    expect(screen.getByText("Análisis completado en 0.42 s")).toBeInTheDocument();
+    expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledWith("experience-1", null);
+  }, 20_000);
+
+  it("saves an experience without detected skills and shows no tags (AC-01.9)", async () => {
+    const user = userEvent.setup();
+    render(<WorkExperienceView />);
+    await screen.findByText("Aún no registraste experiencia laboral.");
+
+    await addExperience(user, {
+      companyName: "Synapse Labs",
+      position: "Desarrolladora web junior",
+      startDate: "2025-03-01",
+    });
+
+    await waitFor(() => expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledTimes(1));
+    expect(screen.queryByText("Habilidades detectadas automáticamente")).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   }, 20_000);
 });
