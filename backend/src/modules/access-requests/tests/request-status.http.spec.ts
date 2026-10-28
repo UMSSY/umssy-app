@@ -14,6 +14,8 @@ import { AccessRequestsRepository } from '../repositories/access-requests.reposi
 import { AccessRequestsService } from '../services/access-requests.service.js';
 import { ActivationOtpService } from '../services/activation-otp.service.js';
 import { RejectionNotificationService } from '../services/rejection-notification.service.js';
+import { AuditEventRecorderService } from '../../audit-events/services/audit-event-recorder.service.js';
+import { DocumentValidationRepository } from '../repositories/document-validation.repository.js';
 
 const REQUEST_CODE = 'SOL-2026-0001';
 const EMAIL = 'ana@example.com';
@@ -45,6 +47,8 @@ describe('Consulta HTTP del estado de una solicitud', () => {
         { provide: FilesService, useValue: {} },
         { provide: ActivationOtpService, useValue: {} },
         { provide: RejectionNotificationService, useValue: {} },
+        { provide: AuditEventRecorderService, useValue: {} },
+        { provide: DocumentValidationRepository, useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -153,6 +157,7 @@ describe('Consulta HTTP del estado de una solicitud', () => {
 
     expect(missingCode.body).toEqual({
       statusCode: 404,
+      code: 'ACCESS_REQUEST_NOT_FOUND',
       data: null,
       detail: 'La solicitud de acceso no existe',
       ok: false,
