@@ -7,7 +7,7 @@ import {
   readMentorEligibility,
 } from './mentor-capacity.queries.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
-import { withMentorIntake } from './mentor-intake-policy.js';
+import { MentorIntakeRepository } from './mentor-intake.repository.js';
 
 export interface MentorParticipationRequest {
   id: string;
@@ -24,8 +24,10 @@ const fields = Prisma.sql`id, user_id AS "userId", status, queued_at AS "queuedA
   orientation_type_ids AS "orientationTypeIds"`;
 
 @Injectable()
-export class MentorParticipationRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class MentorParticipationRepository extends MentorIntakeRepository {
+  constructor(prisma: PrismaService) {
+    super(prisma);
+  }
 
   private async validatePreferences(
     tx: Prisma.TransactionClient,
@@ -48,22 +50,6 @@ export class MentorParticipationRepository {
     return (
       areas === technicalAreaIds.length &&
       orientations === orientationTypeIds.length
-    );
-  }
-
-  withIntake<T>(
-    userId: string,
-    key: string,
-    preferences: { technicalAreaIds: string[]; orientationTypeIds: string[] },
-    action: (tx: Prisma.TransactionClient) => Promise<T>,
-  ) {
-    return withMentorIntake(
-      this.prisma,
-      userId,
-      'REQUEST',
-      key,
-      preferences,
-      action,
     );
   }
 

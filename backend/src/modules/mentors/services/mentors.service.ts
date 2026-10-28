@@ -1,4 +1,6 @@
+import { withMentorIntake } from './mentor-intake.service.js';
 import { Injectable } from '@nestjs/common';
+import { MentorParticipationException } from '../exceptions/mentor-participation.exception.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 import {
   AlreadyMentorException,
@@ -235,8 +237,10 @@ export class MentorsService {
     tx?: Prisma.TransactionClient,
   ): Promise<{ id: string }> {
     if (key)
-      return this.mentorsRepository.withIntake(
+      return withMentorIntake(
+        this.mentorsRepository,
         userId,
+        'ACTIVATE',
         key,
         data,
         (transaction) => this.activate(userId, data, undefined, transaction),
@@ -285,20 +289,36 @@ export class MentorsService {
       throw new InvalidOrientationTypesException();
     }
 
-    if (tx)
-      return this.mentorsRepository.activate(
-        userId,
-        mentorRole.id,
-        data.technicalAreaIds,
-        data.orientationTypeIds,
-        tx,
+    const activation = tx
+      ? await this.mentorsRepository.activate(
+          userId,
+          mentorRole.id,
+          data.technicalAreaIds,
+          data.orientationTypeIds,
+          tx,
+        )
+      : await this.mentorsRepository.activate(
+          userId,
+          mentorRole.id,
+          data.technicalAreaIds,
+          data.orientationTypeIds,
+        );
+    if ('result' in activation) {
+      const hasOffer = activation.result === 'OFFER_EXISTS';
+      throw new MentorParticipationException(
+        hasOffer
+          ? 'Ya tienes un cupo reservado. Confirma tu oferta desde Mi participación.'
+          : 'Ya tienes una solicitud vigente. Revisa su estado en Mi participación.',
+        409,
+        {
+          code: hasOffer
+            ? 'MENTOR_OFFER_CONFIRMATION_REQUIRED'
+            : 'REQUEST_ALREADY_EXISTS',
+          participationPath: '/mentors/participation',
+        },
       );
-    return this.mentorsRepository.activate(
-      userId,
-      mentorRole.id,
-      data.technicalAreaIds,
-      data.orientationTypeIds,
-    );
+    }
+    return activation;
   }
 
   async updateAvailability(userId: string, isAvailable: boolean) {

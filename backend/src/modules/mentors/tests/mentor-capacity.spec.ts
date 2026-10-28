@@ -61,6 +61,8 @@ describe('capacidad HU-7-1', () => {
         queries.push(sql);
         if (sql.includes('pg_advisory_xact_lock')) return [];
         if (sql.includes('AS eligible')) return [{ eligible, alreadyMentor }];
+        if (sql.includes('AS "hasPendingRequest"'))
+          return [{ hasPendingRequest: false, hasOffer: false }];
         return [
           { approvedGraduates: 3, activeMentors: mentors, reservedOffers },
         ];
@@ -125,7 +127,10 @@ describe('capacidad HU-7-1', () => {
     ).toHaveLength(1);
     expect(writes).toHaveBeenCalledTimes(1);
     expect(queries[0]).toContain('pg_advisory_xact_lock(1436)');
-    expect(queries[2]).toContain('ar.approved_user_id = u.id');
-    expect(queries[2]).toContain('expires_at > (SELECT now FROM instant)');
+    const capacityQuery = queries.find((query) =>
+      query.includes('AS "approvedGraduates"'),
+    );
+    expect(capacityQuery).toContain('ar.approved_user_id = u.id');
+    expect(capacityQuery).toContain('expires_at > (SELECT now FROM instant)');
   });
 });

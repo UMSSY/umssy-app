@@ -1,3 +1,4 @@
+import { withMentorIntake } from './mentor-intake.service.js';
 import { Injectable } from '@nestjs/common';
 import { MentorParticipationRepository } from '../repositories/mentor-participation.repository.js';
 import { MentorParticipationException } from '../exceptions/mentor-participation.exception.js';
@@ -16,8 +17,13 @@ export class MentorParticipationService {
     tx?: Prisma.TransactionClient,
   ): Promise<MentorParticipationRequest> {
     if (key)
-      return this.repository.withIntake(userId, key, data, (transaction) =>
-        this.create(userId, data, undefined, transaction),
+      return withMentorIntake(
+        this.repository,
+        userId,
+        'REQUEST',
+        key,
+        data,
+        (transaction) => this.create(userId, data, undefined, transaction),
       );
     const result = await this.repository.createRequest(
       userId,

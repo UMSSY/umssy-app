@@ -13,7 +13,7 @@ import {
 } from './mentor-capacity.queries.js';
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
-import { withMentorIntake } from './mentor-intake-policy.js';
+import { MentorIntakeRepository } from './mentor-intake.repository.js';
 
 const directorySelect = {
   id: true,
@@ -46,23 +46,9 @@ interface DirectoryFilters {
 type MentorDirectorySort = 'name_asc' | 'name_desc';
 
 @Injectable()
-export class MentorsRepository {
-  constructor(private readonly prisma: PrismaService) {}
-
-  withIntake<T>(
-    userId: string,
-    key: string,
-    preferences: { technicalAreaIds: string[]; orientationTypeIds: string[] },
-    action: (tx: Prisma.TransactionClient) => Promise<T>,
-  ) {
-    return withMentorIntake(
-      this.prisma,
-      userId,
-      'ACTIVATE',
-      key,
-      preferences,
-      action,
-    );
+export class MentorsRepository extends MentorIntakeRepository {
+  constructor(prisma: PrismaService) {
+    super(prisma);
   }
 
   findMentorRole(tx: Prisma.TransactionClient = this.prisma) {
@@ -498,6 +484,20 @@ export class MentorsRepository {
       const eligibility = await readMentorEligibility(transaction, userId);
       if (!eligibility.eligible) throw new MentorEligibilityException();
       if (eligibility.alreadyMentor) throw new AlreadyMentorException();
+      const [intake] = await transaction.$queryRaw<
+        { hasPendingRequest: boolean; hasOffer: boolean }[]
+      >`
+        SELECT EXISTS (
+          SELECT 1 FROM mentor_participation_requests
+          WHERE user_id = ${userId}::uuid AND status IN ('PENDING', 'OFFERED')
+        ) AS "hasPendingRequest", EXISTS (
+          SELECT 1 FROM mentor_slot_offers
+          WHERE user_id = ${userId}::uuid AND status = 'OFFERED'
+            AND expires_at > clock_timestamp()
+        ) AS "hasOffer"`;
+      if (intake.hasOffer) return { result: 'OFFER_EXISTS' as const };
+      if (intake.hasPendingRequest)
+        return { result: 'REQUEST_EXISTS' as const };
       const capacity = await readMentorCapacity(transaction);
       if (capacity.available < 1) throw new MentorCapacityException();
 
@@ -509,8 +509,7 @@ export class MentorsRepository {
         },
       });
 
-      // A former mentor may retain preferences from an earlier participation.
-      // Re-entry always uses the newly submitted selections.
+      // La reincorporación utiliza la selección confirmada y sustituye las preferencias conservadas.
       await transaction.mentorTechnicalArea.deleteMany({
         where: { mentorId: userId },
       });

@@ -25,12 +25,13 @@ import { MentorMapper } from '../mappers/mentor.mapper.js';
 import { MentorAffinityService } from '../services/mentor-affinity.service.js';
 import { MentorOffersRepository } from '../repositories/mentor-offers.repository.js';
 import { MentorOffersService } from '../services/mentor-offers.service.js';
+import { MentorOffersController } from '../controllers/mentor-offers.controller.js';
 
 const connectionString = process.env.HU7_TEST_DATABASE_URL;
 const migration = '20261028010000_mentor_intake_compatibility';
 const directory = new URL('../../../../prisma/migrations/', import.meta.url);
 
-// Real JWT/session/HTTP/Prisma/PostgreSQL. No mocked guard or persistence.
+// JWT, sesión, HTTP y PostgreSQL reales; no se simulan el guard ni la persistencia.
 describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
   'HU6-HU7 HTTP/PostgreSQL: %s',
   (variant) => {
@@ -162,8 +163,16 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
       );
       const session = new SessionService(new SessionRepository(db));
       const module = await Test.createTestingModule({
-        controllers: [MentorParticipationController, MentorsController],
+        controllers: [
+          MentorParticipationController,
+          MentorsController,
+          MentorOffersController,
+        ],
         providers: [
+          {
+            provide: MentorOffersService,
+            useValue: new MentorOffersService(new MentorOffersRepository(db)),
+          },
           { provide: MentorParticipationService, useValue: participation },
           { provide: MentorsService, useValue: mentors },
         ],
@@ -206,7 +215,7 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
             ),
           );
         }
-        // Exact failure produced by develop's reconciliation, even for a user without requests.
+        // La conciliación falla antes de consultar si el usuario tiene solicitudes.
         await expect(participation.findMyRequest(users[0])).rejects.toSatisfy(
           (error: unknown) => JSON.stringify(error).includes('42703'),
         );
@@ -276,6 +285,223 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
       } as ReturnType<typeof preferences>).expect(400);
       expect(await prisma.mentorIntakeAttempt.count()).toBe(0);
     });
+
+    it.each(['/api/mentors/activate', '/api/mentor-participation/requests'])(
+      'ambos POST validan cabecera antes de registrar intentos: %s',
+      async (path) => {
+        for (const key of [
+          undefined,
+          '',
+          'invalid',
+          '00000000-0000-0000-0000-000000000000',
+        ]) {
+          const operation = request(server)
+            .post(path)
+            .auth(tokens[4], { type: 'bearer' })
+            .send(preferences());
+          if (key !== undefined) operation.set('Idempotency-Key', key);
+          const response = await operation.expect(400);
+          expect(response.body).toMatchObject({
+            statusCode: 400,
+            ok: false,
+            data: { code: 'INVALID_IDEMPOTENCY_KEY' },
+          });
+          expect(typeof response.body.detail).toBe('string');
+        }
+        expect(await prisma.mentorIntakeAttempt.count()).toBe(0);
+        expect(await prisma.mentorParticipationRequest.count()).toBe(0);
+      },
+    );
+
+    async function reserveOwnSlot() {
+      await prisma.userRole.deleteMany({
+        where: { roleId: mentorRole, userId: { in: users.slice(2, 4) } },
+      });
+      const pending = await prisma.mentorParticipationRequest.create({
+        data: { userId: users[4], ...preferences() },
+      });
+      await get(4).expect(200);
+      const offer = await prisma.mentorSlotOffer.findUniqueOrThrow({
+        where: { requestId: pending.id },
+      });
+      return { pending, offer };
+    }
+
+    it('H1: rechaza activación directa con oferta propia y otro cupo libre sin alterar la reserva', async () => {
+      const { pending, offer } = await reserveOwnSlot();
+      const key = randomUUID();
+      const first = await submit(4, key, '/api/mentors/activate').expect(409);
+      expect(first.body.data).toMatchObject({
+        code: 'MENTOR_OFFER_CONFIRMATION_REQUIRED',
+        participationPath: '/mentors/participation',
+      });
+      const retry = await submit(4, key, '/api/mentors/activate').expect(409);
+      expect(retry.body).toEqual(first.body);
+      expect(await prisma.mentorIntakeAttempt.count()).toBe(1);
+      expect(
+        await prisma.userRole.count({
+          where: { userId: users[4], roleId: mentorRole, deletedAt: null },
+        }),
+      ).toBe(0);
+      expect(
+        await prisma.mentorSlotOffer.findUnique({ where: { id: offer.id } }),
+      ).toEqual(offer);
+      expect(
+        await prisma.mentorParticipationRequest.findUnique({
+          where: { id: pending.id },
+        }),
+      ).toMatchObject({ queuedAt: pending.queuedAt, status: 'OFFERED' });
+    });
+
+    it('H1: reconciliar una solicitud antes de activar respeta FIFO y no duplica su ocupación', async () => {
+      await prisma.userRole.deleteMany({
+        where: { roleId: mentorRole, userId: { in: users.slice(2, 4) } },
+      });
+      const pending = await prisma.mentorParticipationRequest.create({
+        data: { userId: users[4], ...preferences() },
+      });
+      await submit(4, randomUUID(), '/api/mentors/activate').expect(409);
+      expect(
+        await prisma.mentorSlotOffer.count({
+          where: { userId: users[4], status: 'OFFERED' },
+        }),
+      ).toBe(1);
+      expect(
+        await prisma.mentorParticipationRequest.findUnique({
+          where: { id: pending.id },
+        }),
+      ).toMatchObject({ queuedAt: pending.queuedAt, status: 'OFFERED' });
+      expect(
+        await prisma.userRole.count({
+          where: { userId: users[4], roleId: mentorRole, deletedAt: null },
+        }),
+      ).toBe(0);
+    });
+
+    it('H1: una solicitud pendiente no asignable tampoco puede saltarse la cola por activación', async () => {
+      await prisma.userRole.deleteMany({
+        where: { roleId: mentorRole, userId: users[3] },
+      });
+      const pending = await prisma.mentorParticipationRequest.create({
+        data: {
+          userId: users[4],
+          technicalAreaIds: [randomUUID()],
+          orientationTypeIds: [orientation],
+        },
+      });
+      await submit(4, randomUUID(), '/api/mentors/activate').expect(409);
+      expect(
+        await prisma.mentorParticipationRequest.findUnique({
+          where: { id: pending.id },
+        }),
+      ).toEqual(pending);
+      expect(
+        await prisma.userRole.count({
+          where: { userId: users[4], roleId: mentorRole, deletedAt: null },
+        }),
+      ).toBe(0);
+    });
+
+    it('H1: una reserva anterior sin solicitud también bloquea la activación directa', async () => {
+      await prisma.userRole.deleteMany({
+        where: { roleId: mentorRole, userId: { in: users.slice(2, 4) } },
+      });
+      const offer = await prisma.mentorSlotOffer.create({
+        data: { userId: users[4], expiresAt: new Date(Date.now() + 86400000) },
+      });
+      await submit(4, randomUUID(), '/api/mentors/activate').expect(409);
+      expect(
+        await prisma.mentorSlotOffer.findUnique({ where: { id: offer.id } }),
+      ).toEqual(offer);
+    });
+
+    it('H1: confirmar oferta y activar simultáneamente produce un rol y consume un solo cupo', async () => {
+      const { offer } = await reserveOwnSlot();
+      const results = await Promise.all([
+        submit(4, randomUUID(), '/api/mentors/activate'),
+        request(server)
+          .post(`/api/mentors/offers/${offer.id}/confirm`)
+          .auth(tokens[4], { type: 'bearer' }),
+      ]);
+      expect(
+        results
+          .map((result) => result.status)
+          .sort((left, right) => left - right),
+      ).toEqual([201, 409]);
+      expect(
+        await prisma.userRole.count({
+          where: { userId: users[4], roleId: mentorRole, deletedAt: null },
+        }),
+      ).toBe(1);
+      expect(
+        await prisma.mentorSlotOffer.findUnique({ where: { id: offer.id } }),
+      ).toMatchObject({ status: 'CONFIRMED' });
+      expect(
+        await new MentorsRepository(
+          prisma as unknown as PrismaService,
+        ).capacity(),
+      ).toMatchObject({ occupied: 3, available: 1 });
+      await submit(4, randomUUID(), '/api/mentors/activate').expect(409);
+    });
+
+    it('H1: dos intenciones nuevas del mismo usuario crean como máximo un rol', async () => {
+      await prisma.userRole.deleteMany({
+        where: { roleId: mentorRole, userId: users[3] },
+      });
+      const responses = await Promise.all([
+        submit(4, randomUUID(), '/api/mentors/activate'),
+        submit(4, randomUUID(), '/api/mentors/activate'),
+      ]);
+      expect(
+        responses
+          .map((response) => response.status)
+          .sort((left, right) => left - right),
+      ).toEqual([201, 409]);
+      expect(
+        await prisma.userRole.count({
+          where: { userId: users[4], roleId: mentorRole, deletedAt: null },
+        }),
+      ).toBe(1);
+      expect(await prisma.mentorIntakeAttempt.count()).toBe(2);
+    });
+
+    it('H1: dos usuarios compiten por el último cupo sin sobreocupación', async () => {
+      await prisma.userRole.deleteMany({
+        where: { roleId: mentorRole, userId: users[3] },
+      });
+      const responses = await Promise.all([
+        submit(4, randomUUID(), '/api/mentors/activate'),
+        submit(5, randomUUID(), '/api/mentors/activate'),
+      ]);
+      expect(
+        responses
+          .map((response) => response.status)
+          .sort((left, right) => left - right),
+      ).toEqual([201, 409]);
+      expect(
+        await new MentorsRepository(
+          prisma as unknown as PrismaService,
+        ).capacity(),
+      ).toMatchObject({ occupied: 4, available: 0 });
+    });
+
+    it.each(['CANCELLED', 'EXPIRED'])(
+      'H1: una solicitud %s permite una nueva incorporación válida sin borrar historial',
+      async (status) => {
+        await prisma.userRole.deleteMany({
+          where: { roleId: mentorRole, userId: users[3] },
+        });
+        const previous = await prisma.mentorParticipationRequest.create({
+          data: { userId: users[4], status, ...preferences() },
+        });
+        await submit(4, randomUUID(), '/api/mentors/activate').expect(201);
+        expect(
+          await prisma.mentorParticipationRequest.findUnique({
+            where: { id: previous.id },
+          }),
+        ).toEqual(previous);
+      },
+    );
 
     it.each([
       [0, 0],
@@ -541,7 +767,7 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
         .delete('/api/mentor-participation/requests/me')
         .auth(tokens[4], { type: 'bearer' })
         .expect(200);
-      await submit(4).expect(201); // Four recent distinct attempts, no suspension.
+      await submit(4).expect(201); // El cuarto intento reciente no genera sanción.
       expect(await prisma.mentorParticipationSanction.count()).toBe(0);
       expect(
         await prisma.mentorParticipationRequest.findUnique({
