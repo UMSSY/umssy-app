@@ -20,6 +20,11 @@ import { DECIDED_STATUSES } from '../constants/inbox-summary.constants.js';
 import { escapeLikePattern } from '../helpers/escape-like-pattern.js';
 import { foldAccents } from '../helpers/fold-accents.js';
 import { ACCENT_FOLD_FROM, ACCENT_FOLD_TO } from '../constants/accent-folding.constants.js';
+import { ACCESS_REQUEST_AUDIT_SELECT } from '../constants/access-request-audit-select.constants.js';
+import type { AccessRequestAuditHook } from '../types/access-request-audit.types.js';
+import { VALIDATION_DETAIL_SELECT, VALIDATION_SUMMARY_SELECT } from '../constants/document-validation-selects.constants.js';
+import { buildValidationWhere } from '../helpers/build-validation-where.js';
+import type { ValidationResult } from '../types/document-validation.enum.js';
 
 @Injectable()
 export class AccessRequestsRepository {
@@ -61,7 +66,15 @@ export class AccessRequestsRepository {
     return rows.map((row) => row.id);
   }
 
-  async findPage(params: { status?: string; search?: string; career?: string; submittedFrom?: Date; page: number; limit: number }) {
+  async findPage(params: {
+    status?: string;
+    search?: string;
+    career?: string;
+    validation?: ValidationResult;
+    submittedFrom?: Date;
+    page: number;
+    limit: number;
+  }) {
     const terms = params.search?.split(/\s+/).filter(Boolean).slice(0, MAX_SEARCH_TERMS) ?? [];
     const matchingIds = terms.length > 0 ? await this.findIdsBySearch(terms) : undefined;
     const where: Prisma.AccessRequestWhereInput = {
@@ -69,6 +82,7 @@ export class AccessRequestsRepository {
       ...(params.career && { career: { title: params.career } }),
       ...(params.submittedFrom && { submittedAt: { gte: params.submittedFrom } }),
       ...(matchingIds && { id: { in: matchingIds } }),
+      ...(params.validation && buildValidationWhere(params.validation)),
     };
     const [rows, total] = await Promise.all([
       this.prisma.accessRequest.findMany({
@@ -87,6 +101,7 @@ export class AccessRequestsRepository {
           status: { select: { title: true } },
           career: { select: { title: true } },
           documentType: { select: { title: true } },
+          documentValidation: { select: VALIDATION_SUMMARY_SELECT },
         } satisfies Prisma.AccessRequestSelect,
       }),
       this.prisma.accessRequest.count({ where }),
@@ -137,27 +152,29 @@ export class AccessRequestsRepository {
         documentFile: { select: { name: true, extension: true, mimeType: true, size: true } },
         openedBy: { select: { firstName: true, lastName: true } },
         reviewedBy: { select: { firstName: true, lastName: true } },
+        documentValidation: { select: VALIDATION_DETAIL_SELECT },
       } satisfies Prisma.AccessRequestSelect,
     });
   }
 
-  async markInReview(id: string, reviewerId: string): Promise<boolean> {
+  async markInReview(id: string, reviewerId: string, onOpened?: AccessRequestAuditHook): Promise<boolean> {
     const now = new Date();
     try {
       await this.prisma.$transaction(async (tx) => {
-        await tx.accessRequest.update({
+        const updated = await tx.accessRequest.update({
           where: { id, status: { title: ACCESS_REQUEST_STATUS.PENDING } },
           data: {
             status: { connect: { title: ACCESS_REQUEST_STATUS.IN_REVIEW } },
             reviewedBy: { connect: { id: reviewerId } },
             reviewedAt: now,
           },
-          select: { id: true },
+          select: ACCESS_REQUEST_AUDIT_SELECT,
         });
         await tx.accessRequest.updateMany({
           where: { id, openedAt: null },
           data: { openedById: reviewerId, openedAt: now },
         });
+        if (onOpened) await onOpened(updated, tx);
       });
       return true;
     } catch (error) {
@@ -168,9 +185,14 @@ export class AccessRequestsRepository {
     }
   }
 
-  async setVerdict(id: string, reviewerId: string, verdict: { status: string; rejectionReason?: string }): Promise<boolean> {
-    try {
-      await this.prisma.accessRequest.update({
+  async setVerdict(
+    id: string,
+    reviewerId: string,
+    verdict: { status: string; rejectionReason?: string },
+    onApplied?: AccessRequestAuditHook,
+  ): Promise<boolean> {
+    const apply = async (client: Prisma.TransactionClient) => {
+      const updated = await client.accessRequest.update({
         where: { id, status: { title: ACCESS_REQUEST_STATUS.IN_REVIEW } },
         data: {
           status: { connect: { title: verdict.status } },
@@ -178,8 +200,13 @@ export class AccessRequestsRepository {
           reviewedAt: new Date(),
           ...(verdict.rejectionReason !== undefined && { rejectionReason: verdict.rejectionReason }),
         },
-        select: { id: true },
+        select: ACCESS_REQUEST_AUDIT_SELECT,
       });
+      if (onApplied) await onApplied(updated, client);
+    };
+    try {
+      if (onApplied) await this.prisma.$transaction(apply);
+      else await apply(this.prisma);
       return true;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
@@ -275,17 +302,22 @@ export class AccessRequestsRepository {
     return nextRequestCode(year, last?.requestCode);
   }
 
-  async submit(id: string, requestCode: string) {
-    try {
-      return await this.prisma.accessRequest.update({
+  async submit(id: string, requestCode: string, onSubmitted?: AccessRequestAuditHook) {
+    const apply = async (client: Prisma.TransactionClient) => {
+      const submitted = await client.accessRequest.update({
         where: { id, status: { title: ACCESS_REQUEST_STATUS.DRAFT } },
         data: {
           requestCode,
           submittedAt: new Date(),
           status: { connect: { title: ACCESS_REQUEST_STATUS.PENDING } },
         },
-        select: { id: true, requestCode: true, submittedAt: true, status: { select: { title: true } } },
+        select: { ...ACCESS_REQUEST_AUDIT_SELECT, submittedAt: true, status: { select: { title: true } } },
       });
+      if (onSubmitted) await onSubmitted(submitted, client);
+      return { id: submitted.id, requestCode: submitted.requestCode, submittedAt: submitted.submittedAt, status: submitted.status };
+    };
+    try {
+      return onSubmitted ? await this.prisma.$transaction(apply) : await apply(this.prisma);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         if (typeof error.meta?.model === 'string') {
@@ -297,11 +329,11 @@ export class AccessRequestsRepository {
     }
   }
 
-  async submitWithGeneratedCode(id: string) {
+  async submitWithGeneratedCode(id: string, onSubmitted?: AccessRequestAuditHook) {
     for (let attempt = 1; attempt <= MAX_REQUEST_CODE_ATTEMPTS; attempt++) {
       const requestCode = await this.generateRequestCode();
       try {
-        return await this.submit(id, requestCode);
+        return await this.submit(id, requestCode, onSubmitted);
       } catch (error) {
         const isCollision = error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
         if (!isCollision) throw error;
@@ -317,6 +349,8 @@ export class AccessRequestsRepository {
       where: { requestCode, email: { equals: email, mode: 'insensitive' } },
       select: {
         requestCode: true,
+        firstName: true,
+        lastName: true,
         submittedAt: true,
         reviewedAt: true,
         rejectionReason: true,

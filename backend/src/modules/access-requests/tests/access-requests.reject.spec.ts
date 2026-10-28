@@ -66,7 +66,7 @@ describe('AccessRequestsService.reject', () => {
       rejectionReason: 'Documento ilegible',
       notificationSent: true,
     });
-    expect(repository.setVerdict).toHaveBeenCalledWith('id-1', 'admin-1', { status: 'rejected', rejectionReason: 'Documento ilegible' });
+    expect(repository.setVerdict).toHaveBeenCalledWith('id-1', 'admin-1', { status: 'rejected', rejectionReason: 'Documento ilegible' }, expect.any(Function));
     expect(notification.notify).toHaveBeenCalledWith('ana@umss.test', 'Documento ilegible', 'id-1');
   });
 

@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
+import { AuditEventsModule } from '../audit-events/audit-events.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { FilesModule } from '../files/files.module.js';
 import { AccessRequestsController } from './controllers/access-requests.controller.js';
+import { AccessRequestAutomationController } from './controllers/access-request-automation.controller.js';
 import { AccessRequestsService } from './services/access-requests.service.js';
 import { AccessRequestsRepository } from './repositories/access-requests.repository.js';
 import { ActivationOtpRepository } from './repositories/activation-otp.repository.js';
@@ -9,18 +11,22 @@ import { RejectionNotificationService } from './services/rejection-notification.
 import { ActivationOtpService } from './services/activation-otp.service.js';
 import { ConsoleMailSender } from './mail/console-mail-sender.js';
 import { MAIL_SENDER } from './mail/mail-sender.js';
+import { DocumentValidationRepository } from './repositories/document-validation.repository.js';
+import { AutomaticValidationService } from './services/automatic-validation.service.js';
 
 @Module({
-  imports: [AuthModule, FilesModule],
-  controllers: [AccessRequestsController],
+  imports: [AuthModule, FilesModule, AuditEventsModule],
+  controllers: [AccessRequestAutomationController, AccessRequestsController],
   providers: [
     AccessRequestsService,
     AccessRequestsRepository,
     ActivationOtpRepository,
     ActivationOtpService,
     RejectionNotificationService,
+    DocumentValidationRepository,
+    AutomaticValidationService,
     { provide: MAIL_SENDER, useClass: ConsoleMailSender },
   ],
-  exports: [AccessRequestsService],
+  exports: [AccessRequestsService, AutomaticValidationService],
 })
 export class AccessRequestsModule {}

@@ -23,6 +23,7 @@ export function toRejectedUserResponse(user: ReportUser): RejectedUserResponse {
     id: user.id,
     fullName: user.fullName,
     email: user.email,
+    userType: user.userType,
     identifier: user.identifier,
     documentType: user.documentType,
     rejectionReason: user.rejectionReason,

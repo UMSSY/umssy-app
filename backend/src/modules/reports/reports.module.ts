@@ -15,5 +15,6 @@ import { ReportsService } from './services/reports.service.js';
     ReportHistoryService,
     GeneratedReportsRepository,
   ],
+  exports: [ReportHistoryService, GeneratedReportsRepository],
 })
 export class ReportsModule {}
