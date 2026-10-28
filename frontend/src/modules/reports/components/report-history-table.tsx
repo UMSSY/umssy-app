@@ -11,6 +11,7 @@ import {
   REPORT_HISTORY_HEAD_CLASSES as HEAD_CLASSES,
   TABLE_CELL_CLASSES as CELL_CLASSES,
   TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES,
+  REPORT_HISTORY_TABLE_MIN_HEIGHT_CLASSES as MIN_HEIGHT_CLASSES,
 } from "../constants/report-table.constants";
 import type { ReportHistoryTableProps } from "../types/report-history-table-props.types";
 import { TableMessageRow, TableNoResultsRow, TableSkeletonRows } from "./table-state-rows";
@@ -73,7 +74,7 @@ export function ReportHistoryTable({
   };
 
   return (
-    <div className={CONTAINER_CLASSES}>
+    <div className={`${CONTAINER_CLASSES} ${MIN_HEIGHT_CLASSES}`}>
       <Table className="text-left text-xs sm:text-sm md:min-w-160 md:text-base">
         <TableHeader className="bg-surface-soft">
           <TableRow className="border-border hover:bg-transparent">

@@ -29,6 +29,9 @@ import { AuditEventsModule } from './modules/audit-events/audit-events.module.js
 import { ChatModule } from './modules/chat/chat.module.js';
 import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
+import { NlpModule } from './modules/nlp/nlp.module.js';
+import { SurveysModule } from './modules/surveys/surveys.module.js';
+import { AppointmentsModule } from './modules/appointments/appointments.module.js';
 
 
 @Module({
@@ -37,6 +40,7 @@ import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
     PrismaModule,
     MailModule,
     AvailabilityModule,
+    AppointmentsModule,
     AuthModule,
     EventsModule,
     EventCategoriesModule,
@@ -57,6 +61,8 @@ import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
     ChatModule,
     MatchingModule,
     JobOffersModule,
+    NlpModule,
+    SurveysModule,
 
   ],
   controllers: [AppController],
