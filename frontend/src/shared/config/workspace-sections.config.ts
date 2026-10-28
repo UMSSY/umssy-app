@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, House, Inbox, MessageCircle, Radar, UserRound, Users } from "lucide-react";
+import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, ClipboardList, House, Inbox, MessageCircle, Radar, UserRound, Users } from "lucide-react";
 import type { WorkspaceSectionProps } from "@/shared/types/workspace-section-props.types";
 
 export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
@@ -25,6 +25,7 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     id: "events", label: "Talleres", icon: CalendarDays, patterns: [/^\/events(?:\/|$)/],
     items: [
       { label: "Explorar talleres", href: "/events" },
+      { label: "Proponer taller", href: "/events/propose" },
       { label: "Mis inscripciones", href: "/events/my-passes" },
     ],
   },
@@ -32,6 +33,7 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     id: "company", label: "Empresas", icon: Building2, patterns: [/^\/(?:recruiters|matching)(?:\/|$)/, /^\/area-detail(?:-interaction)?-preview\/?$/],
     items: [
       { label: "Portal de empresa", href: "/recruiters" },
+      { label: "Historial", href: "/recruiters/history" },
       { label: "Publicar vacante", href: "/recruiters/job-offers/new" },
       { label: "Buscar candidatos", href: "/matching" },
     ],
@@ -44,9 +46,27 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Historial de reportes", href: "/backoffice/reports/history" },
     ],
   },
+  // Va antes de "requests", que abarca todo /backoffice.
+  {
+    id: "surveys", label: "Encuestas", icon: ClipboardList, patterns: [/^\/backoffice\/surveys(?:\/|$)/],
+    items: [
+      { label: "Encuestas", href: "/backoffice/surveys" },
+      { label: "Crear encuesta", href: "/backoffice/surveys/create" },
+    ],
+  },
   { id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [] },
   { id: "radar-review", label: "Revisión de radares", icon: Radar, patterns: [/^\/affinity-radar\/review-queue\/?$/], items: [] },
-  { id: "vacancies", label: "Vacantes", icon: BriefcaseBusiness, patterns: [/^\/vacancies(?:\/|$)/], items: [] },
+  {
+    id: "vacancies",
+    label: "Vacantes",
+    icon: BriefcaseBusiness,
+    patterns: [/^\/vacancies(?:\/|$)/],
+    items: [
+      { label: "Todas las vacantes", href: "/vacancies" },
+      { label: "Vacantes para ti", href: "/vacancies/recommended" },
+      { label: "Mis postulaciones", href: "/vacancies/my-applications" },
+    ],
+  },
   { id: "chat", label: "Chat", icon: MessageCircle, patterns: [/^\/chat(?:\/|$)/], items: [] },
-  { id: "home", label: "Inicio", icon: House, patterns: [/^\/dashboard\/?$/], items: [] },
+  { id: "home", label: "Inicio", icon: House, patterns: [/^\/dashboard\/?$/, /^\/surveys(?:\/|$)/], items: [] },
 ];

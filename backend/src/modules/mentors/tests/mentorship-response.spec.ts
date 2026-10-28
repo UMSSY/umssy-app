@@ -223,6 +223,7 @@ describe('Mentorship Standard Response HTTP', () => {
 
     await request(server).get(`/api/mentors/${userId}`).expect(404).expect({
       statusCode: 404,
+      code: 'MENTOR_NOT_FOUND',
       ok: false,
       detail: error.message,
       data: null,
@@ -239,6 +240,7 @@ describe('Mentorship Standard Response HTTP', () => {
       .expect(409)
       .expect({
         statusCode: 409,
+        code: 'ALREADY_MENTOR',
         ok: false,
         detail: error.message,
         data: null,
@@ -281,8 +283,10 @@ describe('Mentorship Standard Response HTTP', () => {
 
     expect(response.body).toEqual({
       statusCode: 400,
-      error: 'Bad Request',
-      message: 'Validation failed (uuid v 4 is expected)',
+      ok: false,
+      code: 'VALIDATION_ERROR',
+      detail: 'Los parámetros de la solicitud no son válidos.',
+      data: null,
     });
   });
 });

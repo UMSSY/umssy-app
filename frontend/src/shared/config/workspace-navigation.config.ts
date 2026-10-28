@@ -1,4 +1,4 @@
-import { BookOpen, BriefcaseBusiness, Building2, CalendarClock, FileText, GraduationCap, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, Building2, CalendarClock, ClipboardList, FileText, GraduationCap, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
 import type { WorkspaceArea, WorkspaceTask } from "@/shared/types/workspace-navigation.types";
 
 export const WORKSPACE_AREAS: readonly WorkspaceArea[] = [
@@ -15,6 +15,8 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
   { label: "Usuarios rechazados", href: "/backoffice/reports/rejected-users", icon: FileText, area: "management", keywords: "reporte motivos" },
   { label: "Historial de reportes", href: "/backoffice/reports/history", icon: CalendarClock, area: "management" },
   { label: "Revisión de radares", href: "/affinity-radar/review-queue", icon: Radar, area: "management" },
+  { label: "Encuestas", href: "/backoffice/surveys", icon: ClipboardList, area: "management", keywords: "formularios cuestionarios satisfacción historial resultados estadísticas" },
+  { label: "Crear encuesta", href: "/backoffice/surveys/create", icon: SquarePlus, area: "management", keywords: "nueva encuesta formulario preguntas" },
   { label: "Portal de empresa", href: "/recruiters", icon: Building2, area: "company" },
   { label: "Publicar vacante", href: "/recruiters/job-offers/new", icon: SquarePlus, area: "company", keywords: "empleo oferta trabajo" },
   { label: "Buscar candidatos", href: "/matching", icon: Search, area: "company", keywords: "afinidad reclutamiento" },
@@ -34,7 +36,9 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
   { label: "Tipos de orientación", href: "/mentorship/orientation", icon: Users, area: "community", keywords: "asesoría mentor empleo orientación" },
   { label: "Mensajes", href: "/chat", icon: MessageCircle, area: "community", keywords: "chat mensajes conversaciones" },
   { label: "Talleres disponibles", href: "/events", icon: BookOpen, area: "opportunities", keywords: "eventos actividades formación" },
+  { label: "Proponer taller", href: "/events/propose", icon: SquarePlus, area: "opportunities", keywords: "propuesta crear taller portada" },
   { label: "Mis inscripciones", href: "/events/my-passes", icon: Ticket, area: "opportunities", keywords: "pases talleres entradas" },
   { label: "Vacantes", href: "/vacancies", icon: BriefcaseBusiness, area: "opportunities", keywords: "empleo trabajo ofertas" },
+  { label: "Vacantes para ti", href: "/vacancies/recommended", icon: Sparkles, area: "opportunities", keywords: "afinidad recomendaciones postular" },
   { label: "Radar de afinidad", href: "/profile/radar", icon: Radar, area: "opportunities", keywords: "competencias perfil" },
 ];

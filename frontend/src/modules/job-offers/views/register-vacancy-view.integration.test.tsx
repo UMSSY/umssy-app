@@ -10,7 +10,7 @@ import { RegisterVacancyView } from "./register-vacancy-view";
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn() } }));
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
 vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange }: { children: React.ReactNode; onValueChange?: (value: string) => void }) => (
     <div data-testid="select" onClick={() => onValueChange?.("Tiempo completo")}>{children}</div>
@@ -225,5 +225,52 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     click("Salir");
 
     expect(push).toHaveBeenCalledWith("/profile");
+  });
+
+  it("edita una vacante existente: carga sus datos, guarda con PUT y confirma la actualización", async () => {
+    const OFFER = {
+      ...EXPECTED_PAYLOAD,
+      id: "offer-1",
+      salaryRange: "Bs 6.500 - 8.000",
+      status: "Publicada",
+      expiresAt: null,
+      createdAt: "2026-10-12T00:00:00.000Z",
+      company: { id: COMPANY_ID, name: "TechBolivia" },
+      skills: [DOCKER, KUBERNETES],
+    };
+    vi.mocked(apiClient.get).mockImplementation(async (url: string) => ({
+      data: {
+        statusCode: 200,
+        ok: true,
+        detail: "",
+        data: url === "/job-offers/skills" ? [PYTHON, DOCKER, KUBERNETES] : OFFER,
+      },
+    }));
+    vi.mocked(apiClient.put).mockResolvedValue({ data: { statusCode: 200, ok: true, detail: "", data: OFFER } });
+    renderWithQuery(<RegisterVacancyView jobOfferId="offer-1" />);
+
+    await screen.findByText("Editar vacante");
+    expect(apiClient.get).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`);
+    expect(byId("title").value).toBe("DevOps Senior");
+    click("Continuar");
+    await screen.findByRole("button", { name: "Docker" });
+    click("Continuar");
+    await screen.findByText("Revisa tu publicación");
+    click("Confirmar edición");
+
+    expect(await screen.findByText("Vacante actualizada")).toBeInTheDocument();
+    expect(apiClient.put).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`, EXPECTED_PAYLOAD);
+    expect(apiClient.post).not.toHaveBeenCalled();
+  });
+
+  it("muestra el error y no deja editar si la vacante no se puede cargar", async () => {
+    vi.mocked(apiClient.get).mockImplementation(async (url: string) => {
+      if (url === "/job-offers/skills") return { data: { statusCode: 200, ok: true, detail: "", data: [] } };
+      throw responseError(404, { statusCode: 404, ok: false, detail: "La vacante no existe o no pertenece a la empresa." });
+    });
+    renderWithQuery(<RegisterVacancyView jobOfferId="offer-1" />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("La vacante no existe o no pertenece a la empresa.");
+    expect(document.getElementById("title")).toBeNull();
   });
 });

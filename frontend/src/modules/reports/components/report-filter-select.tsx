@@ -20,7 +20,7 @@ export function ReportFilterSelect<TValue extends string>({
   };
 
   return (
-    <div className="w-full sm:w-72">
+    <div className="w-full sm:w-72 sm:shrink-0">
       <Select items={items} value={value ?? ALL_FILTER_VALUE} onValueChange={handleValueChange}>
         <SelectTrigger
           aria-labelledby={labelId}
