@@ -21,6 +21,30 @@ beforeEach(() => {
 afterEach(() => { cleanup(); clearAccessToken(); });
 
 describe('Mis pases', () => {
+  it('keeps chat unavailable until the chat module is connected', async () => {
+    getMine.mockResolvedValue([pass, { ...pass, id: 'reg-2', eventName: 'Prisma' }]);
+    render(<MyPassesView />);
+    const buttons = await screen.findAllByRole('button', { name: 'Abrir chat del taller' });
+    expect(buttons).toHaveLength(2);
+    for (const button of buttons) {
+      expect(button).toBeDisabled();
+      expect(button).toHaveAttribute('title', 'Chat del taller próximamente');
+    }
+  });
+
+  it('opens chat with the registration reference without selecting a different pass', async () => {
+    const onOpenWorkshopChat = vi.fn();
+    getMine.mockResolvedValue([pass, { ...pass, id: 'reg-2', eventName: 'Prisma' }]);
+    render(<MyPassesView onOpenWorkshopChat={onOpenWorkshopChat} />);
+    const buttons = await screen.findAllByRole('button', { name: 'Abrir chat del taller' });
+    expect(buttons[1]).toBeEnabled();
+    expect(buttons[1].parentElement?.closest('button')).toBeNull();
+    fireEvent.click(buttons[1]);
+    expect(onOpenWorkshopChat).toHaveBeenCalledExactlyOnceWith('reg-2');
+    expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /Prisma/ })).toHaveAttribute('aria-pressed', 'false');
+  });
+
   it('shows the QA location and 24-hour time consistently in passes', async () => {
     getMine.mockResolvedValue([{ ...pass, location: 'Laboratorio 1, Facultad de Ciencias y Tecnología, UMSS' }]);
     render(<MyPassesView />);

@@ -1,7 +1,7 @@
 import { formatEventLocation } from '../utils/format-event-location';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Check } from 'lucide-react';
+import { Calendar, Check, MessageCircle } from 'lucide-react';
 
 import type { PassCardProps } from '../types/pass-card-props.types';
 
@@ -13,15 +13,16 @@ export function PassCard({
   registrationId,
   isSelected,
   onClick,
+  onOpenChat,
 }: PassCardProps) {
   return (
-    <Card className="gap-0 border-0 bg-transparent p-0 shadow-none">
+    <Card className="relative gap-0 border-0 bg-transparent p-0 shadow-none">
       <Button
         variant="ghost"
         type="button"
         aria-pressed={Boolean(isSelected)}
         onClick={onClick}
-        className={`flex h-auto w-full min-w-0 flex-col items-stretch gap-4 rounded-lg p-5 text-left whitespace-normal transition-all ${
+        className={`flex h-auto w-full min-w-0 flex-col items-stretch gap-4 rounded-lg p-5 pb-20 text-left whitespace-normal transition-all ${
           isSelected
             ? 'border border-accent bg-accent text-surface hover:bg-accent hover:text-surface'
             : 'border border-border bg-surface text-ink hover:border-border-strong'
@@ -57,6 +58,19 @@ export function PassCard({
           <span className="font-semibold">ID Inscripción: </span>
           <span className="break-all">{registrationId}</span>
         </p>
+      </Button>
+      <Button
+        variant="outline"
+        size="default"
+        type="button"
+        className={`absolute right-5 bottom-5 border-2 shadow-sm disabled:opacity-100 ${isSelected ? 'border-surface bg-surface text-accent hover:bg-surface/90 hover:text-accent' : 'border-accent bg-accent text-surface hover:bg-accent/90 hover:text-surface'}`}
+        aria-label="Abrir chat del taller"
+        title={onOpenChat ? 'Abrir chat del taller' : 'Chat del taller próximamente'}
+        disabled={!onOpenChat}
+        onClick={() => onOpenChat?.(registrationId)}
+      >
+        <MessageCircle className="size-5" aria-hidden="true" />
+        <span>Chat</span>
       </Button>
     </Card>
   );
