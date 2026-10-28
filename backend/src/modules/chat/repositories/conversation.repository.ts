@@ -70,14 +70,15 @@ export class ConversationRepository {
   async findUserConversations(userId: string) {
     return this.prisma.conversation.findMany({
       where: {
-        OR: [
-          { userAId: userId },
-          { userBId: userId },
-        ],
+        
+        participants: {
+          some: { userId },
+        },
       },
       include: {
         userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
         userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        event: { select: { id: true, title: true } }, // NUEVO: Para saber si es chat de evento
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
@@ -90,4 +91,5 @@ export class ConversationRepository {
       ],
     });
   }
+
 }

@@ -71,6 +71,7 @@ describe('AppController (e2e)', () => {
             userId: sub,
             cancelledAt: null,
             status: { title: 'Confirmada' },
+            event: { status: { title: 'Publicado' } },
           },
         }),
       );

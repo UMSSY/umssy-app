@@ -23,7 +23,7 @@ describe("Unified navigation", () => {
     expect(getWorkspaceSection("/backoffice/surveys", ["administrativo"])?.id).toBe("surveys");
   });
   it("does not leak mentor-only settings into the student directory", () => {
-    expect(getWorkspaceSection("/mentorship/mentors", ["estudiante"])?.items.map(({ href }) => href)).toEqual(["/mentorship/mentors"]);
+    expect(getWorkspaceSection("/mentorship/mentors", ["estudiante"])?.items.map(({ href }) => href)).toEqual(["/mentorship/mentors", "/appointments"]);
     expect(getWorkspaceSection("/mentorship/mentors", ["mentor"])?.items.some(({ href }) => href === "/mentor/availability")).toBe(true);
   });
   it("excludes profile radar when a company has no permission", () => {
