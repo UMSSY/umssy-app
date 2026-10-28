@@ -21,6 +21,30 @@ afterEach(() => {
 });
 
 describe("MentorCard", () => {
+  it("resalta el área técnica seleccionada", () => {
+    render(<MentorCard mentor={mentor} selectedArea="APIs" />);
+    const selected = screen.getByText("APIs");
+    expect(selected).toHaveAttribute("aria-current", "true");
+    expect(selected).toHaveClass("border-accent", "font-semibold", "ring-1", "ring-accent");
+    expect(screen.getByText("Backend")).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("Backend")).toHaveClass("border-accent/15");
+  });
+
+  it("no resalta ninguna área cuando no hay selección", () => {
+    render(<MentorCard mentor={mentor} />);
+    for (const name of mentor.technicalAreas) {
+      expect(screen.getByText(name)).not.toHaveAttribute("aria-current");
+      expect(screen.getByText(name)).not.toHaveClass("ring-1");
+    }
+  });
+
+  it("no resalta nada si el mentor no tiene el área seleccionada", () => {
+    render(<MentorCard mentor={mentor} selectedArea="QA" />);
+    for (const name of mentor.technicalAreas) {
+      expect(screen.getByText(name)).not.toHaveAttribute("aria-current");
+    }
+  });
+
   it("usa iniciales sin intentar cargar una foto inexistente", () => {
     const imageLoader = vi.spyOn(window, "Image");
     render(<MentorCard mentor={mentor} />);
@@ -60,28 +84,22 @@ describe("MentorCard", () => {
     expect(screen.getByText("Ingeniería · UMSS")).toBeVisible();
     const availability = screen.getByText("Disponible para mentoría");
     expect(availability).toBeVisible();
-    expect(availability).toHaveClass("border-availability-border", "text-availability-foreground");
-    expect(availability.querySelector('[aria-hidden="true"]')).toHaveClass(
-      "rounded-full",
-      "bg-accent",
-    );
-    const header = availability.parentElement;
+    expect(availability).toHaveClass("border-border", "text-ink");
+    const indicators = availability.parentElement;
+    expect(indicators).toHaveClass("ml-auto", "flex-col", "items-end");
+    const header = indicators?.parentElement;
     expect(header).toHaveClass("flex-wrap");
-    expect(availability).toHaveClass("ml-auto");
     expect(header?.firstElementChild).toContainElement(
       screen.getByRole("heading", { name: mentor.fullName }),
     );
-    expect(header?.firstElementChild).toHaveClass("basis-36", "min-w-0");
-    expect(header?.lastElementChild).toBe(availability);
+    expect(header?.firstElementChild).toHaveClass("basis-56", "min-w-0");
+    expect(header?.lastElementChild).toBe(indicators);
   });
 
-  it("omite formación ausente y muestra un estado neutral", () => {
+  it("omite formación ausente y muestra disponibilidad explícita", () => {
     render(<MentorCard mentor={mentor} />);
     expect(screen.queryByText(/Ingeniería/)).not.toBeInTheDocument();
-    expect(screen.getByText("No disponible")).toHaveClass(
-      "border-border",
-      "text-text-secondary",
-    );
+    expect(screen.getByText("No disponible")).toBeInTheDocument();
     expect(screen.queryByText("Disponible para mentoría")).not.toBeInTheDocument();
   });
 
@@ -92,7 +110,7 @@ describe("MentorCard", () => {
       />,
     );
     expect(screen.getByText("Orientación técnica")).toBeVisible();
-    expect(screen.getByText("No disponible")).toBeVisible();
+    expect(screen.getByText("No disponible")).toBeInTheDocument();
   });
 
   it("muestra orientaciones reales y conserva un vacío discreto", () => {
@@ -124,6 +142,9 @@ describe("MentorCard", () => {
       expect(screen.getByText(text)).toHaveClass("[overflow-wrap:anywhere]");
     }
     expect(screen.getByText("Disponible para mentoría").parentElement).toHaveClass(
+      "flex-col",
+    );
+    expect(screen.getByText("Disponible para mentoría").parentElement?.parentElement).toHaveClass(
       "flex-wrap",
     );
     expect(screen.getByRole("link")).toHaveAttribute(
@@ -215,5 +236,36 @@ describe("MentorCard", () => {
     );
 
     expect(screen.getByText("Sin áreas registradas")).toBeDefined();
+  });
+  it.each([
+    [0, "0 intereses en común"],
+    [1, "1 interés en común"],
+    [3, "3 intereses en común"],
+  ])("muestra %i coincidencias conocidas con gramática correcta", (count, label) => {
+    render(
+      <MentorCard
+        mentor={{ ...mentor, sharedInterestsCount: count }}
+        showAffinityBadge
+      />,
+    );
+    expect(screen.getByText(label)).toBeVisible();
+    expect(screen.getByText("No disponible")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: `Ver perfil de ${mentor.fullName}` }))
+      .toHaveAttribute("href", `/mentors/${mentor.id}`);
+  });
+
+  it("no muestra la insignia de afinidad cuando está deshabilitada", () => {
+    render(
+      <MentorCard
+        mentor={{ ...mentor, sharedInterestsCount: 3 }}
+      />,
+    );
+
+    expect(screen.queryByText("3 intereses en común")).not.toBeInTheDocument();
+  });
+
+  it("no convierte un conteo ausente en cero", () => {
+    render(<MentorCard mentor={mentor} showAffinityBadge />);
+    expect(screen.queryByText(/intereses? en común/)).not.toBeInTheDocument();
   });
 });

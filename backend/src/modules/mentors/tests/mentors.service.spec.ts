@@ -31,6 +31,14 @@ describe('MentorsService', () => {
     orientationTypeIds: ['0fa5e6de-63a4-430e-87fb-22f5eb700ecd'],
   };
 
+  it.each([
+    { technicalAreaIds: [], orientationTypeIds: data.orientationTypeIds },
+    { technicalAreaIds: data.technicalAreaIds, orientationTypeIds: [] },
+  ])('rechaza el formulario incompleto antes de consultar o escribir', async (form) => {
+    const service = new MentorsService({} as MentorsRepository, mapper);
+    await expect(service.activate(userId, form)).rejects.toMatchObject({ statusCode: 400 });
+  });
+
   it('transforma mentores activos al contrato del directorio', async () => {
     const findActiveMentors = vi.fn().mockResolvedValue([
       {
