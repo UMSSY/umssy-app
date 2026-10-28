@@ -131,7 +131,6 @@ export class ChatGateway
     }
   }
 
-  // NUEVO: unirse a una conversación seleccionada.
   @SubscribeMessage('conversation:join')
   async joinConversation(
     @ConnectedSocket() client: Socket,
@@ -172,7 +171,6 @@ export class ChatGateway
     }
   }
 
-  // NUEVO: enviar y distribuir mensajes en tiempo real.
   @SubscribeMessage('message:send')
   async sendMessage(
     @ConnectedSocket() client: Socket,
