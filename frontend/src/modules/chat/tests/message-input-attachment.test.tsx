@@ -225,3 +225,4 @@ describe('MessageInputBar - File Attachment & Validation Toasts (HU-11 Task 3)',
     expect(onSend).toHaveBeenCalledTimes(1);
   });
 });
+

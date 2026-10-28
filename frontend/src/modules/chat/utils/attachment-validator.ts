@@ -81,3 +81,4 @@ export function formatFileSize(bytes: number): string {
   const mb = kb / 1024;
   return `${mb.toFixed(1).replace(/\.0$/, '')} MB`;
 }
+

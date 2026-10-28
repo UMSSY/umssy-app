@@ -122,3 +122,4 @@ describe('attachment-validator (HU-11 Task 3)', () => {
     });
   });
 });
+
