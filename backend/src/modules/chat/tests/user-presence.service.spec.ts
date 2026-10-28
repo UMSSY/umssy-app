@@ -1,3 +1,4 @@
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { UserPresenceService } from '../services/user-presence.service.js';
@@ -8,12 +9,16 @@ describe('UserPresenceService', () => {
   let repository: UserPresenceRepository;
 
   beforeEach(async () => {
+    const mockRepository = {
+      upsert: vi.fn().mockResolvedValue(undefined),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserPresenceService,
         {
           provide: UserPresenceRepository,
-          useValue: { upsert: vi.fn() },
+          useValue: mockRepository, 
         },
       ],
     }).compile();
@@ -27,7 +32,7 @@ describe('UserPresenceService', () => {
     const now = new Date();
     
     await service.markOnline(userId, now);
-
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(repository.upsert).toHaveBeenCalledWith(userId, true, now);
   });
 
@@ -36,7 +41,7 @@ describe('UserPresenceService', () => {
     const now = new Date();
     
     await service.markOffline(userId, now);
-
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(repository.upsert).toHaveBeenCalledWith(userId, false, now);
   });
 });
