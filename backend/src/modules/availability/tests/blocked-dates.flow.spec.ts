@@ -13,6 +13,7 @@ import { MentorNotFoundException } from '../../mentors/exceptions/mentor-not-fou
 import { MentorsService } from '../../mentors/services/mentors.service.js';
 import { AvailabilityModule } from '../availability.module.js';
 import { ACTIVE_APPOINTMENT_STATUSES } from '../constants/appointment-status.constants.js';
+import { AVAILABILITY_ERROR_CODES } from '../constants/availability-error-codes.constants.js';
 import { AppointmentStatusTitle } from '../enums/appointment-status-title.enum.js';
 import {
   SEED_BLOCKED_DATE_ID,
@@ -456,6 +457,7 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
 
     expect(response.body).toEqual({
       statusCode: 409,
+      code: AVAILABILITY_ERROR_CODES.blockedDateHasAppointment,
       data: null,
       detail: 'No puedes bloquear un día con citas confirmadas',
       ok: false,

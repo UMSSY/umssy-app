@@ -201,7 +201,7 @@ describe('POST /appointments (integración HTTP)', () => {
     expect(response.body.errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          path: ['orientationTypeId'],
+          field: 'orientationTypeId',
           message: APPOINTMENT_MESSAGES.missingTopic,
         }),
       ]),
@@ -219,7 +219,7 @@ describe('POST /appointments (integración HTTP)', () => {
     expect(response.status).toBe(400);
     expect(response.body.errors).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ message: APPOINTMENT_MESSAGES.messageTooLong }),
+        expect.objectContaining({ field: 'message', message: APPOINTMENT_MESSAGES.messageTooLong }),
       ]),
     );
     expect(createAppointment).not.toHaveBeenCalled();
