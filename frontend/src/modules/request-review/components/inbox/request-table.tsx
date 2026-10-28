@@ -9,19 +9,20 @@ import { cn } from "cn";
 import { getInitials } from "@/shared/utils/get-initials";
 import { DOCUMENT_TYPE_LABELS, INBOX_PATH, REVIEW_PAGE_SIZE } from "../../constants/request-review.constants";
 import { formatRelativeTime } from "../../utils/format-relative-time";
-import { StatusBadge } from "../common/status-badge";
+import { AutomationStatus } from "./automation-status";
+import { MatchScoreBar } from "./match-score-bar";
 import type { RequestTableProps } from "../../types/request-table-props.types";
 
 const HEAD_CLASS = "h-10 px-5 lg:px-4 text-[11.5px] font-semibold text-ink-soft";
 const CELL_CLASS =
   "px-5 lg:px-4 text-sm text-ink max-md:block max-md:p-0 max-md:before:mb-0.5 max-md:before:block max-md:before:text-xs max-md:before:font-semibold max-md:before:text-text-secondary max-md:before:content-[attr(data-label)]";
 const WRAP_CLASS = "whitespace-normal break-words";
-const TABLE_COLUMN_COUNT = 7;
-const COLUMN_WIDTHS = ["w-[26%]", "w-[11%]", "w-[17%]", "w-[15%]", "w-[10%]", "w-[11%]", "w-[10%]"] as const;
+const TABLE_COLUMN_COUNT = 8;
+const COLUMN_WIDTHS = ["w-[22%]", "w-[10%]", "w-[15%]", "w-[14%]", "w-[9%]", "w-[13%]", "w-[9%]", "w-[8%]"] as const;
 
 export function RequestTable({ items = [], isLoading = false }: RequestTableProps) {
   return (
-    <Table className="min-w-[960px] table-fixed max-md:block max-md:min-w-0">
+    <Table className="min-w-[1040px] table-fixed max-md:block max-md:min-w-0">
       <TableHeader className="bg-surface-soft max-md:hidden">
         <TableRow className="hover:bg-transparent">
           <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[0])}>Solicitante</TableHead>
@@ -30,7 +31,8 @@ export function RequestTable({ items = [], isLoading = false }: RequestTableProp
           <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[3])}>Documento</TableHead>
           <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[4])}>Enviada</TableHead>
           <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[5])}>Estado</TableHead>
-          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[6], "text-right")}>Acción</TableHead>
+          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[6])}>Coincidencia</TableHead>
+          <TableHead className={cn(HEAD_CLASS, COLUMN_WIDTHS[7], "text-right")}>Acción</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody className="max-md:block">
@@ -77,8 +79,11 @@ export function RequestTable({ items = [], isLoading = false }: RequestTableProp
                 <TableCell data-label="Enviada" className={cn(CELL_CLASS, "text-text-secondary max-md:col-start-2 max-md:row-start-2")}>
                   {formatRelativeTime(item.submittedAt)}
                 </TableCell>
-                <TableCell data-label="Estado" className={cn(CELL_CLASS, "max-md:col-span-2")}>
-                  <StatusBadge status={item.status} />
+                <TableCell data-label="Estado" className={cn(CELL_CLASS, WRAP_CLASS)}>
+                  <AutomationStatus status={item.status} validation={item.validation} />
+                </TableCell>
+                <TableCell data-label="Coincidencia" className={CELL_CLASS}>
+                  <MatchScoreBar validation={item.validation} />
                 </TableCell>
                 <TableCell className={cn(CELL_CLASS, "text-right max-md:col-span-2 max-md:before:hidden")}>
                   <Link
