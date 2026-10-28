@@ -1,5 +1,6 @@
 import { AxiosError, type AxiosResponse } from "axios";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
@@ -9,6 +10,7 @@ import { RegisterVacancyView } from "./register-vacancy-view";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
 vi.mock("@/components/ui/select", () => ({
@@ -227,7 +229,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     expect(push).toHaveBeenCalledWith("/profile");
   });
 
-  it("edita una vacante existente: carga sus datos, guarda con PUT y confirma la actualización", async () => {
+  it("edita una vacante existente: carga sus datos, guarda con PUT, avisa y vuelve al listado", async () => {
     const OFFER = {
       ...EXPECTED_PAYLOAD,
       id: "offer-1",
@@ -258,7 +260,11 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     await screen.findByText("Revisa tu publicación");
     click("Confirmar edición");
 
-    expect(await screen.findByText("Vacante actualizada")).toBeInTheDocument();
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/recruiters"));
+    expect(toast.success).toHaveBeenCalledWith("Vacante actualizada correctamente", {
+      position: "top-center",
+      duration: 5000,
+    });
     expect(apiClient.put).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`, EXPECTED_PAYLOAD);
     expect(apiClient.post).not.toHaveBeenCalled();
   });

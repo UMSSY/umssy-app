@@ -1,5 +1,5 @@
-import { COMPANY_ROLE_TAG, DEFAULT_COMPANY_ID, DEFAULT_COMPANY_NAME } from "../constants/vacancies.constants";
-import type { CurrentCompany } from "../types/job-offer.types";
+import { COMPANY_ROLE_TAG, DEFAULT_COMPANY_ID, DEFAULT_COMPANY_NAME } from "../constants/job-offers.constants";
+import type { CurrentCompany } from "../types/current-company.types";
 import { getSessionRoleTag } from "./get-session-role-tag";
 
 function getInitials(name: string): string {

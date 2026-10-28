@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
-import { DEFAULT_COMPANY_ID } from "../constants/vacancies.constants";
+import { DEFAULT_COMPANY_ID } from "../constants/job-offers.constants";
 import { buildSessionToken } from "../testing/vacancy-fixtures";
 import { getCurrentCompany } from "./get-current-company";
 

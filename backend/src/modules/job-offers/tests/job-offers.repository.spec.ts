@@ -48,6 +48,30 @@ describe('JobOffersRepository', () => {
     });
   });
 
+  it('al reabrir cambia el estado y renueva la fecha de publicación', async () => {
+    const publishedAt = new Date('2026-10-28T14:00:00.000Z');
+    prisma.jobOffer.update.mockResolvedValue({ id: 'offer-1' });
+
+    await repository.reopen('offer-1', 'status-published', publishedAt);
+
+    expect(prisma.jobOffer.update).toHaveBeenCalledWith({
+      where: { id: 'offer-1' },
+      data: { statusId: 'status-published', createdAt: publishedAt },
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('busca el id de un estado por su título', async () => {
+    prisma.jobOfferStatus.findUnique.mockResolvedValueOnce({ id: 'status-1' }).mockResolvedValueOnce(null);
+
+    expect(await repository.findStatusId(JobOfferStatus.DELETED)).toBe('status-1');
+    expect(await repository.findStatusId(JobOfferStatus.CLOSED)).toBeNull();
+    expect(prisma.jobOfferStatus.findUnique).toHaveBeenCalledWith({
+      where: { title: 'Eliminada' },
+      select: { id: true },
+    });
+  });
+
   it('devuelve todos los ids en null si los catálogos no están sembrados', async () => {
     prisma.jobOfferModality.findUnique.mockResolvedValue(null);
     prisma.jobOfferContractType.findUnique.mockResolvedValue({ id: 'contract-1' });

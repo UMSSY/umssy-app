@@ -1,11 +1,16 @@
 import { cleanup, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { AxiosError, type AxiosResponse } from "axios";
+import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
+import { REOPEN_JOB_OFFER_TEXT, TOAST_OPTIONS } from "../constants/job-offers.constants";
 import { jobOffersService } from "../services/job-offers.service";
 import { buildJobOffer, buildSessionToken, COMPANY_ID } from "../testing/vacancy-fixtures";
 import { VacancyList } from "./vacancy-list";
+
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const OFFERS = [
   buildJobOffer({ id: "active", title: "Ingeniero Backend", status: "Publicada" }),
@@ -25,6 +30,7 @@ describe("VacancyList en modo historial", () => {
 
   afterEach(() => {
     cleanup();
+    vi.clearAllMocks();
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
     clearAccessToken();
@@ -70,7 +76,7 @@ describe("VacancyList en modo historial", () => {
     expect(screen.getByRole("button", { name: "Diseñador Gráfico" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Ingeniero Backend" })).not.toBeInTheDocument();
     expect(getOffers).toHaveBeenCalledTimes(1);
-    expect(getOffers.mock.calls[0][1]).toMatchObject({ search: undefined });
+    expect(getOffers.mock.calls[0][1]).not.toHaveProperty("search");
   });
 
   it("muestra el mensaje de búsqueda sin resultados y se restablece al limpiar", async () => {
@@ -170,21 +176,104 @@ describe("VacancyList en modo historial", () => {
     expect(getOffers).toHaveBeenCalledTimes(2);
   });
 
-  it("entrega a Reabrir el identificador de la vacante cerrada", async () => {
-    const user = userEvent.setup();
-    const onReopen = vi.fn();
-    mockOffers();
-    renderWithQuery(<VacancyList scope="history" onReopen={onReopen} />);
-
-    await user.click(await screen.findByRole("button", { name: "Reabrir" }));
-
-    expect(onReopen).toHaveBeenCalledWith("closed");
-  });
-
-  it("mantiene Reabrir deshabilitado cuando no hay acción conectada", async () => {
+  it("ofrece Reabrir solo en las vacantes cerradas", async () => {
     mockOffers();
     renderWithQuery(<VacancyList scope="history" />);
 
-    expect(await screen.findByRole("button", { name: "Reabrir" })).toBeDisabled();
+    const reopenButtons = await screen.findAllByRole("button", { name: "Reabrir" });
+    expect(reopenButtons).toHaveLength(1);
+    expect(reopenButtons[0]).toBeEnabled();
+    expect(within(reopenButtons[0].closest("li") as HTMLElement).getByText("Cerrada")).toBeInTheDocument();
+  });
+
+  it("pide confirmación con el título de la vacante y Cancelar no la reabre", async () => {
+    const user = userEvent.setup();
+    mockOffers();
+    const reopen = vi.spyOn(jobOffersService, "reopen");
+    renderWithQuery(<VacancyList scope="history" />);
+
+    await user.click(await screen.findByRole("button", { name: "Reabrir" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(REOPEN_JOB_OFFER_TEXT.title)).toBeInTheDocument();
+    expect(within(dialog).getByText("Analista de Sistemas")).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(reopen).not.toHaveBeenCalled();
+  });
+
+  it("Escape cierra la confirmación sin reabrir", async () => {
+    const user = userEvent.setup();
+    mockOffers();
+    const reopen = vi.spyOn(jobOffersService, "reopen");
+    renderWithQuery(<VacancyList scope="history" />);
+
+    await user.click(await screen.findByRole("button", { name: "Reabrir" }));
+    await screen.findByRole("dialog");
+    await user.keyboard("{Escape}");
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(reopen).not.toHaveBeenCalled();
+  });
+
+  it("reabre la vacante, avisa, cierra el modal y la muestra como Activa en el historial", async () => {
+    const user = userEvent.setup();
+    const reopened = OFFERS.map((offer) =>
+      offer.id === "closed" ? { ...offer, status: "Publicada" } : offer,
+    );
+    mockOffers().mockResolvedValueOnce(OFFERS).mockResolvedValueOnce(reopened);
+    const reopen = vi.spyOn(jobOffersService, "reopen").mockResolvedValue(reopened[1]);
+    renderWithQuery(<VacancyList scope="history" />);
+
+    await user.click(await screen.findByRole("button", { name: "Reabrir" }));
+    await user.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Reabrir" }));
+
+    expect(reopen).toHaveBeenCalledWith(COMPANY_ID, "closed");
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(toast.success).toHaveBeenCalledWith(REOPEN_JOB_OFFER_TEXT.success, TOAST_OPTIONS);
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Reabrir" })).not.toBeInTheDocument());
+    expect(screen.getAllByText("Activa")).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "Analista de Sistemas" })).toBeInTheDocument();
+  });
+
+  it("con el filtro Cerradas la vacante reabierta deja de aparecer", async () => {
+    const user = userEvent.setup();
+    const reopened = OFFERS.map((offer) =>
+      offer.id === "closed" ? { ...offer, status: "Publicada" } : offer,
+    );
+    mockOffers().mockResolvedValueOnce(OFFERS).mockResolvedValueOnce(reopened);
+    vi.spyOn(jobOffersService, "reopen").mockResolvedValue(reopened[1]);
+    renderWithQuery(<VacancyList scope="history" />);
+    await screen.findByRole("button", { name: "Ingeniero Backend" });
+
+    await user.click(screen.getByRole("button", { name: /Filtrar por/ }));
+    await user.click(screen.getByRole("button", { name: "Cerradas" }));
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(1));
+
+    await user.click(screen.getByRole("button", { name: "Reabrir" }));
+    await user.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Reabrir" }));
+
+    await waitFor(() => expect(screen.queryByRole("listitem")).not.toBeInTheDocument());
+    expect(screen.getByText("Ninguna vacante coincide con los filtros.")).toBeInTheDocument();
+  }, 10000);
+
+  it("si falla la reapertura avisa, no muestra éxito y la vacante sigue Cerrada", async () => {
+    const user = userEvent.setup();
+    mockOffers();
+    vi.spyOn(jobOffersService, "reopen").mockRejectedValue(
+      new AxiosError("fail", "ERR_BAD_RESPONSE", undefined, undefined, { status: 500, data: {} } as AxiosResponse),
+    );
+    renderWithQuery(<VacancyList scope="history" />);
+
+    await user.click(await screen.findByRole("button", { name: "Reabrir" }));
+    await user.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Reabrir" }));
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(REOPEN_JOB_OFFER_TEXT.error, TOAST_OPTIONS),
+    );
+    expect(toast.success).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText("Cerrada", { ignore: "[role=dialog] *" })).toBeInTheDocument();
   });
 });

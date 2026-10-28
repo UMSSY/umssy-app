@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   ParseUUIDPipe,
   Post,
   Put,
@@ -16,6 +17,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBody,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
@@ -40,6 +42,10 @@ import {
   createJobOfferSchema,
   type CreateJobOfferRequest,
 } from '../requests/create-job-offer.request.js';
+import {
+  updateJobOfferSchema,
+  type UpdateJobOfferRequest,
+} from '../requests/update-job-offer.request.js';
 import {
   listCompanyJobOffersSchema,
   type ListCompanyJobOffersRequest,
@@ -90,6 +96,8 @@ export class JobOffersController {
   }
 
   @Post('companies/:companyId/job-offers')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('empresa')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publica una nueva vacante de la empresa' })
   @ApiBody(toApiBody(createJobOfferSchema))
@@ -165,18 +173,32 @@ export class JobOffersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('empresa')
   @ApiOperation({ summary: 'Edita una vacante de la empresa' })
-  @ApiBody(toApiBody(createJobOfferSchema))
+  @ApiBody(toApiBody(updateJobOfferSchema))
   @ApiOkResponse({ description: 'Vacante actualizada' })
   @ApiNotFoundResponse({ description: 'La vacante no existe o no pertenece a la empresa' })
   update(
     @Param('companyId', companyIdPipe) companyId: string,
     @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
-    @Body({ schema: createJobOfferSchema }) request: CreateJobOfferRequest,
+    @Body({ schema: updateJobOfferSchema }) request: UpdateJobOfferRequest,
   ): Promise<JobOfferResponse> {
     return this.jobOffersService.update(companyId, jobOfferId, request);
   }
 
- @Delete('companies/:companyId/job-offers/:jobOfferId')
+  @Patch('companies/:companyId/job-offers/:jobOfferId/reopen')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('empresa')
+  @ApiOperation({ summary: 'Reabre una vacante cerrada de la empresa' })
+  @ApiOkResponse({ description: 'Vacante reabierta con estado Publicada' })
+  @ApiNotFoundResponse({ description: 'La vacante no existe o no pertenece a la empresa' })
+  @ApiConflictResponse({ description: 'La vacante no está cerrada' })
+  reopen(
+    @Param('companyId', companyIdPipe) companyId: string,
+    @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
+  ): Promise<JobOfferResponse> {
+    return this.jobOffersService.reopen(companyId, jobOfferId);
+  }
+
+  @Delete('companies/:companyId/job-offers/:jobOfferId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('empresa')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -187,7 +209,6 @@ export class JobOffersController {
     @Param('companyId', companyIdPipe) companyId: string,
     @Param('jobOfferId', jobOfferIdPipe) jobOfferId: string,
   ): Promise<void> {
-    console.log('>>> [BACKEND] Petición DELETE recibida:', { companyId, jobOfferId });
     return this.jobOffersService.softDelete(companyId, jobOfferId);
   }
 }

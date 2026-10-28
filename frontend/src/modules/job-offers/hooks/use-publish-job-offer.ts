@@ -2,16 +2,18 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { JOB_OFFERS_QUERY_KEYS, PUBLISH_MESSAGES } from "../constants/vacancies.constants";
+import { PUBLISH_MESSAGES } from "../constants/job-offers.constants";
+import { JOB_OFFERS_QUERY_KEYS } from "../constants/job-offers-query-keys.constants";
 import { jobOffersService } from "../services/job-offers.service";
-import type { CreateJobOfferPayload, PublishError } from "../types/job-offer.types";
+import type { CreateJobOfferPayload } from "../types/create-job-offer-payload.types";
+import type { PublishError } from "../types/publish-error.types";
 import type { VacancyConditions } from "../types/vacancy-conditions.types";
 import { getCurrentCompany } from "../utils/get-current-company";
 import { toJobOfferPayload } from "../utils/to-job-offer-payload";
 import { toPublishError } from "../utils/to-publish-error";
 import { validateInformation, validateRequirements } from "../utils/validate-vacancy";
-
-export type PublishStatus = "idle" | "submitting" | "success" | "error";
+import type { PublishStatus } from "../types/publish-status.types";
+import type { UsePublishJobOfferOptions } from "../types/use-publish-job-offer-options.types";
 
 interface PublishVariables {
   companyId: string;
@@ -23,7 +25,7 @@ function hasErrors(conditions: VacancyConditions): boolean {
   return Object.keys(found).length > 0;
 }
 
-export function usePublishJobOffer(jobOfferId?: string) {
+export function usePublishJobOffer(jobOfferId?: string, options: UsePublishJobOfferOptions = {}) {
   const [localError, setLocalError] = useState<PublishError | null>(null);
   const queryClient = useQueryClient();
 
@@ -37,8 +39,10 @@ export function usePublishJobOffer(jobOfferId?: string) {
     },
     networkMode: "always",
     // La raíz de la empresa cubre el listado y los detalles de sus vacantes.
-    onSuccess: (_data, { companyId }) =>
-      queryClient.invalidateQueries({ queryKey: JOB_OFFERS_QUERY_KEYS.company(companyId) }),
+    onSuccess: (_data, { companyId }) => {
+      options.onSuccess?.();
+      return queryClient.invalidateQueries({ queryKey: JOB_OFFERS_QUERY_KEYS.company(companyId) });
+    },
   });
 
   const submit = async (conditions: VacancyConditions): Promise<void> => {
@@ -68,7 +72,7 @@ export function usePublishJobOffer(jobOfferId?: string) {
     mutation.reset();
   };
 
-  const error = localError ?? (mutation.isError ? toPublishError(mutation.error) : null);
+  const error = localError ?? (mutation.isError ? toPublishError(mutation.error, jobOfferId ? "edit" : "publish") : null);
   const status: PublishStatus = mutation.isPending
     ? "submitting"
     : mutation.isSuccess

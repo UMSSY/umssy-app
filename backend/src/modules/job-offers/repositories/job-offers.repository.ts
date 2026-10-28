@@ -48,6 +48,14 @@ export class JobOffersRepository {
     };
   }
 
+  async findStatusId(status: JobOfferStatus): Promise<string | null> {
+    const row = await this.prisma.jobOfferStatus.findUnique({
+      where: { title: status },
+      select: { id: true },
+    });
+    return row?.id ?? null;
+  }
+
   create(data: CreateJobOfferData): Promise<JobOfferCreatedRecord> {
     const { skillIds, ...jobOffer } = data;
     return this.prisma.jobOffer.create({
@@ -112,6 +120,15 @@ export class JobOffersRepository {
           skills: { deleteMany: {}, create: skillIds.map((skillId) => ({ skillId })) },
         }),
       },
+      select: JOB_OFFER_SELECT,
+    });
+  }
+
+  // La fecha de publicación que se muestra es createdAt, por eso al reabrir se renueva.
+  reopen(jobOfferId: string, statusId: string, publishedAt: Date): Promise<JobOfferRecord> {
+    return this.prisma.jobOffer.update({
+      where: { id: jobOfferId },
+      data: { statusId, createdAt: publishedAt },
       select: JOB_OFFER_SELECT,
     });
   }

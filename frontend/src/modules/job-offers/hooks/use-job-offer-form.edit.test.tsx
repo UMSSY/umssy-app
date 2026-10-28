@@ -2,9 +2,10 @@ import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper";
+import { JOB_OFFERS_QUERY_KEYS } from "../constants/job-offers-query-keys.constants";
 import { jobOffersService } from "../services/job-offers.service";
 import { buildSessionToken, COMPANY_ID, DOCKER } from "../testing/vacancy-fixtures";
-import type { JobOfferDetailsResponse } from "../types/job-offer.types";
+import type { JobOfferDetailsResponse } from "../types/job-offer-details-response.types";
 import { useJobOfferForm } from "./use-job-offer-form";
 
 vi.mock("../services/job-offers.service", () => ({ jobOffersService: { getByCompanyAndId: vi.fn() } }));
@@ -55,6 +56,31 @@ describe("useJobOfferForm en modo edición", () => {
       skills: [DOCKER],
     });
     expect(result.current.hasUnsavedChanges).toBe(false);
+  });
+
+  it("muestra los datos aunque la vacante ya esté en caché y no avisa de cambios al cancelar", () => {
+    const { wrapper, client } = createQueryWrapper();
+    client.setQueryData(JOB_OFFERS_QUERY_KEYS.companyOfferDetails(COMPANY_ID, "offer-1"), OFFER);
+
+    const { result } = renderHook(() => useJobOfferForm("offer-1"), { wrapper });
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.conditions).toMatchObject({ title: "DevOps Senior", skills: [DOCKER] });
+    expect(result.current.hasUnsavedChanges).toBe(false);
+  });
+
+  it("no pisa lo que se está editando si la consulta de la vacante se repite", async () => {
+    vi.mocked(jobOffersService.getByCompanyAndId).mockResolvedValue(OFFER);
+    const { wrapper, client } = createQueryWrapper();
+    const { result } = renderHook(() => useJobOfferForm("offer-1"), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    act(() => result.current.updateField("title", "DevOps Lead"));
+    vi.mocked(jobOffersService.getByCompanyAndId).mockResolvedValue({ ...OFFER, title: "DevOps Senior II" });
+    await act(() => client.refetchQueries());
+
+    expect(result.current.conditions.title).toBe("DevOps Lead");
+    expect(result.current.hasUnsavedChanges).toBe(true);
   });
 
   it("deja avanzar sin errores de validación con los datos cargados", async () => {

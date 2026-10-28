@@ -13,14 +13,29 @@ const OFFERS = [
 ];
 
 describe("selectVisibleOffers", () => {
-  it("en el alcance publicado solo conserva las vacantes activas", () => {
+  it("en el alcance publicado solo conserva las vacantes activas e ignora el estado", () => {
     const visible = selectVisibleOffers(OFFERS, "published", {
       ...DEFAULT_JOB_OFFER_FILTERS,
       status: "Cerrada",
-      search: "analista",
-    });  
+    });
 
     expect(visible.map((offer) => offer.id)).toEqual(["active"]);
+  });
+
+  it("en el alcance publicado busca sin distinguir mayúsculas ni tildes", () => {
+    const offers = [
+      ...OFFERS,
+      buildJobOffer({ id: "design", title: "Diseñadora UX", status: "Publicada" }),
+    ];
+
+    expect(
+      selectVisibleOffers(offers, "published", { ...DEFAULT_JOB_OFFER_FILTERS, search: "DISENADORA" }).map(
+        (offer) => offer.id,
+      ),
+    ).toEqual(["design"]);
+    expect(
+      selectVisibleOffers(offers, "published", { ...DEFAULT_JOB_OFFER_FILTERS, search: "analista" }),
+    ).toEqual([]);
   });
 
   it.each(["Borrador", "Pausada", "Archivada"])("el historial no muestra vacantes en estado %s",(status) => {
@@ -107,7 +122,6 @@ describe("selectVisibleOffers", () => {
 describe("toListParams", () => {
   it("omite los filtros vacíos y ordena por fecha descendente", () => {
     expect(toListParams(DEFAULT_JOB_OFFER_FILTERS)).toEqual({
-      search: undefined,
       modality: undefined,
       contractType: undefined,
       dateFrom: undefined,
@@ -115,6 +129,12 @@ describe("toListParams", () => {
       sortBy: "createdAt",
       order: "desc",
     });
+  });
+
+  it("no envía la búsqueda al servidor porque se filtra en el cliente", () => {
+    expect(toListParams({ ...DEFAULT_JOB_OFFER_FILTERS, search: "backend" })).not.toHaveProperty(
+      "search",
+    );
   });
 
   it("no envía el estado al servidor", () => {

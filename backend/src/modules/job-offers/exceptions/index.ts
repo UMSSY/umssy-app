@@ -2,5 +2,6 @@ export { CompanyNotFoundException } from './company-not-found.exception.js';
 export { DuplicateJobOfferSkillsException } from './duplicate-job-offer-skills.exception.js';
 export { JobOfferCatalogNotFoundException } from './job-offer-catalog-not-found.exception.js';
 export { JobOfferNotFoundException } from './job-offer-not-found.exception.js';
+export { JobOfferNotReopenableException } from './job-offer-not-reopenable.exception.js';
 export { JobOfferSkillNotFoundException } from './job-offer-skill-not-found.exception.js';
 export { TooManyJobOfferSkillsException } from './too-many-job-offer-skills.exception.js';

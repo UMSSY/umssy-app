@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { JobOfferDetailsResponse } from "../types/job-offer.types";
+import type { JobOfferDetailsResponse } from "../types/job-offer-details-response.types";
 import { formatSalaryInput } from "../utils/format-salary-input";
 import { getCurrentCompany } from "../utils/get-current-company";
 import { useJobOfferDetails } from "./use-job-offer-details";
-import type {
-    Modality,
-    UpdateVacancyField,
-    VacancyConditions,
-    VacancyErrors,
-} from "../types/vacancy-conditions.types";
+import type { VacancyConditions } from "../types/vacancy-conditions.types";
+import type { Modality } from "../types/modality.types";
+import type { UpdateVacancyField } from "../types/update-vacancy-field.types";
+import type { VacancyErrors } from "../types/vacancy-errors.types";
 import {
     INFORMATION_FIELDS_ORDER,
     isFieldEmpty,
@@ -79,10 +77,12 @@ export function useJobOfferForm(jobOfferId?: string) {
     // Modo edición: se reutiliza el hook de detalles (misma clave de caché y mismo endpoint).
     const details = useJobOfferDetails(jobOfferId ? getCurrentCompany().id : null, jobOfferId ?? null);
     const baseline = details.offer ? toConditions(details.offer) : null;
-    const [loadedOffer, setLoadedOffer] = useState(details.offer);
-    if (details.offer !== loadedOffer) {
-        setLoadedOffer(details.offer);
-        if (details.offer) setConditions(toConditions(details.offer));
+    // Los datos se copian al formulario una sola vez por vacante, también cuando ya estaban en caché
+    // (por ejemplo, tras abrir su detalle en el listado), y no se pisan si la consulta se repite.
+    const [loadedOfferId, setLoadedOfferId] = useState<string | null>(null);
+    if (details.offer && details.offer.id !== loadedOfferId) {
+        setLoadedOfferId(details.offer.id);
+        setConditions(toConditions(details.offer));
     }
 
     useEffect(() => {

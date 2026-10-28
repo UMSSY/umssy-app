@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
 import { COMPANY_ID, DOCKER, PYTHON, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
 import { toJobOfferPayload } from "../utils/to-job-offer-payload";
-import type { JobOfferDetailsResponse } from "../types/job-offer.types";
+import type { JobOfferDetailsResponse } from "../types/job-offer-details-response.types";
 import { jobOffersService } from "./job-offers.service";
 
 vi.mock("@/shared/services/api-client", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() } }));
 
 describe("jobOffersService", () => {
   beforeEach(() => {
@@ -119,5 +119,18 @@ describe("jobOffersService", () => {
 
     await expect(jobOffersService.update(COMPANY_ID, "offer-1", payload)).resolves.toEqual(updated);
     expect(apiClient.put).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`, payload);
+  });
+  it("elimina la vacante con el cliente compartido para que un 401 cierre la sesión", async () => {
+    vi.mocked(apiClient.delete).mockResolvedValue({ data: undefined });
+
+    await expect(jobOffersService.remove(COMPANY_ID, "offer-1")).resolves.toBeUndefined();
+    expect(apiClient.delete).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1`);
+  });
+  it("reabre la vacante con PATCH y devuelve la vacante actualizada", async () => {
+    const reopened = { id: "offer-1", status: "Publicada" };
+    vi.mocked(apiClient.patch).mockResolvedValue({ data: { statusCode: 200, ok: true, detail: "", data: reopened } });
+
+    await expect(jobOffersService.reopen(COMPANY_ID, "offer-1")).resolves.toEqual(reopened);
+    expect(apiClient.patch).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1/reopen`);
   });
 });
