@@ -608,7 +608,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
     expect(invalid.body.errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          path: ['orientationTypeId'],
+          field: 'orientationTypeId',
           message: 'El tema de la sesión no es válido',
         }),
       ]),
