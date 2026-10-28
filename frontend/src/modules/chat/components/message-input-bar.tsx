@@ -241,20 +241,6 @@ export function MessageInputBar({
         />
 
         <div className="flex w-full min-w-0 items-end gap-2.5 rounded-xl border border-border bg-surface-soft p-2 transition-all focus-within:border-ink focus-within:bg-surface">
-          {/* Botón clip para adjuntar archivo */}
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            data-testid="attach-file-button"
-            aria-label="Adjuntar archivo"
-            disabled={disabled || isSending || isUploading}
-            onClick={() => fileInputRef.current?.click()}
-            className="size-9 shrink-0 rounded-lg text-text-secondary hover:bg-surface-soft hover:text-ink focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <Paperclip className="size-4" />
-          </Button>
-
           <Textarea
             ref={textareaRef}
             data-testid="message-textarea"
@@ -279,6 +265,20 @@ export function MessageInputBar({
             >
               {characterCount}/{maxLength}
             </span>
+
+            {/* Botón clip para adjuntar archivo ubicado a la derecha según mockups HU-11 */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              data-testid="attach-file-button"
+              aria-label="Adjuntar archivo"
+              disabled={disabled || isSending || isUploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="size-9 shrink-0 rounded-lg text-text-secondary hover:bg-surface-soft hover:text-ink focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Paperclip className="size-4" />
+            </Button>
 
             <Button
               type="submit"
