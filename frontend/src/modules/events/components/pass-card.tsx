@@ -22,7 +22,7 @@ export function PassCard({
         type="button"
         aria-pressed={Boolean(isSelected)}
         onClick={onClick}
-        className={`flex h-auto w-full min-w-0 flex-col items-stretch gap-4 rounded-lg p-5 pr-20 text-left whitespace-normal transition-all ${
+        className={`flex h-auto w-full min-w-0 flex-col items-stretch gap-4 rounded-lg p-5 pb-20 text-left whitespace-normal transition-all ${
           isSelected
             ? 'border border-accent bg-accent text-surface hover:bg-accent hover:text-surface'
             : 'border border-border bg-surface text-ink hover:border-border-strong'
@@ -61,15 +61,16 @@ export function PassCard({
       </Button>
       <Button
         variant="outline"
-        size="icon"
+        size="default"
         type="button"
-        className={`absolute right-5 bottom-5 ${isSelected ? 'border-surface/50 text-surface hover:bg-surface/10 hover:text-surface' : ''}`}
+        className={`absolute right-5 bottom-5 border-2 shadow-sm disabled:opacity-100 ${isSelected ? 'border-surface bg-surface text-accent hover:bg-surface/90 hover:text-accent' : 'border-accent bg-accent text-surface hover:bg-accent/90 hover:text-surface'}`}
         aria-label="Abrir chat del taller"
         title={onOpenChat ? 'Abrir chat del taller' : 'Chat del taller próximamente'}
         disabled={!onOpenChat}
         onClick={() => onOpenChat?.(registrationId)}
       >
-        <MessageCircle aria-hidden="true" />
+        <MessageCircle className="size-5" aria-hidden="true" />
+        <span>Chat</span>
       </Button>
     </Card>
   );
