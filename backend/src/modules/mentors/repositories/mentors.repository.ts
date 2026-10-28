@@ -13,6 +13,7 @@ import {
 } from './mentor-capacity.queries.js';
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
+import { withMentorIntake } from './mentor-intake-policy.js';
 
 const directorySelect = {
   id: true,
@@ -48,8 +49,24 @@ type MentorDirectorySort = 'name_asc' | 'name_desc';
 export class MentorsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findMentorRole() {
-    return this.prisma.role.findUnique({
+  withIntake<T>(
+    userId: string,
+    key: string,
+    preferences: { technicalAreaIds: string[]; orientationTypeIds: string[] },
+    action: (tx: Prisma.TransactionClient) => Promise<T>,
+  ) {
+    return withMentorIntake(
+      this.prisma,
+      userId,
+      'ACTIVATE',
+      key,
+      preferences,
+      action,
+    );
+  }
+
+  findMentorRole(tx: Prisma.TransactionClient = this.prisma) {
+    return tx.role.findUnique({
       where: {
         name: MENTOR_ROLE_NAME,
       },
@@ -59,8 +76,12 @@ export class MentorsRepository {
     });
   }
 
-  findActiveUserRole(userId: string, roleId: string) {
-    return this.prisma.userRole.findFirst({
+  findActiveUserRole(
+    userId: string,
+    roleId: string,
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
+    return tx.userRole.findFirst({
       where: {
         userId,
         roleId,
@@ -73,8 +94,11 @@ export class MentorsRepository {
     });
   }
 
-  findTechnicalAreas(ids: string[]) {
-    return this.prisma.technicalArea.findMany({
+  findTechnicalAreas(
+    ids: string[],
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
+    return tx.technicalArea.findMany({
       where: {
         id: {
           in: ids,
@@ -86,8 +110,11 @@ export class MentorsRepository {
     });
   }
 
-  findActiveOrientationTypes(ids: string[]) {
-    return this.prisma.orientationType.findMany({
+  findActiveOrientationTypes(
+    ids: string[],
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
+    return tx.orientationType.findMany({
       where: {
         id: {
           in: ids,
@@ -275,9 +302,15 @@ export class MentorsRepository {
       this.findMentorOrientationTypes(userId),
     ]);
     const now = new Date();
-    const isActive = roles.some((role) => role.deletedAt === null && role.startAt <= now);
+    const isActive = roles.some(
+      (role) => role.deletedAt === null && role.startAt <= now,
+    );
     return {
-      status: isActive ? 'ACTIVE' as const : roles.length > 0 ? 'DEACTIVATED' as const : 'NEVER' as const,
+      status: isActive
+        ? ('ACTIVE' as const)
+        : roles.length > 0
+          ? ('DEACTIVATED' as const)
+          : ('NEVER' as const),
       areas: areas.map(({ technicalArea }) => technicalArea),
       orientations: orientations.map(({ orientationType }) => orientationType),
     };
@@ -458,8 +491,9 @@ export class MentorsRepository {
     roleId: string,
     technicalAreaIds: string[],
     orientationTypeIds: string[],
+    tx?: Prisma.TransactionClient,
   ) {
-    return withMentorCapacityLock(this.prisma, async (transaction) => {
+    const activate = async (transaction: Prisma.TransactionClient) => {
       await reconcileMentorOffers(transaction);
       const eligibility = await readMentorEligibility(transaction, userId);
       if (!eligibility.eligible) throw new MentorEligibilityException();
@@ -475,10 +509,14 @@ export class MentorsRepository {
         },
       });
 
-      // El wizard puede cambiar la selección conservada durante la salida.
-      await transaction.mentorTechnicalArea.deleteMany({ where: { mentorId: userId } });
-      await transaction.mentorOrientationType.deleteMany({ where: { mentorId: userId } });
-
+      // A former mentor may retain preferences from an earlier participation.
+      // Re-entry always uses the newly submitted selections.
+      await transaction.mentorTechnicalArea.deleteMany({
+        where: { mentorId: userId },
+      });
+      await transaction.mentorOrientationType.deleteMany({
+        where: { mentorId: userId },
+      });
       await transaction.mentorTechnicalArea.createMany({
         data: technicalAreaIds.map((technicalAreaId) => ({
           mentorId: userId,
@@ -503,7 +541,8 @@ export class MentorsRepository {
       });
 
       return { id: userId };
-    });
+    };
+    return tx ? activate(tx) : withMentorCapacityLock(this.prisma, activate);
   }
 
   updateAvailability(userId: string, isAvailable: boolean) {

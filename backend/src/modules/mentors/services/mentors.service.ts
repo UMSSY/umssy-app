@@ -13,6 +13,7 @@ import type { UpdateMentorOrientationTypesDto } from '../requests/update-mentor-
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import type { MentorDirectoryQuery } from '../requests/mentor-directory-query.schema.js';
 import { MentorAffinityService } from './mentor-affinity.service.js';
+import type { Prisma } from '../../../prisma/client.js';
 
 const DIRECTORY_PAGE_SIZE = 6 as const;
 
@@ -227,43 +228,71 @@ export class MentorsService {
     return { orientationTypeIds: data.orientationTypeIds };
   }
 
-  async activate(userId: string, data: ActivateMentorDto) {
+  async activate(
+    userId: string,
+    data: ActivateMentorDto,
+    key?: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<{ id: string }> {
+    if (key)
+      return this.mentorsRepository.withIntake(
+        userId,
+        key,
+        data,
+        (transaction) => this.activate(userId, data, undefined, transaction),
+      );
     if (!data.technicalAreaIds.length)
       throw new InvalidTechnicalAreasException();
     if (!data.orientationTypeIds.length)
       throw new InvalidOrientationTypesException();
-    const mentorRole = await this.mentorsRepository.findMentorRole();
-
+    const mentorRole = tx
+      ? await this.mentorsRepository.findMentorRole(tx)
+      : await this.mentorsRepository.findMentorRole();
     if (!mentorRole) {
       throw new MentorRoleNotFoundException();
     }
 
-    const existingRole = await this.mentorsRepository.findActiveUserRole(
-      userId,
-      mentorRole.id,
-    );
-
+    const existingRole = tx
+      ? await this.mentorsRepository.findActiveUserRole(
+          userId,
+          mentorRole.id,
+          tx,
+        )
+      : await this.mentorsRepository.findActiveUserRole(userId, mentorRole.id);
     if (existingRole) {
       throw new AlreadyMentorException();
     }
 
-    const technicalAreas = await this.mentorsRepository.findTechnicalAreas(
-      data.technicalAreaIds,
-    );
-
+    const technicalAreas = tx
+      ? await this.mentorsRepository.findTechnicalAreas(
+          data.technicalAreaIds,
+          tx,
+        )
+      : await this.mentorsRepository.findTechnicalAreas(data.technicalAreaIds);
     if (technicalAreas.length !== data.technicalAreaIds.length) {
       throw new InvalidTechnicalAreasException();
     }
 
-    const orientationTypes =
-      await this.mentorsRepository.findActiveOrientationTypes(
-        data.orientationTypeIds,
-      );
-
+    const orientationTypes = tx
+      ? await this.mentorsRepository.findActiveOrientationTypes(
+          data.orientationTypeIds,
+          tx,
+        )
+      : await this.mentorsRepository.findActiveOrientationTypes(
+          data.orientationTypeIds,
+        );
     if (orientationTypes.length !== data.orientationTypeIds.length) {
       throw new InvalidOrientationTypesException();
     }
 
+    if (tx)
+      return this.mentorsRepository.activate(
+        userId,
+        mentorRole.id,
+        data.technicalAreaIds,
+        data.orientationTypeIds,
+        tx,
+      );
     return this.mentorsRepository.activate(
       userId,
       mentorRole.id,

@@ -262,6 +262,9 @@ export type UserWhereInput = {
   aboutMe?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptListRelationFilter
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionListRelationFilter
+  mentorMailOutbox?: Prisma.MentorMailOutboxListRelationFilter
   city?: Prisma.XOR<Prisma.CityNullableScalarRelationFilter, Prisma.CityWhereInput> | null
   roles?: Prisma.UserRoleListRelationFilter
   educations?: Prisma.EducationListRelationFilter
@@ -317,6 +320,9 @@ export type UserOrderByWithRelationInput = {
   aboutMe?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptOrderByRelationAggregateInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionOrderByRelationAggregateInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxOrderByRelationAggregateInput
   city?: Prisma.CityOrderByWithRelationInput
   roles?: Prisma.UserRoleOrderByRelationAggregateInput
   educations?: Prisma.EducationOrderByRelationAggregateInput
@@ -375,6 +381,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   aboutMe?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptListRelationFilter
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionListRelationFilter
+  mentorMailOutbox?: Prisma.MentorMailOutboxListRelationFilter
   city?: Prisma.XOR<Prisma.CityNullableScalarRelationFilter, Prisma.CityWhereInput> | null
   roles?: Prisma.UserRoleListRelationFilter
   educations?: Prisma.EducationListRelationFilter
@@ -471,6 +480,9 @@ export type UserCreateInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -526,6 +538,9 @@ export type UserUncheckedCreateInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -579,6 +594,9 @@ export type UserUpdateInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -634,6 +652,9 @@ export type UserUncheckedUpdateInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -1371,6 +1392,48 @@ export type UserUpdateOneWithoutRevertedValidationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRevertedValidationsInput, Prisma.UserUpdateWithoutRevertedValidationsInput>, Prisma.UserUncheckedUpdateWithoutRevertedValidationsInput>
 }
 
+export type UserCreateNestedOneWithoutMentorIntakeAttemptsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedCreateWithoutMentorIntakeAttemptsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorIntakeAttemptsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutMentorIntakeAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedCreateWithoutMentorIntakeAttemptsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorIntakeAttemptsInput
+  upsert?: Prisma.UserUpsertWithoutMentorIntakeAttemptsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMentorIntakeAttemptsInput, Prisma.UserUpdateWithoutMentorIntakeAttemptsInput>, Prisma.UserUncheckedUpdateWithoutMentorIntakeAttemptsInput>
+}
+
+export type UserCreateNestedOneWithoutMentorParticipationSanctionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedCreateWithoutMentorParticipationSanctionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorParticipationSanctionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutMentorParticipationSanctionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedCreateWithoutMentorParticipationSanctionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorParticipationSanctionsInput
+  upsert?: Prisma.UserUpsertWithoutMentorParticipationSanctionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMentorParticipationSanctionsInput, Prisma.UserUpdateWithoutMentorParticipationSanctionsInput>, Prisma.UserUncheckedUpdateWithoutMentorParticipationSanctionsInput>
+}
+
+export type UserCreateNestedOneWithoutMentorMailOutboxInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorMailOutboxInput, Prisma.UserUncheckedCreateWithoutMentorMailOutboxInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorMailOutboxInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutMentorMailOutboxNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMentorMailOutboxInput, Prisma.UserUncheckedCreateWithoutMentorMailOutboxInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMentorMailOutboxInput
+  upsert?: Prisma.UserUpsertWithoutMentorMailOutboxInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMentorMailOutboxInput, Prisma.UserUpdateWithoutMentorMailOutboxInput>, Prisma.UserUncheckedUpdateWithoutMentorMailOutboxInput>
+}
+
 export type UserCreateWithoutCityInput = {
   id?: string
   firstName: string
@@ -1386,6 +1449,9 @@ export type UserCreateWithoutCityInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
@@ -1439,6 +1505,9 @@ export type UserUncheckedCreateWithoutCityInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -1539,6 +1608,9 @@ export type UserCreateWithoutRolesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
@@ -1593,6 +1665,9 @@ export type UserUncheckedCreateWithoutRolesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
@@ -1661,6 +1736,9 @@ export type UserUpdateWithoutRolesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
@@ -1715,6 +1793,9 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
@@ -1767,6 +1848,9 @@ export type UserCreateWithoutEducationsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
@@ -1821,6 +1905,9 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
@@ -1889,6 +1976,9 @@ export type UserUpdateWithoutEducationsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
@@ -1943,6 +2033,9 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
@@ -1995,6 +2088,9 @@ export type UserCreateWithoutWorkExperiencesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -2049,6 +2145,9 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
@@ -2117,6 +2216,9 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -2171,6 +2273,9 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
@@ -2223,6 +2328,9 @@ export type UserCreateWithoutUserSkillsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -2277,6 +2385,9 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -2345,6 +2456,9 @@ export type UserUpdateWithoutUserSkillsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -2399,6 +2513,9 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -2451,6 +2568,9 @@ export type UserCreateWithoutCertificationsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -2505,6 +2625,9 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -2573,6 +2696,9 @@ export type UserUpdateWithoutCertificationsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -2627,6 +2753,9 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -2679,6 +2808,9 @@ export type UserCreateWithoutCvFilesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -2733,6 +2865,9 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -2801,6 +2936,9 @@ export type UserUpdateWithoutCvFilesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -2855,6 +2993,9 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -2907,6 +3048,9 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -2961,6 +3105,9 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -3029,6 +3176,9 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -3083,6 +3233,9 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -3135,6 +3288,9 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -3189,6 +3345,9 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -3257,6 +3416,9 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -3311,6 +3473,9 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -3363,6 +3528,9 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -3417,6 +3585,9 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -3485,6 +3656,9 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -3539,6 +3713,9 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -3591,6 +3768,9 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -3645,6 +3825,9 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -3713,6 +3896,9 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -3767,6 +3953,9 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -3819,6 +4008,9 @@ export type UserCreateWithoutBlockedDatesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -3873,6 +4065,9 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -3941,6 +4136,9 @@ export type UserUpdateWithoutBlockedDatesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -3995,6 +4193,9 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -4047,6 +4248,9 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -4101,6 +4305,9 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -4158,6 +4365,9 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -4212,6 +4422,9 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -4269,6 +4482,9 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -4323,6 +4539,9 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -4391,6 +4610,9 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -4445,6 +4667,9 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -4508,6 +4733,9 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -4562,6 +4790,9 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -4625,6 +4856,9 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -4679,6 +4913,9 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -4731,6 +4968,9 @@ export type UserCreateWithoutAppointmentChangesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -4785,6 +5025,9 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -4853,6 +5096,9 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -4907,6 +5153,9 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -4959,6 +5208,9 @@ export type UserCreateWithoutCreatedEventsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -5013,6 +5265,9 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -5070,6 +5325,9 @@ export type UserCreateWithoutModeratedEventsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -5124,6 +5382,9 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -5192,6 +5453,9 @@ export type UserUpdateWithoutCreatedEventsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -5246,6 +5510,9 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -5309,6 +5576,9 @@ export type UserUpdateWithoutModeratedEventsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -5363,6 +5633,9 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -5415,6 +5688,9 @@ export type UserCreateWithoutEventRegistrationsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -5469,6 +5745,9 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -5537,6 +5816,9 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -5591,6 +5873,9 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -5643,6 +5928,9 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -5697,6 +5985,9 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -5765,6 +6056,9 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -5819,6 +6113,9 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -5871,6 +6168,9 @@ export type UserCreateWithoutExportHistoriesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -5925,6 +6225,9 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -5993,6 +6296,9 @@ export type UserUpdateWithoutExportHistoriesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -6047,6 +6353,9 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -6099,6 +6408,9 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -6153,6 +6465,9 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -6210,6 +6525,9 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -6264,6 +6582,9 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -6321,6 +6642,9 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -6375,6 +6699,9 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -6443,6 +6770,9 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -6497,6 +6827,9 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -6560,6 +6893,9 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -6614,6 +6950,9 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -6677,6 +7016,9 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -6731,6 +7073,9 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -6783,6 +7128,9 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -6837,6 +7185,9 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -6905,6 +7256,9 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -6959,6 +7313,9 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -7011,6 +7368,9 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -7065,6 +7425,9 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -7133,6 +7496,9 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -7187,6 +7553,9 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -7239,6 +7608,9 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -7293,6 +7665,9 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -7350,6 +7725,9 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -7404,6 +7782,9 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -7472,6 +7853,9 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -7526,6 +7910,9 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -7589,6 +7976,9 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -7643,6 +8033,9 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -7695,6 +8088,9 @@ export type UserCreateWithoutChatParticipantsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -7749,6 +8145,9 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -7817,6 +8216,9 @@ export type UserUpdateWithoutChatParticipantsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -7871,6 +8273,9 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -7923,6 +8328,9 @@ export type UserCreateWithoutChatMessagesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -7977,6 +8385,9 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -8045,6 +8456,9 @@ export type UserUpdateWithoutChatMessagesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -8099,6 +8513,9 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -8151,6 +8568,9 @@ export type UserCreateWithoutPresenceInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -8205,6 +8625,9 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -8273,6 +8696,9 @@ export type UserUpdateWithoutPresenceInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -8327,6 +8753,9 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -8379,6 +8808,9 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -8433,6 +8865,9 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -8501,6 +8936,9 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -8555,6 +8993,9 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -8607,6 +9048,9 @@ export type UserCreateWithoutJobApplicationsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -8661,6 +9105,9 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -8729,6 +9176,9 @@ export type UserUpdateWithoutJobApplicationsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -8783,6 +9233,9 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -8835,6 +9288,9 @@ export type UserCreateWithoutCreatedSurveysInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -8889,6 +9345,9 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -8957,6 +9416,9 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -9011,6 +9473,9 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -9063,6 +9528,9 @@ export type UserCreateWithoutSurveyResponsesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -9117,6 +9585,9 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -9185,6 +9656,9 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -9239,6 +9713,9 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -9291,6 +9768,9 @@ export type UserCreateWithoutAuditEventsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -9345,6 +9825,9 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -9413,6 +9896,9 @@ export type UserUpdateWithoutAuditEventsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -9467,6 +9953,9 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -9519,6 +10008,9 @@ export type UserCreateWithoutRevertedValidationsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -9573,6 +10065,9 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
@@ -9641,6 +10136,9 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -9695,6 +10193,9 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -9732,6 +10233,726 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
 
+export type UserCreateWithoutMentorIntakeAttemptsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutMentorIntakeAttemptsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedCreateWithoutMentorIntakeAttemptsInput>
+}
+
+export type UserUpsertWithoutMentorIntakeAttemptsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedUpdateWithoutMentorIntakeAttemptsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedCreateWithoutMentorIntakeAttemptsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMentorIntakeAttemptsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMentorIntakeAttemptsInput, Prisma.UserUncheckedUpdateWithoutMentorIntakeAttemptsInput>
+}
+
+export type UserUpdateWithoutMentorIntakeAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutMentorParticipationSanctionsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxCreateNestedManyWithoutUserInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutMentorParticipationSanctionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedCreateWithoutMentorParticipationSanctionsInput>
+}
+
+export type UserUpsertWithoutMentorParticipationSanctionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedUpdateWithoutMentorParticipationSanctionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedCreateWithoutMentorParticipationSanctionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMentorParticipationSanctionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMentorParticipationSanctionsInput, Prisma.UserUncheckedUpdateWithoutMentorParticipationSanctionsInput>
+}
+
+export type UserUpdateWithoutMentorParticipationSanctionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutMentorMailOutboxInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutMentorMailOutboxInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutMentorMailOutboxInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMentorMailOutboxInput, Prisma.UserUncheckedCreateWithoutMentorMailOutboxInput>
+}
+
+export type UserUpsertWithoutMentorMailOutboxInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMentorMailOutboxInput, Prisma.UserUncheckedUpdateWithoutMentorMailOutboxInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMentorMailOutboxInput, Prisma.UserUncheckedCreateWithoutMentorMailOutboxInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMentorMailOutboxInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMentorMailOutboxInput, Prisma.UserUncheckedUpdateWithoutMentorMailOutboxInput>
+}
+
+export type UserUpdateWithoutMentorMailOutboxInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMentorMailOutboxInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+}
+
 export type UserCreateManyCityInput = {
   id?: string
   firstName: string
@@ -9764,6 +10985,9 @@ export type UserUpdateWithoutCityInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
@@ -9817,6 +11041,9 @@ export type UserUncheckedUpdateWithoutCityInput = {
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  mentorMailOutbox?: Prisma.MentorMailOutboxUncheckedUpdateManyWithoutUserNestedInput
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
@@ -9878,6 +11105,9 @@ export type UserUncheckedUpdateManyWithoutCityInput = {
  */
 
 export type UserCountOutputType = {
+  mentorIntakeAttempts: number
+  mentorParticipationSanctions: number
+  mentorMailOutbox: number
   roles: number
   educations: number
   workExperiences: number
@@ -9913,6 +11143,9 @@ export type UserCountOutputType = {
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  mentorIntakeAttempts?: boolean | UserCountOutputTypeCountMentorIntakeAttemptsArgs
+  mentorParticipationSanctions?: boolean | UserCountOutputTypeCountMentorParticipationSanctionsArgs
+  mentorMailOutbox?: boolean | UserCountOutputTypeCountMentorMailOutboxArgs
   roles?: boolean | UserCountOutputTypeCountRolesArgs
   educations?: boolean | UserCountOutputTypeCountEducationsArgs
   workExperiences?: boolean | UserCountOutputTypeCountWorkExperiencesArgs
@@ -9955,6 +11188,27 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Select specific fields to fetch from the UserCountOutputType
    */
   select?: Prisma.UserCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMentorIntakeAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MentorIntakeAttemptWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMentorParticipationSanctionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MentorParticipationSanctionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMentorMailOutboxArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MentorMailOutboxWhereInput
 }
 
 /**
@@ -10198,6 +11452,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   aboutMe?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  mentorIntakeAttempts?: boolean | Prisma.User$mentorIntakeAttemptsArgs<ExtArgs>
+  mentorParticipationSanctions?: boolean | Prisma.User$mentorParticipationSanctionsArgs<ExtArgs>
+  mentorMailOutbox?: boolean | Prisma.User$mentorMailOutboxArgs<ExtArgs>
   city?: boolean | Prisma.User$cityArgs<ExtArgs>
   roles?: boolean | Prisma.User$rolesArgs<ExtArgs>
   educations?: boolean | Prisma.User$educationsArgs<ExtArgs>
@@ -10296,6 +11553,9 @@ export type UserSelectScalar = {
 
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "email" | "password" | "isActive" | "isAvailableForMentoring" | "photoUrl" | "cityId" | "phone" | "personalEmail" | "headline" | "aboutMe" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  mentorIntakeAttempts?: boolean | Prisma.User$mentorIntakeAttemptsArgs<ExtArgs>
+  mentorParticipationSanctions?: boolean | Prisma.User$mentorParticipationSanctionsArgs<ExtArgs>
+  mentorMailOutbox?: boolean | Prisma.User$mentorMailOutboxArgs<ExtArgs>
   city?: boolean | Prisma.User$cityArgs<ExtArgs>
   roles?: boolean | Prisma.User$rolesArgs<ExtArgs>
   educations?: boolean | Prisma.User$educationsArgs<ExtArgs>
@@ -10345,6 +11605,9 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
+    mentorIntakeAttempts: Prisma.$MentorIntakeAttemptPayload<ExtArgs>[]
+    mentorParticipationSanctions: Prisma.$MentorParticipationSanctionPayload<ExtArgs>[]
+    mentorMailOutbox: Prisma.$MentorMailOutboxPayload<ExtArgs>[]
     city: Prisma.$CityPayload<ExtArgs> | null
     roles: Prisma.$UserRolePayload<ExtArgs>[]
     educations: Prisma.$EducationPayload<ExtArgs>[]
@@ -10793,6 +12056,9 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  mentorIntakeAttempts<T extends Prisma.User$mentorIntakeAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorIntakeAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorIntakeAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mentorParticipationSanctions<T extends Prisma.User$mentorParticipationSanctionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorParticipationSanctionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorParticipationSanctionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mentorMailOutbox<T extends Prisma.User$mentorMailOutboxArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorMailOutboxArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorMailOutboxPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   city<T extends Prisma.User$cityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cityArgs<ExtArgs>>): Prisma.Prisma__CityClient<runtime.Types.Result.GetResult<Prisma.$CityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   roles<T extends Prisma.User$rolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$rolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   educations<T extends Prisma.User$educationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$educationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -11272,6 +12538,78 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Users to delete.
    */
   limit?: number
+}
+
+/**
+ * User.mentorIntakeAttempts
+ */
+export type User$mentorIntakeAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MentorIntakeAttempt
+   */
+  select?: Prisma.MentorIntakeAttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MentorIntakeAttempt
+   */
+  omit?: Prisma.MentorIntakeAttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MentorIntakeAttemptInclude<ExtArgs> | null
+  where?: Prisma.MentorIntakeAttemptWhereInput
+  orderBy?: Prisma.MentorIntakeAttemptOrderByWithRelationInput | Prisma.MentorIntakeAttemptOrderByWithRelationInput[]
+  cursor?: Prisma.MentorIntakeAttemptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MentorIntakeAttemptScalarFieldEnum | Prisma.MentorIntakeAttemptScalarFieldEnum[]
+}
+
+/**
+ * User.mentorParticipationSanctions
+ */
+export type User$mentorParticipationSanctionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MentorParticipationSanction
+   */
+  select?: Prisma.MentorParticipationSanctionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MentorParticipationSanction
+   */
+  omit?: Prisma.MentorParticipationSanctionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MentorParticipationSanctionInclude<ExtArgs> | null
+  where?: Prisma.MentorParticipationSanctionWhereInput
+  orderBy?: Prisma.MentorParticipationSanctionOrderByWithRelationInput | Prisma.MentorParticipationSanctionOrderByWithRelationInput[]
+  cursor?: Prisma.MentorParticipationSanctionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MentorParticipationSanctionScalarFieldEnum | Prisma.MentorParticipationSanctionScalarFieldEnum[]
+}
+
+/**
+ * User.mentorMailOutbox
+ */
+export type User$mentorMailOutboxArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MentorMailOutbox
+   */
+  select?: Prisma.MentorMailOutboxSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MentorMailOutbox
+   */
+  omit?: Prisma.MentorMailOutboxOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MentorMailOutboxInclude<ExtArgs> | null
+  where?: Prisma.MentorMailOutboxWhereInput
+  orderBy?: Prisma.MentorMailOutboxOrderByWithRelationInput | Prisma.MentorMailOutboxOrderByWithRelationInput[]
+  cursor?: Prisma.MentorMailOutboxWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MentorMailOutboxScalarFieldEnum | Prisma.MentorMailOutboxScalarFieldEnum[]
 }
 
 /**

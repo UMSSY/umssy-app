@@ -1,8 +1,20 @@
-import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
-import { loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "@/modules/mentorship/services/mentorship-wizard-draft.service";
-import { mentorParticipationService, type MyMentorParticipation } from "../services/mentor-participation.service";
+import {
+  loadMentorshipWizardDraft,
+  saveMentorshipWizardDraft,
+} from "@/modules/mentorship/services/mentorship-wizard-draft.service";
+import {
+  mentorParticipationService,
+  type MyMentorParticipation,
+} from "../services/mentor-participation.service";
 import { ParticipationView } from "./participation-view";
 import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 
@@ -11,8 +23,12 @@ const drafts = vi.hoisted(() => new Map<string, unknown>());
 vi.mock("next/navigation", () => ({ useRouter: () => navigation }));
 vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
   readIndexedDb: vi.fn(async (key: string) => drafts.get(key) ?? null),
-  writeIndexedDb: vi.fn(async (key: string, value: unknown) => { drafts.set(key, value); }),
-  removeIndexedDb: vi.fn(async (key: string) => { drafts.delete(key); }),
+  writeIndexedDb: vi.fn(async (key: string, value: unknown) => {
+    drafts.set(key, value);
+  }),
+  removeIndexedDb: vi.fn(async (key: string) => {
+    drafts.delete(key);
+  }),
 }));
 
 const active: MyMentorParticipation = {
@@ -26,7 +42,10 @@ describe("ParticipationView HU-MEN-06", () => {
   beforeEach(() => {
     sessionStorage.setItem("accessToken", "test-token");
     vi.spyOn(mentorParticipationService, "getCurrent").mockResolvedValue(null);
-    vi.spyOn(mentorParticipationService, "getMyParticipation").mockResolvedValue(active);
+    vi.spyOn(
+      mentorParticipationService,
+      "getMyParticipation",
+    ).mockResolvedValue(active);
   });
 
   afterEach(() => {
@@ -42,29 +61,50 @@ describe("ParticipationView HU-MEN-06", () => {
     renderWithQuery(<ParticipationView />);
     expect(await screen.findByText("Activo")).toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Editar áreas técnicas" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Desactivar participación" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Editar áreas técnicas" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Desactivar participación" }),
+    ).toBeInTheDocument();
   });
 
   it("conserva preferencias y oculta acciones de edición al desactivar", async () => {
-    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(deactivated);
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(
+      deactivated,
+    );
     renderWithQuery(<ParticipationView />);
     expect(await screen.findByText("Desactivado")).toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Editar áreas técnicas" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Activar participación" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Editar áreas técnicas" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Activar participación" }),
+    ).toBeInTheDocument();
   });
 
   it("cancelar no llama al servidor; confirmar sale una sola vez", async () => {
-    const leave = vi.spyOn(mentorParticipationService, "leave").mockResolvedValue();
+    const leave = vi
+      .spyOn(mentorParticipationService, "leave")
+      .mockResolvedValue();
     vi.mocked(mentorParticipationService.getMyParticipation)
-      .mockResolvedValueOnce(active).mockResolvedValue(deactivated);
+      .mockResolvedValueOnce(active)
+      .mockResolvedValue(deactivated);
     renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Desactivar participación" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Desactivar participación" }),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
     expect(leave).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Desactivar participación" }));
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Desactivar participación" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Desactivar participación" }),
+    );
+    fireEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Desactivar participación",
+      }),
+    );
     await waitFor(() => expect(leave).toHaveBeenCalledTimes(1));
     expect(await screen.findByText("Desactivado")).toBeInTheDocument();
   });
@@ -72,77 +112,201 @@ describe("ParticipationView HU-MEN-06", () => {
   it("mantiene abierto el modal y explica las citas futuras cuando falla la salida", async () => {
     vi.spyOn(mentorParticipationService, "leave").mockRejectedValue({
       isAxiosError: true,
-      response: { status: 409, data: { message: "Resuelve las citas futuras", data: { code: "MENTOR_HAS_FUTURE_APPOINTMENTS" } } },
+      response: {
+        status: 409,
+        data: {
+          message: "Resuelve las citas futuras",
+          data: { code: "MENTOR_HAS_FUTURE_APPOINTMENTS" },
+        },
+      },
     });
     renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Desactivar participación" }));
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Desactivar participación" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Resuelve las citas futuras");
-    expect(screen.getByRole("link", { name: "Resolver mis citas en la agenda" })).toBeInTheDocument();
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Desactivar participación" }),
+    );
+    fireEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Desactivar participación",
+      }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Resuelve las citas futuras",
+    );
+    expect(
+      screen.getByRole("link", { name: "Resolver mis citas en la agenda" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Activo")).toBeInTheDocument();
   });
 
   it("bloquea el doble envío de desactivación", async () => {
-    const leave = vi.spyOn(mentorParticipationService, "leave").mockImplementation(() => new Promise<void>(() => {}));
+    const leave = vi
+      .spyOn(mentorParticipationService, "leave")
+      .mockImplementation(() => new Promise<void>(() => {}));
     renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Desactivar participación" }));
-    const confirm = within(screen.getByRole("dialog")).getByRole("button", { name: "Desactivar participación" });
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Desactivar participación" }),
+    );
+    const confirm = within(screen.getByRole("dialog")).getByRole("button", {
+      name: "Desactivar participación",
+    });
     fireEvent.click(confirm);
     fireEvent.click(confirm);
     expect(leave).toHaveBeenCalledTimes(1);
   });
 
   it("precarga el wizard al iniciar reincorporación sin activar antes del servidor", async () => {
-    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(deactivated);
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(
+      deactivated,
+    );
     renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Activar participación" }));
-    fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
-    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/mentorship"));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Activar participación" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continuar a incorporación" }),
+    );
+    await waitFor(() =>
+      expect(navigation.push).toHaveBeenCalledWith("/mentorship"),
+    );
     expect(await loadMentorshipWizardDraft()).toEqual({
-      currentStep: 1, wantsToParticipate: true,
-      selectedTechnicalAreaIds: ["area-1"], selectedOrientationTypeIds: ["orientation-1"],
+      currentStep: 1,
+      wantsToParticipate: true,
+      selectedTechnicalAreaIds: ["area-1"],
+      selectedOrientationTypeIds: ["orientation-1"],
     });
     expect(navigation.push).toHaveBeenCalledWith("/mentorship");
     expect(screen.getByText("Desactivado")).toBeInTheDocument();
   });
 
   it("permite continuar sin precarga cuando falla IndexedDB", async () => {
-    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(deactivated);
-    vi.mocked(writeIndexedDb).mockRejectedValueOnce(new Error("IndexedDB no está disponible"));
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(
+      deactivated,
+    );
+    vi.mocked(writeIndexedDb).mockRejectedValueOnce(
+      new Error("IndexedDB no está disponible"),
+    );
     renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Activar participación" }));
-    fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo recuperar el borrador");
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Activar participación" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continuar a incorporación" }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No se pudo recuperar el borrador",
+    );
     expect(navigation.push).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continuar a incorporación" }),
+    );
     expect(navigation.push).toHaveBeenCalledWith("/mentorship");
   });
 
   it("respeta un borrador existente del wizard", async () => {
-    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(deactivated);
-    await saveMentorshipWizardDraft({ currentStep: 3, wantsToParticipate: true,
-      selectedTechnicalAreaIds: ["area-editada"], selectedOrientationTypeIds: ["orientation-1"] });
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(
+      deactivated,
+    );
+    await saveMentorshipWizardDraft({
+      currentStep: 3,
+      wantsToParticipate: true,
+      selectedTechnicalAreaIds: ["area-editada"],
+      selectedOrientationTypeIds: ["orientation-1"],
+    });
     renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Activar participación" }));
-    fireEvent.click(screen.getByRole("button", { name: "Continuar a incorporación" }));
-    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/mentorship"));
-    expect((await loadMentorshipWizardDraft())?.selectedTechnicalAreaIds).toEqual(["area-editada"]);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Activar participación" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continuar a incorporación" }),
+    );
+    await waitFor(() =>
+      expect(navigation.push).toHaveBeenCalledWith("/mentorship"),
+    );
+    expect(
+      (await loadMentorshipWizardDraft())?.selectedTechnicalAreaIds,
+    ).toEqual(["area-editada"]);
   });
 
   it("permite reintentar cuando falla la consulta de participación", async () => {
     vi.mocked(mentorParticipationService.getMyParticipation)
-      .mockRejectedValueOnce(new Error("Network")).mockResolvedValue(active);
+      .mockRejectedValueOnce(new Error("Network"))
+      .mockResolvedValue(active);
     renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Reintentar" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Reintentar participación" }),
+    );
     expect(await screen.findByText("Activo")).toBeInTheDocument();
   });
 
   it("muestra un éxito confirmado durante cuatro segundos y permite cerrarlo", async () => {
     const timer = vi.spyOn(window, "setTimeout");
     renderWithQuery(<ParticipationView activated />);
-    expect(await screen.findByRole("status")).toHaveTextContent("Participación activada correctamente");
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Participación activada correctamente",
+    );
     expect(timer).toHaveBeenCalledWith(expect.any(Function), 4000);
-    fireEvent.click(screen.getByRole("button", { name: "Cerrar notificación" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Cerrar notificación" }),
+    );
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("un fallo HU7 no oculta el mentor activo ni impide su salida HU6", async () => {
+    vi.mocked(mentorParticipationService.getCurrent).mockRejectedValue(
+      new Error("HTTP 500"),
+    );
+    renderWithQuery(<ParticipationView />);
+    expect(await screen.findByText("Activo")).toBeInTheDocument();
+    expect(
+      await screen.findByText("No se pudo consultar tu solicitud de cupo."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Desactivar participación" }),
+    ).toBeEnabled();
+    expect(
+      screen.queryByText("No se pudo cargar tu participación como mentor."),
+    ).not.toBeInTheDocument();
+  });
+
+  it("no ofrece una nueva incorporación mientras la solicitud es desconocida por error", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue({
+      status: "NEVER",
+      areas: [],
+      orientations: [],
+    });
+    vi.mocked(mentorParticipationService.getCurrent).mockRejectedValue(
+      new Error("HTTP 500"),
+    );
+    renderWithQuery(<ParticipationView />);
+    expect(
+      await screen.findByText("No se pudo consultar tu solicitud de cupo."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Participar como mentor"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("muestra solicitudes válidas aunque falle la consulta independiente HU6", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockRejectedValue(
+      new Error("HTTP 500"),
+    );
+    vi.mocked(mentorParticipationService.getCurrent).mockResolvedValue({
+      id: "request",
+      userId: "user",
+      status: "CANCELLED",
+      queuedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      technicalAreaIds: [],
+      orientationTypeIds: [],
+    });
+    renderWithQuery(<ParticipationView />);
+    expect(
+      await screen.findByText(/La solicitud fue cancelada/),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        "No se pudo cargar tu participación como mentor.",
+      ),
+    ).toBeInTheDocument();
   });
 });

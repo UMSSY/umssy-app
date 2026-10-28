@@ -2,16 +2,28 @@ import { Injectable } from '@nestjs/common';
 import { MentorParticipationRepository } from '../repositories/mentor-participation.repository.js';
 import { MentorParticipationException } from '../exceptions/mentor-participation.exception.js';
 import type { CreateMentorParticipationDto } from '../requests/create-mentor-participation.schema.js';
+import type { Prisma } from '../../../prisma/client.js';
+import type { MentorParticipationRequest } from '../repositories/mentor-participation.repository.js';
 
 @Injectable()
 export class MentorParticipationService {
   constructor(private readonly repository: MentorParticipationRepository) {}
 
-  async create(userId: string, data: CreateMentorParticipationDto) {
+  async create(
+    userId: string,
+    data: CreateMentorParticipationDto,
+    key?: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<MentorParticipationRequest> {
+    if (key)
+      return this.repository.withIntake(userId, key, data, (transaction) =>
+        this.create(userId, data, undefined, transaction),
+      );
     const result = await this.repository.createRequest(
       userId,
       data.technicalAreaIds,
       data.orientationTypeIds,
+      tx,
     );
 
     switch (result.result) {
@@ -20,12 +32,9 @@ export class MentorParticipationService {
       case 'ALREADY_EXISTS':
       case 'OFFER_EXISTS':
         throw new MentorParticipationException(
-          'Ya tienes una solicitud pendiente o una oferta vigente', 409,
+          'Ya tienes una solicitud pendiente o una oferta vigente',
+          409,
           { code: 'REQUEST_ALREADY_EXISTS' },
-        );
-      case 'SANCTIONED':
-        throw new MentorParticipationException(
-          `Has superado el limite de 4 intentos en 24 horas. Podras realizar otra solicitud a partir del ${result.blockedUntil.toISOString()}`, 429,
         );
 
       case 'NOT_ELIGIBLE':
@@ -46,7 +55,6 @@ export class MentorParticipationService {
           409,
           { code: 'CAPACITY_AVAILABLE' },
         );
-
     }
   }
 
