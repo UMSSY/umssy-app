@@ -34,7 +34,6 @@ describe('ApplicationsRepository', () => {
     it('debe consultar con filtros por defecto y sort por createdAt', async () => {
       prismaMock.jobApplication.findMany.mockResolvedValue([]);
 
-      // 1. Pasar un objeto de query válido con sortOrder
       await repository.findByUserId('user-1', { sortOrder: 'desc' });
 
       expect(prismaMock.jobApplication.findMany).toHaveBeenCalledWith({
@@ -52,7 +51,6 @@ describe('ApplicationsRepository', () => {
     it('debe aplicar filtros por status y sort por vacancy', async () => {
       prismaMock.jobApplication.findMany.mockResolvedValue([]);
 
-      // 2. Usar la constante del enum ApplicationStatus.IN_REVIEW
       await repository.findByUserId('user-1', {
         status: ApplicationStatus.IN_REVIEW,
         sortBy: 'vacancy',
