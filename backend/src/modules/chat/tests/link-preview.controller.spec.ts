@@ -101,3 +101,4 @@ describe('LinkPreviewController', () => {
     ).rejects.toThrow(BlockedLinkUrlException);
   });
 });
+

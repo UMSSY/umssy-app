@@ -73,7 +73,10 @@ export class LinkPreviewService {
 
     const isSafe = await validateSafeUrl(trimmedUrl);
     if (!isSafe) {
-      throw new BlockedLinkUrlException();
+      throw new BlockedLinkUrlException(
+        trimmedUrl,
+        'Dirección IP o dominio no permitido',
+      );
     }
 
     const domain = parsedUrl.hostname;

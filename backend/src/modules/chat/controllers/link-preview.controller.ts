@@ -63,3 +63,4 @@ export class LinkPreviewController {
     return this.linkPreviewService.getPreview(query.url);
   }
 }
+
