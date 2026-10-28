@@ -120,24 +120,24 @@ export class ConversationService {
   private async toResponse(
     conversation: {
       id: string;
-      userAId: string;
-      userBId: string;
+      userAId: string | null; 
+      userBId: string | null;
       updatedAt: Date;
-      userA: { id: string; firstName: string; lastName: string };
-      userB: { id: string; firstName: string; lastName: string };
+      userA: { id: string; firstName: string; lastName: string; photoUrl?: Uint8Array | null } | null;
+      userB: { id: string; firstName: string; lastName: string; photoUrl?: Uint8Array | null } | null;
       messages: Array<{
         id: string;
         senderId: string;
-        content: string;
+        content: string | null;
         sentAt: Date;
       }>;
+      event?: { id: string; title: string } | null; 
     },
     currentUserId: string,
   ): Promise<ConversationResponse> {
-    const contact =
-      conversation.userAId === currentUserId
-        ? conversation.userB
-        : conversation.userA;
+     const contact = (conversation.userAId === currentUserId
+    ? conversation.userB
+    : conversation.userA) as { id: string; firstName: string; lastName: string; photoUrl?: Uint8Array | null };
 
     const onlineMap = await this.userPresenceService.mapOnlineStatus([
       contact.id,
@@ -158,12 +158,11 @@ export class ConversationService {
       : 0;
 
     const lastMessage = conversation.messages[0];
-    const isAttachment = Boolean(
-      lastMessage?.content.startsWith('[Archivo] '),
-    );
+    const safeContent = lastMessage?.content ?? '';
+    const isAttachment = Boolean(safeContent.startsWith('[Archivo] '));
     const content = isAttachment
-      ? lastMessage!.content.slice(10)
-      : (lastMessage?.content ?? '');
+      ? safeContent.slice(10)
+      : safeContent;
     const attachmentType = isAttachment ? ('file' as const) : null;
 
     const contactPhoto = (contact as { photoUrl?: Uint8Array | null }).photoUrl;

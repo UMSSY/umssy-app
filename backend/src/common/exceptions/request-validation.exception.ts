@@ -11,6 +11,6 @@ function formatErrors(errors: readonly ValidationErrorDetail[]): string {
 
 export class RequestValidationException extends DomainException {
   constructor(readonly errors: ValidationErrorDetail[] = []) {
-    super(formatErrors(errors) || DEFAULT_MESSAGE, 400, errors);
+    super(formatErrors(errors) || DEFAULT_MESSAGE, 400, 'VALIDATION_ERROR', errors);
   }
 }
