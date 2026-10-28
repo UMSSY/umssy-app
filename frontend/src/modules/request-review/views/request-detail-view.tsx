@@ -5,6 +5,7 @@ import { AlertCircle, FileText, History, TableProperties } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { cn } from "cn";
+import { PageHeading } from "@/shared/components/layout/page-heading";
 import { DetailHeader } from "../components/layout/backoffice-page-header";
 import { DataContrastPanel } from "../components/detail/data-contrast-panel";
 import { DocumentViewer } from "../components/detail/document-viewer";
@@ -53,30 +54,24 @@ export function RequestDetailView({ id }: RequestDetailViewProps) {
         {detail && (
           <>
             {/* Cabecera con Nombre, Estado y Motivo de revisión manual (CA12) */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="font-tight text-3xl font-bold text-ink">
-                  {recipientFullName}
-                </h1>
-                <StatusBadge status={detail.status} />
-
-                {/* Motivo de la revisión manual junto al estado (CA12) */}
-                {ocrAnalysis && !ocrAnalysis.isClear && ocrAnalysis.manualReviewReason && (
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800"
-                    data-testid="manual-review-reason-badge"
-                  >
-                    <AlertCircle className="size-3.5 text-amber-600" aria-hidden="true" />
-                    <span>Revisión manual: {ocrAnalysis.manualReviewReason}</span>
-                  </span>
-                )}
-              </div>
-
-              <p className="text-base text-text-secondary">
-                {detail.career}
-                {sentAt ? `. Solicitud enviada el ${sentAt}.` : "."}
-              </p>
-            </div>
+            <PageHeading
+              title={recipientFullName}
+              description={`${detail.career}${sentAt ? `. Solicitud enviada el ${sentAt}.` : "."}`}
+              actions={
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge status={detail.status} />
+                  {ocrAnalysis && !ocrAnalysis.isClear && ocrAnalysis.manualReviewReason && (
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800"
+                      data-testid="manual-review-reason-badge"
+                    >
+                      <AlertCircle className="size-3.5 text-amber-600" aria-hidden="true" />
+                      <span>Revisión manual: {ocrAnalysis.manualReviewReason}</span>
+                    </span>
+                  )}
+                </div>
+              }
+            />
 
             {/* Pestañas para dispositivos móviles (CA15) */}
             <div

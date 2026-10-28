@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, AlertTriangle, CircleAlert, CircleCheck, Info } from "lucide-react";
+import { AlertCircle, AlertTriangle, CircleAlert, CircleCheck, Info, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -23,11 +23,12 @@ function buildLegacyFields(detail: ReviewDetail): ContrastField[] {
   ];
 }
 
-const HEAD_CLASS = "h-9 px-4 text-[12.5px] font-semibold text-text-secondary";
+const HEAD_CLASS = "h-9 px-4 text-xs font-semibold text-text-secondary";
 
 export function DataContrastPanel({ detail, ocrAnalysis }: DataContrastPanelProps) {
   const legacyFields = buildLegacyFields(detail);
   const [documentValues, setDocumentValues] = useState<Record<string, string>>({});
+  const isEditable = detail.status === "in_review";
 
   // Si no se proporcionó ocrAnalysis, se mantiene el modo manual legacy (100% retrocompatible con tests unitarios existentes)
   if (!ocrAnalysis) {
@@ -43,16 +44,23 @@ export function DataContrastPanel({ detail, ocrAnalysis }: DataContrastPanelProp
       >
         <header className="flex flex-wrap items-center justify-between gap-2 px-5 py-4">
           <h2 className="font-tight text-lg font-bold text-ink">Contraste de datos</h2>
-          <p className="flex items-center gap-4 text-sm text-ink" aria-live="polite">
-            <span className="inline-flex items-center gap-1.5">
-              <CircleCheck className="size-4" strokeWidth={1.75} aria-hidden="true" />
-              {matching} coinciden
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <CircleAlert className="size-4 text-ink-soft" strokeWidth={1.75} aria-hidden="true" />
-              {pending} por verificar
-            </span>
-          </p>
+          {isEditable ? (
+            <p className="flex items-center gap-4 text-sm text-ink" aria-live="polite">
+              <span className="inline-flex items-center gap-1.5">
+                <CircleCheck className="size-4" strokeWidth={1.75} aria-hidden="true" />
+                {matching} coinciden
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <CircleAlert className="size-4 text-ink-soft" strokeWidth={1.75} aria-hidden="true" />
+                {pending} por verificar
+              </span>
+            </p>
+          ) : (
+            <p className="inline-flex items-center gap-1.5 text-sm text-text-secondary">
+              <Lock className="size-4" strokeWidth={1.75} aria-hidden="true" />
+              Solo lectura
+            </p>
+          )}
         </header>
 
         <Table className="table-fixed">
@@ -61,9 +69,11 @@ export function DataContrastPanel({ detail, ocrAnalysis }: DataContrastPanelProp
               <TableHead className={`${HEAD_CLASS} w-[28%]`}>Dato</TableHead>
               <TableHead className={`${HEAD_CLASS} w-[30%]`}>Declarado</TableHead>
               <TableHead className={HEAD_CLASS}>En el documento</TableHead>
-              <TableHead className="w-11 px-2">
-                <span className="sr-only">Resultado</span>
-              </TableHead>
+              {isEditable ? (
+                <TableHead className="w-11 px-2">
+                  <span className="sr-only">Resultado</span>
+                </TableHead>
+              ) : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -93,40 +103,49 @@ export function DataContrastPanel({ detail, ocrAnalysis }: DataContrastPanelProp
                           [field.key]: event.target.value,
                         }))
                       }
-                      placeholder="Valor en el documento"
+                      placeholder={isEditable ? "Valor leído" : "No editable"}
+                      readOnly={!isEditable}
+                      disabled={!isEditable}
                       className="h-[34px] rounded-lg"
                     />
                   </TableCell>
-                  <TableCell className="px-2 align-middle">
-                    <Icon
-                      className={matches ? "size-5 text-ink" : "size-5 text-ink-soft"}
-                      strokeWidth={1.75}
-                      aria-hidden="true"
-                    />
-                    <span className="sr-only">{matches ? "Coincide" : "Por verificar"}</span>
-                  </TableCell>
+                  {isEditable ? (
+                    <TableCell className="px-2 align-middle">
+                      <Icon
+                        className={matches ? "size-5 text-ink" : "size-5 text-ink-soft"}
+                        strokeWidth={1.75}
+                        aria-hidden="true"
+                      />
+                      <span className="sr-only">{matches ? "Coincide" : "Por verificar"}</span>
+                    </TableCell>
+                  ) : null}
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
+        {isEditable ? null : (
+          <p className="border-t border-border px-5 py-3 text-sm text-text-secondary">
+            La solicitud ya tiene dictamen o todavía no está en revisión, por eso estos campos no se pueden editar.
+          </p>
+        )}
       </section>
     );
   }
 
-  // MODO LECTURA OCR (Cumple CA6, CA7, CA8, CA9, CA10, CA11, CA15 y diseño exacto de Word)
-  const { matchingCount, pendingCount, fields, isClear } = ocrAnalysis;
+  // Modo OCR automático (CA6, CA7, CA8, CA9, CA10, CA11, CA15)
+  const { fields, matchingCount, pendingCount, isClear } = ocrAnalysis;
 
   return (
     <section
-      className="flex flex-col overflow-hidden rounded-lg border border-border bg-surface"
+      className="overflow-hidden rounded-lg border border-border bg-surface"
       aria-label="Contraste de datos"
-      data-testid="ocr-data-contrast-panel"
+      data-testid="data-contrast-panel"
     >
-      {/* Header con contadores del contraste (CA8) */}
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-4">
+      {/* Cabecera con título y resumen de coincidencias (CA8) */}
+      <header className="flex flex-wrap items-center justify-between gap-2 px-5 py-4">
         <h2 className="font-tight text-lg font-bold text-ink">Contraste de datos</h2>
-        <div className="flex items-center gap-4 text-sm font-medium" aria-live="polite">
+        <div className="flex items-center gap-4 text-xs font-semibold sm:text-sm" aria-live="polite">
           <span className="inline-flex items-center gap-1.5 text-emerald-700">
             <CircleCheck className="size-4" strokeWidth={2} aria-hidden="true" />
             <span>{matchingCount} coinciden</span>
