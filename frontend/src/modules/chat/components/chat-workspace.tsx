@@ -1,40 +1,57 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
 import { useMessagingUi } from "../contexts/messaging-ui-context";
-import type { ChatWorkspaceProps } from '../types/chat-workspace-props.types';
-import { cn } from '@/lib/utils';
-import { useQueryClient } from '@tanstack/react-query';
+import type { ChatWorkspaceProps } from "../types/chat-workspace-props.types";
+import type { Conversation } from "../types/conversation.types";
+import type { User } from "../types/user.types";
 
-import { useConversations } from '../hooks/use-conversations';
-import { useMessages, messagesQueryKey } from '../hooks/use-messages';
+import { useConversations } from "../hooks/use-conversations";
+import { useMessages, messagesQueryKey } from "../hooks/use-messages";
+import { useSendConnectionRequest } from "../hooks/use-send-connection-request";
 
-import { ConversationList } from '../components/conversation-list';
-import { EmptyChatState } from '../components/empty-chat-state';
-import { ContactSearchModal } from '../components/contact-search-modal';
-import { ChatRoom } from '../components/chat-room';
-import { ChatConnectionDialog } from '../components/chat-connection-dialog';
-import { ChatErrorState } from './chat-error-state';
-
-import type { Conversation } from '../types/conversation.types';
-import type { User } from '../types/user.types';
+import { ConversationList } from "./conversation-list";
+import { EmptyChatState } from "./empty-chat-state";
+import { ContactSearchModal } from "./contact-search-modal";
+import { ChatRoom } from "./chat-room";
+import { ChatConnectionDialog } from "./chat-connection-dialog";
+import { ChatErrorState } from "./chat-error-state";
+import { SendConnectionRequestDialog } from "./send-connection-request-dialog";
 
 import {
   sendMessage,
   getCurrentSessionUserId,
-} from '../services/chat-api';
+} from "../services/chat-api";
 
-export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
+export function ChatWorkspace({
+  isCompact = false,
+}: ChatWorkspaceProps) {
   const currentUserId = getCurrentSessionUserId();
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const ui = useMessagingUi();
+
+  const [selectedContactForRequest, setSelectedContactForRequest] =
+    useState<User | null>(null);
+
+  const [requestError, setRequestError] = useState<string | null>(null);
+  const [requestSuccess, setRequestSuccess] = useState<string | null>(null);
+
   const [isSendingLocally, setIsSendingLocally] = useState(false);
-  const isSending = ui?.isSending ?? isSendingLocally;
-  const setIsSending = ui?.setIsSending ?? setIsSendingLocally;
   const [dismissedError, setDismissedError] = useState(false);
 
+  const ui = useMessagingUi();
+
+  const isSending = ui?.isSending ?? isSendingLocally;
+  const setIsSending = ui?.setIsSending ?? setIsSendingLocally;
+
   const queryClient = useQueryClient();
+  const sendRequestMutation = useSendConnectionRequest();
 
   const {
     conversations,
@@ -51,7 +68,7 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
     setSearchQuery,
     handleSelectConversation,
     clearSelectedConversation,
-    startConversationWithContact,
+    findExistingConversationByContact,
     updateConversationLastMessage,
   } = useConversations();
 
@@ -77,26 +94,78 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
   };
 
   const handleStartNewChat = () => {
-    if (activeFilter !== 'all') {
-      setActiveFilter('all');
+    if (activeFilter !== "all") {
+      setActiveFilter("all");
     }
 
+    setRequestSuccess(null);
     setIsSearchModalOpen(true);
   };
 
-  const handleStartChatWithContact = async (contactUser: User) => {
-    if (activeFilter !== 'all') {
-      setActiveFilter('all');
+  const handleStartChatWithContact = (contactUser: User) => {
+    if (activeFilter !== "all") {
+      setActiveFilter("all");
     }
 
-    await startConversationWithContact(contactUser);
     setIsSearchModalOpen(false);
+    setRequestError(null);
+    setRequestSuccess(null);
+
+    const existingConversation =
+      findExistingConversationByContact(contactUser.id);
+
+    if (existingConversation) {
+      handleSelectConversation(existingConversation);
+      return;
+    }
+
+    setSelectedContactForRequest(contactUser);
   };
 
-  const handleSendMessage = async (content: string): Promise<void> => {
+  const handleSendConnectionRequest = async () => {
+    if (
+      !selectedContactForRequest ||
+      sendRequestMutation.isPending
+    ) {
+      return;
+    }
+
+    const contact = selectedContactForRequest;
+
+    setRequestError(null);
+
+    try {
+      await sendRequestMutation.mutateAsync(contact.id);
+
+      setSelectedContactForRequest(null);
+
+      setRequestSuccess(
+        `Solicitud de conexión enviada a ${contact.fullName}.`,
+      );
+    } catch (error) {
+      setRequestError(
+        error instanceof Error
+          ? error.message
+          : "No se pudo enviar la solicitud de conexión.",
+      );
+    }
+  };
+
+  const handleCloseRequestDialog = () => {
+    if (sendRequestMutation.isPending) {
+      return;
+    }
+
+    setSelectedContactForRequest(null);
+    setRequestError(null);
+  };
+
+  const handleSendMessage = async (
+    content: string,
+  ): Promise<void> => {
     if (!selectedId || isSending) {
       throw new Error(
-        'No hay una conversación seleccionada o ya se está enviando un mensaje.',
+        "No hay una conversación seleccionada o ya se está enviando un mensaje.",
       );
     }
 
@@ -130,35 +199,56 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
 
     try {
       await retryConversations();
-    } catch {
     } finally {
       setDismissedError(false);
     }
   };
 
   return (
-    <div className="flex size-full min-h-0 max-w-full flex-1 overflow-hidden bg-surface-soft font-sans">
+    <div className="relative flex size-full min-h-0 max-w-full flex-1 overflow-hidden bg-surface-soft font-sans">
       <aside
-        className={cn("h-full shrink-0 overflow-hidden", isCompact ? "w-full" : "w-80", selectedId ? (isCompact ? "hidden" : "hidden md:block") : "block")}
+        className={cn(
+          "h-full shrink-0 overflow-hidden",
+          isCompact ? "w-full" : "w-80",
+          selectedId
+            ? isCompact
+              ? "hidden"
+              : "hidden md:block"
+            : "block",
+        )}
       >
-        {isCompact && isError ? <ChatErrorState message="No pudimos cargar tus conversaciones." onRetry={() => void handleRetryConversations()} /> : <ConversationList
-          conversations={conversations}
-          selectedId={selectedId}
-          isLoading={isLoading}
-          isError={isError}
-          hasMore={hasMore}
-          activeFilter={activeFilter}
-          searchQuery={searchQuery}
-          onSelectConversation={handleSelectChat}
-          onFilterChange={setActiveFilter}
-          onSearchChange={setSearchQuery}
-          onLoadMore={loadMore}
-          onStartNewChat={handleStartNewChat}
-        />}
+        {isCompact && isError ? (
+          <ChatErrorState
+            message="No pudimos cargar tus conversaciones."
+            onRetry={() => void handleRetryConversations()}
+          />
+        ) : (
+          <ConversationList
+            conversations={conversations}
+            selectedId={selectedId}
+            isLoading={isLoading}
+            isError={isError}
+            hasMore={hasMore}
+            activeFilter={activeFilter}
+            searchQuery={searchQuery}
+            onSelectConversation={handleSelectChat}
+            onFilterChange={setActiveFilter}
+            onSearchChange={setSearchQuery}
+            onLoadMore={loadMore}
+            onStartNewChat={handleStartNewChat}
+          />
+        )}
       </aside>
 
       <main
-        className={cn("h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface", !selectedId ? (isCompact ? "hidden" : "hidden md:flex") : "flex")}
+        className={cn(
+          "h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface",
+          !selectedId
+            ? isCompact
+              ? "hidden"
+              : "hidden md:flex"
+            : "flex",
+        )}
       >
         {selectedConversation ? (
           <ChatRoom
@@ -202,6 +292,35 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
         onClose={() => setIsSearchModalOpen(false)}
         onSelectContact={handleStartChatWithContact}
       />
+
+      <SendConnectionRequestDialog
+        contact={selectedContactForRequest}
+        isSending={sendRequestMutation.isPending}
+        error={requestError}
+        onConfirm={() => {
+          void handleSendConnectionRequest();
+        }}
+        onClose={handleCloseRequestDialog}
+      />
+
+      {requestSuccess && (
+        <div
+          role="status"
+          className="absolute right-4 bottom-4 z-50 max-w-sm rounded-lg border border-border bg-surface p-4 text-sm text-ink shadow-lg"
+        >
+          <p>{requestSuccess}</p>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            onClick={() => setRequestSuccess(null)}
+          >
+            Cerrar
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
