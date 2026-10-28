@@ -15,3 +15,4 @@ export { getTechnicalAreas } from "./services/technical-area.service";
 export { useMentorProfile } from "./hooks/use-mentor-profile";
 export { MENTORSHIP_QUERY_KEYS } from "./constants/mentorship-query-keys.constants";
 export type { OrientationTypeResponse } from "./types/orientation-type-response.types";
+export { loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "./services/mentorship-wizard-draft.service";

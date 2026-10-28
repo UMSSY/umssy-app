@@ -8,5 +8,8 @@ export function useMentorProfile(mentorId: string) {
   return useQuery({
     queryKey: MENTORSHIP_QUERY_KEYS.profile(mentorId),
     queryFn: ({ signal }) => getMentorProfile(mentorId, signal),
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 }
