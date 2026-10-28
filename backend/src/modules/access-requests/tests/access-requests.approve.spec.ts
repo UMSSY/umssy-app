@@ -187,7 +187,7 @@ describe('AccessRequestsService.approve', () => {
     repository.findDetailById.mockResolvedValue(row('in_review'));
 
     await expect(service.approve('id-1', 'admin-1')).resolves.toEqual({ id: 'id-1', status: 'approved', activationCodeSent: true });
-    expect(repository.setVerdict).toHaveBeenCalledWith('id-1', 'admin-1', { status: 'approved' });
+    expect(repository.setVerdict).toHaveBeenCalledWith('id-1', 'admin-1', { status: 'approved' }, expect.any(Function));
     expect(otp.issueFor).toHaveBeenCalledWith('id-1', 'ana@umss.test');
   });
 

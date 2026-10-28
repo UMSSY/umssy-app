@@ -8,6 +8,7 @@ import {
   RequestCodeGenerationException,
 } from '../exceptions/index.js';
 import { MAX_REQUEST_CODE_ATTEMPTS } from '../constants/request-code.constants.js';
+import { ACCESS_REQUEST_AUDIT_SELECT } from '../constants/access-request-audit-select.constants.js';
 
 function build() {
   const accessRequest = { findFirst: vi.fn(), update: vi.fn() };
@@ -64,7 +65,7 @@ describe('AccessRequestsRepository: envío y consulta de estado', () => {
       expect(args.data.requestCode).toBe('SOL-2026-0001');
       expect(args.data.submittedAt).toBeInstanceOf(Date);
       expect(args.data.status).toEqual({ connect: { title: 'pending' } });
-      expect(args.select).toEqual({ id: true, requestCode: true, submittedAt: true, status: { select: { title: true } } });
+      expect(args.select).toEqual({ ...ACCESS_REQUEST_AUDIT_SELECT, submittedAt: true, status: { select: { title: true } } });
     });
 
     it('P2025 sin meta.model lanza 404', async () => {
