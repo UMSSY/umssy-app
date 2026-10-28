@@ -20,4 +20,23 @@ describe('SessionRepository', () => {
       },
     });
   });
+
+  it('selects user session data with active flag for authentication', async () => {
+    const findFirst = vi.fn().mockResolvedValue(null);
+    const repository = new SessionRepository({ user: { findFirst } } as unknown as PrismaService);
+
+    await expect(repository.findUserById('user-1')).resolves.toBeNull();
+    expect(findFirst).toHaveBeenCalledExactlyOnceWith({
+      where: { id: 'user-1' },
+      select: {
+        id: true,
+        email: true,
+        isActive: true,
+        roles: {
+          where: { deletedAt: null, startAt: { lte: expect.any(Date) } },
+          select: { role: { select: { name: true } } },
+        },
+      },
+    });
+  });
 });

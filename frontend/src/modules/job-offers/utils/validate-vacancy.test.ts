@@ -36,6 +36,25 @@ describe("validateInformation", () => {
     expect(validateInformation(withValues({ mapsLink: "https://goo.gl/maps/abc" })).mapsLink).toBeUndefined();
   });
 
+  it("rechaza enlaces de Maps que no siguen un formato oficial", () => {
+    const invalid = "Ingresa un enlace válido de Google Maps";
+    [
+      "https://maps.google.com/URLnoEXISTE",
+      "https://maps.google.com/?q=Av",
+      "https://goo.gl/abc",
+      "https://www.google.com/maps/place/UMSS",
+      "https://maps.app.goo.gl.evil.com/x",
+    ].forEach((mapsLink) => expect(validateInformation(withValues({ mapsLink })).mapsLink).toBe(invalid));
+  });
+
+  it("acepta los enlaces compartidos y los copiados de la barra de direcciones", () => {
+    [
+      "https://maps.app.goo.gl/aB3dE?g_st=iw",
+      "https://www.google.com/maps/place/Plaza+14+de+Septiembre/@-17.3935,-66.157,17z/data=!3m1!4b1",
+      "https://www.google.com.bo/maps/place/UMSS/@-17.39,-66.14,15.5z?entry=ttu",
+    ].forEach((mapsLink) => expect(validateInformation(withValues({ mapsLink })).mapsLink).toBeUndefined());
+  });
+
   it("exige un número de vacantes entre 1 y 500", () => {
     expect(validateInformation(withValues({ vacancyCount: "0" })).vacancyCount).toBe("Debe ser al menos 1");
     expect(validateInformation(withValues({ vacancyCount: "501" })).vacancyCount).toMatch(/500/);
@@ -47,6 +66,10 @@ describe("validateInformation", () => {
     expect(validateInformation(withValues({ salary: "Bs 9.000 - 8.000" })).salary).toMatch(/mínimo no puede ser mayor/);
     expect(validateInformation(withValues({ salary: "Bs 6.500 - " })).salary).toMatch(/Completa el rango/);
     expect(validateInformation(withValues({ salary: "Bs 5.000" })).salary).toBeUndefined();
+  });
+
+  it("en pasantía no exige ni valida el salario", () => {
+    expect(validateInformation(withValues({ contractType: "Pasantía", salary: "" })).salary).toBeUndefined();
   });
 
   it("limita los idiomas a 100 caracteres", () => {

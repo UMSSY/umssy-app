@@ -30,10 +30,20 @@ export function CvUploadCard({
       <SectionCard title="Subir currículum">
         <div className="flex flex-col items-center gap-2 rounded-lg bg-surface-soft px-6 py-12 text-center">
           <CircleCheck aria-hidden="true" className="size-6 text-ink-soft" />
-          <p className="text-base font-semibold text-ink">Ya tienes un CV guardado</p>
+          <p className="text-base font-semibold text-ink">Ya tienes un CV vigente</p>
           <p className="text-sm text-text-secondary">
-            Para cambiarlo, usa «Reemplazar CV» en «Archivo guardado».
+            Sube una nueva versión en PDF. Tu CV actual pasará al historial.
           </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-3 h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
+            disabled={isBusy}
+            onClick={onSelectFile}
+          >
+            {isUploading ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null}
+            {isUploading ? "Cargando..." : "Subir nueva versión"}
+          </Button>
         </div>
       </SectionCard>
     );

@@ -32,6 +32,14 @@ describe('Mentorship Standard Response HTTP', () => {
   const activationPayload = { ...technicalPayload, ...orientationPayload };
   const mentorsService = {
     findAll: vi.fn().mockResolvedValue(directory),
+    findDirectory: vi.fn().mockResolvedValue({
+      items: directory,
+      page: 1,
+      pageSize: 6,
+      totalItems: 1,
+      totalPages: 1,
+      effectiveSort: 'name_asc',
+    }),
     findOne: vi.fn().mockResolvedValue(profile),
     activate: vi.fn().mockResolvedValue({ id: userId }),
     findMyTechnicalAreas: vi.fn().mockResolvedValue(areas),
@@ -102,6 +110,83 @@ describe('Mentorship Standard Response HTTP', () => {
     });
   });
 
+  it('GET /api/mentors/directory valida y envuelve una sola vez la página', async () => {
+    const response = await request(server)
+      .get(
+        '/api/mentors/directory?page=2&search=%20Ana%20&area=Backend&available=true',
+      )
+      .expect(200);
+    expect(response.body.data).toEqual({
+      items: directory,
+      page: 1,
+      pageSize: 6,
+      totalItems: 1,
+      totalPages: 1,
+      effectiveSort: 'name_asc',
+    });
+    expect(mentorsService.findDirectory).toHaveBeenCalledWith(
+      {
+        page: 2,
+        search: 'Ana',
+        area: 'Backend',
+        available: true,
+        sort: 'name_asc',
+      },
+      userId,
+    );
+  });
+
+  it('GET /api/mentors/directory aplica los valores predeterminados', async () => {
+    await request(server).get('/api/mentors/directory').expect(200);
+    expect(mentorsService.findDirectory).toHaveBeenLastCalledWith(
+      {
+        page: 1,
+        search: '',
+        available: false,
+        sort: 'name_asc',
+      },
+      userId,
+    );
+  });
+
+  it('envuelve una sola vez la respuesta de afinidad y usa la identidad del JWT', async () => {
+    const affinityPage = {
+      items: [{ ...directory[0], sharedInterestsCount: 2 }],
+      page: 1,
+      pageSize: 6,
+      totalItems: 1,
+      totalPages: 1,
+      effectiveSort: 'affinity',
+      affinityStatus: 'ready',
+    };
+    mentorsService.findDirectory.mockResolvedValueOnce(affinityPage);
+    const response = await request(server)
+      .get('/api/mentors/directory?sort=affinity')
+      .expect(200);
+    expect(response.body.data).toEqual(affinityPage);
+    expect(mentorsService.findDirectory).toHaveBeenLastCalledWith(
+      {
+        page: 1,
+        search: '',
+        available: false,
+        sort: 'affinity',
+      },
+      userId,
+    );
+  });
+
+  it.each([
+    'page=0',
+    'page=abc',
+    'available=yes',
+    'sort=invalid',
+    'pageSize=100',
+  ])('rechaza %s antes del servicio', async (query) => {
+    const previousCalls = mentorsService.findDirectory.mock.calls.length;
+    await request(server).get(`/api/mentors/directory?${query}`).expect(400);
+    expect(mentorsService.findDirectory).toHaveBeenCalledTimes(previousCalls);
+  });
+
   it('POST /api/mentors/activate conserva HTTP 201', async () => {
     await request(server)
       .post('/api/mentors/activate')
@@ -138,6 +223,7 @@ describe('Mentorship Standard Response HTTP', () => {
 
     await request(server).get(`/api/mentors/${userId}`).expect(404).expect({
       statusCode: 404,
+      code: 'MENTOR_NOT_FOUND',
       ok: false,
       detail: error.message,
       data: null,
@@ -154,6 +240,7 @@ describe('Mentorship Standard Response HTTP', () => {
       .expect(409)
       .expect({
         statusCode: 409,
+        code: 'ALREADY_MENTOR',
         ok: false,
         detail: error.message,
         data: null,
@@ -196,8 +283,10 @@ describe('Mentorship Standard Response HTTP', () => {
 
     expect(response.body).toEqual({
       statusCode: 400,
-      error: 'Bad Request',
-      message: 'Validation failed (uuid v 4 is expected)',
+      ok: false,
+      code: 'VALIDATION_ERROR',
+      detail: 'Los parámetros de la solicitud no son válidos.',
+      data: null,
     });
   });
 });

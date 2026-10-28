@@ -1,76 +1,109 @@
 import { describe, expect, it } from 'vitest';
-import { compareVacancyRank } from '../utils/compare-vacancy-rank.js';
 import { VacancyRankingService } from '../services/vacancy-ranking.service.js';
+import { compareVacancyRank } from '../utils/compare-vacancy-rank.js';
 
-describe('Hierarchical vacancy ranking (#236)', () => {
-  it('accepts matching results without mutating the input list', () => {
-    const common = {
-      careerMatch: true,
-      experienceMatch: true,
-      allRequiredSkillsMatch: false,
-    };
+describe('HU-02A T2.3 - Vacancy ranking', () => {
+  const common = {
+    careerMatch: true,
+    experienceMatch: true,
+    allRequiredSkillsMatch: true,
+    matchedSkills: ['TypeScript'],
+  };
+
+  const service = new VacancyRankingService();
+
+  it('sorts vacancies by compatibility percentage descending', () => {
     const vacancies = [
-      { ...common, id: 'fewer', matchedSkills: ['Python'] },
-      { ...common, id: 'more', matchedSkills: ['Python', 'SQL'] },
+      { ...common, id: 'low', compatibility: 60 },
+      { ...common, id: 'high', compatibility: 95, careerMatch: false },
+      { ...common, id: 'medium', compatibility: 80 },
     ];
-    expect(
-      new VacancyRankingService().rank(vacancies).map(({ id }) => id),
-    ).toEqual(['more', 'fewer']);
-    expect(vacancies.map(({ id }) => id)).toEqual(['fewer', 'more']);
+
+    const result = service.rank(vacancies);
+
+    expect(result.map(({ id }) => id)).toEqual([
+      'high',
+      'medium',
+      'low',
+    ]);
   });
-  it('prioritizes career, then experience, then matching skills regardless of score', () => {
+
+  it('prioritizes career match when compatibility is equal', () => {
     const vacancies = [
-      {
-        id: 'other-career',
-        careerMatch: false,
-        experienceMatch: true,
-        matchingSkills: 20,
-        compatibility: 100,
-      },
-      {
-        id: 'less-experience',
-        careerMatch: true,
-        experienceMatch: false,
-        matchingSkills: 10,
-        compatibility: 95,
-      },
-      {
-        id: 'fewer-skills',
-        careerMatch: true,
-        experienceMatch: true,
-        matchingSkills: 1,
-        compatibility: 80,
-      },
-      {
-        id: 'best',
-        careerMatch: true,
-        experienceMatch: true,
-        matchingSkills: 2,
-        compatibility: 60,
-      },
+      { ...common, id: 'other-career', careerMatch: false, compatibility: 85 },
+      { ...common, id: 'same-career', compatibility: 85 },
     ];
-    expect(vacancies.sort(compareVacancyRank).map(({ id }) => id)).toEqual([
-      'best',
-      'fewer-skills',
-      'less-experience',
+
+    expect(service.rank(vacancies).map(({ id }) => id)).toEqual([
+      'same-career',
       'other-career',
     ]);
   });
 
-  it('preserves repository order when all hierarchy criteria tie', () => {
+  it('prioritizes experience when compatibility and career match are equal', () => {
+    const vacancies = [
+      { ...common, id: 'less-experience', experienceMatch: false, compatibility: 85 },
+      { ...common, id: 'enough-experience', compatibility: 85 },
+    ];
+
+    expect(service.rank(vacancies).map(({ id }) => id)).toEqual([
+      'enough-experience',
+      'less-experience',
+    ]);
+  });
+
+  it('prioritizes more matching skills when previous criteria are equal', () => {
+    const vacancies = [
+      { ...common, id: 'one-skill', compatibility: 85 },
+      {
+        ...common,
+        id: 'two-skills',
+        compatibility: 85,
+        matchedSkills: ['TypeScript', 'PostgreSQL'],
+      },
+    ];
+
+    expect(service.rank(vacancies).map(({ id }) => id)).toEqual([
+      'two-skills',
+      'one-skill',
+    ]);
+  });
+
+  it('preserves the original order on a complete tie', () => {
+    const vacancies = [
+      { ...common, id: 'first', compatibility: 85 },
+      { ...common, id: 'second', compatibility: 85 },
+    ];
+
+    expect(service.rank(vacancies).map(({ id }) => id)).toEqual([
+      'first',
+      'second',
+    ]);
+  });
+
+  it('does not mutate the original vacancy list', () => {
+    const vacancies = [
+      { ...common, id: 'low', compatibility: 60 },
+      { ...common, id: 'high', compatibility: 95 },
+    ];
+
+    service.rank(vacancies);
+
+    expect(vacancies.map(({ id }) => id)).toEqual(['low', 'high']);
+  });
+
+  it('returns an empty list when no vacancies are provided', () => {
+    expect(service.rank([])).toEqual([]);
+  });
+
+  it('returns zero from the comparator on a complete tie', () => {
     const rank = {
+      compatibility: 85,
       careerMatch: true,
       experienceMatch: true,
       matchingSkills: 2,
     };
-    const vacancies = [
-      { ...rank, id: 'z' },
-      { ...rank, id: 'a' },
-    ];
-    expect(compareVacancyRank(vacancies[0]!, vacancies[1]!)).toBe(0);
-    expect(vacancies.sort(compareVacancyRank).map(({ id }) => id)).toEqual([
-      'z',
-      'a',
-    ]);
+
+    expect(compareVacancyRank(rank, rank)).toBe(0);
   });
 });
