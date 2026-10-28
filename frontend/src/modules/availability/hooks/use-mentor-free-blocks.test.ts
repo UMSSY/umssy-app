@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react"
 import { focusManager } from "@tanstack/react-query"
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper"
 import { useMentorFreeBlocks } from "./use-mentor-free-blocks"
-import { availabilityApi } from "../services/availability.api"
+import { availabilityApi } from "../services/availability.service"
 import type { AvailabilityBlock } from "../types/availability-block.types"
 
 const CURRENT_WEEK = {
