@@ -1,4 +1,5 @@
 import type { VacancyConditions } from "../types/vacancy-conditions.types";
+import type { JobOffer } from "../types/job-offer.types";
 
 export const PYTHON = { id: "11111111-1111-4111-8111-111111111111", name: "Python" };
 export const DOCKER = { id: "22222222-2222-4222-8222-222222222222", name: "Docker" };
@@ -26,7 +27,7 @@ export const EMPTY_CONDITIONS: VacancyConditions = {
 export const VALID_CONDITIONS: VacancyConditions = {
   title: "DevOps Senior",
   modality: "Híbrido",
-  mapsLink: "https://maps.google.com/?q=Av.+Ballivian+742+Cochabamba",
+  mapsLink: "https://maps.app.goo.gl/TechBolivia",
   contractType: "Tiempo completo",
   category: "Tecnología",
   vacancyCount: "2",
@@ -38,4 +39,26 @@ export const VALID_CONDITIONS: VacancyConditions = {
 
 export function buildLongDescription(length: number): string {
   return "a".repeat(length);
+}
+
+export function buildJobOffer(overrides: Partial<JobOffer> = {}): JobOffer {
+  return {
+    id: "offer-1",
+    title: "Desarrolladora Frontend",
+    description: "Descripción de la vacante",
+    category: "Tecnología",
+    modality: "Remoto",
+    contractType: "Tiempo completo",
+    status: "Publicada",
+    positionsAvailable: 1,
+    salaryRange: "Bs 5.000 - 7.000",
+    languages: "Español",
+    locationUrl: "https://maps.app.goo.gl/TechBolivia",
+    expiresAt: null,
+    createdAt: "2026-10-12T00:00:00.000Z",
+    company: { id: COMPANY_ID, name: "TechBolivia" },
+    skills: [],
+    applicantsCount: 0,
+    ...overrides,
+  };
 }

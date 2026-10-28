@@ -1,42 +1,55 @@
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { Application } from '../types/application.types';
-import { ApplicationsTable } from '../components/applications-table';
+"use client";
 
-export const ApplicationsView = () => {
-  const [applications, setApplications] = useState<Application[]>([
-    {
-      id: '1',
-      vacancyTitle: 'Desarrollador Backend Python / FastAPI',
-      companyName: 'TechBolivia S.R.L.',
-      affinityPercentage: 92,
-      status: 'En revisión',
-      appliedDate: '2026-10-20'
-    }
-  ]);
+import Link from "next/link";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ApplicationsTable } from "../components/applications-table";
+import { APPLICATION_MESSAGES, VACANCIES_ROUTE } from "../constants/application.constants";
+import { useMyApplications } from "../hooks/use-my-applications";
+import { useWithdrawApplication } from "../hooks/use-withdraw-application";
 
-  const handleWithdraw = (id: string) => {
-    setApplications(applications.filter(app => app.id !== id));
-  };
-
-  if (applications.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <p className="mb-4 text-gray-600">Todavía no te postulaste a ninguna vacante</p>
-        <Link
-          href="/vacancies"
-          className="rounded-md bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
-        >
-          Explorar vacantes
-        </Link>
-      </div>
-    );
-  }
+export function ApplicationsView() {
+  const { data, isPending, isError, refetch } = useMyApplications();
+  const { withdraw, withdrawingId, hasWithdrawError } = useWithdrawApplication();
 
   return (
-    <div className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-6 text-2xl font-bold text-gray-800">Mis postulaciones</h1>
-      <ApplicationsTable applications={applications} onWithdraw={handleWithdraw} />
-    </div>
+    <section className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <h1 className="font-tight text-3xl font-bold text-ink">{APPLICATION_MESSAGES.pageTitle}</h1>
+
+      {isPending && <Skeleton aria-busy="true" className="h-40 rounded-xl" />}
+
+      {isError && (
+        <div role="alert" className="flex max-w-xl flex-col items-start gap-3 rounded-lg border border-border bg-surface p-4">
+          <p className="text-sm text-ink">{APPLICATION_MESSAGES.loadError}</p>
+          <Button
+            variant="outline"
+            onClick={() => {
+              void refetch();
+            }}
+          >
+            {APPLICATION_MESSAGES.retry}
+          </Button>
+        </div>
+      )}
+
+      {hasWithdrawError && (
+        <p role="alert" className="text-sm text-destructive">
+          {APPLICATION_MESSAGES.withdrawError}
+        </p>
+      )}
+
+      {data && data.length === 0 && (
+        <div className="flex max-w-xl flex-col items-center gap-3 rounded-xl border border-dashed border-border-strong bg-surface px-6 py-10 text-center">
+          <p className="text-sm text-text-secondary">{APPLICATION_MESSAGES.emptyTitle}</p>
+          <Link href={VACANCIES_ROUTE} className={buttonVariants({ size: "lg" })}>
+            {APPLICATION_MESSAGES.exploreVacancies}
+          </Link>
+        </div>
+      )}
+
+      {data && data.length > 0 && (
+        <ApplicationsTable applications={data} withdrawingId={withdrawingId} onWithdraw={withdraw} />
+      )}
+    </section>
   );
-};
+}

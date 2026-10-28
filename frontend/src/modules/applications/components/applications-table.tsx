@@ -1,53 +1,51 @@
-import React from 'react';
-import { Button } from '@/components/ui/button'; // O la ruta de importación de Button que use el proyecto
-import { Application } from '../types/application.types';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { APPLICATION_MESSAGES, WITHDRAWABLE_STATUSES } from "../constants/application.constants";
+import type { ApplicationsTableProps } from "../types/applications-table-props.types";
 
-interface Props {
-  applications: Application[];
-  onWithdraw: (id: string) => void;
-}
-
-export const ApplicationsTable: React.FC<Props> = ({ applications, onWithdraw }) => {
+export function ApplicationsTable({ applications, withdrawingId, onWithdraw }: ApplicationsTableProps) {
   return (
-    <div className="overflow-x-auto rounded-lg bg-white shadow">
-      <table className="w-full border-collapse text-left">
-        <thead>
-          <tr className="border-b bg-gray-50 text-sm text-gray-700">
-            <th className="p-4">Vacante</th>
-            <th className="p-4">Empresa</th>
-            <th className="p-4">Afinidad</th>
-            <th className="p-4">Estado</th>
-            <th className="p-4">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {applications.map((app) => (
-            <tr key={app.id} className="border-b text-sm hover:bg-gray-50">
-              <td className="p-4 font-medium text-gray-900">{app.vacancyTitle}</td>
-              <td className="p-4 text-gray-600">{app.companyName}</td>
-              <td className="p-4 text-gray-600">{app.affinityPercentage}%</td>
-              <td className="p-4">
-                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                  {app.status}
-                </span>
-              </td>
-              <td className="p-4">
-                {(app.status === 'En revisión' || app.status === 'Entrevista') ? (
+    <div className="rounded-lg border border-border bg-surface">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{APPLICATION_MESSAGES.vacancy}</TableHead>
+            <TableHead>{APPLICATION_MESSAGES.company}</TableHead>
+            <TableHead>{APPLICATION_MESSAGES.affinity}</TableHead>
+            <TableHead>{APPLICATION_MESSAGES.status}</TableHead>
+            <TableHead>{APPLICATION_MESSAGES.actions}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {applications.map((application) => (
+            <TableRow key={application.id}>
+              <TableCell className="font-semibold text-ink">{application.vacancyTitle}</TableCell>
+              <TableCell className="text-text-secondary">{application.companyName}</TableCell>
+              <TableCell className="text-text-secondary">{application.affinityPercentage}%</TableCell>
+              <TableCell>
+                <Badge variant="outline">{application.status}</Badge>
+              </TableCell>
+              <TableCell>
+                {WITHDRAWABLE_STATUSES.includes(application.status) ? (
                   <Button
-                    onClick={() => onWithdraw(app.id)}
                     variant="destructive"
                     size="sm"
+                    disabled={withdrawingId === application.id}
+                    onClick={() => onWithdraw(application.id)}
                   >
-                    Retirar
+                    {withdrawingId === application.id
+                      ? APPLICATION_MESSAGES.withdrawing
+                      : APPLICATION_MESSAGES.withdraw}
                   </Button>
                 ) : (
-                  <span className="text-xs text-gray-400">No disponible</span>
+                  <span className="text-xs text-text-secondary">{APPLICATION_MESSAGES.notAvailable}</span>
                 )}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
-};
+}

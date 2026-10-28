@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator.j
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { RequestValidationPipe } from '../../../common/pipes/request-validation.pipe.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import {
   activateMentorSchema,
@@ -27,6 +29,10 @@ import {
   type UpdateMentorOrientationTypesDto,
 } from '../requests/update-mentor-orientation-types.schema.js';
 import { MentorsService } from '../services/mentors.service.js';
+import {
+  mentorDirectoryQuerySchema,
+  type MentorDirectoryQuery,
+} from '../requests/mentor-directory-query.schema.js';
 
 @Controller('mentors')
 @UseInterceptors(ResponseInterceptor)
@@ -38,10 +44,26 @@ export class MentorsController {
     return this.mentorsService.findAll();
   }
 
+  @Get('directory')
+  @UseGuards(JwtAuthGuard)
+  findDirectory(
+    @Query(new RequestValidationPipe(mentorDirectoryQuerySchema))
+    query: MentorDirectoryQuery,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.mentorsService.findDirectory(query, user.id);
+  }
+
   @Get('me/technical-areas')
   @UseGuards(JwtAuthGuard)
   findMyTechnicalAreas(@CurrentUser() user: AuthenticatedUser) {
     return this.mentorsService.findMyTechnicalAreas(user.id);
+  }
+
+  @Get('me/participation')
+  @UseGuards(JwtAuthGuard)
+  findMyParticipation(@CurrentUser() user: AuthenticatedUser) {
+    return this.mentorsService.findMyParticipation(user.id);
   }
 
   @Patch('me/technical-areas')
@@ -68,6 +90,12 @@ export class MentorsController {
     body: UpdateMentorOrientationTypesDto,
   ) {
     return this.mentorsService.updateMyOrientationTypes(user.id, body);
+  }
+
+  @Get('capacity')
+  @UseGuards(JwtAuthGuard)
+  capacity() {
+    return this.mentorsService.capacity();
   }
 
   @Get(':userId')

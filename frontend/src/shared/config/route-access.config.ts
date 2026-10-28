@@ -10,9 +10,11 @@ export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
   { pattern: /^\/profile\/radar\/?$/, roles: ["titulado", "mentor"] },
   { pattern: /^\/profile(?:\/|$)/, roles: ["titulado", "estudiante", "mentor", "empresa"] },
   { pattern: /^\/chat(?:\/|$)/, roles: ["titulado", "estudiante", "mentor", "empresa"] },
+  { pattern: /^\/events\/propose\/?$/, roles: ["titulado"] },
   { pattern: /^\/events(?:\/|$)/, roles: ["titulado", "mentor"] },
   { pattern: /^\/vacancies\/recommended(?:\/|$)/, roles: ["titulado", "estudiante"] },
   { pattern: /^\/vacancies(?:\/|$)/, roles: ["titulado", "estudiante", "mentor"] },
+  { pattern: /^\/surveys(?:\/|$)/, roles: ["titulado"] },
   { pattern: /^\/mentor\/availability\/?$/, roles: ["mentor"] },
   { pattern: /^\/mentors\/participation\/technical-areas\/?$/, roles: ["mentor"] },
   { pattern: /^\/mentorship\/orientation\/?$/, roles: ["mentor"] },
@@ -21,4 +23,5 @@ export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
   { pattern: /^\/mentorship\/?$/, roles: ["titulado", "mentor"] },
   { pattern: /^\/mentorship\/mentors\/?$/, roles: ["titulado", "estudiante", "mentor"] },
   { pattern: /^\/mentors\/(?!participation(?:\/|$)|register(?:\/|$))[^/]+(?:\/availability)?\/?$/, roles: ["titulado", "estudiante", "mentor"] },
+  { pattern: /^\/appointments\/?$/, roles: ["titulado", "estudiante", "mentor"] },
 ];

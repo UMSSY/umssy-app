@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { MailModule } from './modules/mail/index.js';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
@@ -27,13 +28,18 @@ import { AccessRequestsModule } from './modules/access-requests/access-requests.
 import { ChatModule } from './modules/chat/chat.module.js';
 import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
-import { ApplicationsModule } from './modules/applications/applications.module.js';
+import { NlpModule } from './modules/nlp/nlp.module.js';
+import { SurveysModule } from './modules/surveys/surveys.module.js';
+import { AppointmentsModule } from './modules/appointments/appointments.module.js';
+
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
+    MailModule,
     AvailabilityModule,
+    AppointmentsModule,
     AuthModule,
     EventsModule,
     EventCategoriesModule,
@@ -53,7 +59,9 @@ import { ApplicationsModule } from './modules/applications/applications.module.j
     ChatModule,
     MatchingModule,
     JobOffersModule,
-    ApplicationsModule,
+    NlpModule,
+    SurveysModule,
+
   ],
   controllers: [AppController],
   providers: [

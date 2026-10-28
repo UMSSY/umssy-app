@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, House, Inbox, MessageCircle, Radar, UserRound, Users } from "lucide-react";
+import { BriefcaseBusiness, Building2, CalendarDays, ChartNoAxesCombined, ClipboardList, House, Inbox, MessageCircle, Radar, UserRound, Users } from "lucide-react";
 import type { WorkspaceSectionProps } from "@/shared/types/workspace-section-props.types";
 
 export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
@@ -12,19 +12,21 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     ],
   },
   {
-    id: "mentorship", label: "Mentorías", icon: Users, patterns: [/^\/(?:mentorship|mentors|mentor)(?:\/|$)/],
+    id: "mentorship", label: "Mentorías", icon: Users, patterns: [/^\/(?:mentorship|mentors|mentor|appointments)(?:\/|$)/],
     items: [
       { label: "Encontrar mentores", href: "/mentorship/mentors" },
       { label: "Mi participación", href: "/mentors/participation" },
       { label: "Áreas técnicas", href: "/mentors/participation/technical-areas" },
       { label: "Tipos de orientación", href: "/mentorship/orientation" },
       { label: "Mi disponibilidad", href: "/mentor/availability" },
+      { label: "Mis citas", href: "/appointments" },
     ],
   },
   {
     id: "events", label: "Talleres", icon: CalendarDays, patterns: [/^\/events(?:\/|$)/],
     items: [
       { label: "Explorar talleres", href: "/events" },
+      { label: "Proponer taller", href: "/events/propose" },
       { label: "Mis inscripciones", href: "/events/my-passes" },
     ],
   },
@@ -32,6 +34,7 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     id: "company", label: "Empresas", icon: Building2, patterns: [/^\/(?:recruiters|matching)(?:\/|$)/, /^\/area-detail(?:-interaction)?-preview\/?$/],
     items: [
       { label: "Portal de empresa", href: "/recruiters" },
+      { label: "Historial", href: "/recruiters/history" },
       { label: "Publicar vacante", href: "/recruiters/job-offers/new" },
       { label: "Buscar candidatos", href: "/matching" },
     ],
@@ -42,6 +45,14 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
       { label: "Usuarios aceptados", href: "/backoffice/reports/registered-users" },
       { label: "Usuarios rechazados", href: "/backoffice/reports/rejected-users" },
       { label: "Historial de reportes", href: "/backoffice/reports/history" },
+    ],
+  },
+  // Va antes de "requests", que abarca todo /backoffice.
+  {
+    id: "surveys", label: "Encuestas", icon: ClipboardList, patterns: [/^\/backoffice\/surveys(?:\/|$)/],
+    items: [
+      { label: "Encuestas", href: "/backoffice/surveys" },
+      { label: "Crear encuesta", href: "/backoffice/surveys/create" },
     ],
   },
   { id: "requests", label: "Solicitudes", icon: Inbox, patterns: [/^\/backoffice(?:\/|$)/], items: [] },
@@ -58,5 +69,5 @@ export const WORKSPACE_SECTIONS: readonly WorkspaceSectionProps[] = [
     ],
   },
   { id: "chat", label: "Chat", icon: MessageCircle, patterns: [/^\/chat(?:\/|$)/], items: [] },
-  { id: "home", label: "Inicio", icon: House, patterns: [/^\/dashboard\/?$/], items: [] },
+  { id: "home", label: "Inicio", icon: House, patterns: [/^\/dashboard\/?$/, /^\/surveys(?:\/|$)/], items: [] },
 ];

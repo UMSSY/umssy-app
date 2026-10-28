@@ -6,8 +6,8 @@ import type {
   MatchingInput,
   MatchingResult,
 } from '../types/matching.types.js';
-import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { SkillDictionaryService } from '../../job-connect/services/skill-dictionary.service.js';
+import { SkillCatalogService } from '../../skills/services/skill-catalog.service.js';
 import { WorkExperienceNotFoundException } from '../../work-experience/exceptions/work-experience-not-found.exception.js';
 import { ExperienceSkillsRepository } from '../repositories/experience-skills.repository.js';
 import { SkillsClassifierService } from './skills-classifier.service.js';
@@ -18,7 +18,7 @@ export class MatchingService {
   constructor(
     private readonly skillDictionaryService: SkillDictionaryService,
     private readonly skillsClassifierService: SkillsClassifierService,
-    private readonly prisma: PrismaService,
+    private readonly skillCatalogService: SkillCatalogService,
     private readonly nlpService: NlpService,
     private readonly experienceSkillsRepository: ExperienceSkillsRepository,
   ) {}
@@ -62,11 +62,9 @@ export class MatchingService {
   private async detectCatalogSkills(
     candidates: string[],
   ): Promise<DetectedSkillResponse[]> {
-    const catalog = await this.prisma.skill.findMany({
-      where: { isCustom: false },
-      orderBy: { name: 'asc' },
-      select: { id: true, name: true },
-    });
+    const catalog = (await this.skillCatalogService.listCatalog({})).map(
+      ({ id, name }) => ({ id, name }),
+    );
     return this.skillsClassifierService.classify(candidates, catalog);
   }
 

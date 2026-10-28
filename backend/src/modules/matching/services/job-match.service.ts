@@ -9,6 +9,7 @@ import {
   hasPendingRequirements,
   toCategorizedRequirements,
 } from '../utils/build-score-requirements.js';
+import { CandidateProfileService } from './candidate-profile.service.js';
 import { WeightedScoreService } from './weighted-score.service.js';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class JobMatchService {
   constructor(
     private readonly jobMatchRepository: JobMatchRepository,
     private readonly userSkillService: UserSkillService,
+    private readonly candidateProfileService: CandidateProfileService,
     private readonly weightedScoreService: WeightedScoreService,
   ) {}
 
@@ -33,7 +35,7 @@ export class JobMatchService {
 
     const [userSkills, profile] = await Promise.all([
       this.userSkillService.getUserSkills(userId),
-      this.jobMatchRepository.findCandidateProfile(userId),
+      this.candidateProfileService.findCandidateProfile(userId),
     ]);
 
     const requirements = buildScoreRequirements(toVacancyRequirements(vacancy), {

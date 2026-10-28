@@ -3,28 +3,61 @@ import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 
+vi.mock('../repositories/mentor-offers.queries.js', () => ({ reconcileMentorOffers: vi.fn() }));
+
 describe('MentorsRepository', () => {
+  it('distingue un exmentor de un titulado nuevo y devuelve solo sus preferencias', async () => {
+    const roles = vi.fn().mockResolvedValueOnce([{ deletedAt: new Date(), startAt: new Date(0) }]).mockResolvedValueOnce([]);
+    const areas = vi.fn().mockResolvedValue([{ technicalArea: { id: 'area', name: 'Backend' } }]);
+    const orientations = vi.fn().mockResolvedValue([{ orientationType: { id: 'orientation', name: 'Empleo' } }]);
+    const repository = new MentorsRepository({
+      userRole: { findMany: roles },
+      mentorTechnicalArea: { findMany: areas },
+      mentorOrientationType: { findMany: orientations },
+    } as unknown as PrismaService);
+    expect(await repository.findMyParticipation('self')).toEqual({
+      status: 'DEACTIVATED', areas: [{ id: 'area', name: 'Backend' }],
+      orientations: [{ id: 'orientation', name: 'Empleo' }],
+    });
+    expect(await repository.findMyParticipation('new')).toMatchObject({ status: 'NEVER' });
+    expect(roles).toHaveBeenCalledWith(expect.objectContaining({ where: { userId: 'self', role: { name: MENTOR_ROLE_NAME } } }));
+    expect(areas).toHaveBeenCalledWith(expect.objectContaining({ where: { mentorId: 'self' } }));
+  });
   it('no consulta metadatos de fotos si el directorio está vacío', async () => {
     const findMany = vi.fn().mockResolvedValue([]);
-    const repository = new MentorsRepository({ user: { findMany } } as unknown as PrismaService);
+    const repository = new MentorsRepository({
+      user: { findMany },
+    } as unknown as PrismaService);
+
     expect(await repository.findActiveMentors(new Date())).toEqual([]);
     expect(findMany).toHaveBeenCalledTimes(1);
   });
 
   it('resuelve las versiones de muchas fotografías en un único lote sin seleccionar binarios', async () => {
-    const records = Array.from({ length: 20 }, (_, index) => ({ id: `mentor-${index}` }));
+    const records = Array.from({ length: 20 }, (_, index) => ({
+      id: `mentor-${index}`,
+    }));
     const updatedAt = new Date('2026-10-09T12:00:00.000Z');
+
     const findMany = vi.fn().mockResolvedValueOnce(records).mockResolvedValueOnce([
       { id: 'mentor-0', updatedAt },
       { id: 'mentor-19', updatedAt },
     ]);
-    const repository = new MentorsRepository({ user: { findMany } } as unknown as PrismaService);
+
+    const repository = new MentorsRepository({
+      user: { findMany },
+    } as unknown as PrismaService);
+
     const result = await repository.findActiveMentors(new Date());
+
     expect(findMany).toHaveBeenCalledTimes(2);
     expect(result[0]?.photoVersion).toBe(updatedAt.toISOString());
     expect(result[1]?.photoVersion).toBeNull();
     expect(result[19]?.photoVersion).toBe(updatedAt.toISOString());
-    expect(findMany.mock.calls[1]?.[0].where.id.in).toEqual(records.map(({ id }) => id));
+    expect(findMany.mock.calls[1]?.[0].where.id.in).toEqual(
+      records.map(({ id }) => id),
+    );
+
     for (const [query] of findMany.mock.calls) {
       expect(query.select).not.toHaveProperty('photoUrl');
       expect(query.select).not.toHaveProperty('email');
@@ -32,6 +65,7 @@ describe('MentorsRepository', () => {
       expect(query.select).not.toHaveProperty('certifications');
     }
   });
+
   it('busca solo el id del rol mentor', async () => {
     const role = { id: 'mentor-role-id' };
     const findUnique = vi.fn().mockResolvedValue(role);
@@ -41,12 +75,8 @@ describe('MentorsRepository', () => {
     const result = await repository.findMentorRole();
 
     expect(findUnique).toHaveBeenCalledWith({
-      where: {
-        name: MENTOR_ROLE_NAME,
-      },
-      select: {
-        id: true,
-      },
+      where: { name: MENTOR_ROLE_NAME },
+      select: { id: true },
     });
     expect(result).toBe(role);
   });
@@ -64,10 +94,9 @@ describe('MentorsRepository', () => {
         userId: 'user-1',
         roleId: 'role-1',
         deletedAt: null,
+        startAt: { lte: expect.any(Date) },
       },
-      select: {
-        id: true,
-      },
+      select: { id: true },
     });
     expect(result).toBe(userRole);
   });
@@ -159,14 +188,8 @@ describe('MentorsRepository', () => {
     const result = await repository.findTechnicalAreas(['area-1']);
 
     expect(findMany).toHaveBeenCalledWith({
-      where: {
-        id: {
-          in: ['area-1'],
-        },
-      },
-      select: {
-        id: true,
-      },
+      where: { id: { in: ['area-1'] } },
+      select: { id: true },
     });
     expect(result).toBe(areas);
   });
@@ -185,14 +208,10 @@ describe('MentorsRepository', () => {
 
     expect(findMany).toHaveBeenCalledWith({
       where: {
-        id: {
-          in: ['orientation-1'],
-        },
+        id: { in: ['orientation-1'] },
         isActive: true,
       },
-      select: {
-        id: true,
-      },
+      select: { id: true },
     });
     expect(result).toBe(orientationTypes);
   });
@@ -214,7 +233,12 @@ describe('MentorsRepository', () => {
         ],
       },
     ];
-    const findMany = vi.fn().mockResolvedValueOnce(mentors).mockResolvedValueOnce([]);
+
+    const findMany = vi
+      .fn()
+      .mockResolvedValueOnce(mentors)
+      .mockResolvedValueOnce([]);
+
     const prisma = { user: { findMany } } as unknown as PrismaService;
     const repository = new MentorsRepository(prisma);
 
@@ -227,12 +251,8 @@ describe('MentorsRepository', () => {
         roles: {
           some: {
             deletedAt: null,
-            startAt: {
-              lte: now,
-            },
-            role: {
-              name: MENTOR_ROLE_NAME,
-            },
+            startAt: { lte: now },
+            role: { name: MENTOR_ROLE_NAME },
           },
         },
       },
@@ -255,23 +275,22 @@ describe('MentorsRepository', () => {
         mentorTechnicalAreas: {
           select: {
             technicalArea: {
-              select: {
-                name: true,
-              },
+              select: { name: true },
             },
           },
         },
       },
       orderBy: [
-        {
-          firstName: 'asc',
-        },
-        {
-          lastName: 'asc',
-        },
+        { firstName: 'asc' },
+        { lastName: 'asc' },
+        { id: 'asc' },
       ],
     });
-    expect(result).toEqual(mentors.map((mentor) => ({ ...mentor, photoVersion: null })));
+
+    expect(result).toEqual(
+      mentors.map((mentor) => ({ ...mentor, photoVersion: null })),
+    );
+
     expect(findMany).toHaveBeenLastCalledWith({
       where: {
         id: { in: ['user-1'] },
@@ -293,21 +312,19 @@ describe('MentorsRepository', () => {
 
     expect(findFirst).toHaveBeenCalledTimes(1);
     const query = findFirst.mock.calls[0]?.[0];
+
     expect(query?.where).toEqual({
       id: 'user-1',
       isActive: true,
       roles: {
         some: {
           deletedAt: null,
-          startAt: {
-            lte: now,
-          },
-          role: {
-            name: MENTOR_ROLE_NAME,
-          },
+          startAt: { lte: now },
+          role: { name: MENTOR_ROLE_NAME },
         },
       },
     });
+
     expect(Object.keys(query?.select ?? {}).sort()).toEqual(
       [
         'aboutMe',
@@ -326,22 +343,21 @@ describe('MentorsRepository', () => {
         'workExperiences',
       ].sort(),
     );
+
     expect(query?.select).not.toHaveProperty('email');
     expect(query?.select).not.toHaveProperty('password');
     expect(query?.select).not.toHaveProperty('phone');
     expect(query?.select).not.toHaveProperty('personalEmail');
+
     expect(query?.select?.mentorOrientationTypes).toMatchObject({
       where: {
-        orientationType: {
-          isActive: true,
-        },
+        orientationType: { isActive: true },
       },
       orderBy: {
-        orientationType: {
-          name: 'asc',
-        },
+        orientationType: { name: 'asc' },
       },
     });
+
     expect(result).toBe(mentor);
   });
 
@@ -353,12 +369,18 @@ describe('MentorsRepository', () => {
       id: 'user-1',
       isAvailableForMentoring: true,
     });
+
     const transaction = {
+      $queryRaw: vi.fn().mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ eligible: true, alreadyMentor: false }])
+        .mockResolvedValueOnce([{ approvedGraduates: 5, activeMentors: 0, reservedOffers: 0 }]),
+      $executeRaw: vi.fn(),
       userRole: { create: createUserRole },
-      mentorTechnicalArea: { createMany: createTechnicalAreas },
-      mentorOrientationType: { createMany: createOrientationTypes },
+      mentorTechnicalArea: { deleteMany: vi.fn(), createMany: createTechnicalAreas },
+      mentorOrientationType: { deleteMany: vi.fn(), createMany: createOrientationTypes },
       user: { update: updateUser },
     };
+
     const $transaction = vi.fn(async (callback) => callback(transaction));
     const prisma = { $transaction } as unknown as PrismaService;
     const repository = new MentorsRepository(prisma);
@@ -391,12 +413,8 @@ describe('MentorsRepository', () => {
       ],
     });
     expect(updateUser).toHaveBeenCalledWith({
-      where: {
-        id: 'user-1',
-      },
-      data: {
-        isAvailableForMentoring: true,
-      },
+      where: { id: 'user-1' },
+      data: { isAvailableForMentoring: true },
     });
     expect(result).toEqual({ id: 'user-1' });
   });
@@ -406,11 +424,17 @@ describe('MentorsRepository', () => {
     const createUserRole = vi.fn().mockResolvedValue({ id: 'user-role-id' });
     const createTechnicalAreas = vi.fn().mockRejectedValue(writeError);
     const createOrientationTypes = vi.fn();
+
     const transaction = {
+      $queryRaw: vi.fn().mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ eligible: true, alreadyMentor: false }])
+        .mockResolvedValueOnce([{ approvedGraduates: 5, activeMentors: 0, reservedOffers: 0 }]),
+      $executeRaw: vi.fn(),
       userRole: { create: createUserRole },
-      mentorTechnicalArea: { createMany: createTechnicalAreas },
-      mentorOrientationType: { createMany: createOrientationTypes },
+      mentorTechnicalArea: { deleteMany: vi.fn(), createMany: createTechnicalAreas },
+      mentorOrientationType: { deleteMany: vi.fn(), createMany: createOrientationTypes },
     };
+
     const $transaction = vi.fn(async (callback) => callback(transaction));
     const prisma = { $transaction } as unknown as PrismaService;
     const repository = new MentorsRepository(prisma);
@@ -418,6 +442,7 @@ describe('MentorsRepository', () => {
     await expect(
       repository.activate('user-1', 'role-1', ['area-1'], ['orientation-1']),
     ).rejects.toBe(writeError);
+
     expect($transaction).toHaveBeenCalledTimes(1);
     expect(createUserRole).toHaveBeenCalledTimes(1);
     expect(createTechnicalAreas).toHaveBeenCalledTimes(1);
@@ -430,21 +455,14 @@ describe('MentorsRepository', () => {
       isAvailableForMentoring: false,
     });
 
-    const prisma = {
-      user: { update },
-    } as unknown as PrismaService;
-
+    const prisma = { user: { update } } as unknown as PrismaService;
     const repository = new MentorsRepository(prisma);
 
     const result = await repository.updateAvailability('user-1', false);
 
     expect(update).toHaveBeenCalledWith({
-      where: {
-        id: 'user-1',
-      },
-      data: {
-        isAvailableForMentoring: false,
-      },
+      where: { id: 'user-1' },
+      data: { isAvailableForMentoring: false },
       select: {
         id: true,
         isAvailableForMentoring: true,
@@ -463,6 +481,7 @@ describe('MentorsRepository', () => {
     const transaction = {
       mentorTechnicalArea: { deleteMany, createMany },
     };
+
     const $transaction = vi.fn(async (callback) => callback(transaction));
     const prisma = { $transaction } as unknown as PrismaService;
     const repository = new MentorsRepository(prisma);
@@ -490,6 +509,7 @@ describe('MentorsRepository', () => {
     const transaction = {
       mentorOrientationType: { deleteMany, createMany },
     };
+
     const $transaction = vi.fn(async (callback) => callback(transaction));
     const prisma = { $transaction } as unknown as PrismaService;
     const repository = new MentorsRepository(prisma);

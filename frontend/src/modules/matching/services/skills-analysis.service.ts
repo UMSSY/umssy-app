@@ -1,6 +1,6 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
-import type { SkillsAnalysisResult } from "@/modules/matching/types/skills-analysis.types";
+import type { SkillsAnalysisResult } from "../types/skills-analysis.types";
 
 export const skillsAnalysisService = {
   analyzeExperience: async (

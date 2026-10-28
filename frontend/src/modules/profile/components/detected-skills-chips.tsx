@@ -2,17 +2,7 @@
 
 import { Sparkles, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-export interface SkillItem {
-  id: string;
-  name: string;
-}
-
-export interface DetectedSkillsChipsProps {
-  skills?: SkillItem[];
-  processingTimeMs?: number;
-  isLoading?: boolean;
-}
+import type { DetectedSkillsChipsProps } from "../types/detected-skills-chips-props.types";
 
 export function DetectedSkillsChips({
   skills = [],

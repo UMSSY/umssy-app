@@ -7,23 +7,12 @@ import {
 import { DuplicateJobApplicationException } from '../exceptions/duplicate-job-application.exception.js';
 import { JobApplicationStatusMissingException } from '../exceptions/job-application-status-missing.exception.js';
 import { JobOfferUnavailableException } from '../exceptions/job-offer-unavailable.exception.js';
+import { JobApplicationMapper } from '../mappers/job-application.mapper.js';
 import { JobApplicationsRepository } from '../repositories/job-applications.repository.js';
 import type {
-  JobApplicationRecord,
   JobApplicationResponse,
   MyJobApplicationResponse,
 } from '../types/job-application.types.js';
-
-function toResponse(record: JobApplicationRecord): JobApplicationResponse {
-  return {
-    id: record.id,
-    jobOfferId: record.jobOffer.id,
-    jobTitle: record.jobOffer.title,
-    companyName: record.jobOffer.company.title,
-    appliedAt: record.appliedAt.toISOString(),
-    status: record.status.title,
-  };
-}
 
 function isUniqueViolation(error: unknown): boolean {
   return (
@@ -34,7 +23,10 @@ function isUniqueViolation(error: unknown): boolean {
 
 @Injectable()
 export class JobApplicationsService {
-  constructor(private readonly repository: JobApplicationsRepository) {}
+  constructor(
+    private readonly repository: JobApplicationsRepository,
+    private readonly mapper: JobApplicationMapper,
+  ) {}
 
   async apply(
     userId: string,
@@ -56,7 +48,7 @@ export class JobApplicationsService {
     }
 
     try {
-      return toResponse(
+      return this.mapper.toResponse(
         await this.repository.create(userId, jobOfferId, status.id),
       );
     } catch (error) {
@@ -71,10 +63,8 @@ export class JobApplicationsService {
     userId: string,
     jobOfferId: string,
   ): Promise<MyJobApplicationResponse> {
-    const record = await this.repository.findByUserAndOffer(userId, jobOfferId);
-    return {
-      hasApplied: record !== null,
-      application: record ? toResponse(record) : null,
-    };
+    return this.mapper.toMyApplicationResponse(
+      await this.repository.findByUserAndOffer(userId, jobOfferId),
+    );
   }
 }
