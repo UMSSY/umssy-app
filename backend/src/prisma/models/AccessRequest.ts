@@ -54,6 +54,7 @@ export type AccessRequestMinAggregateOutputType = {
   openedById: string | null
   openedAt: Date | null
   reviewedById: string | null
+  approvedUserId: string | null
   reviewedAt: Date | null
   rejectionReason: string | null
   createdAt: Date | null
@@ -80,6 +81,7 @@ export type AccessRequestMaxAggregateOutputType = {
   openedById: string | null
   openedAt: Date | null
   reviewedById: string | null
+  approvedUserId: string | null
   reviewedAt: Date | null
   rejectionReason: string | null
   createdAt: Date | null
@@ -106,6 +108,7 @@ export type AccessRequestCountAggregateOutputType = {
   openedById: number
   openedAt: number
   reviewedById: number
+  approvedUserId: number
   reviewedAt: number
   rejectionReason: number
   createdAt: number
@@ -142,6 +145,7 @@ export type AccessRequestMinAggregateInputType = {
   openedById?: true
   openedAt?: true
   reviewedById?: true
+  approvedUserId?: true
   reviewedAt?: true
   rejectionReason?: true
   createdAt?: true
@@ -168,6 +172,7 @@ export type AccessRequestMaxAggregateInputType = {
   openedById?: true
   openedAt?: true
   reviewedById?: true
+  approvedUserId?: true
   reviewedAt?: true
   rejectionReason?: true
   createdAt?: true
@@ -194,6 +199,7 @@ export type AccessRequestCountAggregateInputType = {
   openedById?: true
   openedAt?: true
   reviewedById?: true
+  approvedUserId?: true
   reviewedAt?: true
   rejectionReason?: true
   createdAt?: true
@@ -307,6 +313,7 @@ export type AccessRequestGroupByOutputType = {
   openedById: string | null
   openedAt: Date | null
   reviewedById: string | null
+  approvedUserId: string | null
   reviewedAt: Date | null
   rejectionReason: string | null
   createdAt: Date
@@ -356,6 +363,7 @@ export type AccessRequestWhereInput = {
   openedById?: Prisma.UuidNullableFilter<"AccessRequest"> | string | null
   openedAt?: Prisma.DateTimeNullableFilter<"AccessRequest"> | Date | string | null
   reviewedById?: Prisma.UuidNullableFilter<"AccessRequest"> | string | null
+  approvedUserId?: Prisma.UuidNullableFilter<"AccessRequest"> | string | null
   reviewedAt?: Prisma.DateTimeNullableFilter<"AccessRequest"> | Date | string | null
   rejectionReason?: Prisma.StringNullableFilter<"AccessRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AccessRequest"> | Date | string
@@ -365,6 +373,7 @@ export type AccessRequestWhereInput = {
   documentFile?: Prisma.XOR<Prisma.FileNullableScalarRelationFilter, Prisma.FileWhereInput> | null
   openedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   reviewedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  approvedUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   career?: Prisma.XOR<Prisma.CareerScalarRelationFilter, Prisma.CareerWhereInput>
   activationOtps?: Prisma.ActivationOtpListRelationFilter
   auditEvents?: Prisma.AuditEventListRelationFilter
@@ -391,6 +400,7 @@ export type AccessRequestOrderByWithRelationInput = {
   openedById?: Prisma.SortOrderInput | Prisma.SortOrder
   openedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvedUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -400,6 +410,7 @@ export type AccessRequestOrderByWithRelationInput = {
   documentFile?: Prisma.FileOrderByWithRelationInput
   openedBy?: Prisma.UserOrderByWithRelationInput
   reviewedBy?: Prisma.UserOrderByWithRelationInput
+  approvedUser?: Prisma.UserOrderByWithRelationInput
   career?: Prisma.CareerOrderByWithRelationInput
   activationOtps?: Prisma.ActivationOtpOrderByRelationAggregateInput
   auditEvents?: Prisma.AuditEventOrderByRelationAggregateInput
@@ -410,6 +421,7 @@ export type AccessRequestWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   requestCode?: string
   documentFileId?: string
+  approvedUserId?: string
   AND?: Prisma.AccessRequestWhereInput | Prisma.AccessRequestWhereInput[]
   OR?: Prisma.AccessRequestWhereInput[]
   NOT?: Prisma.AccessRequestWhereInput | Prisma.AccessRequestWhereInput[]
@@ -438,11 +450,12 @@ export type AccessRequestWhereUniqueInput = Prisma.AtLeast<{
   documentFile?: Prisma.XOR<Prisma.FileNullableScalarRelationFilter, Prisma.FileWhereInput> | null
   openedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   reviewedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  approvedUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   career?: Prisma.XOR<Prisma.CareerScalarRelationFilter, Prisma.CareerWhereInput>
   activationOtps?: Prisma.ActivationOtpListRelationFilter
   auditEvents?: Prisma.AuditEventListRelationFilter
   documentValidation?: Prisma.XOR<Prisma.DocumentValidationNullableScalarRelationFilter, Prisma.DocumentValidationWhereInput> | null
-}, "id" | "requestCode" | "documentFileId">
+}, "id" | "requestCode" | "documentFileId" | "approvedUserId">
 
 export type AccessRequestOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -464,6 +477,7 @@ export type AccessRequestOrderByWithAggregationInput = {
   openedById?: Prisma.SortOrderInput | Prisma.SortOrder
   openedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvedUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -498,6 +512,7 @@ export type AccessRequestScalarWhereWithAggregatesInput = {
   openedById?: Prisma.UuidNullableWithAggregatesFilter<"AccessRequest"> | string | null
   openedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AccessRequest"> | Date | string | null
   reviewedById?: Prisma.UuidNullableWithAggregatesFilter<"AccessRequest"> | string | null
+  approvedUserId?: Prisma.UuidNullableWithAggregatesFilter<"AccessRequest"> | string | null
   reviewedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AccessRequest"> | Date | string | null
   rejectionReason?: Prisma.StringNullableWithAggregatesFilter<"AccessRequest"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AccessRequest"> | Date | string
@@ -527,6 +542,7 @@ export type AccessRequestCreateInput = {
   documentFile?: Prisma.FileCreateNestedOneWithoutAccessRequestInput
   openedBy?: Prisma.UserCreateNestedOneWithoutOpenedAccessRequestsInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedAccessRequestsInput
+  approvedUser?: Prisma.UserCreateNestedOneWithoutApprovedAccessRequestInput
   career: Prisma.CareerCreateNestedOneWithoutAccessRequestsInput
   activationOtps?: Prisma.ActivationOtpCreateNestedManyWithoutAccessRequestInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutAccessRequestInput
@@ -553,6 +569,7 @@ export type AccessRequestUncheckedCreateInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -585,6 +602,7 @@ export type AccessRequestUpdateInput = {
   documentFile?: Prisma.FileUpdateOneWithoutAccessRequestNestedInput
   openedBy?: Prisma.UserUpdateOneWithoutOpenedAccessRequestsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutReviewedAccessRequestsNestedInput
+  approvedUser?: Prisma.UserUpdateOneWithoutApprovedAccessRequestNestedInput
   career?: Prisma.CareerUpdateOneRequiredWithoutAccessRequestsNestedInput
   activationOtps?: Prisma.ActivationOtpUpdateManyWithoutAccessRequestNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutAccessRequestNestedInput
@@ -611,6 +629,7 @@ export type AccessRequestUncheckedUpdateInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -640,6 +659,7 @@ export type AccessRequestCreateManyInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -686,6 +706,7 @@ export type AccessRequestUncheckedUpdateManyInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -698,13 +719,13 @@ export type AccessRequestListRelationFilter = {
   none?: Prisma.AccessRequestWhereInput
 }
 
-export type AccessRequestOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type AccessRequestNullableScalarRelationFilter = {
   is?: Prisma.AccessRequestWhereInput | null
   isNot?: Prisma.AccessRequestWhereInput | null
+}
+
+export type AccessRequestOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type AccessRequestCountOrderByAggregateInput = {
@@ -727,6 +748,7 @@ export type AccessRequestCountOrderByAggregateInput = {
   openedById?: Prisma.SortOrder
   openedAt?: Prisma.SortOrder
   reviewedById?: Prisma.SortOrder
+  approvedUserId?: Prisma.SortOrder
   reviewedAt?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -757,6 +779,7 @@ export type AccessRequestMaxOrderByAggregateInput = {
   openedById?: Prisma.SortOrder
   openedAt?: Prisma.SortOrder
   reviewedById?: Prisma.SortOrder
+  approvedUserId?: Prisma.SortOrder
   reviewedAt?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -783,6 +806,7 @@ export type AccessRequestMinOrderByAggregateInput = {
   openedById?: Prisma.SortOrder
   openedAt?: Prisma.SortOrder
   reviewedById?: Prisma.SortOrder
+  approvedUserId?: Prisma.SortOrder
   reviewedAt?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -812,6 +836,12 @@ export type AccessRequestCreateNestedManyWithoutReviewedByInput = {
   connect?: Prisma.AccessRequestWhereUniqueInput | Prisma.AccessRequestWhereUniqueInput[]
 }
 
+export type AccessRequestCreateNestedOneWithoutApprovedUserInput = {
+  create?: Prisma.XOR<Prisma.AccessRequestCreateWithoutApprovedUserInput, Prisma.AccessRequestUncheckedCreateWithoutApprovedUserInput>
+  connectOrCreate?: Prisma.AccessRequestCreateOrConnectWithoutApprovedUserInput
+  connect?: Prisma.AccessRequestWhereUniqueInput
+}
+
 export type AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput = {
   create?: Prisma.XOR<Prisma.AccessRequestCreateWithoutOpenedByInput, Prisma.AccessRequestUncheckedCreateWithoutOpenedByInput> | Prisma.AccessRequestCreateWithoutOpenedByInput[] | Prisma.AccessRequestUncheckedCreateWithoutOpenedByInput[]
   connectOrCreate?: Prisma.AccessRequestCreateOrConnectWithoutOpenedByInput | Prisma.AccessRequestCreateOrConnectWithoutOpenedByInput[]
@@ -824,6 +854,12 @@ export type AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput = {
   connectOrCreate?: Prisma.AccessRequestCreateOrConnectWithoutReviewedByInput | Prisma.AccessRequestCreateOrConnectWithoutReviewedByInput[]
   createMany?: Prisma.AccessRequestCreateManyReviewedByInputEnvelope
   connect?: Prisma.AccessRequestWhereUniqueInput | Prisma.AccessRequestWhereUniqueInput[]
+}
+
+export type AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput = {
+  create?: Prisma.XOR<Prisma.AccessRequestCreateWithoutApprovedUserInput, Prisma.AccessRequestUncheckedCreateWithoutApprovedUserInput>
+  connectOrCreate?: Prisma.AccessRequestCreateOrConnectWithoutApprovedUserInput
+  connect?: Prisma.AccessRequestWhereUniqueInput
 }
 
 export type AccessRequestUpdateManyWithoutOpenedByNestedInput = {
@@ -854,6 +890,16 @@ export type AccessRequestUpdateManyWithoutReviewedByNestedInput = {
   deleteMany?: Prisma.AccessRequestScalarWhereInput | Prisma.AccessRequestScalarWhereInput[]
 }
 
+export type AccessRequestUpdateOneWithoutApprovedUserNestedInput = {
+  create?: Prisma.XOR<Prisma.AccessRequestCreateWithoutApprovedUserInput, Prisma.AccessRequestUncheckedCreateWithoutApprovedUserInput>
+  connectOrCreate?: Prisma.AccessRequestCreateOrConnectWithoutApprovedUserInput
+  upsert?: Prisma.AccessRequestUpsertWithoutApprovedUserInput
+  disconnect?: Prisma.AccessRequestWhereInput | boolean
+  delete?: Prisma.AccessRequestWhereInput | boolean
+  connect?: Prisma.AccessRequestWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AccessRequestUpdateToOneWithWhereWithoutApprovedUserInput, Prisma.AccessRequestUpdateWithoutApprovedUserInput>, Prisma.AccessRequestUncheckedUpdateWithoutApprovedUserInput>
+}
+
 export type AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput = {
   create?: Prisma.XOR<Prisma.AccessRequestCreateWithoutOpenedByInput, Prisma.AccessRequestUncheckedCreateWithoutOpenedByInput> | Prisma.AccessRequestCreateWithoutOpenedByInput[] | Prisma.AccessRequestUncheckedCreateWithoutOpenedByInput[]
   connectOrCreate?: Prisma.AccessRequestCreateOrConnectWithoutOpenedByInput | Prisma.AccessRequestCreateOrConnectWithoutOpenedByInput[]
@@ -880,6 +926,16 @@ export type AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput = {
   update?: Prisma.AccessRequestUpdateWithWhereUniqueWithoutReviewedByInput | Prisma.AccessRequestUpdateWithWhereUniqueWithoutReviewedByInput[]
   updateMany?: Prisma.AccessRequestUpdateManyWithWhereWithoutReviewedByInput | Prisma.AccessRequestUpdateManyWithWhereWithoutReviewedByInput[]
   deleteMany?: Prisma.AccessRequestScalarWhereInput | Prisma.AccessRequestScalarWhereInput[]
+}
+
+export type AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput = {
+  create?: Prisma.XOR<Prisma.AccessRequestCreateWithoutApprovedUserInput, Prisma.AccessRequestUncheckedCreateWithoutApprovedUserInput>
+  connectOrCreate?: Prisma.AccessRequestCreateOrConnectWithoutApprovedUserInput
+  upsert?: Prisma.AccessRequestUpsertWithoutApprovedUserInput
+  disconnect?: Prisma.AccessRequestWhereInput | boolean
+  delete?: Prisma.AccessRequestWhereInput | boolean
+  connect?: Prisma.AccessRequestWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AccessRequestUpdateToOneWithWhereWithoutApprovedUserInput, Prisma.AccessRequestUpdateWithoutApprovedUserInput>, Prisma.AccessRequestUncheckedUpdateWithoutApprovedUserInput>
 }
 
 export type AccessRequestCreateNestedManyWithoutStatusInput = {
@@ -1104,6 +1160,7 @@ export type AccessRequestCreateWithoutOpenedByInput = {
   documentType?: Prisma.AccessRequestDocumentTypeCreateNestedOneWithoutAccessRequestsInput
   documentFile?: Prisma.FileCreateNestedOneWithoutAccessRequestInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedAccessRequestsInput
+  approvedUser?: Prisma.UserCreateNestedOneWithoutApprovedAccessRequestInput
   career: Prisma.CareerCreateNestedOneWithoutAccessRequestsInput
   activationOtps?: Prisma.ActivationOtpCreateNestedManyWithoutAccessRequestInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutAccessRequestInput
@@ -1129,6 +1186,7 @@ export type AccessRequestUncheckedCreateWithoutOpenedByInput = {
   submittedAt?: Date | string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -1170,6 +1228,7 @@ export type AccessRequestCreateWithoutReviewedByInput = {
   documentType?: Prisma.AccessRequestDocumentTypeCreateNestedOneWithoutAccessRequestsInput
   documentFile?: Prisma.FileCreateNestedOneWithoutAccessRequestInput
   openedBy?: Prisma.UserCreateNestedOneWithoutOpenedAccessRequestsInput
+  approvedUser?: Prisma.UserCreateNestedOneWithoutApprovedAccessRequestInput
   career: Prisma.CareerCreateNestedOneWithoutAccessRequestsInput
   activationOtps?: Prisma.ActivationOtpCreateNestedManyWithoutAccessRequestInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutAccessRequestInput
@@ -1195,6 +1254,7 @@ export type AccessRequestUncheckedCreateWithoutReviewedByInput = {
   submittedAt?: Date | string | null
   openedById?: string | null
   openedAt?: Date | string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -1212,6 +1272,69 @@ export type AccessRequestCreateOrConnectWithoutReviewedByInput = {
 export type AccessRequestCreateManyReviewedByInputEnvelope = {
   data: Prisma.AccessRequestCreateManyReviewedByInput | Prisma.AccessRequestCreateManyReviewedByInput[]
   skipDuplicates?: boolean
+}
+
+export type AccessRequestCreateWithoutApprovedUserInput = {
+  id?: string
+  requestCode?: string | null
+  firstName: string
+  lastName: string
+  idCardNumber: string
+  idCardIssuedIn: string
+  sisCode: string
+  email: string
+  phone?: string | null
+  birthDate: Date | string
+  graduationYear: number
+  submittedAt?: Date | string | null
+  openedAt?: Date | string | null
+  reviewedAt?: Date | string | null
+  rejectionReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  status: Prisma.AccessRequestStatusCreateNestedOneWithoutAccessRequestsInput
+  documentType?: Prisma.AccessRequestDocumentTypeCreateNestedOneWithoutAccessRequestsInput
+  documentFile?: Prisma.FileCreateNestedOneWithoutAccessRequestInput
+  openedBy?: Prisma.UserCreateNestedOneWithoutOpenedAccessRequestsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedAccessRequestsInput
+  career: Prisma.CareerCreateNestedOneWithoutAccessRequestsInput
+  activationOtps?: Prisma.ActivationOtpCreateNestedManyWithoutAccessRequestInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutAccessRequestInput
+  documentValidation?: Prisma.DocumentValidationCreateNestedOneWithoutAccessRequestInput
+}
+
+export type AccessRequestUncheckedCreateWithoutApprovedUserInput = {
+  id?: string
+  requestCode?: string | null
+  firstName: string
+  lastName: string
+  idCardNumber: string
+  idCardIssuedIn: string
+  sisCode: string
+  email: string
+  phone?: string | null
+  birthDate: Date | string
+  graduationYear: number
+  careerId: string
+  statusId: string
+  documentTypeId?: string | null
+  documentFileId?: string | null
+  submittedAt?: Date | string | null
+  openedById?: string | null
+  openedAt?: Date | string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  rejectionReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  activationOtps?: Prisma.ActivationOtpUncheckedCreateNestedManyWithoutAccessRequestInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutAccessRequestInput
+  documentValidation?: Prisma.DocumentValidationUncheckedCreateNestedOneWithoutAccessRequestInput
+}
+
+export type AccessRequestCreateOrConnectWithoutApprovedUserInput = {
+  where: Prisma.AccessRequestWhereUniqueInput
+  create: Prisma.XOR<Prisma.AccessRequestCreateWithoutApprovedUserInput, Prisma.AccessRequestUncheckedCreateWithoutApprovedUserInput>
 }
 
 export type AccessRequestUpsertWithWhereUniqueWithoutOpenedByInput = {
@@ -1253,6 +1376,7 @@ export type AccessRequestScalarWhereInput = {
   openedById?: Prisma.UuidNullableFilter<"AccessRequest"> | string | null
   openedAt?: Prisma.DateTimeNullableFilter<"AccessRequest"> | Date | string | null
   reviewedById?: Prisma.UuidNullableFilter<"AccessRequest"> | string | null
+  approvedUserId?: Prisma.UuidNullableFilter<"AccessRequest"> | string | null
   reviewedAt?: Prisma.DateTimeNullableFilter<"AccessRequest"> | Date | string | null
   rejectionReason?: Prisma.StringNullableFilter<"AccessRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AccessRequest"> | Date | string
@@ -1273,6 +1397,75 @@ export type AccessRequestUpdateWithWhereUniqueWithoutReviewedByInput = {
 export type AccessRequestUpdateManyWithWhereWithoutReviewedByInput = {
   where: Prisma.AccessRequestScalarWhereInput
   data: Prisma.XOR<Prisma.AccessRequestUpdateManyMutationInput, Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByInput>
+}
+
+export type AccessRequestUpsertWithoutApprovedUserInput = {
+  update: Prisma.XOR<Prisma.AccessRequestUpdateWithoutApprovedUserInput, Prisma.AccessRequestUncheckedUpdateWithoutApprovedUserInput>
+  create: Prisma.XOR<Prisma.AccessRequestCreateWithoutApprovedUserInput, Prisma.AccessRequestUncheckedCreateWithoutApprovedUserInput>
+  where?: Prisma.AccessRequestWhereInput
+}
+
+export type AccessRequestUpdateToOneWithWhereWithoutApprovedUserInput = {
+  where?: Prisma.AccessRequestWhereInput
+  data: Prisma.XOR<Prisma.AccessRequestUpdateWithoutApprovedUserInput, Prisma.AccessRequestUncheckedUpdateWithoutApprovedUserInput>
+}
+
+export type AccessRequestUpdateWithoutApprovedUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  requestCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  idCardNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  idCardIssuedIn?: Prisma.StringFieldUpdateOperationsInput | string
+  sisCode?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  graduationYear?: Prisma.IntFieldUpdateOperationsInput | number
+  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.AccessRequestStatusUpdateOneRequiredWithoutAccessRequestsNestedInput
+  documentType?: Prisma.AccessRequestDocumentTypeUpdateOneWithoutAccessRequestsNestedInput
+  documentFile?: Prisma.FileUpdateOneWithoutAccessRequestNestedInput
+  openedBy?: Prisma.UserUpdateOneWithoutOpenedAccessRequestsNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutReviewedAccessRequestsNestedInput
+  career?: Prisma.CareerUpdateOneRequiredWithoutAccessRequestsNestedInput
+  activationOtps?: Prisma.ActivationOtpUpdateManyWithoutAccessRequestNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutAccessRequestNestedInput
+  documentValidation?: Prisma.DocumentValidationUpdateOneWithoutAccessRequestNestedInput
+}
+
+export type AccessRequestUncheckedUpdateWithoutApprovedUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  requestCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  idCardNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  idCardIssuedIn?: Prisma.StringFieldUpdateOperationsInput | string
+  sisCode?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  graduationYear?: Prisma.IntFieldUpdateOperationsInput | number
+  careerId?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
+  documentTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentFileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activationOtps?: Prisma.ActivationOtpUncheckedUpdateManyWithoutAccessRequestNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutAccessRequestNestedInput
+  documentValidation?: Prisma.DocumentValidationUncheckedUpdateOneWithoutAccessRequestNestedInput
 }
 
 export type AccessRequestCreateWithoutStatusInput = {
@@ -1297,6 +1490,7 @@ export type AccessRequestCreateWithoutStatusInput = {
   documentFile?: Prisma.FileCreateNestedOneWithoutAccessRequestInput
   openedBy?: Prisma.UserCreateNestedOneWithoutOpenedAccessRequestsInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedAccessRequestsInput
+  approvedUser?: Prisma.UserCreateNestedOneWithoutApprovedAccessRequestInput
   career: Prisma.CareerCreateNestedOneWithoutAccessRequestsInput
   activationOtps?: Prisma.ActivationOtpCreateNestedManyWithoutAccessRequestInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutAccessRequestInput
@@ -1322,6 +1516,7 @@ export type AccessRequestUncheckedCreateWithoutStatusInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -1379,6 +1574,7 @@ export type AccessRequestCreateWithoutDocumentTypeInput = {
   documentFile?: Prisma.FileCreateNestedOneWithoutAccessRequestInput
   openedBy?: Prisma.UserCreateNestedOneWithoutOpenedAccessRequestsInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedAccessRequestsInput
+  approvedUser?: Prisma.UserCreateNestedOneWithoutApprovedAccessRequestInput
   career: Prisma.CareerCreateNestedOneWithoutAccessRequestsInput
   activationOtps?: Prisma.ActivationOtpCreateNestedManyWithoutAccessRequestInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutAccessRequestInput
@@ -1404,6 +1600,7 @@ export type AccessRequestUncheckedCreateWithoutDocumentTypeInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -1461,6 +1658,7 @@ export type AccessRequestCreateWithoutDocumentFileInput = {
   documentType?: Prisma.AccessRequestDocumentTypeCreateNestedOneWithoutAccessRequestsInput
   openedBy?: Prisma.UserCreateNestedOneWithoutOpenedAccessRequestsInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedAccessRequestsInput
+  approvedUser?: Prisma.UserCreateNestedOneWithoutApprovedAccessRequestInput
   career: Prisma.CareerCreateNestedOneWithoutAccessRequestsInput
   activationOtps?: Prisma.ActivationOtpCreateNestedManyWithoutAccessRequestInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutAccessRequestInput
@@ -1486,6 +1684,7 @@ export type AccessRequestUncheckedCreateWithoutDocumentFileInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -1533,6 +1732,7 @@ export type AccessRequestUpdateWithoutDocumentFileInput = {
   documentType?: Prisma.AccessRequestDocumentTypeUpdateOneWithoutAccessRequestsNestedInput
   openedBy?: Prisma.UserUpdateOneWithoutOpenedAccessRequestsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutReviewedAccessRequestsNestedInput
+  approvedUser?: Prisma.UserUpdateOneWithoutApprovedAccessRequestNestedInput
   career?: Prisma.CareerUpdateOneRequiredWithoutAccessRequestsNestedInput
   activationOtps?: Prisma.ActivationOtpUpdateManyWithoutAccessRequestNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutAccessRequestNestedInput
@@ -1558,6 +1758,7 @@ export type AccessRequestUncheckedUpdateWithoutDocumentFileInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1590,6 +1791,7 @@ export type AccessRequestCreateWithoutCareerInput = {
   documentFile?: Prisma.FileCreateNestedOneWithoutAccessRequestInput
   openedBy?: Prisma.UserCreateNestedOneWithoutOpenedAccessRequestsInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedAccessRequestsInput
+  approvedUser?: Prisma.UserCreateNestedOneWithoutApprovedAccessRequestInput
   activationOtps?: Prisma.ActivationOtpCreateNestedManyWithoutAccessRequestInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutAccessRequestInput
   documentValidation?: Prisma.DocumentValidationCreateNestedOneWithoutAccessRequestInput
@@ -1614,6 +1816,7 @@ export type AccessRequestUncheckedCreateWithoutCareerInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -1672,6 +1875,7 @@ export type AccessRequestCreateWithoutActivationOtpsInput = {
   documentFile?: Prisma.FileCreateNestedOneWithoutAccessRequestInput
   openedBy?: Prisma.UserCreateNestedOneWithoutOpenedAccessRequestsInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedAccessRequestsInput
+  approvedUser?: Prisma.UserCreateNestedOneWithoutApprovedAccessRequestInput
   career: Prisma.CareerCreateNestedOneWithoutAccessRequestsInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutAccessRequestInput
   documentValidation?: Prisma.DocumentValidationCreateNestedOneWithoutAccessRequestInput
@@ -1697,6 +1901,7 @@ export type AccessRequestUncheckedCreateWithoutActivationOtpsInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -1744,6 +1949,7 @@ export type AccessRequestUpdateWithoutActivationOtpsInput = {
   documentFile?: Prisma.FileUpdateOneWithoutAccessRequestNestedInput
   openedBy?: Prisma.UserUpdateOneWithoutOpenedAccessRequestsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutReviewedAccessRequestsNestedInput
+  approvedUser?: Prisma.UserUpdateOneWithoutApprovedAccessRequestNestedInput
   career?: Prisma.CareerUpdateOneRequiredWithoutAccessRequestsNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutAccessRequestNestedInput
   documentValidation?: Prisma.DocumentValidationUpdateOneWithoutAccessRequestNestedInput
@@ -1769,6 +1975,7 @@ export type AccessRequestUncheckedUpdateWithoutActivationOtpsInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1800,6 +2007,7 @@ export type AccessRequestCreateWithoutAuditEventsInput = {
   documentFile?: Prisma.FileCreateNestedOneWithoutAccessRequestInput
   openedBy?: Prisma.UserCreateNestedOneWithoutOpenedAccessRequestsInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedAccessRequestsInput
+  approvedUser?: Prisma.UserCreateNestedOneWithoutApprovedAccessRequestInput
   career: Prisma.CareerCreateNestedOneWithoutAccessRequestsInput
   activationOtps?: Prisma.ActivationOtpCreateNestedManyWithoutAccessRequestInput
   documentValidation?: Prisma.DocumentValidationCreateNestedOneWithoutAccessRequestInput
@@ -1825,6 +2033,7 @@ export type AccessRequestUncheckedCreateWithoutAuditEventsInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -1872,6 +2081,7 @@ export type AccessRequestUpdateWithoutAuditEventsInput = {
   documentFile?: Prisma.FileUpdateOneWithoutAccessRequestNestedInput
   openedBy?: Prisma.UserUpdateOneWithoutOpenedAccessRequestsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutReviewedAccessRequestsNestedInput
+  approvedUser?: Prisma.UserUpdateOneWithoutApprovedAccessRequestNestedInput
   career?: Prisma.CareerUpdateOneRequiredWithoutAccessRequestsNestedInput
   activationOtps?: Prisma.ActivationOtpUpdateManyWithoutAccessRequestNestedInput
   documentValidation?: Prisma.DocumentValidationUpdateOneWithoutAccessRequestNestedInput
@@ -1897,6 +2107,7 @@ export type AccessRequestUncheckedUpdateWithoutAuditEventsInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1928,6 +2139,7 @@ export type AccessRequestCreateWithoutDocumentValidationInput = {
   documentFile?: Prisma.FileCreateNestedOneWithoutAccessRequestInput
   openedBy?: Prisma.UserCreateNestedOneWithoutOpenedAccessRequestsInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutReviewedAccessRequestsInput
+  approvedUser?: Prisma.UserCreateNestedOneWithoutApprovedAccessRequestInput
   career: Prisma.CareerCreateNestedOneWithoutAccessRequestsInput
   activationOtps?: Prisma.ActivationOtpCreateNestedManyWithoutAccessRequestInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutAccessRequestInput
@@ -1953,6 +2165,7 @@ export type AccessRequestUncheckedCreateWithoutDocumentValidationInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -2000,6 +2213,7 @@ export type AccessRequestUpdateWithoutDocumentValidationInput = {
   documentFile?: Prisma.FileUpdateOneWithoutAccessRequestNestedInput
   openedBy?: Prisma.UserUpdateOneWithoutOpenedAccessRequestsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutReviewedAccessRequestsNestedInput
+  approvedUser?: Prisma.UserUpdateOneWithoutApprovedAccessRequestNestedInput
   career?: Prisma.CareerUpdateOneRequiredWithoutAccessRequestsNestedInput
   activationOtps?: Prisma.ActivationOtpUpdateManyWithoutAccessRequestNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutAccessRequestNestedInput
@@ -2025,6 +2239,7 @@ export type AccessRequestUncheckedUpdateWithoutDocumentValidationInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2052,6 +2267,7 @@ export type AccessRequestCreateManyOpenedByInput = {
   submittedAt?: Date | string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -2077,6 +2293,7 @@ export type AccessRequestCreateManyReviewedByInput = {
   submittedAt?: Date | string | null
   openedById?: string | null
   openedAt?: Date | string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -2105,6 +2322,7 @@ export type AccessRequestUpdateWithoutOpenedByInput = {
   documentType?: Prisma.AccessRequestDocumentTypeUpdateOneWithoutAccessRequestsNestedInput
   documentFile?: Prisma.FileUpdateOneWithoutAccessRequestNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutReviewedAccessRequestsNestedInput
+  approvedUser?: Prisma.UserUpdateOneWithoutApprovedAccessRequestNestedInput
   career?: Prisma.CareerUpdateOneRequiredWithoutAccessRequestsNestedInput
   activationOtps?: Prisma.ActivationOtpUpdateManyWithoutAccessRequestNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutAccessRequestNestedInput
@@ -2130,6 +2348,7 @@ export type AccessRequestUncheckedUpdateWithoutOpenedByInput = {
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2158,6 +2377,7 @@ export type AccessRequestUncheckedUpdateManyWithoutOpenedByInput = {
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2186,6 +2406,7 @@ export type AccessRequestUpdateWithoutReviewedByInput = {
   documentType?: Prisma.AccessRequestDocumentTypeUpdateOneWithoutAccessRequestsNestedInput
   documentFile?: Prisma.FileUpdateOneWithoutAccessRequestNestedInput
   openedBy?: Prisma.UserUpdateOneWithoutOpenedAccessRequestsNestedInput
+  approvedUser?: Prisma.UserUpdateOneWithoutApprovedAccessRequestNestedInput
   career?: Prisma.CareerUpdateOneRequiredWithoutAccessRequestsNestedInput
   activationOtps?: Prisma.ActivationOtpUpdateManyWithoutAccessRequestNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutAccessRequestNestedInput
@@ -2211,6 +2432,7 @@ export type AccessRequestUncheckedUpdateWithoutReviewedByInput = {
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2239,6 +2461,7 @@ export type AccessRequestUncheckedUpdateManyWithoutReviewedByInput = {
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2264,6 +2487,7 @@ export type AccessRequestCreateManyStatusInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -2292,6 +2516,7 @@ export type AccessRequestUpdateWithoutStatusInput = {
   documentFile?: Prisma.FileUpdateOneWithoutAccessRequestNestedInput
   openedBy?: Prisma.UserUpdateOneWithoutOpenedAccessRequestsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutReviewedAccessRequestsNestedInput
+  approvedUser?: Prisma.UserUpdateOneWithoutApprovedAccessRequestNestedInput
   career?: Prisma.CareerUpdateOneRequiredWithoutAccessRequestsNestedInput
   activationOtps?: Prisma.ActivationOtpUpdateManyWithoutAccessRequestNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutAccessRequestNestedInput
@@ -2317,6 +2542,7 @@ export type AccessRequestUncheckedUpdateWithoutStatusInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2345,6 +2571,7 @@ export type AccessRequestUncheckedUpdateManyWithoutStatusInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2370,6 +2597,7 @@ export type AccessRequestCreateManyDocumentTypeInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -2398,6 +2626,7 @@ export type AccessRequestUpdateWithoutDocumentTypeInput = {
   documentFile?: Prisma.FileUpdateOneWithoutAccessRequestNestedInput
   openedBy?: Prisma.UserUpdateOneWithoutOpenedAccessRequestsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutReviewedAccessRequestsNestedInput
+  approvedUser?: Prisma.UserUpdateOneWithoutApprovedAccessRequestNestedInput
   career?: Prisma.CareerUpdateOneRequiredWithoutAccessRequestsNestedInput
   activationOtps?: Prisma.ActivationOtpUpdateManyWithoutAccessRequestNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutAccessRequestNestedInput
@@ -2423,6 +2652,7 @@ export type AccessRequestUncheckedUpdateWithoutDocumentTypeInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2451,6 +2681,7 @@ export type AccessRequestUncheckedUpdateManyWithoutDocumentTypeInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2476,6 +2707,7 @@ export type AccessRequestCreateManyCareerInput = {
   openedById?: string | null
   openedAt?: Date | string | null
   reviewedById?: string | null
+  approvedUserId?: string | null
   reviewedAt?: Date | string | null
   rejectionReason?: string | null
   createdAt?: Date | string
@@ -2505,6 +2737,7 @@ export type AccessRequestUpdateWithoutCareerInput = {
   documentFile?: Prisma.FileUpdateOneWithoutAccessRequestNestedInput
   openedBy?: Prisma.UserUpdateOneWithoutOpenedAccessRequestsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutReviewedAccessRequestsNestedInput
+  approvedUser?: Prisma.UserUpdateOneWithoutApprovedAccessRequestNestedInput
   activationOtps?: Prisma.ActivationOtpUpdateManyWithoutAccessRequestNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutAccessRequestNestedInput
   documentValidation?: Prisma.DocumentValidationUpdateOneWithoutAccessRequestNestedInput
@@ -2529,6 +2762,7 @@ export type AccessRequestUncheckedUpdateWithoutCareerInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2557,6 +2791,7 @@ export type AccessRequestUncheckedUpdateManyWithoutCareerInput = {
   openedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   openedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2623,6 +2858,7 @@ export type AccessRequestSelect<ExtArgs extends runtime.Types.Extensions.Interna
   openedById?: boolean
   openedAt?: boolean
   reviewedById?: boolean
+  approvedUserId?: boolean
   reviewedAt?: boolean
   rejectionReason?: boolean
   createdAt?: boolean
@@ -2632,6 +2868,7 @@ export type AccessRequestSelect<ExtArgs extends runtime.Types.Extensions.Interna
   documentFile?: boolean | Prisma.AccessRequest$documentFileArgs<ExtArgs>
   openedBy?: boolean | Prisma.AccessRequest$openedByArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.AccessRequest$reviewedByArgs<ExtArgs>
+  approvedUser?: boolean | Prisma.AccessRequest$approvedUserArgs<ExtArgs>
   career?: boolean | Prisma.CareerDefaultArgs<ExtArgs>
   activationOtps?: boolean | Prisma.AccessRequest$activationOtpsArgs<ExtArgs>
   auditEvents?: boolean | Prisma.AccessRequest$auditEventsArgs<ExtArgs>
@@ -2659,6 +2896,7 @@ export type AccessRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   openedById?: boolean
   openedAt?: boolean
   reviewedById?: boolean
+  approvedUserId?: boolean
   reviewedAt?: boolean
   rejectionReason?: boolean
   createdAt?: boolean
@@ -2668,6 +2906,7 @@ export type AccessRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   documentFile?: boolean | Prisma.AccessRequest$documentFileArgs<ExtArgs>
   openedBy?: boolean | Prisma.AccessRequest$openedByArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.AccessRequest$reviewedByArgs<ExtArgs>
+  approvedUser?: boolean | Prisma.AccessRequest$approvedUserArgs<ExtArgs>
   career?: boolean | Prisma.CareerDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["accessRequest"]>
 
@@ -2691,6 +2930,7 @@ export type AccessRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   openedById?: boolean
   openedAt?: boolean
   reviewedById?: boolean
+  approvedUserId?: boolean
   reviewedAt?: boolean
   rejectionReason?: boolean
   createdAt?: boolean
@@ -2700,6 +2940,7 @@ export type AccessRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   documentFile?: boolean | Prisma.AccessRequest$documentFileArgs<ExtArgs>
   openedBy?: boolean | Prisma.AccessRequest$openedByArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.AccessRequest$reviewedByArgs<ExtArgs>
+  approvedUser?: boolean | Prisma.AccessRequest$approvedUserArgs<ExtArgs>
   career?: boolean | Prisma.CareerDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["accessRequest"]>
 
@@ -2723,19 +2964,21 @@ export type AccessRequestSelectScalar = {
   openedById?: boolean
   openedAt?: boolean
   reviewedById?: boolean
+  approvedUserId?: boolean
   reviewedAt?: boolean
   rejectionReason?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AccessRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "requestCode" | "firstName" | "lastName" | "idCardNumber" | "idCardIssuedIn" | "sisCode" | "email" | "phone" | "birthDate" | "graduationYear" | "careerId" | "statusId" | "documentTypeId" | "documentFileId" | "submittedAt" | "openedById" | "openedAt" | "reviewedById" | "reviewedAt" | "rejectionReason" | "createdAt" | "updatedAt", ExtArgs["result"]["accessRequest"]>
+export type AccessRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "requestCode" | "firstName" | "lastName" | "idCardNumber" | "idCardIssuedIn" | "sisCode" | "email" | "phone" | "birthDate" | "graduationYear" | "careerId" | "statusId" | "documentTypeId" | "documentFileId" | "submittedAt" | "openedById" | "openedAt" | "reviewedById" | "approvedUserId" | "reviewedAt" | "rejectionReason" | "createdAt" | "updatedAt", ExtArgs["result"]["accessRequest"]>
 export type AccessRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   status?: boolean | Prisma.AccessRequestStatusDefaultArgs<ExtArgs>
   documentType?: boolean | Prisma.AccessRequest$documentTypeArgs<ExtArgs>
   documentFile?: boolean | Prisma.AccessRequest$documentFileArgs<ExtArgs>
   openedBy?: boolean | Prisma.AccessRequest$openedByArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.AccessRequest$reviewedByArgs<ExtArgs>
+  approvedUser?: boolean | Prisma.AccessRequest$approvedUserArgs<ExtArgs>
   career?: boolean | Prisma.CareerDefaultArgs<ExtArgs>
   activationOtps?: boolean | Prisma.AccessRequest$activationOtpsArgs<ExtArgs>
   auditEvents?: boolean | Prisma.AccessRequest$auditEventsArgs<ExtArgs>
@@ -2748,6 +2991,7 @@ export type AccessRequestIncludeCreateManyAndReturn<ExtArgs extends runtime.Type
   documentFile?: boolean | Prisma.AccessRequest$documentFileArgs<ExtArgs>
   openedBy?: boolean | Prisma.AccessRequest$openedByArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.AccessRequest$reviewedByArgs<ExtArgs>
+  approvedUser?: boolean | Prisma.AccessRequest$approvedUserArgs<ExtArgs>
   career?: boolean | Prisma.CareerDefaultArgs<ExtArgs>
 }
 export type AccessRequestIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2756,6 +3000,7 @@ export type AccessRequestIncludeUpdateManyAndReturn<ExtArgs extends runtime.Type
   documentFile?: boolean | Prisma.AccessRequest$documentFileArgs<ExtArgs>
   openedBy?: boolean | Prisma.AccessRequest$openedByArgs<ExtArgs>
   reviewedBy?: boolean | Prisma.AccessRequest$reviewedByArgs<ExtArgs>
+  approvedUser?: boolean | Prisma.AccessRequest$approvedUserArgs<ExtArgs>
   career?: boolean | Prisma.CareerDefaultArgs<ExtArgs>
 }
 
@@ -2767,6 +3012,7 @@ export type $AccessRequestPayload<ExtArgs extends runtime.Types.Extensions.Inter
     documentFile: Prisma.$FilePayload<ExtArgs> | null
     openedBy: Prisma.$UserPayload<ExtArgs> | null
     reviewedBy: Prisma.$UserPayload<ExtArgs> | null
+    approvedUser: Prisma.$UserPayload<ExtArgs> | null
     career: Prisma.$CareerPayload<ExtArgs>
     activationOtps: Prisma.$ActivationOtpPayload<ExtArgs>[]
     auditEvents: Prisma.$AuditEventPayload<ExtArgs>[]
@@ -2792,6 +3038,7 @@ export type $AccessRequestPayload<ExtArgs extends runtime.Types.Extensions.Inter
     openedById: string | null
     openedAt: Date | null
     reviewedById: string | null
+    approvedUserId: string | null
     reviewedAt: Date | null
     rejectionReason: string | null
     createdAt: Date
@@ -3195,6 +3442,7 @@ export interface Prisma__AccessRequestClient<T, Null = never, ExtArgs extends ru
   documentFile<T extends Prisma.AccessRequest$documentFileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessRequest$documentFileArgs<ExtArgs>>): Prisma.Prisma__FileClient<runtime.Types.Result.GetResult<Prisma.$FilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   openedBy<T extends Prisma.AccessRequest$openedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessRequest$openedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   reviewedBy<T extends Prisma.AccessRequest$reviewedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessRequest$reviewedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  approvedUser<T extends Prisma.AccessRequest$approvedUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessRequest$approvedUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   career<T extends Prisma.CareerDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CareerDefaultArgs<ExtArgs>>): Prisma.Prisma__CareerClient<runtime.Types.Result.GetResult<Prisma.$CareerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   activationOtps<T extends Prisma.AccessRequest$activationOtpsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessRequest$activationOtpsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivationOtpPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditEvents<T extends Prisma.AccessRequest$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccessRequest$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3247,6 +3495,7 @@ export interface AccessRequestFieldRefs {
   readonly openedById: Prisma.FieldRef<"AccessRequest", 'String'>
   readonly openedAt: Prisma.FieldRef<"AccessRequest", 'DateTime'>
   readonly reviewedById: Prisma.FieldRef<"AccessRequest", 'String'>
+  readonly approvedUserId: Prisma.FieldRef<"AccessRequest", 'String'>
   readonly reviewedAt: Prisma.FieldRef<"AccessRequest", 'DateTime'>
   readonly rejectionReason: Prisma.FieldRef<"AccessRequest", 'String'>
   readonly createdAt: Prisma.FieldRef<"AccessRequest", 'DateTime'>
@@ -3712,6 +3961,25 @@ export type AccessRequest$openedByArgs<ExtArgs extends runtime.Types.Extensions.
  * AccessRequest.reviewedBy
  */
 export type AccessRequest$reviewedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * AccessRequest.approvedUser
+ */
+export type AccessRequest$approvedUserArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the User
    */
