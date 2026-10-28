@@ -35,7 +35,7 @@ async function listRequests(
   filters: InboxFilters = {},
 ): Promise<ReviewApiResult<ReviewListResult>> {
   try {
-    const { search, career, period } = filters;
+    const { search, career, period, validation } = filters;
     const response = await apiClient.get("/access-requests", {
       params: {
         status,
@@ -44,6 +44,7 @@ async function listRequests(
         ...(search && { search }),
         ...(career && { career }),
         ...(period && period !== "all" && { period }),
+        ...(validation && { validation }),
       },
       headers: authHeaders(),
       validateStatus: () => true,
