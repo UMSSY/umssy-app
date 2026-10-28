@@ -7,6 +7,7 @@ import { ArrowLeft, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Conversation, Message } from "../types/conversation.types";
 import { MessageInputBar } from "./message-input-bar";
+import { ContactProfileModal } from "./contact-profile-modal";
 import { ChatErrorState } from "./chat-error-state";
 import { getInitials, formatMessageDateSeparator } from "../utils/date-formatter";
 import { isContentValidForSend } from "../utils/unicode-counter";
@@ -89,6 +90,7 @@ function ChatRoomContent({
 }: ChatRoomProps) {
   const ui = useMessagingUi();
   const [localInputText, setLocalInputText] = useState("");
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const inputText = ui ? (ui.drafts[conversation.id] ?? "") : localInputText;
   const setInputText = (content: string) => {
     if (ui) ui.setDraft(conversation.id, content);
@@ -241,27 +243,53 @@ function ChatRoomContent({
             className={`-ml-1 rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-soft hover:text-ink ${isCompact ? "" : "md:hidden"}`}>
             <ArrowLeft className="size-5" aria-hidden="true" />
           </Button>
-          <div className="relative shrink-0">
-            {conversation.contact.avatarUrl ? (
-              <Image src={conversation.contact.avatarUrl} alt={conversation.contact.fullName}
-                width={40} height={40} unoptimized className="size-10 rounded-full border border-border object-cover" />
-            ) : (
-              <div className="flex size-10 items-center justify-center rounded-full border border-border bg-border text-xs font-bold text-ink">
-                {getInitials(conversation.contact.fullName)}
-              </div>
-            )}
-            {conversation.contact.isOnline && (
-              <span data-testid="online-indicator" className="absolute right-0 bottom-0 size-2.5 rounded-full border-2 border-surface bg-emerald-500" title="En línea" />
-            )}
-          </div>
-          <div>
-            <h3 data-testid="chat-contact-name" className="text-sm leading-tight font-bold text-ink md:text-base">
-              {conversation.contact.fullName}
-            </h3>
-            <span className="text-xs font-medium text-ink-soft">
-              {conversation.contact.isOnline ? "En línea" : "Desconectado"}
-            </span>
-          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="default"
+            data-testid="chat-contact-profile-trigger"
+            title="Ver perfil de usuario"
+            aria-label="Ver perfil de usuario"
+            onClick={() => setIsProfileModalOpen(true)}
+            className="flex h-auto items-center gap-3 p-1 transition-colors hover:bg-surface-soft"
+          >
+            <div className="relative shrink-0">
+              {conversation.contact.avatarUrl ? (
+                <Image
+                  src={conversation.contact.avatarUrl}
+                  alt={conversation.contact.fullName}
+                  width={40}
+                  height={40}
+                  unoptimized
+                  className="size-10 rounded-full border border-border object-cover"
+                />
+              ) : (
+                <div className="flex size-10 items-center justify-center rounded-full border border-border bg-border text-xs font-bold text-ink">
+                  {getInitials(conversation.contact.fullName)}
+                </div>
+              )}
+              {conversation.contact.isOnline && (
+                <span
+                  data-testid="online-indicator"
+                  className="absolute right-0 bottom-0 size-2.5 rounded-full border-2 border-surface bg-emerald-500"
+                  title="En línea"
+                />
+              )}
+            </div>
+            <div className="text-left">
+              <h3
+                data-testid="chat-contact-name"
+                className="text-sm leading-tight font-bold text-ink md:text-base"
+              >
+                {conversation.contact.fullName}
+              </h3>
+              <span className="text-xs font-medium text-ink-soft">
+                {conversation.contact.isOnline
+                  ? "En línea"
+                  : "Desconectado"}
+              </span>
+            </div>
+          </Button>
         </div>
       </header>
       <div ref={containerRef} data-testid="messages-container" onScroll={handleScroll}
@@ -351,7 +379,13 @@ function ChatRoomContent({
       <MessageInputBar value={inputText} onChange={setInputText}
         onSend={() => void handleSend()} onKeyDown={handleInputKeyDown}
         isSending={isSending || isSubmitting}
-        disabled={showInitialLoading || (isMessagesError && messages.length === 0)} />
+        disabled={showInitialLoading || (isMessagesError && messages.length === 0)}
+      />
+      <ContactProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        contact={conversation.contact}
+      />
     </div>
   );
 }
