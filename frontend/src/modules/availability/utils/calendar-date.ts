@@ -22,3 +22,9 @@ export const formatLongDate = (date: string): string =>
   `${formatDayAndMonth(date)} de ${date.split("-")[0]}`;
 
 export const getBoliviaToday = (): Date => toCalendarDate(toBoliviaTime(new Date()).date);
+
+export const addDaysToDateString = (date: string, days: number): string => {
+  const value = toCalendarDate(date);
+  value.setDate(value.getDate() + days);
+  return toDateString(value);
+};

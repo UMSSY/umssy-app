@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { BlockForm } from "./block-form"
@@ -64,17 +64,23 @@ describe("BlockForm", () => {
     expect(screen.getByRole("button", { name: /jueves, 8 de octubre de 2026/ })).toBeEnabled()
   })
 
-  it("ofrece horas de 07:00 a 22:00 cada 30 minutos en una lista compacta", async () => {
+  it("ofrece inicios de 07:00 a 21:30 y fines de 07:30 a 22:00 cada 30 minutos en una lista compacta", async () => {
     const { user } = renderForm()
 
     await user.click(screen.getByLabelText(/Hora de inicio/))
-    const options = (await screen.findAllByRole("option")).map((option) => option.textContent)
-
-    expect(options).toHaveLength(31)
-    expect(options[0]).toBe("07:00")
-    expect(options[1]).toBe("07:30")
-    expect(options.at(-1)).toBe("22:00")
+    const starts = (await screen.findAllByRole("option")).map((option) => option.textContent)
+    expect(starts).toHaveLength(30)
+    expect(starts[0]).toBe("07:00")
+    expect(starts[1]).toBe("07:30")
+    expect(starts.at(-1)).toBe("21:30")
     expect(screen.getByRole("listbox").closest('[data-slot="select-content"]')).toHaveClass("max-h-[min(200px,var(--available-height))]")
+    await user.keyboard("{Escape}")
+
+    await user.click(screen.getByLabelText(/Hora de fin/))
+    const ends = (await screen.findAllByRole("option")).map((option) => option.textContent)
+    expect(ends).toHaveLength(30)
+    expect(ends[0]).toBe("07:30")
+    expect(ends.at(-1)).toBe("22:00")
   })
 
   it("muestra los campos obligatorios sin llamar a onSubmit", async () => {
@@ -88,23 +94,84 @@ describe("BlockForm", () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
-  it("muestra el error de fin anterior al inicio junto al campo de fin", async () => {
-    const { onSubmit, user } = renderForm()
+  it("no muestra las horas de fin iguales o anteriores a la de inicio", async () => {
+    const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "20:00", "18:00")
-    await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
+    await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
+    await selectTime(user, /Hora de inicio/, "20:00")
+    await user.click(screen.getByLabelText(/Hora de fin/))
 
-    const endSelect = screen.getByLabelText(/Hora de fin/)
-    const error = screen.getByText("La hora de fin debe ser posterior a la hora de inicio")
-    expect(endSelect).toHaveAttribute("aria-invalid", "true")
-    expect(endSelect).toHaveAttribute("aria-describedby", error.id)
-    expect(onSubmit).not.toHaveBeenCalled()
+    await screen.findAllByRole("option")
+    expect(screen.queryByRole("option", { name: "18:00" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: "20:00" })).not.toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "20:30" })).toBeInTheDocument()
   })
 
-  it("muestra el error de inicio pasado junto al campo de inicio", async () => {
+  it("no muestra las horas de inicio iguales o posteriores a la de fin", async () => {
+    const { user } = renderForm()
+
+    await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
+    await selectTime(user, /Hora de fin/, "12:00")
+    await user.click(screen.getByLabelText(/Hora de inicio/))
+
+    await screen.findAllByRole("option")
+    expect(screen.queryByRole("option", { name: "12:00" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: "15:00" })).not.toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "11:30" })).toBeInTheDocument()
+  })
+
+  it("con la fecha de hoy no muestra las horas de inicio y fin que ya pasaron", async () => {
+    const { user } = renderForm()
+
+    await user.click(screen.getByRole("button", { name: "Hoy, jueves, 8 de octubre de 2026" }))
+    await user.click(screen.getByLabelText(/Hora de inicio/))
+    await screen.findAllByRole("option")
+    expect(screen.queryByRole("option", { name: "08:00" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: "10:00" })).not.toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "10:30" })).toBeInTheDocument()
+    await user.keyboard("{Escape}")
+
+    await user.click(screen.getByLabelText(/Hora de fin/))
+    await screen.findAllByRole("option")
+    expect(screen.queryByRole("option", { name: "09:30" })).not.toBeInTheDocument()
+    expect(screen.getByRole("option", { name: "10:30" })).toBeInTheDocument()
+  })
+
+  it("en otra fecha muestra las horas de la mañana", async () => {
+    const { user } = renderForm()
+
+    await user.click(screen.getByRole("button", { name: "martes, 13 de octubre de 2026" }))
+    await user.click(screen.getByLabelText(/Hora de inicio/))
+
+    expect(await screen.findByRole("option", { name: "07:00" })).toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: "22:00" })).not.toBeInTheDocument()
+  })
+
+  it("limpia las horas elegidas si al cambiar a hoy ya pasaron", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "08:00", "09:00")
+    await user.click(screen.getByRole("button", { name: "Hoy, jueves, 8 de octubre de 2026" }))
+
+    expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("--:--")
+    expect(screen.getByLabelText(/Hora de fin/)).toHaveTextContent("--:--")
+  })
+
+  it("mantiene las horas elegidas si al cambiar de fecha siguen siendo válidas", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "15:00", "16:00")
+    await user.click(screen.getByRole("button", { name: "Hoy, jueves, 8 de octubre de 2026" }))
+
+    expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("15:00")
+    expect(screen.getByLabelText(/Hora de fin/)).toHaveTextContent("16:00")
+  })
+
+  it("muestra el error de inicio pasado si la hora pasa con el formulario abierto", async () => {
     const { onSubmit, user } = renderForm()
 
-    await fillForm(user, "Hoy, jueves, 8 de octubre de 2026", "08:00", "09:00")
+    await fillForm(user, "Hoy, jueves, 8 de octubre de 2026", "10:30", "11:00")
+    vi.setSystemTime(new Date("2026-10-08T14:45:00Z"))
     await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
 
     const error = screen.getByText("La hora de inicio ya pasó")
@@ -115,11 +182,23 @@ describe("BlockForm", () => {
   it("limpia el error del campo cuando el usuario lo corrige", async () => {
     const { user } = renderForm()
 
-    await fillForm(user, "martes, 13 de octubre de 2026", "20:00", "18:00")
+    await fillForm(user, "Hoy, jueves, 8 de octubre de 2026", "10:30", "11:00")
+    vi.setSystemTime(new Date("2026-10-08T14:45:00Z"))
     await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
-    await selectTime(user, /Hora de fin/, "21:00")
+    await selectTime(user, /Hora de fin/, "12:00")
+    await selectTime(user, /Hora de inicio/, "11:00")
 
-    expect(screen.queryByText("La hora de fin debe ser posterior a la hora de inicio")).not.toBeInTheDocument()
+    expect(screen.queryByText("La hora de inicio ya pasó")).not.toBeInTheDocument()
+  })
+
+  it("no deselecciona la fecha al volver a hacer clic sobre ella", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "15:00", "16:00")
+    await user.click(screen.getByRole("button", { name: /martes, 13 de octubre de 2026/ }))
+
+    expect(screen.getByLabelText(/Fecha/)).toHaveValue("Martes 13 de octubre de 2026")
+    expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("15:00")
   })
 
   it("muestra la fecha elegida en el campo Fecha", async () => {
@@ -201,5 +280,122 @@ describe("BlockForm", () => {
 
     expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled()
     expect(screen.getByText("Error al crear el bloque de disponibilidad")).toBeInTheDocument()
+  })
+
+  it("no muestra la casilla de repetición en modo edición", () => {
+    renderForm({
+      mode: "edit",
+      initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-14T00:00:00.000Z" },
+    })
+
+    expect(screen.queryByText("Repetir cada semana")).not.toBeInTheDocument()
+  })
+
+  it("la casilla de repetir cada semana empieza destildada y sin el campo de fecha límite", () => {
+    renderForm()
+
+    expect(screen.getByRole("checkbox", { name: /Repetir cada semana/ })).not.toBeChecked()
+    expect(screen.queryByRole("group", { name: "Repetir hasta" })).not.toBeInTheDocument()
+  })
+
+  it("marcar la casilla muestra el calendario de Repetir hasta", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+
+    expect(screen.getByRole("group", { name: "Repetir hasta" })).toBeInTheDocument()
+  })
+
+  it("exige elegir la fecha límite si la repetición está activa", async () => {
+    const { onSubmit, user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
+
+    expect(screen.getByText("Elige hasta qué fecha se repite el bloque")).toBeInTheDocument()
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it("envía repeatWeekly y repeatUntil cuando se marca la casilla y se elige la fecha límite", async () => {
+    const { onSubmit, user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
+    await user.click(within(repeatGroup).getByRole("button", { name: "martes, 20 de octubre de 2026" }))
+    await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      startAt: "2026-10-13T22:00:00.000Z",
+      endAt: "2026-10-14T00:00:00.000Z",
+      repeatWeekly: true,
+      repeatUntil: "2026-10-20",
+    })
+  })
+
+  it("desmarcar la casilla oculta y limpia la fecha límite elegida", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
+    await user.click(within(repeatGroup).getByRole("button", { name: "martes, 20 de octubre de 2026" }))
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+
+    expect(screen.queryByRole("group", { name: "Repetir hasta" })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    expect(
+      within(screen.getByRole("group", { name: "Repetir hasta" })).getByRole("button", {
+        name: "martes, 20 de octubre de 2026",
+      }),
+    ).not.toHaveAttribute("aria-pressed", "true")
+  })
+
+  it("limpia la fecha límite elegida si la nueva fecha del bloque ya no la admite", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    await user.click(
+      within(screen.getByRole("group", { name: "Repetir hasta" })).getByRole("button", {
+        name: "martes, 20 de octubre de 2026",
+      }),
+    )
+
+    const [mainCalendarDay] = screen.getAllByRole("button", { name: "miércoles, 21 de octubre de 2026" })
+    await user.click(mainCalendarDay)
+
+    expect(
+      within(screen.getByRole("group", { name: "Repetir hasta" })).queryByRole("button", {
+        name: "martes, 20 de octubre de 2026",
+        pressed: true,
+      }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("el calendario de Repetir hasta deshabilita los días anteriores al bloque", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
+
+    expect(within(repeatGroup).getByRole("button", { name: "lunes, 12 de octubre de 2026" })).toBeDisabled()
+  })
+
+  it("el calendario de Repetir hasta solo habilita desde los 7 días del bloque (al menos una repetición real)", async () => {
+    const { user } = renderForm()
+
+    await fillForm(user, "martes, 13 de octubre de 2026", "18:00", "20:00")
+    await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+    const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
+
+    expect(within(repeatGroup).getByRole("button", { name: "martes, 13 de octubre de 2026" })).toBeDisabled()
+    expect(within(repeatGroup).getByRole("button", { name: "jueves, 15 de octubre de 2026" })).toBeDisabled()
+    expect(within(repeatGroup).getByRole("button", { name: "lunes, 19 de octubre de 2026" })).toBeDisabled()
+    expect(within(repeatGroup).getByRole("button", { name: "martes, 20 de octubre de 2026" })).toBeEnabled()
   })
 })
