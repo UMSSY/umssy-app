@@ -11,22 +11,18 @@ export class ApplicationsRepository {
 
     const whereClause: any = { userId };
     
-    // El filtro de estado debe comparar por el 'title' en la tabla relacionada de JobApplicationStatus
     if (status) {
       whereClause.status = {
         title: status,
       };
     }
 
-    // Mapeo de ordenamiento ajustado al esquema de Prisma
     const orderByClause: any = {};
     if (sortBy === 'vacancy') {
       orderByClause.jobOffer = { title: sortOrder };
     } else if (sortBy === 'company') {
-      // 'company' usa 'title' en lugar de 'name'
       orderByClause.jobOffer = { company: { title: sortOrder } };
     } else if (sortBy === 'status') {
-      // 'status' es una relación con JobApplicationStatus (usa 'title')
       orderByClause.status = { title: sortOrder };
     } else {
       orderByClause.createdAt = sortOrder;
