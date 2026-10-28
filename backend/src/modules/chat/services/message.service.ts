@@ -84,7 +84,7 @@ const sentStatusId = await this.messageStatusService.getSentId();
       id: created.id,
       conversationId: created.conversationId,
       senderId: created.senderId,
-      content: created.content,
+      content: created.content ?? '',
       timestamp: created.sentAt.toISOString(),
       createdAt: created.createdAt.toISOString(),
       status: 'sent',
@@ -116,8 +116,9 @@ const sentStatusId = await this.messageStatusService.getSentId();
 
     return {
       data: page.data.map((m) => {
-        const isAttachment = Boolean(m.content.startsWith('[Archivo] '));
-        const content = isAttachment ? m.content.slice(10) : m.content;
+        const rawContent = m.content ?? ''; 
+        const isAttachment = Boolean(rawContent.startsWith('[Archivo] '));
+        const content = isAttachment ? rawContent.slice(10) : rawContent;
         const attachmentType = isAttachment ? ('file' as const) : null;
         const statusTitle = (m as { status?: { title?: string } }).status?.title?.toLowerCase();
         const status = statusTitle === 'read' ? ('read' as const) : ('sent' as const);
@@ -156,9 +157,16 @@ const sentStatusId = await this.messageStatusService.getSentId();
     );
   }
 
-  private sanitize(raw: string): string {
-    return raw
-      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
-      .trim();
+    private sanitize(raw: string): string {
+  
+    const cleaned = raw
+      .split('')
+      .filter((char) => {
+        const code = char.charCodeAt(0);
+        return code >= 32 || code === 10 || code === 13; 
+      })
+      .join('');
+      
+    return cleaned.trim();
   }
 }
