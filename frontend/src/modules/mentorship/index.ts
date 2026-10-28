@@ -12,3 +12,4 @@ export { OrientationConfigView } from "./views/orientation-config-view";
 export type { TechnicalAreaResponse } from "./types/technical-area-response.types";
 export { getMentorOrientationTypes } from "./services/orientation-type.service";
 export { getTechnicalAreas } from "./services/technical-area.service";
+export { loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "./services/mentorship-wizard-draft.service";

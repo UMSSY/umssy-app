@@ -233,6 +233,16 @@ export type Career = Prisma.CareerModel
  */
 export type AccessRequest = Prisma.AccessRequestModel
 /**
+ * Model MentorParticipationRequest
+ * 
+ */
+export type MentorParticipationRequest = Prisma.MentorParticipationRequestModel
+/**
+ * Model MentorSlotOffer
+ * 
+ */
+export type MentorSlotOffer = Prisma.MentorSlotOfferModel
+/**
  * Model ActivationOtp
  * 
  */
@@ -262,6 +272,11 @@ export type Message = Prisma.MessageModel
  * 
  */
 export type UserPresence = Prisma.UserPresenceModel
+/**
+ * Model MentorParticipationAttemptLimit
+ * 
+ */
+export type MentorParticipationAttemptLimit = Prisma.MentorParticipationAttemptLimitModel
 /**
  * Model JobApplicationStatus
  * 
