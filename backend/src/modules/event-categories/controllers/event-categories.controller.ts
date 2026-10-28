@@ -7,7 +7,7 @@ import {
   MAX_PAGE_SIZE,
   MAX_SEARCH_LENGTH,
 } from '../requests/get-event-categories.request.js';
-import type { GetEventCategoriesPayload } from '../requests/get-event-categories.request.js';
+import type { GetEventCategoriesPayload } from '../types/get-event-categories-payload.types.js';
 
 @ApiTags('Event categories')
 @Controller('event-categories')
