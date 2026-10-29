@@ -70,6 +70,19 @@ export class DocumentValidationRepository {
     }
   }
 
+  findQueuedRequests(take: number) {
+    return this.prisma.accessRequest.findMany({
+      where: {
+        documentFileId: { not: null },
+        status: { title: { in: REVIEW_STATUSES } },
+        documentValidation: { is: { result: VALIDATION_RESULT.QUEUED } },
+      },
+      select: { id: true },
+      orderBy: { id: 'asc' },
+      take,
+    });
+  }
+
   findAutomationState(accessRequestId: string) {
     return this.prisma.accessRequest.findUnique({
       where: { id: accessRequestId },
