@@ -1,8 +1,10 @@
+
 'use client';
 
 import { ArrowDown, Building2, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SectionCard } from '@/modules/profile';
+import { DetectedSkillsChips } from '@/modules/profile/components/detected-skills-chips';
 import { cn } from '@/lib/utils';
 import type { WorkExperienceListCardProps } from '../types/work-experience-list-card-props.types';
 import { formatWorkPeriod } from '../utils/format-work-period';
@@ -16,6 +18,7 @@ export function WorkExperienceListCard({
   onEdit,
   onDelete,
   skillsByExperience = {},
+  analysis = null,
 }: WorkExperienceListCardProps) {
   const groups = groupWorkExperiences(experiences);
 
@@ -83,6 +86,9 @@ export function WorkExperienceListCard({
 
                     const skillsList =
                       skillsByExperience[experience.id] ?? [];
+
+                    const hasCurrentAnalysis =
+                      analysis?.experienceId === experience.id;
 
                     return (
                       <li
@@ -163,21 +169,28 @@ export function WorkExperienceListCard({
                           </p>
                         )}
 
-                        {skillsList.length > 0 && (
-                          <div className="mt-3 flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-semibold text-ink-soft">
-                              Habilidades:
-                            </span>
-
-                            {skillsList.map((skill) => (
-                              <span
-                                key={skill.toLocaleLowerCase()}
-                                className="inline-flex items-center rounded-full border border-border bg-interaction px-2.5 py-0.5 text-xs font-medium text-ink"
-                              >
-                                {skill}
+                        {hasCurrentAnalysis && analysis ? (
+                          <DetectedSkillsChips
+                            skills={analysis.skills}
+                            processingTimeMs={analysis.processingTimeMs}
+                          />
+                        ) : (
+                          skillsList.length > 0 && (
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                              <span className="text-xs font-semibold text-ink-soft">
+                                Habilidades:
                               </span>
-                            ))}
-                          </div>
+
+                              {skillsList.map((skill) => (
+                                <span
+                                  key={skill.toLocaleLowerCase()}
+                                  className="inline-flex items-center rounded-full border border-border bg-interaction px-2.5 py-0.5 text-xs font-medium text-ink"
+                                >
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          )
                         )}
                       </li>
                     );

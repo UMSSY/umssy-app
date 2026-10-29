@@ -160,6 +160,7 @@ export function WorkExperienceProfileSection() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         skillsByExperience={skillsByExperience}
+        analysis={saveMutation.analysis}
       />
 
       {isFormOpen ? (
