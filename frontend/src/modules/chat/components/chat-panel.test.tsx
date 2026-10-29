@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   act,
@@ -22,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { MessagingUiProvider } from "../contexts/messaging-ui-context";
 import { ChatView } from "../views/chat-view";
 import * as chatApi from "../services/chat-api";
+import { getChatSocket } from "./chat-socket";
 import { ChatDock, ChatPanel } from "./chat-panel";
 
 vi.mock("@/shared/contexts/auth-context", () => ({
@@ -37,6 +37,17 @@ vi.mock("next/navigation", () => ({
     replace: vi.fn(),
   }),
 }));
+
+vi.mock("./chat-socket", () => ({
+  getChatSocket: vi.fn(),
+}));
+
+const mockSocket = {
+  connected: true,
+  on: vi.fn(),
+  off: vi.fn(),
+  emit: vi.fn(),
+};
 
 const CONVERSATIONS = [
   {
@@ -75,6 +86,10 @@ function MessagingFixture() {
 }
 
 beforeEach(() => {
+  vi.mocked(getChatSocket).mockReturnValue(
+    mockSocket as unknown as ReturnType<typeof getChatSocket>,
+  );
+
   vi.spyOn(chatApi, "getConversations").mockResolvedValue(
     CONVERSATIONS,
   );
@@ -274,11 +289,15 @@ describe("ChatPanel", () => {
         },
       });
 
-      fireEvent.click(
-        screen.getByRole("button", {
-          name: "Enviar mensaje",
-        }),
-      );
+      const sendButton = screen.getByRole("button", {
+        name: "Enviar mensaje",
+      });
+
+      await waitFor(() => {
+        expect(sendButton).toBeEnabled();
+      });
+
+      fireEvent.click(sendButton);
 
       await waitFor(() => {
         expect(chatApi.sendMessage).toHaveBeenCalledTimes(1);
