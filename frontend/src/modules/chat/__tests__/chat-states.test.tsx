@@ -1,4 +1,3 @@
-
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 
 import {
@@ -303,11 +302,13 @@ describe("Estados del chat", () => {
 
       expect(textarea).toHaveValue("Hola");
 
-      expect(sendEmit).toHaveBeenCalledWith(
-        "message:send",
-        { conversationId: conversation.id, content: "Hola" },
-        expect.any(Function),
-      );
+      await waitFor(() => {
+        expect(sendEmit).toHaveBeenCalledWith(
+          "message:send",
+          { conversationId: conversation.id, content: "Hola" },
+          expect.any(Function),
+        );
+      });
 
       fireEvent.click(
         screen.getByRole("button", {
