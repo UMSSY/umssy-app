@@ -21,6 +21,7 @@ import type { User } from '../types/user.types';
 
 import {
   sendMessage,
+  sendAttachmentMessage,
   getCurrentSessionUserId,
 } from '../services/chat-api';
 
@@ -93,7 +94,7 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
     setIsSearchModalOpen(false);
   };
 
-  const handleSendMessage = async (content: string): Promise<void> => {
+  const handleSendMessage = async (content: string, file?: File | null): Promise<void> => {
     if (!selectedId || isSending) {
       throw new Error(
         'No hay una conversación seleccionada o ya se está enviando un mensaje.',
@@ -105,15 +106,19 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
     setIsSending(true);
 
     try {
-      await sendMessage({
-        conversationId,
-        content,
-        senderId: currentUserId,
-      });
+      if (file) {
+        await sendAttachmentMessage(conversationId, file, content);
+      } else {
+        await sendMessage({
+          conversationId,
+          content,
+          senderId: currentUserId,
+        });
+      }
 
       updateConversationLastMessage(
         conversationId,
-        content,
+        content || (file ? `[Archivo] ${file.name}` : ''),
         currentUserId,
       );
 

@@ -8,6 +8,8 @@ import {
   SendMessageResponse,
   StandardApiResponse,
 } from '../types/conversation.types';
+import type { MessageAttachment } from '../types/attachment.types';
+import { toast } from 'sonner';
 import { User } from '../types/user.types';
 import {
   getMessagesByConversation,
@@ -62,6 +64,18 @@ export interface PaginatedMessagesResponse {
   hasMore: boolean;
 }
 
+interface RawBackendAttachmentItem {
+  id: string;
+  messageId?: string;
+  fileName: string;
+  mimeType?: string | null;
+  fileSize?: number | null;
+  url?: string | null;
+  thumbnailUrl?: string | null;
+  type?: string | { title?: string } | null;
+  createdAt?: string;
+}
+
 interface RawBackendMessageItem {
   id?: string;
   conversationId?: string;
@@ -73,6 +87,8 @@ interface RawBackendMessageItem {
   status?: string;
   isAttachment?: boolean;
   attachmentType?: AttachmentType | null;
+  attachment?: RawBackendAttachmentItem | null;
+  attachments?: RawBackendAttachmentItem[];
 }
 
 interface ChatUserResponse {
@@ -218,23 +234,53 @@ export async function getPaginatedMessages({
         payload.hasMore !== undefined
       ) {
         const mappedMessages: Message[] = combined.map(
-          (m: RawBackendMessageItem) => ({
-            id: m.id || '',
-            conversationId: m.conversationId || conversationId,
-            senderId: m.senderId || '',
-            content: m.content || '',
-            timestamp:
-              m.timestamp || m.createdAt || m.sentAt || new Date().toISOString(),
-            createdAt:
-              m.createdAt || m.sentAt || m.timestamp || new Date().toISOString(),
-            status: (m.status as MessageStatus) || 'sent',
-            isAttachment: Boolean(
-              m.isAttachment ?? m.content?.startsWith('[Archivo]'),
-            ),
-            attachmentType:
+          (m: RawBackendMessageItem) => {
+            const rawAttachments = m.attachments || (m.attachment ? [m.attachment] : []);
+            const mappedAttachments: MessageAttachment[] = rawAttachments.map((att) => ({
+              id: att.id,
+              messageId: att.messageId || m.id,
+              fileName: att.fileName,
+              mimeType: att.mimeType || 'application/octet-stream',
+              fileSize: att.fileSize || 0,
+              url: att.url || `/api/chat/attachments/${att.id}/download`,
+              thumbnailUrl: att.thumbnailUrl ?? null,
+              type:
+                typeof att.type === 'object' && att.type !== null
+                  ? att.type.title
+                  : (att.type ?? null),
+              createdAt: att.createdAt,
+            }));
+
+            const firstAtt = mappedAttachments[0] ?? null;
+            const isAttachment = Boolean(
+              m.isAttachment ?? firstAtt ?? m.content?.startsWith('[Archivo]'),
+            );
+            const attachmentType: AttachmentType | null =
               m.attachmentType ??
-              (m.content?.startsWith('[Archivo]') ? 'file' : null),
-          }),
+              (firstAtt
+                ? (firstAtt.type?.toLowerCase() === 'image' || firstAtt.mimeType.startsWith('image/')
+                    ? 'image'
+                    : 'file')
+                : m.content?.startsWith('[Archivo]')
+                  ? 'file'
+                  : null);
+
+            return {
+              id: m.id || '',
+              conversationId: m.conversationId || conversationId,
+              senderId: m.senderId || '',
+              content: m.content || '',
+              timestamp:
+                m.timestamp || m.createdAt || m.sentAt || new Date().toISOString(),
+              createdAt:
+                m.createdAt || m.sentAt || m.timestamp || new Date().toISOString(),
+              status: (m.status as MessageStatus) || 'sent',
+              isAttachment,
+              attachmentType,
+              attachment: firstAtt,
+              attachments: mappedAttachments,
+            };
+          },
         );
 
         return {
@@ -429,5 +475,139 @@ export async function markConversationAsRead(
     await apiClient.patch(`/chat/messages/${conversationId}/read`);
   } catch {
     // Graceful fallback
+  }
+}
+
+export async function downloadAttachment(
+  attachmentId: string,
+  fileName: string,
+): Promise<void> {
+  if (!attachmentId) {
+    throw new Error('El identificador de adjunto es requerido');
+  }
+
+  try {
+    const response = await apiClient.get(
+      `/chat/attachments/${attachmentId}/download`,
+      { responseType: 'blob' },
+    );
+
+    const blob = new Blob([response.data as BlobPart], {
+      type:
+        (response.headers as Record<string, string> | undefined)?.[
+          'content-type'
+        ] || 'application/octet-stream',
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName || 'adjunto');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    toast.error('No se pudo descargar el archivo.');
+    throw error;
+  }
+}
+
+export async function sendAttachmentMessage(
+  conversationId: string,
+  file: File,
+  content?: string,
+): Promise<SendMessageResponse> {
+  const isBrowserOffline =
+    typeof navigator !== 'undefined' && !navigator.onLine;
+
+  if (isBrowserOffline) {
+    throw new Error('Error de red: Sin conexion a internet');
+  }
+
+  if (!conversationId) {
+    throw new Error('El identificador de conversacion es requerido');
+  }
+
+  if (!file) {
+    throw new Error('El archivo adjunto es requerido');
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('conversationId', conversationId);
+  const trimmedContent = (content || '').trim();
+  if (trimmedContent.length > 0) {
+    formData.append('content', trimmedContent);
+  }
+
+  try {
+    const response = await apiClient.post<
+      | StandardApiResponse<Message>
+      | Message
+    >('/chat/messages/attachment', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    const body = response?.data;
+    const msg =
+      typeof body === 'object' &&
+      body !== null &&
+      'data' in body &&
+      body.data !== null &&
+      typeof body.data === 'object' &&
+      'id' in body.data
+        ? (body.data as Message)
+        : (body as Message);
+
+    if (!msg || !msg.id) {
+      throw new Error(
+        'Error del servidor: No se pudo procesar el envio del archivo adjunto',
+      );
+    }
+
+    const isImage = file.type.startsWith('image/');
+    const createdMessage: Message = {
+      id: msg.id,
+      conversationId: msg.conversationId || conversationId,
+      senderId:
+        msg.senderId || getCurrentSessionUserId(),
+      content: msg.content || trimmedContent || file.name,
+      timestamp:
+        msg.timestamp || msg.createdAt || new Date().toISOString(),
+      status: (msg.status as MessageStatus) || 'sent',
+      createdAt:
+        msg.createdAt || msg.timestamp || new Date().toISOString(),
+      isAttachment: true,
+      attachmentType: msg.attachmentType || (isImage ? 'image' : 'file'),
+      attachment: msg.attachment ?? {
+        id: `att-${msg.id}`,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: file.type,
+        url: `/api/chat/attachments/att-${msg.id}/download`,
+        type: isImage ? 'IMAGE' : 'PDF',
+      },
+      attachments: msg.attachments,
+    };
+
+    saveStoredMessage(createdMessage);
+    markStoredConversationAsRead(conversationId);
+
+    return {
+      statusCode: 201,
+      ok: true,
+      detail: 'Mensaje con archivo adjunto enviado exitosamente',
+      data: createdMessage,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(
+      'Error del servidor: No se pudo procesar el envio del archivo adjunto',
+    );
   }
 }

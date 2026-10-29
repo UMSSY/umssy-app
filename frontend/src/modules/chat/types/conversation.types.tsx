@@ -1,3 +1,5 @@
+import type { MessageAttachment } from './attachment.types';
+
 export type AttachmentType = 'image' | 'file' | 'audio';
 
 export interface UserSummary {
@@ -15,7 +17,7 @@ export interface UserSummary {
   areSkillsVisible?: boolean;
 }
 
-export type MessageStatus = 'sending' | 'sent' | 'error';
+export type MessageStatus = 'sending' | 'sent' | 'error' | 'read';
 
 export interface LastMessage {
   id: string;
@@ -26,6 +28,7 @@ export interface LastMessage {
   status?: MessageStatus;
   isAttachment?: boolean;
   attachmentType?: AttachmentType | null;
+  attachment?: MessageAttachment | null;
 }
 
 export interface Message {
@@ -39,6 +42,8 @@ export interface Message {
   sentAt?: string;
   isAttachment?: boolean;
   attachmentType?: AttachmentType | null;
+  attachment?: MessageAttachment | null;
+  attachments?: MessageAttachment[];
 }
 
 export interface Conversation {
