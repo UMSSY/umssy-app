@@ -135,7 +135,39 @@ export class ConversationService {
     },
     currentUserId: string,
   ): Promise<ConversationResponse> {
-     const contact = (conversation.userAId === currentUserId
+    // Si la conversación tiene eventId, es una sala grupal y se excluye del formato 1:1
+    if (conversation.event?.id) {
+      // Devolver respuesta mínima para sala grupal: solo conversationId y eventId,
+      // sin campo contact (el frontend de HU-6 se encargará de la sala grupal)
+      const lastMessage = conversation.messages[0];
+      const safeContent = lastMessage?.content ?? '';
+      const isAttachment = Boolean(safeContent.startsWith('[Archivo] '));
+      const content = isAttachment
+        ? safeContent.slice(10)
+        : safeContent;
+      const attachmentType = isAttachment ? ('file' as const) : null;
+
+      return {
+        id: conversation.id,
+        eventId: conversation.event.id,
+        // Sin contact en salas grupales (lista 1:1 las excluye)
+        lastMessage: lastMessage
+          ? {
+              id: lastMessage.id,
+              senderId: lastMessage.senderId,
+              content,
+              isAttachment,
+              attachmentType,
+              createdAt: lastMessage.sentAt.toISOString(),
+            }
+          : null,
+        unreadCount: 0,
+        updatedAt: conversation.updatedAt.toISOString(),
+      };
+    }
+
+    // Lógica existente para conversaciones 1:1
+    const contact = (conversation.userAId === currentUserId
     ? conversation.userB
     : conversation.userA) as { id: string; firstName: string; lastName: string; photoUrl?: Uint8Array | null };
 

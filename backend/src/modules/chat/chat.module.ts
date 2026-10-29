@@ -3,6 +3,7 @@ import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { FileValidationService } from '../../common/services/file-validation.service.js';
+import { EventRegistrationsModule } from '../event-registrations/event-registrations.module.js';
 
 import { UserSearchController } from './controllers/user-search.controller.js';
 import { ConversationController } from './controllers/conversation.controller.js';
@@ -21,6 +22,7 @@ import { LinkPreviewService } from './services/link-preview.service.js';
 import { AttachmentService } from './services/attachment.service.js';
 import { AttachmentMapper } from './mappers/attachment.mapper.js';
 import { AttachmentUploadInterceptor } from './interceptors/attachment-upload.interceptor.js';
+import { EventRoomService } from './services/event-room.service.js';
 
 import { ConversationRepository } from './repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from './repositories/conversation-participant.repository.js';
@@ -34,7 +36,7 @@ import { AttachmentRepository } from './repositories/attachment.repository.js';
 import { ChatGateway } from './gateways/chat.gateway.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule, AuthModule],
+  imports: [PrismaModule, JwtAuthModule, AuthModule, EventRegistrationsModule],
   controllers: [
     UserSearchController,
     ConversationController,
@@ -56,6 +58,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     AttachmentMapper,
     AttachmentUploadInterceptor,
     FileValidationService,
+    EventRoomService,
 
     ConversationRepository,
     ConversationParticipantRepository,
@@ -76,6 +79,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     LinkPreviewService,
     AttachmentService,
     AttachmentRepository,
+    EventRoomService,
   ],
 })
 export class ChatModule {}
