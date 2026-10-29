@@ -12,6 +12,7 @@ import { toVacancyRequirements } from '../utils/build-vacancy-requirements.js';
 import { buildScoreRequirements } from '../utils/build-score-requirements.js';
 import type { RequirementState } from '../types/requirement-state.types.js';
 import { CandidateProfileService } from './candidate-profile.service.js';
+import { RequirementTermsService } from './requirement-terms.service.js';
 import { VacancyRankingService } from './vacancy-ranking.service.js';
 import { WeightedScoreService } from './weighted-score.service.js';
 
@@ -27,6 +28,7 @@ export class JobRecommendationsService {
     private readonly jobMatchRepository: JobMatchRepository,
     private readonly ranking: VacancyRankingService,
     private readonly score: WeightedScoreService,
+    private readonly requirementTermsService: RequirementTermsService,
   ) {}
 
   async recommendations(userId: string): Promise<JobRecommendations> {
@@ -43,9 +45,11 @@ export class JobRecommendationsService {
       experienceYears: profile.experienceYears,
     };
 
-    const ranked = this.ranking.rank(
+    const evaluated = await Promise.all(
       vacancies.map((vacancy) => this.evaluate(vacancy, candidate)),
     );
+
+    const ranked = this.ranking.rank(evaluated);
     return { isProfileComplete: true, items: ranked.map(({ item }) => item) };
   }
 
@@ -59,11 +63,24 @@ export class JobRecommendationsService {
     }
   }
 
-  private evaluate(vacancy: JobMatchRecord, candidate: CandidateProfile) {
-    const requirements = buildScoreRequirements(
-      toVacancyRequirements(vacancy),
-      candidate,
+  private async evaluate(vacancy: JobMatchRecord, candidate: CandidateProfile) {
+    const vacancyRequirements = toVacancyRequirements(vacancy);
+
+    const extractedSkills = await this.requirementTermsService.extractAndMatchRequirements(
+      vacancy.description ?? '',
     );
+
+    const existingSkillNames = vacancyRequirements.skills.map((skill) => skill.toLowerCase());
+    const newSkillNames = extractedSkills
+      .map((skill) => skill.name)
+      .filter((name) => !existingSkillNames.includes(name.toLowerCase()));
+
+    const mergedRequirements = {
+      ...vacancyRequirements,
+      skills: [...vacancyRequirements.skills, ...newSkillNames],
+    };
+
+    const requirements = buildScoreRequirements(mergedRequirements, candidate);
     const score = this.score.calculate(requirements);
     const matchedSkills = requirements.skills
       .filter(({ status }) => status === 'Cumple')

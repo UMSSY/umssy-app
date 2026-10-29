@@ -7,6 +7,7 @@ import { JobRecommendationsService } from '../services/job-recommendations.servi
 import { VacancyRankingService } from '../services/vacancy-ranking.service.js';
 import { WeightedScoreService } from '../services/weighted-score.service.js';
 import type { JobMatchRecord } from '../types/job-match.types.js';
+import type { RequirementTermsService } from '../services/requirement-terms.service.js';
 
 interface OfferOptions {
   careers?: string[];
@@ -53,12 +54,16 @@ describe('HU-06 recommendations contract', () => {
     findCandidateProfile
       .mockReset()
       .mockResolvedValue({ career: null, experienceYears: 0 });
+      const requirementTermsService = {
+        extractAndMatchRequirements: vi.fn().mockResolvedValue([]),
+      } as unknown as RequirementTermsService;
     service = new JobRecommendationsService(
       { getUserSkills } as unknown as UserSkillService,
       { findCandidateProfile } as unknown as CandidateProfileService,
       { findPublished } as unknown as JobMatchRepository,
       new VacancyRankingService(),
       new WeightedScoreService(),
+      requirementTermsService,
     );
   });
 
