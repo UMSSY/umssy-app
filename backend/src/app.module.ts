@@ -30,6 +30,7 @@ import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
 import { NlpModule } from './modules/nlp/nlp.module.js';
 import { SurveysModule } from './modules/surveys/surveys.module.js';
+import { AppointmentsModule } from './modules/appointments/appointments.module.js';
 
 
 @Module({
@@ -38,6 +39,7 @@ import { SurveysModule } from './modules/surveys/surveys.module.js';
     PrismaModule,
     MailModule,
     AvailabilityModule,
+    AppointmentsModule,
     AuthModule,
     EventsModule,
     EventCategoriesModule,
