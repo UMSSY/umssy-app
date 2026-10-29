@@ -7,4 +7,5 @@ export interface WorkExperienceListCardProps {
   onAdd?: () => void;
   onEdit?: (experience: WorkExperienceItem) => void;
   onDelete?: (experience: WorkExperienceItem) => void;
+  skillsByExperience?: Record<string, string[]>;
 }
