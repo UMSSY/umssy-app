@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   act,
@@ -24,6 +23,14 @@ import { ChatView } from "../views/chat-view";
 import * as chatApi from "../services/chat-api";
 import { ChatDock, ChatPanel } from "./chat-panel";
 
+const socketMock = vi.hoisted(() => ({
+  connected: true,
+  on: vi.fn(),
+  off: vi.fn(),
+  emit: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
 vi.mock("@/shared/contexts/auth-context", () => ({
   useAuth: () => ({
     roles: ["mentor"],
@@ -37,6 +44,15 @@ vi.mock("next/navigation", () => ({
     replace: vi.fn(),
   }),
 }));
+
+vi.mock("./chat-socket", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./chat-socket")>();
+
+  return {
+    ...actual,
+    getChatSocket: () => socketMock,
+  };
+});
 
 const CONVERSATIONS = [
   {
@@ -75,6 +91,12 @@ function MessagingFixture() {
 }
 
 beforeEach(() => {
+  socketMock.connected = true;
+  socketMock.on.mockReset();
+  socketMock.off.mockReset();
+  socketMock.emit.mockReset();
+  socketMock.disconnect.mockReset();
+
   vi.spyOn(chatApi, "getConversations").mockResolvedValue(
     CONVERSATIONS,
   );
@@ -227,26 +249,35 @@ describe("ChatPanel", () => {
     async () => {
       let finishSend!: () => void;
 
-      vi.spyOn(chatApi, "sendMessage").mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            finishSend = () =>
-              resolve({
-                statusCode: 201,
-                ok: true,
-                detail: "Mensaje enviado",
-                data: {
-                  id: "sent-1",
-                  conversationId: "conversation-1",
-                  senderId: "me",
-                  content: "Primer mensaje",
-                  createdAt: "2026-10-22T12:00:00Z",
-                  timestamp: "2026-10-22T12:00:00Z",
-                  status: "sent",
-                },
-              });
-          }),
+      socketMock.emit.mockImplementation(
+        (
+          event: string,
+          _payload: unknown,
+          callback?: (result: unknown) => void,
+        ) => {
+          if (event !== "message:send" || !callback) {
+            return;
+          }
+
+          finishSend = () =>
+            callback({
+              ok: true,
+              message: {
+                id: "sent-1",
+                conversationId: "conversation-1",
+                senderId: "me",
+                content: "Primer mensaje",
+                createdAt: "2026-10-22T12:00:00Z",
+                timestamp: "2026-10-22T12:00:00Z",
+              },
+            });
+        },
       );
+
+      const sentCalls = () =>
+        socketMock.emit.mock.calls.filter(
+          ([event]) => event === "message:send",
+        );
 
       render(<MessagingFixture />);
 
@@ -274,14 +305,23 @@ describe("ChatPanel", () => {
         },
       });
 
-      fireEvent.click(
-        screen.getByRole("button", {
-          name: "Enviar mensaje",
-        }),
-      );
+      const sendButton = screen.getByRole("button", {
+        name: "Enviar mensaje",
+      });
 
       await waitFor(() => {
-        expect(chatApi.sendMessage).toHaveBeenCalledTimes(1);
+        expect(sendButton).toBeEnabled();
+      });
+
+      fireEvent.click(sendButton);
+
+      await waitFor(() => {
+        expect(sentCalls()).toHaveLength(1);
+      });
+
+      expect(sentCalls()[0][1]).toEqual({
+        conversationId: "conversation-1",
+        content: "Primer mensaje",
       });
 
       fireEvent.click(
@@ -311,7 +351,9 @@ describe("ChatPanel", () => {
         expect(fullInput).toBeEnabled();
       });
 
-      expect(fullInput).toHaveValue("");
+      await waitFor(() => {
+        expect(fullInput).toHaveValue("");
+      });
 
       fireEvent.change(fullInput, {
         target: {
@@ -321,9 +363,7 @@ describe("ChatPanel", () => {
 
       expect(fullInput).toHaveValue("Siguiente mensaje");
 
-      expect(
-        chatApi.sendMessage,
-      ).toHaveBeenCalledTimes(1);
+      expect(sentCalls()).toHaveLength(1);
     },
   );
 });

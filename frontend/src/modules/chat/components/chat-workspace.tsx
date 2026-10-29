@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMessagingUi } from "../contexts/messaging-ui-context";
 import type { ChatWorkspaceProps } from '../types/chat-workspace-props.types';
 import { cn } from '@/lib/utils';
@@ -20,10 +20,25 @@ import type { Conversation } from '../types/conversation.types';
 import type { User } from '../types/user.types';
 
 import {
-  sendMessage,
   sendAttachmentMessage,
   getCurrentSessionUserId,
 } from '../services/chat-api';
+import { getChatSocket } from './chat-socket';
+
+interface SocketMessage {
+  id?: string;
+  conversationId?: string;
+  senderId?: string;
+  content?: string;
+  createdAt?: string;
+  timestamp?: string;
+}
+
+interface SocketSendResponse {
+  ok: boolean;
+  message?: SocketMessage;
+  error?: string;
+}
 
 export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
   const currentUserId = getCurrentSessionUserId();
@@ -69,6 +84,49 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
 
   const showConnectionDialog = isError && !dismissedError;
 
+  useEffect(() => {
+    if (!selectedId) return;
+
+    let socket: ReturnType<typeof getChatSocket>;
+
+    try {
+      socket = getChatSocket();
+    } catch (error) {
+      console.error('No se pudo conectar al chat:', error);
+      return;
+    }
+
+    const handleNewMessage = (message: SocketMessage) => {
+      if (message.conversationId) {
+        void queryClient.invalidateQueries({
+          queryKey: messagesQueryKey(message.conversationId),
+        });
+      }
+
+      void queryClient.invalidateQueries({
+        queryKey: ['conversations'],
+      });
+    };
+
+    const joinConversation = () => {
+      socket.emit('conversation:join', {
+        conversationId: selectedId,
+      });
+    };
+
+    socket.on('connect', joinConversation);
+    socket.on('message:new', handleNewMessage);
+
+    if (socket.connected) {
+      joinConversation();
+    }
+
+    return () => {
+      socket.off('connect', joinConversation);
+      socket.off('message:new', handleNewMessage);
+    };
+  }, [selectedId, queryClient]);
+
   const handleBackToList = () => {
     clearSelectedConversation();
   };
@@ -94,36 +152,80 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
     setIsSearchModalOpen(false);
   };
 
-  const handleSendMessage = async (content: string, file?: File | null): Promise<void> => {
+  const handleSendMessage = async (
+    content: string,
+    file?: File | null,
+  ): Promise<void> => {
     if (!selectedId || isSending) {
       throw new Error(
         'No hay una conversación seleccionada o ya se está enviando un mensaje.',
       );
     }
 
-    const conversationId = selectedId;
+    const trimmedContent = content.trim();
+
+    if (!trimmedContent && !file) {
+      throw new Error('El mensaje no puede estar vacío.');
+    }
 
     setIsSending(true);
 
     try {
       if (file) {
-        await sendAttachmentMessage(conversationId, file, content);
+        await sendAttachmentMessage(selectedId, file, trimmedContent);
+
+        updateConversationLastMessage(
+          selectedId,
+          trimmedContent || `[Archivo] ${file.name}`,
+          currentUserId,
+        );
       } else {
-        await sendMessage({
-          conversationId,
-          content,
-          senderId: currentUserId,
-        });
+        const socket = getChatSocket();
+
+        if (!socket.connected) {
+          throw new Error(
+            'No hay conexión con el chat. Comprueba la conexión e inténtalo de nuevo.',
+          );
+        }
+
+        const response = await new Promise<SocketSendResponse>(
+          (resolve, reject) => {
+            socket.emit(
+              'message:send',
+              {
+                conversationId: selectedId,
+                content: trimmedContent,
+              },
+              (result: SocketSendResponse) => {
+                if (result?.ok && result.message) {
+                  resolve(result);
+                } else {
+                  reject(
+                    new Error(
+                      result?.error || 'No se pudo enviar el mensaje.',
+                    ),
+                  );
+                }
+              },
+            );
+          },
+        );
+
+        const message = response.message!;
+
+        updateConversationLastMessage(
+          selectedId,
+          message.content || trimmedContent,
+          message.senderId || currentUserId,
+        );
       }
 
-      updateConversationLastMessage(
-        conversationId,
-        content || (file ? `[Archivo] ${file.name}` : ''),
-        currentUserId,
-      );
+      await queryClient.invalidateQueries({
+        queryKey: messagesQueryKey(selectedId),
+      });
 
       await queryClient.invalidateQueries({
-        queryKey: messagesQueryKey(conversationId),
+        queryKey: ['conversations'],
       });
     } finally {
       setIsSending(false);
@@ -144,26 +246,44 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
   return (
     <div className="flex size-full min-h-0 max-w-full flex-1 overflow-hidden bg-surface-soft font-sans">
       <aside
-        className={cn("h-full shrink-0 overflow-hidden", isCompact ? "w-full" : "w-80", selectedId ? (isCompact ? "hidden" : "hidden md:block") : "block")}
+        className={cn(
+          "h-full shrink-0 overflow-hidden",
+          isCompact ? "w-full" : "w-80",
+          selectedId
+            ? (isCompact ? "hidden" : "hidden md:block")
+            : "block",
+        )}
       >
-        {isCompact && isError ? <ChatErrorState message="No pudimos cargar tus conversaciones." onRetry={() => void handleRetryConversations()} /> : <ConversationList
-          conversations={conversations}
-          selectedId={selectedId}
-          isLoading={isLoading}
-          isError={isError}
-          hasMore={hasMore}
-          activeFilter={activeFilter}
-          searchQuery={searchQuery}
-          onSelectConversation={handleSelectChat}
-          onFilterChange={setActiveFilter}
-          onSearchChange={setSearchQuery}
-          onLoadMore={loadMore}
-          onStartNewChat={handleStartNewChat}
-        />}
+        {isCompact && isError ? (
+          <ChatErrorState
+            message="No pudimos cargar tus conversaciones."
+            onRetry={() => void handleRetryConversations()}
+          />
+        ) : (
+          <ConversationList
+            conversations={conversations}
+            selectedId={selectedId}
+            isLoading={isLoading}
+            isError={isError}
+            hasMore={hasMore}
+            activeFilter={activeFilter}
+            searchQuery={searchQuery}
+            onSelectConversation={handleSelectChat}
+            onFilterChange={setActiveFilter}
+            onSearchChange={setSearchQuery}
+            onLoadMore={loadMore}
+            onStartNewChat={handleStartNewChat}
+          />
+        )}
       </aside>
 
       <main
-        className={cn("h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface", !selectedId ? (isCompact ? "hidden" : "hidden md:flex") : "flex")}
+        className={cn(
+          "h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-surface",
+          !selectedId
+            ? (isCompact ? "hidden" : "hidden md:flex")
+            : "flex",
+        )}
       >
         {selectedConversation ? (
           <ChatRoom

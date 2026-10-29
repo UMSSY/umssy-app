@@ -1,4 +1,3 @@
-
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 
 import {
@@ -16,6 +15,7 @@ import {
 
 import {
   afterEach,
+  beforeEach,
   describe,
   expect,
   it,
@@ -24,12 +24,17 @@ import {
 
 import { ChatView } from "../views/chat-view";
 import { ChatRoom } from "../components/chat-room";
+import { getChatSocket } from "../components/chat-socket";
 import * as chatApi from "../services/chat-api";
 
 import type {
   Conversation,
   Message,
 } from "../types/conversation.types";
+
+vi.mock("../components/chat-socket", () => ({
+  getChatSocket: vi.fn(),
+}));
 
 const conversation: Conversation = {
   id: "empty-chat",
@@ -54,9 +59,23 @@ const sentMessage: Message = {
   createdAt: conversation.updatedAt,
 };
 
+const mockSocket = {
+  connected: true,
+  on: vi.fn(),
+  off: vi.fn(),
+  emit: vi.fn(),
+};
+
+beforeEach(() => {
+  vi.mocked(getChatSocket).mockReturnValue(
+    mockSocket as unknown as ReturnType<typeof getChatSocket>,
+  );
+});
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  vi.clearAllMocks();
 });
 
 function renderChat() {
@@ -221,17 +240,33 @@ describe("Estados del chat", () => {
           nextCursor: null,
         });
 
-      const send = vi
-        .spyOn(chatApi, "sendMessage")
-        .mockRejectedValueOnce(
-          new Error("offline"),
-        )
-        .mockResolvedValueOnce({
-          statusCode: 201,
-          ok: true,
-          detail: "ok",
-          data: sentMessage,
-        });
+      let attempts = 0;
+      const sendEmit = vi.fn(
+        (
+          event: string,
+          _payload: unknown,
+          callback?: (result: {
+            ok: boolean;
+            message?: Message;
+            error?: string;
+          }) => void,
+        ) => {
+          if (event !== "message:send" || !callback) return;
+          attempts += 1;
+          if (attempts === 1) {
+            callback({ ok: false, error: "offline" });
+          } else {
+            callback({ ok: true, message: sentMessage });
+          }
+        },
+      );
+
+      vi.mocked(getChatSocket).mockReturnValue({
+        connected: true,
+        on: vi.fn(),
+        off: vi.fn(),
+        emit: sendEmit,
+      } as unknown as ReturnType<typeof getChatSocket>);
 
       renderChat();
 
@@ -267,7 +302,13 @@ describe("Estados del chat", () => {
 
       expect(textarea).toHaveValue("Hola");
 
-      expect(send).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(sendEmit).toHaveBeenCalledWith(
+          "message:send",
+          { conversationId: conversation.id, content: "Hola" },
+          expect.any(Function),
+        );
+      });
 
       fireEvent.click(
         screen.getByRole("button", {
@@ -276,7 +317,9 @@ describe("Estados del chat", () => {
       );
 
       await waitFor(() => {
-        expect(send).toHaveBeenCalledTimes(2);
+        expect(
+          sendEmit.mock.calls.filter((call) => call[0] === "message:send"),
+        ).toHaveLength(2);
         expect(textarea).toHaveValue("");
         expect(
           screen.queryByRole("alert"),
