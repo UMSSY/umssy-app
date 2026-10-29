@@ -155,7 +155,7 @@ describe('AttachmentService', () => {
       } as MulterFile;
 
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-1' }),
+      service.uploadAndSend('user-1', file, { conversationId: 'conv-1', content: '' }),
       ).rejects.toThrow(UserBlockedException);
 
       expect(blockService.isBlockedBetween).toHaveBeenCalledWith('user-1', 'user-2');

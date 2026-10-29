@@ -233,32 +233,33 @@ export class ConversationService {
     blockedIds: ReadonlySet<string>,
   ): Promise<ConversationResponse> {
 if (conversation.event?.id) {
-      const lastMessage = conversation.messages[0];
-      const safeContent = lastMessage?.content ?? '';
-      const isAttachment = Boolean(safeContent.startsWith('[Archivo] '));
-      const content = isAttachment
-        ? safeContent.slice(10)
-        : safeContent;
-      const attachmentType = isAttachment ? ('file' as const) : null;
+  const lastMessage = conversation.messages[0];
+  const safeContent = lastMessage?.content ?? '';
+  const isAttachment = Boolean(safeContent.startsWith('[Archivo] '));
+  const content = isAttachment
+    ? safeContent.slice(10)
+    : safeContent;
+  const attachmentType = isAttachment ? ('file' as const) : null;
 
-      return {
-        id: conversation.id,
-        eventId: conversation.event.id,
+  return {
+    id: conversation.id,
+    eventId: conversation.event.id,
 
-        lastMessage: lastMessage
-          ? {
-              id: lastMessage.id,
-              senderId: lastMessage.senderId,
-              content,
-              isAttachment,
-              attachmentType,
-              createdAt: lastMessage.sentAt.toISOString(),
-            }
-          : null,
-        unreadCount: 0,
-        updatedAt: conversation.updatedAt.toISOString(),
-      };
-    } 
+    lastMessage: lastMessage
+      ? {
+          id: lastMessage.id,
+          senderId: lastMessage.senderId,
+          content,
+          isAttachment,
+          attachmentType,
+          createdAt: lastMessage.sentAt.toISOString(),
+        }
+      : null,
+    unreadCount: 0,
+    isBlockedByMe: false, 
+    updatedAt: conversation.updatedAt.toISOString(),
+  };
+}
 
 const contact = (
       conversation.userAId === currentUserId
