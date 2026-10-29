@@ -546,11 +546,7 @@ export async function sendAttachmentMessage(
     const response = await apiClient.post<
       | StandardApiResponse<Message>
       | Message
-    >('/chat/messages/attachment', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    >('/chat/messages/attachment', formData);
 
     const body = response?.data;
     const msg =

@@ -25,7 +25,7 @@ export class MessageRepository {
   async create(data: {
     conversationId: string;
     senderId: string;
-    content: string;
+    content?: string | null;
     statusId: string;
     sentAt: Date;
     attachments?: {
@@ -57,6 +57,10 @@ export class MessageRepository {
     return this.prisma.message.create({
       data: {
         ...messageData,
+        content:
+          typeof messageData.content === 'string' && messageData.content.trim().length > 0
+            ? messageData.content.trim()
+            : null,
         attachments: mappedAttachments
           ? ({ create: mappedAttachments } as any)
           : undefined,

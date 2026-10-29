@@ -424,6 +424,9 @@ describe('AttachmentService', () => {
         expect.anything(),
         { allowedTypes: ['pdf'], maxSizeBytes: 10 * 1024 * 1024 },
       );
+      expect(messageRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({ content: null }),
+      );
       expect(result.attachmentType).toBe('file');
       expect(result.isAttachment).toBe(true);
       expect(result.attachment.type).toBe('PDF');
