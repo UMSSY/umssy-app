@@ -565,7 +565,7 @@ export async function sendAttachmentMessage(
       );
     }
 
-    const isImage = file.type.startsWith('image/');
+    const isImage = file.type.startsWith('image/') || /\.(jpe?g|png)$/i.test(file.name);
     const createdMessage: Message = {
       id: msg.id,
       conversationId: msg.conversationId || conversationId,
