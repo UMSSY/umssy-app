@@ -116,7 +116,8 @@ export class AttachmentService {
 
     const sentStatusId = await this.messageStatusService.getSentId();
     const now = new Date();
-    const content = dto.content?.trim() || '';
+    const rawContent = dto.content?.trim();
+    const content = rawContent && rawContent.length > 0 ? rawContent : null;
 
     // Creación de mensaje en base de datos
     const message = await this.messageRepository.create({
