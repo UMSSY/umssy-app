@@ -1,5 +1,3 @@
--- Additive repair for develop and databases upgraded by the reverted PR #1717.
--- No existing column/table/catalog is removed. Stop old writers during rollout.
 BEGIN;
 ALTER TABLE mentor_participation_requests ADD COLUMN IF NOT EXISTS status VARCHAR(20);
 ALTER TABLE mentor_slot_offers ADD COLUMN IF NOT EXISTS status VARCHAR(20);
@@ -13,7 +11,6 @@ DO $$ BEGIN
 END $$;
 ALTER TABLE mentor_participation_requests ALTER COLUMN status SET NOT NULL;
 ALTER TABLE mentor_slot_offers ALTER COLUMN status SET NOT NULL;
--- Additive migration: retain legacy counters and preserve active suspensions.
 CREATE TABLE IF NOT EXISTS mentor_intake_attempts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
@@ -73,8 +70,6 @@ ALTER TABLE mentor_intake_attempts ALTER COLUMN operation SET NOT NULL;
 ALTER TABLE mentor_mail_outbox ALTER COLUMN kind SET NOT NULL;
 ALTER TABLE mentor_mail_outbox ALTER COLUMN status SET NOT NULL;
 
--- A bridge keeps catalog writers and develop's text contract consistent. On a
--- catalog database INSERT derives either representation from the one supplied.
 CREATE FUNCTION mentor_sync_legacy_catalog() RETURNS TRIGGER LANGUAGE plpgsql AS $$
 DECLARE doc JSONB; olddoc JSONB; label TEXT; catalog_id UUID;
 BEGIN
@@ -132,7 +127,6 @@ FROM mentor_participation_attempt_limits l CROSS JOIN LATERAL generate_series(1,
 WHERE l.window_started_at > clock_timestamp() - INTERVAL '24 hours'
 AND NOT EXISTS (SELECT 1 FROM mentor_intake_attempts a WHERE a.user_id = l.user_id);
 
--- Persist notifications as domain events only. No HU7 SMTP dispatcher is enabled.
 INSERT INTO mentor_mail_outbox(id, event_key, kind, user_id, recipient, payload)
 SELECT gen_random_uuid(), 'offer:' || o.id::text, 'OFFER', o.user_id, u.email,
   jsonb_build_object('offerId', o.id, 'expiresAt', o.expires_at)

@@ -249,60 +249,44 @@ export class MentorsService {
       throw new InvalidTechnicalAreasException();
     if (!data.orientationTypeIds.length)
       throw new InvalidOrientationTypesException();
-    const mentorRole = tx
-      ? await this.mentorsRepository.findMentorRole(tx)
-      : await this.mentorsRepository.findMentorRole();
+    const mentorRole = await this.mentorsRepository.findMentorRole(tx);
     if (!mentorRole) {
       throw new MentorRoleNotFoundException();
     }
 
-    const existingRole = tx
-      ? await this.mentorsRepository.findActiveUserRole(
-          userId,
-          mentorRole.id,
-          tx,
-        )
-      : await this.mentorsRepository.findActiveUserRole(userId, mentorRole.id);
+    const existingRole = await this.mentorsRepository.findActiveUserRole(
+      userId,
+      mentorRole.id,
+      tx,
+    );
     if (existingRole) {
       throw new AlreadyMentorException();
     }
 
-    const technicalAreas = tx
-      ? await this.mentorsRepository.findTechnicalAreas(
-          data.technicalAreaIds,
-          tx,
-        )
-      : await this.mentorsRepository.findTechnicalAreas(data.technicalAreaIds);
+    const technicalAreas = await this.mentorsRepository.findTechnicalAreas(
+      data.technicalAreaIds,
+      tx,
+    );
     if (technicalAreas.length !== data.technicalAreaIds.length) {
       throw new InvalidTechnicalAreasException();
     }
 
-    const orientationTypes = tx
-      ? await this.mentorsRepository.findActiveOrientationTypes(
-          data.orientationTypeIds,
-          tx,
-        )
-      : await this.mentorsRepository.findActiveOrientationTypes(
-          data.orientationTypeIds,
-        );
+    const orientationTypes =
+      await this.mentorsRepository.findActiveOrientationTypes(
+        data.orientationTypeIds,
+        tx,
+      );
     if (orientationTypes.length !== data.orientationTypeIds.length) {
       throw new InvalidOrientationTypesException();
     }
 
-    const activation = tx
-      ? await this.mentorsRepository.activate(
-          userId,
-          mentorRole.id,
-          data.technicalAreaIds,
-          data.orientationTypeIds,
-          tx,
-        )
-      : await this.mentorsRepository.activate(
-          userId,
-          mentorRole.id,
-          data.technicalAreaIds,
-          data.orientationTypeIds,
-        );
+    const activation = await this.mentorsRepository.activate(
+      userId,
+      mentorRole.id,
+      data.technicalAreaIds,
+      data.orientationTypeIds,
+      tx,
+    );
     if ('result' in activation) {
       const hasOffer = activation.result === 'OFFER_EXISTS';
       throw new MentorParticipationException(

@@ -117,7 +117,7 @@ export const ModelName = {
   DocumentValidation: 'DocumentValidation',
   MentorIntakeAttempt: 'MentorIntakeAttempt',
   MentorParticipationSanction: 'MentorParticipationSanction',
-  MentorMailOutbox: 'MentorMailOutbox'
+  MentorIntakeOperation: 'MentorIntakeOperation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -996,6 +996,7 @@ export type DocumentValidationScalarFieldEnum = (typeof DocumentValidationScalar
 
 
 export const MentorIntakeAttemptScalarFieldEnum = {
+  operationId: 'operationId',
   id: 'id',
   userId: 'userId',
   operation: 'operation',
@@ -1021,23 +1022,15 @@ export const MentorParticipationSanctionScalarFieldEnum = {
 export type MentorParticipationSanctionScalarFieldEnum = (typeof MentorParticipationSanctionScalarFieldEnum)[keyof typeof MentorParticipationSanctionScalarFieldEnum]
 
 
-export const MentorMailOutboxScalarFieldEnum = {
+export const MentorIntakeOperationScalarFieldEnum = {
   id: 'id',
-  eventKey: 'eventKey',
-  kind: 'kind',
-  userId: 'userId',
-  recipient: 'recipient',
-  payload: 'payload',
-  status: 'status',
-  attempts: 'attempts',
-  availableAt: 'availableAt',
-  claimedAt: 'claimedAt',
-  sentAt: 'sentAt',
-  lastError: 'lastError',
-  createdAt: 'createdAt'
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
-export type MentorMailOutboxScalarFieldEnum = (typeof MentorMailOutboxScalarFieldEnum)[keyof typeof MentorMailOutboxScalarFieldEnum]
+export type MentorIntakeOperationScalarFieldEnum = (typeof MentorIntakeOperationScalarFieldEnum)[keyof typeof MentorIntakeOperationScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -239,7 +239,38 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
       ).toEqual(sentinelOffer);
       expect(await prisma.mentorParticipationSanction.count()).toBe(1);
       expect(await prisma.mentorIntakeAttempt.count()).toBe(5);
-      expect(await prisma.mentorMailOutbox.count()).toBe(2);
+      expect(
+        (
+          await admin.query(
+            'SELECT count(*)::int AS count FROM mentor_mail_outbox',
+          )
+        ).rows[0].count,
+      ).toBe(2);
+      await admin.query(
+        await readFile(
+          new URL(
+            '20261029020000_mentor_intake_catalogs/migration.sql',
+            directory,
+          ),
+          'utf8',
+        ),
+      );
+      await admin.query(
+        await readFile(
+          new URL(
+            '20261029030000_remove_mentor_email_notifications/migration.sql',
+            directory,
+          ),
+          'utf8',
+        ),
+      );
+      expect(await prisma.mentorParticipationSanction.count()).toBe(1);
+      expect(await prisma.mentorIntakeAttempt.count()).toBe(5);
+      expect(
+        await prisma.mentorSlotOffer.findUnique({
+          where: { id: sentinelOffer.id },
+        }),
+      ).toEqual(sentinelOffer);
     }, 60_000);
 
     afterAll(async () => {
@@ -250,7 +281,7 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
     });
 
     beforeEach(async () => {
-      await prisma.$executeRaw`TRUNCATE mentor_mail_outbox, mentor_participation_sanctions, mentor_intake_attempts, mentor_slot_offers, mentor_participation_requests`;
+      await prisma.$executeRaw`TRUNCATE mentor_participation_sanctions, mentor_intake_attempts, mentor_slot_offers, mentor_participation_requests`;
       await prisma.mentorParticipationAttemptLimit.deleteMany();
       await prisma.userRole.deleteMany({ where: { roleId: mentorRole } });
       await prisma.mentorTechnicalArea.deleteMany();
@@ -267,6 +298,33 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
           .slice(0, 4)
           .map((userId) => ({ userId, roleId: mentorRole })),
       });
+    });
+
+    it('persiste el catálogo de operación y conserva la idempotencia', async () => {
+      const key = randomUUID();
+      await submit(4, key).expect(201);
+      await submit(4, key).expect(201);
+      const attempts = await prisma.mentorIntakeAttempt.findMany({
+        where: { userId: users[4] },
+        include: { intakeOperation: true },
+      });
+      expect(attempts).toHaveLength(1);
+      expect(attempts[0].intakeOperation.title).toBe('REQUEST');
+    });
+
+    it('funciona sin cola ni catálogos de correo de mentorías', async () => {
+      const result = await admin.query(
+        'SELECT tablename FROM pg_tables WHERE schemaname = $1 AND tablename IN ($2, $3, $4)',
+        [
+          schema,
+          'mentor_mail_outbox',
+          'mentor_mail_kinds',
+          'mentor_mail_statuses',
+        ],
+      );
+      expect(result.rows).toEqual([]);
+      await submit(4).expect(201);
+      expect(await prisma.mentorParticipationRequest.count()).toBe(1);
     });
 
     it('requires a real JWT and UUID key, rejects forged identity', async () => {
@@ -657,7 +715,7 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
       });
     });
 
-    it('two independent backend pools allocate only one reservation and one event for the same slot', async () => {
+    it('dos pools reservan un único cupo sin generar correos', async () => {
       await prisma.userRole.deleteMany({
         where: { roleId: mentorRole, userId: users[3] },
       });
@@ -690,9 +748,6 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
             where: { status: 'PENDING' },
           }),
         ).toBe(2);
-        expect(
-          await prisma.mentorMailOutbox.count({ where: { kind: 'OFFER' } }),
-        ).toBe(1);
       } finally {
         await otherPool.$disconnect();
       }
@@ -715,7 +770,7 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
       ).toBe(1);
     });
 
-    it('counts both POST routes, serializes fourth/fifth attempts and preserves one exact 72h sanction/event', async () => {
+    it('ambos POST serializan intentos y conservan una sanción exacta de 72 horas sin correos', async () => {
       for (let i = 0; i < 3; i++) {
         const path =
           i % 2
@@ -745,9 +800,7 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
       expect(
         (await prisma.mentorParticipationSanction.findFirstOrThrow()).endsAt,
       ).toEqual(sanction.endsAt);
-      expect(
-        await prisma.mentorMailOutbox.count({ where: { kind: 'SANCTION' } }),
-      ).toBe(1);
+
       expect(
         await prisma.mentorIntakeAttempt.count({ where: { counted: true } }),
       ).toBe(5);
@@ -794,7 +847,7 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
       }
     });
 
-    it('expires and reallocates while GET runs, preserving timestamps and recording one event', async () => {
+    it('vence y reasigna durante la consulta, preservando fechas sin correos', async () => {
       await prisma.userRole.deleteMany({
         where: { roleId: mentorRole, userId: users[3] },
       });
@@ -824,11 +877,7 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
           where: { id: previous.id },
         }),
       ).toMatchObject({ status: 'EXPIRED' });
-      expect(
-        await prisma.mentorMailOutbox.count({
-          where: { eventKey: `offer:${offer.id}` },
-        }),
-      ).toBe(1);
+
       const saved = await prisma.mentorParticipationRequest.findUniqueOrThrow({
         where: { id: next.id },
       });

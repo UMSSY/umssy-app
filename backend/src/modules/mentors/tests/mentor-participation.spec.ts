@@ -79,6 +79,18 @@ function fixture(
   const tx = {
     $executeRaw: vi.fn(
       async (strings: TemplateStringsArray, ...values: unknown[]) => {
+        if (
+          strings
+            .join(' ')
+            .includes('INSERT INTO mentor_participation_sanctions')
+        ) {
+          policySanctions.push({
+            id: randomUUID(),
+            userId: values[0] as string,
+            startedAt: values[2] as Date,
+            endsAt: values[3] as Date,
+          });
+        }
         if (strings.join(' ').includes('INSERT INTO mentor_intake_attempts')) {
           policyAttempts.push({
             id: values[0] as string,
@@ -128,16 +140,6 @@ function fixture(
             (row) =>
               row.userId === values[0] && row.endsAt > (values[1] as Date),
           );
-        if (sql.includes('INSERT INTO mentor_participation_sanctions')) {
-          const row = {
-            id: randomUUID(),
-            userId: values[0] as string,
-            startedAt: values[2] as Date,
-            endsAt: values[3] as Date,
-          };
-          policySanctions.push(row);
-          return [row];
-        }
 
         if (sql.includes('pg_advisory_xact_lock')) {
           return [];

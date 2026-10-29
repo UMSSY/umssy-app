@@ -24,7 +24,6 @@ function responseAt(outcome: Outcome, now: Date): Outcome {
     : outcome;
 }
 
-// Ambas rutas comparten el bloqueo, la ventana móvil y los resultados persistidos.
 export async function withMentorIntake<T>(
   repository: MentorIntakeRepository,
   userId: string,
@@ -75,7 +74,6 @@ export async function withMentorIntake<T>(
       try {
         result = { status: 201, data: await action(tx) };
       } catch (error) {
-        // Los rechazos de negocio cuentan; una falla técnica revierte también el intento.
         if (!(error instanceof DomainException) || error.statusCode >= 500)
           throw error;
         result = {
