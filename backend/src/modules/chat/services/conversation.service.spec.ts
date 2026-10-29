@@ -78,12 +78,12 @@ describe('ConversationService', () => {
     const result = await service.findAllForUser('user-current');
 
     expect(result).toHaveLength(1);
-    expect(result[0].id).toBe('conv-1');
-    expect(result[0].contact.id).toBe('user-contact');
-    expect(result[0].contact.fullName).toBe('Contact Person');
-    expect(result[0].contact.isOnline).toBe(true);
-    expect(result[0].unreadCount).toBe(1);
-    expect(result[0].lastMessage?.content).toBe('Hola');
+    expect(result[0]?.id).toBe('conv-1');
+    expect(result[0]?.contact?.id).toBe('user-contact');
+    expect(result[0]?.contact?.fullName).toBe('Contact Person');
+    expect(result[0]?.contact?.isOnline).toBe(true);
+    expect(result[0]?.unreadCount).toBe(1);
+    expect(result[0]?.lastMessage?.content).toBe('Hola');
   });
 
   it('rejects self-conversation even when UUID has different casing', async () => {
@@ -226,10 +226,11 @@ describe('ConversationService', () => {
     const conversations =
       await service.findAllForUser('user-me');
 
-    expect(conversations[0].contact.avatarUrl).toBe(
+    expect(conversations[0]?.contact?.avatarUrl).toBe(
       `data:image/jpeg;base64,${photoBuffer.toString('base64')}`,
     );
   });
+
   describe('isBlockedByMe', () => {
     const buildConversation = (id: string, contactId: string) => ({
       id,
@@ -279,7 +280,7 @@ describe('ConversationService', () => {
     it('returns false for the blocked user (does not reveal who blocked)', async () => {
       const { service } = buildService([], [buildConversation('conv-1', 'user-blocker')]);
       const result = await service.findAllForUser('user-me');
-      expect(result[0].isBlockedByMe).toBe(false);
+      expect(result[0]?.isBlockedByMe).toBe(false);
     });
 
     it('includes isBlockedByMe in POST /chat/conversations (getOrCreate)', async () => {
