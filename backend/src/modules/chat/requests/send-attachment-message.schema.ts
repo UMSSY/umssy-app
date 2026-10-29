@@ -13,7 +13,7 @@ export const sendAttachmentMessageSchema = z
         message: `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
       })
       .optional()
-      .default(''),
+      .nullable(),
   });
 
 export type SendAttachmentMessageDto = z.infer<typeof sendAttachmentMessageSchema>;

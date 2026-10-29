@@ -394,6 +394,25 @@ export const MOCK_MESSAGES: Message[] = [
     },
     createdAt: minutesAgo(1430),
   },
+  {
+    id: 'msg-3-3',
+    conversationId: 'conv-3',
+    senderId: 'user-103',
+    content: 'Revisa el portal oficial en https://www.umss.edu.bo y el repositorio en https://github.com/UMSSY/umssy-app para mas detalles.',
+    timestamp: minutesAgo(1400),
+    status: 'sent',
+    isAttachment: false,
+    attachment: {
+      id: 'att-mock-link-1',
+      fileName: 'Universidad Mayor de San Simón',
+      fileSize: 0,
+      mimeType: 'text/html',
+      url: 'https://www.umss.edu.bo',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=400&q=80',
+      type: 'LINK',
+    },
+    createdAt: minutesAgo(1400),
+  },
 
   {
     id: 'msg-4-1',
