@@ -1,4 +1,3 @@
-import { SurveysModule } from './modules/surveys/surveys.module.js';
 import { Module } from '@nestjs/common';
 import { MailModule } from './modules/mail/index.js';
 import { ConfigModule } from '@nestjs/config';
@@ -31,6 +30,8 @@ import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
 import { NlpModule } from './modules/nlp/nlp.module.js';
 import { RadarIntegrationModule } from './modules/radar-integration/radar-integration.module.js';
+import { SurveysModule } from './modules/surveys/surveys.module.js';
+import { AppointmentsModule } from './modules/appointments/appointments.module.js';
 
 
 @Module({
@@ -39,6 +40,7 @@ import { RadarIntegrationModule } from './modules/radar-integration/radar-integr
     PrismaModule,
     MailModule,
     AvailabilityModule,
+    AppointmentsModule,
     AuthModule,
     EventsModule,
     EventCategoriesModule,

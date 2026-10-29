@@ -40,24 +40,48 @@ export class RadarIntegrationService implements OnModuleInit, OnModuleDestroy {
   // La extracción NO aprueba automáticamente ningún documento ni habilidad.
   // Se invoca al guardar un CV nuevo o al reprocesar uno historico.
   // Reprocesar jamas revoca silenciosamente una decision administrativa anterior.
-  async ingestCv(userId:string,cvId:string,buffer:Buffer,reprocess=false){
-    let extractedText='';
-    let extractionStatus='unreadable';
-    try{
-      const {getDocument}=await import('pdfjs-dist/legacy/build/pdf.mjs');
-      const pdf=await getDocument({data:new Uint8Array(buffer),useSystemFonts:true,disableFontFace:true}).promise;
-      try{
-        const contents:string[]=[];
-        const count=Math.min(pdf.numPages,40);
-        for(let pageNumber=1;pageNumber<=count;pageNumber++){
-          const page=await pdf.getPage(pageNumber);
-          const data=await page.getTextContent();
-          contents.push(data.items.flatMap(item=>('str' in item && typeof item.str==='string')?[item.str]:[]).join(' '));
+  async ingestCv(userId:string,cvId:string,buffer:Buffer,reprocess=false){    
+    let extractedText = '';
+    let extractionStatus = 'unreadable';
+
+    try {
+      const mupdf = await import('mupdf');
+
+      const document = mupdf.Document.openDocument(
+        new Uint8Array(buffer),
+        'application/pdf',
+      );
+
+      try {
+        const contents: string[] = [];
+        const pageCount = Math.min(document.countPages(), 40);
+
+        for (let pageNumber = 0; pageNumber < pageCount; pageNumber++) {
+          const page = document.loadPage(pageNumber);
+
+          try {
+            const structuredText = page.toStructuredText('');
+
+            try {
+              contents.push(structuredText.asText());
+            } finally {
+              structuredText.destroy();
+            }
+          } finally {
+            page.destroy();
+          }
         }
-        extractedText=contents.join('\n').slice(0,20_000);
-        extractionStatus=extractedText.trim()?'ready':'unreadable';
-      }finally{await pdf.cleanup();}
-    }catch{extractionStatus='error';}
+
+        extractedText = contents.join('\n').slice(0, 20_000);
+        extractionStatus = extractedText.trim()
+          ? 'ready'
+          : 'unreadable';
+      } finally {
+        document.destroy();
+      }
+    } catch {
+      extractionStatus = 'error';
+    }
     const rows=await this.prisma.$queryRaw<{review_status:string}[]>`
       INSERT INTO radar_cv_evidence (cv_id,user_id,extracted_text,extraction_status,review_status)
       VALUES (${cvId}::uuid,${userId}::uuid,${extractedText},${extractionStatus},'pending')
