@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../../../common/services/session.service.js';
 import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
+import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -30,6 +31,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private readonly sessionService: SessionService,
     private readonly chatService: ChatService,
     private readonly userPresenceService: UserPresenceService,
+    private readonly eventRoomService: EventRoomService,
   ) {}
 
   afterInit(server: Server) {
@@ -84,6 +86,21 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       
      
       this.server.emit('presence:online', { userId: user.id });
+
+      // Listener for event_room:join
+      client.on('event_room:join', async (payload: EventRoomJoinDto) => {
+        try {
+          const conversationId = await this.eventRoomService.joinEventRoom(user.id, payload.eventId);
+          await client.join(conversationId);
+          client.emit('event_room:joined', { conversationId });
+        } catch (error) {
+          if (error instanceof NotRegisteredForEventException) {
+            client.emit('event_room:error', { code: 'not_registered' });
+          } else {
+            client.emit('event_room:error', { code: 'generic_error' });
+          }
+        }
+      });
 
     } catch (error) {
       this.logger.error(`Error inicializando socket para el usuario ${user.id}`, error);

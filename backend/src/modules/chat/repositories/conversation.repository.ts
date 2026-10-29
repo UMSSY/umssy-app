@@ -56,6 +56,32 @@ export class ConversationRepository {
     });
   }
 
+  async upsertByEventId(eventId: string, userId: string, now: Date) {
+    return this.prisma.$transaction(async tx => {
+      // 1️⃣ Conversación grupal: unique sobre eventId, userAId/userBId opcionales
+      const [conversation] = await tx.conversation.findOrCreate({
+        where: { eventId },
+        select: { id: true, userAId: true, userBId: true },
+        data: {
+          eventId,
+          userAId: null,
+          userBId: null,
+          updatedAt: now,
+          createdAt: now,
+        },
+      });
+
+      // 2️⃣ Participante: idéntica clave única (conversationId, userId) → idempotente
+      await tx.conversationParticipant.upsert({
+        where: { conversationId_userId: { conversationId: conversation.id, userId } },
+        update: { lastReadAt: now },
+        create: { conversationId: conversation.id, userId, lastReadAt: now },
+      });
+
+      return conversation.id;
+    });
+  }
+
   async touchLastMessage(
     conversationId: string,
     lastMessageId: string,
@@ -70,10 +96,17 @@ export class ConversationRepository {
   async findUserConversations(userId: string) {
     return this.prisma.conversation.findMany({
       where: {
-        
-        participants: {
-          some: { userId },
-        },
+        AND: [
+          {
+            OR: [
+              { userAId: userId },
+              { userBId: userId },
+            ],
+          },
+          {
+            eventId: null,
+          },
+        ],
       },
       include: {
         userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
