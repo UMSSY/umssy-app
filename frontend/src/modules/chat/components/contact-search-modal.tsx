@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -44,7 +43,7 @@ export function ContactSearchModal({
   onSelectContact,
 }: ContactSearchModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [sendingUserId, setSendingUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -86,13 +85,10 @@ export function ContactSearchModal({
     acceptedQuery.isError;
 
   useEffect(() => {
-    if (
-      selectedIndex >= 0 &&
-      optionRefs.current[selectedIndex]
-    ) {
+    if (selectedIndex >= 0 && optionRefs.current[selectedIndex]) {
       optionRefs.current[selectedIndex]?.scrollIntoView({
-        block: "nearest",
-        behavior: "smooth",
+        block: 'nearest',
+        behavior: 'smooth',
       });
     }
   }, [selectedIndex]);
@@ -154,8 +150,6 @@ export function ContactSearchModal({
 
     try {
       await sendRequest.mutateAsync(user.id);
-      // El hook invalida las consultas de solicitudes.
-      // La lista se actualizará con el estado del backend.
     } catch (err) {
       setError(
         err instanceof Error
@@ -352,7 +346,7 @@ export function ContactSearchModal({
             })
           ) : (
             searchTerm.trim().length >= 2 && (
-              <div className="py-6 text-center text-sm text-text-secondary">
+              <div className="py-6 text-center text-sm text-slate-500">
                 No se encontraron usuarios
               </div>
             )

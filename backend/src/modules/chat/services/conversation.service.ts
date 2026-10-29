@@ -249,7 +249,7 @@ export class ConversationService {
       return {
         id: conversation.id,
         eventId: conversation.event.id,
-        // Sin contact en salas grupales (lista 1:1 las excluye)
+
         lastMessage: lastMessage
           ? {
               id: lastMessage.id,
@@ -271,11 +271,20 @@ export class ConversationService {
     : conversation.userA) as { id: string; firstName: string; lastName: string; photoUrl?: Uint8Array | null };
 >>>>>>> fb9ba34d (feat: event room service and registration (issue #1700))
 
+<<<<<<< HEAD
     // Obtener estado de conexión del contacto
     const onlineMap =
       await this.userPresenceService.mapOnlineStatus([
         contact.id,
       ]);
+=======
+    if (!contact) {
+      throw new UserNotFoundException();
+    }
+    const onlineMap = await this.userPresenceService.mapOnlineStatus([
+      contact.id,
+    ]);
+>>>>>>> 56e9c7b2 (refactor(chat): update services and fix modal linter rules)
 
     // Consultar participación del usuario
     const participant =
