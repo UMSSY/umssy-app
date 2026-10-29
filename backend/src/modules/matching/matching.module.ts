@@ -1,8 +1,6 @@
 import { CompanyJobApplicantsController } from './controllers/company-job-applicants.controller.js';
 import { JobApplicationsController } from './controllers/job-applications.controller.js';
 import { CompanyJobApplicantsService } from './services/company-job-applicants.service.js';
-import { MyApplicationsController } from './controllers/my-applications.controller.js';
-import { MyApplicationsService } from './services/my-applications.service.js';
 import { JobApplicationsService } from './services/job-applications.service.js';
 import { JobApplicationsRepository } from './repositories/job-applications.repository.js';
 import { Module } from '@nestjs/common';
@@ -44,12 +42,10 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
     JobApplicationsController,
     JobRecommendationsController,
     CompanyJobApplicantsController,
-    MyApplicationsController,
   ],
   providers: [
     JobApplicationsService,
     CompanyJobApplicantsService,
-    MyApplicationsService,
     JobApplicationsRepository,
     JobApplicationMapper,
     MatchingService,
