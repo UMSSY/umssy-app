@@ -71,13 +71,8 @@ export abstract class MentorIntakeRepository {
     now: Date,
     endsAt: Date,
   ) {
-    const [sanction] = await tx.$queryRaw<{ id: string }[]>`
-      INSERT INTO mentor_participation_sanctions(id, user_id, trigger_attempt_id, started_at, ends_at)
-      VALUES (gen_random_uuid(), ${userId}::uuid, ${attemptId}::uuid, ${now}, ${endsAt}) RETURNING id`;
     await tx.$executeRaw`
-      INSERT INTO mentor_mail_outbox(id, event_key, kind, user_id, recipient, payload)
-      SELECT gen_random_uuid(), ${'sanction:' + sanction.id}, 'SANCTION', u.id, u.email,
-        jsonb_build_object('sanctionEndsAt', ${endsAt.toISOString()}::text)
-      FROM users u WHERE u.id = ${userId}::uuid ON CONFLICT(event_key) DO NOTHING`;
+      INSERT INTO mentor_participation_sanctions(id, user_id, trigger_attempt_id, started_at, ends_at)
+      VALUES (gen_random_uuid(), ${userId}::uuid, ${attemptId}::uuid, ${now}, ${endsAt})`;
   }
 }

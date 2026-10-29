@@ -109,7 +109,6 @@ model Company {
 model User {
   mentorIntakeAttempts MentorIntakeAttempt[]
   mentorParticipationSanctions MentorParticipationSanction[]
-  mentorMailOutbox MentorMailOutbox[]
   id                      String   @id @default(uuid()) @db.Uuid
   firstName               String   @map("first_name") @db.VarChar(100)
   lastName                String   @map("last_name") @db.VarChar(100)
@@ -1177,34 +1176,6 @@ model MentorParticipationSanction {
   @@map("mentor_participation_sanctions")
 }
 
-model MentorMailOutbox {
-  kindId      String           @default(dbgenerated("mentor_mail_kind('OFFER'::text)")) @map("kind_id") @db.Uuid
-  statusId    String           @default(dbgenerated("mentor_mail_status('PENDING'::text)")) @map("status_id") @db.Uuid
-  mailKind    MentorMailKind   @relation(fields: [kindId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  mailStatus  MentorMailStatus @relation(fields: [statusId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  eventKey    String           @unique @map("event_key") @db.VarChar(100)
-  kind        String           @db.VarChar(20)
-  userId      String           @map("user_id") @db.Uuid
-  recipient   String           @db.VarChar(150)
-  payload     Json
-  status      String           @default("PENDING") @db.VarChar(20)
-  attempts    Int              @default(0)
-  availableAt DateTime         @default(dbgenerated("clock_timestamp()")) @map("available_at") @db.Timestamptz(6)
-  claimedAt   DateTime?        @map("claimed_at") @db.Timestamptz(6)
-  sentAt      DateTime?        @map("sent_at") @db.Timestamptz(6)
-  lastError   String?          @map("last_error") @db.VarChar(100)
-  createdAt   DateTime         @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-
-  @@index([status, availableAt], map: "mentor_mail_outbox_legacy_dispatch")
-  @@index([userId])
-  @@index([kindId])
-  @@index([statusId])
-  @@map("mentor_mail_outbox")
-}
-
 model MentorIntakeOperation {
   id          String                @id @default(uuid()) @db.Uuid
   title       String                @unique @db.VarChar(30)
@@ -1214,26 +1185,4 @@ model MentorIntakeOperation {
   attempts    MentorIntakeAttempt[]
 
   @@map("mentor_intake_operations")
-}
-
-model MentorMailKind {
-  id          String             @id @default(uuid()) @db.Uuid
-  title       String             @unique @db.VarChar(30)
-  description String?
-  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  messages    MentorMailOutbox[]
-
-  @@map("mentor_mail_kinds")
-}
-
-model MentorMailStatus {
-  id          String             @id @default(uuid()) @db.Uuid
-  title       String             @unique @db.VarChar(30)
-  description String?
-  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  messages    MentorMailOutbox[]
-
-  @@map("mentor_mail_statuses")
 }

@@ -372,22 +372,7 @@ export type MentorIntakeAttempt = Prisma.MentorIntakeAttemptModel
  */
 export type MentorParticipationSanction = Prisma.MentorParticipationSanctionModel
 /**
- * Model MentorMailOutbox
- *
- */
-export type MentorMailOutbox = Prisma.MentorMailOutboxModel
-/**
  * Model MentorIntakeOperation
  *
  */
 export type MentorIntakeOperation = Prisma.MentorIntakeOperationModel
-/**
- * Model MentorMailKind
- *
- */
-export type MentorMailKind = Prisma.MentorMailKindModel
-/**
- * Model MentorMailStatus
- *
- */
-export type MentorMailStatus = Prisma.MentorMailStatusModel

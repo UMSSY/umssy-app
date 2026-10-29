@@ -172,7 +172,7 @@ describe.skipIf(!connectionString)(
 
     beforeEach(async () => {
       await prisma.mentorParticipationAttemptLimit.deleteMany();
-      await prisma.$executeRaw`TRUNCATE mentor_mail_outbox, mentor_participation_sanctions, mentor_intake_attempts`;
+      await prisma.$executeRaw`TRUNCATE mentor_participation_sanctions, mentor_intake_attempts`;
       await prisma.mentorParticipationRequest.deleteMany();
     });
 

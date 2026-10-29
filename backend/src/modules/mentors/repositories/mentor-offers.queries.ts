@@ -37,14 +37,7 @@ export async function reconcileMentorOffers(tx: Prisma.TransactionClient) {
     ), offered AS (
       INSERT INTO mentor_slot_offers (id, user_id, request_id, offered_at, expires_at)
       SELECT gen_random_uuid(), r.user_id, r.id, instant.now, instant.now + interval '24 hours'
-      FROM next_requests r CROSS JOIN instant RETURNING id, user_id, request_id, expires_at
-    ), mail AS (
-      INSERT INTO mentor_mail_outbox(id, event_key, kind, user_id, recipient, payload)
-      SELECT gen_random_uuid(), 'offer:' || o.id::text, 'OFFER', o.user_id, u.email,
-        jsonb_build_object('offerId', o.id, 'expiresAt', o.expires_at)
-      FROM offered o JOIN users u ON u.id = o.user_id
-      ON CONFLICT(event_key) DO NOTHING
-      RETURNING id
+      FROM next_requests r CROSS JOIN instant RETURNING request_id
     )
     UPDATE mentor_participation_requests SET status = 'OFFERED'
     WHERE id IN (SELECT request_id FROM offered)

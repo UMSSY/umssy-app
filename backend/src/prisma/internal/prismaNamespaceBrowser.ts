@@ -117,10 +117,7 @@ export const ModelName = {
   DocumentValidation: 'DocumentValidation',
   MentorIntakeAttempt: 'MentorIntakeAttempt',
   MentorParticipationSanction: 'MentorParticipationSanction',
-  MentorMailOutbox: 'MentorMailOutbox',
-  MentorIntakeOperation: 'MentorIntakeOperation',
-  MentorMailKind: 'MentorMailKind',
-  MentorMailStatus: 'MentorMailStatus'
+  MentorIntakeOperation: 'MentorIntakeOperation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1025,27 +1022,6 @@ export const MentorParticipationSanctionScalarFieldEnum = {
 export type MentorParticipationSanctionScalarFieldEnum = (typeof MentorParticipationSanctionScalarFieldEnum)[keyof typeof MentorParticipationSanctionScalarFieldEnum]
 
 
-export const MentorMailOutboxScalarFieldEnum = {
-  kindId: 'kindId',
-  statusId: 'statusId',
-  id: 'id',
-  eventKey: 'eventKey',
-  kind: 'kind',
-  userId: 'userId',
-  recipient: 'recipient',
-  payload: 'payload',
-  status: 'status',
-  attempts: 'attempts',
-  availableAt: 'availableAt',
-  claimedAt: 'claimedAt',
-  sentAt: 'sentAt',
-  lastError: 'lastError',
-  createdAt: 'createdAt'
-} as const
-
-export type MentorMailOutboxScalarFieldEnum = (typeof MentorMailOutboxScalarFieldEnum)[keyof typeof MentorMailOutboxScalarFieldEnum]
-
-
 export const MentorIntakeOperationScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -1055,28 +1031,6 @@ export const MentorIntakeOperationScalarFieldEnum = {
 } as const
 
 export type MentorIntakeOperationScalarFieldEnum = (typeof MentorIntakeOperationScalarFieldEnum)[keyof typeof MentorIntakeOperationScalarFieldEnum]
-
-
-export const MentorMailKindScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  description: 'description',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type MentorMailKindScalarFieldEnum = (typeof MentorMailKindScalarFieldEnum)[keyof typeof MentorMailKindScalarFieldEnum]
-
-
-export const MentorMailStatusScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  description: 'description',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type MentorMailStatusScalarFieldEnum = (typeof MentorMailStatusScalarFieldEnum)[keyof typeof MentorMailStatusScalarFieldEnum]
 
 
 export const SortOrder = {
