@@ -43,21 +43,21 @@ export class MessageService {
     }
 
     const content = this.sanitize(params.content);
-const characterCount = countCharacters(content);
+    const characterCount = countCharacters(content);
 
-if (characterCount === 0) {
-  throw new InvalidMessageContentException(
-    'El contenido del mensaje no puede estar vacío',
-  );
-}
+    if (characterCount === 0) {
+      throw new InvalidMessageContentException(
+        'El contenido del mensaje no puede estar vacío',
+      );
+    }
 
-if (characterCount > MAX_MESSAGE_LENGTH) {
-  throw new InvalidMessageContentException(
-    `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
-  );
-}
+    if (characterCount > MAX_MESSAGE_LENGTH) {
+      throw new InvalidMessageContentException(
+        `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
+      );
+    }
 
-const sentStatusId = await this.messageStatusService.getSentId();
+    const sentStatusId = await this.messageStatusService.getSentId();
     const now = new Date();
 
     const created = await this.messageRepository.create({
@@ -116,12 +116,53 @@ const sentStatusId = await this.messageStatusService.getSentId();
 
     return {
       data: page.data.map((m) => {
-        const rawContent = m.content ?? ''; 
-        const isAttachment = Boolean(rawContent.startsWith('[Archivo] '));
-        const content = isAttachment ? rawContent.slice(10) : rawContent;
-        const attachmentType = isAttachment ? ('file' as const) : null;
+        const rawContent = m.content ?? '';
+        const rawAttachments = (m as {
+          attachments?: Array<{
+            id: string;
+            messageId: string;
+            typeId: string;
+            fileName: string;
+            mimeType: string | null;
+            fileSize: number | null;
+            url: string | null;
+            thumbnailUrl: string | null;
+            createdAt: Date;
+            type?: { title: string } | null;
+          }>;
+        }).attachments;
+
+        const firstAttachment = rawAttachments?.[0];
+        const isAttachment = Boolean(
+          firstAttachment || rawContent.startsWith('[Archivo] '),
+        );
+        const content = rawContent.startsWith('[Archivo] ')
+          ? rawContent.slice(10)
+          : rawContent;
+        const attachmentType = firstAttachment
+          ? (firstAttachment.type?.title?.toLowerCase() === 'image'
+              ? ('image' as const)
+              : ('file' as const))
+          : isAttachment
+            ? ('file' as const)
+            : null;
         const statusTitle = (m as { status?: { title?: string } }).status?.title?.toLowerCase();
         const status = statusTitle === 'read' ? ('read' as const) : ('sent' as const);
+
+        const mappedAttachments = rawAttachments?.map((att) => ({
+          id: att.id,
+          messageId: att.messageId,
+          fileName: att.fileName,
+          mimeType: att.mimeType ?? 'application/octet-stream',
+          fileSize: att.fileSize ?? 0,
+          url: att.url ?? `/api/chat/attachments/${att.id}/download`,
+          thumbnailUrl: att.thumbnailUrl,
+          type: att.type?.title ?? 'FILE',
+          createdAt:
+            att.createdAt instanceof Date
+              ? att.createdAt.toISOString()
+              : String(att.createdAt),
+        }));
 
         return {
           id: m.id,
@@ -133,6 +174,8 @@ const sentStatusId = await this.messageStatusService.getSentId();
           status,
           isAttachment,
           attachmentType,
+          attachments: mappedAttachments,
+          attachment: mappedAttachments?.[0],
         };
       }),
       hasMore: page.hasMore,
@@ -157,16 +200,15 @@ const sentStatusId = await this.messageStatusService.getSentId();
     );
   }
 
-    private sanitize(raw: string): string {
-  
+  private sanitize(raw: string): string {
     const cleaned = raw
       .split('')
       .filter((char) => {
         const code = char.charCodeAt(0);
-        return code >= 32 || code === 10 || code === 13; 
+        return code >= 32 || code === 10 || code === 13;
       })
       .join('');
-      
+
     return cleaned.trim();
   }
 }
