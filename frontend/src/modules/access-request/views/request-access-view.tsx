@@ -1,28 +1,32 @@
 "use client";
 
-import { AccessRequestProvider, useAccessRequestForm } from "../contexts/access-request-context";
+import {
+  AccessRequestProvider,
+  useAccessRequestForm,
+} from "../contexts/access-request-context";
 import { DocumentStep } from "../components/document/document-step";
 import { PersonalDataForm } from "../components/personal-data/personal-data-form";
 import { PublicHeader } from "../components/request-steps/public-header";
+import { RequestAccessShell } from "../components/request-steps/request-access-shell";
 import { ReviewStep } from "../components/request-steps/review-step";
-import { RequestStepsSidebar } from "../components/request-steps/request-steps-sidebar";
 
-// Vive dentro del Provider: la barra lateral y el contenido leen el paso actual del Context
+// Vive dentro del Provider y conserva el paso actual del formulario.
 function RequestAccessLayout() {
   const { currentStep } = useAccessRequestForm();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <PublicHeader />
-      <div className="flex flex-1 flex-col lg:flex-row">
-        <RequestStepsSidebar currentStep={currentStep} />
-        <section className="flex min-w-0 flex-1 flex-col px-4 py-6 md:p-8">
-          <div className="mx-auto flex w-full max-w-5xl justify-center">
-            {currentStep === 1 ? <PersonalDataForm /> : currentStep === 2 ? <DocumentStep /> : <ReviewStep />}
-          </div>
-        </section>
-      </div>
-    </div>
+    <RequestAccessShell
+      currentStep={currentStep}
+      header={<PublicHeader />}
+    >
+      {currentStep === 1 ? (
+        <PersonalDataForm />
+      ) : currentStep === 2 ? (
+        <DocumentStep />
+      ) : (
+        <ReviewStep />
+      )}
+    </RequestAccessShell>
   );
 }
 
