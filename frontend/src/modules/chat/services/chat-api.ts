@@ -113,7 +113,7 @@ export async function getConversations(): Promise<Conversation[]> {
       ? body.data
       : [];
 
-  return applyStoredReadState(items).sort((a, b) => {
+  return applyStoredReadState(items.map(withBlockState)).sort((a, b) => {
     const dateA = new Date(
       a.lastMessage?.createdAt || a.updatedAt,
     ).getTime();
@@ -371,6 +371,21 @@ export async function getOrCreateConversation(
   }
 
   return data as Conversation;
+}
+
+/** HU-13: asegura que isBlockedByMe siempre sea booleano (false si el backend no lo envía). */
+function withBlockState(conversation: Conversation): Conversation {
+  return { ...conversation, isBlockedByMe: Boolean(conversation.isBlockedByMe) };
+}
+
+/** HU-13: POST /chat/blocks. Sin catch: la interfaz muestra el error. */
+export async function blockUser(contactId: string): Promise<void> {
+  await apiClient.post('/chat/blocks', { userId: contactId });
+}
+
+/** HU-13: DELETE /chat/blocks/:userId. Sin catch: la interfaz muestra el error. */
+export async function unblockUser(contactId: string): Promise<void> {
+  await apiClient.delete(`/chat/blocks/${encodeURIComponent(contactId)}`);
 }
 
 export async function sendMessage(

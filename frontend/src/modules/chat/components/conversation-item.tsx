@@ -1,8 +1,8 @@
 
 "use client";
-
 /* eslint-disable @next/next/no-img-element */
 
+import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import type { Conversation } from "../types/conversation.types";
@@ -26,6 +26,15 @@ export function ConversationItem({
   const hasUnread = unreadCount > 0;
 
   const renderMessagePreview = () => {
+    if (conversation.isBlockedByMe) {
+      return (
+        <span data-testid="conversation-blocked-label" className="inline-flex items-center gap-1 font-medium text-ink-soft">
+          <Lock className="size-3" aria-hidden="true" />
+          Bloqueado
+        </span>
+      );
+    }
+
     if (!lastMessage) {
       return (
         <span className="text-text-secondary italic">
@@ -77,7 +86,7 @@ export function ConversationItem({
           </div>
         )}
 
-        {contact.isOnline && (
+        {contact.isOnline && !conversation.isBlockedByMe && (
           <span
             className="absolute right-0 bottom-0 size-3.5 rounded-full border-2 border-surface bg-ink-soft shadow-xs"
             title="En línea"

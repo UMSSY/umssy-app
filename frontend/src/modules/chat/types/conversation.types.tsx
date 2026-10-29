@@ -52,6 +52,7 @@ export interface Conversation {
   lastMessage?: LastMessage | null;
   unreadCount: number;
   updatedAt: string;
+  isBlockedByMe?: boolean;
 }
 
 export type ConversationFilter = 'all' | 'unread';

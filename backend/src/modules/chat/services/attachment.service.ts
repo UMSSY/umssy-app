@@ -14,6 +14,7 @@ import {
   InvalidAttachmentTypeException,
   ConversationNotFoundException,
   NotConversationParticipantException,
+  UserBlockedException,
 } from '../exceptions/index.js';
 import { AttachmentRepository } from '../repositories/attachment.repository.js';
 import { AttachmentMapper } from '../mappers/attachment.mapper.js';
@@ -21,6 +22,7 @@ import { ConversationRepository } from '../repositories/conversation.repository.
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import { MessageRepository } from '../repositories/message.repository.js';
 import { MessageStatusService } from './message-status.service.js';
+import { BlockService } from './block.service.js';
 import type { SendAttachmentMessageDto } from '../requests/send-attachment-message.schema.js';
 import type { AttachmentFileDownload } from '../types/attachment.types.js';
 import type { AttachmentResponse } from '../responses/attachment.response.js';
@@ -35,6 +37,7 @@ export class AttachmentService {
     private readonly messageRepository: MessageRepository,
     private readonly messageStatusService: MessageStatusService,
     private readonly fileValidationService: FileValidationService,
+    private readonly blockService: BlockService,
   ) {}
 
   async uploadAndSend(
@@ -91,6 +94,15 @@ export class AttachmentService {
       );
     if (!participant) {
       throw new NotConversationParticipantException();
+    }
+
+    // HU-13: con un bloqueo activo (en cualquier dirección) no se envían adjuntos.
+    const otherParticipantId = this.getOtherParticipantId(conversation, userId);
+    if (
+      otherParticipantId &&
+      (await this.blockService.isBlockedBetween(userId, otherParticipantId))
+    ) {
+      throw new UserBlockedException();
     }
 
     const typeTitle = isImage ? 'IMAGE' : 'PDF';
@@ -189,5 +201,15 @@ export class AttachmentService {
     }
 
     return this.attachmentMapper.toResponse(record);
+  }
+
+  private getOtherParticipantId(
+    conversation: { userAId?: string | null; userBId?: string | null },
+    userId: string,
+  ): string | null {
+    const { userAId, userBId } = conversation;
+    if (!userAId || !userBId) return null;
+    const sender = userId.trim().toLowerCase();
+    return userAId.toLowerCase() === sender ? userBId : userAId;
   }
 }

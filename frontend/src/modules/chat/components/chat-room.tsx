@@ -3,7 +3,7 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import Image from "next/image";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ArrowLeft, Lock, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Conversation, Message } from "../types/conversation.types";
 import type { MessageAttachment } from "../types/attachment.types";
@@ -14,7 +14,11 @@ import { ChatErrorState } from "./chat-error-state";
 import { getInitials } from "../utils/date-formatter";
 import { isContentValidForSend } from "../utils/unicode-counter";
 import { useMessagingUi } from "../contexts/messaging-ui-context";
+import { ChatOptionsMenu } from "./chat-options-menu";
+import { BlockUserDialog } from "./block-user-dialog";
+import { BlockedConversationNotice } from "./blocked-conversation-notice";
 import { downloadAttachment } from "../services/chat-api";
+import { isApiError } from "@/shared/services/api-client";
 
 interface ChatRoomProps {
   conversation: Conversation;
@@ -31,6 +35,8 @@ interface ChatRoomProps {
   isLoadingOlderError?: boolean;
   onRetryMessages?: () => void;
   isCompact?: boolean;
+  onBlockUser?: () => Promise<void>;
+  onUnblockUser?: () => Promise<void>;
 }
 
 interface ScrollAnchor {
@@ -80,6 +86,7 @@ function ChatRoomContent({
   isLoadingMessages = false, isSending = false, hasMoreMessages = false,
   onLoadMoreMessages, isLoadingMoreMessages = false, isMessagesError = false,
   isLoadingOlderError = false, onRetryMessages, isCompact = false,
+  onBlockUser, onUnblockUser,
 }: ChatRoomProps) {
   const ui = useMessagingUi();
   const [localInputText, setLocalInputText] = useState("");
@@ -92,7 +99,12 @@ function ChatRoomContent({
     else setLocalInputText(content);
   };
   const [sendError, setSendError] = useState(false);
+  const [blockedSendError, setBlockedSendError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
+  const [isUnblocking, setIsUnblocking] = useState(false);
+  const [unblockError, setUnblockError] = useState(false);
+  const isBlockedByMe = Boolean(conversation.isBlockedByMe);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<ScrollAnchor | null>(null);
   const loadingOlderRef = useRef(false);
@@ -198,6 +210,7 @@ function ChatRoomContent({
   }, [messages, showInitialLoading, isLoadingMoreMessages, hasMoreMessages, getMessageElement]);
 
   const handleSend = async () => {
+    if (isBlockedByMe) return; // con bloqueo activo no se envía nada
     const hasText = isContentValidForSend(inputText);
     const hasAttachment = Boolean(selectedAttachment);
     if ((!hasText && !hasAttachment) || isSending || sendPendingRef.current || isSubmitting || isUploading ||
@@ -210,6 +223,7 @@ function ChatRoomContent({
       setIsUploading(true);
     }
     setSendError(false);
+    setBlockedSendError(false);
     try {
       if (selectedAttachment) {
         await onSendMessage(content, selectedAttachment);
@@ -219,8 +233,10 @@ function ChatRoomContent({
       if (ui) ui.clearSubmittedDraft(conversation.id, inputText);
       else setLocalInputText("");
       setSelectedAttachment(null);
-    } catch {
-      setSendError(true);
+    } catch (error) {
+      // 403 del backend (UserBlockedException): el otro usuario bloqueó esta conversación.
+      if (isApiError(error) && error.response?.status === 403) setBlockedSendError(true);
+      else setSendError(true);
       scrollAfterSendRef.current = false;
       return;
     } finally {
@@ -230,6 +246,19 @@ function ChatRoomContent({
     }
     setSendError(false);
     if (containerRef.current) scrollToBottom(containerRef.current, "smooth");
+  };
+
+  const handleUnblock = async () => {
+    if (!onUnblockUser || isUnblocking) return;
+    setIsUnblocking(true);
+    setUnblockError(false);
+    try {
+      await onUnblockUser();
+    } catch {
+      setUnblockError(true);
+    } finally {
+      setIsUnblocking(false);
+    }
   };
 
   const handleInputKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -281,7 +310,7 @@ function ChatRoomContent({
                   {getInitials(conversation.contact.fullName)}
                 </div>
               )}
-              {conversation.contact.isOnline && (
+              {conversation.contact.isOnline && !isBlockedByMe && (
                 <span
                   data-testid="online-indicator"
                   className="absolute right-0 bottom-0 size-2.5 rounded-full border-2 border-surface bg-emerald-500"
@@ -296,15 +325,43 @@ function ChatRoomContent({
               >
                 {conversation.contact.fullName}
               </h3>
-              <span className="text-xs font-medium text-ink-soft">
-                {conversation.contact.isOnline
-                  ? "En línea"
-                  : "Desconectado"}
-              </span>
+              {isBlockedByMe ? (
+                <span data-testid="chat-blocked-status" className="inline-flex items-center gap-1 text-xs font-medium text-ink-soft">
+                  <Lock className="size-3" aria-hidden="true" />
+                  Bloqueado
+                </span>
+              ) : (
+                <span className="text-xs font-medium text-ink-soft">
+                  {conversation.contact.isOnline
+                    ? "En línea"
+                    : "Desconectado"}
+                </span>
+              )}
             </div>
           </Button>
         </div>
+        {onBlockUser && onUnblockUser && (
+          <ChatOptionsMenu
+            isBlocked={isBlockedByMe}
+            disabled={isUnblocking}
+            onBlockSelect={() => setIsBlockDialogOpen(true)}
+            onUnblockSelect={() => void handleUnblock()}
+          />
+        )}
       </header>
+      {onBlockUser && (
+        <BlockUserDialog
+          open={isBlockDialogOpen}
+          onOpenChange={setIsBlockDialogOpen}
+          contactName={conversation.contact.fullName}
+          onConfirm={onBlockUser}
+        />
+      )}
+      {unblockError && (
+        <div role="alert" className="mx-4 mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-center">
+          <p className="text-sm text-red-800">No se pudo desbloquear. Intenta de nuevo.</p>
+        </div>
+      )}
       <div ref={containerRef} data-testid="messages-container" onScroll={handleScroll}
         className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-surface-soft p-4 md:p-6">
         {isMessagesError && !showInitialLoading && (
@@ -367,22 +424,37 @@ function ChatRoomContent({
         )}
         <div data-testid="messages-scroll-anchor" />
       </div>
-      {sendError && (
-        <div role="alert" className="m-4 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-center">
-          <p className="text-sm text-destructive">No se pudo enviar el mensaje. Conservamos tu texto; vuelve a pulsar Enviar para reintentar.</p>
-        </div>
+      {isBlockedByMe ? (
+        <BlockedConversationNotice
+          contactName={conversation.contact.fullName}
+          isUnblocking={isUnblocking}
+          onUnblock={() => void handleUnblock()}
+        />
+      ) : (
+        <>
+          {sendError && (
+            <div role="alert" className="m-4 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-center">
+              <p className="text-sm text-destructive">No se pudo enviar el mensaje. Conservamos tu texto; vuelve a pulsar Enviar para reintentar.</p>
+            </div>
+          )}
+          {blockedSendError && (
+            <div role="alert" data-testid="blocked-send-error" className="m-4 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-center">
+              <p className="text-sm text-destructive">No es posible enviar mensajes en esta conversación</p>
+            </div>
+          )}
+          <MessageInputBar
+            value={inputText}
+            onChange={setInputText}
+            onSend={() => void handleSend()}
+            onKeyDown={handleInputKeyDown}
+            isSending={isSending || isSubmitting}
+            isUploading={isUploading}
+            attachment={selectedAttachment}
+            onAttachmentChange={setSelectedAttachment}
+            disabled={showInitialLoading || (isMessagesError && messages.length === 0)}
+          />
+        </>
       )}
-      <MessageInputBar
-        value={inputText}
-        onChange={setInputText}
-        onSend={() => void handleSend()}
-        onKeyDown={handleInputKeyDown}
-        isSending={isSending || isSubmitting}
-        isUploading={isUploading}
-        attachment={selectedAttachment}
-        onAttachmentChange={setSelectedAttachment}
-        disabled={showInitialLoading || (isMessagesError && messages.length === 0)}
-      />
       <ContactProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}

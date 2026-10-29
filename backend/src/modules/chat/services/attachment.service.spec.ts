@@ -6,6 +6,7 @@ import type { ConversationRepository } from '../repositories/conversation.reposi
 import type { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import type { MessageRepository } from '../repositories/message.repository.js';
 import type { MessageStatusService } from './message-status.service.js';
+import type { BlockService } from './block.service.js';
 import type { FileValidationService } from '../../../common/services/file-validation.service.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { EmptyFileException } from '../../../common/exceptions/empty-file.exception.js';
@@ -15,6 +16,7 @@ import {
   InvalidAttachmentTypeException,
   ConversationNotFoundException,
   NotConversationParticipantException,
+  UserBlockedException,
 } from '../exceptions/index.js';
 
 describe('AttachmentService', () => {
@@ -69,6 +71,10 @@ describe('AttachmentService', () => {
       validate: vi.fn(),
     } as unknown as FileValidationService;
 
+    const blockService = {
+      isBlockedBetween: vi.fn().mockResolvedValue(false),
+    } as unknown as BlockService;
+
     const service = new AttachmentService(
       attachmentRepository,
       attachmentMapper,
@@ -77,6 +83,7 @@ describe('AttachmentService', () => {
       messageRepository,
       messageStatusService,
       fileValidationService,
+      blockService,
     );
 
     return {
@@ -109,10 +116,52 @@ describe('AttachmentService', () => {
         detectMimeType: ReturnType<typeof vi.fn>;
         validate: ReturnType<typeof vi.fn>;
       },
+      blockService: blockService as unknown as {
+        isBlockedBetween: ReturnType<typeof vi.fn>;
+      },
     };
   };
 
   describe('uploadAndSend', () => {
+    it('throws UserBlockedException (403) if there is an active block and does not create the message', async () => {
+      const {
+        service,
+        fileValidationService,
+        conversationRepository,
+        participantRepository,
+        messageRepository,
+        blockService,
+      } = createMockService();
+      fileValidationService.detectMimeType.mockReturnValue('image/png');
+      fileValidationService.validate.mockReturnValue({
+        originalName: 'photo.png',
+        detectedMimeType: 'image/png',
+        size: 1024,
+        buffer: Buffer.alloc(1024),
+      });
+      conversationRepository.findById.mockResolvedValue({
+        id: 'conv-1',
+        userAId: 'user-1',
+        userBId: 'user-2',
+      });
+      participantRepository.findByConversationAndUser.mockResolvedValue({ id: 'part-1' });
+      blockService.isBlockedBetween.mockResolvedValue(true);
+
+      const file = {
+        originalname: 'photo.png',
+        mimetype: 'image/png',
+        size: 1024,
+        buffer: Buffer.alloc(1024),
+      } as MulterFile;
+
+      await expect(
+        service.uploadAndSend('user-1', file, { conversationId: 'conv-1' }),
+      ).rejects.toThrow(UserBlockedException);
+
+      expect(blockService.isBlockedBetween).toHaveBeenCalledWith('user-1', 'user-2');
+      expect(messageRepository.create).not.toHaveBeenCalled();
+    });
+
     it('throws EmptyFileException if file is undefined or empty', async () => {
       const { service } = createMockService();
 

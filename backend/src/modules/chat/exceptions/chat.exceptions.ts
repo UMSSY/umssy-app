@@ -42,3 +42,24 @@ export class InvalidMessageContentException extends DomainException {
     super(message, HttpStatus.BAD_REQUEST, 'INVALID_MESSAGE_CONTENT');
   }
 }
+
+
+export class CannotBlockSelfException extends DomainException {
+  constructor() { super('No puedes bloquearte a ti mismo', HttpStatus.BAD_REQUEST, 'CANNOT_BLOCK_SELF'); }
+}
+
+export class InvalidBlockTargetException extends DomainException {
+  constructor() { super('El identificador del usuario no es válido', HttpStatus.BAD_REQUEST, 'INVALID_BLOCK_TARGET'); }
+}
+
+export class UserAlreadyBlockedException extends DomainException {
+  constructor() { super('El usuario ya está bloqueado', HttpStatus.CONFLICT, 'USER_ALREADY_BLOCKED'); }
+}
+
+export class BlockNotFoundException extends DomainException {
+  constructor() { super('No existe un bloqueo para este usuario', HttpStatus.NOT_FOUND, 'BLOCK_NOT_FOUND'); }
+}
+
+export class UserBlockedException extends DomainException {
+  constructor() { super('No es posible enviar mensajes en esta conversación', HttpStatus.FORBIDDEN, 'USER_BLOCKED'); }
+}
