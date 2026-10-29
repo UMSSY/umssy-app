@@ -1,7 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { JobOfferStatus } from '../../job-offers/types/job-offer.enum.js';
+import type {
+  CompanyJobOfferRecord,
+  JobApplicantRecord,
+} from '../types/company-job-applicants.types.js';
 import type { JobApplicationRecord } from '../types/job-application.types.js';
+import type {
+  MyApplicationRecord,
+  OwnedApplicationRecord,
+} from '../types/my-applications.types.js';
 
 const JOB_APPLICATION_SELECT = {
   id: true,
@@ -12,6 +20,21 @@ const JOB_APPLICATION_SELECT = {
       id: true,
       title: true,
       company: { select: { title: true } },
+    },
+  },
+} as const;
+
+const JOB_APPLICANT_SELECT = {
+  id: true,
+  appliedAt: true,
+  status: { select: { title: true } },
+  user: {
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      headline: true,
     },
   },
 } as const;
@@ -57,6 +80,57 @@ export class JobApplicationsRepository {
     return this.prisma.jobApplication.create({
       data: { userId, jobOfferId, statusId },
       select: JOB_APPLICATION_SELECT,
+    });
+  }
+
+  findCompanyOffer(
+    companyId: string,
+    jobOfferId: string,
+  ): Promise<CompanyJobOfferRecord | null> {
+    return this.prisma.jobOffer.findFirst({
+      where: { id: jobOfferId, companyId },
+      select: { id: true, title: true },
+    });
+  }
+
+  findApplicantsByOffer(jobOfferId: string): Promise<JobApplicantRecord[]> {
+    return this.prisma.jobApplication.findMany({
+      where: { jobOfferId },
+      orderBy: [{ appliedAt: 'desc' }, { id: 'desc' }],
+      select: JOB_APPLICANT_SELECT,
+    });
+  }
+
+  findAllByUser(userId: string): Promise<MyApplicationRecord[]> {
+    return this.prisma.jobApplication.findMany({
+      where: { userId },
+      orderBy: [{ appliedAt: 'desc' }, { id: 'desc' }],
+      select: {
+        id: true,
+        appliedAt: true,
+        jobOfferId: true,
+        status: { select: { title: true } },
+        jobOffer: {
+          select: { title: true, company: { select: { title: true } } },
+        },
+      },
+    });
+  }
+
+  findOwned(
+    applicationId: string,
+    userId: string,
+  ): Promise<OwnedApplicationRecord | null> {
+    return this.prisma.jobApplication.findFirst({
+      where: { id: applicationId, userId },
+      select: { id: true, status: { select: { title: true } } },
+    });
+  }
+
+  async updateStatus(applicationId: string, statusId: string): Promise<void> {
+    await this.prisma.jobApplication.update({
+      where: { id: applicationId },
+      data: { statusId },
     });
   }
 }
