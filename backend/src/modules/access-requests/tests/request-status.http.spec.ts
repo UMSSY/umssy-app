@@ -16,6 +16,7 @@ import { ActivationOtpService } from '../services/activation-otp.service.js';
 import { RejectionNotificationService } from '../services/rejection-notification.service.js';
 import { AuditEventRecorderService } from '../../audit-events/services/audit-event-recorder.service.js';
 import { DocumentValidationRepository } from '../repositories/document-validation.repository.js';
+import { DocumentReadingService } from '../services/document-reading.service.js';
 
 const REQUEST_CODE = 'SOL-2026-0001';
 const EMAIL = 'ana@example.com';
@@ -49,6 +50,7 @@ describe('Consulta HTTP del estado de una solicitud', () => {
         { provide: RejectionNotificationService, useValue: {} },
         { provide: AuditEventRecorderService, useValue: {} },
         { provide: DocumentValidationRepository, useValue: {} },
+        { provide: DocumentReadingService, useValue: {} },
       ],
     })
       .overrideGuard(JwtAuthGuard)

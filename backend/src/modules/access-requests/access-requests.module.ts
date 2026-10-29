@@ -21,6 +21,8 @@ import { RejectionMailLinkService } from './services/rejection-mail-link.service
 import { RejectionMailRepository } from './repositories/rejection-mail.repository.js';
 import { DocumentValidationRepository } from './repositories/document-validation.repository.js';
 import { AutomaticValidationService } from './services/automatic-validation.service.js';
+import { DocumentReadingService } from './services/document-reading.service.js';
+import { DocumentTextExtractorService } from './services/document-text-extractor.service.js';
 import { DocumentCorrectionController } from './controllers/document-correction.controller.js';
 import { DocumentCorrectionGuard } from './guards/document-correction.guard.js';
 import { DocumentCorrectionRepository } from './repositories/document-correction.repository.js';
@@ -43,6 +45,8 @@ import { DocumentCorrectionService } from './services/document-correction.servic
     RejectionMailRepository,
     DocumentValidationRepository,
     AutomaticValidationService,
+    DocumentTextExtractorService,
+    DocumentReadingService,
     DocumentCorrectionRepository,
     DocumentCorrectionAuthorizationService,
     DocumentCorrectionService,

@@ -35,7 +35,7 @@ export class AutomaticValidationService {
     private readonly rejectionNotificationService: RejectionNotificationService,
   ) {}
 
-  async evaluateReading(accessRequestId: string, reading: DocumentReading, now: Date = new Date()) {
+  async evaluateReading(accessRequestId: string, reading: DocumentReading, now: Date = new Date(), expectedDocumentFileId?: string) {
     const current = await this.documentValidationRepository.findAutomationState(accessRequestId);
     if (!current?.documentValidation) {
       throw new AccessRequestNotFoundException();
@@ -47,8 +47,8 @@ export class AutomaticValidationService {
 
     const decide = current.status.title === ACCESS_REQUEST_STATUS.PENDING;
     const saved =
-      (await this.save(accessRequestId, decide ? evaluation : this.asReference(evaluation), decide, now)) ??
-      (await this.save(accessRequestId, this.asReference(evaluation), false, now));
+      (await this.save(accessRequestId, decide ? evaluation : this.asReference(evaluation), decide, now, expectedDocumentFileId)) ??
+      (await this.save(accessRequestId, this.asReference(evaluation), false, now, expectedDocumentFileId));
     if (!saved) {
       throw new AccessRequestNotFoundException();
     }
@@ -66,6 +66,12 @@ export class AutomaticValidationService {
       notificationSent = await this.rejectionNotificationService.notify(current.email, stored.reason, accessRequestId);
     }
     return { accessRequestId, result: stored.result, matchScore: stored.matchScore, reason: stored.reason, activationCodeSent, notificationSent };
+  }
+
+  async markOcrFailed(accessRequestId: string, documentFileId: string, now: Date = new Date()) {
+    return this.documentValidationRepository.markOcrFailed(accessRequestId, documentFileId, now, (source, tx) =>
+      this.auditEventRecorder.record(toManualReviewAuditEvent(source, VALIDATION_REASONS.OCR_FAILED), tx),
+    );
   }
 
   async getSummary(now: Date = new Date()) {
@@ -101,10 +107,10 @@ export class AutomaticValidationService {
     return { ...evaluation, result: VALIDATION_RESULT.MANUAL_REVIEW, reason: evaluation.reason ?? VALIDATION_REASONS.ALREADY_IN_REVIEW };
   }
 
-  private async save(accessRequestId: string, evaluation: DocumentEvaluation, decide: boolean, now: Date) {
+  private async save(accessRequestId: string, evaluation: DocumentEvaluation, decide: boolean, now: Date, expectedDocumentFileId?: string) {
     try {
       const { decided, source } = await this.documentValidationRepository.saveEvaluation(
-        { accessRequestId, ...evaluation, decide, now },
+        { accessRequestId, ...evaluation, decide, now, ...(expectedDocumentFileId !== undefined && { expectedDocumentFileId }) },
         async (savedSource, tx) => {
           await this.auditEventRecorder.record(toOcrReadAuditEvent(savedSource, evaluation.matchScore), tx);
           if (!decide) return;
@@ -113,7 +119,7 @@ export class AutomaticValidationService {
       );
       return { decided, source, evaluation };
     } catch (error) {
-      if (decide && isRecordNotFound(error)) return null;
+      if ((decide || expectedDocumentFileId !== undefined) && isRecordNotFound(error)) return null;
       throw error;
     }
   }

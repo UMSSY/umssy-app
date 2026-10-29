@@ -17,6 +17,7 @@ import { DocumentCorrectionGuard } from '../src/modules/access-requests/guards/d
 import { DocumentCorrectionRepository } from '../src/modules/access-requests/repositories/document-correction.repository.js';
 import { DocumentValidationRepository } from '../src/modules/access-requests/repositories/document-validation.repository.js';
 import { DocumentCorrectionAuthorizationService } from '../src/modules/access-requests/services/document-correction-authorization.service.js';
+import { DocumentReadingService } from '../src/modules/access-requests/services/document-reading.service.js';
 import { DocumentCorrectionService } from '../src/modules/access-requests/services/document-correction.service.js';
 
 // Opt-in: utiliza PostgreSQL real, solo con una base de pruebas identificada.
@@ -45,6 +46,7 @@ describeDatabase('B2: persistencia y concurrencia reales de la corrección', () 
       imports: [PrismaModule],
       controllers: [DocumentCorrectionController],
       providers: [
+        { provide: DocumentReadingService, useValue: { scheduleReading: vi.fn() } },
         DocumentCorrectionGuard, DocumentCorrectionRepository, DocumentCorrectionAuthorizationService,
         DocumentCorrectionService, DocumentValidationRepository, FilesRepository, FilesService,
         AuditEventsRepository, AuditEventRecorderService,
