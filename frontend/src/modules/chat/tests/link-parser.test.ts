@@ -77,6 +77,17 @@ describe("link-parser utility (HU-11 Task 5)", () => {
       ]);
     });
 
+    it("soporta enlaces con www. prependiendoles https://", () => {
+      const text = "Visita www.umss.edu.bo hoy mismo.";
+      const segments = parseMessageWithLinks(text);
+
+      expect(segments).toEqual([
+        { type: "text", content: "Visita " },
+        { type: "link", content: "www.umss.edu.bo", url: "https://www.umss.edu.bo" },
+        { type: "text", content: " hoy mismo." },
+      ]);
+    });
+
     it("mantiene esquemas no permitidos como javascript: en texto plano sin enlace", () => {
       const text = "Prueba javascript:alert('xss') en tu navegador";
       const segments = parseMessageWithLinks(text);

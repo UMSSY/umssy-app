@@ -4,7 +4,7 @@ export interface TextSegment {
   url?: string;
 }
 
-const URL_SEARCH_REGEX = /(https?:\/\/[^\s<]+)/gi;
+const URL_SEARCH_REGEX = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
 
 export function isSafeHttpUrl(rawUrl: string): boolean {
   if (!rawUrl || typeof rawUrl !== "string") return false;
@@ -90,12 +90,15 @@ export function parseMessageWithLinks(text: string): TextSegment[] {
     }
 
     const { url, trailing } = cleanTrailingPunctuation(rawMatch);
+    const resolvedUrl = url.toLowerCase().startsWith("www.")
+      ? `https://${url}`
+      : url;
 
-    if (isSafeHttpUrl(url)) {
+    if (isSafeHttpUrl(resolvedUrl)) {
       segments.push({
         type: "link",
         content: url,
-        url,
+        url: resolvedUrl,
       });
       if (trailing) {
         segments.push({

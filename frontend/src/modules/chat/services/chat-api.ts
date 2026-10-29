@@ -650,8 +650,10 @@ export async function getLinkPreview(
       if (data && typeof data === 'object' && data.hasPreview) {
         return data;
       }
+      linkPreviewCache.delete(trimmedUrl);
       return null;
     } catch {
+      linkPreviewCache.delete(trimmedUrl);
       return null;
     }
   })();
