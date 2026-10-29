@@ -1,13 +1,13 @@
 
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { useEffect, useState } from 'react';
+
 import { useMessagingUi } from "../contexts/messaging-ui-context";
 
 import type { ChatWorkspaceProps } from "../types/chat-workspace-props.types";
@@ -527,11 +527,12 @@ const handleSendMessage = async (
             activeFilter={activeFilter}
             searchQuery={searchQuery}
             onSelectConversation={handleSelectChat}
-            onFilterChange={setActiveFilter}
-            onSearchChange={setSearchQuery}
-            onLoadMore={loadMore}
-            onStartNewChat={handleStartNewChat}
-          />
+onSelectRequest={handleSelectRequest}
+onFilterChange={setActiveFilter}
+onSearchChange={setSearchQuery}
+onLoadMore={loadMore}
+onStartNewChat={handleStartNewChat}
+/>
         )}
       </aside>
 
