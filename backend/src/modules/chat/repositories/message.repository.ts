@@ -1,6 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
+const ATTACHMENT_METADATA_SELECT = {
+  select: {
+    id: true,
+    messageId: true,
+    typeId: true,
+    fileName: true,
+    mimeType: true,
+    fileSize: true,
+    url: true,
+    thumbnailUrl: true,
+    createdAt: true,
+    type: {
+      select: { title: true },
+    },
+  },
+} as const;
+
 @Injectable()
 export class MessageRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -16,13 +33,13 @@ export class MessageRepository {
       fileName: string;
       mimeType?: string;
       fileSize?: number;
-      fileDataBase64?: string; 
+      fileDataBase64?: string;
       url?: string;
     }[];
   }) {
     const { attachments, ...messageData } = data;
 
-    let mappedAttachments: any = undefined;
+    let mappedAttachments = undefined;
 
     if (attachments) {
       mappedAttachments = attachments.map((att) => ({
@@ -30,7 +47,9 @@ export class MessageRepository {
         fileName: att.fileName,
         mimeType: att.mimeType ?? null,
         fileSize: att.fileSize ?? null,
-        fileData: att.fileDataBase64 ? Buffer.from(att.fileDataBase64, 'base64') : null,
+        fileData: att.fileDataBase64
+          ? new Uint8Array(Buffer.from(att.fileDataBase64, 'base64'))
+          : null,
         url: att.url ?? null,
       }));
     }
@@ -39,14 +58,12 @@ export class MessageRepository {
       data: {
         ...messageData,
         attachments: mappedAttachments
-          ? {
-              create: mappedAttachments,
-            }
+          ? ({ create: mappedAttachments } as any)
           : undefined,
       },
       include: {
         status: { select: { title: true } },
-        attachments: true,
+        attachments: ATTACHMENT_METADATA_SELECT,
       },
     });
   }
@@ -62,7 +79,7 @@ export class MessageRepository {
       where: { conversationId },
       include: {
         status: { select: { title: true } },
-        attachments: true,
+        attachments: ATTACHMENT_METADATA_SELECT,
       },
       orderBy: { sentAt: 'desc' },
       take: limit + 1,
