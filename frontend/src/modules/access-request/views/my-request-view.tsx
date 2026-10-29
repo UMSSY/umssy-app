@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   Alert,
   AlertDescription,
@@ -9,12 +11,20 @@ import { RequestAccessHeader } from "../components/request-steps/request-access-
 import { RequestAccessShell } from "../components/request-steps/request-access-shell";
 import { RequestStatusDetails } from "../components/request-status/request-status-details";
 import { RequestStatusForm } from "../components/request-status/request-status-form";
+import { DocumentCorrectionForm } from "../components/request-status/document-correction-form";
+import { useDocumentCorrectionGrant } from "../hooks/use-document-correction-grant";
+import type { RequestStatusResponse } from "../types/access-request.types";
+import type { DocumentCorrectionResponse } from "../types/document-correction.types";
 import { useRequestStatus } from "../hooks/use-request-status";
 import type { MyRequestViewProps } from "../types/my-request-view-props.types";
 import { getRequestCodeFromLink } from "../utils/get-request-code-from-link";
 
 function RequestStatusLookup({ requestCode }: MyRequestViewProps) {
-  const { request, error, isLoading, lookupRequest } = useRequestStatus();
+  const { request: queriedRequest, error, isLoading, lookupRequest } = useRequestStatus();
+  const { token, clearConfirmedToken } = useDocumentCorrectionGrant();
+  const [editingGrant, setEditingGrant] = useState<string | null>(null);
+  const [submittedRequest, setSubmittedRequest] = useState<RequestStatusResponse | null>(null);
+  const request = submittedRequest ?? queriedRequest;
   const responseMismatch =
     request !== null && request.requestCode !== requestCode;
   const lookupFailed = error !== null || responseMismatch;
@@ -27,6 +37,20 @@ function RequestStatusLookup({ requestCode }: MyRequestViewProps) {
     if (requestCode) {
       await lookupRequest(requestCode, email);
     }
+  }
+
+  function handleCorrectionSubmitted(response: DocumentCorrectionResponse) {
+    if (!visibleRequest || response.requestCode !== requestCode || response.status !== "pending") return;
+    setSubmittedRequest({
+      requestCode: response.requestCode,
+      status: "pending",
+      submittedAt: visibleRequest.submittedAt,
+      reviewedAt: null,
+      rejectionReason: null,
+      document: null,
+    });
+    setEditingGrant(null);
+    if (editingGrant) clearConfirmedToken(editingGrant);
   }
 
   return (
@@ -63,7 +87,33 @@ function RequestStatusLookup({ requestCode }: MyRequestViewProps) {
               </AlertDescription>
             </Alert>
           ) : visibleRequest ? (
-            <RequestStatusDetails {...visibleRequest} />
+            editingGrant !== null && editingGrant === token && visibleRequest.status === "rejected" ? (
+              <DocumentCorrectionForm
+                requestCode={visibleRequest.requestCode}
+                token={editingGrant}
+                initialDocumentType={visibleRequest.document?.type}
+                onSubmitted={handleCorrectionSubmitted}
+                onCancel={() => setEditingGrant(null)}
+              />
+            ) : (
+              <>
+                {submittedRequest ? (
+                  <Alert role="status">
+                    <AlertTitle>Documento enviado correctamente</AlertTitle>
+                    <AlertDescription>Tu solicitud está pendiente de una nueva revisión.</AlertDescription>
+                  </Alert>
+                ) : null}
+                <RequestStatusDetails
+                  {...visibleRequest}
+                  onStartCorrection={visibleRequest.status === "rejected" && token ? () => setEditingGrant(token) : undefined}
+                />
+                {visibleRequest.status === "rejected" && !token ? (
+                  <p className="text-sm text-text-secondary">
+                    Para corregir el documento, abre el enlace de tu correo de revisión.
+                  </p>
+                ) : null}
+              </>
+            )
           ) : (
             <>
               <RequestStatusForm
