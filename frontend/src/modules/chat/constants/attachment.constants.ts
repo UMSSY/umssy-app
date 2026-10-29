@@ -25,4 +25,3 @@ export const ATTACHMENT_ERROR_MESSAGES = {
   INVALID_FORMAT:
     'Formato no permitido, Solo puedes adjuntar imágenes (JPG, PNG) o documentos PDF.',
 } as const;
-
