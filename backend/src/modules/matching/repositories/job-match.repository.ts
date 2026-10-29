@@ -32,11 +32,4 @@ export class JobMatchRepository {
       select: JOB_MATCH_SELECT,
     });
   }
-
-  findByIds(jobOfferIds: readonly string[]): Promise<JobMatchRecord[]> {
-    return this.prisma.jobOffer.findMany({
-      where: { id: { in: [...jobOfferIds] } },
-      select: JOB_MATCH_SELECT,
-    });
-  }
 }
