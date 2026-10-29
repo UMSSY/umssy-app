@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { ExperienceSkillsRepository } from '../repositories/experience-skills.repository.js';
 import { buildExperienceRef } from '../utils/build-experience-ref.js';
+import { appendEvidenceRef } from '../utils/append-evidence-ref.js';
 import { readEvidenceRefs } from '../utils/read-evidence-refs.js';
 
 const USER_ID = '0b9f8a52-3c1d-4e7a-9d55-6f1c2a8b7e10';
@@ -23,6 +24,25 @@ describe('buildExperienceRef y readEvidenceRefs', () => {
 
   it('conserva solo los textos de la lista', () => {
     expect(readEvidenceRefs(['a', 1, null, 'b'])).toEqual(['a', 'b']);
+  });
+});
+
+describe('appendEvidenceRef', () => {
+  it.each([[null], [undefined], ['texto'], [{ a: 1 }]])(
+    'empieza una lista nueva cuando el valor no es una lista (%o)',
+    (value) => {
+      expect(appendEvidenceRef(value, REF)).toEqual([REF]);
+    },
+  );
+
+  it('agrega la referencia al final y conserva las referencias que no son texto', () => {
+    const evidence = { type: 'work-experience', id: 'other-experience' };
+
+    expect(appendEvidenceRef([OTHER_REF, evidence], REF)).toEqual([OTHER_REF, evidence, REF]);
+  });
+
+  it('no repite una referencia que ya estaba', () => {
+    expect(appendEvidenceRef([REF], REF)).toEqual([REF]);
   });
 });
 
@@ -71,11 +91,11 @@ describe('ExperienceSkillsRepository', () => {
   });
 
   describe('replaceDetected', () => {
-    it('crea la habilidad detectada con origen nlp y la referencia de la experiencia', async () => {
+    it('crea la habilidad detectada como habilidad del perfil con la referencia de la experiencia', async () => {
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, ['skill-1']);
 
       expect(userSkill.create).toHaveBeenCalledWith({
-        data: { userId: USER_ID, skillId: 'skill-1', source: 'nlp', evidenceRefs: [REF] },
+        data: { userId: USER_ID, skillId: 'skill-1', source: 'manual', evidenceRefs: [REF] },
       });
       expect(userSkill.update).not.toHaveBeenCalled();
       expect(userSkill.delete).not.toHaveBeenCalled();
@@ -93,7 +113,9 @@ describe('ExperienceSkillsRepository', () => {
     it('agrega la referencia a una habilidad que la persona ya tenia sin cambiar su origen', async () => {
       userSkill.findMany
         .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ id: 'row-1', skillId: 'skill-1', evidenceRefs: [] }]);
+        .mockResolvedValueOnce([
+          { id: 'row-1', skillId: 'skill-1', source: 'manual', evidenceRefs: [] },
+        ]);
 
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, ['skill-1']);
 
@@ -104,12 +126,49 @@ describe('ExperienceSkillsRepository', () => {
       expect(userSkill.create).not.toHaveBeenCalled();
     });
 
-    it('no repite la referencia cuando la habilidad ya estaba vinculada', async () => {
+    it('promueve a habilidad del perfil la habilidad nlp que la experiencia vuelve a detectar', async () => {
       userSkill.findMany
         .mockResolvedValueOnce([
           { id: 'row-1', skillId: 'skill-1', source: 'nlp', evidenceRefs: [REF] },
         ])
-        .mockResolvedValueOnce([{ id: 'row-1', skillId: 'skill-1', evidenceRefs: [REF] }]);
+        .mockResolvedValueOnce([
+          { id: 'row-1', skillId: 'skill-1', source: 'nlp', evidenceRefs: [REF] },
+        ]);
+
+      await repository.replaceDetected(USER_ID, EXPERIENCE_ID, ['skill-1']);
+
+      expect(userSkill.update).toHaveBeenCalledWith({
+        where: { id: 'row-1' },
+        data: { source: 'manual' },
+      });
+      expect(userSkill.create).not.toHaveBeenCalled();
+      expect(userSkill.delete).not.toHaveBeenCalled();
+    });
+
+    it('promueve la habilidad nlp detectada por otro proceso y conserva sus referencias', async () => {
+      const otherEvidence = { type: 'work-experience', id: 'other-experience' };
+      userSkill.findMany
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          { id: 'row-1', skillId: 'skill-1', source: 'nlp', evidenceRefs: [otherEvidence] },
+        ]);
+
+      await repository.replaceDetected(USER_ID, EXPERIENCE_ID, ['skill-1']);
+
+      expect(userSkill.update).toHaveBeenCalledWith({
+        where: { id: 'row-1' },
+        data: { source: 'manual', evidenceRefs: [otherEvidence, REF] },
+      });
+    });
+
+    it('no repite la referencia cuando la habilidad ya estaba vinculada', async () => {
+      userSkill.findMany
+        .mockResolvedValueOnce([
+          { id: 'row-1', skillId: 'skill-1', source: 'manual', evidenceRefs: [REF] },
+        ])
+        .mockResolvedValueOnce([
+          { id: 'row-1', skillId: 'skill-1', source: 'manual', evidenceRefs: [REF] },
+        ]);
 
       await repository.replaceDetected(USER_ID, EXPERIENCE_ID, ['skill-1']);
 
