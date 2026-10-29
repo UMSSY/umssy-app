@@ -21,6 +21,8 @@ vi.mock("@/modules/auth", async (importOriginal) => {
 });
 
 const VACANCY = buildVacancy();
+// La primera carga de AppLayout es lenta con coverage en CI.
+const ASYNC_RENDER = { timeout: 5000 };
 
 vi.mock("@/modules/vacancies/services/vacancies.service", () => ({
   vacanciesService: { listPublished: vi.fn(async () => [VACANCY]) },
@@ -49,13 +51,13 @@ describe("Vacancy routes", () => {
 
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Vacantes", level: 1 })).toBeDefined();
-    expect((await screen.findAllByRole("link", { name: /^Ver detalles de / }))[0]).toHaveAttribute("href", `/vacancies/${VACANCY.id}`);
+    expect((await screen.findAllByRole("link", { name: /^Ver detalles de / }, ASYNC_RENDER))[0]).toHaveAttribute("href", `/vacancies/${VACANCY.id}`);
   });
 
   it("opens details over the listing and restores the listing on Escape", async () => {
     const user = userEvent.setup();
     renderWithQuery(<AppLayout><VacanciesPage /></AppLayout>);
-    await user.click((await screen.findAllByRole("link", { name: /^Ver detalles de / }))[0]);
+    await user.click((await screen.findAllByRole("link", { name: /^Ver detalles de / }, ASYNC_RENDER))[0]);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -72,7 +74,7 @@ describe("Vacancy routes", () => {
     const page = await VacancyDetailPage({ params: Promise.resolve({ id: VACANCY.id }) });
     renderWithQuery(<AppLayout>{page}</AppLayout>);
 
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("dialog", {}, ASYNC_RENDER);
     expect(within(dialog).getByRole("heading", { name: VACANCY.cargo })).toBeDefined();
     expect(within(dialog).getByRole("button", { name: "Volver al listado" })).toBeDefined();
   });
@@ -81,7 +83,7 @@ describe("Vacancy routes", () => {
     const page = await VacancyDetailPage({ params: Promise.resolve({ id: "missing" }) });
     renderWithQuery(<AppLayout>{page}</AppLayout>);
 
-    expect(await screen.findByRole("heading", { name: "Vacante no encontrada" })).toBeDefined();
+    expect(await screen.findByRole("heading", { name: "Vacante no encontrada" }, ASYNC_RENDER)).toBeDefined();
     expect(screen.getByRole("navigation", { name: "Menú principal", hidden: true })).toBeDefined();
     expect(screen.getByRole("button", { name: "Volver al listado" })).toBeDefined();
   });
