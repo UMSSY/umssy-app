@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service.js';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
@@ -10,6 +11,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('session')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   getSession(@CurrentUser() user: AuthenticatedUser) {
     return this.authService.getSession(user);

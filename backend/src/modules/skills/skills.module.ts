@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { NlpModule } from '../nlp/nlp.module.js';
@@ -13,7 +13,7 @@ import { UserSkillService } from './services/user-skill.service.js';
 import { SkillDictionaryService } from '../job-connect/services/skill-dictionary.service.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule, ProfileModule, NlpModule],
+  imports: [PrismaModule, JwtAuthModule, ProfileModule, forwardRef(() => NlpModule)],
   controllers: [SkillController, UserSkillController],
   providers: [
     SkillCatalogService,
@@ -23,6 +23,12 @@ import { SkillDictionaryService } from '../job-connect/services/skill-dictionary
     SkillMapper,
     SkillDictionaryService,
   ],
-  exports: [SkillCatalogService, UserSkillService, SkillDictionaryService],
+  exports: [
+    SkillCatalogService,
+    UserSkillService,
+    SkillDictionaryService,
+    SkillRepository,
+    UserSkillRepository,
+  ],
 })
 export class SkillsModule {}

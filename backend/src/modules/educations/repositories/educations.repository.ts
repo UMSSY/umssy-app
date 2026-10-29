@@ -14,6 +14,10 @@ import type { CreateEducationRequest } from '../requests/create-education.reques
 import type { UpdateEducationRequest } from '../requests/update-education.request.js';
 import type { EducationRecord } from '../types/education-record.type.js';
 import type { EducationPeriodSnapshot } from '../types/education-period-snapshot.type.js';
+import type { NlpTextSource } from '../../nlp/types/nlp-text-source.type.js';
+
+const joinText = (title: string, description: string | null) =>
+  [title, description].filter((part) => Boolean(part?.trim())).join('.\n');
 
 @Injectable()
 export class EducationsRepository {
@@ -33,6 +37,19 @@ export class EducationsRepository {
       orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
       select: EDUCATION_SELECT,
     });
+  }
+
+  async findTextSources(userId: string): Promise<NlpTextSource[]> {
+    const records = await this.prisma.education.findMany({
+      where: { userId },
+      orderBy: { startDate: 'desc' },
+      select: { id: true, degree: true, description: true },
+    });
+    return records.map((record) => ({
+      id: record.id,
+      type: 'education',
+      text: joinText(record.degree, record.description),
+    }));
   }
 
   findByIdAndUserId(

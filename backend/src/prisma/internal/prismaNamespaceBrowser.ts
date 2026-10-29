@@ -114,7 +114,12 @@ export const ModelName = {
   SurveyAnswer: 'SurveyAnswer',
   AuditAction: 'AuditAction',
   AuditEvent: 'AuditEvent',
-  DocumentValidation: 'DocumentValidation'
+  DocumentValidation: 'DocumentValidation',
+  RadarCvEvidence: 'RadarCvEvidence',
+  RadarScoreSnapshot: 'RadarScoreSnapshot',
+  RadarAuditEvent: 'RadarAuditEvent',
+  RadarCompanyAccess: 'RadarCompanyAccess',
+  RadarJobApplication: 'RadarJobApplication'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -992,6 +997,71 @@ export const DocumentValidationScalarFieldEnum = {
 export type DocumentValidationScalarFieldEnum = (typeof DocumentValidationScalarFieldEnum)[keyof typeof DocumentValidationScalarFieldEnum]
 
 
+export const RadarCvEvidenceScalarFieldEnum = {
+  cvId: 'cvId',
+  userId: 'userId',
+  extractedText: 'extractedText',
+  extractionStatus: 'extractionStatus',
+  reviewStatus: 'reviewStatus',
+  submittedAt: 'submittedAt',
+  decidedAt: 'decidedAt',
+  reviewerId: 'reviewerId'
+} as const
+
+export type RadarCvEvidenceScalarFieldEnum = (typeof RadarCvEvidenceScalarFieldEnum)[keyof typeof RadarCvEvidenceScalarFieldEnum]
+
+
+export const RadarScoreSnapshotScalarFieldEnum = {
+  userId: 'userId',
+  version: 'version',
+  rubricVersion: 'rubricVersion',
+  fingerprint: 'fingerprint',
+  scores: 'scores',
+  evidence: 'evidence',
+  averageScore: 'averageScore',
+  createdAt: 'createdAt'
+} as const
+
+export type RadarScoreSnapshotScalarFieldEnum = (typeof RadarScoreSnapshotScalarFieldEnum)[keyof typeof RadarScoreSnapshotScalarFieldEnum]
+
+
+export const RadarAuditEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  actorId: 'actorId',
+  eventType: 'eventType',
+  targetId: 'targetId',
+  details: 'details',
+  occurredAt: 'occurredAt'
+} as const
+
+export type RadarAuditEventScalarFieldEnum = (typeof RadarAuditEventScalarFieldEnum)[keyof typeof RadarAuditEventScalarFieldEnum]
+
+
+export const RadarCompanyAccessScalarFieldEnum = {
+  companyId: 'companyId',
+  userId: 'userId'
+} as const
+
+export type RadarCompanyAccessScalarFieldEnum = (typeof RadarCompanyAccessScalarFieldEnum)[keyof typeof RadarCompanyAccessScalarFieldEnum]
+
+
+export const RadarJobApplicationScalarFieldEnum = {
+  id: 'id',
+  jobOfferId: 'jobOfferId',
+  userId: 'userId',
+  consentToRecruiter: 'consentToRecruiter',
+  consentToCv: 'consentToCv',
+  consentToContact: 'consentToContact',
+  state: 'state',
+  appliedAt: 'appliedAt',
+  decidedAt: 'decidedAt',
+  decidedBy: 'decidedBy'
+} as const
+
+export type RadarJobApplicationScalarFieldEnum = (typeof RadarJobApplicationScalarFieldEnum)[keyof typeof RadarJobApplicationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1006,6 +1076,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { SkillRecord } from '../types/skill-record.type.js';
+import type { NlpCatalogSkill } from '../../nlp/types/nlp-catalog-skill.type.js';
 
 export const skillSelect = { id: true, name: true, isCustom: true } as const;
 
@@ -16,6 +17,13 @@ export class SkillRepository {
       },
       orderBy: { name: 'asc' },
       select: skillSelect,
+    });
+  }
+
+  findNlpCatalog(): Promise<NlpCatalogSkill[]> {
+    return this.prisma.skill.findMany({
+      where: { isCustom: false },
+      select: { id: true, name: true, areaId: true },
     });
   }
 

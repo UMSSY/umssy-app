@@ -9,16 +9,21 @@ export function AffinityRadarDot({ area, cx, cy, onAreaClick, className }: Affin
     <g
       data-testid={`radar-dot-${area.id}`}
       onClick={onAreaClick ? () => onAreaClick(area.id) : undefined}
-      className={onAreaClick ? "group cursor-pointer" : undefined}
+      onKeyDown={onAreaClick ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onAreaClick(area.id); } } : undefined}
+      role={onAreaClick ? "button" : undefined}
+      tabIndex={onAreaClick ? 0 : undefined}
+      aria-label={`Ver evidencias de ${area.name}: ${formatDecimal(area.score, 1)} de 10`}
+      className={onAreaClick ? "group cursor-pointer outline-none" : undefined}
     >
       <title>{`${area.name}: ${formatDecimal(area.score, 1)}`}</title>
-      <circle cx={cx} cy={cy} r={12} fill="transparent" />
+      <circle cx={cx} cy={cy} r={16} fill="transparent" pointerEvents="all" />
       <circle
         cx={cx}
         cy={cy}
         r={4.5}
         strokeWidth={2}
-        className={cn("fill-accent stroke-surface group-hover:[r:6px] motion-safe:transition-[r]", className)}
+        pointerEvents="none"
+        className={cn("fill-accent stroke-surface group-hover:[r:6px] group-focus-visible:[r:7px] motion-safe:transition-[r]", className)}
       />
     </g>
   );

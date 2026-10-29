@@ -1,3 +1,5 @@
+import type { CertificationsRepository } from '../../certifications/repositories/certifications.repository.js';
+import type { RadarEvidenceSourcesRepository } from '../../radar-integration/radar-evidence-sources.repository.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { EducationSourcesService } from '../../educations/services/education-sources.service.js';
 import type { WorkExperienceSourcesService } from '../../work-experience/services/work-experience-sources.service.js';
@@ -13,14 +15,31 @@ describe('ProfileSkillSourcesService', () => {
   const workExperience = { findAnalysisSources: vi.fn() };
   const profile = { ensureProfileExists: vi.fn() };
   const skills = { findCatalog: vi.fn() };
+
+  const certifications = {
+    findManyByUserId: vi.fn(),
+  };
+
+  const radarEvidence = {
+    findCurrentCvText: vi.fn(),
+  };
+
   const service = new ProfileSkillSourcesService(
     educations as unknown as EducationSourcesService,
     workExperience as unknown as WorkExperienceSourcesService,
     profile as unknown as ProfileService,
     skills as unknown as SkillAnalysisService,
+    certifications as unknown as CertificationsRepository,
+    radarEvidence as unknown as RadarEvidenceSourcesRepository,
   );
 
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => {
+    vi.resetAllMocks();
+
+    certifications.findManyByUserId.mockResolvedValue([]);
+    radarEvidence.findCurrentCvText.mockResolvedValue([]);
+  });
+
 
   it('delegates profile validation and propagates the owner exception', async () => {
     profile.ensureProfileExists.mockRejectedValue(new ProfileNotFoundException());
@@ -60,5 +79,42 @@ describe('ProfileSkillSourcesService', () => {
     workExperience.findAnalysisSources.mockResolvedValue([]);
 
     await expect(service.findTextSources(userId)).rejects.toThrow('education unavailable');
+  });
+
+  it('includes certifications and current CV text as NLP sources', async () => {
+  workExperience.findAnalysisSources.mockResolvedValue([]);
+  educations.findAnalysisSources.mockResolvedValue([]);
+
+  certifications.findManyByUserId.mockResolvedValue([
+    {
+      id: 'cert-1',
+      name: 'AWS Certified',
+      issuingOrganization: 'Amazon',
+    },
+  ]);
+
+  radarEvidence.findCurrentCvText.mockResolvedValue([
+    {
+      id: 'cv-1',
+      type: 'cv',
+      text: 'Python, Docker',
+    },
+  ]);
+
+  await expect(service.findTextSources(userId)).resolves.toEqual([
+    {
+      id: 'cert-1',
+      type: 'certification',
+      text: 'AWS Certified. Amazon',
+    },
+    {
+      id: 'cv-1',
+      type: 'cv',
+      text: 'Python, Docker',
+    },
+  ]);
+
+    expect(certifications.findManyByUserId).toHaveBeenCalledWith(userId);
+    expect(radarEvidence.findCurrentCvText).toHaveBeenCalledWith(userId);
   });
 });

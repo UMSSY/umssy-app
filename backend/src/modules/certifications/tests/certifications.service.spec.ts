@@ -1,9 +1,11 @@
+import type { CertificationDocumentsService } from '../../certification-documents/services/certification-documents.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
 import { CertificationMapper } from '../mappers/certification.mapper.js';
 import { CertificationDocumentsRepository } from '../../certification-documents/repositories/certification-documents.repository.js';
 import { CertificationsRepository } from '../repositories/certifications.repository.js';
 import { CertificationsService } from '../services/certifications.service.js';
+import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import type { CertificationRecord } from '../types/certification-record.type.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
@@ -53,6 +55,8 @@ describe('CertificationsService', () => {
       repository as unknown as CertificationsRepository,
       documentsRepository as unknown as CertificationDocumentsRepository,
       new CertificationMapper(),
+      { refreshAfterChange: vi.fn().mockResolvedValue(undefined) } as unknown as ProfileSkillsAnalysisService,
+      {} as CertificationDocumentsService,
     );
   });
 

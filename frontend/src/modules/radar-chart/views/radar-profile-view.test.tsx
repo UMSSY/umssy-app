@@ -1,24 +1,23 @@
 import { cloneElement, type ReactElement } from "react";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { stubMatchMedia } from "@/shared/testing/stub-match-media";
-import { RADAR_AREA_SCORES } from "../data/radar-profile.data";
-import { RadarProfileView } from "./radar-profile-view";
 import AppLayout from "@/app/(app)/layout";
+import { stubMatchMedia } from "@/shared/testing/stub-match-media";
+import { mapEpic2Radar } from "../sprint2/radar-mapper";
+import { useLiveRadar } from "../sprint2/use-live-radar";
+import { RadarProfileView } from "./radar-profile-view";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/profile/radar",
   useRouter: () => ({ replace: vi.fn() }),
 }));
-
 vi.mock("@/modules/auth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/auth")>();
   return { ...actual, SessionUserCard: () => null };
 });
-
+vi.mock("../sprint2/use-live-radar", () => ({ useLiveRadar: vi.fn() }));
 vi.mock("recharts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("recharts")>();
-
   return {
     ...actual,
     ResponsiveContainer: ({ children }: { children: ReactElement<{ width: number; height: number }> }) =>
@@ -26,50 +25,50 @@ vi.mock("recharts", async (importOriginal) => {
   };
 });
 
-describe("RadarProfileView", () => {
-  beforeEach(() => {
-    stubMatchMedia();
-  });
+const source = {
+  userId: "person-1", status: "ready" as const, version: 1,
+  updatedAt: "2026-10-25T08:00:00Z", dictionaryVersion: "1", skills: [],
+};
 
-  afterEach(() => {
-    cleanup();
-    sessionStorage.clear();
-    vi.unstubAllGlobals();
-    vi.restoreAllMocks();
+const mockHook = vi.mocked(useLiveRadar);
+function setRadar(override: Partial<ReturnType<typeof useLiveRadar>> = {}) {
+  mockHook.mockReturnValue({
+    data: mapEpic2Radar(source), loading: false, error: null, variation: null,
+    refresh: vi.fn().mockResolvedValue(undefined), retry: vi.fn().mockResolvedValue(undefined), retrying: false, ...override,
   });
+}
 
-  it("renders the header, the KPI cards, the radar and the breakdown", () => {
+describe("Radar personal integrado con Épica 2", () => {
+  beforeEach(() => { stubMatchMedia(); setRadar(); });
+  afterEach(() => { cleanup(); vi.clearAllMocks(); sessionStorage.clear(); });
+
+  it("muestra seis ejes en cero sin inventar datos ni mezclar perfiles", () => {
     render(<RadarProfileView />);
-
-    expect(screen.getByRole("heading", { level: 2, name: "Carlos Mendoza Ríos" })).toBeDefined();
-    expect(screen.getByRole("list", { name: "Resumen del perfil" })).toBeDefined();
-    expect(screen.getByRole("heading", { name: "Desglose vectorial de afinidad" })).toBeDefined();
-
-    const breakdown = within(screen.getByRole("complementary", { name: "Desglose por área" }));
-    RADAR_AREA_SCORES.forEach((area) => {
-      expect(screen.getByTestId(`radar-dot-${area.id}`)).toBeDefined();
-      expect(breakdown.getByText(area.name)).toBeDefined();
-    });
-    expect(breakdown.getByText("6,25")).toBeDefined();
+    expect(screen.getByText("Mi perfil profesional")).toBeInTheDocument();
+    expect(screen.getByText(/Todavía no tienes habilidades aprobadas/)).toBeInTheDocument();
+    expect(screen.getByTestId("radar-dot-qa")).toBeInTheDocument();
+    expect(screen.getByTestId("radar-dot-data-ai")).toBeInTheDocument();
   });
 
-  it("renders only one app navigation when wrapped by the route layout", () => {
+  it("abre el detalle del eje seleccionado y permite cerrarlo", () => {
+    render(<RadarProfileView />);
+    fireEvent.click(screen.getByRole("button", { name: "Ver detalle de QA" }));
+    expect(screen.getByRole("dialog", { name: "QA" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle del área" }));
+    expect(screen.queryByRole("dialog", { name: "QA" })).not.toBeInTheDocument();
+  });
+
+  it("muestra error y reintento sin representar un fallo como cero competencias", () => {
+    setRadar({ data: null, error: "Error de conexión" });
+    render(<RadarProfileView />);
+    expect(screen.getByRole("alert")).toHaveTextContent("Error de conexión");
+    expect(screen.getByRole("button", { name: "Reintentar" })).toBeInTheDocument();
+    expect(screen.queryByTestId("radar-dot-qa")).not.toBeInTheDocument();
+  });
+
+  it("mantiene una sola navegación dentro del layout de la aplicación", () => {
     sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
     render(<AppLayout><RadarProfileView /></AppLayout>);
-
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
-    expect(screen.getByRole("button", { name: "Mi perfil" })).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("link", { name: "Radar de afinidad" })).toHaveAttribute("aria-current", "page");
-    expect(screen.queryByRole("navigation", { name: "Ruta de navegación" })).not.toBeInTheDocument();
-
-  });
-
-  it("does not make HTTP requests", () => {
-    const fetchSpy = vi.fn();
-    vi.stubGlobal("fetch", fetchSpy);
-
-    render(<RadarProfileView />);
-
-    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

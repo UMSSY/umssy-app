@@ -1,3 +1,4 @@
+import { JOB_OFFER_FIXTURE } from "@/modules/vacancies/testing/job-offer-fixture";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
@@ -18,6 +19,9 @@ vi.mock("@/modules/auth", async (importOriginal) => {
   return { ...actual, SessionUserCard: () => null };
 });
 
+vi.mock("@/shared/services/api-client", () => ({ apiClient: { get: vi.fn(async () => ({ data: { data: [JOB_OFFER_FIXTURE] } })) } }));
+vi.mock("@/modules/radar-chart/sprint2-integration/radar-integration-api", () => ({ radarIntegrationApi: { applications: vi.fn().mockResolvedValue([]) } }));
+
 describe("Vacancy routes", () => {
   beforeEach(() => {
     stubMatchMedia();
@@ -29,18 +33,18 @@ describe("Vacancy routes", () => {
     vi.unstubAllGlobals();
   });
 
-  it.each([VacanciesPage])("renders vacancy listings inside one app navigation", (Page) => {
+  it.each([VacanciesPage])("renders vacancy listings inside one app navigation", async (Page) => {
     render(<AppLayout><Page /></AppLayout>);
 
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Vacantes", level: 1 })).toBeDefined();
-    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })[0]).toHaveAttribute("href", "/vacancies/1");
+    expect(await screen.findByRole("button", { name: "Detalles y postulaci\u00f3n" })).toBeInTheDocument();
   });
 
   it("opens details over the listing and restores the listing on Escape", async () => {
     const user = userEvent.setup();
     render(<AppLayout><VacanciesPage /></AppLayout>);
-    await user.click(screen.getAllByRole("link", { name: /^Ver detalles de / })[0]);
+    await user.click(await screen.findByRole("button", { name: "Detalles y postulaci\u00f3n" }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -54,12 +58,13 @@ describe("Vacancy routes", () => {
   });
 
   it("renders resolved vacancy details and links back to the listing", async () => {
-    const page = await VacancyDetailPage({ params: Promise.resolve({ id: "1" }) });
+    const page = await VacancyDetailPage({ params: Promise.resolve({ id: JOB_OFFER_FIXTURE.id }) });
     render(<AppLayout>{page}</AppLayout>);
 
+    await screen.findAllByRole("heading", { name: JOB_OFFER_FIXTURE.title });
     const dialog = screen.getByRole("dialog");
-    expect(within(dialog).getByRole("heading", { name: "Desarrollador Web Junior" })).toBeDefined();
-    expect(within(dialog).getByRole("button", { name: "Volver al listado" })).toBeDefined();
+    expect(within(dialog).getByRole("heading", { name: JOB_OFFER_FIXTURE.title })).toBeDefined();
+    expect(within(dialog).getByRole("button", { name: "Cerrar" })).toBeDefined();
   });
 
   it("keeps the app navigation when a vacancy does not exist", async () => {
@@ -67,7 +72,7 @@ describe("Vacancy routes", () => {
     render(<AppLayout>{page}</AppLayout>);
 
     expect(screen.getByRole("navigation", { name: "Menú principal", hidden: true })).toBeDefined();
-    expect(screen.getByRole("heading", { name: "Vacante no encontrada" })).toBeDefined();
-    expect(screen.getByRole("button", { name: "Volver al listado" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Vacante no disponible" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Close" })).toBeDefined();
   });
 });

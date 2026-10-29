@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 import {
   PolarAngleAxis,
   PolarGrid,
@@ -27,17 +27,18 @@ export function AffinityRadarChart({
   className,
 }: AffinityRadarChartProps) {
   const titleId = useId();
+  const [radius, setRadius] = useState('68%');
   const hasAreas = areas.length > 0;
 
   return (
-    <RadarCard aria-labelledby={titleId} className={cn("flex flex-col p-6", className)}>
+    <RadarCard aria-labelledby={titleId} className={cn("flex flex-col p-4 sm:p-6", className)}>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 id={titleId} className="font-heading text-lg font-semibold tracking-tight text-ink">
             Desglose vectorial de afinidad
           </h2>
           <p className="mt-1 text-xs text-text-secondary">
-            {areas.length} áreas · Tokenización NLP
+            {areas.length} áreas de competencias verificadas
           </p>
         </div>
         {hasAreas && average !== undefined && (
@@ -54,9 +55,9 @@ export function AffinityRadarChart({
 
       {hasAreas ? (
         <>
-          <div className="mt-2 h-[440px] w-full [&_.recharts-surface]:outline-none">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={areas} outerRadius="68%" accessibilityLayer={false}>
+          <div className="mt-2 h-[360px] w-full sm:h-[440px] [&_.recharts-surface]:outline-none">
+            <ResponsiveContainer width="100%" height="100%" onResize={width => setRadius(width < 280 ? '30%' : width < 360 ? '50%' : '68%')}>
+              <RadarChart data={areas} outerRadius={radius} accessibilityLayer={false}>
                 <PolarGrid stroke="var(--color-border)" />
                 <PolarAngleAxis
                   dataKey="name"
@@ -85,6 +86,7 @@ export function AffinityRadarChart({
                   dataKey="score"
                   stroke="var(--color-accent)"
                   strokeWidth={2}
+                  isAnimationActive={false}
                   fill="var(--color-accent)"
                   fillOpacity={0.14}
                   dot={({ cx, cy, index }) => (

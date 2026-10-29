@@ -213,4 +213,21 @@ describe('WorkExperienceRepository', () => {
       where: { id: workExperienceId, userId },
     });
   });
+
+  it('extracts text sources for NLP processing', async () => {
+    workExperience.findMany.mockResolvedValue([
+      { id: 'w1', position: 'Desarrollador backend', description: 'APIs con Node.js' },
+      { id: 'w2', position: 'Analista', description: null },
+    ]);
+
+    await expect(repository.findTextSources(userId)).resolves.toEqual([
+      { id: 'w1', type: 'work-experience', text: 'Desarrollador backend.\nAPIs con Node.js' },
+      { id: 'w2', type: 'work-experience', text: 'Analista' },
+    ]);
+    expect(workExperience.findMany).toHaveBeenCalledWith({
+      where: { userId },
+      orderBy: { startDate: 'desc' },
+      select: { id: true, position: true, description: true },
+    });
+  });
 });

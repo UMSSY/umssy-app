@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CV_VALIDATION_RULES } from '../constants/cv.constants.js';
 import { CvNotFoundException } from '../exceptions/cv-not-found.exception.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import { CvMapper } from '../mappers/cv.mapper.js';
+import { RadarIntegrationService } from '../../radar-integration/radar-integration.service.js';
 import { CvMetadataRepository } from '../repositories/cv-metadata.repository.js';
 import type { ListCvsRequest } from '../requests/list-cvs.request.js';
 import type { CvResponse } from '../responses/cv.response.js';
@@ -15,11 +16,13 @@ import { FileValidationService } from '../../../common/services/file-validation.
 
 @Injectable()
 export class CvService {
+  private readonly logger = new Logger(CvService.name);
   constructor(
     private readonly cvMetadataRepository: CvMetadataRepository,
     private readonly cvFileStorage: CvFileStorage,
     private readonly fileValidationService: FileValidationService,
     private readonly cvMapper: CvMapper,
+    private readonly radarIntegration: RadarIntegrationService,
   ) {}
 
   async list(userId: string, request: ListCvsRequest): Promise<PaginatedResult<CvResponse>> {
@@ -63,6 +66,11 @@ export class CvService {
       this.cvMapper.toStoredFileName(file?.originalname),
     );
 
+    try {
+      await this.radarIntegration.ingestCv(userId, cvId, validatedFile.buffer);
+    } catch {
+      this.logger.error(JSON.stringify({ event: 'cv.analysis_failed', userId, cvId }));
+    }
     const record = await this.cvMetadataRepository.findByIdForUser(userId, cvId);
     return record ? this.cvMapper.toResponse(record) : null;
   }
@@ -72,6 +80,11 @@ export class CvService {
 
     if (!isRemoved) {
       throw new CvNotFoundException();
+    }
+    try {
+      await this.radarIntegration.cvRemoved(userId, cvId);
+    } catch {
+      this.logger.error(JSON.stringify({ event: 'cv.removal_refresh_failed', userId, cvId }));
     }
   }
 

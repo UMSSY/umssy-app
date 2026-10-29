@@ -8,10 +8,11 @@ import { CvMapper } from './mappers/cv.mapper.js';
 import { CvFileRepository } from './repositories/cv-file.repository.js';
 import { CvMetadataRepository } from './repositories/cv-metadata.repository.js';
 import { CvService } from './services/cv.service.js';
+import { RadarIntegrationModule } from '../radar-integration/radar-integration.module.js';
 import { CvFileStorage } from './types/cv-file-storage.type.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule],
+  imports: [PrismaModule, JwtAuthModule, RadarIntegrationModule],
   controllers: [CvHistoryController, CvFileController],
   providers: [
     CvService,

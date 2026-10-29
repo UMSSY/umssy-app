@@ -460,7 +460,12 @@ export const ModelName = {
   SurveyAnswer: 'SurveyAnswer',
   AuditAction: 'AuditAction',
   AuditEvent: 'AuditEvent',
-  DocumentValidation: 'DocumentValidation'
+  DocumentValidation: 'DocumentValidation',
+  RadarCvEvidence: 'RadarCvEvidence',
+  RadarScoreSnapshot: 'RadarScoreSnapshot',
+  RadarAuditEvent: 'RadarAuditEvent',
+  RadarCompanyAccess: 'RadarCompanyAccess',
+  RadarJobApplication: 'RadarJobApplication'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -476,7 +481,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCompanyAccess" | "radarJobApplication"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -5216,6 +5221,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RadarCvEvidence: {
+      payload: Prisma.$RadarCvEvidencePayload<ExtArgs>
+      fields: Prisma.RadarCvEvidenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RadarCvEvidenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCvEvidencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RadarCvEvidenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCvEvidencePayload>
+        }
+        findFirst: {
+          args: Prisma.RadarCvEvidenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCvEvidencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RadarCvEvidenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCvEvidencePayload>
+        }
+        findMany: {
+          args: Prisma.RadarCvEvidenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCvEvidencePayload>[]
+        }
+        create: {
+          args: Prisma.RadarCvEvidenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCvEvidencePayload>
+        }
+        createMany: {
+          args: Prisma.RadarCvEvidenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RadarCvEvidenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCvEvidencePayload>[]
+        }
+        delete: {
+          args: Prisma.RadarCvEvidenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCvEvidencePayload>
+        }
+        update: {
+          args: Prisma.RadarCvEvidenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCvEvidencePayload>
+        }
+        deleteMany: {
+          args: Prisma.RadarCvEvidenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RadarCvEvidenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RadarCvEvidenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCvEvidencePayload>[]
+        }
+        upsert: {
+          args: Prisma.RadarCvEvidenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCvEvidencePayload>
+        }
+        aggregate: {
+          args: Prisma.RadarCvEvidenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRadarCvEvidence>
+        }
+        groupBy: {
+          args: Prisma.RadarCvEvidenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarCvEvidenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RadarCvEvidenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarCvEvidenceCountAggregateOutputType> | number
+        }
+      }
+    }
+    RadarScoreSnapshot: {
+      payload: Prisma.$RadarScoreSnapshotPayload<ExtArgs>
+      fields: Prisma.RadarScoreSnapshotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RadarScoreSnapshotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarScoreSnapshotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RadarScoreSnapshotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarScoreSnapshotPayload>
+        }
+        findFirst: {
+          args: Prisma.RadarScoreSnapshotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarScoreSnapshotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RadarScoreSnapshotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarScoreSnapshotPayload>
+        }
+        findMany: {
+          args: Prisma.RadarScoreSnapshotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarScoreSnapshotPayload>[]
+        }
+        create: {
+          args: Prisma.RadarScoreSnapshotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarScoreSnapshotPayload>
+        }
+        createMany: {
+          args: Prisma.RadarScoreSnapshotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RadarScoreSnapshotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarScoreSnapshotPayload>[]
+        }
+        delete: {
+          args: Prisma.RadarScoreSnapshotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarScoreSnapshotPayload>
+        }
+        update: {
+          args: Prisma.RadarScoreSnapshotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarScoreSnapshotPayload>
+        }
+        deleteMany: {
+          args: Prisma.RadarScoreSnapshotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RadarScoreSnapshotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RadarScoreSnapshotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarScoreSnapshotPayload>[]
+        }
+        upsert: {
+          args: Prisma.RadarScoreSnapshotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarScoreSnapshotPayload>
+        }
+        aggregate: {
+          args: Prisma.RadarScoreSnapshotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRadarScoreSnapshot>
+        }
+        groupBy: {
+          args: Prisma.RadarScoreSnapshotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarScoreSnapshotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RadarScoreSnapshotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarScoreSnapshotCountAggregateOutputType> | number
+        }
+      }
+    }
+    RadarAuditEvent: {
+      payload: Prisma.$RadarAuditEventPayload<ExtArgs>
+      fields: Prisma.RadarAuditEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RadarAuditEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAuditEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RadarAuditEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAuditEventPayload>
+        }
+        findFirst: {
+          args: Prisma.RadarAuditEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAuditEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RadarAuditEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAuditEventPayload>
+        }
+        findMany: {
+          args: Prisma.RadarAuditEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAuditEventPayload>[]
+        }
+        create: {
+          args: Prisma.RadarAuditEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAuditEventPayload>
+        }
+        createMany: {
+          args: Prisma.RadarAuditEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RadarAuditEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAuditEventPayload>[]
+        }
+        delete: {
+          args: Prisma.RadarAuditEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAuditEventPayload>
+        }
+        update: {
+          args: Prisma.RadarAuditEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAuditEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.RadarAuditEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RadarAuditEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RadarAuditEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAuditEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.RadarAuditEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarAuditEventPayload>
+        }
+        aggregate: {
+          args: Prisma.RadarAuditEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRadarAuditEvent>
+        }
+        groupBy: {
+          args: Prisma.RadarAuditEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarAuditEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RadarAuditEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarAuditEventCountAggregateOutputType> | number
+        }
+      }
+    }
+    RadarCompanyAccess: {
+      payload: Prisma.$RadarCompanyAccessPayload<ExtArgs>
+      fields: Prisma.RadarCompanyAccessFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RadarCompanyAccessFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RadarCompanyAccessFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
+        }
+        findFirst: {
+          args: Prisma.RadarCompanyAccessFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RadarCompanyAccessFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
+        }
+        findMany: {
+          args: Prisma.RadarCompanyAccessFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>[]
+        }
+        create: {
+          args: Prisma.RadarCompanyAccessCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
+        }
+        createMany: {
+          args: Prisma.RadarCompanyAccessCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RadarCompanyAccessCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>[]
+        }
+        delete: {
+          args: Prisma.RadarCompanyAccessDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
+        }
+        update: {
+          args: Prisma.RadarCompanyAccessUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
+        }
+        deleteMany: {
+          args: Prisma.RadarCompanyAccessDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RadarCompanyAccessUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RadarCompanyAccessUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>[]
+        }
+        upsert: {
+          args: Prisma.RadarCompanyAccessUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
+        }
+        aggregate: {
+          args: Prisma.RadarCompanyAccessAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRadarCompanyAccess>
+        }
+        groupBy: {
+          args: Prisma.RadarCompanyAccessGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarCompanyAccessGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RadarCompanyAccessCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarCompanyAccessCountAggregateOutputType> | number
+        }
+      }
+    }
+    RadarJobApplication: {
+      payload: Prisma.$RadarJobApplicationPayload<ExtArgs>
+      fields: Prisma.RadarJobApplicationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RadarJobApplicationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RadarJobApplicationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
+        }
+        findFirst: {
+          args: Prisma.RadarJobApplicationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RadarJobApplicationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
+        }
+        findMany: {
+          args: Prisma.RadarJobApplicationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>[]
+        }
+        create: {
+          args: Prisma.RadarJobApplicationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
+        }
+        createMany: {
+          args: Prisma.RadarJobApplicationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RadarJobApplicationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>[]
+        }
+        delete: {
+          args: Prisma.RadarJobApplicationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
+        }
+        update: {
+          args: Prisma.RadarJobApplicationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
+        }
+        deleteMany: {
+          args: Prisma.RadarJobApplicationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RadarJobApplicationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RadarJobApplicationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>[]
+        }
+        upsert: {
+          args: Prisma.RadarJobApplicationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
+        }
+        aggregate: {
+          args: Prisma.RadarJobApplicationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRadarJobApplication>
+        }
+        groupBy: {
+          args: Prisma.RadarJobApplicationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarJobApplicationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RadarJobApplicationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RadarJobApplicationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -6114,6 +6489,71 @@ export const DocumentValidationScalarFieldEnum = {
 export type DocumentValidationScalarFieldEnum = (typeof DocumentValidationScalarFieldEnum)[keyof typeof DocumentValidationScalarFieldEnum]
 
 
+export const RadarCvEvidenceScalarFieldEnum = {
+  cvId: 'cvId',
+  userId: 'userId',
+  extractedText: 'extractedText',
+  extractionStatus: 'extractionStatus',
+  reviewStatus: 'reviewStatus',
+  submittedAt: 'submittedAt',
+  decidedAt: 'decidedAt',
+  reviewerId: 'reviewerId'
+} as const
+
+export type RadarCvEvidenceScalarFieldEnum = (typeof RadarCvEvidenceScalarFieldEnum)[keyof typeof RadarCvEvidenceScalarFieldEnum]
+
+
+export const RadarScoreSnapshotScalarFieldEnum = {
+  userId: 'userId',
+  version: 'version',
+  rubricVersion: 'rubricVersion',
+  fingerprint: 'fingerprint',
+  scores: 'scores',
+  evidence: 'evidence',
+  averageScore: 'averageScore',
+  createdAt: 'createdAt'
+} as const
+
+export type RadarScoreSnapshotScalarFieldEnum = (typeof RadarScoreSnapshotScalarFieldEnum)[keyof typeof RadarScoreSnapshotScalarFieldEnum]
+
+
+export const RadarAuditEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  actorId: 'actorId',
+  eventType: 'eventType',
+  targetId: 'targetId',
+  details: 'details',
+  occurredAt: 'occurredAt'
+} as const
+
+export type RadarAuditEventScalarFieldEnum = (typeof RadarAuditEventScalarFieldEnum)[keyof typeof RadarAuditEventScalarFieldEnum]
+
+
+export const RadarCompanyAccessScalarFieldEnum = {
+  companyId: 'companyId',
+  userId: 'userId'
+} as const
+
+export type RadarCompanyAccessScalarFieldEnum = (typeof RadarCompanyAccessScalarFieldEnum)[keyof typeof RadarCompanyAccessScalarFieldEnum]
+
+
+export const RadarJobApplicationScalarFieldEnum = {
+  id: 'id',
+  jobOfferId: 'jobOfferId',
+  userId: 'userId',
+  consentToRecruiter: 'consentToRecruiter',
+  consentToCv: 'consentToCv',
+  consentToContact: 'consentToContact',
+  state: 'state',
+  appliedAt: 'appliedAt',
+  decidedAt: 'decidedAt',
+  decidedBy: 'decidedBy'
+} as const
+
+export type RadarJobApplicationScalarFieldEnum = (typeof RadarJobApplicationScalarFieldEnum)[keyof typeof RadarJobApplicationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -6128,6 +6568,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -6235,6 +6682,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 
@@ -6466,6 +6927,11 @@ export type GlobalOmitConfig = {
   auditAction?: Prisma.AuditActionOmit
   auditEvent?: Prisma.AuditEventOmit
   documentValidation?: Prisma.DocumentValidationOmit
+  radarCvEvidence?: Prisma.RadarCvEvidenceOmit
+  radarScoreSnapshot?: Prisma.RadarScoreSnapshotOmit
+  radarAuditEvent?: Prisma.RadarAuditEventOmit
+  radarCompanyAccess?: Prisma.RadarCompanyAccessOmit
+  radarJobApplication?: Prisma.RadarJobApplicationOmit
 }
 
 /* Types for Logging */

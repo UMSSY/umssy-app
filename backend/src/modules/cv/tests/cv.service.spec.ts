@@ -9,6 +9,7 @@ import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { CvMapper } from '../mappers/cv.mapper.js';
 import type { CvMetadataRepository } from '../repositories/cv-metadata.repository.js';
 import { CvService } from '../services/cv.service.js';
+import type { RadarIntegrationService } from '../../radar-integration/radar-integration.service.js';
 import type { CvFileStorage } from '../types/cv-file-storage.type.js';
 import type { CvMetadataRecord } from '../types/cv-metadata-record.type.js';
 
@@ -67,6 +68,7 @@ describe('CvService', () => {
       storage as unknown as CvFileStorage,
       new FileValidationService(),
       new CvMapper(),
+      { ingestCv: vi.fn().mockResolvedValue(undefined), cvRemoved: vi.fn().mockResolvedValue(undefined) } as unknown as RadarIntegrationService,
     );
   });
 

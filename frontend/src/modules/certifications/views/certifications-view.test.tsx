@@ -13,6 +13,8 @@ vi.mock("../services/certifications.service", () => ({
   certificationsService: {
     getCertifications: vi.fn(),
     createCertification: vi.fn(),
+    createWithDocument: vi.fn(),
+    updateWithDocument: vi.fn(),
     updateCertification: vi.fn(),
     deleteCertification: vi.fn(),
     uploadDocument: vi.fn(),
@@ -200,7 +202,7 @@ describe("CertificationsView", () => {
 
   it("adds a certification, resets the form and reloads the list", async () => {
     const created = createCertification("ccna", "CCNA", "2024-01-15");
-    vi.mocked(certificationsService.createCertification).mockResolvedValue(created);
+    vi.mocked(certificationsService.createWithDocument).mockResolvedValue(created);
     const user = await renderView();
 
     vi.mocked(certificationsService.getCertifications).mockResolvedValue([SCRUM, AWS, created]);
@@ -208,11 +210,11 @@ describe("CertificationsView", () => {
     await fillCertificationForm(user);
     await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
-    expect(certificationsService.createCertification).toHaveBeenCalledWith({
+    expect(certificationsService.createWithDocument).toHaveBeenCalledWith({
       name: "CCNA",
       issuingOrganization: "Cisco",
       issueDate: "2024-01-15",
-    });
+    }, expect.any(File));
     expect(await screen.findByRole("status")).toHaveTextContent(
       CERTIFICATION_FEEDBACK_MESSAGES.createSuccess,
     );
@@ -221,7 +223,7 @@ describe("CertificationsView", () => {
   });
 
   it("keeps the typed values when adding fails", async () => {
-    vi.mocked(certificationsService.createCertification).mockRejectedValue(new Error("failed"));
+    vi.mocked(certificationsService.createWithDocument).mockRejectedValue(new Error("failed"));
     const user = await renderView();
     await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
     await fillCertificationForm(user);
@@ -301,16 +303,15 @@ describe("CertificationsView", () => {
     });
 
     it("keeps closing disabled until the certification document has uploaded", async () => {
-      const uploading = createDeferred<void>();
-      vi.mocked(certificationsService.createCertification).mockResolvedValue(createCertification("ccna", "CCNA", "2024-01-15"));
-      vi.mocked(certificationsService.uploadDocument).mockReturnValue(uploading.promise);
+      const uploading = createDeferred<Certification>();
+      vi.mocked(certificationsService.createWithDocument).mockReturnValue(uploading.promise);
       const user = await renderView();
       await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
       await fillCertificationForm(user);
       await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
       expect(await screen.findByRole("button", { name: "Guardando..." })).toBeDisabled();
       expect(screen.getByRole("button", { name: "Cerrar formulario" })).toBeDisabled();
-      await act(async () => { uploading.resolve(); await uploading.promise; });
+      await act(async () => { uploading.resolve(createCertification("ccna", "CCNA", "2024-01-15")); await uploading.promise; });
       await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     });
 
@@ -397,14 +398,9 @@ describe("CertificationsView", () => {
       const corrupted = {
         response: { status: 400, data: { data: { code: "CORRUPTED_FILE" } } },
       };
-      let createdCount = 0;
-      vi.mocked(certificationsService.createCertification).mockImplementation(async () => {
-        createdCount += 1;
-        return createCertification(`ccna-${createdCount}`, "CCNA", "2024-01-15");
-      });
-      vi.mocked(certificationsService.uploadDocument)
+      vi.mocked(certificationsService.createWithDocument)
         .mockRejectedValueOnce(corrupted)
-        .mockResolvedValueOnce(undefined);
+        .mockResolvedValueOnce(createCertification("ccna-2", "CCNA", "2024-01-15"));
       const user = await renderView();
 
       await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
@@ -417,7 +413,7 @@ describe("CertificationsView", () => {
       ).toBeInTheDocument();
       expect(within(form).getByLabelText(/Nombre de la certificación/)).toHaveValue("CCNA");
       expect(within(form).getByLabelText(/Entidad emisora/)).toHaveValue("Cisco");
-      expect(certificationsService.deleteCertification).toHaveBeenCalledWith("ccna-1");
+      expect(certificationsService.deleteCertification).not.toHaveBeenCalled();
 
       vi.mocked(certificationsService.getCertifications).mockResolvedValue([
         SCRUM,
@@ -427,7 +423,7 @@ describe("CertificationsView", () => {
       await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
       await waitFor(() => expect(screen.queryByRole("form")).not.toBeInTheDocument());
-      expect(certificationsService.uploadDocument).toHaveBeenLastCalledWith("ccna-2", CERTIFICATE_PDF);
+      expect(certificationsService.createWithDocument).toHaveBeenCalledTimes(2);
       expect(getCertificationNames().filter((name) => name === "CCNA")).toHaveLength(1);
     });
 
@@ -444,22 +440,16 @@ describe("CertificationsView", () => {
       expect(screen.queryByRole("button", { name: /Eliminar documento/ })).not.toBeInTheDocument();
     });
 
-    it("uploads the document of a new certification and rolls back when the upload fails", async () => {
-      vi.mocked(certificationsService.createCertification).mockResolvedValue(
-        createCertification("ccna", "CCNA", "2024-01-15"),
-      );
-      vi.mocked(certificationsService.uploadDocument).mockRejectedValue(new Error("failed"));
+    it("keeps the new form open when the combined request fails without a rollback request", async () => {
+      vi.mocked(certificationsService.createWithDocument).mockRejectedValue(new Error("failed"));
       const user = await renderView();
-
-      await user.click(screen.getByRole("button", { name: "Agregar certificación" }));
+      await user.click(screen.getByRole("button", { name: "Agregar certificaci\u00f3n" }));
       await fillCertificationForm(user);
-      await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
-
-      expect(await screen.findByText(CERTIFICATION_DOCUMENT_MESSAGES.uploadError)).toBeInTheDocument();
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      expect(certificationsService.uploadDocument).toHaveBeenCalledWith("ccna", CERTIFICATE_PDF);
-      expect(certificationsService.deleteCertification).toHaveBeenCalledWith("ccna");
-      expect(screen.getByRole("form", { name: "Agregar certificación" })).toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "Guardar certificaci\u00f3n" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(CERTIFICATION_FEEDBACK_MESSAGES.createError);
+      expect(certificationsService.uploadDocument).not.toHaveBeenCalled();
+      expect(certificationsService.deleteCertification).not.toHaveBeenCalled();
+      expect(screen.getByRole("form", { name: "Agregar certificaci\u00f3n" })).toBeInTheDocument();
     });
 
     describe("when editing a certification with a document", () => {
@@ -483,8 +473,8 @@ describe("CertificationsView", () => {
         expect(certificationsService.deleteDocument).not.toHaveBeenCalled();
       });
 
-      it("replaces the document after updating the fields and refreshes the list", async () => {
-        vi.mocked(certificationsService.uploadDocument).mockResolvedValue(undefined);
+      it("replaces the document together with the fields and refreshes the list", async () => {
+        vi.mocked(certificationsService.updateWithDocument).mockResolvedValue(WITH_DOCUMENT);
         const user = await renderView();
 
         await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
@@ -493,10 +483,8 @@ describe("CertificationsView", () => {
         await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
         await waitFor(() => expect(screen.queryByRole("form")).not.toBeInTheDocument());
-        expect(certificationsService.uploadDocument).toHaveBeenCalledWith("scrum", CERTIFICATE_PDF);
-        expect(vi.mocked(certificationsService.updateCertification).mock.invocationCallOrder[0]).toBeLessThan(
-          vi.mocked(certificationsService.uploadDocument).mock.invocationCallOrder[0],
-        );
+        expect(certificationsService.updateWithDocument).toHaveBeenCalledWith("scrum", expect.any(Object), {type:"replace", file:CERTIFICATE_PDF});
+        expect(certificationsService.updateCertification).not.toHaveBeenCalled();
         expect(certificationsService.getCertifications).toHaveBeenCalled();
         expect(
           await screen.findByRole("button", { name: "Previsualizar documento de Scrum Master" }),
@@ -529,7 +517,7 @@ describe("CertificationsView", () => {
       });
 
       it("keeps the form open with an inline error and the data when the document operation fails", async () => {
-        vi.mocked(certificationsService.uploadDocument).mockRejectedValue(new Error("failed"));
+        vi.mocked(certificationsService.updateWithDocument).mockRejectedValue(new Error("failed"));
         const user = await renderView();
 
         await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
@@ -539,11 +527,11 @@ describe("CertificationsView", () => {
         await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
         expect(
-          await screen.findByText(CERTIFICATION_DOCUMENT_MESSAGES.uploadError),
+          await screen.findByText(CERTIFICATION_FEEDBACK_MESSAGES.updateError),
         ).toBeInTheDocument();
         expect(screen.getByRole("form", { name: "Editar certificación" })).toBeInTheDocument();
         expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("Nuevo nombre");
-        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+        expect(screen.getByRole("alert")).toBeInTheDocument();
       });
     });
 

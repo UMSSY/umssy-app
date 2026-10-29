@@ -361,3 +361,28 @@ export type AuditEvent = Prisma.AuditEventModel
  * 
  */
 export type DocumentValidation = Prisma.DocumentValidationModel
+/**
+ * Model RadarCvEvidence
+ * 
+ */
+export type RadarCvEvidence = Prisma.RadarCvEvidenceModel
+/**
+ * Model RadarScoreSnapshot
+ * 
+ */
+export type RadarScoreSnapshot = Prisma.RadarScoreSnapshotModel
+/**
+ * Model RadarAuditEvent
+ * 
+ */
+export type RadarAuditEvent = Prisma.RadarAuditEventModel
+/**
+ * Model RadarCompanyAccess
+ * 
+ */
+export type RadarCompanyAccess = Prisma.RadarCompanyAccessModel
+/**
+ * Model RadarJobApplication
+ * 
+ */
+export type RadarJobApplication = Prisma.RadarJobApplicationModel

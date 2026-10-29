@@ -43,4 +43,8 @@ export class ProfileRepository {
       () => new ProfileNotFoundException(),
     );
   }
+
+  async userExists(userId: string): Promise<boolean> {
+    return (await this.prisma.user.count({ where: { id: userId } })) > 0;
+  }
 }
