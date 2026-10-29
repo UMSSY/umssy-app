@@ -58,20 +58,21 @@ export class ConversationRepository {
 
   async upsertByEventId(eventId: string, userId: string, now: Date) {
     return this.prisma.$transaction(async tx => {
-      // 1️⃣ Conversación grupal: unique sobre eventId, userAId/userBId opcionales
-      const [conversation] = await tx.conversation.findOrCreate({
+      // Conversación grupal: unique sobre eventId, userAId/userBId opcionales
+      const conversation = await tx.conversation.upsert({
         where: { eventId },
-        select: { id: true, userAId: true, userBId: true },
-        data: {
+        update: {},
+        create: {
           eventId,
           userAId: null,
           userBId: null,
           updatedAt: now,
           createdAt: now,
         },
+        select: { id: true, userAId: true, userBId: true },
       });
 
-      // 2️⃣ Participante: idéntica clave única (conversationId, userId) → idempotente
+      // Participante: misma clave única (conversationId, userId), por lo que es idempotente
       await tx.conversationParticipant.upsert({
         where: { conversationId_userId: { conversationId: conversation.id, userId } },
         update: { lastReadAt: now },
@@ -111,7 +112,7 @@ export class ConversationRepository {
       include: {
         userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
         userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
-        event: { select: { id: true, title: true } }, // NUEVO: Para saber si es chat de evento
+        event: { select: { id: true, title: true } },
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,

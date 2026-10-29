@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useEventRoom } from "../hooks/use-event-room";
 
 export function EventChatRoomView() {
-  const { id: eventId } = useParams<{ eventId: string }>();
+  const { id: eventId } = useParams<{ id: string }>();
   const { conversationId, isJoined, error, joinEventRoom, leaveEventRoom } = useEventRoom();
 
   useEffect(() => {

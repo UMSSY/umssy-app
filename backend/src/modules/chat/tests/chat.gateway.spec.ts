@@ -6,6 +6,7 @@ import { SessionService } from '../../../common/services/session.service.js';
 import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
 import { MessageService } from '../services/message.service.js';
+import { EventRoomService } from '../services/event-room.service.js';
 
 describe('ChatGateway (HU-5 Handshake)', () => {
   let gateway: ChatGateway;
@@ -31,6 +32,10 @@ describe('ChatGateway (HU-5 Handshake)', () => {
         {
           provide: MessageService,
           useValue: {},
+        },
+        {
+          provide: EventRoomService,
+          useValue: { joinEventRoom: vi.fn() },
         },
         {
           provide: UserPresenceService,

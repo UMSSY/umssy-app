@@ -1,4 +1,3 @@
-// backend/src/modules/chat/chat.gateway.ts
 import { Logger } from '@nestjs/common';
 import {
   OnGatewayConnection,
@@ -17,6 +16,7 @@ import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
 <<<<<<< HEAD
 import { MessageService } from '../services/message.service.js';
+import { EventRoomService } from '../services/event-room.service.js';
 
 interface SocketMessagePayload {
   conversationId?: string;

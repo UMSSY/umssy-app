@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventRegistrationsService } from '../event-registrations/services/event-registrations.service.js';
+import { EventRegistrationsService } from '../../event-registrations/services/event-registrations.service.js';
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
 
@@ -11,7 +11,7 @@ export class EventRoomService {
   ) {}
 
   async joinEventRoom(userId: string, eventId: string): Promise<string> {
-    // 1️⃣ Validar que el usuario tiene inscripción confirmada en el evento
+    // Validar que el usuario tiene inscripción confirmada en el evento
     let registration;
     try {
       registration = await this.registrationsService.findOwn(eventId, userId);
@@ -23,7 +23,7 @@ export class EventRoomService {
       throw new NotRegisteredForEventException();
     }
 
-    // 2️⃣ Obtener o crear la conversación grupal asociada al eventId (idempotente)
+    // Obtener o crear la conversación grupal asociada al eventId (idempotente)
     const now = new Date();
     const conversationId = await this.conversationRepository.upsertByEventId(
       eventId,
