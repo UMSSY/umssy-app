@@ -3,9 +3,14 @@
 import { useMemo } from "react";
 import type { MessageItemProps } from "../types/message-item-props.types";
 import type { MessageAttachment } from "../types/attachment.types";
+import type { LinkPreviewData } from "../types/link-preview.types";
 import { ChatImageThumbnail } from "./chat-image-thumbnail";
 import { ChatPdfCard } from "./chat-pdf-card";
+import { ChatMessageText } from "./chat-message-text";
+import { ChatLinkPreviewCard } from "./chat-link-preview-card";
 import { formatMessageDateSeparator } from "../utils/date-formatter";
+import { extractFirstValidUrl, extractDomainFromUrl } from "../utils/link-parser";
+import { useLinkPreview } from "../hooks/use-link-preview";
 import { cn } from "@/lib/utils";
 
 function getMessageDate(message: MessageItemProps["message"]): string {
@@ -92,6 +97,28 @@ export function MessageItem({
     return true;
   }, [message.content, resolvedAttachment]);
 
+  const firstUrl = useMemo(() => {
+    return extractFirstValidUrl(message.content);
+  }, [message.content]);
+
+  const { preview: fetchedPreview } = useLinkPreview(firstUrl);
+
+  const linkAttachmentPreview = useMemo<LinkPreviewData | null>(() => {
+    if (resolvedAttachment && resolvedAttachment.type?.toUpperCase() === "LINK") {
+      return {
+        url: resolvedAttachment.url,
+        domain: extractDomainFromUrl(resolvedAttachment.url),
+        title: resolvedAttachment.fileName || null,
+        description: null,
+        imageUrl: resolvedAttachment.thumbnailUrl || null,
+        hasPreview: true,
+      };
+    }
+    return null;
+  }, [resolvedAttachment]);
+
+  const activePreview = linkAttachmentPreview || fetchedPreview;
+
   return (
     <div data-testid={`message-item-wrapper-${message.id}`} className="w-full">
       {showDateSeparator && (
@@ -140,23 +167,30 @@ export function MessageItem({
                 onDownload={onDownloadAttachment}
               />
               {shouldShowTextContent && (
-                <p
-                  data-testid="pdf-caption"
-                  className={cn(
-                    "px-0.5 text-sm leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap",
-                    isOwn ? "text-surface" : "text-ink"
-                  )}
-                >
-                  {message.content.trim()}
-                </p>
+                <div data-testid="pdf-caption" className="px-0.5">
+                  <ChatMessageText
+                    content={message.content.trim()}
+                    isOwn={isOwn}
+                    className="text-sm"
+                  />
+                </div>
               )}
             </div>
           )}
 
-          {!resolvedAttachment && (
-            <p className="leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
-              {message.content}
-            </p>
+          {!isImageAttachment && !isPdfAttachment && (
+            <div className="flex flex-col">
+              <ChatMessageText
+                content={message.content}
+                isOwn={isOwn}
+              />
+              {activePreview && (
+                <ChatLinkPreviewCard
+                  preview={activePreview}
+                  isOwn={isOwn}
+                />
+              )}
+            </div>
           )}
 
           {/* Hora y estado de entrega */}

@@ -9,6 +9,7 @@ import {
   StandardApiResponse,
 } from '../types/conversation.types';
 import type { MessageAttachment } from '../types/attachment.types';
+import type { LinkPreviewResponse } from '../types/link-preview.types';
 import { toast } from 'sonner';
 import { User } from '../types/user.types';
 import {
@@ -610,4 +611,57 @@ export async function sendAttachmentMessage(
       'Error del servidor: No se pudo procesar el envio del archivo adjunto',
     );
   }
+}
+
+const linkPreviewCache = new Map<string, Promise<LinkPreviewResponse | null>>();
+
+export function clearLinkPreviewCache(): void {
+  linkPreviewCache.clear();
+}
+
+export async function getLinkPreview(
+  rawUrl: string,
+): Promise<LinkPreviewResponse | null> {
+  const trimmedUrl = (rawUrl || '').trim();
+  if (
+    !trimmedUrl ||
+    (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://'))
+  ) {
+    return null;
+  }
+
+  const cached = linkPreviewCache.get(trimmedUrl);
+  if (cached) {
+    return cached;
+  }
+
+  const promise = (async () => {
+    try {
+      const response = await apiClient.get<
+        StandardApiResponse<LinkPreviewResponse> | LinkPreviewResponse
+      >(`/chat/link-preview?url=${encodeURIComponent(trimmedUrl)}`);
+
+      const body = response?.data;
+      const data =
+        typeof body === 'object' && body !== null && 'data' in body
+          ? (body.data as LinkPreviewResponse)
+          : (body as LinkPreviewResponse);
+
+      if (data && typeof data === 'object' && data.hasPreview) {
+        return data;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  })();
+
+  linkPreviewCache.set(trimmedUrl, promise);
+  return promise;
+}
+
+export function fetchCachedLinkPreview(
+  url: string,
+): Promise<LinkPreviewResponse | null> {
+  return getLinkPreview(url);
 }
