@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { JobOfferStatus } from '../../job-offers/types/job-offer.enum.js';
+import type {
+  CompanyJobOfferRecord,
+  JobApplicantRecord,
+} from '../types/company-job-applicants.types.js';
 import type { JobApplicationRecord } from '../types/job-application.types.js';
 
 const JOB_APPLICATION_SELECT = {
@@ -12,6 +16,21 @@ const JOB_APPLICATION_SELECT = {
       id: true,
       title: true,
       company: { select: { title: true } },
+    },
+  },
+} as const;
+
+const JOB_APPLICANT_SELECT = {
+  id: true,
+  appliedAt: true,
+  status: { select: { title: true } },
+  user: {
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      headline: true,
     },
   },
 } as const;
@@ -57,6 +76,24 @@ export class JobApplicationsRepository {
     return this.prisma.jobApplication.create({
       data: { userId, jobOfferId, statusId },
       select: JOB_APPLICATION_SELECT,
+    });
+  }
+
+  findCompanyOffer(
+    companyId: string,
+    jobOfferId: string,
+  ): Promise<CompanyJobOfferRecord | null> {
+    return this.prisma.jobOffer.findFirst({
+      where: { id: jobOfferId, companyId },
+      select: { id: true, title: true },
+    });
+  }
+
+  findApplicantsByOffer(jobOfferId: string): Promise<JobApplicantRecord[]> {
+    return this.prisma.jobApplication.findMany({
+      where: { jobOfferId },
+      orderBy: [{ appliedAt: 'desc' }, { id: 'desc' }],
+      select: JOB_APPLICANT_SELECT,
     });
   }
 }
