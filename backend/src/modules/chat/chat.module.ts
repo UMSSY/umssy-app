@@ -10,6 +10,8 @@ import { MessageController } from './controllers/message.controller.js';
 import { ChatController } from './controllers/chat.controller.js';
 import { LinkPreviewController } from './controllers/link-preview.controller.js';
 import { AttachmentController } from './controllers/attachment.controller.js';
+import { ConnectionRequestController } from './controllers/connection-request.controller.js';
+import { BlockController } from './controllers/block.controller.js';
 
 import { UserSearchService } from './services/user-search.service.js';
 import { ConversationService } from './services/conversation.service.js';
@@ -21,6 +23,8 @@ import { LinkPreviewService } from './services/link-preview.service.js';
 import { AttachmentService } from './services/attachment.service.js';
 import { AttachmentMapper } from './mappers/attachment.mapper.js';
 import { AttachmentUploadInterceptor } from './interceptors/attachment-upload.interceptor.js';
+import { ConnectionRequestService } from './services/connection-request.service.js';
+import { BlockService } from './services/block.service.js';
 
 import { ConversationRepository } from './repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from './repositories/conversation-participant.repository.js';
@@ -30,13 +34,10 @@ import { UserPresenceRepository } from './repositories/user-presence.repository.
 import { UserLookupRepository } from './repositories/user-lookup.repository.js';
 import { ChatRepository } from './repositories/chat.repository.js';
 import { AttachmentRepository } from './repositories/attachment.repository.js';
-
-import { ChatGateway } from './gateways/chat.gateway.js';
-
-import { ConnectionRequestService } from './services/connection-request.service.js';
 import { ConnectionRequestRepository } from './repositories/connection-request.repository.js';
 import { ChatUserBlockRepository } from './repositories/chat-user-block.repository.js';
-import { ConnectionRequestController } from './controllers/connection-request.controller.js';
+
+import { ChatGateway } from './gateways/chat.gateway.js';
 
 @Module({
   imports: [PrismaModule, JwtAuthModule, AuthModule],
@@ -46,8 +47,9 @@ import { ConnectionRequestController } from './controllers/connection-request.co
     MessageController,
     ChatController,
     LinkPreviewController,
-    ConnectionRequestController,
     AttachmentController,
+    ConnectionRequestController,
+    BlockController,
   ],
   providers: [
     UserSearchService,
@@ -62,10 +64,8 @@ import { ConnectionRequestController } from './controllers/connection-request.co
     AttachmentMapper,
     AttachmentUploadInterceptor,
     FileValidationService,
-
     ConnectionRequestService,
-    ConnectionRequestRepository,
-    ChatUserBlockRepository,
+    BlockService,
 
     ConversationRepository,
     ConversationParticipantRepository,
@@ -75,6 +75,8 @@ import { ConnectionRequestController } from './controllers/connection-request.co
     UserLookupRepository,
     ChatRepository,
     AttachmentRepository,
+    ConnectionRequestRepository,
+    ChatUserBlockRepository,
   ],
   exports: [
     ConversationService,
@@ -86,6 +88,7 @@ import { ConnectionRequestController } from './controllers/connection-request.co
     LinkPreviewService,
     AttachmentService,
     AttachmentRepository,
+    BlockService,
   ],
 })
 export class ChatModule {}

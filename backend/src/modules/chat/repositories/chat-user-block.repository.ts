@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
@@ -38,5 +37,13 @@ export class ChatUserBlockRepository {
       },
     });
     return !!block;
+  }
+
+  async findBlockedIdsBy(blockerId: string): Promise<string[]> {
+    const rows = await this.prisma.chatUserBlock.findMany({
+      where: { blockerId },
+      select: { blockedId: true },
+    });
+    return rows.map((r) => r.blockedId);
   }
 }

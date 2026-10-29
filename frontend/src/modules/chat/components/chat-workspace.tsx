@@ -34,6 +34,8 @@ import { SendConnectionRequestDialog } from "./send-connection-request-dialog";
 import {
   sendAttachmentMessage,
   getCurrentSessionUserId,
+  blockUser,
+  unblockUser,
 } from '../services/chat-api';
 import { getChatSocket } from './chat-socket';
 
@@ -134,6 +136,7 @@ export function ChatWorkspace({
     findExistingConversationByContact,
     startConversationWithContact,
     updateConversationLastMessage,
+    setConversationBlocked,
   } = useConversations();
 
   const {
@@ -480,6 +483,23 @@ const handleSendMessage = async (
     }
   };
 
+  const handleBlockUser = async (): Promise<void> => {
+    if (!selectedConversation) return;
+    await blockUser(selectedConversation.contact.id);
+    setConversationBlocked(selectedConversation.id, true);
+  };
+
+  const handleUnblockUser = async (): Promise<void> => {
+    if (!selectedConversation) return;
+   try {
+      await unblockUser(selectedConversation.contact.id);
+    } catch (error) {
+      void retryConversations();
+      throw error;
+    }
+    setConversationBlocked(selectedConversation.id, false);
+  };
+
   const handleRetryConversations = async () => {
     setDismissedError(true);
 
@@ -579,6 +599,9 @@ onStartNewChat={handleStartNewChat}
             onRetryMessages={() => {
               void retryMessages();
             }}
+
+            onBlockUser={handleBlockUser}
+            onUnblockUser={handleUnblockUser}
           />
         ) : (
           <EmptyChatState

@@ -1,4 +1,3 @@
-
 import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { ConversationRepository } from '../repositories/conversation.repository.js';
@@ -7,7 +6,7 @@ import { UserLookupRepository } from '../repositories/user-lookup.repository.js'
 import { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
 
 import { UserPresenceService } from './user-presence.service.js';
-
+import { BlockService } from './block.service.js';
 
 import {
   InactiveUserException,
@@ -25,6 +24,7 @@ export class ConversationService {
     private readonly userLookupRepository: UserLookupRepository,
     private readonly userPresenceService: UserPresenceService,
     private readonly connectionRequestRepository: ConnectionRequestRepository,
+    private readonly blockService: BlockService,
   ) {}
 
   async getOrCreate(
@@ -74,6 +74,11 @@ export class ConversationService {
         ? [normalizedCurrentUserId, normalizedContactId]
         : [normalizedContactId, normalizedCurrentUserId];
 
+    // HU-13: ids bloqueados por el usuario actual (una sola consulta)
+    const blockedIds = await this.blockService.findBlockedIdsBy(
+      normalizedCurrentUserId,
+    );
+
     // Buscar una conversación existente
     const existing =
       await this.conversationRepository.findByOrderedPair(
@@ -85,6 +90,7 @@ export class ConversationService {
       const conversation = await this.toResponse(
         existing,
         normalizedCurrentUserId,
+        blockedIds,
       );
 
       return {
@@ -118,6 +124,7 @@ export class ConversationService {
       const conversation = await this.toResponse(
         created,
         normalizedCurrentUserId,
+        blockedIds,
       );
 
       return {
@@ -146,6 +153,7 @@ export class ConversationService {
           const conversation = await this.toResponse(
             concurrentExisting,
             normalizedCurrentUserId,
+            blockedIds,
           );
 
           return {
@@ -175,14 +183,15 @@ export class ConversationService {
   async findAllForUser(
     currentUserId: string,
   ): Promise<ConversationResponse[]> {
-    const list =
-      await this.conversationRepository.findUserConversations(
-        currentUserId,
-      );
+    // HU-13: una sola consulta de bloqueos por petición (sin N+1)
+    const [list, blockedIds] = await Promise.all([
+      this.conversationRepository.findUserConversations(currentUserId),
+      this.blockService.findBlockedIdsBy(currentUserId),
+    ]);
 
     return Promise.all(
       list.map((conversation) =>
-        this.toResponse(conversation, currentUserId),
+        this.toResponse(conversation, currentUserId, blockedIds),
       ),
     );
   }
@@ -221,6 +230,7 @@ export class ConversationService {
       } | null;
     },
     currentUserId: string,
+    blockedIds: ReadonlySet<string>,
   ): Promise<ConversationResponse> {
     const contact = (
       conversation.userAId === currentUserId
@@ -300,6 +310,8 @@ export class ConversationService {
         : null,
 
       unreadCount,
+      // HU-13: solo quien bloquea recibe true; al bloqueado no se le revela.
+      isBlockedByMe: blockedIds.has(contact.id.toLowerCase()),
       updatedAt: conversation.updatedAt.toISOString(),
     };
   }

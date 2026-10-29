@@ -1,4 +1,3 @@
-
 import { ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -9,6 +8,13 @@ import type { ConversationParticipantRepository } from '../repositories/conversa
 import type { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import type { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
 import type { UserPresenceService } from './user-presence.service.js';
+
+import type { BlockService } from './block.service.js';
+
+const noBlocks = () =>
+  ({
+    findBlockedIdsBy: vi.fn().mockResolvedValue(new Set<string>()),
+  }) as unknown as BlockService;
 
 describe('ConversationService', () => {
   it('findAllForUser maps and returns conversations for the current user', async () => {
@@ -66,6 +72,7 @@ describe('ConversationService', () => {
       userLookupRepositoryMock,
       userPresenceServiceMock,
       connectionRequestRepositoryMock,
+      noBlocks(),
     );
 
     const result = await service.findAllForUser('user-current');
@@ -86,6 +93,7 @@ describe('ConversationService', () => {
       {} as unknown as UserLookupRepository,
       {} as unknown as UserPresenceService,
       {} as unknown as ConnectionRequestRepository,
+      noBlocks(),
     );
 
     await expect(
@@ -159,6 +167,7 @@ describe('ConversationService', () => {
       userLookupRepositoryMock,
       userPresenceServiceMock,
       connectionRequestRepositoryMock,
+      noBlocks(),
     );
 
     const result = await service.getOrCreateWithStatus(
@@ -211,6 +220,7 @@ describe('ConversationService', () => {
       {} as unknown as UserLookupRepository,
       userPresenceServiceMock,
       {} as unknown as ConnectionRequestRepository,
+      noBlocks(),
     );
 
     const conversations =
@@ -219,6 +229,65 @@ describe('ConversationService', () => {
     expect(conversations[0].contact.avatarUrl).toBe(
       `data:image/jpeg;base64,${photoBuffer.toString('base64')}`,
     );
+  });
+  describe('isBlockedByMe', () => {
+    const buildConversation = (id: string, contactId: string) => ({
+      id,
+      userAId: 'user-me',
+      userBId: contactId,
+      updatedAt: new Date('2026-01-01T00:00:00Z'),
+      userA: { id: 'user-me', firstName: 'Me', lastName: 'Self' },
+      userB: { id: contactId, firstName: 'Contact', lastName: id },
+      messages: [],
+    });
+
+    const buildService = (blockedIds: string[], conversations: unknown[]) => {
+      const blockService = { findBlockedIdsBy: vi.fn().mockResolvedValue(new Set(blockedIds)) };
+      const service = new ConversationService(
+        {
+          findUserConversations: vi.fn().mockResolvedValue(conversations),
+          findByOrderedPair: vi.fn().mockResolvedValue(conversations[0] ?? null),
+        } as unknown as ConversationRepository,
+        {
+          findByConversationAndUser: vi.fn().mockResolvedValue(null),
+          countUnread: vi.fn().mockResolvedValue(0),
+        } as unknown as ConversationParticipantRepository,
+        { findById: vi.fn().mockResolvedValue({ id: 'user-blocked', isActive: true }) } as unknown as UserLookupRepository,
+        { mapOnlineStatus: vi.fn().mockResolvedValue(new Map()) } as unknown as UserPresenceService,
+        {
+          findAcceptedRequest: vi.fn().mockResolvedValue({ id: 'accepted-request' }),
+        } as unknown as ConnectionRequestRepository,
+        blockService as unknown as BlockService,
+      );
+      return { service, blockService };
+    };
+
+    it('marks only the conversation with the blocked contact and queries blocks once', async () => {
+      const { service, blockService } = buildService(['user-blocked'], [
+        buildConversation('conv-1', 'user-blocked'),
+        buildConversation('conv-2', 'user-ok'),
+        buildConversation('conv-3', 'user-ok-2'),
+      ]);
+
+      const result = await service.findAllForUser('user-me');
+
+      expect(result.map((c) => c.isBlockedByMe)).toEqual([true, false, false]);
+      expect(blockService.findBlockedIdsBy).toHaveBeenCalledTimes(1);
+      expect(blockService.findBlockedIdsBy).toHaveBeenCalledWith('user-me');
+    });
+
+    it('returns false for the blocked user (does not reveal who blocked)', async () => {
+      const { service } = buildService([], [buildConversation('conv-1', 'user-blocker')]);
+      const result = await service.findAllForUser('user-me');
+      expect(result[0].isBlockedByMe).toBe(false);
+    });
+
+    it('includes isBlockedByMe in POST /chat/conversations (getOrCreate)', async () => {
+      const { service } = buildService(['user-blocked'], [buildConversation('conv-1', 'user-blocked')]);
+      const result = await service.getOrCreateWithStatus('user-me', 'user-blocked');
+      expect(result.isCreated).toBe(false);
+      expect(result.conversation.isBlockedByMe).toBe(true);
+    });
   });
 
   it('impide crear una conversación sin conexión aceptada', async () => {
@@ -244,6 +313,7 @@ describe('ConversationService', () => {
       userLookupRepositoryMock as unknown as UserLookupRepository,
       {} as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
+      noBlocks(),
     );
 
     await expect(
@@ -317,6 +387,7 @@ describe('ConversationService', () => {
       userLookupRepositoryMock as unknown as UserLookupRepository,
       userPresenceServiceMock as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
+      noBlocks(),
     );
 
     const result = await service.getOrCreateWithStatus(
@@ -390,6 +461,7 @@ describe('ConversationService', () => {
       userLookupRepositoryMock as unknown as UserLookupRepository,
       userPresenceServiceMock as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
+      noBlocks(),
     );
 
     const result = await service.getOrCreateWithStatus(

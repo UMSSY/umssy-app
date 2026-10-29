@@ -15,5 +15,6 @@ export interface ConversationResponse {
     createdAt: string;
   } | null;
   unreadCount: number;
+  isBlockedByMe: boolean;
   updatedAt: string;
 }
