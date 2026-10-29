@@ -1,6 +1,8 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
+import { buildVacancy } from "@/modules/vacancies/testing/vacancy-fixtures";
+import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import AppLayout from "../layout";
 import VacanciesPage from "./page";
@@ -18,6 +20,21 @@ vi.mock("@/modules/auth", async (importOriginal) => {
   return { ...actual, SessionUserCard: () => null };
 });
 
+const VACANCY = buildVacancy();
+// La primera carga de AppLayout es lenta con coverage en CI.
+const ASYNC_RENDER = { timeout: 5000 };
+
+vi.mock("@/modules/vacancies/services/vacancies.service", () => ({
+  vacanciesService: { listPublished: vi.fn(async () => [VACANCY]) },
+}));
+
+vi.mock("@/modules/matching/services/job-application.service", () => ({
+  jobApplicationService: {
+    apply: vi.fn(),
+    getMine: vi.fn(async () => ({ hasApplied: false, application: null })),
+  },
+}));
+
 describe("Vacancy routes", () => {
   beforeEach(() => {
     stubMatchMedia();
@@ -29,18 +46,18 @@ describe("Vacancy routes", () => {
     vi.unstubAllGlobals();
   });
 
-  it.each([VacanciesPage])("renders vacancy listings inside one app navigation", (Page) => {
-    render(<AppLayout><Page /></AppLayout>);
+  it.each([VacanciesPage])("renders vacancy listings inside one app navigation", async (Page) => {
+    renderWithQuery(<AppLayout><Page /></AppLayout>);
 
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Vacantes", level: 1 })).toBeDefined();
-    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })[0]).toHaveAttribute("href", "/vacancies/1");
+    expect((await screen.findAllByRole("link", { name: /^Ver detalles de / }, ASYNC_RENDER))[0]).toHaveAttribute("href", `/vacancies/${VACANCY.id}`);
   });
 
   it("opens details over the listing and restores the listing on Escape", async () => {
     const user = userEvent.setup();
-    render(<AppLayout><VacanciesPage /></AppLayout>);
-    await user.click(screen.getAllByRole("link", { name: /^Ver detalles de / })[0]);
+    renderWithQuery(<AppLayout><VacanciesPage /></AppLayout>);
+    await user.click((await screen.findAllByRole("link", { name: /^Ver detalles de / }, ASYNC_RENDER))[0]);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -54,20 +71,20 @@ describe("Vacancy routes", () => {
   });
 
   it("renders resolved vacancy details and links back to the listing", async () => {
-    const page = await VacancyDetailPage({ params: Promise.resolve({ id: "1" }) });
-    render(<AppLayout>{page}</AppLayout>);
+    const page = await VacancyDetailPage({ params: Promise.resolve({ id: VACANCY.id }) });
+    renderWithQuery(<AppLayout>{page}</AppLayout>);
 
-    const dialog = screen.getByRole("dialog");
-    expect(within(dialog).getByRole("heading", { name: "Desarrollador Web Junior" })).toBeDefined();
+    const dialog = await screen.findByRole("dialog", {}, ASYNC_RENDER);
+    expect(within(dialog).getByRole("heading", { name: VACANCY.cargo })).toBeDefined();
     expect(within(dialog).getByRole("button", { name: "Volver al listado" })).toBeDefined();
   });
 
   it("keeps the app navigation when a vacancy does not exist", async () => {
     const page = await VacancyDetailPage({ params: Promise.resolve({ id: "missing" }) });
-    render(<AppLayout>{page}</AppLayout>);
+    renderWithQuery(<AppLayout>{page}</AppLayout>);
 
+    expect(await screen.findByRole("heading", { name: "Vacante no encontrada" }, ASYNC_RENDER)).toBeDefined();
     expect(screen.getByRole("navigation", { name: "Menú principal", hidden: true })).toBeDefined();
-    expect(screen.getByRole("heading", { name: "Vacante no encontrada" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Volver al listado" })).toBeDefined();
   });
 });
