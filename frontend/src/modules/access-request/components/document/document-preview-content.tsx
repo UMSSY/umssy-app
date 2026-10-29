@@ -1,0 +1,79 @@
+"use client";
+
+import Image from "next/image";
+import { CircleCheck, Eye, FileText, X } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "cn";
+import type { DocumentPreviewContentProps } from "../../types/document-preview-content-props.types";
+import { formatFileSize } from "../../utils/format-file-size";
+import { FieldError } from "../personal-data/field-error";
+
+export function DocumentPreviewContent({
+  document: documentState,
+  isDisabled = false,
+  isRemoving = false,
+  onRemove,
+}: DocumentPreviewContentProps) {
+  const { previewUrl } = documentState;
+  if (!previewUrl) return null;
+
+  const fileName = documentState.fileName ?? "Documento";
+  const isPdf = documentState.mimeType === "application/pdf" ||
+    (!documentState.mimeType && fileName.toLowerCase().endsWith(".pdf"));
+
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-md border border-border text-ink-soft">
+          <FileText className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-ink">{fileName}</p>
+          <p className="text-xs text-text-secondary">{formatFileSize(documentState.fileSize ?? 0)}</p>
+        </div>
+        <p className="flex items-center gap-1.5 text-sm font-semibold text-ink">
+          <CircleCheck aria-hidden="true" className="size-4" />
+          Listo
+        </p>
+        {/* Button con render={<a />} pone role="button" al ancla; por eso se usa <a> con las clases de buttonVariants */}
+        <a
+          href={previewUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(buttonVariants({ variant: "ghost" }), "h-9 rounded-md px-3 text-sm font-semibold text-ink")}
+        >
+          <Eye aria-hidden="true" />
+          Ver
+        </a>
+        <Button
+          type="button"
+          variant="ghost"
+          disabled={isDisabled}
+          onClick={() => void onRemove()}
+          className="h-9 rounded-md px-3 text-sm font-semibold text-ink-soft"
+        >
+          {isRemoving ? (
+            "Quitando..."
+          ) : (
+            <>
+              <X aria-hidden="true" />
+              Quitar
+            </>
+          )}
+        </Button>
+      </div>
+
+      <div className="relative h-72 overflow-hidden rounded-md border border-border bg-surface-soft">
+        {isPdf ? (
+          <object data={previewUrl} type="application/pdf" aria-label={`Vista previa de ${fileName}`} className="size-full">
+            <p className="p-4 text-sm text-text-secondary">No se puede mostrar la vista previa de este PDF.</p>
+          </object>
+        ) : (
+          // Next ya omite la optimización con URL blob; unoptimized lo deja explícito
+          <Image src={previewUrl} alt={`Vista previa de ${fileName}`} fill unoptimized className="object-contain" />
+        )}
+      </div>
+      <FieldError id="document-remove-error" message={documentState.error ?? undefined} />
+    </div>
+  );
+}

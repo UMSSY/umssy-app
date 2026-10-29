@@ -3,21 +3,12 @@
 import { ArrowLeft, Check, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeading } from "@/shared/components/layout/page-heading";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SELECT_ITEM_CONTRAST_CLASS } from "@/shared/constants/select.constants";
-import type { DocumentType } from "../../constants/document-types.constants";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
 import { DocumentDropzone } from "./document-dropzone";
+import { DocumentTypeField } from "./document-type-field";
 import { DocumentPreviewCard } from "./document-preview-card";
 import { FieldError } from "../personal-data/field-error";
-import { RequiredMark } from "../personal-data/required-mark";
 import { DOCUMENT_RECOMMENDATIONS } from "../../constants/document-recommendations.constants";
-
-const DOCUMENT_TYPE_OPTIONS: ReadonlyArray<{ value: DocumentType; label: string }> = [
-  { value: "academic_diploma", label: "Diploma académico" },
-  { value: "national_title", label: "Título en provisión nacional" },
-];
 
 export function DocumentStep() {
   const { values, status, document: documentState, hasDocument, submitError, goToStep, selectDocumentType, submitRequest } =
@@ -33,36 +24,11 @@ export function DocumentStep() {
           description={`El nombre del documento debe coincidir con el que escribiste en el paso anterior: ${fullName}`}
         />
 
-        <div>
-          <Label htmlFor="documentType" className="mb-1.5 text-xs font-semibold text-ink">
-            Tipo de documento
-            <RequiredMark />
-          </Label>
-          <Select
-            name="documentType"
-            items={DOCUMENT_TYPE_OPTIONS}
-            value={documentState.documentType || null}
-            onValueChange={(value) => {
-              if (value) selectDocumentType(value as DocumentType);
-            }}
-            disabled={hasDocument || !isIdle}
-          >
-            <SelectTrigger
-              id="documentType"
-              aria-required="true"
-              className="w-full rounded-md border-border bg-surface px-3 text-base text-ink focus-visible:border-accent focus-visible:ring-interaction data-[size=default]:h-11"
-            >
-              <SelectValue placeholder="Elige el tipo de documento" />
-            </SelectTrigger>
-            <SelectContent alignItemWithTrigger={false}>
-              {DOCUMENT_TYPE_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value} className={SELECT_ITEM_CONTRAST_CLASS}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <DocumentTypeField
+          value={documentState.documentType}
+          onChange={selectDocumentType}
+          isDisabled={hasDocument || !isIdle}
+        />
 
         {hasDocument ? <DocumentPreviewCard /> : <DocumentDropzone />}
 
