@@ -82,3 +82,25 @@ restricciones o triggers exige otra migración revisada y respaldo verificado.
 
 No ejecutar este borrador en QA/producción. Los responsables de Database deben
 aprobar el SQL definitivo, el ajuste Prisma y el plan de despliegue/recuperación.
+
+## Corrección de CI del PR #1775
+
+La comprobación `Verify migrations match the Prisma schema` del job
+`123204347791` falló con código 2 por el nombre del índice de despacho. Se
+reprodujo el mismo resultado en una base local nueva de PostgreSQL 18.6:
+la migración crea `mentor_mail_outbox_legacy_dispatch`, pero el esquema
+declaraba `mentor_mail_outbox_dispatch`.
+
+Se alineó únicamente el `map` del índice Prisma con el nombre ya creado por la
+migración y se regeneró el cliente. Esto corrige la diferencia de nombre indicada
+en la tabla de auditoría anterior. Se conserva el nombre separado del índice
+histórico de catálogo sobre `status_id`; no se renombra ni elimina ningún índice
+existente y no se modifica el contenido de migraciones aplicadas.
+
+Validación local con la rama actualizada a `140c581a`: schema válido, aplicación de
+todas las migraciones sobre base vacía, reproducción previa del diff con código 2,
+diff corregido con `No difference detected` y código 0, segunda aplicación sin
+pendientes y generación Prisma. También pasaron compilación de seeds, catálogos
+de producción, administrador ficticio y seeds de desarrollo en esa base aislada.
+Los datos de prueba y logs permanecen fuera de Git. El resto de los pendientes de
+Database de este documento conserva su estado; esta corrección no los resuelve.

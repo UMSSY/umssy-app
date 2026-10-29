@@ -1191,6 +1191,6 @@ model MentorMailOutbox {
 
   user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
-  @@index([status, availableAt], map: "mentor_mail_outbox_dispatch")
+  @@index([status, availableAt], map: "mentor_mail_outbox_legacy_dispatch")
   @@map("mentor_mail_outbox")
 }
