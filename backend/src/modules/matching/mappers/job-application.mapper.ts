@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type {
   CompanyJobApplicantsResponse,
-  CompanyJobOfferRecord,
+  CompanyJobOffer,
   JobApplicantRecord,
   JobApplicantResponse,
 } from '../types/company-job-applicants.types.js';
@@ -46,7 +46,7 @@ export class JobApplicationMapper {
   }
 
   toCompanyApplicantsResponse(
-    offer: CompanyJobOfferRecord,
+    offer: CompanyJobOffer,
     records: JobApplicantRecord[],
   ): CompanyJobApplicantsResponse {
     return {

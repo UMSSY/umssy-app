@@ -1,4 +1,4 @@
-export interface CompanyJobOfferRecord {
+export interface CompanyJobOffer {
   id: string;
   title: string;
 }

@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { JobOfferUnavailableException } from '../exceptions/job-offer-unavailable.exception.js';
+import {
+  CompanyNotFoundException,
+  JobOfferNotFoundException,
+} from '../../job-offers/exceptions/index.js';
+import type { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { JobApplicationMapper } from '../mappers/job-application.mapper.js';
 import type { JobApplicationsRepository } from '../repositories/job-applications.repository.js';
 import { CompanyJobApplicantsService } from '../services/company-job-applicants.service.js';
@@ -23,17 +27,16 @@ const APPLICANT: JobApplicantRecord = {
 };
 
 describe('HU-02B - CompanyJobApplicantsService', () => {
-  const repository = {
-    findCompanyOffer: vi.fn(),
-    findApplicantsByOffer: vi.fn(),
-  };
+  const jobOffersService = { getByCompanyAndId: vi.fn() };
+  const repository = { findApplicantsByOffer: vi.fn() };
   let service: CompanyJobApplicantsService;
 
   beforeEach(() => {
     vi.resetAllMocks();
-    repository.findCompanyOffer.mockResolvedValue(OFFER);
+    jobOffersService.getByCompanyAndId.mockResolvedValue(OFFER);
     repository.findApplicantsByOffer.mockResolvedValue([APPLICANT]);
     service = new CompanyJobApplicantsService(
+      jobOffersService as unknown as JobOffersService,
       repository as unknown as JobApplicationsRepository,
       new JobApplicationMapper(),
     );
@@ -56,7 +59,7 @@ describe('HU-02B - CompanyJobApplicantsService', () => {
         },
       ],
     });
-    expect(repository.findCompanyOffer).toHaveBeenCalledWith(COMPANY_ID, OFFER_ID);
+    expect(jobOffersService.getByCompanyAndId).toHaveBeenCalledWith(COMPANY_ID, OFFER_ID);
     expect(repository.findApplicantsByOffer).toHaveBeenCalledWith(OFFER_ID);
   });
 
@@ -70,10 +73,19 @@ describe('HU-02B - CompanyJobApplicantsService', () => {
   });
 
   it('responde 404 si la vacante no existe o es de otra empresa', async () => {
-    repository.findCompanyOffer.mockResolvedValue(null);
+    jobOffersService.getByCompanyAndId.mockRejectedValue(new JobOfferNotFoundException());
 
     await expect(service.listByOffer(COMPANY_ID, OFFER_ID)).rejects.toBeInstanceOf(
-      JobOfferUnavailableException,
+      JobOfferNotFoundException,
+    );
+    expect(repository.findApplicantsByOffer).not.toHaveBeenCalled();
+  });
+
+  it('responde 404 si la empresa no existe', async () => {
+    jobOffersService.getByCompanyAndId.mockRejectedValue(new CompanyNotFoundException());
+
+    await expect(service.listByOffer(COMPANY_ID, OFFER_ID)).rejects.toBeInstanceOf(
+      CompanyNotFoundException,
     );
     expect(repository.findApplicantsByOffer).not.toHaveBeenCalled();
   });
