@@ -16,6 +16,9 @@ import { RejectionNotificationService } from './services/rejection-notification.
 import { ActivationOtpService } from './services/activation-otp.service.js';
 import { MailServiceSender } from './mail/mail-service-sender.js';
 import { MAIL_SENDER } from './mail/mail-sender.js';
+import { RejectionMailContextService } from './mail/rejection-mail-context.service.js';
+import { RejectionMailLinkService } from './services/rejection-mail-link.service.js';
+import { RejectionMailRepository } from './repositories/rejection-mail.repository.js';
 import { DocumentValidationRepository } from './repositories/document-validation.repository.js';
 import { AutomaticValidationService } from './services/automatic-validation.service.js';
 import { DocumentCorrectionController } from './controllers/document-correction.controller.js';
@@ -35,6 +38,9 @@ import { DocumentCorrectionService } from './services/document-correction.servic
     ActivationOtpRepository,
     ActivationOtpService,
     RejectionNotificationService,
+    RejectionMailContextService,
+    RejectionMailLinkService,
+    RejectionMailRepository,
     DocumentValidationRepository,
     AutomaticValidationService,
     DocumentCorrectionRepository,

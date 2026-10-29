@@ -2,10 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MailTemplateService } from '../../mail/services/mail-template.service.js';
 import { buildFrontendUrl, frontendBaseUrl } from '../mail/helpers/frontend-url.js';
 import { MailServiceSender } from '../mail/mail-service-sender.js';
+import type { MailService } from '../../mail/services/mail.service.js';
+import type { RejectionMailLinkService } from '../services/rejection-mail-link.service.js';
 import {
   ACCOUNT_ACTIVATED_MJML,
   ACTIVATION_CODE_MJML,
-  REJECTION_MJML,
+  loadRejectionTemplate,
 } from '../mail/templates/access-request-mails.template.js';
 
 const NOW = new Date('2026-10-05T12:00:00.000Z');
@@ -49,7 +51,13 @@ describe('MailServiceSender', () => {
 
   function build() {
     const mailService = { send: vi.fn().mockResolvedValue(undefined) };
-    return { mailService, sender: new MailServiceSender(mailService as any) };
+    const rejectionLinks = { forRecipient: vi.fn().mockResolvedValue({
+      requestCode: 'SOL-2026-0001',
+      url: `https://umssy.test/request-access/status?code=SOL-2026-0001#correctionToken=dcr1.${'x'.repeat(43)}`,
+    }) };
+    return { mailService, rejectionLinks, sender: new MailServiceSender(
+      mailService as unknown as MailService, rejectionLinks as unknown as RejectionMailLinkService,
+    ) };
   }
 
   it('envía el código con su vigencia en minutos y el enlace de activación', async () => {
@@ -88,14 +96,17 @@ describe('MailServiceSender', () => {
     });
   });
 
-  it('envía el rechazo con el motivo y el enlace para volver a solicitar', async () => {
+  it('envía el rechazo con el motivo y el enlace personal a Mi solicitud', async () => {
     const { mailService, sender } = build();
 
     await sender.sendRejection('ana@umss.test', 'Documento ilegible');
 
     expect(mailService.send.mock.calls[0][0]).toMatchObject({
-      mjml: REJECTION_MJML,
-      values: { reason: 'Documento ilegible', requestAccessUrl: 'https://umssy.test/request-access' },
+      mjml: await loadRejectionTemplate(),
+      values: {
+        reason: 'Documento ilegible', requestCode: 'SOL-2026-0001',
+        requestStatusUrl: `https://umssy.test/request-access/status?code=SOL-2026-0001#correctionToken=dcr1.${'x'.repeat(43)}`,
+      },
     });
   });
 
@@ -135,10 +146,11 @@ describe('plantillas MJML', () => {
   });
 
   it('el correo de rechazo escapa el HTML del motivo', async () => {
-    const html = await templates.render(REJECTION_MJML, {
+    const html = await templates.render(await loadRejectionTemplate(), {
       ...brand,
       reason: '<script>alert(1)</script>',
-      requestAccessUrl: 'https://umssy.test/request-access',
+      requestCode: 'SOL-2026-0001',
+      requestStatusUrl: 'https://umssy.test/request-access/status?code=SOL-2026-0001',
     });
 
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');

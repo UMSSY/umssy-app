@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+
 // Contenido de cada correo en MJML. Los {{ valores }} los reemplaza MailTemplateService
 // y el marco (logo, cabecera y pie) lo pone layout.mjml.
 
@@ -22,13 +24,7 @@ export const ACCOUNT_ACTIVATED_MJML = `
   </mj-column>
 </mj-section>`;
 
-export const REJECTION_MJML = `
-<mj-section padding="8px 24px">
-  <mj-column>
-    <mj-text mj-class="heading">Tu solicitud no fue aprobada</mj-text>
-    <mj-text>Revisamos tu solicitud de acceso y no pudimos aprobarla por el siguiente motivo:</mj-text>
-    <mj-text mj-class="secondary">{{ reason }}</mj-text>
-    <mj-text>Puedes corregir lo indicado y enviar una nueva solicitud.</mj-text>
-    <mj-button href="{{ requestAccessUrl }}">Solicitar acceso</mj-button>
-  </mj-column>
-</mj-section>`;
+// El build ya copia el directorio mail/mjml al mismo lugar relativo en dist.
+export function loadRejectionTemplate(): Promise<string> {
+  return readFile(new URL('../../../mail/mjml/access-request-rejection.mjml', import.meta.url), 'utf8');
+}
