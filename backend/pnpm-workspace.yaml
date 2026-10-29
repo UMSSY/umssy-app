@@ -4,3 +4,5 @@ allowBuilds:
   prisma: true
   "@prisma/engines": true
   "@scarf/scarf": true
+  tesseract.js: false
+  onnxruntime-node: false
