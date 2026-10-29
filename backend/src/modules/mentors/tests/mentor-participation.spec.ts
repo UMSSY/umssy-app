@@ -1,4 +1,3 @@
-
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { GUARDS_METADATA } from '@nestjs/common/constants.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
@@ -6,6 +5,7 @@ import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MentorParticipationController } from '../controllers/mentor-participation.controller.js';
 import { MentorParticipationRepository } from '../repositories/mentor-participation.repository.js';
 import { MentorParticipationService } from '../services/mentor-participation.service.js';
+import { randomUUID } from 'node:crypto';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -46,37 +46,28 @@ function fixture(
     offer: null,
   };
 
-  let attemptLimit: AttemptLimit | null = null;
+  const policyAttempts: Array<{
+    id: string;
+    userId: string;
+    operation: string;
+    key: string;
+    payloadHash: string;
+    occurredAt: Date;
+    counted: boolean;
+    outcome: unknown;
+  }> = [];
+  const policySanctions: Array<{
+    id: string;
+    userId: string;
+    startedAt: Date;
+    endsAt: Date;
+  }> = [];
 
-  const findAttemptLimit = vi.fn(async () => attemptLimit);
-
-  const createAttemptLimit = vi.fn(async ({ data }) => {
-    attemptLimit = { ...data };
-    return attemptLimit;
-  });
-
-  const updateAttemptLimit = vi.fn(async ({ data }) => {
-    if (!attemptLimit) {
-      throw new Error('No existe el control de intentos');
-    }
-
-    attemptLimit = { ...attemptLimit, ...data };
-    return attemptLimit;
-  });
-
-  const upsertAttemptLimit = vi.fn(async ({ create, update }) => {
-    attemptLimit = attemptLimit
-      ? { ...attemptLimit, ...update }
-      : { ...create };
-
-    return attemptLimit;
-  });
-
-  const findFirst = vi.fn().mockResolvedValue(
-    options.existingRequest || options.pending
-      ? request
-      : null,
-  );
+  const findFirst = vi
+    .fn()
+    .mockResolvedValue(
+      options.existingRequest || options.pending ? request : null,
+    );
 
   const create = vi.fn().mockResolvedValue(request);
 
@@ -86,58 +77,126 @@ function fixture(
   }));
 
   const tx = {
-    $executeRaw: vi.fn().mockResolvedValue(0),
-    $queryRaw: vi.fn(async (strings: TemplateStringsArray) => {
-      const sql = strings.join(' ');
+    $executeRaw: vi.fn(
+      async (strings: TemplateStringsArray, ...values: unknown[]) => {
+        if (strings.join(' ').includes('INSERT INTO mentor_intake_attempts')) {
+          policyAttempts.push({
+            id: values[0] as string,
+            userId: values[1] as string,
+            operation: values[2] as string,
+            key: values[3] as string,
+            payloadHash: values[4] as string,
+            occurredAt: values[5] as Date,
+            counted: values[6] as boolean,
+            outcome: JSON.parse(values[8] as string),
+          });
+        }
+        return 0;
+      },
+    ),
+    $queryRaw: vi.fn(
+      async (strings: TemplateStringsArray, ...values: unknown[]) => {
+        const sql = strings.join(' ');
 
-      if (sql.includes('pg_advisory_xact_lock')) {
+        if (sql.trim() === 'SELECT clock_timestamp() AS now')
+          return [{ now: new Date() }];
+        if (sql.includes('payload_hash AS'))
+          return policyAttempts.filter(
+            (row) =>
+              row.userId === values[0] &&
+              row.operation === values[1] &&
+              row.key === values[2],
+          );
+        if (
+          sql.includes(
+            'SELECT count(*)::int AS count FROM mentor_intake_attempts',
+          )
+        )
+          return [
+            {
+              count: policyAttempts.filter(
+                (row) =>
+                  row.counted &&
+                  row.userId === values[0] &&
+                  row.occurredAt.getTime() >
+                    (values[1] as Date).getTime() - 86400000,
+              ).length,
+            },
+          ];
+        if (sql.includes('SELECT ends_at AS'))
+          return policySanctions.filter(
+            (row) =>
+              row.userId === values[0] && row.endsAt > (values[1] as Date),
+          );
+        if (sql.includes('INSERT INTO mentor_participation_sanctions')) {
+          const row = {
+            id: randomUUID(),
+            userId: values[0] as string,
+            startedAt: values[2] as Date,
+            endsAt: values[3] as Date,
+          };
+          policySanctions.push(row);
+          return [row];
+        }
+
+        if (sql.includes('pg_advisory_xact_lock')) {
+          return [];
+        }
+
+        if (sql.includes('AS eligible')) {
+          return [
+            {
+              eligible: options.eligible ?? true,
+              alreadyMentor: false,
+            },
+          ];
+        }
+
+        if (sql.includes('AS "approvedGraduates"')) {
+          return [
+            {
+              approvedGraduates: 3,
+              activeMentors: options.available === 0 ? 3 : 2,
+              reservedOffers: 0,
+            },
+          ];
+        }
+
+        if (sql.includes(' AS exists')) return [{ exists: false }];
+        if (sql.includes('INSERT INTO mentor_participation_requests')) {
+          return [
+            await create({
+              data: { userId: 'user-1', status: 'PENDING', ...preferences },
+            }),
+          ];
+        }
+        if (sql.includes('UPDATE mentor_participation_requests')) {
+          if (!options.pending) return [];
+          return [
+            await update({
+              where: { id: request.id },
+              data: sql.includes("status = 'CANCELLED'")
+                ? { status: 'CANCELLED' }
+                : preferences,
+            }),
+          ];
+        }
+        if (sql.includes('FROM mentor_participation_requests')) {
+          const found = await findFirst();
+          return found ? [found] : [];
+        }
         return [];
-      }
-
-      if (sql.includes('AS eligible')) {
-        return [{
-          eligible: options.eligible ?? true,
-          alreadyMentor: false,
-        }];
-      }
-
-      if (sql.includes('AS "approvedGraduates"')) {
-        return [{
-          approvedGraduates: 3,
-          activeMentors: options.available === 0 ? 3 : 2,
-          reservedOffers: 0,
-        }];
-      }
-
-      if (sql.includes(' AS exists')) return [{ exists: false }];
-      if (sql.includes('INSERT INTO mentor_participation_requests')) {
-        return [await create({ data: { userId: 'user-1', status: 'PENDING', ...preferences } })];
-      }
-      if (sql.includes('UPDATE mentor_participation_requests')) {
-        if (!options.pending) return [];
-        return [await update({ where: { id: request.id }, data: sql.includes("status = 'CANCELLED'") ? { status: 'CANCELLED' } : preferences })];
-      }
-      if (sql.includes('FROM mentor_participation_requests')) {
-        const found = await findFirst();
-        return found ? [found] : [];
-      }
-      return [];
-    }),
+      },
+    ),
     technicalArea: {
-      count: vi.fn().mockResolvedValue(
-        options.validPreferences === false ? 0 : 1,
-      ),
+      count: vi
+        .fn()
+        .mockResolvedValue(options.validPreferences === false ? 0 : 1),
     },
     orientationType: {
-      count: vi.fn().mockResolvedValue(
-        options.validPreferences === false ? 0 : 1,
-      ),
-    },
-    mentorParticipationAttemptLimit: {
-      findUnique: findAttemptLimit,
-      create: createAttemptLimit,
-      update: updateAttemptLimit,
-      upsert: upsertAttemptLimit,
+      count: vi
+        .fn()
+        .mockResolvedValue(options.validPreferences === false ? 0 : 1),
     },
     mentorParticipationRequest: {
       findFirst,
@@ -157,6 +216,15 @@ function fixture(
 
   const repository = new MentorParticipationRepository(prisma);
   const service = new MentorParticipationService(repository);
+  const createWithPolicy = service.create.bind(service);
+  vi.spyOn(service, 'create').mockImplementation((id, form, key, transaction) =>
+    createWithPolicy(
+      id,
+      form,
+      transaction ? undefined : (key ?? randomUUID()),
+      transaction,
+    ),
+  );
 
   return {
     repository,
@@ -166,12 +234,24 @@ function fixture(
     findFirst,
     create,
     update,
-    findAttemptLimit,
-    createAttemptLimit,
-    updateAttemptLimit,
-    upsertAttemptLimit,
     transaction,
-    getAttemptLimit: () => attemptLimit,
+    getAttemptLimit: (): AttemptLimit | null => {
+      const recent = policyAttempts.filter(
+        (row) =>
+          row.counted && row.occurredAt.getTime() > Date.now() - 86400000,
+      );
+      const active = policySanctions.find(
+        (row) => row.endsAt.getTime() > Date.now(),
+      );
+      return recent.length || active
+        ? {
+            userId: 'user-1',
+            attemptCount: recent.length,
+            windowStartedAt: recent[0]?.occurredAt ?? null,
+            blockedUntil: active?.endsAt ?? null,
+          }
+        : null;
+    },
   };
 }
 
@@ -202,7 +282,8 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
     });
 
     await expect(service.create('user-1', preferences)).rejects.toMatchObject({
-      statusCode: 409, data: { code: 'REQUEST_ALREADY_EXISTS' },
+      statusCode: 409,
+      data: { code: 'REQUEST_ALREADY_EXISTS' },
     });
     expect(create).not.toHaveBeenCalled();
   });
@@ -228,10 +309,7 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
       pending: true,
     });
 
-    const result = await service.updatePreferences(
-      'user-1',
-      preferences,
-    );
+    const result = await service.updatePreferences('user-1', preferences);
 
     expect(result.id).toBe(request.id);
     expect(result.queuedAt).toEqual(request.queuedAt);
@@ -263,9 +341,7 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
       validPreferences: false,
     });
 
-    await expect(
-      service.create('user-1', preferences),
-    ).rejects.toMatchObject({
+    await expect(service.create('user-1', preferences)).rejects.toMatchObject({
       statusCode: 400,
     });
 
@@ -277,9 +353,7 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
       eligible: false,
     });
 
-    await expect(
-      service.create('user-1', preferences),
-    ).rejects.toMatchObject({
+    await expect(service.create('user-1', preferences)).rejects.toMatchObject({
       statusCode: 403,
     });
 
@@ -308,20 +382,19 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
     } as unknown as MentorParticipationService);
 
     expect(
-      Reflect.getMetadata(
-        GUARDS_METADATA,
-        MentorParticipationController,
-      ),
+      Reflect.getMetadata(GUARDS_METADATA, MentorParticipationController),
     ).toEqual([JwtAuthGuard]);
 
     await controller.create(
       { id: 'jwt-user' } as never,
       preferences,
+      '11111111-1111-4111-8111-111111111111',
     );
 
     expect(create).toHaveBeenCalledWith(
       'jwt-user',
       preferences,
+      '11111111-1111-4111-8111-111111111111',
     );
   });
 });
@@ -333,9 +406,9 @@ describe('HU7-4: limite de intentos y sanciones', () => {
     });
 
     for (let attempt = 1; attempt <= 4; attempt++) {
-      await expect(
-        service.create('user-1', preferences),
-      ).rejects.toMatchObject({ statusCode: 409 });
+      await expect(service.create('user-1', preferences)).rejects.toMatchObject(
+        { statusCode: 409 },
+      );
     }
 
     expect(getAttemptLimit()?.attemptCount).toBe(4);
@@ -348,12 +421,12 @@ describe('HU7-4: limite de intentos y sanciones', () => {
     });
 
     for (let attempt = 1; attempt <= 4; attempt++) {
-      await expect(service.create('user-1', preferences)).rejects.toMatchObject({ statusCode: 409 });
+      await expect(service.create('user-1', preferences)).rejects.toMatchObject(
+        { statusCode: 409 },
+      );
     }
 
-    await expect(
-      service.create('user-1', preferences),
-    ).rejects.toMatchObject({
+    await expect(service.create('user-1', preferences)).rejects.toMatchObject({
       statusCode: 429,
     });
 
@@ -370,12 +443,12 @@ describe('HU7-4: limite de intentos y sanciones', () => {
     });
 
     for (let attempt = 1; attempt <= 4; attempt++) {
-      await expect(service.create('user-1', preferences)).rejects.toMatchObject({ statusCode: 409 });
+      await expect(service.create('user-1', preferences)).rejects.toMatchObject(
+        { statusCode: 409 },
+      );
     }
 
-    await expect(
-      service.create('user-1', preferences),
-    ).rejects.toMatchObject({
+    await expect(service.create('user-1', preferences)).rejects.toMatchObject({
       statusCode: 429,
     });
 
@@ -385,17 +458,15 @@ describe('HU7-4: limite de intentos y sanciones', () => {
 
     vi.setSystemTime(new Date('2026-10-29T11:59:59Z'));
 
-    await expect(
-      service.create('user-1', preferences),
-    ).rejects.toMatchObject({
+    await expect(service.create('user-1', preferences)).rejects.toMatchObject({
       statusCode: 429,
     });
 
     vi.setSystemTime(new Date('2026-10-29T12:00:00Z'));
 
-    await expect(
-      service.create('user-1', preferences),
-    ).rejects.toMatchObject({ statusCode: 409 });
+    await expect(service.create('user-1', preferences)).rejects.toMatchObject({
+      statusCode: 409,
+    });
 
     expect(getAttemptLimit()?.attemptCount).toBe(1);
     expect(getAttemptLimit()?.blockedUntil).toBeNull();
@@ -409,11 +480,15 @@ describe('HU7-4: limite de intentos y sanciones', () => {
       existingRequest: true,
     });
 
-    await expect(service.create('user-1', preferences)).rejects.toMatchObject({ statusCode: 409 });
+    await expect(service.create('user-1', preferences)).rejects.toMatchObject({
+      statusCode: 409,
+    });
 
     vi.setSystemTime(new Date('2026-10-27T12:00:00Z'));
 
-    await expect(service.create('user-1', preferences)).rejects.toMatchObject({ statusCode: 409 });
+    await expect(service.create('user-1', preferences)).rejects.toMatchObject({
+      statusCode: 409,
+    });
 
     expect(getAttemptLimit()?.attemptCount).toBe(1);
     expect(getAttemptLimit()?.windowStartedAt).toEqual(

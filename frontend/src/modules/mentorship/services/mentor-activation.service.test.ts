@@ -1,6 +1,9 @@
 import { apiClient } from "@/shared/services/api-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { activateMentor } from "./mentor-activation.service";
+vi.mock("@/shared/services/storage/business-record-storage", () => ({
+  updateBusinessRecord: vi.fn(async (_key, update) => update(null)),
+}));
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -27,7 +30,9 @@ describe("activateMentor", () => {
     const result = await activateMentor(payload);
     const sentPayload = request.mock.calls[0]?.[1];
 
-    expect(request).toHaveBeenCalledWith("/mentors/activate", payload);
+    expect(request).toHaveBeenCalledWith("/mentors/activate", payload, {
+      headers: { "Idempotency-Key": expect.any(String) },
+    });
     expect(sentPayload).toEqual({
       technicalAreaIds: payload.technicalAreaIds,
       orientationTypeIds: payload.orientationTypeIds,

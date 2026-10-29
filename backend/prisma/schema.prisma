@@ -107,6 +107,9 @@ model Company {
 }
 
 model User {
+  mentorIntakeAttempts MentorIntakeAttempt[]
+  mentorParticipationSanctions MentorParticipationSanction[]
+  mentorMailOutbox MentorMailOutbox[]
   id                      String   @id @default(uuid()) @db.Uuid
   firstName               String   @map("first_name") @db.VarChar(100)
   lastName                String   @map("last_name") @db.VarChar(100)
@@ -1137,4 +1140,57 @@ model DocumentValidation {
   @@index([result])
   @@index([revertedById])
   @@map("document_validations")
+}
+
+model MentorIntakeAttempt {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  operation      String   @db.VarChar(20)
+  idempotencyKey String   @map("idempotency_key") @db.Uuid
+  payloadHash    String   @map("payload_hash") @db.VarChar(64)
+  occurredAt     DateTime @default(dbgenerated("clock_timestamp()")) @map("occurred_at") @db.Timestamptz(6)
+  counted        Boolean  @default(true)
+  responseStatus Int      @map("response_status")
+  responseData   Json     @map("response_data")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  sanction MentorParticipationSanction?
+
+  @@unique([userId, operation, idempotencyKey], map: "mentor_intake_attempts_identity")
+  @@map("mentor_intake_attempts")
+}
+
+model MentorParticipationSanction {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String   @map("user_id") @db.Uuid
+  triggerAttemptId String?  @unique @map("trigger_attempt_id") @db.Uuid
+  startedAt        DateTime @map("started_at") @db.Timestamptz(6)
+  endsAt           DateTime @map("ends_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  triggerAttempt MentorIntakeAttempt? @relation(fields: [triggerAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@index([userId, endsAt], map: "mentor_participation_sanctions_active")
+  @@map("mentor_participation_sanctions")
+}
+
+model MentorMailOutbox {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventKey    String    @unique @map("event_key") @db.VarChar(100)
+  kind        String    @db.VarChar(20)
+  userId      String    @map("user_id") @db.Uuid
+  recipient   String    @db.VarChar(150)
+  payload     Json
+  status      String    @default("PENDING") @db.VarChar(20)
+  attempts    Int       @default(0)
+  availableAt DateTime  @default(dbgenerated("clock_timestamp()")) @map("available_at") @db.Timestamptz(6)
+  claimedAt   DateTime? @map("claimed_at") @db.Timestamptz(6)
+  sentAt      DateTime? @map("sent_at") @db.Timestamptz(6)
+  lastError   String?   @map("last_error") @db.VarChar(100)
+  createdAt   DateTime  @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@index([status, availableAt], map: "mentor_mail_outbox_legacy_dispatch")
+  @@map("mentor_mail_outbox")
 }
