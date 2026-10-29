@@ -24,7 +24,16 @@ interface SocketMessagePayload {
 }
 =======
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
+<<<<<<< HEAD
 >>>>>>> e98f3988 (feat: conversation repository upsert and gateway handler (issue #1701-#1705))
+=======
+import { MessageService } from '../services/message.service.js';
+
+interface SocketMessagePayload {
+  conversationId?: string;
+  content?: string;
+}
+>>>>>>> aba8f049 (fix: resolve chat.gateway conflict - keep event room join + message send functionality)
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -49,7 +58,11 @@ export class ChatGateway
     private readonly messageService: MessageService,
 =======
     private readonly eventRoomService: EventRoomService,
+<<<<<<< HEAD
 >>>>>>> e98f3988 (feat: conversation repository upsert and gateway handler (issue #1701-#1705))
+=======
+    private readonly messageService: MessageService,
+>>>>>>> aba8f049 (fix: resolve chat.gateway conflict - keep event room join + message send functionality)
   ) {}
 
   afterInit(server: Server) {
@@ -104,8 +117,12 @@ export class ChatGateway
     }
 
     try {
+<<<<<<< HEAD
       const conversationIds =
         await this.chatService.getActiveConversationIds(user.id);
+=======
+      const conversationIds = await this.chatService.getActiveConversationIds(user.id);
+>>>>>>> aba8f049 (fix: resolve chat.gateway conflict - keep event room join + message send functionality)
 
       for (const convId of conversationIds) {
         await client.join(convId);
@@ -113,6 +130,7 @@ export class ChatGateway
 
       await this.userPresenceService.markOnline(user.id);
       this.server.emit('presence:online', { userId: user.id });
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 
@@ -132,6 +150,8 @@ export class ChatGateway
       });
 
 >>>>>>> e98f3988 (feat: conversation repository upsert and gateway handler (issue #1701-#1705))
+=======
+>>>>>>> aba8f049 (fix: resolve chat.gateway conflict - keep event room join + message send functionality)
     } catch (error) {
       this.logger.error(
         `Error inicializando socket para el usuario ${user.id}`,
@@ -158,6 +178,7 @@ export class ChatGateway
     }
   }
 
+<<<<<<< HEAD
   @SubscribeMessage('conversation:join')
   async joinConversation(
     @ConnectedSocket() client: Socket,
@@ -200,6 +221,33 @@ export class ChatGateway
 
   @SubscribeMessage('message:send')
   async sendMessage(
+=======
+  // Listener for event_room:join
+  @SubscribeMessage('event_room:join')
+  async handleEventRoomJoin(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { eventId: string },
+  ) {
+    try {
+      const conversationId = await this.eventRoomService.joinEventRoom(
+        client.data.user.id,
+        payload.eventId,
+      );
+      await client.join(conversationId);
+      client.emit('event_room:joined', { conversationId });
+    } catch (error) {
+      if (error instanceof NotRegisteredForEventException) {
+        client.emit('event_room:error', { code: 'not_registered' });
+      } else {
+        client.emit('event_room:error', { code: 'generic_error' });
+      }
+    }
+  }
+
+  // Subscribe message:send
+  @SubscribeMessage('message:send')
+  async handleMessageSend(
+>>>>>>> aba8f049 (fix: resolve chat.gateway conflict - keep event room join + message send functionality)
     @ConnectedSocket() client: Socket,
     @MessageBody() body: SocketMessagePayload,
   ) {
@@ -233,17 +281,25 @@ export class ChatGateway
       };
     } catch (error) {
       this.logger.warn(
+<<<<<<< HEAD
         `No se pudo enviar mensaje: ${
           error instanceof Error ? error.message : String(error)
         }`,
+=======
+        `No se pudo enviar mensaje: ${error instanceof Error ? error.message : String(error)}`,
+>>>>>>> aba8f049 (fix: resolve chat.gateway conflict - keep event room join + message send functionality)
       );
 
       return {
         ok: false,
         error:
+<<<<<<< HEAD
           error instanceof Error
             ? error.message
             : 'No se pudo enviar el mensaje',
+=======
+          error instanceof Error ? error.message : 'No se pudo enviar el mensaje',
+>>>>>>> aba8f049 (fix: resolve chat.gateway conflict - keep event room join + message send functionality)
       };
     }
   }
