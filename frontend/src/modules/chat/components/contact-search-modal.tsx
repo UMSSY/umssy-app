@@ -322,8 +322,7 @@ export function ContactSearchModal({
                       </p>
                     )}
                   </div>
-
-                  <Button
+<Button
                     ref={(el) => {
                       optionRefs.current[index] = el;
                     }}
