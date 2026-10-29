@@ -15,12 +15,16 @@ import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../../../common/services/session.service.js';
 import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
+<<<<<<< HEAD
 import { MessageService } from '../services/message.service.js';
 
 interface SocketMessagePayload {
   conversationId?: string;
   content?: string;
 }
+=======
+import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
+>>>>>>> e98f3988 (feat: conversation repository upsert and gateway handler (issue #1701-#1705))
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -41,7 +45,11 @@ export class ChatGateway
     private readonly sessionService: SessionService,
     private readonly chatService: ChatService,
     private readonly userPresenceService: UserPresenceService,
+<<<<<<< HEAD
     private readonly messageService: MessageService,
+=======
+    private readonly eventRoomService: EventRoomService,
+>>>>>>> e98f3988 (feat: conversation repository upsert and gateway handler (issue #1701-#1705))
   ) {}
 
   afterInit(server: Server) {
@@ -105,6 +113,25 @@ export class ChatGateway
 
       await this.userPresenceService.markOnline(user.id);
       this.server.emit('presence:online', { userId: user.id });
+<<<<<<< HEAD
+=======
+
+      // Listener for event_room:join
+      client.on('event_room:join', async (payload: EventRoomJoinDto) => {
+        try {
+          const conversationId = await this.eventRoomService.joinEventRoom(user.id, payload.eventId);
+          await client.join(conversationId);
+          client.emit('event_room:joined', { conversationId });
+        } catch (error) {
+          if (error instanceof NotRegisteredForEventException) {
+            client.emit('event_room:error', { code: 'not_registered' });
+          } else {
+            client.emit('event_room:error', { code: 'generic_error' });
+          }
+        }
+      });
+
+>>>>>>> e98f3988 (feat: conversation repository upsert and gateway handler (issue #1701-#1705))
     } catch (error) {
       this.logger.error(
         `Error inicializando socket para el usuario ${user.id}`,
