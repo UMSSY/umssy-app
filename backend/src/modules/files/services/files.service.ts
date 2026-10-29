@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { Prisma } from '../../../prisma/client.js';
 import { FilesRepository } from '../repositories/files.repository.js';
 import { EmptyFileException, FileNotFoundException, FileTooLargeException, InvalidFileTypeException } from '../exceptions/index.js';
 import { type FileTypeRule } from '../types/file-rules.js';
@@ -19,7 +20,7 @@ function removeControlChars(value: string): string {
 export class FilesService {
   constructor(private readonly filesRepository: FilesRepository) {}
 
-  async create(input: CreateFileInput): Promise<FileMetadata> {
+  async create(input: CreateFileInput, tx?: Prisma.TransactionClient): Promise<FileMetadata> {
     const { content } = input;
     if (content.length === 0) {
       throw new EmptyFileException();
@@ -33,13 +34,14 @@ export class FilesService {
       throw new InvalidFileTypeException();
     }
 
-    return this.filesRepository.create({
+    const data = {
       name: this.sanitizeName(input.name),
       extension: type.extension,
       mimeType: type.mimeType,
       size: content.length,
       content,
-    });
+    };
+    return tx ? this.filesRepository.create(data, tx) : this.filesRepository.create(data);
   }
 
   async getMetadata(id: string): Promise<FileMetadata> {
