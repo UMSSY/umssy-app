@@ -9,6 +9,8 @@ import {
   useEffect,
   type KeyboardEvent,
 } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { UserRoundPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,8 +22,15 @@ import {
 import { Input } from "@/components/ui/input";
 
 import { useContactSearch } from "../hooks/use-contact-search";
+import { useSendConnectionRequest } from "../hooks/use-send-connection-request";
+import {
+  getSentConnectionRequests,
+  getReceivedConnectionRequests,
+  getAcceptedConnectionRequests,
+} from "../services/connection-request-api";
 import { getInitials } from "../utils/date-formatter";
 import type { User } from "../types/user.types";
+import type { ConnectionRequest } from "../types/connection-request.types";
 
 interface ContactSearchModalProps {
   isOpen: boolean;
@@ -35,11 +44,46 @@ export function ContactSearchModal({
   onSelectContact,
 }: ContactSearchModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
-
-  const { results, isSearching } = useContactSearch(searchTerm);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [sendingUserId, setSendingUserId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const { results, isSearching } = useContactSearch(searchTerm);
+  const sendRequest = useSendConnectionRequest();
+
+  const sentQuery = useQuery({
+    queryKey: ["chat", "connection-requests", "sent"],
+    queryFn: getSentConnectionRequests,
+    enabled: isOpen,
+  });
+
+  const receivedQuery = useQuery({
+    queryKey: ["chat", "connection-requests", "received"],
+    queryFn: getReceivedConnectionRequests,
+    enabled: isOpen,
+  });
+
+  const acceptedQuery = useQuery({
+    queryKey: ["chat", "connection-requests", "accepted"],
+    queryFn: getAcceptedConnectionRequests,
+    enabled: isOpen,
+  });
+
+  const sentRequests = sentQuery.data ?? [];
+  const receivedRequests = receivedQuery.data ?? [];
+  const acceptedRequests = acceptedQuery.data ?? [];
+
+  const isLoadingStatuses =
+    sentQuery.isPending ||
+    receivedQuery.isPending ||
+    acceptedQuery.isPending;
+
+  const hasStatusError =
+    sentQuery.isError ||
+    receivedQuery.isError ||
+    acceptedQuery.isError;
 
   useEffect(() => {
     if (
@@ -54,19 +98,90 @@ export function ContactSearchModal({
   }, [selectedIndex]);
 
   const handleClose = () => {
+    if (sendingUserId) return;
+
     setSearchTerm("");
     setSelectedIndex(-1);
+    setError(null);
     onClose();
   };
 
-  const handleSelectUser = (user: User) => {
-    onSelectContact(user);
-    handleClose();
+  const getRequestStatus = (userId: string) => {
+    const accepted = acceptedRequests.some(
+      (request: ConnectionRequest) =>
+        request.status?.title === "ACCEPTED" &&
+        (request.senderId === userId ||
+          request.receiverId === userId),
+    );
+
+    if (accepted) return "ACCEPTED";
+
+    const received = receivedRequests.some(
+      (request: ConnectionRequest) =>
+        request.senderId === userId &&
+        request.status?.title === "PENDING",
+    );
+
+    if (received) return "RECEIVED";
+
+    const sent = sentRequests.some(
+      (request: ConnectionRequest) =>
+        request.receiverId === userId &&
+        request.status?.title === "PENDING",
+    );
+
+    if (sent) return "PENDING";
+
+    const rejected = [...sentRequests, ...receivedRequests].some(
+      (request: ConnectionRequest) =>
+        (request.senderId === userId ||
+          request.receiverId === userId) &&
+        request.status?.title === "REJECTED",
+    );
+
+    if (rejected) return "REJECTED";
+
+    return "NONE";
   };
 
-  const handleKeyDown = (
-    e: KeyboardEvent<HTMLInputElement>
-  ) => {
+  const handleSendRequest = async (user: User) => {
+    if (sendingUserId || hasStatusError || isLoadingStatuses) {
+      return;
+    }
+
+    setError(null);
+    setSendingUserId(user.id);
+
+    try {
+      await sendRequest.mutateAsync(user.id);
+      // El hook invalida las consultas de solicitudes.
+      // La lista se actualizará con el estado del backend.
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo enviar la solicitud.",
+      );
+    } finally {
+      setSendingUserId(null);
+    }
+  };
+
+  const handleUserAction = (user: User) => {
+    const status = getRequestStatus(user.id);
+
+    if (status === "ACCEPTED") {
+      onSelectContact(user);
+      handleClose();
+      return;
+    }
+
+    if (status === "NONE") {
+      void handleSendRequest(user);
+    }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
       e.preventDefault();
       e.stopPropagation();
@@ -78,24 +193,19 @@ export function ContactSearchModal({
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-
       setSelectedIndex((prev) =>
-        prev < results.length - 1 ? prev + 1 : 0
+        prev < results.length - 1 ? prev + 1 : 0,
       );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-
       setSelectedIndex((prev) =>
-        prev > 0 ? prev - 1 : results.length - 1
+        prev > 0 ? prev - 1 : results.length - 1,
       );
     } else if (e.key === "Enter") {
       e.preventDefault();
 
-      if (
-        selectedIndex >= 0 &&
-        selectedIndex < results.length
-      ) {
-        handleSelectUser(results[selectedIndex]);
+      if (selectedIndex >= 0 && selectedIndex < results.length) {
+        handleUserAction(results[selectedIndex]);
       }
     }
   };
@@ -107,15 +217,9 @@ export function ContactSearchModal({
         if (!open) handleClose();
       }}
     >
-      <DialogContent
-        className="sm:max-w-md"
-        aria-labelledby="contact-search-title"
-      >
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle
-            id="contact-search-title"
-            className="font-heading text-base font-medium text-ink"
-          >
+          <DialogTitle className="font-heading text-lg font-medium text-ink">
             Nueva conversación
           </DialogTitle>
         </DialogHeader>
@@ -130,72 +234,120 @@ export function ContactSearchModal({
               setSelectedIndex(-1);
             }}
             onKeyDown={handleKeyDown}
-            className="w-full"
             aria-label="Buscar contactos"
           />
         </div>
 
-        <div
-          className="mt-2 flex max-h-[320px] flex-col gap-1 overflow-y-auto pr-1 pb-4"
-          role="listbox"
-          aria-label="Lista de contactos"
-        >
-          {isSearching ? (
-            <div
-              className="py-6 text-center text-sm text-text-secondary"
-              role="status"
+        {error && (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        )}
+
+        {hasStatusError && (
+          <div role="alert" className="text-sm text-destructive">
+            No se pudieron consultar las solicitudes.
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="ml-2"
+              onClick={() => {
+                void sentQuery.refetch();
+                void receivedQuery.refetch();
+                void acceptedQuery.refetch();
+              }}
             >
+              Reintentar
+            </Button>
+          </div>
+        )}
+
+        <div className="mt-2 flex max-h-[320px] flex-col overflow-y-auto">
+          {isSearching ? (
+            <div role="status" className="py-6 text-center text-sm">
               Buscando...
             </div>
           ) : results.length > 0 ? (
             results.map((user, index) => {
-              const isSelected = index === selectedIndex;
+              const status = getRequestStatus(user.id);
+              const isSendingThisUser = sendingUserId === user.id;
+              const isSelected = selectedIndex === index;
+
+              const isDisabled =
+                isLoadingStatuses ||
+                hasStatusError ||
+                Boolean(sendingUserId) ||
+                status === "PENDING" ||
+                status === "RECEIVED" ||
+                status === "REJECTED";
+
+              const buttonText = isSendingThisUser
+                ? "Enviando..."
+                : isLoadingStatuses
+                  ? "Consultando..."
+                  : hasStatusError
+                    ? "No disponible"
+                    : status === "PENDING"
+                      ? "Solicitud enviada"
+                      : status === "RECEIVED"
+                        ? "Solicitud recibida"
+                        : status === "ACCEPTED"
+                          ? "Abrir chat"
+                          : status === "REJECTED"
+                            ? "Solicitud rechazada"
+                            : "Enviar Solicitud";
 
               return (
-                <Button
+                <div
                   key={user.id}
-                  type="button"
-                  variant="ghost"
-                  size="default"
-                  ref={(el) => {
-                    optionRefs.current[index] = el;
-                  }}
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => handleSelectUser(user)}
-                  onMouseEnter={() =>
-                    setSelectedIndex(index)
-                  }
-                  className={`flex h-auto w-full min-w-0 cursor-pointer items-center justify-start gap-3 rounded-lg p-2.5 text-left whitespace-normal transition-colors outline-none ${
-                    isSelected
-                      ? "bg-surface-soft ring-2 ring-ring/20"
-                      : "hover:bg-surface-soft focus-visible:bg-surface-soft focus-visible:ring-2 focus-visible:ring-ring"
+                  className={`flex min-w-0 items-center gap-3 border-b border-border px-2 py-3 ${
+                    isSelected ? "bg-surface-soft" : ""
                   }`}
+                  onMouseEnter={() => setSelectedIndex(index)}
                 >
                   {user.avatarUrl ? (
                     <img
                       src={user.avatarUrl}
                       alt={user.fullName}
-                      className="size-10 shrink-0 rounded-full object-cover"
+                      className="size-10 shrink-0 rounded object-cover"
                     />
                   ) : (
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-border text-sm font-bold text-ink-soft">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded bg-border text-sm font-bold text-ink-soft">
                       {getInitials(user.fullName)}
                     </div>
                   )}
 
-                  <div className="flex min-w-0 flex-col overflow-hidden">
-                    <span className="truncate text-sm font-medium text-ink">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-ink">
                       {user.fullName}
-                    </span>
-
+                    </p>
                     {user.headline && (
-                      <span className="truncate text-xs text-text-secondary">
+                      <p className="truncate text-xs text-text-secondary">
                         {user.headline}
-                      </span>
+                      </p>
                     )}
                   </div>
-                </Button>
+
+                  <Button
+                    ref={(el) => {
+                      optionRefs.current[index] = el;
+                    }}
+                    type="button"
+                    size="sm"
+                    variant={status === "NONE" ? "default" : "secondary"}
+                    disabled={isDisabled}
+                    onClick={() => handleUserAction(user)}
+                    className={`shrink-0 gap-2 text-xs ${
+                      status === "PENDING"
+                        ? "bg-gray-400 text-white"
+                        : ""
+                    }`}
+                  >
+                    <UserRoundPlus className="size-4" />
+                    {buttonText}
+                  </Button>
+                </div>
               );
             })
           ) : (
