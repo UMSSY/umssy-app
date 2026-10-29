@@ -240,6 +240,15 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
       expect(await prisma.mentorParticipationSanction.count()).toBe(1);
       expect(await prisma.mentorIntakeAttempt.count()).toBe(5);
       expect(await prisma.mentorMailOutbox.count()).toBe(2);
+      await admin.query(
+        await readFile(
+          new URL(
+            '20261029020000_mentor_intake_catalogs/migration.sql',
+            directory,
+          ),
+          'utf8',
+        ),
+      );
     }, 60_000);
 
     afterAll(async () => {
@@ -267,6 +276,68 @@ describe.skipIf(!connectionString).each(['develop', 'reverted-catalogs'])(
           .slice(0, 4)
           .map((userId) => ({ userId, roleId: mentorRole })),
       });
+    });
+
+    it('persiste el catálogo de operación y conserva la idempotencia', async () => {
+      const key = randomUUID();
+      await submit(4, key).expect(201);
+      await submit(4, key).expect(201);
+      const attempts = await prisma.mentorIntakeAttempt.findMany({
+        where: { userId: users[4] },
+        include: { intakeOperation: true },
+      });
+      expect(attempts).toHaveLength(1);
+      expect(attempts[0].intakeOperation.title).toBe('REQUEST');
+    });
+
+    it('sincroniza tipo y estado del outbox con sus catálogos', async () => {
+      const message = await prisma.mentorMailOutbox.create({
+        data: {
+          id: randomUUID(),
+          eventKey: randomUUID(),
+          kind: 'SANCTION',
+          userId: users[4],
+          recipient: 'qa@example.test',
+          payload: {},
+        },
+        include: { mailKind: true, mailStatus: true },
+      });
+      expect(message.mailKind.title).toBe('SANCTION');
+      expect(message.mailStatus.title).toBe('PENDING');
+      const sent = await prisma.mentorMailStatus.findUniqueOrThrow({
+        where: { title: 'SENT' },
+      });
+      await prisma.$executeRaw`UPDATE mentor_mail_outbox SET status_id = ${sent.id}::uuid WHERE id = ${message.id}::uuid`;
+      const updated = await prisma.mentorMailOutbox.findUniqueOrThrow({
+        where: { id: message.id },
+      });
+      expect(updated.status).toBe('SENT');
+      const inserted = await prisma.mentorMailOutbox.create({
+        data: {
+          id: randomUUID(),
+          eventKey: randomUUID(),
+          kind: 'OFFER',
+          statusId: sent.id,
+          userId: users[4],
+          recipient: 'qa@example.test',
+          payload: {},
+        },
+      });
+      expect(inserted.status).toBe('SENT');
+      await expect(
+        prisma.$executeRaw`UPDATE mentor_mail_outbox SET kind_id = ${randomUUID()}::uuid WHERE id = ${message.id}::uuid`,
+      ).rejects.toThrow();
+      await expect(
+        prisma.$executeRaw`UPDATE mentor_mail_outbox SET status = 'INVALID' WHERE id = ${message.id}::uuid`,
+      ).rejects.toThrow();
+    });
+
+    it('indexa la FK de usuario del outbox', async () => {
+      const result = await admin.query(
+        "SELECT indexdef FROM pg_indexes WHERE schemaname = $1 AND indexname = 'mentor_mail_outbox_user_id_idx'",
+        [schema],
+      );
+      expect(result.rows[0].indexdef).toContain('(user_id)');
     });
 
     it('requires a real JWT and UUID key, rejects forged identity', async () => {

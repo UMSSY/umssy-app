@@ -333,7 +333,7 @@ describe.skipIf(!connectionString)('FIFO y ofertas HU7 en PostgreSQL', () => {
     });
   }
 
-  it.each(['PENDIENTE', 'CONFIRMADA'])(
+  it.each(['PENDIENTE', 'CONFIRMADA', 'CONFIRMED'])(
     'rechaza la salida por una cita futura %s sin cambiar ningún estado',
     async (title) => {
       const offer = await activateFirst();

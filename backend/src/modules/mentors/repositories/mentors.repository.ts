@@ -509,7 +509,6 @@ export class MentorsRepository extends MentorIntakeRepository {
         },
       });
 
-      // La reincorporación utiliza la selección confirmada y sustituye las preferencias conservadas.
       await transaction.mentorTechnicalArea.deleteMany({
         where: { mentorId: userId },
       });

@@ -792,7 +792,7 @@ model MentorParticipationRequest {
   status             String   @default("PENDING") @db.VarChar(20)
   queuedAt           DateTime @default(now()) @map("queued_at") @db.Timestamptz(6)
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  technicalAreaIds    String[] @map("technical_area_ids") @db.Uuid
+  technicalAreaIds   String[] @map("technical_area_ids") @db.Uuid
   orientationTypeIds String[] @map("orientation_type_ids") @db.Uuid
 
   user  User             @relation(fields: [userId], references: [id], onDelete: Restrict)
@@ -803,15 +803,15 @@ model MentorParticipationRequest {
 }
 
 model MentorSlotOffer {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  status    String   @default("OFFERED") @db.VarChar(20)
-  offeredAt DateTime @default(now()) @map("offered_at") @db.Timestamptz(6)
-  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
-  requestId String?  @unique @map("request_id") @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  status      String    @default("OFFERED") @db.VarChar(20)
+  offeredAt   DateTime  @default(now()) @map("offered_at") @db.Timestamptz(6)
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(6)
+  requestId   String?   @unique @map("request_id") @db.Uuid
   confirmedAt DateTime? @map("confirmed_at") @db.Timestamptz(6)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user    User                        @relation(fields: [userId], references: [id], onDelete: Restrict)
   request MentorParticipationRequest? @relation(fields: [requestId], references: [id], onDelete: Restrict)
 
   @@index([status, expiresAt])
@@ -1143,20 +1143,23 @@ model DocumentValidation {
 }
 
 model MentorIntakeAttempt {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId         String   @map("user_id") @db.Uuid
-  operation      String   @db.VarChar(20)
-  idempotencyKey String   @map("idempotency_key") @db.Uuid
-  payloadHash    String   @map("payload_hash") @db.VarChar(64)
-  occurredAt     DateTime @default(dbgenerated("clock_timestamp()")) @map("occurred_at") @db.Timestamptz(6)
-  counted        Boolean  @default(true)
-  responseStatus Int      @map("response_status")
-  responseData   Json     @map("response_data")
+  operationId     String                @default(dbgenerated("mentor_intake_operation('LEGACY'::text)")) @map("operation_id") @db.Uuid
+  intakeOperation MentorIntakeOperation @relation(fields: [operationId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  id              String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String                @map("user_id") @db.Uuid
+  operation       String                @db.VarChar(20)
+  idempotencyKey  String                @map("idempotency_key") @db.Uuid
+  payloadHash     String                @map("payload_hash") @db.VarChar(64)
+  occurredAt      DateTime              @default(dbgenerated("clock_timestamp()")) @map("occurred_at") @db.Timestamptz(6)
+  counted         Boolean               @default(true)
+  responseStatus  Int                   @map("response_status")
+  responseData    Json                  @map("response_data")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  user     User                         @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   sanction MentorParticipationSanction?
 
   @@unique([userId, operation, idempotencyKey], map: "mentor_intake_attempts_identity")
+  @@index([operationId])
   @@map("mentor_intake_attempts")
 }
 
@@ -1167,7 +1170,7 @@ model MentorParticipationSanction {
   startedAt        DateTime @map("started_at") @db.Timestamptz(6)
   endsAt           DateTime @map("ends_at") @db.Timestamptz(6)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   triggerAttempt MentorIntakeAttempt? @relation(fields: [triggerAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
   @@index([userId, endsAt], map: "mentor_participation_sanctions_active")
@@ -1175,22 +1178,62 @@ model MentorParticipationSanction {
 }
 
 model MentorMailOutbox {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  eventKey    String    @unique @map("event_key") @db.VarChar(100)
-  kind        String    @db.VarChar(20)
-  userId      String    @map("user_id") @db.Uuid
-  recipient   String    @db.VarChar(150)
+  kindId      String           @default(dbgenerated("mentor_mail_kind('OFFER'::text)")) @map("kind_id") @db.Uuid
+  statusId    String           @default(dbgenerated("mentor_mail_status('PENDING'::text)")) @map("status_id") @db.Uuid
+  mailKind    MentorMailKind   @relation(fields: [kindId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  mailStatus  MentorMailStatus @relation(fields: [statusId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventKey    String           @unique @map("event_key") @db.VarChar(100)
+  kind        String           @db.VarChar(20)
+  userId      String           @map("user_id") @db.Uuid
+  recipient   String           @db.VarChar(150)
   payload     Json
-  status      String    @default("PENDING") @db.VarChar(20)
-  attempts    Int       @default(0)
-  availableAt DateTime  @default(dbgenerated("clock_timestamp()")) @map("available_at") @db.Timestamptz(6)
-  claimedAt   DateTime? @map("claimed_at") @db.Timestamptz(6)
-  sentAt      DateTime? @map("sent_at") @db.Timestamptz(6)
-  lastError   String?   @map("last_error") @db.VarChar(100)
-  createdAt   DateTime  @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
+  status      String           @default("PENDING") @db.VarChar(20)
+  attempts    Int              @default(0)
+  availableAt DateTime         @default(dbgenerated("clock_timestamp()")) @map("available_at") @db.Timestamptz(6)
+  claimedAt   DateTime?        @map("claimed_at") @db.Timestamptz(6)
+  sentAt      DateTime?        @map("sent_at") @db.Timestamptz(6)
+  lastError   String?          @map("last_error") @db.VarChar(100)
+  createdAt   DateTime         @default(dbgenerated("clock_timestamp()")) @map("created_at") @db.Timestamptz(6)
 
   user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
   @@index([status, availableAt], map: "mentor_mail_outbox_legacy_dispatch")
+  @@index([userId])
+  @@index([kindId])
+  @@index([statusId])
   @@map("mentor_mail_outbox")
+}
+
+model MentorIntakeOperation {
+  id          String                @id @default(uuid()) @db.Uuid
+  title       String                @unique @db.VarChar(30)
+  description String?
+  createdAt   DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  attempts    MentorIntakeAttempt[]
+
+  @@map("mentor_intake_operations")
+}
+
+model MentorMailKind {
+  id          String             @id @default(uuid()) @db.Uuid
+  title       String             @unique @db.VarChar(30)
+  description String?
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  messages    MentorMailOutbox[]
+
+  @@map("mentor_mail_kinds")
+}
+
+model MentorMailStatus {
+  id          String             @id @default(uuid()) @db.Uuid
+  title       String             @unique @db.VarChar(30)
+  description String?
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  messages    MentorMailOutbox[]
+
+  @@map("mentor_mail_statuses")
 }

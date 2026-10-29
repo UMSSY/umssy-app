@@ -12,7 +12,6 @@ export class PrismaService
     super({
       adapter: new PrismaPg({
         connectionString: buildDatabaseConnectionString('runtime'),
-        // Prisma and raw HU7 timestamps must use the same session timezone.
         options: '-c TimeZone=UTC',
         max: 3,
         connectionTimeoutMillis: 10_000,

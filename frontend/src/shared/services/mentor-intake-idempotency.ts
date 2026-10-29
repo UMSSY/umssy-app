@@ -27,7 +27,6 @@ function storageKey(operation: MentorIntakeOperation): string {
   return `hu7:intake:${currentSubject()}:${operation}`;
 }
 
-// Recupera intenciones anteriores al cambio a IndexedDB sin generar otra petición de negocio.
 function legacyIntention(
   operation: MentorIntakeOperation,
 ): MentorIntakeIntention | null {
