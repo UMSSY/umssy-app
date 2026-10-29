@@ -3,10 +3,12 @@ import { MessageRepository } from '../repositories/message.repository.js';
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import { MessageStatusService } from './message-status.service.js';
+import { BlockService } from './block.service.js';
 import {
   ConversationNotFoundException,
   InvalidMessageContentException,
   NotConversationParticipantException,
+  UserBlockedException,
 } from '../exceptions/index.js';
 import { MAX_MESSAGE_LENGTH } from '../constants/chat.constants.js';
 import type { MessageResponse } from '../responses/message.response.js';
@@ -19,8 +21,8 @@ export class MessageService {
     private readonly conversationRepository: ConversationRepository,
     private readonly participantRepository: ConversationParticipantRepository,
     private readonly messageStatusService: MessageStatusService,
-  ) {}
-
+    private readonly blockService: BlockService,
+    ) {}
   async send(params: {
     conversationId: string;
     senderId: string;
@@ -40,6 +42,17 @@ export class MessageService {
       );
     if (!participant) {
       throw new NotConversationParticipantException();
+    }
+
+    const otherParticipantId = this.getOtherParticipantId(
+      conversation,
+      params.senderId,
+    );
+    if (
+      otherParticipantId &&
+      (await this.blockService.isBlockedBetween(params.senderId, otherParticipantId))
+    ) {
+      throw new UserBlockedException();
     }
 
     const content = this.sanitize(params.content);
@@ -200,7 +213,18 @@ export class MessageService {
     );
   }
 
-  private sanitize(raw: string): string {
+   private getOtherParticipantId(
+    conversation: { userAId?: string | null; userBId?: string | null },
+    senderId: string,
+  ): string | null {
+    const { userAId, userBId } = conversation;
+    if (!userAId || !userBId) return null;
+    const sender = senderId.trim().toLowerCase();
+    return userAId.toLowerCase() === sender ? userBId : userAId;
+  }
+
+    private sanitize(raw: string): string {
+  
     const cleaned = raw
       .split('')
       .filter((char) => {

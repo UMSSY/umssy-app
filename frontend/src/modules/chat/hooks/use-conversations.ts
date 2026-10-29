@@ -272,6 +272,18 @@ export function useConversations() {
       }),
     );
   };
+  const setConversationBlocked = (
+    conversationId: string,
+    isBlocked: boolean,
+  ) => {
+    setConversationsData((prev) =>
+      prev.map((item) =>
+        item.id === conversationId
+          ? { ...item, isBlockedByMe: isBlocked }
+          : item,
+      ),
+    );
+  };
 
   const findExistingConversationByContact = (
     contactId: string,
@@ -337,6 +349,8 @@ export function useConversations() {
     clearSelectedConversation,
     simulateIncomingMessage,
     updateConversationLastMessage,
+
+    setConversationBlocked,
     findExistingConversationByContact,
     startConversationWithContact,
   };
