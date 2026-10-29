@@ -93,7 +93,7 @@ export class ConversationService {
       };
     }
 
-    // HU-09: Verificar conexión aceptada antes de crear el chat
+   
     const acceptedRequest =
       await this.connectionRequestRepository.findAcceptedRequest(
         userAId,
@@ -106,7 +106,7 @@ export class ConversationService {
       );
     }
 
-    // Crear una conversación autorizada
+
     try {
       const created =
         await this.conversationRepository.createWithParticipants(
@@ -222,22 +222,7 @@ export class ConversationService {
     },
     currentUserId: string,
   ): Promise<ConversationResponse> {
-<<<<<<< HEAD
-    const contact = (
-      conversation.userAId === currentUserId
-        ? conversation.userB
-        : conversation.userA
-    ) as {
-      id: string;
-      firstName: string;
-      lastName: string;
-      photoUrl?: Uint8Array | null;
-    };
-=======
-    // Si la conversación tiene eventId, es una sala grupal y se excluye del formato 1:1
-    if (conversation.event?.id) {
-      // Devolver respuesta mínima para sala grupal: solo conversationId y eventId,
-      // sin campo contact (el frontend de HU-6 se encargará de la sala grupal)
+if (conversation.event?.id) {
       const lastMessage = conversation.messages[0];
       const safeContent = lastMessage?.content ?? '';
       const isAttachment = Boolean(safeContent.startsWith('[Archivo] '));
@@ -263,30 +248,27 @@ export class ConversationService {
         unreadCount: 0,
         updatedAt: conversation.updatedAt.toISOString(),
       };
-    }
+    } 
 
-    // Lógica existente para conversaciones 1:1
-    const contact = (conversation.userAId === currentUserId
-    ? conversation.userB
-    : conversation.userA) as { id: string; firstName: string; lastName: string; photoUrl?: Uint8Array | null };
->>>>>>> fb9ba34d (feat: event room service and registration (issue #1700))
+const contact = (
+      conversation.userAId === currentUserId
+        ? conversation.userB
+        : conversation.userA
+    ) as {
+      id: string;
+      firstName: string;
+      lastName: string;
+      photoUrl?: Uint8Array | null;
+    };
 
-<<<<<<< HEAD
-    // Obtener estado de conexión del contacto
-    const onlineMap =
-      await this.userPresenceService.mapOnlineStatus([
-        contact.id,
-      ]);
-=======
     if (!contact) {
       throw new UserNotFoundException();
     }
+
     const onlineMap = await this.userPresenceService.mapOnlineStatus([
       contact.id,
     ]);
->>>>>>> 56e9c7b2 (refactor(chat): update services and fix modal linter rules)
 
-    // Consultar participación del usuario
     const participant =
       await this.participantRepository.findByConversationAndUser(
         conversation.id,
@@ -302,7 +284,6 @@ export class ConversationService {
         )
       : 0;
 
-    // Obtener último mensaje
     const lastMessage = conversation.messages[0];
 
     const safeContent = lastMessage?.content ?? '';
