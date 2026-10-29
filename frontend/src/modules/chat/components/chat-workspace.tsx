@@ -19,7 +19,10 @@ import { ChatErrorState } from './chat-error-state';
 import type { Conversation } from '../types/conversation.types';
 import type { User } from '../types/user.types';
 
-import { getCurrentSessionUserId } from '../services/chat-api';
+import {
+  sendAttachmentMessage,
+  getCurrentSessionUserId,
+} from '../services/chat-api';
 import { getChatSocket } from './chat-socket';
 
 interface SocketMessage {
@@ -100,7 +103,6 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
         });
       }
 
-    
       void queryClient.invalidateQueries({
         queryKey: ['conversations'],
       });
@@ -150,8 +152,10 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
     setIsSearchModalOpen(false);
   };
 
- 
-  const handleSendMessage = async (content: string): Promise<void> => {
+  const handleSendMessage = async (
+    content: string,
+    file?: File | null,
+  ): Promise<void> => {
     if (!selectedId || isSending) {
       throw new Error(
         'No hay una conversación seleccionada o ya se está enviando un mensaje.',
@@ -160,51 +164,61 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
 
     const trimmedContent = content.trim();
 
-    if (!trimmedContent) {
+    if (!trimmedContent && !file) {
       throw new Error('El mensaje no puede estar vacío.');
     }
 
     setIsSending(true);
 
     try {
-      const socket = getChatSocket();
+      if (file) {
+        await sendAttachmentMessage(selectedId, file, trimmedContent);
 
-      if (!socket.connected) {
-        throw new Error(
-          'No hay conexión con el chat. Comprueba la conexión e inténtalo de nuevo.',
+        updateConversationLastMessage(
+          selectedId,
+          trimmedContent || `[Archivo] ${file.name}`,
+          currentUserId,
+        );
+      } else {
+        const socket = getChatSocket();
+
+        if (!socket.connected) {
+          throw new Error(
+            'No hay conexión con el chat. Comprueba la conexión e inténtalo de nuevo.',
+          );
+        }
+
+        const response = await new Promise<SocketSendResponse>(
+          (resolve, reject) => {
+            socket.emit(
+              'message:send',
+              {
+                conversationId: selectedId,
+                content: trimmedContent,
+              },
+              (result: SocketSendResponse) => {
+                if (result?.ok && result.message) {
+                  resolve(result);
+                } else {
+                  reject(
+                    new Error(
+                      result?.error || 'No se pudo enviar el mensaje.',
+                    ),
+                  );
+                }
+              },
+            );
+          },
+        );
+
+        const message = response.message!;
+
+        updateConversationLastMessage(
+          selectedId,
+          message.content || trimmedContent,
+          message.senderId || currentUserId,
         );
       }
-
-      const response = await new Promise<SocketSendResponse>(
-        (resolve, reject) => {
-          socket.emit(
-            'message:send',
-            {
-              conversationId: selectedId,
-              content: trimmedContent,
-            },
-            (result: SocketSendResponse) => {
-              if (result?.ok && result.message) {
-                resolve(result);
-              } else {
-                reject(
-                  new Error(
-                    result?.error || 'No se pudo enviar el mensaje.',
-                  ),
-                );
-              }
-            },
-          );
-        },
-      );
-
-      const message = response.message!;
-
-      updateConversationLastMessage(
-        selectedId,
-        message.content || trimmedContent,
-        message.senderId || currentUserId,
-      );
 
       await queryClient.invalidateQueries({
         queryKey: messagesQueryKey(selectedId),

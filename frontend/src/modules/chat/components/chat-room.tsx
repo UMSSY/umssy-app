@@ -6,18 +6,22 @@ import Image from "next/image";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Conversation, Message } from "../types/conversation.types";
+import type { MessageAttachment } from "../types/attachment.types";
 import { MessageInputBar } from "./message-input-bar";
+import { MessageItem } from "./message-item";
+import { ContactProfileModal } from "./contact-profile-modal";
 import { ChatErrorState } from "./chat-error-state";
-import { getInitials, formatMessageDateSeparator } from "../utils/date-formatter";
+import { getInitials } from "../utils/date-formatter";
 import { isContentValidForSend } from "../utils/unicode-counter";
 import { useMessagingUi } from "../contexts/messaging-ui-context";
+import { downloadAttachment } from "../services/chat-api";
 
 interface ChatRoomProps {
   conversation: Conversation;
   messages: Message[];
   currentUserId: string;
   onBack: () => void;
-  onSendMessage: (content: string) => void | Promise<void>;
+  onSendMessage: (content: string, file?: File | null) => void | Promise<void>;
   isLoadingMessages?: boolean;
   isSending?: boolean;
   hasMoreMessages?: boolean;
@@ -42,16 +46,6 @@ const BOTTOM_THRESHOLD = 120;
 
 function getMessageDate(message: Message): string {
   return message.timestamp || message.createdAt || "";
-}
-
-function formatMessageTime(value?: string | null): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  const hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const hour = String(hours % 12 || 12).padStart(2, "0");
-  return `${hour}:${minutes} ${hours >= 12 ? "PM" : "AM"}`;
 }
 
 function isSameDay(firstDate?: string | null, secondDate?: string | null): boolean {
@@ -89,6 +83,9 @@ function ChatRoomContent({
 }: ChatRoomProps) {
   const ui = useMessagingUi();
   const [localInputText, setLocalInputText] = useState("");
+  const [selectedAttachment, setSelectedAttachment] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const inputText = ui ? (ui.drafts[conversation.id] ?? "") : localInputText;
   const setInputText = (content: string) => {
     if (ui) ui.setDraft(conversation.id, content);
@@ -201,18 +198,27 @@ function ChatRoomContent({
   }, [messages, showInitialLoading, isLoadingMoreMessages, hasMoreMessages, getMessageElement]);
 
   const handleSend = async () => {
-    if (!isContentValidForSend(inputText) || isSending || sendPendingRef.current ||
+    const hasText = isContentValidForSend(inputText);
+    const hasAttachment = Boolean(selectedAttachment);
+    if ((!hasText && !hasAttachment) || isSending || sendPendingRef.current || isSubmitting || isUploading ||
         showInitialLoading || (isMessagesError && messages.length === 0)) return;
     const content = inputText.trim();
-    if (!content) return;
     sendPendingRef.current = true;
     scrollAfterSendRef.current = true;
     setIsSubmitting(true);
+    if (selectedAttachment) {
+      setIsUploading(true);
+    }
     setSendError(false);
     try {
-      await onSendMessage(content);
+      if (selectedAttachment) {
+        await onSendMessage(content, selectedAttachment);
+      } else {
+        await onSendMessage(content);
+      }
       if (ui) ui.clearSubmittedDraft(conversation.id, inputText);
       else setLocalInputText("");
+      setSelectedAttachment(null);
     } catch {
       setSendError(true);
       scrollAfterSendRef.current = false;
@@ -220,6 +226,7 @@ function ChatRoomContent({
     } finally {
       sendPendingRef.current = false;
       setIsSubmitting(false);
+      setIsUploading(false);
     }
     setSendError(false);
     if (containerRef.current) scrollToBottom(containerRef.current, "smooth");
@@ -232,6 +239,14 @@ function ChatRoomContent({
     }
   };
 
+  const handleDownloadAttachment = useCallback(async (attachment: MessageAttachment) => {
+    try {
+      await downloadAttachment(attachment.id, attachment.fileName);
+    } catch {
+      // toast de error manejado en el servicio
+    }
+  }, []);
+
   return (
     <div data-testid="chat-room" className="flex size-full min-h-0 min-w-0 flex-col overflow-hidden bg-surface-soft">
       <header data-testid="chat-room-header" className="z-10 flex w-full min-w-0 shrink-0 items-center justify-between border-b border-border bg-surface p-3 md:p-4">
@@ -241,27 +256,53 @@ function ChatRoomContent({
             className={`-ml-1 rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-soft hover:text-ink ${isCompact ? "" : "md:hidden"}`}>
             <ArrowLeft className="size-5" aria-hidden="true" />
           </Button>
-          <div className="relative shrink-0">
-            {conversation.contact.avatarUrl ? (
-              <Image src={conversation.contact.avatarUrl} alt={conversation.contact.fullName}
-                width={40} height={40} unoptimized className="size-10 rounded-full border border-border object-cover" />
-            ) : (
-              <div className="flex size-10 items-center justify-center rounded-full border border-border bg-border text-xs font-bold text-ink">
-                {getInitials(conversation.contact.fullName)}
-              </div>
-            )}
-            {conversation.contact.isOnline && (
-              <span data-testid="online-indicator" className="absolute right-0 bottom-0 size-2.5 rounded-full border-2 border-surface bg-emerald-500" title="En línea" />
-            )}
-          </div>
-          <div>
-            <h3 data-testid="chat-contact-name" className="text-sm leading-tight font-bold text-ink md:text-base">
-              {conversation.contact.fullName}
-            </h3>
-            <span className="text-xs font-medium text-ink-soft">
-              {conversation.contact.isOnline ? "En línea" : "Desconectado"}
-            </span>
-          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="default"
+            data-testid="chat-contact-profile-trigger"
+            title="Ver perfil de usuario"
+            aria-label="Ver perfil de usuario"
+            onClick={() => setIsProfileModalOpen(true)}
+            className="flex h-auto items-center gap-3 p-1 transition-colors hover:bg-surface-soft"
+          >
+            <div className="relative shrink-0">
+              {conversation.contact.avatarUrl ? (
+                <Image
+                  src={conversation.contact.avatarUrl}
+                  alt={conversation.contact.fullName}
+                  width={40}
+                  height={40}
+                  unoptimized
+                  className="size-10 rounded-full border border-border object-cover"
+                />
+              ) : (
+                <div className="flex size-10 items-center justify-center rounded-full border border-border bg-border text-xs font-bold text-ink">
+                  {getInitials(conversation.contact.fullName)}
+                </div>
+              )}
+              {conversation.contact.isOnline && (
+                <span
+                  data-testid="online-indicator"
+                  className="absolute right-0 bottom-0 size-2.5 rounded-full border-2 border-surface bg-emerald-500"
+                  title="En línea"
+                />
+              )}
+            </div>
+            <div className="text-left">
+              <h3
+                data-testid="chat-contact-name"
+                className="text-sm leading-tight font-bold text-ink md:text-base"
+              >
+                {conversation.contact.fullName}
+              </h3>
+              <span className="text-xs font-medium text-ink-soft">
+                {conversation.contact.isOnline
+                  ? "En línea"
+                  : "Desconectado"}
+              </span>
+            </div>
+          </Button>
         </div>
       </header>
       <div ref={containerRef} data-testid="messages-container" onScroll={handleScroll}
@@ -310,32 +351,15 @@ function ChatRoomContent({
           <div className="space-y-3">
             {messages.map((message, index) => {
               const isOwn = message.senderId === currentUserId;
-              const messageDate = getMessageDate(message);
               const showDateSeparator = shouldShowDateSeparator(messages, index, hasMoreMessages);
               return (
                 <div key={message.id} data-message-id={message.id}>
-                  {showDateSeparator && (
-                    <div data-testid={`date-separator-${message.id}`} className="my-5 flex items-center gap-3">
-                      <div className="h-px flex-1 bg-border" />
-                      <span className="text-center text-xs font-semibold whitespace-nowrap text-text-secondary">
-                        {formatMessageDateSeparator(messageDate)}
-                      </span>
-                      <div className="h-px flex-1 bg-border" />
-                    </div>
-                  )}
-                  <div data-testid={`message-item-${message.id}`} className={`flex w-full min-w-0 ${isOwn ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[85%] min-w-0 rounded-2xl px-4 py-2.5 text-sm [overflow-wrap:anywhere] break-words shadow-xs md:max-w-[70%] ${isOwn ? "rounded-tr-xs bg-accent text-surface" : "rounded-tl-xs border border-border bg-surface text-ink"}`}>
-                      <p className="leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap">{message.content}</p>
-                      <div className={`mt-1 flex items-center justify-end gap-1.5 text-[10px] ${isOwn ? "text-slate-200" : "text-text-secondary"}`}>
-                        <span>{formatMessageTime(messageDate)}</span>
-                        {isOwn && (
-                          <span className="font-medium">
-                            {message.status === "sending" ? "Enviando..." : message.status === "error" ? "Error" : ""}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <MessageItem
+                    message={message}
+                    isOwn={isOwn}
+                    showDateSeparator={showDateSeparator}
+                    onDownloadAttachment={handleDownloadAttachment}
+                  />
                 </div>
               );
             })}
@@ -344,14 +368,26 @@ function ChatRoomContent({
         <div data-testid="messages-scroll-anchor" />
       </div>
       {sendError && (
-        <div role="alert" className="m-4 rounded-xl border border-red-200 bg-red-50 p-4 text-center">
-          <p className="text-sm text-red-800">No se pudo enviar el mensaje. Conservamos tu texto; vuelve a pulsar Enviar para reintentar.</p>
+        <div role="alert" className="m-4 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-center">
+          <p className="text-sm text-destructive">No se pudo enviar el mensaje. Conservamos tu texto; vuelve a pulsar Enviar para reintentar.</p>
         </div>
       )}
-      <MessageInputBar value={inputText} onChange={setInputText}
-        onSend={() => void handleSend()} onKeyDown={handleInputKeyDown}
+      <MessageInputBar
+        value={inputText}
+        onChange={setInputText}
+        onSend={() => void handleSend()}
+        onKeyDown={handleInputKeyDown}
         isSending={isSending || isSubmitting}
-        disabled={showInitialLoading || (isMessagesError && messages.length === 0)} />
+        isUploading={isUploading}
+        attachment={selectedAttachment}
+        onAttachmentChange={setSelectedAttachment}
+        disabled={showInitialLoading || (isMessagesError && messages.length === 0)}
+      />
+      <ContactProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        contact={conversation.contact}
+      />
     </div>
   );
 }
