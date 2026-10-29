@@ -1,4 +1,5 @@
 import { access } from 'node:fs/promises';
+import { join } from 'node:path';
 import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
 import * as mupdf from 'mupdf';
 import type { PaddleOcrService } from 'paddleocr';
@@ -7,7 +8,7 @@ import { createPaddleWorker, recognizeWithPaddle } from '../../../common/ocr/pad
 import type { FileContent } from '../../files/types/file.types.js';
 import {
   MIN_PDF_TEXT_LENGTH,
-  OCR_CACHE_PATH,
+  OCR_TESSERACT_MODEL_PATH,
   OCR_ENGINE_MODE,
   OCR_LANGUAGE,
   PADDLE_DETECTION_MODEL,
@@ -25,6 +26,7 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
   private readonly logger = new Logger(DocumentTextExtractorService.name);
   private paddleWorker: Promise<PaddleOcrService | null> | null = null;
   private tesseractWorker: Promise<Worker> | null = null;
+  private tesseractQueue: Promise<unknown> = Promise.resolve();
 
   async extract(file: FileContent): Promise<DocumentText> {
     if (file.mimeType === PDF_MIME_TYPE) {
@@ -106,6 +108,7 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
   }
 
   private async getPaddleWorker(): Promise<PaddleOcrService | null> {
+    if (process.env.OCR_ENGINE === 'tesseract') return null;
     if (this.paddleWorker !== null) {
       return this.paddleWorker;
     }
@@ -138,10 +141,30 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
     return this.paddleWorker;
   }
 
-  private async recognizeWithTesseract(image: Buffer): Promise<DocumentText> {
-    this.tesseractWorker ??= createWorker(OCR_LANGUAGE, OCR_ENGINE_MODE, { cachePath: OCR_CACHE_PATH });
-    const { data } = await (await this.tesseractWorker).recognize(image);
-    return { text: data.text, confidence: data.confidence / 100 };
+  private recognizeWithTesseract(image: Buffer): Promise<DocumentText> {
+    const job = this.tesseractQueue.then(async () => {
+      this.tesseractWorker ??= this.createTesseractWorker();
+      try {
+        const { data } = await (await this.tesseractWorker).recognize(image);
+        return { text: data.text, confidence: data.confidence / 100 };
+      } catch (error) {
+        const failedWorker = this.tesseractWorker;
+        this.tesseractWorker = null;
+        if (failedWorker) await failedWorker.then((worker) => worker.terminate(), () => undefined).catch(() => undefined);
+        throw error;
+      }
+    });
+    this.tesseractQueue = job.then(() => undefined, () => undefined);
+    return job;
+  }
+
+  private async createTesseractWorker(): Promise<Worker> {
+    await access(join(OCR_TESSERACT_MODEL_PATH, OCR_LANGUAGE + '.traineddata'));
+    return createWorker(OCR_LANGUAGE, OCR_ENGINE_MODE, {
+      langPath: OCR_TESSERACT_MODEL_PATH,
+      gzip: false,
+      cacheMethod: 'none',
+    });
   }
 
   private async fileExists(path: string): Promise<boolean> {

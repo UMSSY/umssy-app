@@ -5,6 +5,7 @@ import { Prisma } from '../../../prisma/client.js';
 import { InvalidDocumentTypeException, MissingDocumentFileException } from '../exceptions/index.js';
 import { DocumentCorrectionRepository } from '../repositories/document-correction.repository.js';
 import { DocumentValidationRepository } from '../repositories/document-validation.repository.js';
+import { DocumentReadingService } from '../services/document-reading.service.js';
 import { DocumentCorrectionService } from '../services/document-correction.service.js';
 import type { ReplaceRejectedDocumentOperation } from '../types/document-correction.types.js';
 import type { AttachDocumentInput } from '../types/uploaded-file.types.js';
@@ -15,6 +16,7 @@ describe('DocumentCorrectionService', () => {
   const files = { create: vi.fn(), delete: vi.fn() };
   const audit = { record: vi.fn() };
   const validation = { queue: vi.fn() };
+  const documentReading = { scheduleReading: vi.fn() };
   const tx = {} as Prisma.TransactionClient;
   let service: DocumentCorrectionService;
   let input: AttachDocumentInput;
@@ -34,6 +36,7 @@ describe('DocumentCorrectionService', () => {
       files as unknown as FilesService,
       audit as unknown as AuditEventRecorderService,
       validation as unknown as DocumentValidationRepository,
+      documentReading as unknown as DocumentReadingService,
     );
     input = { documentType: 'national_title', file: { originalname: 'titulo.pdf', mimetype: 'application/pdf', size: 6, buffer: Buffer.from('%PDF-1') } };
   });
@@ -48,6 +51,7 @@ describe('DocumentCorrectionService', () => {
     }), tx);
     expect(validation.queue).toHaveBeenCalledWith('request-1', tx);
     expect(files.delete).not.toHaveBeenCalled();
+    expect(documentReading.scheduleReading).toHaveBeenCalledWith('request-1');
   });
 
   it('no reserva la revisión ni consume el permiso si falta el archivo', async () => {

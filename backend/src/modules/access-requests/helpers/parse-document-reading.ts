@@ -34,10 +34,34 @@ function closestLine(lines: string[], phrase: string): string | null {
   return best?.line ?? null;
 }
 
-function readYear(text: string, declaredYear: number, currentYear: number): number | null {
-  const years = (text.match(/\b(?:19|20)\d{2}\b/g) ?? []).map(Number).filter((year) => year >= MIN_GRADUATION_YEAR && year <= currentYear);
-  if (years.length === 0) return null;
-  return years.includes(declaredYear) ? declaredYear : Math.max(...years);
+function readYear(text: string, currentYear: number): number | null {
+  const lines = toLines(text)
+    .map((line) => foldAccents(line))
+    .filter((line) => !/\b(?:resolucion|decreto|ley)\b/.test(line));
+  const valid = (year: number) => year >= MIN_GRADUATION_YEAR && year <= currentYear;
+  const dates = new Set<number>();
+
+  for (const line of lines) {
+    const patterns = [
+      /\b\d{1,2}\s+de\s+[a-zñ]+\s+(?:de|del)\s+((?:19|20)\d{2})\b/g,
+      /\b\d{1,2}[/-]\d{1,2}[/-]((?:19|20)\d{2})\b/g,
+      /\b((?:19|20)\d{2})-\d{2}-\d{2}\b/g,
+    ];
+    for (const pattern of patterns) {
+      for (const match of line.matchAll(pattern)) {
+        const year = Number(match[1]);
+        if (valid(year)) dates.add(year);
+      }
+    }
+  }
+
+  if (dates.size > 0) return dates.size === 1 ? (dates.values().next().value ?? null) : null;
+  const years = new Set(
+    (lines.join('\n').match(/\b(?:19|20)\d{2}\b/g) ?? [])
+      .map(Number)
+      .filter(valid),
+  );
+  return years.size === 1 ? (years.values().next().value ?? null) : null;
 }
 
 export function parseDocumentReading(document: DocumentText, declared: DeclaredData, currentYear: number): DocumentReading {
@@ -49,7 +73,7 @@ export function parseDocumentReading(document: DocumentText, declared: DeclaredD
     confidence: Math.min(1, Math.max(0, document.confidence)),
     fullName: findPhrase(lines, fullName) ?? closestLine(lines, fullName),
     career: findPhrase(lines, declared.career) ?? closestLine(lines, declared.career),
-    graduationYear: readYear(document.text, declared.graduationYear, currentYear),
+    graduationYear: readYear(document.text, currentYear),
   };
 }
 

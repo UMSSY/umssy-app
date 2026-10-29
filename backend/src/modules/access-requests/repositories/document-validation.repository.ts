@@ -38,6 +38,38 @@ export class DocumentValidationRepository {
     });
   }
 
+  async markOcrFailed(accessRequestId: string, documentFileId: string, now: Date, onSaved: AccessRequestAuditHook) {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const source = await tx.accessRequest.update({
+          where: {
+            id: accessRequestId,
+            documentFileId,
+            status: { title: { in: REVIEW_STATUSES } },
+            documentValidation: { is: { result: VALIDATION_RESULT.QUEUED } },
+          },
+          data: { updatedAt: now },
+          select: ACCESS_REQUEST_AUDIT_SELECT,
+        });
+        await tx.documentValidation.update({
+          where: { accessRequestId },
+          data: {
+            result: VALIDATION_RESULT.MANUAL_REVIEW,
+            matchScore: null,
+            reason: VALIDATION_REASONS.OCR_FAILED,
+            fieldResults: Prisma.DbNull,
+            readAt: null,
+          },
+        });
+        await onSaved(source, tx);
+        return true;
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') return false;
+      throw error;
+    }
+  }
+
   findAutomationState(accessRequestId: string) {
     return this.prisma.accessRequest.findUnique({
       where: { id: accessRequestId },
@@ -53,11 +85,23 @@ export class DocumentValidationRepository {
   }
 
   saveEvaluation(
-    params: { accessRequestId: string; result: ValidationResult; matchScore: number; reason: string | null; fields: ValidationFieldOutcome[]; decide: boolean; now: Date },
+    params: { accessRequestId: string; result: ValidationResult; matchScore: number; reason: string | null; fields: ValidationFieldOutcome[]; decide: boolean; now: Date; expectedDocumentFileId?: string },
     onSaved: AccessRequestAuditHook,
   ) {
-    const { accessRequestId, result, matchScore, reason, fields, decide, now } = params;
+    const { accessRequestId, result, matchScore, reason, fields, decide, now, expectedDocumentFileId } = params;
     return this.prisma.$transaction(async (tx) => {
+      if (expectedDocumentFileId !== undefined) {
+        await tx.accessRequest.update({
+          where: {
+            id: accessRequestId,
+            documentFileId: expectedDocumentFileId,
+            status: { title: { in: REVIEW_STATUSES } },
+            documentValidation: { is: { result: VALIDATION_RESULT.QUEUED } },
+          },
+          data: { updatedAt: now },
+          select: { id: true },
+        });
+      }
       await tx.documentValidation.update({
         where: { accessRequestId },
         data: { result, matchScore, reason, fieldResults: fields as unknown as Prisma.InputJsonValue, readAt: now },

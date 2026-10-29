@@ -11,6 +11,7 @@ export const FIELD_WEIGHTS = {
 } as const;
 
 export const VALIDATION_REASONS = {
+  OCR_FAILED: 'No se pudo leer el documento automáticamente. Requiere revisión manual.',
   NOT_A_DIPLOMA: 'El archivo no es un diploma',
   ILLEGIBLE: 'El documento es ilegible',
   LOW_LEGIBILITY: 'Documento poco legible',

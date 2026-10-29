@@ -18,6 +18,7 @@ import { DocumentCorrectionGuard } from '../guards/document-correction.guard.js'
 import { DocumentCorrectionRepository } from '../repositories/document-correction.repository.js';
 import { DocumentValidationRepository } from '../repositories/document-validation.repository.js';
 import { DocumentCorrectionAuthorizationService } from '../services/document-correction-authorization.service.js';
+import { DocumentReadingService } from '../services/document-reading.service.js';
 import { DocumentCorrectionService } from '../services/document-correction.service.js';
 import type { ReplaceRejectedDocumentOperation } from '../types/document-correction.types.js';
 import type { DocumentCorrectionRequest } from '../types/document-correction-request.types.js';
@@ -41,6 +42,7 @@ describe('Reenvío HTTP del documento rechazado', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [DocumentCorrectionController],
       providers: [
+        { provide: DocumentReadingService, useValue: { scheduleReading: vi.fn() } },
         DocumentCorrectionGuard, DocumentCorrectionAuthorizationService, DocumentCorrectionService, FilesService,
         { provide: DocumentCorrectionRepository, useValue: repository },
         { provide: FilesRepository, useValue: fileRepository },

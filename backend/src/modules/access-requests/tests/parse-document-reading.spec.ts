@@ -48,3 +48,16 @@ describe('parseDocumentReading', () => {
   });
 });
 
+
+describe('regresiones del año leído', () => {
+  it('no toma el año de una resolución como año de titulación', () => {
+    const text = DIPLOMA.replace('2019', '2020') + '\nResolución 2019';
+    const reading = parseDocumentReading({ text, confidence: 0.95 }, DECLARED, 2026);
+    expect(reading.graduationYear).toBe(2020);
+  });
+
+  it('no elige el año declarado cuando hay dos fechas posibles', () => {
+    const text = DIPLOMA + '\nFecha de expedición: 12/12/2020';
+    expect(parseDocumentReading({ text, confidence: 0.95 }, DECLARED, 2026).graduationYear).toBeNull();
+  });
+});

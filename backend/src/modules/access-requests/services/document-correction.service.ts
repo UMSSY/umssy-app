@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { DocumentReadingService } from './document-reading.service.js';
 import { AuditEventRecorderService } from '../../audit-events/services/audit-event-recorder.service.js';
 import { FilesService } from '../../files/services/files.service.js';
 import { InvalidDocumentTypeException, MissingDocumentFileException } from '../exceptions/index.js';
@@ -17,6 +18,7 @@ export class DocumentCorrectionService {
     private readonly files: FilesService,
     private readonly audit: AuditEventRecorderService,
     private readonly validation: DocumentValidationRepository,
+    private readonly documentReading: DocumentReadingService,
   ) {}
 
   async resubmit(context: DocumentCorrectionContext, input: AttachDocumentInput) {
@@ -26,7 +28,7 @@ export class DocumentCorrectionService {
       throw new InvalidDocumentTypeException();
     }
 
-    return this.repository.replaceRejectedDocument({
+    const result = await this.repository.replaceRejectedDocument({
       context,
       documentType,
       createFile: (tx) => this.files.create({ name: decodeUploadFileName(file.originalname), content: file.buffer }, tx),
@@ -35,5 +37,7 @@ export class DocumentCorrectionService {
         await this.validation.queue(context.accessRequestId, tx);
       },
     });
+    this.documentReading.scheduleReading(context.accessRequestId);
+    return result;
   }
 }
