@@ -1,12 +1,19 @@
-import { Injectable, type OnModuleDestroy } from '@nestjs/common';
+import { access } from 'node:fs/promises';
+import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
 import * as mupdf from 'mupdf';
+import type { PaddleOcrService } from 'paddleocr';
 import { createWorker, type Worker } from 'tesseract.js';
+import { createPaddleWorker, recognizeWithPaddle } from '../../../common/ocr/paddle-ocr.js';
 import type { FileContent } from '../../files/types/file.types.js';
 import {
   MIN_PDF_TEXT_LENGTH,
   OCR_CACHE_PATH,
   OCR_ENGINE_MODE,
   OCR_LANGUAGE,
+  PADDLE_DETECTION_MODEL,
+  PADDLE_DICTIONARY,
+  PADDLE_PRESET,
+  PADDLE_RECOGNITION_MODEL,
   PDF_MIME_TYPE,
   PDF_RENDER_SCALE,
   PDF_TEXT_CONFIDENCE,
@@ -15,7 +22,9 @@ import type { DocumentText } from '../types/document-text.types.js';
 
 @Injectable()
 export class DocumentTextExtractorService implements OnModuleDestroy {
-  private worker: Promise<Worker> | null = null;
+  private readonly logger = new Logger(DocumentTextExtractorService.name);
+  private paddleWorker: Promise<PaddleOcrService | null> | null = null;
+  private tesseractWorker: Promise<Worker> | null = null;
 
   async extract(file: FileContent): Promise<DocumentText> {
     if (file.mimeType === PDF_MIME_TYPE) {
@@ -24,13 +33,28 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
         return { text: embedded, confidence: PDF_TEXT_CONFIDENCE };
       }
       // PDF escaneado: la primera página se convierte en imagen y se lee con OCR
-      return this.recognize(this.renderFirstPage(file.content));
+      return this.recognizePdfPage(file.content);
     }
-    return this.recognize(file.content);
+    return this.recognizeImage(file.content);
   }
 
   async onModuleDestroy() {
-    if (this.worker) await (await this.worker).terminate();
+    if (this.paddleWorker) {
+      try {
+        const paddle = await this.paddleWorker;
+        await paddle?.destroy?.();
+      } catch (error) {
+        this.logger.warn(`Error al destruir worker de PaddleOCR: ${(error as Error).message}`);
+      }
+    }
+    if (this.tesseractWorker) {
+      try {
+        const tesseract = await this.tesseractWorker;
+        await tesseract.terminate();
+      } catch (error) {
+        this.logger.warn(`Error al destruir worker de Tesseract: ${(error as Error).message}`);
+      }
+    }
   }
 
   private readPdfText(content: Buffer): string {
@@ -42,18 +66,90 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
     return pages.join('\n');
   }
 
-  private renderFirstPage(content: Buffer): Buffer {
+  private async recognizeImage(imageBuffer: Buffer): Promise<DocumentText> {
+    const paddle = await this.getPaddleWorker();
+    if (paddle) {
+      try {
+        const image = new mupdf.Image(imageBuffer);
+        const pixmap = image.toPixmap().convertToColorSpace(mupdf.ColorSpace.DeviceRGB, false);
+        return await recognizeWithPaddle(paddle, {
+          width: pixmap.getWidth(),
+          height: pixmap.getHeight(),
+          data: pixmap.getPixels(),
+        });
+      } catch (error) {
+        this.logger.warn(`PaddleOCR falló en imagen, aplicando fallback a Tesseract: ${(error as Error).message}`);
+      }
+    }
+    return this.recognizeWithTesseract(imageBuffer);
+  }
+
+  private async recognizePdfPage(content: Buffer): Promise<DocumentText> {
     const document = mupdf.Document.openDocument(content, PDF_MIME_TYPE);
     const matrix = mupdf.Matrix.scale(PDF_RENDER_SCALE, PDF_RENDER_SCALE);
     const pixmap = document.loadPage(0).toPixmap(matrix, mupdf.ColorSpace.DeviceRGB, false, true);
-    return Buffer.from(pixmap.asPNG());
+
+    const paddle = await this.getPaddleWorker();
+    if (paddle) {
+      try {
+        const rgbPixmap = pixmap.convertToColorSpace(mupdf.ColorSpace.DeviceRGB, false);
+        return await recognizeWithPaddle(paddle, {
+          width: rgbPixmap.getWidth(),
+          height: rgbPixmap.getHeight(),
+          data: rgbPixmap.getPixels(),
+        });
+      } catch (error) {
+        this.logger.warn(`PaddleOCR falló en página PDF, aplicando fallback a Tesseract: ${(error as Error).message}`);
+      }
+    }
+    return this.recognizeWithTesseract(Buffer.from(pixmap.asPNG()));
   }
 
-  private async recognize(image: Buffer): Promise<DocumentText> {
-    // El motor se crea una sola vez y se reutiliza en las siguientes lecturas
-    this.worker ??= createWorker(OCR_LANGUAGE, OCR_ENGINE_MODE, { cachePath: OCR_CACHE_PATH });
-    const { data } = await (await this.worker).recognize(image);
+  private async getPaddleWorker(): Promise<PaddleOcrService | null> {
+    if (this.paddleWorker !== null) {
+      return this.paddleWorker;
+    }
+
+    this.paddleWorker = (async () => {
+      try {
+        const [detExists, recExists, dictExists] = await Promise.all([
+          this.fileExists(PADDLE_DETECTION_MODEL),
+          this.fileExists(PADDLE_RECOGNITION_MODEL),
+          this.fileExists(PADDLE_DICTIONARY),
+        ]);
+
+        if (!detExists || !recExists || !dictExists) {
+          this.logger.log('Modelos de PaddleOCR no encontrados localmente. Se usará Tesseract como fallback.');
+          return null;
+        }
+
+        return await createPaddleWorker({
+          detection: PADDLE_DETECTION_MODEL,
+          recognition: PADDLE_RECOGNITION_MODEL,
+          dictionary: PADDLE_DICTIONARY,
+          preset: PADDLE_PRESET,
+        });
+      } catch (error) {
+        this.logger.warn(`No se pudo inicializar PaddleOCR: ${(error as Error).message}. Se usará Tesseract.`);
+        return null;
+      }
+    })();
+
+    return this.paddleWorker;
+  }
+
+  private async recognizeWithTesseract(image: Buffer): Promise<DocumentText> {
+    this.tesseractWorker ??= createWorker(OCR_LANGUAGE, OCR_ENGINE_MODE, { cachePath: OCR_CACHE_PATH });
+    const { data } = await (await this.tesseractWorker).recognize(image);
     return { text: data.text, confidence: data.confidence / 100 };
   }
-}
 
+  private async fileExists(path: string): Promise<boolean> {
+    try {
+      await access(path);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
