@@ -2,12 +2,14 @@ import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { AuthModule } from '../auth/auth.module.js';
+import { FileValidationService } from '../../common/services/file-validation.service.js';
 
 import { UserSearchController } from './controllers/user-search.controller.js';
 import { ConversationController } from './controllers/conversation.controller.js';
 import { MessageController } from './controllers/message.controller.js';
 import { ChatController } from './controllers/chat.controller.js';
 import { LinkPreviewController } from './controllers/link-preview.controller.js';
+import { AttachmentController } from './controllers/attachment.controller.js';
 
 import { UserSearchService } from './services/user-search.service.js';
 import { ConversationService } from './services/conversation.service.js';
@@ -16,6 +18,9 @@ import { MessageStatusService } from './services/message-status.service.js';
 import { UserPresenceService } from './services/user-presence.service.js';
 import { ChatService } from './services/chat.service.js';
 import { LinkPreviewService } from './services/link-preview.service.js';
+import { AttachmentService } from './services/attachment.service.js';
+import { AttachmentMapper } from './mappers/attachment.mapper.js';
+import { AttachmentUploadInterceptor } from './interceptors/attachment-upload.interceptor.js';
 
 import { ConversationRepository } from './repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from './repositories/conversation-participant.repository.js';
@@ -24,6 +29,7 @@ import { MessageStatusRepository } from './repositories/message-status.repositor
 import { UserPresenceRepository } from './repositories/user-presence.repository.js';
 import { UserLookupRepository } from './repositories/user-lookup.repository.js';
 import { ChatRepository } from './repositories/chat.repository.js';
+import { AttachmentRepository } from './repositories/attachment.repository.js';
 
 import { ChatGateway } from './gateways/chat.gateway.js';
 
@@ -35,6 +41,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     MessageController,
     ChatController,
     LinkPreviewController,
+    AttachmentController,
   ],
   providers: [
     UserSearchService,
@@ -45,6 +52,10 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     ChatService,
     ChatGateway,
     LinkPreviewService,
+    AttachmentService,
+    AttachmentMapper,
+    AttachmentUploadInterceptor,
+    FileValidationService,
 
     ConversationRepository,
     ConversationParticipantRepository,
@@ -53,6 +64,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     UserPresenceRepository,
     UserLookupRepository,
     ChatRepository,
+    AttachmentRepository,
   ],
   exports: [
     ConversationService,
@@ -62,6 +74,8 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     ChatService,
     ChatGateway,
     LinkPreviewService,
+    AttachmentService,
+    AttachmentRepository,
   ],
 })
 export class ChatModule {}

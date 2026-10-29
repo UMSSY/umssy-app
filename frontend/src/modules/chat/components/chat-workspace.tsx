@@ -19,23 +19,11 @@ import { ChatErrorState } from './chat-error-state';
 import type { Conversation } from '../types/conversation.types';
 import type { User } from '../types/user.types';
 
-import { getCurrentSessionUserId } from '../services/chat-api';
-import { getChatSocket } from './chat-socket';
-
-interface SocketMessage {
-  id?: string;
-  conversationId?: string;
-  senderId?: string;
-  content?: string;
-  createdAt?: string;
-  timestamp?: string;
-}
-
-interface SocketSendResponse {
-  ok: boolean;
-  message?: SocketMessage;
-  error?: string;
-}
+import {
+  sendMessage,
+  sendAttachmentMessage,
+  getCurrentSessionUserId,
+} from '../services/chat-api';
 
 export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
   const currentUserId = getCurrentSessionUserId();
@@ -150,8 +138,7 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
     setIsSearchModalOpen(false);
   };
 
- 
-  const handleSendMessage = async (content: string): Promise<void> => {
+  const handleSendMessage = async (content: string, file?: File | null): Promise<void> => {
     if (!selectedId || isSending) {
       throw new Error(
         'No hay una conversación seleccionada o ya se está enviando un mensaje.',
@@ -167,43 +154,20 @@ export function ChatWorkspace({ isCompact = false }: ChatWorkspaceProps) {
     setIsSending(true);
 
     try {
-      const socket = getChatSocket();
-
-      if (!socket.connected) {
-        throw new Error(
-          'No hay conexión con el chat. Comprueba la conexión e inténtalo de nuevo.',
-        );
+      if (file) {
+        await sendAttachmentMessage(conversationId, file, content);
+      } else {
+        await sendMessage({
+          conversationId,
+          content,
+          senderId: currentUserId,
+        });
       }
 
-      const response = await new Promise<SocketSendResponse>(
-        (resolve, reject) => {
-          socket.emit(
-            'message:send',
-            {
-              conversationId: selectedId,
-              content: trimmedContent,
-            },
-            (result: SocketSendResponse) => {
-              if (result?.ok && result.message) {
-                resolve(result);
-              } else {
-                reject(
-                  new Error(
-                    result?.error || 'No se pudo enviar el mensaje.',
-                  ),
-                );
-              }
-            },
-          );
-        },
-      );
-
-      const message = response.message!;
-
       updateConversationLastMessage(
-        selectedId,
-        message.content || trimmedContent,
-        message.senderId || currentUserId,
+        conversationId,
+        content || (file ? `[Archivo] ${file.name}` : ''),
+        currentUserId,
       );
 
       await queryClient.invalidateQueries({
