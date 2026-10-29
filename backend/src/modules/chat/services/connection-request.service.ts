@@ -104,6 +104,10 @@ async reject(requestId: string, currentUserId: string) {
   return this.respond(requestId, currentUserId, 'REJECTED');
 }
 
+async findAccepted(userId: string) {
+  return this.connectionRequestRepository.findAcceptedByUser(userId);
+}
+
 private async respond(
   requestId: string,
   currentUserId: string,

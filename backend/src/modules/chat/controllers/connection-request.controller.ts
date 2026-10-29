@@ -1,3 +1,4 @@
+
 import {
   Body,
   Controller,
@@ -49,6 +50,11 @@ export class ConnectionRequestController {
   @Get('received')
   findReceived(@CurrentUser() user: AuthenticatedUser) {
     return this.connectionRequestService.findReceived(user.id);
+  }
+
+  @Get('accepted')
+  findAccepted(@CurrentUser() user: AuthenticatedUser) {
+    return this.connectionRequestService.findAccepted(user.id);
   }
 
   @Patch(':id/accept')

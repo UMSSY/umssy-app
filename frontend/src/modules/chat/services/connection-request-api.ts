@@ -29,29 +29,34 @@ function unwrapResponse<T>(body: ApiResponse<T>): T {
 export async function sendConnectionRequest(
   payload: SendConnectionRequestPayload,
 ): Promise<ConnectionRequest> {
-  const response = await apiClient.post<
-    ApiResponse<ConnectionRequest>
-  >('/chat/connection-requests', payload);
+  const response = await apiClient.post<ApiResponse<ConnectionRequest>>(
+    '/chat/connection-requests',
+    payload,
+  );
 
   return unwrapResponse(response.data);
 }
 
-export async function getSentConnectionRequests(): Promise<
-  ConnectionRequest[]
-> {
-  const response = await apiClient.get<
-    ApiResponse<ConnectionRequest[]>
-  >('/chat/connection-requests/sent');
+export async function getSentConnectionRequests(): Promise<ConnectionRequest[]> {
+  const response = await apiClient.get<ApiResponse<ConnectionRequest[]>>(
+    '/chat/connection-requests/sent',
+  );
 
   return unwrapResponse(response.data);
 }
 
-export async function getReceivedConnectionRequests(): Promise<
-  ConnectionRequest[]
-> {
-  const response = await apiClient.get<
-    ApiResponse<ConnectionRequest[]>
-  >('/chat/connection-requests/received');
+export async function getReceivedConnectionRequests(): Promise<ConnectionRequest[]> {
+  const response = await apiClient.get<ApiResponse<ConnectionRequest[]>>(
+    '/chat/connection-requests/received',
+  );
+
+  return unwrapResponse(response.data);
+}
+
+export async function getAcceptedConnectionRequests(): Promise<ConnectionRequest[]> {
+  const response = await apiClient.get<ApiResponse<ConnectionRequest[]>>(
+    '/chat/connection-requests/accepted',
+  );
 
   return unwrapResponse(response.data);
 }
@@ -59,9 +64,9 @@ export async function getReceivedConnectionRequests(): Promise<
 export async function acceptConnectionRequest(
   requestId: string,
 ): Promise<ConnectionRequest> {
-  const response = await apiClient.patch<
-    ApiResponse<ConnectionRequest>
-  >(`/chat/connection-requests/${requestId}/accept`);
+  const response = await apiClient.patch<ApiResponse<ConnectionRequest>>(
+    `/chat/connection-requests/${requestId}/accept`,
+  );
 
   return unwrapResponse(response.data);
 }
@@ -69,9 +74,9 @@ export async function acceptConnectionRequest(
 export async function rejectConnectionRequest(
   requestId: string,
 ): Promise<ConnectionRequest> {
-  const response = await apiClient.patch<
-    ApiResponse<ConnectionRequest>
-  >(`/chat/connection-requests/${requestId}/reject`);
+  const response = await apiClient.patch<ApiResponse<ConnectionRequest>>(
+    `/chat/connection-requests/${requestId}/reject`,
+  );
 
   return unwrapResponse(response.data);
 }

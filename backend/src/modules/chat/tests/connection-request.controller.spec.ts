@@ -14,6 +14,7 @@ describe('ConnectionRequestController', () => {
     send: vi.fn(),
     findSent: vi.fn(),
     findReceived: vi.fn(),
+    findAccepted: vi.fn(),
     accept: vi.fn(),
     reject: vi.fn(),
   };
@@ -28,6 +29,7 @@ describe('ConnectionRequestController', () => {
 
   it('envía una solicitud utilizando el usuario autenticado', async () => {
     const request = { id: 'request-id' };
+
     service.send.mockResolvedValueOnce(request);
 
     const result = await controller.send(user, {
@@ -44,6 +46,7 @@ describe('ConnectionRequestController', () => {
 
   it('consulta las solicitudes enviadas del usuario autenticado', async () => {
     const requests = [{ id: 'request-1' }];
+
     service.findSent.mockResolvedValueOnce(requests);
 
     const result = await controller.findSent(user);
@@ -54,6 +57,7 @@ describe('ConnectionRequestController', () => {
 
   it('consulta las solicitudes recibidas del usuario autenticado', async () => {
     const requests = [{ id: 'request-2' }];
+
     service.findReceived.mockResolvedValueOnce(requests);
 
     const result = await controller.findReceived(user);
@@ -62,8 +66,27 @@ describe('ConnectionRequestController', () => {
     expect(result).toEqual(requests);
   });
 
+  it('consulta las conexiones aceptadas del usuario autenticado', async () => {
+    const acceptedConnections = [
+      {
+        id: 'accepted-request-1',
+        senderId: user.id,
+        receiverId: 'other-user-id',
+        status: { title: 'ACCEPTED' },
+      },
+    ];
+
+    service.findAccepted.mockResolvedValueOnce(acceptedConnections);
+
+    const result = await controller.findAccepted(user);
+
+    expect(service.findAccepted).toHaveBeenCalledWith(user.id);
+    expect(result).toEqual(acceptedConnections);
+  });
+
   it('acepta una solicitud utilizando el usuario autenticado', async () => {
     const requestId = 'request-id';
+
     const response = {
       id: requestId,
       status: { title: 'ACCEPTED' },
@@ -83,6 +106,7 @@ describe('ConnectionRequestController', () => {
 
   it('rechaza una solicitud utilizando el usuario autenticado', async () => {
     const requestId = 'request-id';
+
     const response = {
       id: requestId,
       status: { title: 'REJECTED' },

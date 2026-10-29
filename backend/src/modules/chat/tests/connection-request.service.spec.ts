@@ -24,6 +24,7 @@ describe('ConnectionRequestService', () => {
     create: vi.fn(),
     findSentByUser: vi.fn(),
     findReceivedByUser: vi.fn(),
+    findAcceptedByUser: vi.fn(),
   };
 
   const blockRepository = {
@@ -284,4 +285,28 @@ describe('ConnectionRequestService', () => {
       service.accept(requestId, receiverId),
     ).rejects.toBeInstanceOf(ConflictException);
   });
+
+  it('consulta las conexiones aceptadas del usuario', async () => {
+  const acceptedConnections = [
+    {
+      id: 'accepted-request-1',
+      senderId,
+      receiverId,
+      status: { title: 'ACCEPTED' },
+    },
+    {
+      id: 'accepted-request-2',
+      senderId: receiverId,
+      receiverId: senderId,
+      status: { title: 'ACCEPTED' },
+    },
+  ];
+
+  repository.findAcceptedByUser.mockResolvedValue(acceptedConnections);
+
+  const result = await service.findAccepted(senderId);
+
+  expect(repository.findAcceptedByUser).toHaveBeenCalledWith(senderId);
+  expect(result).toEqual(acceptedConnections);
+});
 });

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { useMessages, messagesQueryKey } from "../hooks/use-messages";
 import { useSendConnectionRequest } from "../hooks/use-send-connection-request";
 import { useReceivedConnectionRequests } from "../hooks/use-received-connection-requests";
 import { useRespondConnectionRequest } from "../hooks/use-respond-connection-request";
+import { useAcceptedConnections } from "../hooks/use-accepted-connections";
 
 import { ConversationList } from "./conversation-list";
 import { ConnectionRequestDetail } from "./connection-request-detail";
@@ -59,11 +60,20 @@ export function ChatWorkspace({
   const [responseError, setResponseError] =
     useState<string | null>(null);
 
+  const [contactSelectionError, setContactSelectionError] =
+    useState<string | null>(null);
+
   const [isSendingLocally, setIsSendingLocally] =
     useState(false);
 
   const [dismissedError, setDismissedError] =
     useState(false);
+
+  const [isStartingConversation, setIsStartingConversation] =
+    useState(false);
+
+  // Evita selecciones simultáneas antes del siguiente render.
+  const startingConversationRef = useRef(false);
 
   const ui = useMessagingUi();
 
@@ -77,6 +87,10 @@ export function ChatWorkspace({
   const sendRequestMutation = useSendConnectionRequest();
 
   const respondRequestMutation = useRespondConnectionRequest();
+
+  const {
+    refetch: refetchAcceptedConnections,
+  } = useAcceptedConnections();
 
   const {
     data: receivedRequests = [],
@@ -101,6 +115,7 @@ export function ChatWorkspace({
     handleSelectConversation,
     clearSelectedConversation,
     findExistingConversationByContact,
+    startConversationWithContact,
     updateConversationLastMessage,
   } = useConversations();
 
@@ -136,6 +151,7 @@ export function ChatWorkspace({
   const handleSelectChat = (conversation: Conversation) => {
     setSelectedRequestId(null);
     setResponseError(null);
+    setContactSelectionError(null);
     handleSelectConversation(conversation);
   };
 
@@ -145,6 +161,7 @@ export function ChatWorkspace({
     clearSelectedConversation();
     setResponseError(null);
     setRequestSuccess(null);
+    setContactSelectionError(null);
     setSelectedRequestId(request.id);
   };
 
@@ -154,12 +171,29 @@ export function ChatWorkspace({
     }
 
     setRequestSuccess(null);
+    setContactSelectionError(null);
     setIsSearchModalOpen(true);
   };
 
-  const handleStartChatWithContact = (
+  /**
+   * HU-09: Iniciar una conversación según el estado
+   * de conexión entre los usuarios.
+   *
+   * 1. Si existe un chat, abrirlo.
+   * 2. Si la conexión está aceptada, crear el chat.
+   * 3. Si no está aceptada, mostrar el diálogo
+   *    para enviar una solicitud.
+   */
+  const handleStartChatWithContact = async (
     contactUser: User,
-  ) => {
+  ): Promise<void> => {
+    if (startingConversationRef.current) {
+      return;
+    }
+
+    startingConversationRef.current = true;
+    setIsStartingConversation(true);
+
     if (activeFilter !== "all") {
       setActiveFilter("all");
     }
@@ -167,16 +201,66 @@ export function ChatWorkspace({
     setIsSearchModalOpen(false);
     setRequestError(null);
     setRequestSuccess(null);
+    setContactSelectionError(null);
 
-    const existingConversation =
-      findExistingConversationByContact(contactUser.id);
+    try {
+      const existingConversation =
+        findExistingConversationByContact(contactUser.id);
 
-    if (existingConversation) {
-      handleSelectChat(existingConversation);
-      return;
+      if (existingConversation) {
+        handleSelectChat(existingConversation);
+        return;
+      }
+
+      // Consultar el estado actualizado desde el backend.
+      const result = await refetchAcceptedConnections();
+
+      if (result.isError) {
+        throw (
+          result.error ??
+          new Error(
+            "No se pudieron consultar las conexiones aceptadas.",
+          )
+        );
+      }
+
+      const connections = result.data ?? [];
+
+      const hasAcceptedConnection = connections.some(
+        (connection) =>
+          connection.status?.title === "ACCEPTED" &&
+          (
+            connection.senderId === contactUser.id ||
+            connection.receiverId === contactUser.id
+          ),
+      );
+
+      if (hasAcceptedConnection) {
+        // Reutilizar la lógica existente de TanStack Query.
+        await startConversationWithContact(contactUser);
+
+        // Asegurar que se muestre la conversación.
+        setSelectedRequestId(null);
+        setResponseError(null);
+        return;
+      }
+
+      // No existe conexión aceptada.
+      setSelectedContactForRequest(contactUser);
+    } catch (error) {
+      // No mostrar el diálogo de solicitud si falla
+      // la consulta o la creación de la conversación.
+      setSelectedContactForRequest(null);
+
+      setContactSelectionError(
+        error instanceof Error
+          ? error.message
+          : "No se pudo iniciar la conversación.",
+      );
+    } finally {
+      startingConversationRef.current = false;
+      setIsStartingConversation(false);
     }
-
-    setSelectedContactForRequest(contactUser);
   };
 
   const handleSendConnectionRequest = async () => {
@@ -190,6 +274,7 @@ export function ChatWorkspace({
     const contact = selectedContactForRequest;
 
     setRequestError(null);
+    setContactSelectionError(null);
 
     try {
       await sendRequestMutation.mutateAsync(contact.id);
@@ -391,7 +476,11 @@ export function ChatWorkspace({
           />
         ) : (
           <EmptyChatState
-            description="Selecciona una conversación existente en el panel izquierdo o inicia una nueva para comenzar a comunicarte."
+            description={
+              isStartingConversation
+                ? "Comprobando conexión e iniciando conversación..."
+                : "Selecciona una conversación existente en el panel izquierdo o inicia una nueva para comenzar a comunicarte."
+            }
             actionLabel="Iniciar una nueva conversación"
             onAction={handleStartNewChat}
           />
@@ -409,7 +498,9 @@ export function ChatWorkspace({
       <ContactSearchModal
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
-        onSelectContact={handleStartChatWithContact}
+        onSelectContact={(contact) => {
+          void handleStartChatWithContact(contact);
+        }}
       />
 
       <SendConnectionRequestDialog
@@ -421,6 +512,24 @@ export function ChatWorkspace({
         }}
         onClose={handleCloseRequestDialog}
       />
+
+      {contactSelectionError && (
+        <div
+          role="alert"
+          className="absolute right-4 bottom-4 z-50 max-w-sm rounded-lg border border-destructive bg-surface p-4 text-sm text-ink shadow-lg"
+        >
+          <p>{contactSelectionError}</p>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            onClick={() => setContactSelectionError(null)}
+          >
+          </Button>
+        </div>
+      )}
 
       {requestSuccess && (
         <div
@@ -436,7 +545,6 @@ export function ChatWorkspace({
             className="mt-2"
             onClick={() => setRequestSuccess(null)}
           >
-            Cerrar
           </Button>
         </div>
       )}
