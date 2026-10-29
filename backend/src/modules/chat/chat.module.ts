@@ -35,6 +35,11 @@ import { AttachmentRepository } from './repositories/attachment.repository.js';
 
 import { ChatGateway } from './gateways/chat.gateway.js';
 
+import { ConnectionRequestService } from './services/connection-request.service.js';
+import { ConnectionRequestRepository } from './repositories/connection-request.repository.js';
+import { ChatUserBlockRepository } from './repositories/chat-user-block.repository.js';
+import { ConnectionRequestController } from './controllers/connection-request.controller.js';
+
 @Module({
   imports: [PrismaModule, JwtAuthModule, AuthModule, EventRegistrationsModule],
   controllers: [
@@ -43,6 +48,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     MessageController,
     ChatController,
     LinkPreviewController,
+    ConnectionRequestController,
     AttachmentController,
   ],
   providers: [
@@ -59,6 +65,10 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     AttachmentUploadInterceptor,
     FileValidationService,
     EventRoomService,
+
+    ConnectionRequestService,
+    ConnectionRequestRepository,
+    ChatUserBlockRepository,
 
     ConversationRepository,
     ConversationParticipantRepository,
