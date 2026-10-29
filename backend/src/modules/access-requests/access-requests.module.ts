@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AuditEventsModule } from '../audit-events/audit-events.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { FilesModule } from '../files/files.module.js';
@@ -17,10 +18,15 @@ import { MailServiceSender } from './mail/mail-service-sender.js';
 import { MAIL_SENDER } from './mail/mail-sender.js';
 import { DocumentValidationRepository } from './repositories/document-validation.repository.js';
 import { AutomaticValidationService } from './services/automatic-validation.service.js';
+import { DocumentCorrectionController } from './controllers/document-correction.controller.js';
+import { DocumentCorrectionGuard } from './guards/document-correction.guard.js';
+import { DocumentCorrectionRepository } from './repositories/document-correction.repository.js';
+import { DocumentCorrectionAuthorizationService } from './services/document-correction-authorization.service.js';
+import { DocumentCorrectionService } from './services/document-correction.service.js';
 
 @Module({
-  imports: [AuthModule, FilesModule, MailModule, AuditEventsModule],
-  controllers: [AccessRequestAutomationController, AccessRequestsController, AccountActivationController],
+  imports: [ConfigModule, AuthModule, FilesModule, MailModule, AuditEventsModule],
+  controllers: [AccessRequestAutomationController, AccessRequestsController, AccountActivationController, DocumentCorrectionController],
   providers: [
     AccessRequestsService,
     AccessRequestsRepository,
@@ -31,8 +37,12 @@ import { AutomaticValidationService } from './services/automatic-validation.serv
     RejectionNotificationService,
     DocumentValidationRepository,
     AutomaticValidationService,
+    DocumentCorrectionRepository,
+    DocumentCorrectionAuthorizationService,
+    DocumentCorrectionService,
+    DocumentCorrectionGuard,
     { provide: MAIL_SENDER, useClass: MailServiceSender },
   ],
-  exports: [AccessRequestsService, AutomaticValidationService],
+  exports: [AccessRequestsService, AutomaticValidationService, DocumentCorrectionAuthorizationService],
 })
 export class AccessRequestsModule {}
