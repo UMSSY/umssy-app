@@ -350,10 +350,6 @@ const handleSendMessage = async (
       "No hay una conversación seleccionada o ya se está enviando un mensaje."
     );
   }
-      throw new Error(
-        "No hay una conversación seleccionada o ya se está enviando un mensaje.",
-      );
-    }
 
     const conversationId = selectedId;
 

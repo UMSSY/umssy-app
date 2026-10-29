@@ -40,7 +40,7 @@ import { ConnectionRequestController } from './controllers/connection-request.co
 
 @Module({
   imports: [PrismaModule, JwtAuthModule, AuthModule],
-  controllers: [X
+  controllers: [
     UserSearchController,
     ConversationController,
     MessageController,
