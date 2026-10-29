@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { useEffect, useState } from 'react';
 import { useMessagingUi } from "../contexts/messaging-ui-context";
 
 import type { ChatWorkspaceProps } from "../types/chat-workspace-props.types";
@@ -31,10 +32,25 @@ import { ChatErrorState } from "./chat-error-state";
 import { SendConnectionRequestDialog } from "./send-connection-request-dialog";
 
 import {
-  sendMessage,
   sendAttachmentMessage,
   getCurrentSessionUserId,
-} from "../services/chat-api";
+} from '../services/chat-api';
+import { getChatSocket } from './chat-socket';
+
+interface SocketMessage {
+  id?: string;
+  conversationId?: string;
+  senderId?: string;
+  content?: string;
+  createdAt?: string;
+  timestamp?: string;
+}
+
+interface SocketSendResponse {
+  ok: boolean;
+  message?: SocketMessage;
+  error?: string;
+}
 
 export function ChatWorkspace({
   isCompact = false,
@@ -142,6 +158,49 @@ export function ChatWorkspace({
 
   const showConnectionDialog =
     isError && !dismissedError;
+
+  useEffect(() => {
+    if (!selectedId) return;
+
+    let socket: ReturnType<typeof getChatSocket>;
+
+    try {
+      socket = getChatSocket();
+    } catch (error) {
+      console.error('No se pudo conectar al chat:', error);
+      return;
+    }
+
+    const handleNewMessage = (message: SocketMessage) => {
+      if (message.conversationId) {
+        void queryClient.invalidateQueries({
+          queryKey: messagesQueryKey(message.conversationId),
+        });
+      }
+
+      void queryClient.invalidateQueries({
+        queryKey: ['conversations'],
+      });
+    };
+
+    const joinConversation = () => {
+      socket.emit('conversation:join', {
+        conversationId: selectedId,
+      });
+    };
+
+    socket.on('connect', joinConversation);
+    socket.on('message:new', handleNewMessage);
+
+    if (socket.connected) {
+      joinConversation();
+    }
+
+    return () => {
+      socket.off('connect', joinConversation);
+      socket.off('message:new', handleNewMessage);
+    };
+  }, [selectedId, queryClient]);
 
   const handleBackToList = () => {
     setSelectedRequestId(null);
@@ -351,29 +410,70 @@ const handleSendMessage = async (
     );
   }
 
-    const conversationId = selectedId;
+    const trimmedContent = content.trim();
+
+    if (!trimmedContent && !file) {
+      throw new Error('El mensaje no puede estar vacío.');
+    }
 
     setIsSending(true);
 
     try {
       if (file) {
-        await sendAttachmentMessage(conversationId, file, content);
+        await sendAttachmentMessage(selectedId, file, trimmedContent);
+
+        updateConversationLastMessage(
+          selectedId,
+          trimmedContent || `[Archivo] ${file.name}`,
+          currentUserId,
+        );
       } else {
-        await sendMessage({
-          conversationId,
-          content,
-          senderId: currentUserId,
-        });
+        const socket = getChatSocket();
+
+        if (!socket.connected) {
+          throw new Error(
+            'No hay conexión con el chat. Comprueba la conexión e inténtalo de nuevo.',
+          );
+        }
+
+        const response = await new Promise<SocketSendResponse>(
+          (resolve, reject) => {
+            socket.emit(
+              'message:send',
+              {
+                conversationId: selectedId,
+                content: trimmedContent,
+              },
+              (result: SocketSendResponse) => {
+                if (result?.ok && result.message) {
+                  resolve(result);
+                } else {
+                  reject(
+                    new Error(
+                      result?.error || 'No se pudo enviar el mensaje.',
+                    ),
+                  );
+                }
+              },
+            );
+          },
+        );
+
+        const message = response.message!;
+
+        updateConversationLastMessage(
+          selectedId,
+          message.content || trimmedContent,
+          message.senderId || currentUserId,
+        );
       }
 
-      updateConversationLastMessage(
-        conversationId,
-        content || (file ? `[Archivo] ${file.name}` : ''),
-        currentUserId,
-      );
+      await queryClient.invalidateQueries({
+        queryKey: messagesQueryKey(selectedId),
+      });
 
       await queryClient.invalidateQueries({
-        queryKey: messagesQueryKey(conversationId),
+        queryKey: ['conversations'],
       });
     } finally {
       setIsSending(false);
@@ -427,7 +527,6 @@ const handleSendMessage = async (
             activeFilter={activeFilter}
             searchQuery={searchQuery}
             onSelectConversation={handleSelectChat}
-            onSelectRequest={handleSelectRequest}
             onFilterChange={setActiveFilter}
             onSearchChange={setSearchQuery}
             onLoadMore={loadMore}

@@ -5,6 +5,7 @@ import { ChatGateway } from '../gateways/chat.gateway.js';
 import { SessionService } from '../../../common/services/session.service.js';
 import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
+import { MessageService } from '../services/message.service.js';
 
 describe('ChatGateway (HU-5 Handshake)', () => {
   let gateway: ChatGateway;
@@ -26,6 +27,10 @@ describe('ChatGateway (HU-5 Handshake)', () => {
         {
           provide: ChatService,
           useValue: { getActiveConversationIds: vi.fn() },
+        },
+        {
+          provide: MessageService,
+          useValue: {},
         },
         {
           provide: UserPresenceService,
@@ -51,6 +56,7 @@ describe('ChatGateway (HU-5 Handshake)', () => {
     const mockSocket: any = { handshake: { auth: {} } };
     const mockNext = vi.fn();
 
+    // Ejecutamos el middleware
     await middleware(mockSocket, mockNext);
 
     expect(mockNext).toHaveBeenCalledWith(new Error('unauthorized'));
@@ -61,12 +67,13 @@ describe('ChatGateway (HU-5 Handshake)', () => {
     gateway.afterInit(mockServer);
     const middleware = mockServer.use.mock.calls[0][0];
 
-    const mockSocket: any = { handshake: { auth: { token: 'valid-token' } }, data: {} };
+    const mockSocket: any = {
+      handshake: { auth: { token: 'valid-token' } },
+      data: {},
+    };
     const mockNext = vi.fn();
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     vi.mocked(jwtService.verifyAsync).mockResolvedValue({ sub: 'user-123' } as any);
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     vi.mocked(sessionService.getAuthenticatedUser).mockResolvedValue({ 
      id: 'user-123', 
      roles: ['titulado'] 

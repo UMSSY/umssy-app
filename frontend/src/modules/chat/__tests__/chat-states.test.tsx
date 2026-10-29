@@ -1,7 +1,28 @@
-
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 
 import {
+import {
+  act,
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+
+import {
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  it,
+  expect,
+  vi,
+  afterEach as afterEachVitest,
+} from "vitest";
   describe,
   it,
   expect,
@@ -9,16 +30,15 @@ import {
   afterEach,
 } from "vitest";
 
-import {
-  screen,
-  fireEvent,
-  cleanup,
-} from "@testing-library/react";
-
 import { EmptyChatState } from "../components/empty-chat-state";
 import { ConversationSkeleton } from "../components/conversation-skeleton";
 import { ConversationItem } from "../components/conversation-item";
 import { ConversationList } from "../components/conversation-list";
+
+import { ChatView } from "../views/chat-view";
+import { ChatRoom } from "../components/chat-room";
+import { getChatSocket } from "../components/chat-socket";
+import * as chatApi from "../services/chat-api";
 
 import type { Conversation } from "../types/conversation.types";
 
@@ -28,6 +48,20 @@ afterEach(() => {
 
 const mockConversationWithAvatar: Conversation = {
   id: "conv-1",
+  contact: {
+    id: "user-1",
+    fullName: "Maria Fernandez",
+    avatarUrl: "https://example.com/avatar.jpg",
+    isOnline: true,
+  },
+};
+
+vi.mock("../components/chat-socket", () => ({
+  getChatSocket: vi.fn(),
+}));
+
+const conversation: Conversation = {
+  id: "empty-chat",
   contact: {
     id: "user-1",
     fullName: "Maria Fernandez",
@@ -101,6 +135,41 @@ const mockConversationWithoutMessages: Conversation = {
   unreadCount: 0,
   updatedAt: new Date().toISOString(),
 };
+
+const mockSocket = {
+  connected: true,
+  on: vi.fn(),
+  off: vi.fn(),
+  emit: vi.fn(),
+};
+
+beforeEach(() => {
+  vi.mocked(getChatSocket).mockReturnValue(
+    mockSocket as unknown as ReturnType<typeof getChatSocket>,
+  );
+});
+
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+  vi.clearAllMocks();
+});
+
+function renderChat() {
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  return render(
+    <QueryClientProvider client={client}>
+      <ChatView />
+    </QueryClientProvider>,
+  );
+}
 
 describe("Chat Components", () => {
   it(
@@ -210,13 +279,90 @@ describe("Chat Components", () => {
           isSelected={false}
           onSelect={vi.fn()}
         />,
+    "conserva el borrador tras fallar el envío y lo limpia solo cuando se envía correctamente",
+    async () => {
+      vi.spyOn(
+        chatApi,
+        "getConversations",
+      ).mockResolvedValue([conversation]);
+
+      vi.spyOn(chatApi, "getPaginatedMessages")
+        .mockResolvedValueOnce({
+          data: [],
+          hasMore: false,
+          nextCursor: null,
+        })
+        .mockResolvedValue({
+          data: [sentMessage],
+          hasMore: false,
+          nextCursor: null,
+        });
+
+      let attempts = 0;
+      const sendEmit = vi.fn(
+        (
+          event: string,
+          _payload: unknown,
+          callback?: (result: {
+            ok: boolean;
+            message?: Message;
+            error?: string;
+          }) => void,
+        ) => {
+          if (event !== "message:send" || !callback) return;
+          attempts += 1;
+          if (attempts === 1) {
+            callback({ ok: false, error: "offline" });
+          } else {
+            callback({ ok: true, message: sentMessage });
+          }
+        },
+      );
+
+      vi.mocked(getChatSocket).mockReturnValue({
+        connected: true,
+        on: vi.fn(),
+        off: vi.fn(),
+        emit: sendEmit,
+      } as unknown as ReturnType<typeof getChatSocket>);
+
+      renderChat();
+
+      fireEvent.click(
+        await screen.findByText("Ana Pérez"),
+      );
+
+      await screen.findByText(
+        /Aún no hay mensajes/,
+      );
+
+      const textarea = screen.getByTestId(
+        "message-textarea",
+      );
+
+      fireEvent.change(textarea, {
+        target: {
+          value: "Hola",
+        },
+      });
+
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: "Enviar mensaje",
+        }),
       );
 
       expect(
         screen.getByText(/\[Audio\]/),
       ).toBeDefined();
 
-      unmount();
+      await waitFor(() => {
+        expect(sendEmit).toHaveBeenCalledWith(
+          "message:send",
+          { conversationId: conversation.id, content: "Hola" },
+          expect.any(Function),
+        );
+      });
 
       render(
         <ConversationItem
@@ -226,9 +372,15 @@ describe("Chat Components", () => {
         />,
       );
 
-      expect(
-        screen.getByText("Conversación iniciada"),
-      ).toBeDefined();
+      await waitFor(() => {
+        expect(
+          sendEmit.mock.calls.filter((call) => call[0] === "message:send"),
+        ).toHaveLength(2);
+        expect(textarea).toHaveValue("");
+        expect(
+          screen.queryByRole("alert"),
+        ).toBeNull();
+      });
     },
   );
 
