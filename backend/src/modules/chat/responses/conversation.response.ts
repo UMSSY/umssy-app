@@ -1,6 +1,7 @@
 export interface ConversationResponse {
   id: string;
-  contact: {
+  eventId?: string;
+  contact?: {
     id: string;
     fullName: string;
     avatarUrl: string | null;

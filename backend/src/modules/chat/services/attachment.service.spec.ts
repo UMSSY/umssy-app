@@ -155,7 +155,7 @@ describe('AttachmentService', () => {
       } as MulterFile;
 
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-1' }),
+      service.uploadAndSend('user-1', file, { conversationId: 'conv-1', content: '' }),
       ).rejects.toThrow(UserBlockedException);
 
       expect(blockService.isBlockedBetween).toHaveBeenCalledWith('user-1', 'user-2');
@@ -166,14 +166,14 @@ describe('AttachmentService', () => {
       const { service } = createMockService();
 
       await expect(
-        service.uploadAndSend('user-1', undefined, { conversationId: 'conv-1' }),
+        service.uploadAndSend('user-1', undefined, { conversationId: 'conv-1', content: '' }),
       ).rejects.toThrow(EmptyFileException);
 
       await expect(
         service.uploadAndSend(
           'user-1',
           { buffer: Buffer.alloc(0), size: 0 } as MulterFile,
-          { conversationId: 'conv-1' },
+          { conversationId: 'conv-1', content: '' },
         ),
       ).rejects.toThrow(EmptyFileException);
     });
@@ -190,7 +190,7 @@ describe('AttachmentService', () => {
       } as MulterFile;
 
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-1' }),
+        service.uploadAndSend('user-1', file, { conversationId: 'conv-1', content: '' }),
       ).rejects.toThrow(InvalidAttachmentTypeException);
     });
 
@@ -206,7 +206,7 @@ describe('AttachmentService', () => {
       } as MulterFile;
 
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-1' }),
+        service.uploadAndSend('user-1', file, { conversationId: 'conv-1', content: '' }),
       ).rejects.toThrow(AttachmentTooLargeException);
     });
 
@@ -222,7 +222,7 @@ describe('AttachmentService', () => {
       } as MulterFile;
 
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-1' }),
+        service.uploadAndSend('user-1', file, { conversationId: 'conv-1', content: '' }),
       ).rejects.toThrow(AttachmentTooLargeException);
     });
 
@@ -246,7 +246,7 @@ describe('AttachmentService', () => {
       } as MulterFile;
 
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-none' }),
+        service.uploadAndSend('user-1', file, { conversationId: 'conv-none', content: '' }),
       ).rejects.toThrow(ConversationNotFoundException);
     });
 
@@ -275,7 +275,7 @@ describe('AttachmentService', () => {
       } as MulterFile;
 
       await expect(
-        service.uploadAndSend('user-intruder', file, { conversationId: 'conv-1' }),
+        service.uploadAndSend('user-intruder', file, { conversationId: 'conv-1', content: '' }),
       ).rejects.toThrow(NotConversationParticipantException);
     });
 
@@ -306,7 +306,7 @@ describe('AttachmentService', () => {
       } as MulterFile;
 
       await expect(
-        service.uploadAndSend('user-1', file, { conversationId: 'conv-1' }),
+        service.uploadAndSend('user-1', file, { conversationId: 'conv-1', content: '' }),
       ).rejects.toThrow(InvalidAttachmentTypeException);
     });
 
@@ -467,6 +467,7 @@ describe('AttachmentService', () => {
 
       const result = await service.uploadAndSend('user-1', file, {
         conversationId: 'conv-1',
+        content: '',
       });
 
       expect(fileValidationService.validate).toHaveBeenCalledWith(

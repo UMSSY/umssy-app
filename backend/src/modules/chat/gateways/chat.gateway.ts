@@ -1,4 +1,3 @@
-// backend/src/modules/chat/chat.gateway.ts
 import { Logger } from '@nestjs/common';
 import {
   OnGatewayConnection,
@@ -15,13 +14,18 @@ import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../../../common/services/session.service.js';
 import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
+
 import { MessageService } from '../services/message.service.js';
+import { EventRoomService } from '../services/event-room.service.js';
+
+
+import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
+
 
 interface SocketMessagePayload {
   conversationId?: string;
   content?: string;
 }
-
 @WebSocketGateway({
   namespace: '/chat',
   cors: {
@@ -41,7 +45,11 @@ export class ChatGateway
     private readonly sessionService: SessionService,
     private readonly chatService: ChatService,
     private readonly userPresenceService: UserPresenceService,
+   
     private readonly messageService: MessageService,
+   
+    private readonly eventRoomService: EventRoomService,
+  
   ) {}
 
   afterInit(server: Server) {
@@ -96,23 +104,25 @@ export class ChatGateway
     }
 
     try {
-      const conversationIds =
+     const conversationIds =
         await this.chatService.getActiveConversationIds(user.id);
-
-      for (const convId of conversationIds) {
+      
+        for (const convId of conversationIds) {
         await client.join(convId);
       }
 
       await this.userPresenceService.markOnline(user.id);
       this.server.emit('presence:online', { userId: user.id });
+ 
     } catch (error) {
       this.logger.error(
         `Error inicializando socket para el usuario ${user.id}`,
         error instanceof Error ? error.stack : String(error),
       );
     }
+ 
   }
-
+ 
   async handleDisconnect(client: Socket) {
     const user = client.data.user;
     if (!user) return;
@@ -131,7 +141,7 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('conversation:join')
+@SubscribeMessage('conversation:join')
   async joinConversation(
     @ConnectedSocket() client: Socket,
     @MessageBody() body: SocketMessagePayload,
@@ -171,8 +181,8 @@ export class ChatGateway
     }
   }
 
-  @SubscribeMessage('message:send')
-  async sendMessage(
+  @SubscribeMessage('event_room:join')
+  async handleEventRoomJoin(
     @ConnectedSocket() client: Socket,
     @MessageBody() body: SocketMessagePayload,
   ) {
@@ -210,8 +220,7 @@ export class ChatGateway
           error instanceof Error ? error.message : String(error)
         }`,
       );
-
-      return {
+return {
         ok: false,
         error:
           error instanceof Error

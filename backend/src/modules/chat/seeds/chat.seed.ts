@@ -95,6 +95,7 @@ async function seedConversations(
       data: {
         userAId,
         userBId,
+        eventId: definition.eventId ?? null,
         participants: {
           createMany: {
             data: [

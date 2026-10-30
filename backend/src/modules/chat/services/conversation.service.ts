@@ -99,7 +99,7 @@ export class ConversationService {
       };
     }
 
-    // HU-09: Verificar conexión aceptada antes de crear el chat
+   
     const acceptedRequest =
       await this.connectionRequestRepository.findAcceptedRequest(
         userAId,
@@ -112,7 +112,7 @@ export class ConversationService {
       );
     }
 
-    // Crear una conversación autorizada
+
     try {
       const created =
         await this.conversationRepository.createWithParticipants(
@@ -232,7 +232,36 @@ export class ConversationService {
     currentUserId: string,
     blockedIds: ReadonlySet<string>,
   ): Promise<ConversationResponse> {
-    const contact = (
+if (conversation.event?.id) {
+  const lastMessage = conversation.messages[0];
+  const safeContent = lastMessage?.content ?? '';
+  const isAttachment = Boolean(safeContent.startsWith('[Archivo] '));
+  const content = isAttachment
+    ? safeContent.slice(10)
+    : safeContent;
+  const attachmentType = isAttachment ? ('file' as const) : null;
+
+  return {
+    id: conversation.id,
+    eventId: conversation.event.id,
+
+    lastMessage: lastMessage
+      ? {
+          id: lastMessage.id,
+          senderId: lastMessage.senderId,
+          content,
+          isAttachment,
+          attachmentType,
+          createdAt: lastMessage.sentAt.toISOString(),
+        }
+      : null,
+    unreadCount: 0,
+    isBlockedByMe: false, 
+    updatedAt: conversation.updatedAt.toISOString(),
+  };
+}
+
+const contact = (
       conversation.userAId === currentUserId
         ? conversation.userB
         : conversation.userA
@@ -243,13 +272,14 @@ export class ConversationService {
       photoUrl?: Uint8Array | null;
     };
 
-    // Obtener estado de conexión del contacto
-    const onlineMap =
-      await this.userPresenceService.mapOnlineStatus([
-        contact.id,
-      ]);
+    if (!contact) {
+      throw new UserNotFoundException();
+    }
 
-    // Consultar participación del usuario
+    const onlineMap = await this.userPresenceService.mapOnlineStatus([
+      contact.id,
+    ]);
+
     const participant =
       await this.participantRepository.findByConversationAndUser(
         conversation.id,
@@ -265,7 +295,6 @@ export class ConversationService {
         )
       : 0;
 
-    // Obtener último mensaje
     const lastMessage = conversation.messages[0];
 
     const safeContent = lastMessage?.content ?? '';
