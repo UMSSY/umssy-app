@@ -1,7 +1,13 @@
 import { DomainException } from '../../../common/exceptions/domain.exception.js';
 
 export class MentorParticipationException extends DomainException {
-  constructor(message: string, statusCode = 409, data: unknown = null) {
+  retryAfterSeconds?: number;
+  constructor(
+    message: string,
+    statusCode = 409,
+    data: unknown = null,
+    codeOverride?: string,
+  ) {
     const code =
       typeof data === 'object' &&
       data !== null &&
@@ -9,6 +15,6 @@ export class MentorParticipationException extends DomainException {
       typeof data.code === 'string'
         ? data.code
         : 'MENTOR_PARTICIPATION_ERROR';
-    super(message, statusCode, code, data);
+    super(message, statusCode, codeOverride ?? code, data);
   }
 }

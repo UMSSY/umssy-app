@@ -18,13 +18,14 @@ async function bootstrap(): Promise<void> {
 
   app.enableCors({
     origin: corsOrigins,
-    exposedHeaders: ['Content-Disposition'],
+    exposedHeaders: ['Content-Disposition', 'Retry-After'],
   });
   app.setGlobalPrefix('api');
 
   const config = buildSwaggerConfig();
 
-  const documentFactory = () => cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
+  const documentFactory = () =>
+    cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
   SwaggerModule.setup('docs', app, documentFactory, {
     swaggerOptions: { persistAuthorization: true },
   });
@@ -39,9 +40,7 @@ async function bootstrap(): Promise<void> {
   );
 }
 
-try {
-  await bootstrap();
-} catch (error: unknown) {
+void bootstrap().catch((error: unknown) => {
   console.error('[bootstrap] FAILED', error);
   process.exit(1);
-}
+});
