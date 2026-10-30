@@ -1,3 +1,4 @@
+
 import { Injectable } from '@nestjs/common';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
@@ -23,6 +24,7 @@ import { ConversationParticipantRepository } from '../repositories/conversation-
 import { MessageRepository } from '../repositories/message.repository.js';
 import { MessageStatusService } from './message-status.service.js';
 import { BlockService } from './block.service.js';
+import { ChatRolePolicyService } from './chat-role-policy.service.js';
 import type { SendAttachmentMessageDto } from '../requests/send-attachment-message.schema.js';
 import type { AttachmentFileDownload } from '../types/attachment.types.js';
 import type { AttachmentResponse } from '../responses/attachment.response.js';
@@ -38,6 +40,7 @@ export class AttachmentService {
     private readonly messageStatusService: MessageStatusService,
     private readonly fileValidationService: FileValidationService,
     private readonly blockService: BlockService,
+    private readonly chatRolePolicyService: ChatRolePolicyService,
   ) {}
 
   async uploadAndSend(
@@ -50,9 +53,11 @@ export class AttachmentService {
     }
 
     const detectedMime = this.fileValidationService.detectMimeType(file.buffer);
+
     const isImage = detectedMime
       ? (ALLOWED_IMAGE_MIME_TYPES as readonly string[]).includes(detectedMime)
       : (ALLOWED_IMAGE_MIME_TYPES as readonly string[]).includes(file.mimetype);
+
     const isPdf = detectedMime
       ? (ALLOWED_PDF_MIME_TYPES as readonly string[]).includes(detectedMime)
       : (ALLOWED_PDF_MIME_TYPES as readonly string[]).includes(file.mimetype);
@@ -73,41 +78,66 @@ export class AttachmentService {
       );
     }
 
-    // Validación profunda de integridad estructural y seguridad contra políglotas
+    // Validación profunda de integridad estructural
     const uploadedFile = this.attachmentMapper.toUploadedFile(file);
+
     const validatedFile = this.fileValidationService.validate(uploadedFile, {
       allowedTypes: isImage ? ['jpg', 'png'] : ['pdf'],
       maxSizeBytes: isImage ? MAX_IMAGE_SIZE_BYTES : MAX_PDF_SIZE_BYTES,
     });
 
+    // Verificar que la conversación exista
     const conversation = await this.conversationRepository.findById(
       dto.conversationId,
     );
+
     if (!conversation) {
       throw new ConversationNotFoundException();
     }
 
+    // Verificar que el usuario participe en la conversación
     const participant =
       await this.participantRepository.findByConversationAndUser(
         dto.conversationId,
         userId,
       );
+
     if (!participant) {
       throw new NotConversationParticipantException();
     }
 
-    // HU-13: con un bloqueo activo (en cualquier dirección) no se envían adjuntos.
-    const otherParticipantId = this.getOtherParticipantId(conversation, userId);
+    // HU-13: impedir envío de adjuntos entre usuarios bloqueados
+    const otherParticipantId = this.getOtherParticipantId(
+      conversation,
+      userId,
+    );
+
     if (
       otherParticipantId &&
-      (await this.blockService.isBlockedBetween(userId, otherParticipantId))
+      (await this.blockService.isBlockedBetween(
+        userId,
+        otherParticipantId,
+      ))
     ) {
       throw new UserBlockedException();
     }
 
+    // HU-08: validar los roles actuales de ambos usuarios
+    // antes de crear mensajes o guardar archivos.
+    // Se aplica a conversaciones privadas entre dos usuarios.
+    if (otherParticipantId) {
+      await this.chatRolePolicyService.assertCanCommunicate(
+        userId,
+        otherParticipantId,
+      );
+    }
+
+    // Determinar el tipo de archivo
     const typeTitle = isImage ? 'IMAGE' : 'PDF';
+
     const attachmentType =
       await this.attachmentRepository.findAttachmentTypeByTitle(typeTitle);
+
     if (!attachmentType) {
       throw new InvalidAttachmentTypeException(
         `Tipo de adjunto ${typeTitle} no disponible en catálogo`,
@@ -128,7 +158,7 @@ export class AttachmentService {
       sentAt: now,
     });
 
-    // Guardado binario en PostgreSQL (columna file_data)
+    // Guardado binario en PostgreSQL
     const attachmentRecord = await this.attachmentRepository.create({
       messageId: message.id,
       typeId: attachmentType.id,
@@ -138,19 +168,22 @@ export class AttachmentService {
       fileData: validatedFile.buffer,
     });
 
+    // Actualizar el último mensaje de la conversación
     await this.conversationRepository.touchLastMessage(
       dto.conversationId,
       message.id,
       now,
     );
 
+    // Marcar como leído para el remitente
     await this.participantRepository.markRead(
       dto.conversationId,
       userId,
       now,
     );
 
-    const attachmentResponse = this.attachmentMapper.toResponse(attachmentRecord);
+    const attachmentResponse =
+      this.attachmentMapper.toResponse(attachmentRecord);
 
     return {
       id: message.id,
@@ -170,7 +203,10 @@ export class AttachmentService {
     userId: string,
     attachmentId: string,
   ): Promise<AttachmentFileDownload> {
-    const record = await this.attachmentRepository.findDownloadById(attachmentId);
+    const record = await this.attachmentRepository.findDownloadById(
+      attachmentId,
+    );
+
     if (!record || !record.fileData) {
       throw new AttachmentNotFoundException();
     }
@@ -180,6 +216,7 @@ export class AttachmentService {
         record.message.conversationId,
         userId,
       );
+
     if (!participant) {
       throw new NotConversationParticipantException();
     }
@@ -197,6 +234,7 @@ export class AttachmentService {
     attachmentId: string,
   ): Promise<AttachmentResponse> {
     const record = await this.attachmentRepository.findById(attachmentId);
+
     if (!record) {
       throw new AttachmentNotFoundException();
     }
@@ -205,12 +243,22 @@ export class AttachmentService {
   }
 
   private getOtherParticipantId(
-    conversation: { userAId?: string | null; userBId?: string | null },
+    conversation: {
+      userAId?: string | null;
+      userBId?: string | null;
+    },
     userId: string,
   ): string | null {
     const { userAId, userBId } = conversation;
-    if (!userAId || !userBId) return null;
+
+    // Las conversaciones de eventos no tienen necesariamente
+    // dos participantes privados.
+    if (!userAId || !userBId) {
+      return null;
+    }
+
     const sender = userId.trim().toLowerCase();
+
     return userAId.toLowerCase() === sender ? userBId : userAId;
   }
 }

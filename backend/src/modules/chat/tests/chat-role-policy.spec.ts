@@ -8,6 +8,7 @@ import { AttachmentService } from '../services/attachment.service.js';
 import { ChatGateway } from '../gateways/chat.gateway.js';
 import { UserBlockedException } from '../exceptions/index.js';
 
+
 const USER_A = '00000000-0000-4000-8000-000000000001';
 const USER_B = '00000000-0000-4000-8000-000000000002';
 const CONVERSATION_ID = '00000000-0000-4000-8000-000000000003';

@@ -4,6 +4,7 @@ import { ConversationRepository } from '../repositories/conversation.repository.
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
+import { ChatRolePolicyService } from './chat-role-policy.service.js';
 
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
@@ -12,6 +13,7 @@ import {
   InactiveUserException,
   SelfConversationException,
   UserNotFoundException,
+  UserBlockedException,
 } from '../exceptions/index.js';
 
 import type { ConversationResponse } from '../responses/conversation.response.js';
@@ -19,13 +21,14 @@ import type { ConversationResponse } from '../responses/conversation.response.js
 @Injectable()
 export class ConversationService {
   constructor(
-    private readonly conversationRepository: ConversationRepository,
-    private readonly participantRepository: ConversationParticipantRepository,
-    private readonly userLookupRepository: UserLookupRepository,
-    private readonly userPresenceService: UserPresenceService,
-    private readonly connectionRequestRepository: ConnectionRequestRepository,
-    private readonly blockService: BlockService,
-  ) {}
+  private readonly conversationRepository: ConversationRepository,
+  private readonly participantRepository: ConversationParticipantRepository,
+  private readonly userLookupRepository: UserLookupRepository,
+  private readonly userPresenceService: UserPresenceService,
+  private readonly connectionRequestRepository: ConnectionRequestRepository,
+  private readonly blockService: BlockService,
+  private readonly chatRolePolicyService: ChatRolePolicyService,
+) {}
 
   async getOrCreate(
     currentUserId: string,
@@ -78,6 +81,21 @@ export class ConversationService {
     const blockedIds = await this.blockService.findBlockedIdsBy(
       normalizedCurrentUserId,
     );
+    // HU-13: impedir conversaciones con usuarios bloqueados.
+if (
+  await this.blockService.isBlockedBetween(
+    normalizedCurrentUserId,
+    normalizedContactId,
+  )
+) {
+  throw new UserBlockedException();
+}
+
+// HU-08: validar los roles actuales de ambos usuarios.
+await this.chatRolePolicyService.assertCanCommunicate(
+  normalizedCurrentUserId,
+  normalizedContactId,
+);
 
     // Buscar una conversación existente
     const existing =
