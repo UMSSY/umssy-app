@@ -14,6 +14,7 @@ import type { BlockService } from './block.service.js';
 const noBlocks = () =>
   ({
     findBlockedIdsBy: vi.fn().mockResolvedValue(new Set<string>()),
+    isBlockedBetween: vi.fn().mockResolvedValue(false),
   }) as unknown as BlockService;
 
 describe('ConversationService', () => {
@@ -54,13 +55,12 @@ describe('ConversationService', () => {
       countUnread: vi.fn().mockResolvedValue(1),
     } as unknown as ConversationParticipantRepository;
 
-    const userLookupRepositoryMock =
-      {} as unknown as UserLookupRepository;
+    const userLookupRepositoryMock = {} as unknown as UserLookupRepository;
 
     const userPresenceServiceMock = {
-      mapOnlineStatus: vi.fn().mockResolvedValue(
-        new Map([['user-contact', true]]),
-      ),
+      mapOnlineStatus: vi
+        .fn()
+        .mockResolvedValue(new Map([['user-contact', true]])),
     } as unknown as UserPresenceService;
 
     const connectionRequestRepositoryMock =
@@ -73,6 +73,9 @@ describe('ConversationService', () => {
       userPresenceServiceMock,
       connectionRequestRepositoryMock,
       noBlocks(),
+      {
+        assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ConstructorParameters<typeof ConversationService>[6],
     );
 
     const result = await service.findAllForUser('user-current');
@@ -94,6 +97,9 @@ describe('ConversationService', () => {
       {} as unknown as UserPresenceService,
       {} as unknown as ConnectionRequestRepository,
       noBlocks(),
+      {
+        assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ConstructorParameters<typeof ConversationService>[6],
     );
 
     await expect(
@@ -101,9 +107,7 @@ describe('ConversationService', () => {
         '123e4567-e89b-12d3-a456-426614174000',
         '123E4567-E89B-12D3-A456-426614174000',
       ),
-    ).rejects.toThrow(
-      /No es posible iniciar una conversaci/,
-    );
+    ).rejects.toThrow(/No es posible iniciar una conversaci/);
   });
 
   it('recovers gracefully from concurrent creation unique constraint collision (P2002)', async () => {
@@ -168,12 +172,12 @@ describe('ConversationService', () => {
       userPresenceServiceMock,
       connectionRequestRepositoryMock,
       noBlocks(),
+      {
+        assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ConstructorParameters<typeof ConversationService>[6],
     );
 
-    const result = await service.getOrCreateWithStatus(
-      'user-a',
-      'user-b',
-    );
+    const result = await service.getOrCreateWithStatus('user-a', 'user-b');
 
     expect(result.isCreated).toBe(false);
     expect(result.conversation.id).toBe('conv-concurrent');
@@ -221,10 +225,12 @@ describe('ConversationService', () => {
       userPresenceServiceMock,
       {} as unknown as ConnectionRequestRepository,
       noBlocks(),
+      {
+        assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ConstructorParameters<typeof ConversationService>[6],
     );
 
-    const conversations =
-      await service.findAllForUser('user-me');
+    const conversations = await service.findAllForUser('user-me');
 
     expect(conversations[0]?.contact?.avatarUrl).toBe(
       `data:image/jpeg;base64,${photoBuffer.toString('base64')}`,
@@ -243,32 +249,50 @@ describe('ConversationService', () => {
     });
 
     const buildService = (blockedIds: string[], conversations: unknown[]) => {
-      const blockService = { findBlockedIdsBy: vi.fn().mockResolvedValue(new Set(blockedIds)) };
+      const blockService = {
+        findBlockedIdsBy: vi.fn().mockResolvedValue(new Set(blockedIds)),
+      };
       const service = new ConversationService(
         {
           findUserConversations: vi.fn().mockResolvedValue(conversations),
-          findByOrderedPair: vi.fn().mockResolvedValue(conversations[0] ?? null),
+          findByOrderedPair: vi
+            .fn()
+            .mockResolvedValue(conversations[0] ?? null),
         } as unknown as ConversationRepository,
         {
           findByConversationAndUser: vi.fn().mockResolvedValue(null),
           countUnread: vi.fn().mockResolvedValue(0),
         } as unknown as ConversationParticipantRepository,
-        { findById: vi.fn().mockResolvedValue({ id: 'user-blocked', isActive: true }) } as unknown as UserLookupRepository,
-        { mapOnlineStatus: vi.fn().mockResolvedValue(new Map()) } as unknown as UserPresenceService,
         {
-          findAcceptedRequest: vi.fn().mockResolvedValue({ id: 'accepted-request' }),
+          findById: vi
+            .fn()
+            .mockResolvedValue({ id: 'user-blocked', isActive: true }),
+        } as unknown as UserLookupRepository,
+        {
+          mapOnlineStatus: vi.fn().mockResolvedValue(new Map()),
+        } as unknown as UserPresenceService,
+        {
+          findAcceptedRequest: vi
+            .fn()
+            .mockResolvedValue({ id: 'accepted-request' }),
         } as unknown as ConnectionRequestRepository,
         blockService as unknown as BlockService,
+        {
+          assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+        } as unknown as ConstructorParameters<typeof ConversationService>[6],
       );
       return { service, blockService };
     };
 
     it('marks only the conversation with the blocked contact and queries blocks once', async () => {
-      const { service, blockService } = buildService(['user-blocked'], [
-        buildConversation('conv-1', 'user-blocked'),
-        buildConversation('conv-2', 'user-ok'),
-        buildConversation('conv-3', 'user-ok-2'),
-      ]);
+      const { service, blockService } = buildService(
+        ['user-blocked'],
+        [
+          buildConversation('conv-1', 'user-blocked'),
+          buildConversation('conv-2', 'user-ok'),
+          buildConversation('conv-3', 'user-ok-2'),
+        ],
+      );
 
       const result = await service.findAllForUser('user-me');
 
@@ -278,14 +302,23 @@ describe('ConversationService', () => {
     });
 
     it('returns false for the blocked user (does not reveal who blocked)', async () => {
-      const { service } = buildService([], [buildConversation('conv-1', 'user-blocker')]);
+      const { service } = buildService(
+        [],
+        [buildConversation('conv-1', 'user-blocker')],
+      );
       const result = await service.findAllForUser('user-me');
       expect(result[0]?.isBlockedByMe).toBe(false);
     });
 
     it('includes isBlockedByMe in POST /chat/conversations (getOrCreate)', async () => {
-      const { service } = buildService(['user-blocked'], [buildConversation('conv-1', 'user-blocked')]);
-      const result = await service.getOrCreateWithStatus('user-me', 'user-blocked');
+      const { service } = buildService(
+        ['user-blocked'],
+        [buildConversation('conv-1', 'user-blocked')],
+      );
+      const result = await service.getOrCreateWithStatus(
+        'user-me',
+        'user-blocked',
+      );
       expect(result.isCreated).toBe(false);
       expect(result.conversation.isBlockedByMe).toBe(true);
     });
@@ -315,6 +348,9 @@ describe('ConversationService', () => {
       {} as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
+      {
+        assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ConstructorParameters<typeof ConversationService>[6],
     );
 
     await expect(
@@ -353,9 +389,7 @@ describe('ConversationService', () => {
 
     const conversationRepositoryMock = {
       findByOrderedPair: vi.fn().mockResolvedValue(null),
-      createWithParticipants: vi
-        .fn()
-        .mockResolvedValue(createdConversation),
+      createWithParticipants: vi.fn().mockResolvedValue(createdConversation),
     };
 
     const participantRepositoryMock = {
@@ -389,12 +423,12 @@ describe('ConversationService', () => {
       userPresenceServiceMock as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
+      {
+        assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ConstructorParameters<typeof ConversationService>[6],
     );
 
-    const result = await service.getOrCreateWithStatus(
-      'user-a',
-      'user-b',
-    );
+    const result = await service.getOrCreateWithStatus('user-a', 'user-b');
 
     expect(result.isCreated).toBe(true);
     expect(result.conversation.id).toBe('conv-new');
@@ -430,9 +464,7 @@ describe('ConversationService', () => {
     };
 
     const conversationRepositoryMock = {
-      findByOrderedPair: vi
-        .fn()
-        .mockResolvedValue(existingConversation),
+      findByOrderedPair: vi.fn().mockResolvedValue(existingConversation),
       createWithParticipants: vi.fn(),
     };
 
@@ -463,12 +495,12 @@ describe('ConversationService', () => {
       userPresenceServiceMock as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
+      {
+        assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ConstructorParameters<typeof ConversationService>[6],
     );
 
-    const result = await service.getOrCreateWithStatus(
-      'user-a',
-      'user-b',
-    );
+    const result = await service.getOrCreateWithStatus('user-a', 'user-b');
 
     expect(result.isCreated).toBe(false);
     expect(result.conversation.id).toBe('conv-existing');

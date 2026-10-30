@@ -43,6 +43,9 @@ describe('MessageService', () => {
       participantRepository,
       messageStatusService,
       blockService,
+      {
+        assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ConstructorParameters<typeof MessageService>[5],
     );
 
     return {
@@ -201,9 +204,9 @@ describe('MessageService', () => {
       const { service, participantRepository } = createMockService();
       participantRepository.findByConversationAndUser.mockResolvedValue(null);
 
-      await expect(
-        service.markRead('conv-1', 'user-intruder'),
-      ).rejects.toThrow(NotConversationParticipantException);
+      await expect(service.markRead('conv-1', 'user-intruder')).rejects.toThrow(
+        NotConversationParticipantException,
+      );
     });
 
     it('marks conversation as read for participant', async () => {
@@ -274,13 +277,15 @@ describe('MessageService', () => {
     });
   });
 
-    describe('send con usuarios bloqueados', () => {
+  describe('send con usuarios bloqueados', () => {
     const conversation = { id: 'conv-1', userAId: 'user-a', userBId: 'user-b' };
 
     const arrange = (blocked: boolean) => {
       const mocks = createMockService();
       mocks.conversationRepository.findById.mockResolvedValue(conversation);
-      mocks.participantRepository.findByConversationAndUser.mockResolvedValue({ id: 'part-1' });
+      mocks.participantRepository.findByConversationAndUser.mockResolvedValue({
+        id: 'part-1',
+      });
       mocks.blockService.isBlockedBetween.mockResolvedValue(blocked);
       mocks.messageRepository.create.mockResolvedValue({
         id: 'msg-1',
@@ -294,13 +299,25 @@ describe('MessageService', () => {
     };
 
     it('quien bloquea envía → 403 y no crea el mensaje ni toca last_message_at', async () => {
-      const { service, blockService, messageRepository, conversationRepository } = arrange(true);
+      const {
+        service,
+        blockService,
+        messageRepository,
+        conversationRepository,
+      } = arrange(true);
 
       await expect(
-        service.send({ conversationId: 'conv-1', senderId: 'user-a', content: 'Hola' }),
+        service.send({
+          conversationId: 'conv-1',
+          senderId: 'user-a',
+          content: 'Hola',
+        }),
       ).rejects.toThrow(UserBlockedException);
 
-      expect(blockService.isBlockedBetween).toHaveBeenCalledWith('user-a', 'user-b');
+      expect(blockService.isBlockedBetween).toHaveBeenCalledWith(
+        'user-a',
+        'user-b',
+      );
       expect(messageRepository.create).not.toHaveBeenCalled();
       expect(conversationRepository.touchLastMessage).not.toHaveBeenCalled();
     });
@@ -309,10 +326,17 @@ describe('MessageService', () => {
       const { service, blockService, messageRepository } = arrange(true);
 
       await expect(
-        service.send({ conversationId: 'conv-1', senderId: 'user-b', content: 'Hola' }),
+        service.send({
+          conversationId: 'conv-1',
+          senderId: 'user-b',
+          content: 'Hola',
+        }),
       ).rejects.toThrow('No es posible enviar mensajes en esta conversación');
 
-      expect(blockService.isBlockedBetween).toHaveBeenCalledWith('user-b', 'user-a');
+      expect(blockService.isBlockedBetween).toHaveBeenCalledWith(
+        'user-b',
+        'user-a',
+      );
       expect(messageRepository.create).not.toHaveBeenCalled();
     });
 
@@ -321,9 +345,14 @@ describe('MessageService', () => {
     });
 
     it('otros contactos no se afectan / tras desbloquear → se crea el mensaje', async () => {
-      const { service, messageRepository, conversationRepository } = arrange(false);
+      const { service, messageRepository, conversationRepository } =
+        arrange(false);
 
-      const result = await service.send({ conversationId: 'conv-1', senderId: 'user-a', content: 'Hola' });
+      const result = await service.send({
+        conversationId: 'conv-1',
+        senderId: 'user-a',
+        content: 'Hola',
+      });
 
       expect(result.id).toBe('msg-1');
       expect(messageRepository.create).toHaveBeenCalledTimes(1);
@@ -332,7 +361,11 @@ describe('MessageService', () => {
 
     it('conversaciones de evento (sin userA/userB) no consultan bloqueos', async () => {
       const mocks = arrange(true);
-      mocks.conversationRepository.findById.mockResolvedValue({ id: 'conv-event', userAId: null, userBId: null });
+      mocks.conversationRepository.findById.mockResolvedValue({
+        id: 'conv-event',
+        userAId: null,
+        userBId: null,
+      });
 
       await sendToEventConversation(mocks.service);
 
@@ -341,11 +374,27 @@ describe('MessageService', () => {
     });
 
     it('el historial (getPage) sigue disponible con bloqueo activo', async () => {
-      const { service, participantRepository, messageRepository, blockService } = arrange(true);
-      participantRepository.findByConversationAndUser.mockResolvedValue({ id: 'part-1' });
-      messageRepository.findPage.mockResolvedValue({ data: [], hasMore: false, nextCursor: null });
+      const {
+        service,
+        participantRepository,
+        messageRepository,
+        blockService,
+      } = arrange(true);
+      participantRepository.findByConversationAndUser.mockResolvedValue({
+        id: 'part-1',
+      });
+      messageRepository.findPage.mockResolvedValue({
+        data: [],
+        hasMore: false,
+        nextCursor: null,
+      });
 
-      const page = await service.getPage({ conversationId: 'conv-1', userId: 'user-a', cursor: null, limit: 10 });
+      const page = await service.getPage({
+        conversationId: 'conv-1',
+        userId: 'user-a',
+        cursor: null,
+        limit: 10,
+      });
 
       expect(page.data).toEqual([]);
       expect(blockService.isBlockedBetween).not.toHaveBeenCalled();
@@ -354,6 +403,9 @@ describe('MessageService', () => {
 });
 
 function sendToEventConversation(service: MessageService) {
-  return service.send({ conversationId: 'conv-event', senderId: 'user-a', content: 'Hola' });
+  return service.send({
+    conversationId: 'conv-event',
+    senderId: 'user-a',
+    content: 'Hola',
+  });
 }
-

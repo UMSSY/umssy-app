@@ -28,23 +28,30 @@ describe('MessageService (group chat)', () => {
     participantRepository = {
       findByConversationAndUser: vi
         .fn()
-        .mockResolvedValue({ conversationId: 'group-conv-1', userId: 'user-1' }),
+        .mockResolvedValue({
+          conversationId: 'group-conv-1',
+          userId: 'user-1',
+        }),
       markRead: vi.fn().mockResolvedValue(undefined),
     };
     messageRepository = {
-      create: vi.fn().mockImplementation(async (data: {
-        conversationId: string;
-        senderId: string;
-        content: string;
-        sentAt: Date;
-      }) => ({
-        id: 'message-1',
-        conversationId: data.conversationId,
-        senderId: data.senderId,
-        content: data.content,
-        sentAt: data.sentAt,
-        createdAt: data.sentAt,
-      })),
+      create: vi
+        .fn()
+        .mockImplementation(
+          async (data: {
+            conversationId: string;
+            senderId: string;
+            content: string;
+            sentAt: Date;
+          }) => ({
+            id: 'message-1',
+            conversationId: data.conversationId,
+            senderId: data.senderId,
+            content: data.content,
+            sentAt: data.sentAt,
+            createdAt: data.sentAt,
+          }),
+        ),
     };
     messageStatusService = {
       getSentId: vi.fn().mockResolvedValue('status-sent'),
@@ -55,6 +62,12 @@ describe('MessageService (group chat)', () => {
       conversationRepository as unknown as ConversationRepository,
       participantRepository as unknown as ConversationParticipantRepository,
       messageStatusService as unknown as MessageStatusService,
+      {
+        isBlockedBetween: vi.fn().mockResolvedValue(false),
+      } as unknown as ConstructorParameters<typeof MessageService>[4],
+      {
+        assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ConstructorParameters<typeof MessageService>[5],
     );
   });
 

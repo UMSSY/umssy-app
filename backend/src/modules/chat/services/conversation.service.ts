@@ -76,15 +76,6 @@ export class ConversationService {
       normalizedContactId,
     );
 
-    if (
-      await this.blockService.isBlockedBetween(
-        normalizedCurrentUserId,
-        normalizedContactId,
-      )
-    ) {
-      throw new UserBlockedException();
-    }
-
     const [userAId, userBId] =
       normalizedCurrentUserId < normalizedContactId
         ? [normalizedCurrentUserId, normalizedContactId]
@@ -112,6 +103,15 @@ export class ConversationService {
         conversation,
         isCreated: false,
       };
+    }
+
+    if (
+      await this.blockService.isBlockedBetween(
+        normalizedCurrentUserId,
+        normalizedContactId,
+      )
+    ) {
+      throw new UserBlockedException();
     }
 
     const acceptedRequest =
