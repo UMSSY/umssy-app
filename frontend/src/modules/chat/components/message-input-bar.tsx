@@ -31,6 +31,7 @@ export interface MessageInputBarProps {
   onChange: (value: string) => void;
   onSend: () => void;
   disabled?: boolean;
+  sendDisabled?: boolean;
   isSending?: boolean;
   maxLength?: number;
   placeholder?: string;
@@ -45,6 +46,7 @@ export function MessageInputBar({
   onChange,
   onSend,
   disabled = false,
+  sendDisabled = false,
   isSending = false,
   maxLength = MAX_MESSAGE_LENGTH,
   placeholder = "Escribe un mensaje...",
@@ -100,6 +102,7 @@ export function MessageInputBar({
 
   const isSendDisabled =
     disabled ||
+    sendDisabled ||
     isSending ||
     isUploading ||
     !canSend ||

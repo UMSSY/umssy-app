@@ -20,7 +20,11 @@ import { BlockedConversationNotice } from "./blocked-conversation-notice";
 import { downloadAttachment } from "../services/chat-api";
 import { isApiError } from "@/shared/services/api-client";
 
+import { ChatConnectionBanner } from './chat-connection-banner';
+import type { ChatConnectionStatus } from '../types/chat-connection-status.types';
+
 interface ChatRoomProps {
+  connectionStatus?: ChatConnectionStatus;
   conversation: Conversation;
   messages: Message[];
   currentUserId: string;
@@ -86,7 +90,7 @@ function ChatRoomContent({
   isLoadingMessages = false, isSending = false, hasMoreMessages = false,
   onLoadMoreMessages, isLoadingMoreMessages = false, isMessagesError = false,
   isLoadingOlderError = false, onRetryMessages, isCompact = false,
-  onBlockUser, onUnblockUser,
+  onBlockUser, onUnblockUser, connectionStatus = "connected",
 }: ChatRoomProps) {
   const ui = useMessagingUi();
   const [localInputText, setLocalInputText] = useState("");
@@ -210,6 +214,7 @@ function ChatRoomContent({
   }, [messages, showInitialLoading, isLoadingMoreMessages, hasMoreMessages, getMessageElement]);
 
   const handleSend = async () => {
+    if (connectionStatus !== "connected") return;
     if (isBlockedByMe) return; // con bloqueo activo no se envía nada
     const hasText = isContentValidForSend(inputText);
     const hasAttachment = Boolean(selectedAttachment);
@@ -349,6 +354,7 @@ function ChatRoomContent({
           />
         )}
       </header>
+      {connectionStatus !== "connected" && <ChatConnectionBanner key={connectionStatus} status={connectionStatus} />}
       {onBlockUser && (
         <BlockUserDialog
           open={isBlockDialogOpen}
@@ -449,6 +455,7 @@ function ChatRoomContent({
             onKeyDown={handleInputKeyDown}
             isSending={isSending || isSubmitting}
             isUploading={isUploading}
+            sendDisabled={connectionStatus !== "connected"}
             attachment={selectedAttachment}
             onAttachmentChange={setSelectedAttachment}
             disabled={showInitialLoading || (isMessagesError && messages.length === 0)}

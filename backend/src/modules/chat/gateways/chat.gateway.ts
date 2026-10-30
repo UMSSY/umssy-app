@@ -181,6 +181,14 @@ export class ChatGateway
     }
   }
 
+  @SubscribeMessage('message:send')
+  sendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: SocketMessagePayload,
+  ) {
+    return this.handleEventRoomJoin(client, body);
+  }
+
   @SubscribeMessage('event_room:join')
   async handleEventRoomJoin(
     @ConnectedSocket() client: Socket,
