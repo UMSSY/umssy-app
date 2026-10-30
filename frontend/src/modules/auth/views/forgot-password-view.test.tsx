@@ -69,7 +69,7 @@ describe("ForgotPasswordView", () => {
       expect(screen.getByRole("heading", { name: "Revisa tu correo" })).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/e\*+@umss\.edu/)).toBeInTheDocument();
+    expect(screen.getByText(/es\*+@umss\.edu/)).toBeInTheDocument();
     expect(screen.getByText(/Vence en 5 minutos\./)).toBeInTheDocument();
     expect(screen.getByText(/05:00/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cambiar correo" })).toBeInTheDocument();
@@ -105,7 +105,7 @@ describe("ForgotPasswordView", () => {
     fireEvent.click(screen.getByRole("button", { name: "¿No te llegó? Reenviar código" }));
 
     await waitFor(() => {
-      const msg = screen.getByText(/Código reenviado a e\*+@umss\.edu/);
+      const msg = screen.getByText(/Código reenviado a es\*+@umss\.edu/);
       expect(msg).toBeInTheDocument();
       expect(msg).toHaveClass("text-accent");
     });

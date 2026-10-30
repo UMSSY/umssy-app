@@ -4,13 +4,14 @@ import { useRef, type KeyboardEvent, type ClipboardEvent, type ChangeEvent, type
 import { cn } from "cn";
 import { Input } from "@/components/ui/input";
 
-interface OtpInputProps {
+export interface OtpInputProps {
   value: string;
   onChange: (value: string) => void;
   length?: number;
   disabled?: boolean;
-  isInvalid?: boolean;
+  invalid?: boolean;
   id?: string;
+  describedBy?: string;
 }
 
 export function OtpInput({
@@ -18,16 +19,15 @@ export function OtpInput({
   onChange,
   length = 6,
   disabled = false,
-  isInvalid = false,
+  invalid = false,
   id = "otp-input",
+  describedBy,
 }: OtpInputProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const digits = Array.from({ length }, (_, index) => value[index] || "");
 
   function handleFocus(index: number, event: FocusEvent<HTMLInputElement>) {
-    // Si el usuario intenta ir a una casilla superior sin haber completado las anteriores,
-    // se redirige el foco a la primera casilla vacía
     const firstEmptyIndex = value.length;
     if (index > firstEmptyIndex && firstEmptyIndex < length) {
       inputRefs.current[firstEmptyIndex]?.focus();
@@ -40,7 +40,6 @@ export function OtpInput({
     const rawVal = event.target.value;
     const cleaned = rawVal.replace(/\D/g, "");
 
-    // Si no hay dígitos (por ejemplo, al limpiar el campo)
     if (!cleaned) {
       const newDigits = [...digits];
       newDigits[index] = "";
@@ -48,7 +47,6 @@ export function OtpInput({
       return;
     }
 
-    // Si se pegó o autocompletó más de un dígito
     if (cleaned.length > 1) {
       const pasted = cleaned.slice(0, length);
       onChange(pasted);
@@ -60,7 +58,6 @@ export function OtpInput({
       return;
     }
 
-    // Entrada de un solo dígito
     const digit = cleaned.slice(-1);
     const targetIndex = index > value.length ? value.length : index;
     const newDigits = [...digits];
@@ -68,7 +65,6 @@ export function OtpInput({
     const newValue = newDigits.join("");
     onChange(newValue);
 
-    // Saltar automáticamente a la siguiente casilla
     if (targetIndex < length - 1) {
       setTimeout(() => {
         inputRefs.current[targetIndex + 1]?.focus();
@@ -122,8 +118,8 @@ export function OtpInput({
       {Array.from({ length }).map((_, index) => (
         <Input
           key={index}
-          ref={(el) => {
-            inputRefs.current[index] = el;
+          ref={(element) => {
+            inputRefs.current[index] = element;
           }}
           id={index === 0 ? id : `${id}-${index}`}
           type="text"
@@ -133,10 +129,10 @@ export function OtpInput({
           maxLength={1}
           value={digits[index]}
           disabled={disabled}
-          onChange={(e) => handleDigitChange(index, e)}
-          onKeyDown={(e) => handleKeyDown(index, e)}
+          onChange={(event) => handleDigitChange(index, event)}
+          onKeyDown={(event) => handleKeyDown(index, event)}
           onPaste={handlePaste}
-          onFocus={(e) => handleFocus(index, e)}
+          onFocus={(event) => handleFocus(index, event)}
           onClick={() => {
             const firstEmptyIndex = value.length;
             if (index > firstEmptyIndex && firstEmptyIndex < length) {
@@ -144,16 +140,18 @@ export function OtpInput({
             }
           }}
           aria-label={`Dígito ${index + 1} de ${length}`}
-          aria-invalid={isInvalid ? true : undefined}
+          aria-invalid={invalid ? true : undefined}
+          aria-describedby={describedBy}
           data-testid={`otp-input-${index}`}
           className={cn(
             "size-12 rounded-xl border-2 border-border-strong bg-surface px-0 text-center text-xl font-bold text-ink transition-all duration-150 sm:size-14 sm:text-2xl md:text-2xl",
             "outline-hidden focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20",
             disabled && "cursor-not-allowed opacity-50",
-            isInvalid && "border-danger text-danger ring-2 ring-danger/20"
+            invalid && "border-danger text-danger ring-2 ring-danger/20"
           )}
         />
       ))}
     </div>
   );
 }
+
