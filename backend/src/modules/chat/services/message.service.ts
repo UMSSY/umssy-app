@@ -4,6 +4,7 @@ import { ConversationRepository } from '../repositories/conversation.repository.
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import { MessageStatusService } from './message-status.service.js';
 import { BlockService } from './block.service.js';
+import { ChatRolePolicyService } from './chat-role-policy.service.js';
 import {
   ConversationNotFoundException,
   InvalidMessageContentException,
@@ -22,7 +23,8 @@ export class MessageService {
     private readonly participantRepository: ConversationParticipantRepository,
     private readonly messageStatusService: MessageStatusService,
     private readonly blockService: BlockService,
-    ) {}
+    private readonly chatRolePolicyService: ChatRolePolicyService,
+  ) {}
   async send(params: {
     conversationId: string;
     senderId: string;
@@ -48,9 +50,19 @@ export class MessageService {
       conversation,
       params.senderId,
     );
+    if (otherParticipantId) {
+      await this.chatRolePolicyService.assertCanCommunicate(
+        params.senderId,
+        otherParticipantId,
+      );
+    }
+
     if (
       otherParticipantId &&
-      (await this.blockService.isBlockedBetween(params.senderId, otherParticipantId))
+      (await this.blockService.isBlockedBetween(
+        params.senderId,
+        otherParticipantId,
+      ))
     ) {
       throw new UserBlockedException();
     }
@@ -130,20 +142,22 @@ export class MessageService {
     return {
       data: page.data.map((m) => {
         const rawContent = m.content ?? '';
-        const rawAttachments = (m as {
-          attachments?: Array<{
-            id: string;
-            messageId: string;
-            typeId: string;
-            fileName: string;
-            mimeType: string | null;
-            fileSize: number | null;
-            url: string | null;
-            thumbnailUrl: string | null;
-            createdAt: Date;
-            type?: { title: string } | null;
-          }>;
-        }).attachments;
+        const rawAttachments = (
+          m as {
+            attachments?: Array<{
+              id: string;
+              messageId: string;
+              typeId: string;
+              fileName: string;
+              mimeType: string | null;
+              fileSize: number | null;
+              url: string | null;
+              thumbnailUrl: string | null;
+              createdAt: Date;
+              type?: { title: string } | null;
+            }>;
+          }
+        ).attachments;
 
         const firstAttachment = rawAttachments?.[0];
         const isAttachment = Boolean(
@@ -153,14 +167,17 @@ export class MessageService {
           ? rawContent.slice(10)
           : rawContent;
         const attachmentType = firstAttachment
-          ? (firstAttachment.type?.title?.toLowerCase() === 'image'
-              ? ('image' as const)
-              : ('file' as const))
+          ? firstAttachment.type?.title?.toLowerCase() === 'image'
+            ? ('image' as const)
+            : ('file' as const)
           : isAttachment
             ? ('file' as const)
             : null;
-        const statusTitle = (m as { status?: { title?: string } }).status?.title?.toLowerCase();
-        const status = statusTitle === 'read' ? ('read' as const) : ('sent' as const);
+        const statusTitle = (
+          m as { status?: { title?: string } }
+        ).status?.title?.toLowerCase();
+        const status =
+          statusTitle === 'read' ? ('read' as const) : ('sent' as const);
 
         const mappedAttachments = rawAttachments?.map((att) => ({
           id: att.id,
@@ -213,7 +230,7 @@ export class MessageService {
     );
   }
 
-   private getOtherParticipantId(
+  private getOtherParticipantId(
     conversation: { userAId?: string | null; userBId?: string | null },
     senderId: string,
   ): string | null {
@@ -223,8 +240,7 @@ export class MessageService {
     return userAId.toLowerCase() === sender ? userBId : userAId;
   }
 
-    private sanitize(raw: string): string {
-  
+  private sanitize(raw: string): string {
     const cleaned = raw
       .split('')
       .filter((char) => {

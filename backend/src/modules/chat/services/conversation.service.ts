@@ -1,3 +1,4 @@
+import { UserBlockedException } from '../exceptions/index.js';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { ConversationRepository } from '../repositories/conversation.repository.js';
@@ -7,6 +8,7 @@ import { ConnectionRequestRepository } from '../repositories/connection-request.
 
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
+import { ChatRolePolicyService } from './chat-role-policy.service.js';
 
 import {
   InactiveUserException,
@@ -25,6 +27,7 @@ export class ConversationService {
     private readonly userPresenceService: UserPresenceService,
     private readonly connectionRequestRepository: ConnectionRequestRepository,
     private readonly blockService: BlockService,
+    private readonly chatRolePolicyService: ChatRolePolicyService,
   ) {}
 
   async getOrCreate(
@@ -55,9 +58,8 @@ export class ConversationService {
     }
 
     // Verificar que el destinatario exista
-    const contact = await this.userLookupRepository.findById(
-      normalizedContactId,
-    );
+    const contact =
+      await this.userLookupRepository.findById(normalizedContactId);
 
     if (!contact) {
       throw new UserNotFoundException();
@@ -69,6 +71,20 @@ export class ConversationService {
     }
 
     // Normalizar el orden de los usuarios
+    await this.chatRolePolicyService.assertCanCommunicate(
+      normalizedCurrentUserId,
+      normalizedContactId,
+    );
+
+    if (
+      await this.blockService.isBlockedBetween(
+        normalizedCurrentUserId,
+        normalizedContactId,
+      )
+    ) {
+      throw new UserBlockedException();
+    }
+
     const [userAId, userBId] =
       normalizedCurrentUserId < normalizedContactId
         ? [normalizedCurrentUserId, normalizedContactId]
@@ -80,11 +96,10 @@ export class ConversationService {
     );
 
     // Buscar una conversación existente
-    const existing =
-      await this.conversationRepository.findByOrderedPair(
-        userAId,
-        userBId,
-      );
+    const existing = await this.conversationRepository.findByOrderedPair(
+      userAId,
+      userBId,
+    );
 
     if (existing) {
       const conversation = await this.toResponse(
@@ -99,7 +114,6 @@ export class ConversationService {
       };
     }
 
-   
     const acceptedRequest =
       await this.connectionRequestRepository.findAcceptedRequest(
         userAId,
@@ -112,14 +126,12 @@ export class ConversationService {
       );
     }
 
-
     try {
-      const created =
-        await this.conversationRepository.createWithParticipants(
-          userAId,
-          userBId,
-          new Date(),
-        );
+      const created = await this.conversationRepository.createWithParticipants(
+        userAId,
+        userBId,
+        new Date(),
+      );
 
       const conversation = await this.toResponse(
         created,
@@ -144,10 +156,7 @@ export class ConversationService {
         err?.message?.includes('Unique constraint')
       ) {
         const concurrentExisting =
-          await this.conversationRepository.findByOrderedPair(
-            userAId,
-            userBId,
-          );
+          await this.conversationRepository.findByOrderedPair(userAId, userBId);
 
         if (concurrentExisting) {
           const conversation = await this.toResponse(
@@ -180,9 +189,7 @@ export class ConversationService {
     return participant !== null;
   }
 
-  async findAllForUser(
-    currentUserId: string,
-  ): Promise<ConversationResponse[]> {
+  async findAllForUser(currentUserId: string): Promise<ConversationResponse[]> {
     // HU-13: una sola consulta de bloqueos por petición (sin N+1)
     const [list, blockedIds] = await Promise.all([
       this.conversationRepository.findUserConversations(currentUserId),
@@ -232,36 +239,34 @@ export class ConversationService {
     currentUserId: string,
     blockedIds: ReadonlySet<string>,
   ): Promise<ConversationResponse> {
-if (conversation.event?.id) {
-  const lastMessage = conversation.messages[0];
-  const safeContent = lastMessage?.content ?? '';
-  const isAttachment = Boolean(safeContent.startsWith('[Archivo] '));
-  const content = isAttachment
-    ? safeContent.slice(10)
-    : safeContent;
-  const attachmentType = isAttachment ? ('file' as const) : null;
+    if (conversation.event?.id) {
+      const lastMessage = conversation.messages[0];
+      const safeContent = lastMessage?.content ?? '';
+      const isAttachment = Boolean(safeContent.startsWith('[Archivo] '));
+      const content = isAttachment ? safeContent.slice(10) : safeContent;
+      const attachmentType = isAttachment ? ('file' as const) : null;
 
-  return {
-    id: conversation.id,
-    eventId: conversation.event.id,
+      return {
+        id: conversation.id,
+        eventId: conversation.event.id,
 
-    lastMessage: lastMessage
-      ? {
-          id: lastMessage.id,
-          senderId: lastMessage.senderId,
-          content,
-          isAttachment,
-          attachmentType,
-          createdAt: lastMessage.sentAt.toISOString(),
-        }
-      : null,
-    unreadCount: 0,
-    isBlockedByMe: false, 
-    updatedAt: conversation.updatedAt.toISOString(),
-  };
-}
+        lastMessage: lastMessage
+          ? {
+              id: lastMessage.id,
+              senderId: lastMessage.senderId,
+              content,
+              isAttachment,
+              attachmentType,
+              createdAt: lastMessage.sentAt.toISOString(),
+            }
+          : null,
+        unreadCount: 0,
+        isBlockedByMe: false,
+        updatedAt: conversation.updatedAt.toISOString(),
+      };
+    }
 
-const contact = (
+    const contact = (
       conversation.userAId === currentUserId
         ? conversation.userB
         : conversation.userA
@@ -302,13 +307,9 @@ const contact = (
     // Detectar archivos adjuntos
     const isAttachment = safeContent.startsWith('[Archivo] ');
 
-    const content = isAttachment
-      ? safeContent.slice(10)
-      : safeContent;
+    const content = isAttachment ? safeContent.slice(10) : safeContent;
 
-    const attachmentType = isAttachment
-      ? ('file' as const)
-      : null;
+    const attachmentType = isAttachment ? ('file' as const) : null;
 
     // Convertir foto binaria a base64
     const contactPhoto = contact.photoUrl;

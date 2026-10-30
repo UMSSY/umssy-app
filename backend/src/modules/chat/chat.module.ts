@@ -27,6 +27,7 @@ import { AttachmentUploadInterceptor } from './interceptors/attachment-upload.in
 import { EventRoomService } from './services/event-room.service.js';
 import { ConnectionRequestService } from './services/connection-request.service.js';
 import { BlockService } from './services/block.service.js';
+import { ChatRolePolicyService } from './services/chat-role-policy.service.js';
 
 import { ConversationRepository } from './repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from './repositories/conversation-participant.repository.js';
@@ -67,10 +68,9 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     AttachmentUploadInterceptor,
     FileValidationService,
     EventRoomService,
-
     ConnectionRequestService,
     BlockService,
-
+    ChatRolePolicyService,
     ConversationRepository,
     ConversationParticipantRepository,
     MessageRepository,

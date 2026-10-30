@@ -23,6 +23,7 @@ import { ConversationParticipantRepository } from '../repositories/conversation-
 import { MessageRepository } from '../repositories/message.repository.js';
 import { MessageStatusService } from './message-status.service.js';
 import { BlockService } from './block.service.js';
+import { ChatRolePolicyService } from './chat-role-policy.service.js';
 import type { SendAttachmentMessageDto } from '../requests/send-attachment-message.schema.js';
 import type { AttachmentFileDownload } from '../types/attachment.types.js';
 import type { AttachmentResponse } from '../responses/attachment.response.js';
@@ -38,6 +39,7 @@ export class AttachmentService {
     private readonly messageStatusService: MessageStatusService,
     private readonly fileValidationService: FileValidationService,
     private readonly blockService: BlockService,
+    private readonly chatRolePolicyService: ChatRolePolicyService,
   ) {}
 
   async uploadAndSend(
@@ -98,6 +100,13 @@ export class AttachmentService {
 
     // HU-13: con un bloqueo activo (en cualquier dirección) no se envían adjuntos.
     const otherParticipantId = this.getOtherParticipantId(conversation, userId);
+    if (otherParticipantId) {
+      await this.chatRolePolicyService.assertCanCommunicate(
+        userId,
+        otherParticipantId,
+      );
+    }
+
     if (
       otherParticipantId &&
       (await this.blockService.isBlockedBetween(userId, otherParticipantId))
@@ -144,13 +153,10 @@ export class AttachmentService {
       now,
     );
 
-    await this.participantRepository.markRead(
-      dto.conversationId,
-      userId,
-      now,
-    );
+    await this.participantRepository.markRead(dto.conversationId, userId, now);
 
-    const attachmentResponse = this.attachmentMapper.toResponse(attachmentRecord);
+    const attachmentResponse =
+      this.attachmentMapper.toResponse(attachmentRecord);
 
     return {
       id: message.id,
@@ -170,7 +176,8 @@ export class AttachmentService {
     userId: string,
     attachmentId: string,
   ): Promise<AttachmentFileDownload> {
-    const record = await this.attachmentRepository.findDownloadById(attachmentId);
+    const record =
+      await this.attachmentRepository.findDownloadById(attachmentId);
     if (!record || !record.fileData) {
       throw new AttachmentNotFoundException();
     }
