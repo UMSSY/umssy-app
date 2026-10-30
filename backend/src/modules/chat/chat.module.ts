@@ -4,6 +4,7 @@ import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { FileValidationService } from '../../common/services/file-validation.service.js';
 import { EventRegistrationsModule } from '../event-registrations/event-registrations.module.js';
+import { ChatRolePolicyService } from './services/chat-role-policy.service.js';
 
 import { UserSearchController } from './controllers/user-search.controller.js';
 import { ConversationController } from './controllers/conversation.controller.js';
@@ -62,6 +63,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     UserPresenceService,
     ChatService,
     ChatGateway,
+    ChatRolePolicyService,
     LinkPreviewService,
     AttachmentService,
     AttachmentMapper,
