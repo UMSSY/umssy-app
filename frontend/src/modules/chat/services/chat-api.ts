@@ -25,6 +25,13 @@ import {
 import { apiClient } from '@/shared/services/api-client';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import type { UserRole } from '../types/user.types';
+import type {
+  ChatUserResponse,
+  GetPaginatedMessagesParams,
+  PaginatedMessagesResponse,
+  RawBackendAttachmentItem,
+  RawBackendMessageItem,
+} from '../types/chat-api.types';
 const MIN_SEARCH_CHARS = 2;
 const DEFAULT_MESSAGE_PAGE_SIZE = 10;
 
@@ -51,54 +58,6 @@ export function getCurrentSessionUserId(): string {
   }
 
   return '';
-}
-
-export interface GetPaginatedMessagesParams {
-  conversationId: string;
-  cursor?: string | null;
-  limit?: number;
-}
-
-export interface PaginatedMessagesResponse {
-  data: Message[];
-  nextCursor: string | null;
-  hasMore: boolean;
-}
-
-interface RawBackendAttachmentItem {
-  id: string;
-  messageId?: string;
-  fileName: string;
-  mimeType?: string | null;
-  fileSize?: number | null;
-  url?: string | null;
-  thumbnailUrl?: string | null;
-  type?: string | { title?: string } | null;
-  createdAt?: string;
-}
-
-interface RawBackendMessageItem {
-  id?: string;
-  conversationId?: string;
-  senderId?: string;
-  content?: string;
-  timestamp?: string;
-  createdAt?: string;
-  sentAt?: string;
-  status?: string;
-  isAttachment?: boolean;
-  attachmentType?: AttachmentType | null;
-  attachment?: RawBackendAttachmentItem | null;
-  attachments?: RawBackendAttachmentItem[];
-}
-
-interface ChatUserResponse {
-  id: string;
-  fullName: string;
-  avatarUrl: string | null;
-  headline: string | null;
-  role: string;
-  isOnline: boolean;
 }
 
 export async function getConversations(): Promise<Conversation[]> {
@@ -237,7 +196,7 @@ export async function getPaginatedMessages({
         const mappedMessages: Message[] = combined.map(
           (m: RawBackendMessageItem) => {
             const rawAttachments = m.attachments || (m.attachment ? [m.attachment] : []);
-            const mappedAttachments: MessageAttachment[] = rawAttachments.map((att) => ({
+            const mappedAttachments: MessageAttachment[] = rawAttachments.map((att: RawBackendAttachmentItem) => ({
               id: att.id,
               messageId: att.messageId || m.id,
               fileName: att.fileName,

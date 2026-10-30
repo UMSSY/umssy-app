@@ -2,6 +2,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ConversationService } from './conversation.service.js';
+import { ConversationMapper } from '../mappers/conversation.mapper.js';
 
 import type { ConversationRepository } from '../repositories/conversation.repository.js';
 import type { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
@@ -73,6 +74,7 @@ describe('ConversationService', () => {
       userPresenceServiceMock,
       connectionRequestRepositoryMock,
       noBlocks(),
+      new ConversationMapper(),
     );
 
     const result = await service.findAllForUser('user-current');
@@ -94,6 +96,7 @@ describe('ConversationService', () => {
       {} as unknown as UserPresenceService,
       {} as unknown as ConnectionRequestRepository,
       noBlocks(),
+      new ConversationMapper(),
     );
 
     await expect(
@@ -168,6 +171,7 @@ describe('ConversationService', () => {
       userPresenceServiceMock,
       connectionRequestRepositoryMock,
       noBlocks(),
+      new ConversationMapper(),
     );
 
     const result = await service.getOrCreateWithStatus(
@@ -221,6 +225,7 @@ describe('ConversationService', () => {
       userPresenceServiceMock,
       {} as unknown as ConnectionRequestRepository,
       noBlocks(),
+      new ConversationMapper(),
     );
 
     const conversations =
@@ -259,6 +264,7 @@ describe('ConversationService', () => {
           findAcceptedRequest: vi.fn().mockResolvedValue({ id: 'accepted-request' }),
         } as unknown as ConnectionRequestRepository,
         blockService as unknown as BlockService,
+        new ConversationMapper(),
       );
       return { service, blockService };
     };
@@ -315,6 +321,7 @@ describe('ConversationService', () => {
       {} as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
+      new ConversationMapper(),
     );
 
     await expect(
@@ -389,6 +396,7 @@ describe('ConversationService', () => {
       userPresenceServiceMock as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
+      new ConversationMapper(),
     );
 
     const result = await service.getOrCreateWithStatus(
@@ -463,6 +471,7 @@ describe('ConversationService', () => {
       userPresenceServiceMock as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
+      new ConversationMapper(),
     );
 
     const result = await service.getOrCreateWithStatus(

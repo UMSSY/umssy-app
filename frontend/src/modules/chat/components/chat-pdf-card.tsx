@@ -53,7 +53,6 @@ export function ChatPdfCard({
           : "border-border bg-surface-soft text-ink"
       )}
     >
-      {/* Icono / Placa distintiva PDF */}
       <div
         data-testid="pdf-card-icon-container"
         className="flex size-10 shrink-0 flex-col items-center justify-center rounded-lg border border-brand-red/30 bg-brand-soft text-brand-red shadow-2xs"
@@ -61,7 +60,6 @@ export function ChatPdfCard({
         <FileText className="size-5" aria-hidden="true" />
       </div>
 
-      {/* Nombre y metadatos truncados */}
       <div className="flex min-w-0 flex-1 flex-col justify-center">
         <span
           data-testid="pdf-card-filename"
@@ -81,7 +79,6 @@ export function ChatPdfCard({
         </span>
       </div>
 
-      {/* Botón de descarga directa */}
       <Button
         type="button"
         variant="ghost"
@@ -107,3 +104,4 @@ export function ChatPdfCard({
     </div>
   );
 }
+
