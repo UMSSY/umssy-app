@@ -11,15 +11,17 @@ export function getChatSocket(): Socket {
     throw new Error('No hay una sesión iniciada.');
   }
 
+  if (!ENV_CONFIG.apiUrl) throw new Error('Falta la URL del backend.');
+
   if (!chatSocket) {
-    chatSocket = io(`${ENV_CONFIG.apiUrl}/chat`, {
+    chatSocket = io(`${new URL(ENV_CONFIG.apiUrl).origin}/chat`, {
       autoConnect: false,
-      auth: { token },
+      auth: (callback) => callback({ token: getAccessToken() }),
       transports: ['websocket'],
     });
   }
 
-  chatSocket.auth = { token };
+  chatSocket.auth = (callback) => callback({ token: getAccessToken() });
 
   if (!chatSocket.connected) {
     chatSocket.connect();

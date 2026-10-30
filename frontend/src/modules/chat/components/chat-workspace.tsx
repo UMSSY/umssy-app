@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import type { ConnectionRequest } from "../types/connection-request.types";
 import type { User } from "../types/user.types";
 
 import { useConversations } from "../hooks/use-conversations";
-import { useMessages, messagesQueryKey } from "../hooks/use-messages";
+import { useMessages } from "../hooks/use-messages";
 import { useSendConnectionRequest } from "../hooks/use-send-connection-request";
 import { useReceivedConnectionRequests } from "../hooks/use-received-connection-requests";
 import { useRespondConnectionRequest } from "../hooks/use-respond-connection-request";
@@ -38,6 +38,7 @@ import {
   unblockUser,
 } from '../services/chat-api';
 import { getChatSocket } from './chat-socket';
+import { useChatConnection } from '../hooks/use-chat-connection';
 
 interface SocketMessage {
   id?: string;
@@ -49,6 +50,7 @@ interface SocketMessage {
 }
 
 interface SocketSendResponse {
+  data?: SocketSendResponse;
   ok: boolean;
   message?: SocketMessage;
   error?: string;
@@ -162,48 +164,7 @@ export function ChatWorkspace({
   const showConnectionDialog =
     isError && !dismissedError;
 
-  useEffect(() => {
-    if (!selectedId) return;
-
-    let socket: ReturnType<typeof getChatSocket>;
-
-    try {
-      socket = getChatSocket();
-    } catch (error) {
-      console.error('No se pudo conectar al chat:', error);
-      return;
-    }
-
-    const handleNewMessage = (message: SocketMessage) => {
-      if (message.conversationId) {
-        void queryClient.invalidateQueries({
-          queryKey: messagesQueryKey(message.conversationId),
-        });
-      }
-
-      void queryClient.invalidateQueries({
-        queryKey: ['conversations'],
-      });
-    };
-
-    const joinConversation = () => {
-      socket.emit('conversation:join', {
-        conversationId: selectedId,
-      });
-    };
-
-    socket.on('connect', joinConversation);
-    socket.on('message:new', handleNewMessage);
-
-    if (socket.connected) {
-      joinConversation();
-    }
-
-    return () => {
-      socket.off('connect', joinConversation);
-      socket.off('message:new', handleNewMessage);
-    };
-  }, [selectedId, queryClient]);
+  const { status: connectionStatus, refreshMessages } = useChatConnection(selectedRequestId ? null : selectedId);
 
   const handleBackToList = () => {
     setSelectedRequestId(null);
@@ -407,7 +368,7 @@ const handleSendMessage = async (
   content: string,
   file?: File | null
 ): Promise<void> => {
-  if (!selectedId || selectedRequestId || isSending) {
+  if (!selectedId || selectedRequestId || isSending || connectionStatus !== "connected") {
     throw new Error(
       "No hay una conversación seleccionada o ya se está enviando un mensaje."
     );
@@ -441,6 +402,7 @@ const handleSendMessage = async (
 
         const response = await new Promise<SocketSendResponse>(
           (resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('El chat no confirmó el envío.')), 15000);
             socket.emit(
               'message:send',
               {
@@ -448,12 +410,14 @@ const handleSendMessage = async (
                 content: trimmedContent,
               },
               (result: SocketSendResponse) => {
-                if (result?.ok && result.message) {
-                  resolve(result);
+                clearTimeout(timeout);
+                const acknowledgement = result?.data ?? result;
+                if (acknowledgement?.ok && acknowledgement.message) {
+                  resolve(acknowledgement);
                 } else {
                   reject(
                     new Error(
-                      result?.error || 'No se pudo enviar el mensaje.',
+                      acknowledgement?.error || 'No se pudo enviar el mensaje.',
                     ),
                   );
                 }
@@ -471,12 +435,10 @@ const handleSendMessage = async (
         );
       }
 
-      await queryClient.invalidateQueries({
-        queryKey: messagesQueryKey(selectedId),
-      });
+      refreshMessages(selectedId);
 
       await queryClient.invalidateQueries({
-        queryKey: ['conversations'],
+        queryKey: ['chat', 'conversations'],
       });
     } finally {
       setIsSending(false);
@@ -582,6 +544,7 @@ onStartNewChat={handleStartNewChat}
           />
         ) : selectedConversation ? (
           <ChatRoom
+            connectionStatus={connectionStatus}
             isCompact={isCompact}
             key={selectedConversation.id}
             conversation={selectedConversation}
