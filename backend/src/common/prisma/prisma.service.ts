@@ -12,6 +12,7 @@ export class PrismaService
     super({
       adapter: new PrismaPg({
         connectionString: buildDatabaseConnectionString('runtime'),
+        options: '-c TimeZone=UTC',
         max: 3,
         connectionTimeoutMillis: 10_000,
         idleTimeoutMillis: 30_000,
