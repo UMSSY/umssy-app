@@ -5,3 +5,8 @@ export * from './attachment-not-found.exception.js';
 export * from './not-registered-for-event.exception.js';
 export * from './attachment-too-large.exception.js';
 export * from './invalid-attachment-type.exception.js';
+export * from './cannot-block-self.exception.js';
+export * from './invalid-block-target.exception.js';
+export * from './user-already-blocked.exception.js';
+export * from './block-not-found.exception.js';
+export * from './user-blocked.exception.js';

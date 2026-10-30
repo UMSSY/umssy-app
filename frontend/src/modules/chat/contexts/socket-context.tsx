@@ -1,9 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import { toast } from 'sonner';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
+import { getChatSocket, resetChatSocket } from '../components/chat-socket';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -17,44 +18,46 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const token = getAccessToken(); 
-    if (!token) return; 
+    const token = getAccessToken();
+    if (!token) return;
 
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-    
-    const socketInstance = io(`${backendUrl}/chat`, {
-      auth: { token },
-      transports: ['websocket'], 
-    });
+    let socketInstance: Socket;
+    try {
+      socketInstance = getChatSocket();
+    } catch {
+      return;
+    }
 
-    
     const initTimer = setTimeout(() => {
       setSocket(socketInstance);
       if (socketInstance.connected) setIsConnected(true);
     }, 0);
 
-    socketInstance.on('connect', () => setIsConnected(true));
-    
-    socketInstance.on('disconnect', () => setIsConnected(false));
-
-    socketInstance.on('connect_error', (err) => {
+    const handleConnect = () => setIsConnected(true);
+    const handleDisconnect = () => setIsConnected(false);
+    const handleConnectError = (err: Error) => {
       setIsConnected(false);
-      
       if (err.message === 'unauthorized') {
-       
         toast.error('Sesión expirada', {
           description: 'Por favor, recarga la página o inicia sesión nuevamente.',
         });
       }
-    });
+    };
+
+    socketInstance.on('connect', handleConnect);
+    socketInstance.on('disconnect', handleDisconnect);
+    socketInstance.on('connect_error', handleConnectError);
 
     return () => {
       clearTimeout(initTimer);
-      socketInstance.disconnect();
+      socketInstance.off('connect', handleConnect);
+      socketInstance.off('disconnect', handleDisconnect);
+      socketInstance.off('connect_error', handleConnectError);
+      resetChatSocket();
       setSocket(null);
       setIsConnected(false);
     };
-  }, []); 
+  }, []);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>
