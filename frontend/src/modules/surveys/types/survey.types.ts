@@ -5,6 +5,8 @@ export type SurveyDisplayStatus = SurveyStatus | "closed";
 
 export type QuestionType = "single_choice" | "multiple_choice";
 
+export type SurveyTargetAudience = "all" | "graduates" | "students" | "mentors";
+
 export interface Career {
   id: string;
   title: string;
@@ -26,6 +28,7 @@ export interface CreateSurveyPayload {
   description?: string;
   careerId?: string;
   academicPeriod?: string;
+  targetAudience?: SurveyTargetAudience;
   opensAt?: string;
   closesAt?: string;
   status: SurveyStatus;
@@ -51,6 +54,7 @@ export interface SurveySummary {
   career: Career | null;
   createdBy: SurveyCreator;
   academicPeriod: string | null;
+  targetAudience?: SurveyTargetAudience | null;
   opensAt: string | null;
   closesAt: string | null;
   questionCount: number;
@@ -111,10 +115,13 @@ export interface SurveyDetail {
   description: string | null;
   status: SurveyDisplayStatus;
   career: Career | null;
+  targetsAllCareers?: boolean;
   academicPeriod: string | null;
+  targetAudience?: SurveyTargetAudience | null;
   opensAt: string | null;
   closesAt: string | null;
   hasAnswered?: boolean;
   isExpired?: boolean;
+  responseCount?: number;
   questions: SurveyDetailQuestion[];
 }

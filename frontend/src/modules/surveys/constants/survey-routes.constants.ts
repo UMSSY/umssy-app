@@ -17,6 +17,8 @@ export const SURVEY_ROW_ACTION_LABELS = {
   view: (title: string) => `Ver ${title}`,
   statistics: (title: string) => `Ver estadísticas de ${title}`,
   statisticsUnavailable: "Las estadísticas estarán disponibles cuando la encuesta se publique",
+  unpublish: (title: string) => `Inhabilitar ${title}`,
+  unpublishUnavailable: "No se puede inhabilitar una encuesta que ya tiene respuestas registradas",
 } as const;
 
 export const SURVEYS_TABLE_COLUMNS = [

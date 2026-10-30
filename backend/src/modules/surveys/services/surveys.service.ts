@@ -4,9 +4,12 @@ import {
   InvalidSurveyScheduleException,
   SurveyAlreadyAnsweredException,
   SurveyExpiredException,
+  SurveyHasResponsesException,
   SurveyNotAvailableException,
   SurveyNotEditableException,
   SurveyNotFoundException,
+  SurveyNotOpenException,
+  SurveyNotPublishedException,
   SurveyTitleAlreadyExistsException,
 } from '../exceptions/index.js';
 import { SurveyMapper } from '../mappers/survey.mapper.js';
@@ -22,7 +25,10 @@ import type { SurveySummaryResponse } from '../responses/survey-summary.response
 import { SURVEYS_ROLE } from '../constants/surveys-access.constants.js';
 import type { UpdateSurveyData } from '../types/create-survey-data.type.js';
 import { SurveyStatus } from '../types/survey.enum.js';
-import { isSurveyForGraduate } from '../utils/is-survey-for-graduate.js';
+import {
+  getSurveyAudiencesForRoles,
+  isSurveyForGraduate,
+} from '../utils/is-survey-for-graduate.js';
 import { getScheduleError } from '../utils/survey-schedule.js';
 
 import { ReportHistoryService } from '../../reports/services/report-history.service.js';
@@ -72,6 +78,16 @@ export class SurveysService {
     return this.surveyMapper.toCreatedResponse(record);
   }
 
+  async unpublish(id: string): Promise<void> {
+    const current = await this.surveysRepository.findPublicationState(id);
+    if (!current) throw new SurveyNotFoundException();
+    if (current.status !== SurveyStatus.PUBLISHED) throw new SurveyNotPublishedException();
+    if (current.responseCount > 0) throw new SurveyHasResponsesException();
+
+    const unpublished = await this.surveysRepository.unpublish(id);
+    if (!unpublished) throw new SurveyHasResponsesException();
+  }
+
   async listSurveys(now: Date = new Date()): Promise<SurveySummaryResponse[]> {
     const records = await this.surveysRepository.findAll();
     return records.map((record) => this.surveyMapper.toSummaryResponse(record, now));
@@ -109,10 +125,14 @@ export class SurveysService {
     return { fileName, buffer };
   }
 
-  async getNotificationsForUser(userId: string): Promise<SurveyNotificationResponse[]> {
+  async getNotificationsForUser(
+    userId: string,
+    sessionRoles: readonly string[] = [],
+  ): Promise<SurveyNotificationResponse[]> {
+    const audiences = getSurveyAudiencesForRoles(sessionRoles);
+    if (audiences.length === 0) return [];
     const graduate = await this.surveysRepository.findGraduateProfile(userId);
-    if (!graduate) return [];
-    return this.surveysRepository.findNotificationsForUser(userId, graduate);
+    return this.surveysRepository.findNotificationsForUser(userId, graduate, audiences);
   }
 
   async getSurveyForAnswering(
@@ -124,7 +144,8 @@ export class SurveysService {
     if (!survey) throw new SurveyNotFoundException();
     if (!sessionRoles.includes(SURVEYS_ROLE)) {
       if (survey.status !== 'published') throw new SurveyNotFoundException();
-      await this.ensureSurveyIsForGraduate(survey, userId);
+      await this.ensureSurveyIsForGraduate(survey, userId, sessionRoles);
+      this.ensureSurveyIsOpen(survey);
     }
     return survey;
   }
@@ -141,7 +162,8 @@ export class SurveysService {
     }
 
     if (!sessionRoles.includes(SURVEYS_ROLE)) {
-      await this.ensureSurveyIsForGraduate(survey, userId);
+      await this.ensureSurveyIsForGraduate(survey, userId, sessionRoles);
+      this.ensureSurveyIsOpen(survey);
     }
 
     if (survey.isExpired) {
@@ -192,6 +214,7 @@ export class SurveysService {
       careerId: data.careerId,
       academicPeriod: data.academicPeriod,
       excludedId,
+      now,
     });
     if (titleTaken) throw new SurveyTitleAlreadyExistsException();
   }
@@ -199,10 +222,17 @@ export class SurveysService {
   private async ensureSurveyIsForGraduate(
     survey: SurveyDetailResponse,
     userId: string,
+    sessionRoles: readonly string[],
   ): Promise<void> {
     const graduate = await this.surveysRepository.findGraduateProfile(userId);
-    if (!graduate || !isSurveyForGraduate(survey, graduate)) {
+    if (!isSurveyForGraduate(survey, graduate, sessionRoles)) {
       throw new SurveyNotAvailableException();
+    }
+  }
+
+  private ensureSurveyIsOpen(survey: SurveyDetailResponse, now: Date = new Date()): void {
+    if (survey.opensAt && new Date(survey.opensAt).getTime() > now.getTime()) {
+      throw new SurveyNotOpenException();
     }
   }
 
