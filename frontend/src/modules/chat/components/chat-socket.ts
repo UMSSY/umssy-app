@@ -2,7 +2,37 @@ import { io, type Socket } from 'socket.io-client';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import { ENV_CONFIG } from '@/shared/config/env.config';
 
-let chatSocket: Socket | null = null;
+let sharedSocket: Socket | null = null;
+
+export function resolveSocketEndpoint(apiUrl: string = ENV_CONFIG.apiUrl || 'http://localhost:8080'): {
+  serverUrl: string;
+  path?: string;
+} {
+  try {
+    const parsed = new URL(apiUrl);
+    const serverUrl = parsed.origin;
+    const cleanPath = parsed.pathname.replace(/\/+$/, '');
+    if (!cleanPath || cleanPath === '/') {
+      return { serverUrl };
+    }
+    return {
+      serverUrl,
+      path: `${cleanPath}/socket.io`,
+    };
+  } catch {
+    return { serverUrl: apiUrl };
+  }
+}
+
+export function createChatSocket(token: string): Socket {
+  const { serverUrl, path } = resolveSocketEndpoint();
+  return io(`${serverUrl}/chat`, {
+    autoConnect: false,
+    auth: { token },
+    transports: ['websocket'],
+    ...(path ? { path } : {}),
+  });
+}
 
 export function getChatSocket(): Socket {
   const token = getAccessToken();
@@ -11,19 +41,22 @@ export function getChatSocket(): Socket {
     throw new Error('No hay una sesión iniciada.');
   }
 
-  if (!chatSocket) {
-    chatSocket = io(`${ENV_CONFIG.apiUrl}/chat`, {
-      autoConnect: false,
-      auth: { token },
-      transports: ['websocket'],
-    });
+  if (!sharedSocket) {
+    sharedSocket = createChatSocket(token);
   }
 
-  chatSocket.auth = { token };
+  sharedSocket.auth = { token };
 
-  if (!chatSocket.connected) {
-    chatSocket.connect();
+  if (!sharedSocket.connected) {
+    sharedSocket.connect();
   }
 
-  return chatSocket;
+  return sharedSocket;
+}
+
+export function resetChatSocket(): void {
+  if (sharedSocket) {
+    sharedSocket.disconnect();
+    sharedSocket = null;
+  }
 }

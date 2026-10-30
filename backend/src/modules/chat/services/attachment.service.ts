@@ -96,8 +96,7 @@ export class AttachmentService {
       throw new NotConversationParticipantException();
     }
 
-    // HU-13: con un bloqueo activo (en cualquier dirección) no se envían adjuntos.
-    const otherParticipantId = this.getOtherParticipantId(conversation, userId);
+        const otherParticipantId = this.getOtherParticipantId(conversation, userId);
     if (
       otherParticipantId &&
       (await this.blockService.isBlockedBetween(userId, otherParticipantId))
@@ -119,7 +118,6 @@ export class AttachmentService {
     const rawContent = dto.content?.trim();
     const content = rawContent && rawContent.length > 0 ? rawContent : null;
 
-    // Creación de mensaje en base de datos
     const message = await this.messageRepository.create({
       conversationId: dto.conversationId,
       senderId: userId,
@@ -128,7 +126,6 @@ export class AttachmentService {
       sentAt: now,
     });
 
-    // Guardado binario en PostgreSQL (columna file_data)
     const attachmentRecord = await this.attachmentRepository.create({
       messageId: message.id,
       typeId: attachmentType.id,
@@ -150,20 +147,11 @@ export class AttachmentService {
       now,
     );
 
-    const attachmentResponse = this.attachmentMapper.toResponse(attachmentRecord);
-
-    return {
-      id: message.id,
-      conversationId: message.conversationId,
-      senderId: message.senderId,
-      content: message.content ?? '',
-      timestamp: message.sentAt.toISOString(),
-      createdAt: message.createdAt.toISOString(),
-      status: 'sent' as const,
-      isAttachment: true,
-      attachmentType: isImage ? ('image' as const) : ('file' as const),
-      attachment: attachmentResponse,
-    };
+    return this.attachmentMapper.toMessageResponse({
+      message,
+      attachmentRecord,
+      isImage,
+    });
   }
 
   async getDownload(

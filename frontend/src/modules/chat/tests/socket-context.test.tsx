@@ -4,16 +4,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { SocketProvider, useSocket } from '../contexts/socket-context';
 import * as accessTokenStorage from '@/shared/services/storage/access-token-storage';
 
-
 vi.mock('socket.io-client', () => ({
   io: vi.fn(() => ({
     on: vi.fn(),
+    off: vi.fn(),
     disconnect: vi.fn(),
+    connect: vi.fn(),
     connected: true,
   })),
 }));
-
-
 
 const TestConsumer = () => {
   const { isConnected, socket } = useSocket();
