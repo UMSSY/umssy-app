@@ -14,18 +14,11 @@ import { JwtService } from '@nestjs/jwt';
 import { SessionService } from '../../../common/services/session.service.js';
 import { ChatService } from '../services/chat.service.js';
 import { UserPresenceService } from '../services/user-presence.service.js';
-
 import { MessageService } from '../services/message.service.js';
 import { EventRoomService } from '../services/event-room.service.js';
-
-
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
+import type { SocketMessagePayload, EventRoomJoinPayload } from '../types/chat-gateway.types.js';
 
-
-interface SocketMessagePayload {
-  conversationId?: string;
-  content?: string;
-}
 @WebSocketGateway({
   namespace: '/chat',
   cors: {
@@ -45,50 +38,34 @@ export class ChatGateway
     private readonly sessionService: SessionService,
     private readonly chatService: ChatService,
     private readonly userPresenceService: UserPresenceService,
-   
     private readonly messageService: MessageService,
-   
     private readonly eventRoomService: EventRoomService,
-  
   ) {}
 
   afterInit(server: Server) {
     server.use(async (socket: Socket, next) => {
       try {
         const token = socket.handshake.auth?.token;
-        console.log(
-          '[Socket] Intento de conexión. Token recibido:',
-          token ? 'SÍ' : 'NO',
-        );
-
         if (!token) {
           return next(new Error('unauthorized'));
         }
 
         const payload = await this.jwtService.verifyAsync(token);
-        console.log('[Socket] Token válido. Payload:', payload);
-
         const user = await this.sessionService.getAuthenticatedUser(
           payload.sub,
         );
 
         if (!user) {
-          console.log('[Socket] Usuario no encontrado en la DB');
           return next(new Error('unauthorized'));
         }
 
         socket.data.user = user;
-        console.log('[Socket] Usuario autenticado:', user.id);
         next();
       } catch (error) {
         this.logger.warn(
           `Intento de conexión rechazado: ${
             error instanceof Error ? error.message : String(error)
           }`,
-        );
-        console.log(
-          '[Socket] Error en handshake:',
-          error instanceof Error ? error.message : String(error),
         );
         next(new Error('unauthorized'));
       }
@@ -104,25 +81,23 @@ export class ChatGateway
     }
 
     try {
-     const conversationIds =
+      const conversationIds =
         await this.chatService.getActiveConversationIds(user.id);
-      
-        for (const convId of conversationIds) {
+
+      for (const convId of conversationIds) {
         await client.join(convId);
       }
 
       await this.userPresenceService.markOnline(user.id);
       this.server.emit('presence:online', { userId: user.id });
- 
     } catch (error) {
       this.logger.error(
         `Error inicializando socket para el usuario ${user.id}`,
         error instanceof Error ? error.stack : String(error),
       );
     }
- 
   }
- 
+
   async handleDisconnect(client: Socket) {
     const user = client.data.user;
     if (!user) return;
@@ -141,7 +116,7 @@ export class ChatGateway
     }
   }
 
-@SubscribeMessage('conversation:join')
+  @SubscribeMessage('conversation:join')
   async joinConversation(
     @ConnectedSocket() client: Socket,
     @MessageBody() body: SocketMessagePayload,
@@ -184,6 +159,40 @@ export class ChatGateway
   @SubscribeMessage('event_room:join')
   async handleEventRoomJoin(
     @ConnectedSocket() client: Socket,
+    @MessageBody() payload: EventRoomJoinPayload,
+  ) {
+    const user = client.data.user;
+    if (!user || typeof payload?.eventId !== 'string') {
+      return {
+        ok: false,
+        error: 'Identificador de evento inválido',
+      };
+    }
+
+    try {
+      const conversationId = await this.eventRoomService.joinEventRoom(
+        user.id,
+        payload.eventId,
+      );
+      await client.join(conversationId);
+      client.emit('event_room:joined', { conversationId });
+      return { ok: true, conversationId };
+    } catch (error) {
+      if (error instanceof NotRegisteredForEventException) {
+        client.emit('event_room:error', { code: 'not_registered' });
+      } else {
+        client.emit('event_room:error', { code: 'generic_error' });
+      }
+      return {
+        ok: false,
+        error: error instanceof Error ? error.message : 'Error al unirse a la sala',
+      };
+    }
+  }
+
+  @SubscribeMessage('message:send')
+  async sendMessage(
+    @ConnectedSocket() client: Socket,
     @MessageBody() body: SocketMessagePayload,
   ) {
     const user = client.data.user;
@@ -220,7 +229,8 @@ export class ChatGateway
           error instanceof Error ? error.message : String(error)
         }`,
       );
-return {
+
+      return {
         ok: false,
         error:
           error instanceof Error

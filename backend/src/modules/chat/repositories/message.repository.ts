@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { Prisma } from '../../../prisma/client.js';
 
 const ATTACHMENT_METADATA_SELECT = {
   select: {
@@ -39,19 +40,23 @@ export class MessageRepository {
   }) {
     const { attachments, ...messageData } = data;
 
-    let mappedAttachments = undefined;
+    let attachmentCreateData:
+      | Prisma.MessageAttachmentUncheckedCreateNestedManyWithoutMessageInput
+      | undefined = undefined;
 
-    if (attachments) {
-      mappedAttachments = attachments.map((att) => ({
-        typeId: att.typeId,
-        fileName: att.fileName,
-        mimeType: att.mimeType ?? null,
-        fileSize: att.fileSize ?? null,
-        fileData: att.fileDataBase64
-          ? new Uint8Array(Buffer.from(att.fileDataBase64, 'base64'))
-          : null,
-        url: att.url ?? null,
-      }));
+    if (attachments && attachments.length > 0) {
+      attachmentCreateData = {
+        create: attachments.map((att) => ({
+          typeId: att.typeId,
+          fileName: att.fileName,
+          mimeType: att.mimeType ?? 'application/octet-stream',
+          fileSize: att.fileSize ?? 0,
+          fileData: att.fileDataBase64
+            ? new Uint8Array(Buffer.from(att.fileDataBase64, 'base64'))
+            : null,
+          url: att.url ?? null,
+        })),
+      };
     }
 
     return this.prisma.message.create({
@@ -61,9 +66,7 @@ export class MessageRepository {
           typeof messageData.content === 'string' && messageData.content.trim().length > 0
             ? messageData.content.trim()
             : null,
-        attachments: mappedAttachments
-          ? ({ create: mappedAttachments } as any)
-          : undefined,
+        attachments: attachmentCreateData,
       },
       include: {
         status: { select: { title: true } },
@@ -92,11 +95,7 @@ export class MessageRepository {
 
     const hasMore = rows.length > limit;
     const data = hasMore ? rows.slice(0, limit) : rows;
-
-    return {
-      data,
-      hasMore,
-      nextCursor: hasMore && data.length > 0 ? data[data.length - 1].id : null,
-    };
+    const nextCursor = hasMore && data.length > 0 ? data[data.length - 1].id : null;
+    return { data, hasMore, nextCursor };
   }
 }

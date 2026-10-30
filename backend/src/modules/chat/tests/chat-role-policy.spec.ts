@@ -7,7 +7,7 @@ import { MessageService } from '../services/message.service.js';
 import { AttachmentService } from '../services/attachment.service.js';
 import { ChatGateway } from '../gateways/chat.gateway.js';
 import { UserBlockedException } from '../exceptions/index.js';
-
+import { ConversationMapper } from '../mappers/conversation.mapper.js';
 
 const USER_A = '00000000-0000-4000-8000-000000000001';
 const USER_B = '00000000-0000-4000-8000-000000000002';
@@ -121,6 +121,18 @@ function setup(rolesA: string[], rolesB: string[]) {
   const mapper = {
     toUploadedFile: vi.fn().mockReturnValue({}),
     toResponse: vi.fn().mockReturnValue({ id: 'attachment-1' }),
+    toMessageResponse: vi.fn().mockImplementation(({ message, attachmentRecord, isImage }) => ({
+      id: message.id,
+      conversationId: message.conversationId,
+      senderId: message.senderId,
+      content: message.content ?? '',
+      timestamp: message.sentAt.toISOString(),
+      createdAt: message.createdAt.toISOString(),
+      status: 'sent',
+      isAttachment: true,
+      attachmentType: isImage ? 'image' : 'file',
+      attachment: { id: attachmentRecord.id },
+    })),
   };
 
   const fileValidation = {
@@ -141,6 +153,7 @@ function setup(rolesA: string[], rolesB: string[]) {
       presence,
       connections,
       blocks,
+      new ConversationMapper(),
       policy,
     ] as unknown as ConstructorParameters<typeof ConversationService>),
   );
@@ -383,9 +396,9 @@ describe('HU8 tarea 3: roles permitidos', () => {
 
     const client = {
       data: { user: { id: USER_A } },
-    } as Parameters<ChatGateway['handleEventRoomJoin']>[0];
+    } as Parameters<ChatGateway['sendMessage']>[0];
 
-    const result = await gateway.handleEventRoomJoin(client, {
+    const result = await gateway.sendMessage(client, {
       conversationId: CONVERSATION_ID,
       content: 'Hola',
     });

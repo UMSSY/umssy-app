@@ -3,6 +3,7 @@ import { UserBlockedException } from '../exceptions/index.js';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ConversationService } from './conversation.service.js';
+import { ConversationMapper } from '../mappers/conversation.mapper.js';
 
 import type { ConversationRepository } from '../repositories/conversation.repository.js';
 import type { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
@@ -81,6 +82,7 @@ describe('ConversationService', () => {
       userPresenceServiceMock,
       connectionRequestRepositoryMock,
       noBlocks(),
+      new ConversationMapper(),
       allowedRoles(),
     );
 
@@ -103,6 +105,7 @@ describe('ConversationService', () => {
       {} as unknown as UserPresenceService,
       {} as unknown as ConnectionRequestRepository,
       noBlocks(),
+      new ConversationMapper(),
       allowedRoles(),
     );
 
@@ -178,6 +181,7 @@ describe('ConversationService', () => {
       userPresenceServiceMock,
       connectionRequestRepositoryMock,
       noBlocks(),
+      new ConversationMapper(),
       allowedRoles(),
     );
 
@@ -232,6 +236,7 @@ describe('ConversationService', () => {
       userPresenceServiceMock,
       {} as unknown as ConnectionRequestRepository,
       noBlocks(),
+      new ConversationMapper(),
       allowedRoles(),
     );
 
@@ -277,6 +282,7 @@ describe('ConversationService', () => {
           findAcceptedRequest: vi.fn().mockResolvedValue({ id: 'accepted-request' }),
         } as unknown as ConnectionRequestRepository,
         blockService as unknown as BlockService,
+        new ConversationMapper(),
         allowedRoles(),
       );
       return { service, blockService };
@@ -338,6 +344,7 @@ describe('ConversationService', () => {
       {} as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
+      new ConversationMapper(),
       allowedRoles(),
     );
 
@@ -413,6 +420,7 @@ describe('ConversationService', () => {
       userPresenceServiceMock as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
+      new ConversationMapper(),
       allowedRoles(),
     );
 
@@ -488,6 +496,7 @@ describe('ConversationService', () => {
       userPresenceServiceMock as unknown as UserPresenceService,
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
+      new ConversationMapper(),
       allowedRoles(),
     );
 
