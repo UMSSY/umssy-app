@@ -14,6 +14,7 @@ import { SurveyBuilderTopbar } from "./survey-builder-topbar";
 import { SurveyHeaderCard } from "./survey-header-card";
 import { SurveyPreviewDialog } from "./survey-preview-dialog";
 import { SurveyValidationAlert } from "./survey-validation-alert";
+import { ALL_CAREERS_LABEL, ALL_CAREERS_VALUE } from "../constants/survey-builder.constants";
 import { SURVEY_FIELD_ERROR_DEPENDENCIES, SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import { SURVEYS_PATH } from "../constants/survey-routes.constants";
 import { SURVEY_TOAST_DURATION_MS } from "../constants/surveys-query-keys.constants";
@@ -48,7 +49,8 @@ export function SurveyEditor({ title, initialState, isSaving, pendingStatus, dra
   const { pendingHref, clearPendingHref } = useUnsavedChangesGuard(state.isDirty);
 
   const minDate = toCalendarDate(today) ?? new Date();
-  const careerTitle = careers.find(({ id }) => id === state.careerId)?.title ?? "";
+  const careerTitle =
+    state.careerId === ALL_CAREERS_VALUE ? ALL_CAREERS_LABEL : (careers.find(({ id }) => id === state.careerId)?.title ?? "");
   const clientErrors = hasAttemptedPublish ? validateSurvey(state, today) : [];
   const visibleErrors = [
     ...clientErrors,
@@ -80,6 +82,12 @@ export function SurveyEditor({ title, initialState, isSaving, pendingStatus, dra
   };
 
   const submit = async (status: SurveyStatus) => {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      setIsPublishDialogOpen(false);
+      toast.error(SURVEY_MESSAGES.offlineError, { duration: SURVEY_TOAST_DURATION_MS, closeButton: true, richColors: true });
+      return;
+    }
+
     try {
       await onSave(toCreateSurveyPayload(state, status));
       builder.markSaved();
@@ -89,8 +97,10 @@ export function SurveyEditor({ title, initialState, isSaving, pendingStatus, dra
       });
       router.push(SURVEYS_PATH);
     } catch (error) {
+      setIsPublishDialogOpen(false);
       if (isConnectionError(error)) {
-        toast.error(CONNECTION_ERROR_MESSAGE, {
+        const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+        toast.error(isOffline ? SURVEY_MESSAGES.offlineError : CONNECTION_ERROR_MESSAGE, {
           duration: SURVEY_TOAST_DURATION_MS,
           closeButton: true,
           richColors: true,
@@ -98,7 +108,6 @@ export function SurveyEditor({ title, initialState, isSaving, pendingStatus, dra
         return;
       }
 
-      setIsPublishDialogOpen(false);
       const apiErrors = mapApiErrors(error);
       if (apiErrors.length > 0) {
         setSubmitErrors(apiErrors);

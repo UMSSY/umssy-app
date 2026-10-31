@@ -13,6 +13,7 @@ import {
 import {
   ApiBody,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiProduces,
@@ -26,7 +27,10 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
 import { toApiBody } from '../../../common/utils/to-api-body.js';
-import { SURVEYS_ROLE } from '../constants/surveys-access.constants.js';
+import {
+  SURVEY_RESPONDENT_ROLES,
+  SURVEYS_ROLE,
+} from '../constants/surveys-access.constants.js';
 import {
   createSurveySchema,
   type CreateSurveyRequest,
@@ -70,7 +74,7 @@ export class SurveysController {
   }
 
   @Get(':id')
-  @Roles('titulado', 'administrativo')
+  @Roles(...SURVEY_RESPONDENT_ROLES, SURVEYS_ROLE)
   @ApiOperation({ summary: 'Obtiene una encuesta con sus preguntas y opciones' })
   @ApiOkResponse({ description: 'Detalle de la encuesta para ser respondida o editada' })
   getById(
@@ -96,8 +100,16 @@ export class SurveysController {
     return this.surveysService.update(id, request);
   }
 
+  @Patch(':id/unpublish')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Inhabilita una encuesta publicada sin respuestas y la devuelve a borrador' })
+  @ApiNoContentResponse({ description: 'Encuesta devuelta a borrador para su corrección' })
+  unpublish(@Param('id', new ZodValidationPipe(surveyIdSchema)) id: string): Promise<void> {
+    return this.surveysService.unpublish(id);
+  }
+
   @Post(':id/responses')
-  @Roles('titulado', 'administrativo')
+  @Roles(...SURVEY_RESPONDENT_ROLES, SURVEYS_ROLE)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registra las respuestas del usuario a una encuesta' })
   @ApiBody(toApiBody(submitSurveyResponseSchema))

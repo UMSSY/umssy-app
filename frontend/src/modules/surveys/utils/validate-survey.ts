@@ -7,7 +7,7 @@ import { toCompleteDateValue } from "./survey-dates";
 
 type SurveyValidationInput = Pick<
   SurveyBuilderState,
-  "title" | "careerId" | "academicPeriod" | "opensAt" | "closesAt" | "questions"
+  "title" | "careerId" | "targetAudience" | "academicPeriod" | "opensAt" | "closesAt" | "questions"
 >;
 
 function getTitleError(title: string): SurveyValidationError | null {
@@ -39,6 +39,7 @@ export function validateSurvey(input: SurveyValidationInput, today: string): Sur
 
   const requiredFields = [
     ["careerId", SURVEY_MESSAGES.careerRequired],
+    ["targetAudience", SURVEY_MESSAGES.targetAudienceRequired],
     ["academicPeriod", SURVEY_MESSAGES.academicPeriodRequired],
     ["opensAt", SURVEY_MESSAGES.opensAtRequired],
     ["closesAt", SURVEY_MESSAGES.closesAtRequired],
