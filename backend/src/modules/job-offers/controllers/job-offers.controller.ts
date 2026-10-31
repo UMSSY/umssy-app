@@ -48,6 +48,7 @@ import type { JobOfferCreatedResponse } from '../responses/job-offer-created.res
 import type {
   JobOfferResponse,
   JobOfferSkillResponse,
+  PublishedJobOfferResponse,
 } from '../responses/job-offer.response.js';
 import { JobOffersService } from '../services/job-offers.service.js';
 import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
@@ -78,7 +79,7 @@ export class JobOffersController {
   @Get('job-offers')
   @ApiOperation({ summary: 'Lista las vacantes publicadas y vigentes para los egresados' })
   @ApiOkResponse({ description: 'Vacantes publicadas, de la más reciente a la más antigua' })
-  listPublished(): Promise<JobOfferResponse[]> {
+  listPublished(): Promise<PublishedJobOfferResponse[]> {
     return this.jobOffersService.listPublished();
   }
 
