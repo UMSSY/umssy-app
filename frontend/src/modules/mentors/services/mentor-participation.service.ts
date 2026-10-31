@@ -96,14 +96,6 @@ export const mentorParticipationService = {
     return response.data.data;
   },
 
-  async getHistory(): Promise<MentorParticipationRequest[]> {
-    const response = await apiClient.get<
-      ApiResponse<MentorParticipationRequest[]>
-    >(`${BASE_PATH}/me/history`);
-
-    return response.data.data;
-  },
-
   async create(
     preferences: MentorParticipationPreferences,
   ): Promise<MentorParticipationRequest> {

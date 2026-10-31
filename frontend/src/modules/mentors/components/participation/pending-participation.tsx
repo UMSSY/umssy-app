@@ -2,8 +2,8 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, History, Info, Pencil, Trash2, TriangleAlert, UsersRound } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { AtSign, CalendarDays, Clock, FileText, Info, Pencil, Trash2, TriangleAlert, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -87,6 +87,16 @@ function formatDate(value?: string): string {
   }).format(date);
 }
 
+function formatElapsed(value: string, now: number): string {
+  const timestamp = new Date(value).getTime();
+  if (!Number.isFinite(timestamp)) return "Fecha de envío no disponible";
+  const hours = Math.floor(Math.max(0, now - timestamp) / 3600000);
+  if (hours < 1) return "Solicitud enviada hace menos de una hora";
+  if (hours < 24) return `Solicitud enviada hace ${hours} ${hours === 1 ? "hora" : "horas"}`;
+  const days = Math.floor(hours / 24);
+  return `Solicitud enviada hace ${days} ${days === 1 ? "día" : "días"}`;
+}
+
 export function PendingParticipation({
   request,
   onCancelled,
@@ -103,7 +113,6 @@ export function PendingParticipation({
 
   const [editOpen, setEditOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [openedAt, setOpenedAt] = useState(() => Date.now());
   const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
@@ -127,13 +136,6 @@ export function PendingParticipation({
     orientationTypes,
   );
 
-  const historyQuery = useQuery({
-    queryKey: ["mentor-participation-history", request.userId],
-    queryFn: () => mentorParticipationService.getHistory(),
-    enabled: historyOpen,
-    retry: false,
-  });
-
   const updateMutation = useMutation({
     mutationFn: () =>
       mentorParticipationService.update({
@@ -143,10 +145,6 @@ export function PendingParticipation({
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ["mentor-participation-requests"],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["mentor-participation-history"],
       });
 
       setEditOpen(false);
@@ -165,9 +163,6 @@ export function PendingParticipation({
         queryKey: ["mentor-participation-requests"],
       });
 
-      await queryClient.invalidateQueries({
-        queryKey: ["mentor-participation-history"],
-      });
       onCancelled?.();
       setSuccessMessage("Solicitud cancelada correctamente");
     },
@@ -284,16 +279,31 @@ export function PendingParticipation({
       </section>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
-          <DialogTitle>Estado: Pendiente</DialogTitle>
-          <DialogDescription>Tu solicitud está en espera de un cupo. No necesitas enviar otra solicitud.</DialogDescription>
-          <span className="font-semibold">En evaluación</span>
-          <p>Fecha de registro: {formatDate(request.queuedAt)}</p>
-          <p>Tiempo transcurrido: {Math.floor(Math.max(0, openedAt - new Date(request.queuedAt).getTime()) / 3600000)} horas</p>
-          <p className="min-w-0 text-sm">Correo institucional: <span className="block truncate font-semibold" title={request.email}>{request.email ?? "Correo institucional no disponible"}</span></p>
-          <p className="text-sm text-text-secondary">Modificar tus preferencias conserva tu fecha de ingreso a la lista de espera. Si cancelas y solicitas nuevamente, perderás tu prioridad anterior.</p>
-          <Button variant="outline" onClick={() => { setDetailsOpen(false); setHistoryOpen(true); }}><History className="size-4" aria-hidden="true" />Ver historial</Button>
-          <Button variant="outline" onClick={() => setDetailsOpen(false)}>Volver</Button>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] grid-cols-1 gap-0 overflow-y-auto p-0 sm:max-w-xl">
+          <header className="flex items-center gap-4 border-b border-border px-5 py-5 pr-12 sm:px-7 sm:pr-12">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-notice text-notice-foreground"><Clock aria-hidden="true" size={28} /></div>
+            <div>
+              <span className="rounded-md bg-notice px-2 py-1 text-xs font-bold uppercase text-notice-foreground">Estado: pendiente</span>
+              <DialogTitle className="mt-2 text-xl leading-tight font-bold text-ink">Solicitud pendiente</DialogTitle>
+            </div>
+          </header>
+          <div className="space-y-4 px-5 py-5 sm:px-7">
+            <DialogDescription className="text-base leading-relaxed text-text-secondary">Tu solicitud sigue en espera. Puedes consultar aquí su estado y las ofertas disponibles en Mi participación.</DialogDescription>
+            <div className="flex flex-wrap items-center gap-4 rounded-lg border border-availability bg-interaction p-4">
+              <CalendarDays aria-hidden="true" className="size-6 shrink-0 text-availability-foreground" />
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-ink">{formatElapsed(request.queuedAt, openedAt)}</p>
+                <p className="mt-1 text-sm text-text-secondary">Registrada: {formatDate(request.queuedAt)}</p>
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-md bg-availability px-2 py-1 text-sm font-semibold text-availability-foreground"><Clock aria-hidden="true" className="size-4" />Pendiente</span>
+            </div>
+            <div className="flex items-start gap-4 rounded-lg border border-availability bg-interaction p-4">
+              <Info aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-availability-foreground" />
+              <div><h3 className="font-bold text-ink">Ya tienes una solicitud activa</h3><p className="mt-1 text-sm leading-relaxed text-text-secondary">No necesitas solicitar nuevamente. El envío de más postulaciones no acelera el proceso de asignación de vacantes.</p></div>
+            </div>
+            <p className="flex min-w-0 items-start gap-3 text-sm text-text-secondary"><AtSign aria-hidden="true" className="mt-0.5 size-5 shrink-0" /><span>Correo institucional: <span className="font-semibold break-all text-ink">{request.email ?? "No disponible"}</span></span></p>
+          </div>
+          <footer className="flex justify-end rounded-b-xl bg-surface-soft px-5 py-4 sm:px-7"><Button onClick={() => setDetailsOpen(false)} className="min-h-10 px-8">Volver</Button></footer>
         </DialogContent>
       </Dialog>
 
@@ -446,66 +456,6 @@ export function PendingParticipation({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
-        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
-          <DialogTitle>Historial de solicitudes</DialogTitle>
-
-          <DialogDescription>
-            Consulta tus solicitudes registradas.
-          </DialogDescription>
-
-          {historyQuery.isLoading && (
-            <p className="text-sm">Cargando historial...</p>
-          )}
-
-          {historyQuery.isError && (
-            <div className="space-y-3">
-              <p role="alert" className="text-sm text-destructive">
-                {getErrorMessage(historyQuery.error)}
-              </p>
-
-              <Button
-                variant="outline"
-                onClick={() => void historyQuery.refetch()}
-              >
-                Reintentar
-              </Button>
-            </div>
-          )}
-
-          {historyQuery.isSuccess &&
-            historyQuery.data.length === 0 && (
-              <p className="text-sm text-text-secondary">
-                No tienes solicitudes registradas.
-              </p>
-            )}
-
-          {historyQuery.isSuccess && (
-            <div className="space-y-3">
-              {historyQuery.data.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="rounded-lg border border-border bg-surface-soft p-4"
-                >
-                  <p className="font-semibold text-ink">
-                    Estado: {entry.status}
-                  </p>
-
-                  <p className="mt-2 text-sm text-text-secondary">
-                    Registrada: {formatDate(entry.queuedAt)}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="flex justify-end">
-            <Button onClick={() => setHistoryOpen(false)}>
-              Cerrar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </main>
   );
 }

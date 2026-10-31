@@ -1,6 +1,6 @@
 
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { PendingParticipation } from "./pending-participation";
 import * as participationService from "../../services/mentor-participation.service";
@@ -29,13 +29,6 @@ const pendingRequest: participationService.MentorParticipationRequest = {
   technicalAreaIds: ["area-backend"],
   orientationTypeIds: ["orientation-technical"],
 };
-
-beforeEach(() => {
-  vi.spyOn(
-    participationService.mentorParticipationService,
-    "getHistory",
-  ).mockResolvedValue([]);
-});
 
 afterEach(() => {
   cleanup();
@@ -178,33 +171,14 @@ describe("Participación pendiente HU7-2", () => {
     });
   });
 
-  it("consulta el historial de solicitudes", async () => {
-    const getHistory = vi
-      .spyOn(
-        participationService.mentorParticipationService,
-        "getHistory",
-      )
-      .mockResolvedValue([
-        {
-          ...pendingRequest,
-          id: "request-previous",
-          status: "CANCELLED",
-        },
-      ]);
-
-    renderWithQuery(
-      <PendingParticipation request={pendingRequest} />,
-    );
-
+  it("muestra el detalle pendiente y permite volver sin historial", () => {
+    renderWithQuery(<PendingParticipation request={{ ...pendingRequest, email: "titulado@umssy.test" }} />);
     fireEvent.click(screen.getByRole("button", { name: "Ver detalle" }));
-    fireEvent.click(screen.getByRole("button", { name: "Ver historial" }));
-
-    await waitFor(() => {
-      expect(getHistory).toHaveBeenCalledTimes(1);
-    });
-
-    expect(
-      await screen.findByText("Estado: CANCELLED"),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Solicitud pendiente" })).toBeInTheDocument();
+    expect(screen.getByText(/Solicitud enviada hace/)).toBeInTheDocument();
+    expect(screen.getByText("titulado@umssy.test")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ver historial" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Volver" }));
+    expect(screen.queryByRole("dialog", { name: "Solicitud pendiente" })).not.toBeInTheDocument();
   });
 });
