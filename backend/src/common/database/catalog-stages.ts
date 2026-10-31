@@ -18,6 +18,7 @@ import { seedConnectionRequestStatusesCatalog } from '../../modules/chat/seeds/c
 import { seedAttachmentTypesCatalog } from '../../modules/chat/seeds/attachment-types-catalog.seed.js';
 import { seedSurveyStatusesCatalog } from '../../modules/surveys/seeds/survey-statuses-catalog.seed.js';
 import { seedSurveyQuestionTypesCatalog } from '../../modules/surveys/seeds/survey-question-types-catalog.seed.js';
+import { seedSurveyTargetAudiencesCatalog } from '../../modules/surveys/seeds/survey-target-audiences-catalog.seed.js';
 import type { Prisma } from '../../prisma/client.js';
 
 export async function seedCatalogStages(
@@ -41,6 +42,7 @@ export async function seedCatalogStages(
   await seedMessageStatusesCatalog(tx);
   await seedSurveyStatusesCatalog(tx);
   await seedSurveyQuestionTypesCatalog(tx);
+  await seedSurveyTargetAudiencesCatalog(tx);
   await seedConnectionRequestStatusesCatalog(tx);
   await seedAttachmentTypesCatalog(tx);
 }

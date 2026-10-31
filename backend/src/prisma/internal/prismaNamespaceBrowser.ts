@@ -113,6 +113,7 @@ export const ModelName = {
   JobApplication: 'JobApplication',
   SurveyStatus: 'SurveyStatus',
   SurveyQuestionType: 'SurveyQuestionType',
+  SurveyTargetAudience: 'SurveyTargetAudience',
   Survey: 'Survey',
   SurveyQuestion: 'SurveyQuestion',
   SurveyQuestionOption: 'SurveyQuestionOption',
@@ -960,12 +961,25 @@ export const SurveyQuestionTypeScalarFieldEnum = {
 export type SurveyQuestionTypeScalarFieldEnum = (typeof SurveyQuestionTypeScalarFieldEnum)[keyof typeof SurveyQuestionTypeScalarFieldEnum]
 
 
+export const SurveyTargetAudienceScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyTargetAudienceScalarFieldEnum = (typeof SurveyTargetAudienceScalarFieldEnum)[keyof typeof SurveyTargetAudienceScalarFieldEnum]
+
+
 export const SurveyScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
   careerId: 'careerId',
+  targetsAllCareers: 'targetsAllCareers',
   academicPeriod: 'academicPeriod',
+  targetAudienceId: 'targetAudienceId',
   opensAt: 'opensAt',
   closesAt: 'closesAt',
   statusId: 'statusId',
