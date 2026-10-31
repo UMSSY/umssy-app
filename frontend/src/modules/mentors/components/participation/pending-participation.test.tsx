@@ -49,23 +49,23 @@ describe("Participación pendiente HU7-2", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Solicitud pendiente" }),
+      screen.getByRole("heading", { name: "Estado de participación" }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText("PENDING")).toBeInTheDocument();
+    expect(screen.getByText("PENDIENTE")).toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", { name: "Modificar solicitud" }),
+      screen.getByRole("button", { name: "Editar áreas técnicas" }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", { name: "Cancelar solicitud" }),
+      screen.getByRole("button", { name: "Cancelar cupo" }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", { name: "Ver historial" }),
+      screen.getByRole("button", { name: "Editar tipos de orientación" }),
     ).toBeInTheDocument();
   });
 
@@ -75,7 +75,7 @@ describe("Participación pendiente HU7-2", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Modificar solicitud" }),
+      screen.getByRole("button", { name: "Editar áreas técnicas" }),
     );
 
     expect(
@@ -109,7 +109,7 @@ describe("Participación pendiente HU7-2", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Modificar solicitud" }),
+      screen.getByRole("button", { name: "Editar tipos de orientación" }),
     );
 
     fireEvent.click(
@@ -138,7 +138,7 @@ describe("Participación pendiente HU7-2", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Cancelar solicitud" }),
+      screen.getByRole("button", { name: "Cancelar cupo" }),
     );
 
     expect(
@@ -164,7 +164,7 @@ describe("Participación pendiente HU7-2", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Cancelar solicitud" }),
+      screen.getByRole("button", { name: "Cancelar cupo" }),
     );
 
     fireEvent.click(
@@ -196,9 +196,8 @@ describe("Participación pendiente HU7-2", () => {
       <PendingParticipation request={pendingRequest} />,
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Ver historial" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Ver detalle" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ver historial" }));
 
     await waitFor(() => {
       expect(getHistory).toHaveBeenCalledTimes(1);

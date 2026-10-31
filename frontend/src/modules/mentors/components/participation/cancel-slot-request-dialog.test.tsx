@@ -14,8 +14,8 @@ describe("Cancelación persistida", () => {
   it("Volver conserva la solicitud sin llamar al backend", () => {
     const cancel = vi.spyOn(mentorParticipationService, "cancel");
     renderWithQuery(<PendingParticipation request={request} />);
-    fireEvent.click(screen.getByRole("button", { name: "Cancelar solicitud" }));
-    expect(screen.getByText(/perderás tu prioridad en la lista FIFO/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar cupo" }));
+    expect(screen.getByText(/perderás tu lugar en la lista de espera/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Volver" }));
     expect(cancel).not.toHaveBeenCalled();
   });
@@ -24,7 +24,7 @@ describe("Cancelación persistida", () => {
     const onCancelled = vi.fn();
     vi.spyOn(mentorParticipationService, "cancel").mockResolvedValue({ ...request, status: "CANCELLED" });
     renderWithQuery(<PendingParticipation request={request} onCancelled={onCancelled} />);
-    fireEvent.click(screen.getByRole("button", { name: "Cancelar solicitud" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar cupo" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirmar cancelación" }));
     await waitFor(() => expect(onCancelled).toHaveBeenCalledTimes(1));
     expect(screen.getByRole("status")).toHaveTextContent("Solicitud cancelada correctamente");
@@ -34,10 +34,10 @@ describe("Cancelación persistida", () => {
     const onCancelled = vi.fn();
     vi.spyOn(mentorParticipationService, "cancel").mockRejectedValue(new Error("Network"));
     renderWithQuery(<PendingParticipation request={request} onCancelled={onCancelled} />);
-    fireEvent.click(screen.getByRole("button", { name: "Cancelar solicitud" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar cupo" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirmar cancelación" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo completar");
     expect(onCancelled).not.toHaveBeenCalled();
-    expect(screen.getByRole("heading", { name: "Solicitud pendiente", hidden: true })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Estado de participación", hidden: true })).toBeInTheDocument();
   });
 });

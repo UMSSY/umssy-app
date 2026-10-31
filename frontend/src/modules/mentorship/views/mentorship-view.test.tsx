@@ -206,10 +206,14 @@ describe("MentorshipView", () => {
       technicalAreaIds: ["550e8400-e29b-41d4-a716-446655440001"],
       orientationTypeIds: ["550e8400-e29b-41d4-a716-446655440003"],
     });
-    await waitFor(() =>
-      expect(integrationMocks.push).toHaveBeenCalledWith(
-        "/mentors/participation?registered=1",
-      ),
+    const registered = await screen.findByRole("dialog", {
+      name: "Solicitud registrada correctamente",
+    });
+    expect(within(registered).getByText("Estado: Pendiente")).toBeInTheDocument();
+    expect(integrationMocks.push).not.toHaveBeenCalled();
+    fireEvent.click(within(registered).getByRole("button", { name: "Cerrar" }));
+    expect(integrationMocks.push).toHaveBeenCalledWith(
+      "/mentors/participation?registered=1",
     );
     expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
   });

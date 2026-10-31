@@ -66,7 +66,9 @@ describe("ParticipationView HU-MEN-06", () => {
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Editar áreas técnicas" }),
-    ).toBeInTheDocument();
+    ).toHaveAttribute("href", "/mentors/participation/technical-areas");
+    expect(screen.getByRole("link", { name: "Editar tipos de orientación" }))
+      .toHaveAttribute("href", "/mentorship/orientation");
     expect(
       screen.getByRole("button", { name: "Desactivar participación" }),
     ).toBeInTheDocument();

@@ -10,7 +10,8 @@ describe("Solicitud de cupo real", () => {
   it("abre sin registrar y permite cancelar", () => {
     const submit = vi.fn(), close = vi.fn();
     renderWithQuery(<SlotUnavailableDialog open onOpenChange={close} isSubmitting={false} error={null} onSubmit={submit} />);
-    expect(screen.getByText("Criterio de asignación institucional (FIFO)")).toBeInTheDocument();
+    expect(screen.getByText("Criterio estricto de asignación institucional (FIFO)")).toBeInTheDocument();
+    expect(screen.getByText(/Por confidencialidad institucional/)).toBeInTheDocument();
     expect(submit).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
     expect(close).toHaveBeenCalledWith(false);
