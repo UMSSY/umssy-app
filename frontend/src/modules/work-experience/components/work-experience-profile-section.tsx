@@ -6,7 +6,7 @@ import {
   ConfirmDeleteDialog,
   FeedbackMessage,
 } from "@/modules/profile";
-import { useProfileSkillsRadar } from "@/modules/profile/hooks/use-profile-skills-radar";
+import { useProfileSkillsRadar } from "@/modules/profile";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
 import { WorkExperienceForm } from "../components/work-experience-form";
 import { WorkExperienceListCard } from "../components/work-experience-list-card";

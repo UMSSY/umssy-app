@@ -7,8 +7,8 @@ import {
   skillsAnalysisService,
   type SkillsAnalysisResult,
 } from "@/modules/matching";
-import { profileSkillsRadarService } from "@/modules/profile/services/profile-skills-radar.service";
-import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile/hooks/use-profile-skills-radar";
+import { profileSkillsRadarService } from "@/modules/profile";
+import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
 import type { Feedback } from "@/modules/profile";
@@ -59,10 +59,8 @@ export function useSaveWorkExperience(onSaved: () => void) {
       }
 
       try {
-        // Reconstruye las habilidades NLP de todas las experiencias del perfil.
         await profileSkillsRadarService.analyzeSkills();
       } catch {
-        // Un error de análisis no revierte la experiencia que ya se guardó.
       }
 
       await refreshSkills();

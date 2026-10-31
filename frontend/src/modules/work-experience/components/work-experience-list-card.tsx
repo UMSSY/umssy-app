@@ -4,7 +4,7 @@
 import { ArrowDown, Building2, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SectionCard } from '@/modules/profile';
-import { DetectedSkillsChips } from '@/modules/profile/components/detected-skills-chips';
+import { DetectedSkillsChips } from '@/modules/profile';
 import { cn } from '@/lib/utils';
 import type { WorkExperienceListCardProps } from '../types/work-experience-list-card-props.types';
 import { formatWorkPeriod } from '../utils/format-work-period';
