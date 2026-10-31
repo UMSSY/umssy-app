@@ -47,6 +47,7 @@ const RECORD: JobOfferRecord = {
   contractType: { title: 'Tiempo completo' },
   status: { title: 'Publicada' },
   skills: [{ skill: { id: 'skill-1', name: 'Docker' } }],
+  _count: { applications: 0 },
 };
 
 function createRepository() {
