@@ -28,7 +28,10 @@ export function parseMailConfig(env: Record<string, unknown> = process.env) {
   if (config.MAIL_TRANSPORT === 'smtp' && !config.SMTP_HOST) {
     throw new Error('SMTP_HOST is required for SMTP transport.');
   }
-  if (env.NODE_ENV === 'production') {
+  // QA puede usar consola de forma explícita con el runtime optimizado de Node.
+  const isQaConsoleTransport =
+    env.UMSSY_DEPLOYMENT_ENV === 'qa' && config.MAIL_TRANSPORT === 'console';
+  if (env.NODE_ENV === 'production' && !isQaConsoleTransport) {
     if (config.MAIL_TRANSPORT !== 'smtp') {
       throw new Error('Production requires MAIL_TRANSPORT=smtp.');
     }

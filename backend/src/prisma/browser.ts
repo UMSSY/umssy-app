@@ -362,3 +362,18 @@ export type AuditEvent = Prisma.AuditEventModel
  * 
  */
 export type DocumentValidation = Prisma.DocumentValidationModel
+/**
+ * Model MentorIntakeAttempt
+ * 
+ */
+export type MentorIntakeAttempt = Prisma.MentorIntakeAttemptModel
+/**
+ * Model MentorParticipationSanction
+ * 
+ */
+export type MentorParticipationSanction = Prisma.MentorParticipationSanctionModel
+/**
+ * Model MentorIntakeOperation
+ * 
+ */
+export type MentorIntakeOperation = Prisma.MentorIntakeOperationModel
