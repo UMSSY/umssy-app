@@ -99,6 +99,16 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
         <div className="flex items-center gap-2">
           <Button
             type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void refetch()}
+            className="cursor-pointer gap-1.5 text-xs text-ink-soft hover:text-ink"
+          >
+            <RefreshCw className="size-3.5" aria-hidden="true" />
+            Actualizar
+          </Button>
+          <Button
+            type="button"
             size="sm"
             onClick={handleGeneratePdf}
             disabled={isGeneratingPdf}
@@ -107,24 +117,14 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
             {isGeneratingPdf ? (
               <>
                 <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                Generando PDF...
+                Exportando PDF...
               </>
             ) : (
               <>
                 <Download className="size-3.5" aria-hidden="true" />
-                Generar PDF
+                Exportar PDF
               </>
             )}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => void refetch()}
-            className="cursor-pointer gap-1.5 text-xs text-ink-soft hover:text-ink"
-          >
-            <RefreshCw className="size-3.5" aria-hidden="true" />
-            Actualizar
           </Button>
         </div>
       }

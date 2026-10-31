@@ -55,7 +55,7 @@ describe("Pantallas de encuestas", () => {
     expect(screen.getByText("Respuestas Recibidas")).toBeInTheDocument();
     expect(screen.getByText("105")).toBeInTheDocument();
 
-    const generatePdfButton = screen.getByRole("button", { name: /Generar PDF/i });
+    const generatePdfButton = screen.getByRole("button", { name: /Exportar PDF/i });
     expect(generatePdfButton).toBeInTheDocument();
 
     fireEvent.click(generatePdfButton);
