@@ -215,6 +215,10 @@ export class FileValidationService {
         return false;
       }
 
+      if (marker === 0xda) {
+        break;
+      }
+
       if (length >= 2) {
         offset += length;
       } else {
