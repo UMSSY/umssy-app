@@ -26,10 +26,11 @@ import type {
   SurveyTitleScope,
 } from '../types/survey-record.type.js';
 import type { GraduateProfile } from '../types/graduate-profile.type.js';
-import { SurveyStatus } from '../types/survey.enum.js';
+import { SurveyStatus, type SurveyTargetAudienceValue } from '../types/survey.enum.js';
 import {
   toSurveyQuestionTypeValue,
   toSurveyStatusValue,
+  toSurveyTargetAudienceValue,
 } from '../utils/survey-catalog-values.js';
 
 @Injectable()
@@ -41,12 +42,14 @@ export class SurveysRepository {
     careerId,
     academicPeriod,
     excludedId,
+    now,
   }: SurveyTitleScope): Promise<boolean> {
     const survey = await this.prisma.survey.findFirst({
       where: {
         title: { equals: title, mode: 'insensitive' },
         careerId,
         academicPeriod,
+        OR: [{ status: { title: SurveyStatus.DRAFT } }, { closesAt: null }, { closesAt: { gte: now } }],
         ...(excludedId ? { id: { not: excludedId } } : {}),
       },
       select: { id: true },
@@ -55,13 +58,17 @@ export class SurveysRepository {
   }
 
   async create(data: CreateSurveyData): Promise<SurveyCreatedRecord> {
-    const { questions, status, ...survey } = data;
+    const { questions, status, targetAudience, ...survey } = data;
 
     return this.prisma.$transaction(async (tx) => {
       const catalogs = await this.findCatalogIds(tx);
       const { questionRows, optionRows } = this.toQuestionRows(questions, catalogs.typeIds);
       const created = await tx.survey.create({
-        data: { ...survey, statusId: this.requireCatalogId(catalogs.statusIds, status) },
+        data: {
+          ...survey,
+          statusId: this.requireCatalogId(catalogs.statusIds, status),
+          targetAudienceId: targetAudience ? this.requireCatalogId(catalogs.audienceIds, targetAudience) : null,
+        },
         select: SURVEY_CREATED_SELECT,
       });
 
@@ -101,8 +108,26 @@ export class SurveysRepository {
     return survey ? { status: survey.status.title } : null;
   }
 
+  async findPublicationState(
+    surveyId: string,
+  ): Promise<{ status: string; responseCount: number } | null> {
+    const survey = await this.prisma.survey.findUnique({
+      where: { id: surveyId },
+      select: { status: CATALOG_TITLE_SELECT, _count: { select: { responses: true } } },
+    });
+    return survey ? { status: survey.status.title, responseCount: survey._count.responses } : null;
+  }
+
+  async unpublish(surveyId: string): Promise<boolean> {
+    const { count } = await this.prisma.survey.updateMany({
+      where: { id: surveyId, status: { title: SurveyStatus.PUBLISHED }, responses: { none: {} } },
+      data: { statusId: await this.findStatusId(SurveyStatus.DRAFT) },
+    });
+    return count > 0;
+  }
+
   update(surveyId: string, data: UpdateSurveyData): Promise<SurveyCreatedRecord> {
-    const { questions, status, ...survey } = data;
+    const { questions, status, targetAudience, ...survey } = data;
 
     return this.prisma.$transaction(async (tx) => {
       const catalogs = await this.findCatalogIds(tx);
@@ -111,7 +136,11 @@ export class SurveysRepository {
 
       const updated = await tx.survey.update({
         where: { id: surveyId },
-        data: { ...survey, statusId: this.requireCatalogId(catalogs.statusIds, status) },
+        data: {
+          ...survey,
+          statusId: this.requireCatalogId(catalogs.statusIds, status),
+          targetAudienceId: targetAudience ? this.requireCatalogId(catalogs.audienceIds, targetAudience) : null,
+        },
         select: SURVEY_CREATED_SELECT,
       });
 
@@ -155,18 +184,24 @@ export class SurveysRepository {
 
   async findNotificationsForUser(
     userId: string,
-    graduate: GraduateProfile,
+    graduate: GraduateProfile | null,
+    audiences: SurveyTargetAudienceValue[],
   ): Promise<SurveyNotificationResponse[]> {
+    const now = new Date();
     const surveys = await this.prisma.survey.findMany({
       where: {
         status: { title: SurveyStatus.PUBLISHED },
+        targetAudience: { title: { in: audiences } },
         AND: [
-          { OR: [{ careerId: null }, { careerId: graduate.careerId }] },
+          { OR: [{ opensAt: null }, { opensAt: { lte: now } }] },
+          { OR: [{ careerId: null }, ...(graduate ? [{ careerId: graduate.careerId }] : [])] },
           {
             OR: [
               { academicPeriod: null },
               { academicPeriod: SURVEY_ALL_ACADEMIC_PERIODS },
-              { academicPeriod: { endsWith: String(graduate.graduationYear) } },
+              ...(graduate
+                ? [{ academicPeriod: { endsWith: String(graduate.graduationYear) } }]
+                : []),
             ],
           },
         ],
@@ -180,7 +215,6 @@ export class SurveysRepository {
       orderBy: { createdAt: 'desc' },
     });
 
-    const now = new Date();
     return surveys.map((s) => {
       const hasAnswered = s.responses.length > 0;
       let status: 'pending' | 'expired' | 'answered';
@@ -210,6 +244,7 @@ export class SurveysRepository {
       include: {
         career: { select: CAREER_SELECT },
         status: CATALOG_TITLE_SELECT,
+        targetAudience: CATALOG_TITLE_SELECT,
         questions: {
           orderBy: { position: 'asc' },
           include: {
@@ -223,6 +258,7 @@ export class SurveysRepository {
           where: { respondentId: userId },
           select: { id: true },
         },
+        _count: { select: { responses: true } },
       },
     });
 
@@ -237,11 +273,14 @@ export class SurveysRepository {
       description: survey.description,
       status: toSurveyStatusValue(survey.status.title),
       career: survey.career ? { id: survey.career.id, title: survey.career.title } : null,
+      targetsAllCareers: survey.targetsAllCareers,
       academicPeriod: survey.academicPeriod,
+      targetAudience: toSurveyTargetAudienceValue(survey.targetAudience),
       opensAt: survey.opensAt?.toISOString() ?? null,
       closesAt: survey.closesAt?.toISOString() ?? null,
       hasAnswered,
       isExpired,
+      responseCount: survey._count.responses,
       questions: survey.questions.map((q) => ({
         id: q.id,
         position: q.position,
@@ -287,14 +326,22 @@ export class SurveysRepository {
   }
 
   private async findCatalogIds(tx: Prisma.TransactionClient) {
-    const [statuses, types] = await Promise.all([
+    const [statuses, types, audiences] = await Promise.all([
       tx.surveyStatus.findMany({ select: { id: true, title: true } }),
       tx.surveyQuestionType.findMany({ select: { id: true, title: true } }),
+      tx.surveyTargetAudience.findMany({ select: { id: true, title: true } }),
     ]);
     return {
       statusIds: new Map(statuses.map(({ id, title }) => [title, id])),
       typeIds: new Map(types.map(({ id, title }) => [title, id])),
+      audienceIds: new Map(audiences.map(({ id, title }) => [title, id])),
     };
+  }
+
+  private async findStatusId(title: string): Promise<string> {
+    const status = await this.prisma.surveyStatus.findUnique({ where: { title }, select: { id: true } });
+    if (!status) throw new SurveysStorageUnavailableException();
+    return status.id;
   }
 
   private requireCatalogId(ids: ReadonlyMap<string, string>, title: string): string {

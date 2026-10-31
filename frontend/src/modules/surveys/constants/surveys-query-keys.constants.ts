@@ -7,4 +7,5 @@ export const SURVEYS_QUERY_KEYS = {
 };
 
 export const SURVEY_TOAST_DURATION_MS = 7_000;
+export const SURVEY_SAVE_TIMEOUT_MS = 15_000;
 export const CAREERS_STALE_TIME_MS = 5 * 60_000;
