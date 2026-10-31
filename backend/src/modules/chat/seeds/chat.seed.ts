@@ -83,35 +83,44 @@ async function seedConversations(
 
     const [userAId, userBId] =
       userA.id < userB.id ? [userA.id, userB.id] : [userB.id, userA.id];
+ 
+    const isEventConversation = definition.eventId != null;
 
-    // Idempotencia: si ya existe, no la recreamos ni duplicamos mensajes.
-    const existing = await tx.conversation.findUnique({
+const existing = isEventConversation
+  ? await tx.conversation.findFirst({
+      where: { eventId: definition.eventId },
+      select: { id: true },
+    })
+  : await tx.conversation.findUnique({
       where: { userAId_userBId: { userAId, userBId } },
       select: { id: true },
     });
-    if (existing) continue;
+
+if (existing) continue;
 
     const conversation = await tx.conversation.create({
-      data: {
-        userAId,
-        userBId,
-        participants: {
-          createMany: {
-            data: [
-              {
-                userId: userA.id,
-                lastReadAt: resolveLastReadAt(definition.lastReadAtByA, now),
-              },
-              {
-                userId: userB.id,
-                lastReadAt: resolveLastReadAt(definition.lastReadAtByB, now),
-              },
-            ],
+  data: {
+    ...(isEventConversation
+      ? { eventId: definition.eventId }
+      : { userAId, userBId }),
+    participants: {
+      createMany: {
+        data: [
+          {
+            userId: userA.id,
+            lastReadAt: resolveLastReadAt(definition.lastReadAtByA, now),
           },
-        },
+          {
+            userId: userB.id,
+            lastReadAt: resolveLastReadAt(definition.lastReadAtByB, now),
+          },
+        ],
       },
-      select: { id: true },
-    });
+    },
+  },
+  select: { id: true },
+});
+
     conversations += 1;
 
     let lastMessageId: string | null = null;
