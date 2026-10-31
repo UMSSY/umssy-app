@@ -110,6 +110,7 @@ export function ParticipationView({
   const isActive = state?.status === "ACTIVE";
   const hasHistory = state?.status === "DEACTIVATED";
   const currentRequest = request.data;
+  const hasOpenRequest = ["PENDING", "OFFERED"].includes(currentRequest?.status ?? "");
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -133,7 +134,7 @@ export function ParticipationView({
           </Button>
         </Alert>
       )}
-      {(isActive || hasHistory) && (
+      {(isActive || (hasHistory && !request.isPending && !hasOpenRequest)) && (
         <ParticipationOverview
           isActive={isActive}
           actionEnabled={
@@ -155,7 +156,6 @@ export function ParticipationView({
       {!isActive && currentRequest?.status === "PENDING" && (
         <PendingParticipation
           request={currentRequest}
-          showHeading={!hasHistory}
           onCancelled={() => setNotice("Solicitud cancelada correctamente")}
         />
       )}
@@ -165,7 +165,6 @@ export function ParticipationView({
           <SlotOfferParticipation
             key={currentRequest.offer.id}
             request={currentRequest}
-            showHeading={!hasHistory}
             onConfirmed={() => {
               void refreshRoles();
               void client.invalidateQueries({
