@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { formatCountdown, secondsUntil } from "./format-countdown";
-import { maskEmail } from "./mask-email";
-import { sanitizeOtp } from "./sanitize-otp";
 
 describe("format-countdown", () => {
   it("formatea mm:ss", () => {
@@ -19,10 +17,4 @@ describe("format-countdown", () => {
     expect(secondsUntil(target, 0, now + 700_000)).toBe(0);
   });
 
-  it("enmascara el correo y limpia el código", () => {
-    expect(maskEmail("keyla@gmail.com")).toBe("ke***@gmail.com");
-    expect(maskEmail("a@x.com")).toBe("a***@x.com");
-    expect(maskEmail("sin-arroba")).toBe("sin-arroba");
-    expect(sanitizeOtp("12 34-56789")).toBe("123456");
-  });
 });

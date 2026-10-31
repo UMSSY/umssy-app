@@ -12,7 +12,6 @@ interface ActivationNoticeProps {
   disabled?: boolean;
 }
 
-// Mensaje a pantalla completa para estados sin formulario: bloqueado, ya activada o sin conexión
 export function ActivationNotice({ title, message, actionLabel, onAction, disabled }: ActivationNoticeProps) {
   return (
     <div className="w-full max-w-md">

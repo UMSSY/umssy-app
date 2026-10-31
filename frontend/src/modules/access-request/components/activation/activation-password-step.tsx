@@ -3,9 +3,9 @@
 import { useState, type FormEvent } from "react";
 import { ArrowLeft, LoaderCircle, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getPasswordRules, validatePasswords, type PasswordErrors } from "../../utils/password-rules";
-import { PasswordField } from "./password-field";
-import { PasswordRequirements } from "./password-requirements";
+import { getPasswordRules, validatePasswords, type PasswordErrors } from "@/shared/utils/password-rules";
+import { PasswordField } from "@/shared/components/password-field";
+import { PasswordRequirements } from "@/shared/components/password-requirements";
 
 interface ActivationPasswordStepProps {
   isActivating: boolean;

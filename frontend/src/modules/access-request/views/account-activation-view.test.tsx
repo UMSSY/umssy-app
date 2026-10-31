@@ -1,4 +1,5 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { accountActivationService } from "../services/account-activation.service";
@@ -6,7 +7,7 @@ import { AccountActivationView } from "./account-activation-view";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/modules/auth/utils/session", () => ({ startSession: vi.fn() }));
+vi.mock("@/modules/auth", () => ({ startSession: vi.fn(), resolvePostLoginPath: vi.fn(() => "/community") }));
 vi.mock("../services/account-activation.service", () => ({
   accountActivationService: { getStatus: vi.fn(), verifyCode: vi.fn(), activate: vi.fn(), resend: vi.fn() },
 }));
@@ -89,4 +90,18 @@ describe("AccountActivationView", () => {
     render(<AccountActivationView initialEmail="keyla@gmail.com" />);
     expect(await screen.findByText(/ya está activa/i)).toBeInTheDocument();
   });
+  it("muestra la contraseña rechazada por el servidor", async () => {
+    service.getStatus.mockResolvedValue({ ok: true, data: readyStatus });
+    service.verifyCode.mockResolvedValue({ ok: true, data: {} });
+    service.activate.mockResolvedValue({ ok: false, status: 400, message: "Contraseña rechazada", fieldErrors: { password: "Contraseña rechazada" } });
+    render(<AccountActivationView initialEmail="keyla@gmail.com" />);
+    const user = await typeCode("123456");
+    await user.click(screen.getByRole("button", { name: /continuar/i }));
+    await user.type(await screen.findByLabelText("Contraseña", { selector: "input" }), "Abcdefg1");
+    await user.type(screen.getByLabelText("Confirmar contraseña", { selector: "input" }), "Abcdefg1");
+    await user.click(screen.getByRole("button", { name: /activar cuenta/i }));
+    expect(await screen.findByText("Contraseña rechazada")).toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
+  });
+
 });

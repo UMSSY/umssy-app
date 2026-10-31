@@ -1,7 +1,5 @@
 export const OTP_LENGTH = 6;
 export const OTP_MAX_ATTEMPTS = 5;
-export const PASSWORD_MIN_LENGTH = 8;
-export const PASSWORD_MAX_LENGTH = 64;
 export const ACTIVATION_PATH = "/request-access/activation";
 
 export const ACTIVATION_NETWORK_MESSAGE = "No se pudo conectar con el servidor. Inténtalo de nuevo.";
