@@ -93,7 +93,9 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
   return (
     <WorkspacePage
       title={`Analíticas de ${statistics.title}`}
-      description={`Resultados de las ${statistics.questions.length} preguntas: ${careerName}`}
+      description={`${
+        statistics.questions.length === 1 ? "Resultados de 1 pregunta" : `Resultados de las ${statistics.questions.length} preguntas`
+      }: ${careerName}`}
       actions={
         <div className="flex items-center gap-2">
           <Button
