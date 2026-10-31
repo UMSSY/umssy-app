@@ -1,3 +1,4 @@
+import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { Injectable } from '@nestjs/common';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import { UserSkillService } from '../../skills/services/user-skill.service.js';
@@ -23,6 +24,7 @@ function allFulfilled(requirements: readonly RequirementState[]): boolean {
 @Injectable()
 export class JobRecommendationsService {
   constructor(
+    private readonly jobOffers: JobOffersService,
     private readonly userSkillService: UserSkillService,
     private readonly candidateProfileService: CandidateProfileService,
     private readonly jobMatchRepository: JobMatchRepository,
@@ -31,19 +33,37 @@ export class JobRecommendationsService {
     private readonly requirementTermsService: RequirementTermsService,
   ) {}
 
-  async recommendations(userId: string): Promise<JobRecommendations> {
-    const skills = await this.profileSkills(userId);
-    if (skills.length === 0) return { isProfileComplete: false, items: [] };
+  async scoresForOffers(
+    userId: string,
+    ids: string[],
+  ): Promise<Map<string, number>> {
+    const [vacancies, candidate] = await Promise.all([
+      this.jobOffers.findScoringOffers(ids),
+      this.getCandidate(userId),
+    ]);
+    const evaluated = await Promise.all(
+      vacancies.map((vacancy) => this.evaluate(vacancy, candidate)),
+    );
+    return new Map(evaluated.map(({ item }) => [item.jobOfferId, item.score]));
+  }
 
-    const [vacancies, profile] = await Promise.all([
-      this.jobMatchRepository.findPublished(new Date()),
+  private async getCandidate(userId: string): Promise<CandidateProfile> {
+    const [skills, profile] = await Promise.all([
+      this.profileSkills(userId),
       this.candidateProfileService.findCandidateProfile(userId),
     ]);
-    const candidate: CandidateProfile = {
+    return {
       skills,
       career: profile.career,
       experienceYears: profile.experienceYears,
     };
+  }
+
+  async recommendations(userId: string): Promise<JobRecommendations> {
+    const candidate = await this.getCandidate(userId);
+    if (!candidate.skills.length)
+      return { isProfileComplete: false, items: [] };
+    const vacancies = await this.jobMatchRepository.findPublished(new Date());
 
     const evaluated = await Promise.all(
       vacancies.map((vacancy) => this.evaluate(vacancy, candidate)),
@@ -66,11 +86,14 @@ export class JobRecommendationsService {
   private async evaluate(vacancy: JobMatchRecord, candidate: CandidateProfile) {
     const vacancyRequirements = toVacancyRequirements(vacancy);
 
-    const extractedSkills = await this.requirementTermsService.extractAndMatchRequirements(
-      vacancy.description ?? '',
-    );
+    const extractedSkills =
+      await this.requirementTermsService.extractAndMatchRequirements(
+        vacancy.description ?? '',
+      );
 
-    const existingSkillNames = vacancyRequirements.skills.map((skill) => skill.toLowerCase());
+    const existingSkillNames = vacancyRequirements.skills.map((skill) =>
+      skill.toLowerCase(),
+    );
     const newSkillNames = extractedSkills
       .map((skill) => skill.name)
       .filter((name) => !existingSkillNames.includes(name.toLowerCase()));
