@@ -1,4 +1,4 @@
-import { BookOpen, BriefcaseBusiness, Building2, CalendarClock, ClipboardList, FileText, GraduationCap, History, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
+import { Bell, BookOpen, BriefcaseBusiness, Building2, CalendarClock, ClipboardList, FileText, GraduationCap, History, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
 import type { WorkspaceArea, WorkspaceTask } from "@/shared/types/workspace-navigation.types";
 
 export const WORKSPACE_AREAS: readonly WorkspaceArea[] = [
@@ -36,6 +36,7 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
   { label: "Áreas técnicas", href: "/mentors/participation/technical-areas", icon: BookOpen, area: "community", keywords: "especialidades mentor experiencia" },
   { label: "Tipos de orientación", href: "/mentorship/orientation", icon: Users, area: "community", keywords: "asesoría mentor empleo orientación" },
   { label: "Mensajes", href: "/chat", icon: MessageCircle, area: "community", keywords: "chat mensajes conversaciones" },
+  { label: "Notificaciones de encuestas", href: "/surveys", icon: Bell, area: "community", keywords: "encuestas formularios cuestionarios responder pendientes" },
   { label: "Talleres disponibles", href: "/events", icon: BookOpen, area: "opportunities", keywords: "eventos actividades formación" },
   { label: "Proponer taller", href: "/events/propose", icon: SquarePlus, area: "opportunities", keywords: "propuesta crear taller portada" },
   { label: "Mis inscripciones", href: "/events/my-passes", icon: Ticket, area: "opportunities", keywords: "pases talleres entradas" },

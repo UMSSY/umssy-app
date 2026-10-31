@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   SURVEY_ACADEMIC_PERIOD_PATTERN,
+  SURVEY_ALL_CAREERS,
   SURVEY_DESCRIPTION_MAX_LENGTH,
   SURVEY_MIN_OPTIONS_TO_PUBLISH,
   SURVEY_MIN_QUESTIONS_TO_PUBLISH,
@@ -10,7 +11,11 @@ import {
   SURVEY_TITLE_MIN_LENGTH,
   SURVEY_VALIDATION_MESSAGES as MESSAGES,
 } from '../constants/survey.constants.js';
-import { SURVEY_QUESTION_TYPES, SURVEY_STATUSES } from '../types/survey.enum.js';
+import {
+  SURVEY_QUESTION_TYPES,
+  SURVEY_STATUSES,
+  SURVEY_TARGET_AUDIENCES,
+} from '../types/survey.enum.js';
 import { findDuplicatedLabels } from '../utils/find-duplicated-labels.js';
 
 const optionSchema = z.object({
@@ -52,10 +57,22 @@ export const createSurveySchema = z
       .max(SURVEY_DESCRIPTION_MAX_LENGTH, MESSAGES.DESCRIPTION_TOO_LONG)
       .nullish()
       .transform((value) => (value ? value : undefined)),
-    careerId: optionalText(z.uuid({ message: MESSAGES.INVALID_CAREER_ID })),
+    careerId: optionalText(
+      z
+        .string()
+        .refine(
+          (value) => value === SURVEY_ALL_CAREERS || z.uuid().safeParse(value).success,
+          MESSAGES.INVALID_CAREER_ID,
+        ),
+    ),
     academicPeriod: optionalText(
       z.string().trim().regex(SURVEY_ACADEMIC_PERIOD_PATTERN, MESSAGES.INVALID_ACADEMIC_PERIOD),
     ),
+    targetAudience: z
+      .enum(SURVEY_TARGET_AUDIENCES, { message: MESSAGES.INVALID_TARGET_AUDIENCE })
+      .nullish()
+      .transform((value) => value ?? undefined)
+      .optional(),
     opensAt: optionalText(dateSchema),
     closesAt: optionalText(dateSchema),
     status: z.enum(SURVEY_STATUSES, { message: MESSAGES.INVALID_STATUS }),
@@ -67,6 +84,7 @@ export const createSurveySchema = z
     const requiredFields = [
       ['careerId', MESSAGES.CAREER_REQUIRED],
       ['academicPeriod', MESSAGES.ACADEMIC_PERIOD_REQUIRED],
+      ['targetAudience', MESSAGES.TARGET_AUDIENCE_REQUIRED],
       ['opensAt', MESSAGES.OPENS_AT_REQUIRED],
       ['closesAt', MESSAGES.CLOSES_AT_REQUIRED],
     ] as const;

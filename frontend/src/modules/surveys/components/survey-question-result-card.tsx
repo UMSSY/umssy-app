@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { QUESTION_TYPE_LABELS } from "../constants/survey-builder.constants";
 import type { SurveyQuestionResultCardProps } from "../types/survey-component-props.types";
 import { SurveyHorizontalBars } from "./survey-horizontal-bars";
 
@@ -21,7 +22,7 @@ export function SurveyQuestionResultCard({ question }: SurveyQuestionResultCardP
           </div>
         </div>
         <Badge variant="outline" className="shrink-0 text-xs text-text-secondary">
-          {question.type === "single_choice" ? "Opción única" : "Opción múltiple"}
+          {QUESTION_TYPE_LABELS[question.type]}
         </Badge>
       </div>
 
