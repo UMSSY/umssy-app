@@ -222,7 +222,7 @@ describe('AccountActivationService.activate', () => {
     const [otpId, user, usedAt] = activationRepository.createUserAndConsumeOtp.mock.calls[0];
     expect(otpId).toBe('otp-1');
     expect(usedAt).toBe(NOW);
-    expect(user).toMatchObject({ firstName: 'Ana', lastName: 'Pérez', email: EMAIL, phone: '71234567' });
+    expect(user).toMatchObject({ accessRequestId: 'req-1', firstName: 'Ana', lastName: 'Pérez', email: EMAIL, phone: '71234567' });
     expect(user.passwordHash).not.toBe('Jackson2026');
     expect(await bcrypt.compare('Jackson2026', user.passwordHash)).toBe(true);
     expect(mail.sendAccountActivated).toHaveBeenCalledWith(EMAIL, 'Ana');

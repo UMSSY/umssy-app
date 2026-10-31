@@ -84,6 +84,7 @@ export class AccountActivationService {
         email: context.request.email,
         phone: context.request.phone,
         passwordHash,
+        accessRequestId: context.request.id,
       },
       now,
     );
@@ -155,7 +156,6 @@ export class AccountActivationService {
     throw new InvalidActivationCodeException(remaining);
   }
 
-  // El correo de confirmación nunca debe deshacer una activación ya hecha (CA14)
   private async notifyActivated(request: ApprovedRequest): Promise<void> {
     try {
       await this.mailSender.sendAccountActivated(request.email, request.firstName);

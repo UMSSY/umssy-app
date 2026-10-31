@@ -5,6 +5,7 @@ import { ACTIVATION_ROLE } from '../constants/activation.constants.js';
 import { ACCESS_REQUEST_STATUS } from '../types/access-request.enum.js';
 
 export interface NewActivatedUser {
+  accessRequestId: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -40,7 +41,7 @@ export class AccountActivationRepository {
           data: { usedAt: now },
         });
         if (consumed.count === 0) return 'already_used' as const;
-        await tx.user.create({
+        const created = await tx.user.create({
           data: {
             firstName: user.firstName,
             lastName: user.lastName,
@@ -51,6 +52,10 @@ export class AccountActivationRepository {
             roles: { create: { role: { connect: { name: ACTIVATION_ROLE } } } },
           },
           select: { id: true },
+        });
+        await tx.accessRequest.update({
+          where: { id: user.accessRequestId },
+          data: { approvedUserId: created.id },
         });
         return 'created' as const;
       });
