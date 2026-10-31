@@ -38,6 +38,7 @@ async function pickDate(user: ReturnType<typeof userEvent.setup>, fieldLabel: Re
 async function fillValidSurvey(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText("Título"), "Encuesta de Empleabilidad");
   await selectOption(user, "Carrera dirigida", CAREERS[0].title);
+  await selectOption(user, "Dirigido a", "Titulados");
   await selectOption(user, "Gestión", "2026");
   await pickDate(user, /^Apertura/, "24102026");
   await pickDate(user, /^Cierre/, "27102026");
@@ -193,7 +194,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
 
     await user.click(screen.getByRole("combobox", { name: "Tipo de pregunta" }));
     const options = await screen.findAllByRole("option");
-    expect(options.map((option) => option.textContent)).toEqual(["Opción única", "Opción múltiple"]);
+    expect(options.map((option) => option.textContent)).toEqual(["Opción única", "Opción múltiple", "Lista desplegable"]);
     await user.click(screen.getByRole("option", { name: "Opción múltiple" }));
 
     expect(screen.getByLabelText("Texto de la opción 1")).toHaveValue("Sí");
@@ -230,6 +231,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     expect(alert).toHaveTextContent(SURVEY_MESSAGES.validationAlertTitle);
     expect(alert).toHaveTextContent("Título: es obligatorio.");
     expect(alert).toHaveTextContent("Carrera dirigida: es obligatoria.");
+    expect(alert).toHaveTextContent("Dirigido a: es obligatoria.");
     expect(alert).toHaveTextContent("Pregunta 1: el enunciado es obligatorio.");
     expect(alert).toHaveTextContent("Pregunta 1: debe tener al menos 2 opciones.");
     expect(screen.getByLabelText("Título")).toHaveAttribute("aria-invalid", "true");
@@ -301,7 +303,8 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     expect(within(dialog).getByText("¿Publicar encuesta?")).toBeInTheDocument();
     expect(dialog).toHaveTextContent(SURVEY_MESSAGES.publishDialogDescription);
     expect(dialog).toHaveTextContent("EncuestaEncuesta de Empleabilidad");
-    expect(dialog).toHaveTextContent(`Dirigida a${CAREERS[0].title}`);
+    expect(dialog).toHaveTextContent(`Carrera${CAREERS[0].title}`);
+    expect(dialog).toHaveTextContent("Dirigido aTitulados");
     expect(dialog).toHaveTextContent("Vigencia24/10/2026 - 27/10/2026");
     expect(dialog).toHaveTextContent("Preguntas2 (1 obligatoria)");
 
@@ -314,6 +317,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
       description: undefined,
       careerId: CAREERS[0].id,
       academicPeriod: "2026",
+      targetAudience: "graduates",
       opensAt: "2026-10-24T04:00:00.000Z",
       closesAt: "2026-10-28T03:59:59.999Z",
       status: "published",
@@ -369,9 +373,41 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith("Error 503/504: Sin conexión con el servidor", expect.anything()),
     );
-    expect(within(dialog).getByRole("button", { name: "Publicar" })).toBeEnabled();
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(screen.getByRole("button", { name: /Publicar encuesta/ })).toBeEnabled();
     expect(screen.getByLabelText("Título")).toHaveValue("Encuesta de Empleabilidad");
     expect(push).not.toHaveBeenCalled();
+  });
+
+  it("CA14: sin internet no envía la petición, cierra el modal y avisa con un toast", async () => {
+    const user = renderView();
+    await fillValidSurvey(user);
+    await user.click(screen.getByRole("button", { name: /Publicar encuesta/ }));
+    const dialog = await screen.findByRole("alertdialog");
+    const onLine = vi.spyOn(window.navigator, "onLine", "get").mockReturnValue(false);
+
+    await user.click(within(dialog).getByRole("button", { name: "Publicar" }));
+
+    expect(toast.error).toHaveBeenCalledWith(SURVEY_MESSAGES.offlineError, expect.anything());
+    expect(surveysService.createSurvey).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(screen.getByLabelText("Título")).toHaveValue("Encuesta de Empleabilidad");
+    onLine.mockRestore();
+  });
+
+  it("permite dirigir la encuesta a todas las carreras", async () => {
+    const user = renderView();
+    await fillValidSurvey(user);
+    await selectOption(user, "Carrera dirigida", "Todas las carreras");
+    await user.click(screen.getByRole("button", { name: /Publicar encuesta/ }));
+    const dialog = await screen.findByRole("alertdialog");
+
+    expect(dialog).toHaveTextContent("CarreraTodas las carreras");
+    await user.click(within(dialog).getByRole("button", { name: "Publicar" }));
+
+    await waitFor(() =>
+      expect(surveysService.createSurvey).toHaveBeenCalledWith(expect.objectContaining({ careerId: "all" })),
+    );
   });
 
   it("CA11: muestra el mensaje de encuesta duplicada junto al título", async () => {
