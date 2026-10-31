@@ -1,6 +1,7 @@
 import {
   SurveyQuestionType,
   SurveyStatus,
+  SURVEY_QUESTION_TYPES,
   SURVEY_TARGET_AUDIENCES,
   type SurveyQuestionTypeValue,
   type SurveyStatusValue,
@@ -16,9 +17,10 @@ export function toSurveyStatusValue(title: string): SurveyStatusValue {
 export function toSurveyQuestionTypeValue(
   title: string,
 ): SurveyQuestionTypeValue {
-  return title === SurveyQuestionType.MULTIPLE_CHOICE
-    ? SurveyQuestionType.MULTIPLE_CHOICE
-    : SurveyQuestionType.SINGLE_CHOICE;
+  return (
+    SURVEY_QUESTION_TYPES.find((value) => value === title) ??
+    SurveyQuestionType.SINGLE_CHOICE
+  );
 }
 
 export function toSurveyTargetAudienceValue(

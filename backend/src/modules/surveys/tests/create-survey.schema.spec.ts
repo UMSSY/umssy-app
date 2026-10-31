@@ -245,7 +245,7 @@ describe('createSurveySchema', () => {
     });
   });
 
-  it.each(['short_text', 'dropdown'])('rechaza el tipo de pregunta %s', (type) => {
+  it.each(['short_text'])('rechaza el tipo de pregunta %s', (type) => {
     const questions = [{ ...VALID_QUESTION, type }];
 
     expect(issues({ questions })).toContainEqual({

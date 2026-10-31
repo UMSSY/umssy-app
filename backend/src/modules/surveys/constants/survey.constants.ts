@@ -62,6 +62,12 @@ export const SURVEY_DISPLAY_STATUS_LABELS = {
   closed: 'Cerrada',
 } as const;
 
+export const SURVEY_QUESTION_TYPE_LABELS: Readonly<Record<string, string>> = {
+  single_choice: 'Opción única',
+  multiple_choice: 'Opción múltiple',
+  dropdown: 'Lista desplegable',
+};
+
 export const CATALOG_TITLE_SELECT = { select: { title: true } } as const;
 
 export const SURVEY_CREATED_SELECT = {
