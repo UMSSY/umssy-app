@@ -15,7 +15,7 @@ describe('HU-02B T2.8 - JobApplicationsRepository', () => {
   const prisma = {
     jobOffer: { findFirst: vi.fn() },
     jobApplicationStatus: { findUnique: vi.fn() },
-    jobApplication: { findUnique: vi.fn(), create: vi.fn() },
+    jobApplication: { findUnique: vi.fn(), create: vi.fn(), findMany: vi.fn() },
   };
   let repository: JobApplicationsRepository;
 
@@ -83,5 +83,20 @@ describe('HU-02B T2.8 - JobApplicationsRepository', () => {
       data: { userId: 'user-1', jobOfferId: 'offer-1', statusId: 'status-1' },
       select: SELECT,
     });
+  });
+
+  it('no lista a la empresa las postulaciones retiradas', async () => {
+    prisma.jobApplication.findMany.mockResolvedValue([]);
+
+    await repository.findApplicantsByOffer('offer-1');
+
+    expect(prisma.jobApplication.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          jobOfferId: 'offer-1',
+          status: { title: { not: 'Retirada' } },
+        },
+      }),
+    );
   });
 });

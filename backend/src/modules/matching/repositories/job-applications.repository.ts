@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { ACTIVE_APPLICATION_WHERE } from '../../job-offers/constants/job-offer.constants.js';
 import { JobOfferStatus } from '../../job-offers/types/job-offer.enum.js';
 import type { JobApplicantRecord } from '../types/company-job-applicants.types.js';
 import type { JobApplicationRecord } from '../types/job-application.types.js';
@@ -78,7 +79,7 @@ export class JobApplicationsRepository {
 
   findApplicantsByOffer(jobOfferId: string): Promise<JobApplicantRecord[]> {
     return this.prisma.jobApplication.findMany({
-      where: { jobOfferId },
+      where: { jobOfferId, ...ACTIVE_APPLICATION_WHERE },
       orderBy: [{ appliedAt: 'desc' }, { id: 'desc' }],
       select: JOB_APPLICANT_SELECT,
     });

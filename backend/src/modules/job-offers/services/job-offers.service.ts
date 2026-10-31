@@ -70,7 +70,13 @@ export class JobOffersService {
       companyId,
       filters,
     );
-    return records.map((record) => this.jobOfferMapper.toResponse(record));
+    const responses = records.map((record) => this.jobOfferMapper.toResponse(record));
+    if (filters.sortBy !== 'applicants') return responses;
+
+    const direction = filters.order === 'asc' ? 1 : -1;
+    return responses.sort(
+      (a, b) => (a.applicantsCount - b.applicantsCount) * direction,
+    );
   }
 
   async getByCompanyAndId(

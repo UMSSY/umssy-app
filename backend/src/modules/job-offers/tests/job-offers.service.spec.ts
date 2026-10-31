@@ -182,6 +182,27 @@ describe('JobOffersService', () => {
     expect(result[0]).toMatchObject({ id: 'offer-1', company: { name: 'TechBolivia S.R.L.' } });
   });
 
+  it.each([
+    ['asc', ['one', 'two-old', 'two-new']],
+    ['desc', ['two-old', 'two-new', 'one']],
+  ] as const)(
+    'ordena por postulantes activos en orden %s conservando la fecha en los empates',
+    async (order, expected) => {
+      repository.findByCompany.mockResolvedValue([
+        { ...RECORD, id: 'two-old', _count: { applications: 2 } },
+        { ...RECORD, id: 'one', _count: { applications: 1 } },
+        { ...RECORD, id: 'two-new', _count: { applications: 2 } },
+      ]);
+
+      const result = await service.listByCompany('company-1', {
+        sortBy: 'applicants',
+        order,
+      });
+
+      expect(result.map(({ id }) => id)).toEqual(expected);
+    },
+  );
+
   it('pasa los filtros al repositorio al listar las vacantes de una empresa', async () => {
     const filters = {
       modality: JobOfferModality.REMOTE,

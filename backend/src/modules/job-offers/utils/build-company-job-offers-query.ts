@@ -39,7 +39,6 @@ export function buildCompanyJobOffersQuery(
   };
 
   const orderBy: Prisma.JobOfferOrderByWithRelationInput[] = [
-    ...(filters.sortBy === 'applicants' ? [{ applications: { _count: filters.order } }] : []),
     { createdAt: filters.order },
     { id: filters.order },
   ];
