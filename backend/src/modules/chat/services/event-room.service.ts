@@ -11,7 +11,6 @@ export class EventRoomService {
   ) {}
 
   async joinEventRoom(userId: string, eventId: string): Promise<string> {
-    // Validar que el usuario tiene inscripción confirmada en el evento
     let registration;
     try {
       registration = await this.registrationsService.findOwn(eventId, userId);
@@ -23,7 +22,6 @@ export class EventRoomService {
       throw new NotRegisteredForEventException();
     }
 
-    // Obtener o crear la conversación grupal asociada al eventId (idempotente)
     const now = new Date();
     const conversationId = await this.conversationRepository.upsertByEventId(
       eventId,
