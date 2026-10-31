@@ -4,7 +4,7 @@ import { JOB_MATCHING_MESSAGES } from "../constants/job-matching.constants";
 import type { CategorizedJobRequirement } from "../types/requirement-category.types";
 import { MissingRequirements } from "./missing-requirements";
 
-const NO_PENDING = "Para esta oportunidad no tienes habilidades ni requisitos pendientes";
+const NO_PENDING = "No tienes habilidades ni requisitos visibles pendientes para esta oportunidad";
 
 const MIXED: CategorizedJobRequirement[] = [
   { name: "Docker", status: "Cumple", category: "skill" },
@@ -20,7 +20,7 @@ describe("MissingRequirements", () => {
     render(<MissingRequirements requirements={MIXED} />);
 
     expect(screen.getByText("Coincide")).toBeInTheDocument();
-    expect(screen.getAllByText("Falta")).toHaveLength(3);
+    expect(screen.getAllByText("Falta")).toHaveLength(2);
     expect(screen.queryByText("Cumple")).not.toBeInTheDocument();
     expect(screen.queryByText("Pendiente")).not.toBeInTheDocument();
   });
@@ -28,23 +28,22 @@ describe("MissingRequirements", () => {
   it("pairs every status with an icon and text, not only with color", () => {
     const { container } = render(<MissingRequirements requirements={MIXED} />);
 
-    expect(container.querySelectorAll("svg[aria-hidden='true']")).toHaveLength(MIXED.length);
+    expect(container.querySelectorAll("svg[aria-hidden='true']")).toHaveLength(3);
   });
 
-  it("groups the requirements as Habilidades, Académicos y experiencia and Otros requisitos", () => {
+  it("shows skills and other requirements without academic requirements", () => {
     render(<MissingRequirements requirements={MIXED} />);
 
     const headings = screen.getAllByRole("heading", { level: 4 }).map((heading) => heading.textContent);
-    expect(headings).toEqual(["Habilidades", "Académicos y experiencia", "Otros requisitos"]);
+    expect(headings).toEqual(["Habilidades", "Otros requisitos"]);
+    expect(screen.queryByText("Ingeniería de Sistemas")).not.toBeInTheDocument();
 
     const lists = screen.getAllByRole("list");
-    expect(lists).toHaveLength(3);
+    expect(lists).toHaveLength(2);
     expect(within(lists[0]).getByText("Docker")).toBeInTheDocument();
     expect(within(lists[0]).getByText("Kubernetes")).toBeInTheDocument();
-    expect(within(lists[1]).getByText("Ingeniería de Sistemas")).toBeInTheDocument();
+    expect(within(lists[1]).getByText("Carta de motivación")).toBeInTheDocument();
     expect(within(lists[1]).getByText("Falta")).toBeInTheDocument();
-    expect(within(lists[2]).getByText("Carta de motivación")).toBeInTheDocument();
-    expect(within(lists[2]).getByText("Falta")).toBeInTheDocument();
   });
 
   it("shows only the groups that have requirements", () => {
@@ -92,7 +91,7 @@ describe("MissingRequirements", () => {
 
     expect(screen.getByRole("status")).toHaveTextContent(NO_PENDING);
     expect(screen.queryByText("Falta")).not.toBeInTheDocument();
-    expect(screen.getAllByText("Coincide")).toHaveLength(2);
+    expect(screen.getAllByText("Coincide")).toHaveLength(1);
   });
 
   it("shows the zero-gap message and no list when the vacancy has no requirements", () => {
