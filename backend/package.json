@@ -33,7 +33,9 @@
     "lint:standards": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "seed:production": "tsc -p tsconfig.seed.json && node dist-seed/src/common/database/catalog-seeds.js",
     "seed:admin": "tsc -p tsconfig.seed.json && node dist-seed/src/common/database/production-seeds.js",
-    "seed:catalogs": "pnpm run seed:production"
+    "seed:catalogs": "pnpm run seed:production",
+    "ocr:models": "node scripts/prepare-ocr-models.ts",
+    "ocr:smoke": "node scripts/ocr-smoke.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.1.0",
@@ -55,10 +57,12 @@
     "mupdf": "^1.28.1",
     "nestjs-zod": "^5.5.0",
     "nodemailer": "^10.2.1",
+    "paddleocr": "^1.2.0",
     "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "socket.io": "^4.8.4",
+    "tesseract.js": "^6.0.1",
     "typescript-eslint": "^8.70.1",
     "zod": "^4.6.5"
   },
@@ -88,5 +92,8 @@
     "typescript": "^6.0.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.1.11"
+  },
+  "optionalDependencies": {
+    "onnxruntime-node": "1.24.3"
   }
 }
