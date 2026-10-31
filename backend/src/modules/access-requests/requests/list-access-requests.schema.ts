@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { DEFAULT_INBOX_PERIOD, INBOX_PERIODS, MAX_SEARCH_LENGTH, MIN_SEARCH_LENGTH } from '../constants/inbox-filters.constants.js';
 import { LIST_STATUSES, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../constants/list-access-requests.constants.js';
 import { CAREER } from '../types/career.enum.js';
+import { VALIDATION_FILTERS } from '../constants/automatic-validation.constants.js';
 
 const emptyToUndefined = (value: unknown) => (typeof value === 'string' && value.trim() === '' ? undefined : value);
 
@@ -17,6 +18,7 @@ export const listAccessRequestsQuerySchema = z.object({
       .optional(),
   ),
   career: z.preprocess(emptyToUndefined, z.enum(Object.values(CAREER), { error: 'La carrera no es válida' }).optional()),
+  validation: z.preprocess(emptyToUndefined, z.enum(VALIDATION_FILTERS, { error: 'La validación automática no es válida' }).optional()),
   period: z.enum(INBOX_PERIODS, { error: 'El período no es válido' }).default(DEFAULT_INBOX_PERIOD),
   page: z.coerce
     .number({ error: 'La página debe ser un número' })
