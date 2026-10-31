@@ -85,9 +85,17 @@ export function LoginView() {
         </div>
 
         <div className="mb-6">
-          <Label htmlFor="login-password" className="mb-1.5 text-[12.5px] font-semibold text-ink">
-            Contraseña
-          </Label>
+          <div className="mb-1.5 flex items-center justify-between">
+            <Label htmlFor="login-password" className="text-[12.5px] font-semibold text-ink">
+              Contraseña
+            </Label>
+            <Link
+              href="/forgot-password"
+              className="text-xs font-semibold text-accent hover:underline focus-visible:rounded-xs focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-hidden"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
           <div className="relative"><LockKeyhole className="pointer-events-none absolute top-4 left-4 size-5 text-accent" aria-hidden="true" /><Input
             id="login-password"
             type={isPasswordVisible ? "text" : "password"}

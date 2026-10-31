@@ -298,6 +298,11 @@ export type ConnectionRequest = Prisma.ConnectionRequestModel
  */
 export type UserPresence = Prisma.UserPresenceModel
 /**
+ * Model PasswordResetOtp
+ * 
+ */
+export type PasswordResetOtp = Prisma.PasswordResetOtpModel
+/**
  * Model MentorParticipationAttemptLimit
  * 
  */
