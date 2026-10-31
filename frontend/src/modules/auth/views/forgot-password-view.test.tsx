@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+import { renderWithQuery } from "@/shared/testing/render-with-query";
+import { screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ForgotPasswordView } from "./forgot-password-view";
 import { authService } from "../services/auth.service";
@@ -30,7 +31,7 @@ describe("ForgotPasswordView", () => {
   });
 
   it("renderiza el paso 1 con los textos y enlaces iniciales", () => {
-    render(<ForgotPasswordView />);
+    renderWithQuery(<ForgotPasswordView />);
 
     expect(screen.getByRole("heading", { name: "Recupera tu contraseña" })).toBeInTheDocument();
     expect(screen.getByText("Ingresa el correo con el que te registraste y te enviaremos un código de verificación.")).toBeInTheDocument();
@@ -40,7 +41,7 @@ describe("ForgotPasswordView", () => {
   });
 
   it("muestra error si se intenta enviar el correo vacío", async () => {
-    render(<ForgotPasswordView />);
+    renderWithQuery(<ForgotPasswordView />);
 
     fireEvent.click(screen.getByRole("button", { name: "ENVIAR CÓDIGO →" }));
 
@@ -49,7 +50,7 @@ describe("ForgotPasswordView", () => {
   });
 
   it("muestra error si el correo tiene un formato inválido", async () => {
-    render(<ForgotPasswordView />);
+    renderWithQuery(<ForgotPasswordView />);
 
     fireEvent.change(screen.getByLabelText("Correo electrónico"), { target: { value: "correo-invalido" } });
     fireEvent.click(screen.getByRole("button", { name: "ENVIAR CÓDIGO →" }));
@@ -59,7 +60,7 @@ describe("ForgotPasswordView", () => {
   });
 
   it("avanza al paso 2 al enviar un correo válido, muestra el correo enmascarado y vigencia de 5 minutos", async () => {
-    render(<ForgotPasswordView />);
+    renderWithQuery(<ForgotPasswordView />);
 
     fireEvent.change(screen.getByLabelText("Correo electrónico"), { target: { value: "estudiante@umss.edu" } });
     fireEvent.click(screen.getByRole("button", { name: "ENVIAR CÓDIGO →" }));
@@ -76,7 +77,7 @@ describe("ForgotPasswordView", () => {
   });
 
   it("permite volver al paso 1 haciendo clic en 'Cambiar correo'", async () => {
-    render(<ForgotPasswordView />);
+    renderWithQuery(<ForgotPasswordView />);
 
     fireEvent.change(screen.getByLabelText("Correo electrónico"), { target: { value: "estudiante@umss.edu" } });
     fireEvent.click(screen.getByRole("button", { name: "ENVIAR CÓDIGO →" }));
@@ -93,7 +94,7 @@ describe("ForgotPasswordView", () => {
   });
 
   it("en el paso 2 permite reenviar el código, activa el cooldown de 2 minutos y muestra mensaje", async () => {
-    render(<ForgotPasswordView />);
+    renderWithQuery(<ForgotPasswordView />);
 
     fireEvent.change(screen.getByLabelText("Correo electrónico"), { target: { value: "estudiante@umss.edu" } });
     fireEvent.click(screen.getByRole("button", { name: "ENVIAR CÓDIGO →" }));
@@ -115,7 +116,7 @@ describe("ForgotPasswordView", () => {
   });
 
   it("en el paso 2 avanza al paso 3 tras ingresar 6 dígitos y verificar", async () => {
-    render(<ForgotPasswordView />);
+    renderWithQuery(<ForgotPasswordView />);
 
     fireEvent.change(screen.getByLabelText("Correo electrónico"), { target: { value: "estudiante@umss.edu" } });
     fireEvent.click(screen.getByRole("button", { name: "ENVIAR CÓDIGO →" }));
@@ -143,7 +144,7 @@ describe("ForgotPasswordView", () => {
   });
 
   it("en el paso 3 valida coincidencia y requisitos de seguridad de contraseña", async () => {
-    render(<ForgotPasswordView />);
+    renderWithQuery(<ForgotPasswordView />);
 
     // Step 1
     fireEvent.change(screen.getByLabelText("Correo electrónico"), { target: { value: "estudiante@umss.edu" } });
@@ -220,7 +221,7 @@ describe("ForgotPasswordView", () => {
 
     it("muestra el error del servidor cuando falla la solicitud del código", async () => {
       vi.mocked(authService.requestPasswordResetCode).mockRejectedValue(new Error("Servicio no disponible"));
-      render(<ForgotPasswordView />);
+      renderWithQuery(<ForgotPasswordView />);
 
       fireEvent.change(screen.getByLabelText("Correo electrónico"), { target: { value: "estudiante@umss.edu" } });
       fireEvent.click(screen.getByRole("button", { name: "ENVIAR CÓDIGO →" }));
@@ -231,7 +232,7 @@ describe("ForgotPasswordView", () => {
 
     it("muestra el error del servidor cuando el código es incorrecto y no avanza de paso", async () => {
       vi.mocked(authService.verifyPasswordResetCode).mockRejectedValue(new Error("El código ingresado es incorrecto"));
-      render(<ForgotPasswordView />);
+      renderWithQuery(<ForgotPasswordView />);
       await goToVerifyStep();
 
       enterCode();
@@ -242,7 +243,7 @@ describe("ForgotPasswordView", () => {
     });
 
     it("muestra el error del servidor cuando falla el reenvío del código", async () => {
-      render(<ForgotPasswordView />);
+      renderWithQuery(<ForgotPasswordView />);
       await goToVerifyStep();
 
       vi.mocked(authService.requestPasswordResetCode).mockRejectedValue(new Error("No se pudo reenviar el código"));
@@ -253,7 +254,7 @@ describe("ForgotPasswordView", () => {
 
     it("muestra el error del servidor cuando falla el cambio de contraseña y no llega al éxito", async () => {
       vi.mocked(authService.resetPassword).mockRejectedValue(new Error("El código ya expiró"));
-      render(<ForgotPasswordView />);
+      renderWithQuery(<ForgotPasswordView />);
       await goToResetStep();
 
       fireEvent.change(screen.getByLabelText("Nueva contraseña"), { target: { value: "Segura123" } });
@@ -266,7 +267,7 @@ describe("ForgotPasswordView", () => {
 
     it("muestra un mensaje por defecto cuando el rechazo no trae un Error", async () => {
       vi.mocked(authService.verifyPasswordResetCode).mockRejectedValue("fallo");
-      render(<ForgotPasswordView />);
+      renderWithQuery(<ForgotPasswordView />);
       await goToVerifyStep();
 
       enterCode();

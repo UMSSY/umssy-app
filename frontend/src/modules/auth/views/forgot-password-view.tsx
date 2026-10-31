@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useContext, type FormEvent, type ReactNode } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { QueryClient, QueryClientProvider, QueryClientContext } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { cn } from "cn";
 import { maskEmail } from "@/shared/utils/mask-email";
@@ -29,7 +28,7 @@ function formatTime(seconds: number): string {
   return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 }
 
-function ForgotPasswordViewContent() {
+export function ForgotPasswordView() {
   const router = useRouter();
   const [step, setStep] = useState<ForgotPasswordStep>("request");
   const [isExiting, setIsExiting] = useState(false);
@@ -278,32 +277,5 @@ function ForgotPasswordViewContent() {
         <p className="text-center text-xs text-text-secondary">UMSSY · Universidad Mayor de San Simón</p>
       </div>
     </main>
-  );
-}
-
-function QueryClientEnsurer({ children }: { children: ReactNode }) {
-  const existingClient = useContext(QueryClientContext);
-  const [localClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: { retry: false },
-          mutations: { retry: false },
-        },
-      })
-  );
-
-  if (existingClient) {
-    return <>{children}</>;
-  }
-
-  return <QueryClientProvider client={localClient}>{children}</QueryClientProvider>;
-}
-
-export function ForgotPasswordView() {
-  return (
-    <QueryClientEnsurer>
-      <ForgotPasswordViewContent />
-    </QueryClientEnsurer>
   );
 }
