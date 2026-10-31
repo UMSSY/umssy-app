@@ -89,6 +89,21 @@ describe("ParticipationView HU-MEN-06", () => {
     ).toBeInTheDocument();
   });
 
+  it("muestra solo la solicitud pendiente cuando la participación anterior está desactivada", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(deactivated);
+    vi.mocked(mentorParticipationService.getCurrent).mockResolvedValue({
+      id: "request", userId: "user", status: "PENDING",
+      queuedAt: "2026-10-26T15:00:00Z", createdAt: "2026-10-26T15:00:00Z",
+      technicalAreaIds: [], orientationTypeIds: [],
+    });
+    renderWithQuery(<ParticipationView />);
+    expect(await screen.findByText("PENDIENTE")).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: "Estado de participación" })).toHaveLength(1);
+    expect(screen.getByRole("heading", { name: "Mi participación como mentor" })).toBeInTheDocument();
+    expect(screen.queryByText("Desactivado")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ver detalle" })).toBeInTheDocument();
+  });
+
   it("cancelar no llama al servidor; confirmar sale una sola vez", async () => {
     const leave = vi
       .spyOn(mentorParticipationService, "leave")
