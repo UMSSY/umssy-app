@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider, QueryClientContext } from "@tanstack/
 import { Button } from "@/components/ui/button";
 import { cn } from "cn";
 import { maskEmail } from "@/shared/utils/mask-email";
+import { getPasswordRules } from "@/shared/utils/password-rules";
 import type { ForgotPasswordStep } from "../types/forgot-password.types";
 import { ForgotPasswordRequestStep } from "../components/forgot-password-request-step";
 import { ForgotPasswordVerifyStep } from "../components/forgot-password-verify-step";
@@ -96,15 +97,15 @@ function ForgotPasswordViewContent() {
 
     setEmailError("");
     const res = await requestHook.requestResetCode({ email: trimmedEmail });
-    if (res) {
+    if (res.ok) {
       setCountdown(INITIAL_COUNTDOWN_SECONDS);
       setResendCooldown(0);
       setOtpCode("");
       setOtpError("");
       setIsResent(false);
       goToStep("verify", "forward");
-    } else if (requestHook.error) {
-      setEmailError(requestHook.error);
+    } else {
+      setEmailError(res.error);
     }
   }
 
@@ -121,37 +122,34 @@ function ForgotPasswordViewContent() {
 
     setOtpError("");
     const res = await verifyHook.verifyResetCode({ email: email.trim(), code: otpCode });
-    if (res) {
+    if (res.ok) {
       setPasswordError("");
       setNewPassword("");
       setConfirmPassword("");
       goToStep("reset", "forward");
-    } else if (verifyHook.error) {
-      setOtpError(verifyHook.error);
+    } else {
+      setOtpError(res.error);
     }
   }
 
   async function handleResend() {
     if (resendCooldown > 0 || resendHook.isLoading) return;
     const res = await resendHook.requestResetCode({ email: email.trim() });
-    if (res) {
+    if (res.ok) {
       setCountdown(INITIAL_COUNTDOWN_SECONDS);
       setResendCooldown(RESEND_COOLDOWN_SECONDS);
       setOtpCode("");
       setOtpError("");
       setIsResent(true);
-    } else if (resendHook.error) {
-      setOtpError(resendHook.error);
+    } else {
+      setOtpError(res.error);
     }
   }
 
   async function handleResetPassword(event: FormEvent) {
     event.preventDefault();
-    const hasMinLength = newPassword.length >= 8;
-    const hasUpperCase = /[A-Z]/.test(newPassword);
-    const hasNumber = /[0-9]/.test(newPassword);
 
-    if (!hasMinLength || !hasUpperCase || !hasNumber) {
+    if (getPasswordRules(newPassword).some((rule) => !rule.met)) {
       setPasswordError("La contraseña no cumple con los requisitos de seguridad.");
       return;
     }
@@ -166,10 +164,10 @@ function ForgotPasswordViewContent() {
       code: otpCode,
       password: newPassword,
     });
-    if (res) {
+    if (res.ok) {
       goToStep("success", "forward");
-    } else if (resetHook.error) {
-      setPasswordError(resetHook.error);
+    } else {
+      setPasswordError(res.error);
     }
   }
 

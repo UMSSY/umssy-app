@@ -1,36 +1,24 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
 import { authService } from "../services/auth.service";
-import type { RequestResetCodePayload } from "../types/forgot-password.types";
+import type { PasswordResetResult, RequestResetCodePayload } from "../types/forgot-password.types";
+
+const DEFAULT_ERROR_MESSAGE = "Error al solicitar el código de recuperación.";
 
 export function useRequestPasswordReset() {
   const mutation = useMutation({
     mutationFn: (payload: RequestResetCodePayload) => authService.requestPasswordResetCode(payload),
   });
-  const [error, setError] = useState<string | null>(null);
 
-  async function requestResetCode(payload: RequestResetCodePayload) {
-    setError(null);
+  async function requestResetCode(payload: RequestResetCodePayload): Promise<PasswordResetResult> {
     try {
-      return await mutation.mutateAsync(payload);
+      await mutation.mutateAsync(payload);
+      return { ok: true };
     } catch (cause: unknown) {
-      const message = cause instanceof Error ? cause.message : "Error al solicitar el código de recuperación.";
-      setError(message);
-      return null;
+      return { ok: false, error: cause instanceof Error ? cause.message : DEFAULT_ERROR_MESSAGE };
     }
   }
 
-  return {
-    requestResetCode,
-    isLoading: mutation.isPending,
-    error,
-    setError,
-    reset: () => {
-      setError(null);
-      mutation.reset();
-    },
-  };
+  return { requestResetCode, isLoading: mutation.isPending };
 }
-

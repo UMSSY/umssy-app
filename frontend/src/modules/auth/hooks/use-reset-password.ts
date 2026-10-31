@@ -1,36 +1,24 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
 import { authService } from "../services/auth.service";
-import type { ResetPasswordPayload } from "../types/forgot-password.types";
+import type { PasswordResetResult, ResetPasswordPayload } from "../types/forgot-password.types";
+
+const DEFAULT_ERROR_MESSAGE = "No se pudo actualizar la contraseña.";
 
 export function useResetPassword() {
   const mutation = useMutation({
     mutationFn: (payload: ResetPasswordPayload) => authService.resetPassword(payload),
   });
-  const [error, setError] = useState<string | null>(null);
 
-  async function resetPassword(payload: ResetPasswordPayload) {
-    setError(null);
+  async function resetPassword(payload: ResetPasswordPayload): Promise<PasswordResetResult> {
     try {
-      return await mutation.mutateAsync(payload);
+      await mutation.mutateAsync(payload);
+      return { ok: true };
     } catch (cause: unknown) {
-      const message = cause instanceof Error ? cause.message : "No se pudo actualizar la contraseña.";
-      setError(message);
-      return null;
+      return { ok: false, error: cause instanceof Error ? cause.message : DEFAULT_ERROR_MESSAGE };
     }
   }
 
-  return {
-    resetPassword,
-    isLoading: mutation.isPending,
-    error,
-    setError,
-    reset: () => {
-      setError(null);
-      mutation.reset();
-    },
-  };
+  return { resetPassword, isLoading: mutation.isPending };
 }
-

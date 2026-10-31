@@ -1,36 +1,24 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
 import { authService } from "../services/auth.service";
-import type { VerifyResetCodePayload } from "../types/forgot-password.types";
+import type { PasswordResetResult, VerifyResetCodePayload } from "../types/forgot-password.types";
+
+const DEFAULT_ERROR_MESSAGE = "El código de verificación es incorrecto o ha expirado.";
 
 export function useVerifyPasswordReset() {
   const mutation = useMutation({
     mutationFn: (payload: VerifyResetCodePayload) => authService.verifyPasswordResetCode(payload),
   });
-  const [error, setError] = useState<string | null>(null);
 
-  async function verifyResetCode(payload: VerifyResetCodePayload) {
-    setError(null);
+  async function verifyResetCode(payload: VerifyResetCodePayload): Promise<PasswordResetResult> {
     try {
-      return await mutation.mutateAsync(payload);
+      await mutation.mutateAsync(payload);
+      return { ok: true };
     } catch (cause: unknown) {
-      const message = cause instanceof Error ? cause.message : "El código de verificación es incorrecto o ha expirado.";
-      setError(message);
-      return null;
+      return { ok: false, error: cause instanceof Error ? cause.message : DEFAULT_ERROR_MESSAGE };
     }
   }
 
-  return {
-    verifyResetCode,
-    isLoading: mutation.isPending,
-    error,
-    setError,
-    reset: () => {
-      setError(null);
-      mutation.reset();
-    },
-  };
+  return { verifyResetCode, isLoading: mutation.isPending };
 }
-
