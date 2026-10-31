@@ -1,3 +1,4 @@
+import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { Injectable } from '@nestjs/common';
 import { JobOfferUnavailableException } from '../exceptions/job-offer-unavailable.exception.js';
 import { JobApplicationMapper } from '../mappers/job-application.mapper.js';
@@ -8,6 +9,7 @@ import type { CompanyJobApplicantsResponse } from '../types/company-job-applican
 export class CompanyJobApplicantsService {
   constructor(
     private readonly repository: JobApplicationsRepository,
+    private readonly jobOffers: JobOffersService,
     private readonly mapper: JobApplicationMapper,
   ) {}
 
@@ -15,7 +17,7 @@ export class CompanyJobApplicantsService {
     companyId: string,
     jobOfferId: string,
   ): Promise<CompanyJobApplicantsResponse> {
-    const offer = await this.repository.findCompanyOffer(companyId, jobOfferId);
+    const offer = await this.jobOffers.findCompanyOffer(companyId, jobOfferId);
     if (!offer) {
       throw new JobOfferUnavailableException();
     }

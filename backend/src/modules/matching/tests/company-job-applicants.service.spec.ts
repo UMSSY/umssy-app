@@ -1,3 +1,4 @@
+import type { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { JobOfferUnavailableException } from '../exceptions/job-offer-unavailable.exception.js';
 import { JobApplicationMapper } from '../mappers/job-application.mapper.js';
@@ -24,17 +25,18 @@ const APPLICANT: JobApplicantRecord = {
 
 describe('HU-02B - CompanyJobApplicantsService', () => {
   const repository = {
-    findCompanyOffer: vi.fn(),
     findApplicantsByOffer: vi.fn(),
   };
+  const jobOffers = { findCompanyOffer: vi.fn() };
   let service: CompanyJobApplicantsService;
 
   beforeEach(() => {
     vi.resetAllMocks();
-    repository.findCompanyOffer.mockResolvedValue(OFFER);
+    jobOffers.findCompanyOffer.mockResolvedValue(OFFER);
     repository.findApplicantsByOffer.mockResolvedValue([APPLICANT]);
     service = new CompanyJobApplicantsService(
       repository as unknown as JobApplicationsRepository,
+      jobOffers as unknown as JobOffersService,
       new JobApplicationMapper(),
     );
   });
@@ -56,25 +58,30 @@ describe('HU-02B - CompanyJobApplicantsService', () => {
         },
       ],
     });
-    expect(repository.findCompanyOffer).toHaveBeenCalledWith(COMPANY_ID, OFFER_ID);
+    expect(jobOffers.findCompanyOffer).toHaveBeenCalledWith(
+      COMPANY_ID,
+      OFFER_ID,
+    );
     expect(repository.findApplicantsByOffer).toHaveBeenCalledWith(OFFER_ID);
   });
 
   it('devuelve total 0 cuando nadie se postuló', async () => {
     repository.findApplicantsByOffer.mockResolvedValue([]);
 
-    await expect(service.listByOffer(COMPANY_ID, OFFER_ID)).resolves.toMatchObject({
+    await expect(
+      service.listByOffer(COMPANY_ID, OFFER_ID),
+    ).resolves.toMatchObject({
       total: 0,
       applicants: [],
     });
   });
 
   it('responde 404 si la vacante no existe o es de otra empresa', async () => {
-    repository.findCompanyOffer.mockResolvedValue(null);
+    jobOffers.findCompanyOffer.mockResolvedValue(null);
 
-    await expect(service.listByOffer(COMPANY_ID, OFFER_ID)).rejects.toBeInstanceOf(
-      JobOfferUnavailableException,
-    );
+    await expect(
+      service.listByOffer(COMPANY_ID, OFFER_ID),
+    ).rejects.toBeInstanceOf(JobOfferUnavailableException);
     expect(repository.findApplicantsByOffer).not.toHaveBeenCalled();
   });
 });
