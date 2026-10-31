@@ -5,7 +5,8 @@ export interface ReportFilterOption<TValue extends string> {
 
 export interface ReportFilterSelectProps<TValue extends string> {
   label: string;
-  allLabel: string;
+  allLabel?: string;
+  placeholder?: string;
   options: ReportFilterOption<TValue>[];
   value?: TValue;
   onChange: (value?: TValue) => void;

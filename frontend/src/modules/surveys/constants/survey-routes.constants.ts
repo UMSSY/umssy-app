@@ -9,7 +9,7 @@ export const CREATE_SURVEY_ACTION_LABEL = "Crear encuesta";
 export const REFRESH_SURVEYS_LABEL = "Actualizar";
 export const CREATOR_SEARCH_LABEL = "Buscar por correo electrónico del administrador";
 export const ACADEMIC_PERIOD_FILTER_LABEL = "Gestión académica";
-export const ALL_ACADEMIC_PERIODS_LABEL = "Todos";
+export const ACADEMIC_PERIOD_FILTER_PLACEHOLDER = "Selecciona una gestión";
 export const SURVEYS_FILTERED_EMPTY = "No hay encuestas que coincidan con los filtros.";
 
 export const SURVEY_ROW_ACTION_LABELS = {
