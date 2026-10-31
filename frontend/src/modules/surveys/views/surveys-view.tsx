@@ -9,7 +9,6 @@ import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { SurveysTable } from "../components/surveys-table";
 import {
   ACADEMIC_PERIOD_FILTER_LABEL,
-  ALL_ACADEMIC_PERIODS_LABEL,
   CREATE_SURVEY_ACTION_LABEL,
   CREATE_SURVEY_PATH,
   CREATOR_SEARCH_LABEL,
@@ -25,10 +24,14 @@ import { getSurveyYears } from "../utils/survey-academic-periods";
 export function SurveysView() {
   const { surveys, isLoading, isRefreshing, hasError, refresh } = useSurveys();
   const [creatorSearch, setCreatorSearch] = useState("");
-  const [academicPeriod, setAcademicPeriod] = useState<string | undefined>(undefined);
   const [periodOptions] = useState(() => getSurveyYears().map((year) => ({ value: year, label: year })));
-  const hasFilters = Boolean(creatorSearch.trim() || academicPeriod);
+  // El listado siempre se segmenta por una gestión concreta; por defecto la del año actual.
+  const [academicPeriod, setAcademicPeriod] = useState(periodOptions[0].value);
   const visibleSurveys = filterSurveys(surveys, creatorSearch, academicPeriod);
+
+  const handleAcademicPeriodChange = (selectedPeriod?: string) => {
+    if (selectedPeriod) setAcademicPeriod(selectedPeriod);
+  };
 
   return (
     <WorkspacePage
@@ -48,17 +51,16 @@ export function SurveysView() {
         <ReportSearchInput value={creatorSearch} onChange={setCreatorSearch} label={CREATOR_SEARCH_LABEL} />
         <ReportFilterSelect
           label={ACADEMIC_PERIOD_FILTER_LABEL}
-          allLabel={ALL_ACADEMIC_PERIODS_LABEL}
           options={periodOptions}
           value={academicPeriod}
-          onChange={setAcademicPeriod}
+          onChange={handleAcademicPeriodChange}
         />
       </div>
       <SurveysTable
         surveys={visibleSurveys}
         isLoading={isLoading}
         hasError={hasError}
-        emptyMessage={hasFilters ? SURVEYS_FILTERED_EMPTY : undefined}
+        emptyMessage={SURVEYS_FILTERED_EMPTY}
       />
     </WorkspacePage>
   );

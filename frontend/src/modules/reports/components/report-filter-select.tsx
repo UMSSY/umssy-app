@@ -13,7 +13,8 @@ export function ReportFilterSelect<TValue extends string>({
   onChange,
 }: ReportFilterSelectProps<TValue>) {
   const labelId = useId();
-  const items = [{ value: ALL_FILTER_VALUE, label: allLabel }, ...options];
+  // Sin allLabel el selector solo lista las opciones concretas, sin la alternativa general.
+  const items = allLabel ? [{ value: ALL_FILTER_VALUE, label: allLabel }, ...options] : options;
 
   const handleValueChange = (selectedValue: string | null) => {
     onChange(!selectedValue || selectedValue === ALL_FILTER_VALUE ? undefined : (selectedValue as TValue));
