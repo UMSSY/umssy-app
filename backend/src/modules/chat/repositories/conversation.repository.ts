@@ -15,8 +15,8 @@ export class ConversationRepository {
     return this.prisma.conversation.findUnique({
       where: { userAId_userBId: { userAId, userBId } },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true } },
-        userB: { select: { id: true, firstName: true, lastName: true } },
+        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
@@ -45,14 +45,41 @@ export class ConversationRepository {
         },
       },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true } },
-        userB: { select: { id: true, firstName: true, lastName: true } },
+        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
           include: { status: { select: { title: true } } },
         },
       },
+    });
+  }
+
+  async upsertByEventId(eventId: string, userId: string, now: Date) {
+    return this.prisma.$transaction(async tx => {
+      // Conversación grupal: unique sobre eventId, userAId/userBId opcionales
+      const conversation = await tx.conversation.upsert({
+        where: { eventId },
+        update: {},
+        create: {
+          eventId,
+          userAId: null,
+          userBId: null,
+          updatedAt: now,
+          createdAt: now,
+        },
+        select: { id: true, userAId: true, userBId: true },
+      });
+
+      // Participante: misma clave única (conversationId, userId), por lo que es idempotente
+      await tx.conversationParticipant.upsert({
+        where: { conversationId_userId: { conversationId: conversation.id, userId } },
+        update: { lastReadAt: now },
+        create: { conversationId: conversation.id, userId, lastReadAt: now },
+      });
+
+      return conversation.id;
     });
   }
 
@@ -70,14 +97,22 @@ export class ConversationRepository {
   async findUserConversations(userId: string) {
     return this.prisma.conversation.findMany({
       where: {
-        OR: [
-          { userAId: userId },
-          { userBId: userId },
+        AND: [
+          {
+            OR: [
+              { userAId: userId },
+              { userBId: userId },
+            ],
+          },
+          {
+            eventId: null,
+          },
         ],
       },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true } },
-        userB: { select: { id: true, firstName: true, lastName: true } },
+        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        event: { select: { id: true, title: true } },
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
@@ -90,4 +125,5 @@ export class ConversationRepository {
       ],
     });
   }
+
 }
