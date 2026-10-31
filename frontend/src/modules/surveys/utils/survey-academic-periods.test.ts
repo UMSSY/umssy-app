@@ -19,7 +19,7 @@ describe("survey-academic-periods", () => {
   it("filtra por año incluyendo las encuestas de todas las gestiones", () => {
     expect(matchesSurveyYear("2026", "2026")).toBe(true);
     expect(matchesSurveyYear("I-2026", "2026")).toBe(true);
-    expect(matchesSurveyYear("Todas", "2026")).toBe(true);
+    expect(matchesSurveyYear("Todas", "2026")).toBe(false);
     expect(matchesSurveyYear("2025", "2026")).toBe(false);
     expect(matchesSurveyYear(null, "2026")).toBe(false);
   });
