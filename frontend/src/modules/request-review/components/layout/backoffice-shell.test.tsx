@@ -135,7 +135,7 @@ describe("BackofficeShell", () => {
       expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeInTheDocument();
 
       expect(screen.getByText("PA")).toBeInTheDocument();
-      expect(screen.queryByText("Registro de auditoría")).toBeNull();
+      expect(screen.getByText("Registro de auditoría")).toBeInTheDocument();
       const text = document.body.textContent?.toLowerCase() ?? "";
       expect(text).not.toContain("egres");
       expect(text).not.toContain("certificado de egreso");
