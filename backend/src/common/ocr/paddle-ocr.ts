@@ -3,21 +3,10 @@ import {
   PaddleOcrService,
   type OrtModule,
   type RecognitionResult,
-  type PaddleOcrModelPresetName,
 } from 'paddleocr';
+import type { PaddleModelFiles, PaddleOcrInput } from './paddle-ocr.types.js';
 
-export interface PaddleModelFiles {
-  detection: string;
-  recognition: string;
-  dictionary: string;
-  preset: PaddleOcrModelPresetName;
-}
-
-export interface PaddleOcrInput {
-  width: number;
-  height: number;
-  data: Uint8Array | Uint8ClampedArray;
-}
+export type { PaddleModelFiles, PaddleOcrInput } from './paddle-ocr.types.js';
 
 export async function createPaddleWorker(files: PaddleModelFiles) {
   const ort = await import('onnxruntime-node').catch((cause: unknown) => {
