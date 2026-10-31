@@ -12,7 +12,9 @@ import { PassDetail } from "../components/pass-detail";
 import { MyPassesEmptyState } from "../components/my-passes-empty-state";
 import { formatRegistrationDate } from "../utils/registration-format";
 
-export function MyPassesView() {
+import type { MyPassesViewProps } from "../types/my-passes-view-props.types";
+
+export function MyPassesView({ onOpenWorkshopChat }: MyPassesViewProps = {}) {
   const { registrations, isLoading, error, retry } = useMyPasses();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = registrations.find((item) => item.id === selectedId) ?? registrations[0];
@@ -22,7 +24,7 @@ export function MyPassesView() {
       <PageHeading title="Mis inscripciones" description={isLoading ? "Cargando tus inscripciones…" : `${registrations.length} ${registrations.length === 1 ? "pase" : "pases"}`} actions={<Link href="/events" className={buttonVariants({ variant: "outline" })}><CalendarDays aria-hidden="true" />Explorar talleres</Link>} />
       {isLoading ? <RequestFeedback message="Cargando tus inscripciones..." /> : error ? <RequestFeedback message={error} isError onRetry={retry} /> : !registrations.length ? <MyPassesEmptyState /> : (
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
-          <section aria-label="Tus inscripciones"><ul className="space-y-3">{registrations.map((item) => <li key={item.id}><PassCard title={item.eventName} date={formatRegistrationDate(item.date)} status={item.status} location={item.location} registrationId={item.id} isSelected={selected?.id === item.id} onClick={() => setSelectedId(item.id)} /></li>)}</ul></section>
+          <section aria-label="Tus inscripciones"><ul className="space-y-3">{registrations.map((item) => <li key={item.id}><PassCard title={item.eventName} date={formatRegistrationDate(item.date)} status={item.status} location={item.location} registrationId={item.id} onOpenChat={onOpenWorkshopChat} isSelected={selected?.id === item.id} onClick={() => setSelectedId(item.id)} /></li>)}</ul></section>
           {selected ? <aside aria-label="Detalle de la inscripción" className="sticky top-24 min-w-0"><PassDetail registration={selected} /></aside> : null}
         </div>
       )}
