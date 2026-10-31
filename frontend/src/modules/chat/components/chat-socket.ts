@@ -11,16 +11,9 @@ export function resolveSocketEndpoint(apiUrl: string = ENV_CONFIG.apiUrl || 'htt
   try {
     const parsed = new URL(apiUrl);
     const serverUrl = parsed.origin;
-    const cleanPath = parsed.pathname.replace(/\/+$/, '');
-    if (!cleanPath || cleanPath === '/') {
-      return { serverUrl };
-    }
-    return {
-      serverUrl,
-      path: `${cleanPath}/socket.io`,
-    };
+    return { serverUrl, path: '/api/socket.io' };
   } catch {
-    return { serverUrl: apiUrl };
+    return { serverUrl: apiUrl, path: '/api/socket.io' };
   }
 }
 

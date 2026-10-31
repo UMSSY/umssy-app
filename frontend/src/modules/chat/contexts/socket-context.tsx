@@ -1,9 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useSyncExternalStore } from 'react';
 import type { Socket } from 'socket.io-client';
 import { toast } from 'sonner';
-import { getAccessToken } from '@/shared/services/storage/access-token-storage';
+import { getAccessToken, subscribeAccessToken } from '@/shared/services/storage/access-token-storage';
 import { getChatSocket, resetChatSocket } from '../components/chat-socket';
 
 interface SocketContextType {
@@ -17,8 +17,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
+  const token = useSyncExternalStore(subscribeAccessToken, getAccessToken, () => null);
+
   useEffect(() => {
-    const token = getAccessToken();
     if (!token) return;
 
     let socketInstance: Socket;
@@ -57,7 +58,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setSocket(null);
       setIsConnected(false);
     };
-  }, []);
+  }, [token]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>
