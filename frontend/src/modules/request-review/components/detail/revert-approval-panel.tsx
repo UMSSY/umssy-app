@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { Undo2 } from "lucide-react";
 import {
   AlertDialog,
@@ -15,23 +14,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { REVERT_SUCCESS_MESSAGE } from "../../constants/automatic-validation.constants";
-import { REQUEST_REVIEW_QUERY_KEYS } from "../../constants/request-review-query-keys.constants";
-import { useInvalidateReviewQueries } from "../../hooks/use-invalidate-review-queries";
-import { automaticValidationService } from "../../services/automatic-validation.service";
+import { useRevertApproval } from "../../hooks/use-revert-approval";
 import type { RevertApprovalPanelProps } from "../../types/automatic-validation-props.types";
 
 export function RevertApprovalPanel({ detail }: RevertApprovalPanelProps) {
-  const queryClient = useQueryClient();
-  const invalidateReviewQueries = useInvalidateReviewQueries();
   const [open, setOpen] = useState(false);
-  const [isReverting, setIsReverting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { mutate, isPending, isSuccess, error, reset } = useRevertApproval(detail.id);
 
-  if (message) {
+  if (isSuccess) {
     return (
       <p role="status" className="rounded-lg border border-border bg-surface p-4 text-sm text-ink">
-        {message}
+        {REVERT_SUCCESS_MESSAGE}
       </p>
     );
   }
@@ -40,21 +33,9 @@ export function RevertApprovalPanel({ detail }: RevertApprovalPanelProps) {
     return null;
   }
 
-  async function handleRevert() {
-    setIsReverting(true);
-    setError(null);
-    const result = await automaticValidationService.revertApproval(detail.id);
-    setIsReverting(false);
-    setOpen(false);
-    if (!result.ok) {
-      setError(result.message);
-      return;
-    }
-    setMessage(REVERT_SUCCESS_MESSAGE);
-    await Promise.all([
-      invalidateReviewQueries(detail.id),
-      queryClient.invalidateQueries({ queryKey: REQUEST_REVIEW_QUERY_KEYS.history(detail.id) }),
-    ]);
+  function handleRevert() {
+    reset();
+    mutate(undefined, { onSettled: () => setOpen(false) });
   }
 
   return (
@@ -64,13 +45,13 @@ export function RevertApprovalPanel({ detail }: RevertApprovalPanelProps) {
         El sistema aprobó esta solicitud. Si necesitas evaluarla de nuevo, revierte la aprobación: volverá a revisión manual y se anulará el código de
         activación sin usar.
       </p>
-      <Button type="button" variant="outline" onClick={() => setOpen(true)} disabled={isReverting} className="w-fit border-border bg-surface text-ink">
+      <Button type="button" variant="outline" onClick={() => setOpen(true)} disabled={isPending} className="w-fit border-border bg-surface text-ink">
         <Undo2 aria-hidden="true" />
         Revertir aprobación
       </Button>
       {error ? (
         <p role="alert" className="text-sm text-danger">
-          {error}
+          {error.message}
         </p>
       ) : null}
 
@@ -83,18 +64,18 @@ export function RevertApprovalPanel({ detail }: RevertApprovalPanelProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel type="button" disabled={isReverting}>
+            <AlertDialogCancel type="button" disabled={isPending}>
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               type="button"
-              disabled={isReverting}
+              disabled={isPending}
               onClick={(event) => {
                 event.preventDefault();
-                void handleRevert();
+                handleRevert();
               }}
             >
-              {isReverting ? "Revirtiendo..." : "Revertir aprobación"}
+              {isPending ? "Revirtiendo..." : "Revertir aprobación"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

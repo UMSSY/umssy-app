@@ -1,9 +1,10 @@
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
+import { REQUEST_REVIEW_QUERY_KEYS } from "../../constants/request-review-query-keys.constants";
 import { automaticValidationService } from "../../services/automatic-validation.service";
 import type { ValidationDetail } from "../../types/automatic-validation.types";
-import type { ReviewDetail } from "../../types/request-review.types";
+import type { ReviewApiResult, ReviewDetail } from "../../types/request-review.types";
 import { AutomaticValidationPanel } from "./automatic-validation-panel";
 import { RequestTimeline } from "./request-timeline";
 import { RevertApprovalPanel } from "./revert-approval-panel";
@@ -119,6 +120,57 @@ describe("RevertApprovalPanel", () => {
     fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Revertir aprobación" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("ya activó su cuenta");
+  });
+
+  it("al revertir refresca el detalle, la bandeja y el historial de la solicitud", async () => {
+    revertApproval.mockResolvedValue({ ok: true, data: { id: "req-1", status: "in_review" } });
+    const { client } = renderWithQuery(<RevertApprovalPanel detail={detail()} />);
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+
+    fireEvent.click(screen.getByRole("button", { name: "Revertir aprobación" }));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Revertir aprobación" }));
+
+    await waitFor(() => expect(invalidate).toHaveBeenCalledTimes(3));
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: REQUEST_REVIEW_QUERY_KEYS.detail("req-1") });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: REQUEST_REVIEW_QUERY_KEYS.inbox });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: REQUEST_REVIEW_QUERY_KEYS.history("req-1") });
+  });
+
+  it("mientras revierte bloquea los controles y no envía la operación dos veces", async () => {
+    let finish!: (result: ReviewApiResult<{ id: string; status: "in_review" }>) => void;
+    revertApproval.mockReturnValue(new Promise((resolve) => { finish = resolve; }));
+    renderWithQuery(<RevertApprovalPanel detail={detail()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Revertir aprobación" }));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Revertir aprobación" }));
+
+    const pending = await screen.findByRole("button", { name: "Revirtiendo..." });
+    expect(pending).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
+    fireEvent.click(pending);
+    expect(revertApproval).toHaveBeenCalledTimes(1);
+
+    finish({ ok: true, data: { id: "req-1", status: "in_review" } });
+    expect(await screen.findByRole("status")).toHaveTextContent("volvió a revisión manual");
+  });
+
+  it("tras un error de conexión permite reintentar y limpia el aviso al lograrlo", async () => {
+    revertApproval
+      .mockResolvedValueOnce({ ok: false, status: 0, message: "No se pudo conectar con el servidor. Inténtalo de nuevo." })
+      .mockResolvedValueOnce({ ok: true, data: { id: "req-1", status: "in_review" } });
+    renderWithQuery(<RevertApprovalPanel detail={detail()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Revertir aprobación" }));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Revertir aprobación" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo conectar con el servidor");
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: "Revertir aprobación" }));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Revertir aprobación" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("volvió a revisión manual");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(revertApproval).toHaveBeenCalledTimes(2);
   });
 });
 
