@@ -39,7 +39,8 @@ describe("PersonalDataField", () => {
     render(<PersonalDataField id="firstName" label="Nombres" />);
 
     const input = screen.getByLabelText("Nombres");
-    expect(input).toHaveClass("h-10", "2xl:h-12", "2xl:text-base", "rounded-md", "border-border", "focus-visible:border-accent");
+    expect(input).toHaveClass("h-11", "rounded-md", "border-border", "focus-visible:border-accent");
+    expect(input.className).not.toMatch(/2xl:/);
     expect(input).not.toHaveClass("h-8");
   });
 
@@ -72,7 +73,7 @@ describe("PersonalDataField", () => {
 
     const input = screen.getByLabelText("Correo");
     const error = screen.getByText("El correo es obligatorio");
-    expect(error).toHaveClass("text-destructive");
+    expect(error).toHaveClass("text-danger");
     expect(input).toHaveAttribute("aria-invalid", "true");
     expect(input.getAttribute("aria-describedby")).toBe(`email-help ${error.id}`);
   });
