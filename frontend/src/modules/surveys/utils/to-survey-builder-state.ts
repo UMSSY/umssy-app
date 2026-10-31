@@ -1,3 +1,4 @@
+import { ALL_CAREERS_VALUE } from "../constants/survey-builder.constants";
 import type { SurveyBuilderState } from "../types/survey-builder.types";
 import type { SurveyDetail } from "../types/survey.types";
 import { toSurveyAcademicPeriod } from "./survey-academic-periods";
@@ -15,7 +16,8 @@ export function toSurveyBuilderState(survey: SurveyDetail): SurveyBuilderState {
   return {
     title: survey.title ?? "",
     description: survey.description ?? "",
-    careerId: survey.career?.id ?? "",
+    careerId: survey.career?.id ?? (survey.targetsAllCareers ? ALL_CAREERS_VALUE : ""),
+    targetAudience: survey.targetAudience ?? "",
     academicPeriod: toSurveyAcademicPeriod(survey.academicPeriod),
     opensAt: toDateValueFromIso(survey.opensAt),
     closesAt: toDateValueFromIso(survey.closesAt),
