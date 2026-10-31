@@ -49,7 +49,6 @@ export class SurveysRepository {
         title: { equals: title, mode: 'insensitive' },
         careerId,
         academicPeriod,
-        // Una encuesta cerrada no reserva su título: permite lanzar un nuevo ciclo con el mismo nombre.
         OR: [{ status: { title: SurveyStatus.DRAFT } }, { closesAt: null }, { closesAt: { gte: now } }],
         ...(excludedId ? { id: { not: excludedId } } : {}),
       },
