@@ -46,7 +46,8 @@ export interface Message {
   attachments?: MessageAttachment[];
 }
 
-export interface Conversation {
+export interface DirectConversation {
+  eventId?: never;
   id: string;
   contact: UserSummary;
   lastMessage?: LastMessage | null;
@@ -54,6 +55,14 @@ export interface Conversation {
   updatedAt: string;
   isBlockedByMe?: boolean;
 }
+
+export interface EventConversation extends Omit<DirectConversation, 'contact' | 'eventId'> {
+  eventId: string;
+  eventTitle?: string;
+  contact?: never;
+}
+
+export type Conversation = DirectConversation | EventConversation;
 
 export type ConversationFilter = 'all' | 'unread';
 

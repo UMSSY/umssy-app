@@ -116,7 +116,7 @@ export function useConversations() {
 
       list = list.filter((item) => {
         const normalizedName = (
-          item.contact?.fullName || ""
+          (item.eventId ? item.eventTitle : item.contact?.fullName) || ""
         )
           .toLowerCase()
           .normalize("NFD")
@@ -235,7 +235,7 @@ export function useConversations() {
           unreadCount: newUnread,
           lastMessage: {
             id: `msg-${Date.now()}`,
-            senderId: item.contact.id,
+            senderId: item.contact?.id ?? '',
             content: newContent,
             isAttachment: false,
             createdAt: timestamp,

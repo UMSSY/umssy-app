@@ -22,7 +22,11 @@ export function ConversationItem({
   isSelected,
   onSelect,
 }: ConversationItemProps) {
-  const { contact, lastMessage, unreadCount } = conversation;
+  const { lastMessage, unreadCount } = conversation;
+  const contact = conversation.eventId
+    ? { fullName: conversation.eventTitle ?? 'Chat del evento', avatarUrl: null, isOnline: false }
+    : conversation.contact;
+  if (!contact) return null;
   const hasUnread = unreadCount > 0;
 
   const renderMessagePreview = () => {

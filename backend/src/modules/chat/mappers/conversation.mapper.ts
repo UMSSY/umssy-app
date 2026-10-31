@@ -1,38 +1,29 @@
+import { UserNotFoundException } from '../exceptions/index.js';
 import { Injectable } from '@nestjs/common';
 import type { ConversationResponse } from '../responses/conversation.response.js';
 
-export interface RawConversationMessage {
-  id: string;
-  senderId: string;
-  content: string | null;
-  sentAt: Date;
-}
-
-export interface RawConversationUser {
-  id: string;
-  firstName: string;
-  lastName: string;
-  photoUrl?: Uint8Array | null;
-}
-
-export interface RawConversationEvent {
-  id: string;
-  title: string;
-}
-
-export interface RawConversationRecord {
-  id: string;
-  userAId: string | null;
-  userBId: string | null;
-  updatedAt: Date;
-  userA: RawConversationUser | null;
-  userB: RawConversationUser | null;
-  messages: RawConversationMessage[];
-  event?: RawConversationEvent | null;
-}
+import type { RawConversationMessage } from '../types/raw-conversation-message.types.js';
+import type { RawConversationUser } from '../types/raw-conversation-user.types.js';
+import type { RawConversationRecord } from '../types/raw-conversation-record.types.js';
 
 @Injectable()
 export class ConversationMapper {
+  private toLastMessage(
+    message?: RawConversationMessage,
+  ): ConversationResponse['lastMessage'] {
+    if (!message) return null;
+    const content = message.content ?? '';
+    const isAttachment = content.startsWith('[Archivo] ');
+    return {
+      id: message.id,
+      senderId: message.senderId,
+      content: isAttachment ? content.slice(10) : content,
+      isAttachment,
+      attachmentType: isAttachment ? 'file' : null,
+      createdAt: message.sentAt.toISOString(),
+    };
+  }
+
   toAvatarUrl(photo?: Uint8Array | null): string | null {
     if (!photo || photo.length === 0) return null;
     return `data:image/jpeg;base64,${Buffer.from(photo).toString('base64')}`;
@@ -41,25 +32,12 @@ export class ConversationMapper {
   toEventConversationResponse(
     conversation: RawConversationRecord,
   ): ConversationResponse {
-    const lastMessage = conversation.messages[0];
-    const safeContent = lastMessage?.content ?? '';
-    const isAttachment = Boolean(safeContent.startsWith('[Archivo] '));
-    const content = isAttachment ? safeContent.slice(10) : safeContent;
-    const attachmentType = isAttachment ? ('file' as const) : null;
-
+    if (!conversation.event) throw new UserNotFoundException();
     return {
       id: conversation.id,
-      eventId: conversation.event?.id,
-      lastMessage: lastMessage
-        ? {
-            id: lastMessage.id,
-            senderId: lastMessage.senderId,
-            content,
-            isAttachment,
-            attachmentType,
-            createdAt: lastMessage.sentAt.toISOString(),
-          }
-        : null,
+      eventId: conversation.event.id,
+      eventTitle: conversation.event.title,
+      lastMessage: this.toLastMessage(conversation.messages[0]),
       unreadCount: 0,
       isBlockedByMe: false,
       updatedAt: conversation.updatedAt.toISOString(),
@@ -73,12 +51,8 @@ export class ConversationMapper {
     unreadCount: number;
     isBlockedByMe: boolean;
   }): ConversationResponse {
-    const { conversation, contact, isOnline, unreadCount, isBlockedByMe } = params;
-    const lastMessage = conversation.messages[0];
-    const safeContent = lastMessage?.content ?? '';
-    const isAttachment = safeContent.startsWith('[Archivo] ');
-    const content = isAttachment ? safeContent.slice(10) : safeContent;
-    const attachmentType = isAttachment ? ('file' as const) : null;
+    const { conversation, contact, isOnline, unreadCount, isBlockedByMe } =
+      params;
     const avatarUrl = this.toAvatarUrl(contact.photoUrl);
 
     return {
@@ -89,16 +63,7 @@ export class ConversationMapper {
         avatarUrl,
         isOnline,
       },
-      lastMessage: lastMessage
-        ? {
-            id: lastMessage.id,
-            senderId: lastMessage.senderId,
-            content,
-            isAttachment,
-            attachmentType,
-            createdAt: lastMessage.sentAt.toISOString(),
-          }
-        : null,
+      lastMessage: this.toLastMessage(conversation.messages[0]),
       unreadCount,
       isBlockedByMe,
       updatedAt: conversation.updatedAt.toISOString(),

@@ -1,7 +1,7 @@
-export interface ConversationResponse {
+interface ConversationBaseResponse {
   id: string;
-  eventId?: string;
-  contact?: {
+
+  contact: {
     id: string;
     fullName: string;
     avatarUrl: string | null;
@@ -19,3 +19,18 @@ export interface ConversationResponse {
   isBlockedByMe: boolean;
   updatedAt: string;
 }
+export interface DirectConversationResponse extends ConversationBaseResponse {
+  eventId?: never;
+}
+
+export interface EventConversationResponse extends Omit<
+  ConversationBaseResponse,
+  'contact'
+> {
+  eventId: string;
+  eventTitle: string;
+  contact?: never;
+}
+
+export type ConversationResponse =
+  DirectConversationResponse | EventConversationResponse;

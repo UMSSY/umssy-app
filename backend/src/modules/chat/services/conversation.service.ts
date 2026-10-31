@@ -7,7 +7,8 @@ import { ConnectionRequestRepository } from '../repositories/connection-request.
 
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
-import { ConversationMapper, type RawConversationRecord } from '../mappers/conversation.mapper.js';
+import { ConversationMapper } from '../mappers/conversation.mapper.js';
+import type { RawConversationRecord } from '../types/raw-conversation-record.types.js';
 
 import {
   InactiveUserException,
