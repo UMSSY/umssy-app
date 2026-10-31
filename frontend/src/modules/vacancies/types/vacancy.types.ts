@@ -18,14 +18,14 @@ export interface PublishedJobOffer {
 
 export interface Vacancy {
   id: string;
-  cargo: string;
-  empresa: string;
-  descripcion: string;
-  requisitos: string[];
-  salario: string;
-  modalidad: string;
-  tipoContrato: string;
-  idiomas: string;
-  vacantes: number;
-  ubicacionUrl: string;
+  title: string;
+  companyName: string;
+  description: string;
+  requirements: string[];
+  salary: string;
+  modality: string;
+  contractType: string;
+  languages: string;
+  positionsAvailable: number;
+  locationUrl: string;
 }

@@ -19,7 +19,7 @@ const getMine = vi.mocked(jobApplicationService.getMine);
 
 const VACANCIES = [
   buildVacancy(),
-  buildVacancy({ id: "7c3e9a10-1d2b-4f5a-9c8e-2b4d6f8a0c11", cargo: "Analista de Datos", empresa: "Datos SRL", requisitos: ["SQL"] }),
+  buildVacancy({ id: "7c3e9a10-1d2b-4f5a-9c8e-2b4d6f8a0c11", title: "Analista de Datos", companyName: "Datos SRL", requirements: ["SQL"] }),
 ];
 
 function setRole(roleTag: string) {
