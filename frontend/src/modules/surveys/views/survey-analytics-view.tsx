@@ -58,12 +58,23 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: SURVEY_STATISTICS_SUMMARY_SKELETONS }).map((_, i) => (
-              <Skeleton key={i} className="h-24 rounded-xl" />
+              <div key={i} className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 shadow-xs">
+                <Skeleton className="size-11 shrink-0 rounded-lg bg-border" />
+                <div className="flex flex-1 flex-col gap-2">
+                  <Skeleton className="h-3 w-24 bg-border" />
+                  <Skeleton className="h-6 w-12 bg-border" />
+                </div>
+              </div>
             ))}
           </div>
           <div className="flex flex-col gap-4">
             {Array.from({ length: SURVEY_STATISTICS_QUESTION_SKELETONS }).map((_, i) => (
-              <Skeleton key={i} className="h-48 rounded-xl" />
+              <div key={i} className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-xs">
+                <Skeleton className="h-4 w-2/3 bg-border" />
+                <Skeleton className="h-3 w-full bg-border" />
+                <Skeleton className="h-3 w-5/6 bg-border" />
+                <Skeleton className="h-3 w-3/4 bg-border" />
+              </div>
             ))}
           </div>
         </div>
@@ -89,14 +100,25 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
   }
 
   const careerName = statistics.career?.title ?? "Todas las carreras";
-  const period = statistics.academicPeriod ?? "Sin gestión";
 
   return (
     <WorkspacePage
-      title={`Analíticas: ${statistics.title}`}
-      description={`${careerName} · Gestión ${period} · ${statistics.questions.length} preguntas`}
+      title={`Analíticas de ${statistics.title}`}
+      description={`${
+        statistics.questions.length === 1 ? "Resultados de 1 pregunta" : `Resultados de las ${statistics.questions.length} preguntas`
+      }: ${careerName}`}
       actions={
         <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => void refetch()}
+            className="cursor-pointer gap-1.5 text-xs text-ink-soft hover:text-ink"
+          >
+            <RefreshCw className="size-3.5" aria-hidden="true" />
+            Actualizar
+          </Button>
           <Button
             type="button"
             size="sm"
@@ -107,24 +129,14 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
             {isGeneratingPdf ? (
               <>
                 <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                Generando PDF...
+                Exportando PDF...
               </>
             ) : (
               <>
                 <Download className="size-3.5" aria-hidden="true" />
-                Generar PDF
+                Exportar PDF
               </>
             )}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => void refetch()}
-            className="cursor-pointer gap-1.5 text-xs text-ink-soft hover:text-ink"
-          >
-            <RefreshCw className="size-3.5" aria-hidden="true" />
-            Actualizar
           </Button>
         </div>
       }

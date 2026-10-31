@@ -459,6 +459,7 @@ export const ModelName = {
   JobApplication: 'JobApplication',
   SurveyStatus: 'SurveyStatus',
   SurveyQuestionType: 'SurveyQuestionType',
+  SurveyTargetAudience: 'SurveyTargetAudience',
   Survey: 'Survey',
   SurveyQuestion: 'SurveyQuestion',
   SurveyQuestionOption: 'SurveyQuestionOption',
@@ -485,7 +486,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -5077,6 +5078,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SurveyTargetAudience: {
+      payload: Prisma.$SurveyTargetAudiencePayload<ExtArgs>
+      fields: Prisma.SurveyTargetAudienceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SurveyTargetAudienceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyTargetAudiencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SurveyTargetAudienceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyTargetAudiencePayload>
+        }
+        findFirst: {
+          args: Prisma.SurveyTargetAudienceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyTargetAudiencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SurveyTargetAudienceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyTargetAudiencePayload>
+        }
+        findMany: {
+          args: Prisma.SurveyTargetAudienceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyTargetAudiencePayload>[]
+        }
+        create: {
+          args: Prisma.SurveyTargetAudienceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyTargetAudiencePayload>
+        }
+        createMany: {
+          args: Prisma.SurveyTargetAudienceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SurveyTargetAudienceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyTargetAudiencePayload>[]
+        }
+        delete: {
+          args: Prisma.SurveyTargetAudienceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyTargetAudiencePayload>
+        }
+        update: {
+          args: Prisma.SurveyTargetAudienceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyTargetAudiencePayload>
+        }
+        deleteMany: {
+          args: Prisma.SurveyTargetAudienceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SurveyTargetAudienceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SurveyTargetAudienceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyTargetAudiencePayload>[]
+        }
+        upsert: {
+          args: Prisma.SurveyTargetAudienceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SurveyTargetAudiencePayload>
+        }
+        aggregate: {
+          args: Prisma.SurveyTargetAudienceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSurveyTargetAudience>
+        }
+        groupBy: {
+          args: Prisma.SurveyTargetAudienceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SurveyTargetAudienceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SurveyTargetAudienceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SurveyTargetAudienceCountAggregateOutputType> | number
+        }
+      }
+    }
     Survey: {
       payload: Prisma.$SurveyPayload<ExtArgs>
       fields: Prisma.SurveyFieldRefs
@@ -6748,12 +6823,25 @@ export const SurveyQuestionTypeScalarFieldEnum = {
 export type SurveyQuestionTypeScalarFieldEnum = (typeof SurveyQuestionTypeScalarFieldEnum)[keyof typeof SurveyQuestionTypeScalarFieldEnum]
 
 
+export const SurveyTargetAudienceScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyTargetAudienceScalarFieldEnum = (typeof SurveyTargetAudienceScalarFieldEnum)[keyof typeof SurveyTargetAudienceScalarFieldEnum]
+
+
 export const SurveyScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
   careerId: 'careerId',
+  targetsAllCareers: 'targetsAllCareers',
   academicPeriod: 'academicPeriod',
+  targetAudienceId: 'targetAudienceId',
   opensAt: 'opensAt',
   closesAt: 'closesAt',
   statusId: 'statusId',
@@ -7261,6 +7349,7 @@ export type GlobalOmitConfig = {
   jobApplication?: Prisma.JobApplicationOmit
   surveyStatus?: Prisma.SurveyStatusOmit
   surveyQuestionType?: Prisma.SurveyQuestionTypeOmit
+  surveyTargetAudience?: Prisma.SurveyTargetAudienceOmit
   survey?: Prisma.SurveyOmit
   surveyQuestion?: Prisma.SurveyQuestionOmit
   surveyQuestionOption?: Prisma.SurveyQuestionOptionOmit

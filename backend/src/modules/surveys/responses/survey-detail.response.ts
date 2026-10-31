@@ -1,6 +1,7 @@
 import type {
   SurveyQuestionTypeValue,
   SurveyDisplayStatusValue,
+  SurveyTargetAudienceValue,
 } from '../types/survey.enum.js';
 import type { CareerResponse } from './career.response.js';
 
@@ -25,10 +26,13 @@ export interface SurveyDetailResponse {
   description: string | null;
   status: SurveyDisplayStatusValue;
   career?: CareerResponse | null;
+  targetsAllCareers?: boolean;
   academicPeriod: string | null;
+  targetAudience: SurveyTargetAudienceValue | null;
   opensAt: string | null;
   closesAt: string | null;
   hasAnswered?: boolean;
   isExpired?: boolean;
+  responseCount?: number;
   questions: SurveyDetailQuestionResponse[];
 }
