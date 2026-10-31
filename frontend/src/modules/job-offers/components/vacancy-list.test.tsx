@@ -1,4 +1,4 @@
-import { act, cleanup, screen, waitFor, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -210,5 +210,38 @@ describe("VacancyList details", () => {
 
     expect(await screen.findByText("Enlace no disponible")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Abrir ubicación" })).not.toBeInTheDocument();
+  });
+  it("mantener Tab presionado no saca el foco del detalle ni abre otro diálogo", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(jobOffersService, "getByCompanyAndId").mockResolvedValue(OFFERS[1]);
+
+    renderWithQuery(<VacancyList />);
+    await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
+    const dialog = await screen.findByRole("dialog");
+    await within(dialog).findByText("TypeScript");
+
+    for (let press = 0; press < 25; press += 1) {
+      await user.tab();
+      expect(dialog.contains(document.activeElement)).toBe(true);
+    }
+    await user.keyboard("{Enter}");
+
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+  });
+
+  it("no abre la confirmación de eliminar mientras el detalle está abierto", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(jobOffersService, "getByCompanyAndId").mockResolvedValue(OFFERS[1]);
+
+    renderWithQuery(<VacancyList />);
+    await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
+    await screen.findByText("TypeScript");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Eliminar vacante Ingeniero Backend", hidden: true }),
+    );
+
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    expect(screen.queryByText("¿Estás seguro de eliminar esta vacante?")).not.toBeInTheDocument();
   });
 });

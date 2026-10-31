@@ -19,6 +19,7 @@ import {
 import { useJobOfferDetails } from "../hooks/use-job-offer-details";
 import type { JobOfferDetailsDialogProps } from "../types/job-offer-details-dialog-props.types";
 import { formatVacancyCount } from "../utils/format-vacancy-count";
+import { trapTabFocus } from "../utils/trap-tab-focus";
 import { JobOfferHighlights } from "./job-offer-highlights";
 
 const SECTION_TITLE_CLASSES = "mb-1 text-sm font-semibold text-ink";
@@ -47,6 +48,7 @@ export function JobOfferDetailsDialog({
     <Dialog open={status !== "error"} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
       <DialogContent
         showCloseButton={false}
+        onKeyDown={trapTabFocus}
         className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 p-0 sm:max-w-2xl"
       >
         <header className="flex items-center justify-between gap-4 border-b border-border px-5 py-3">

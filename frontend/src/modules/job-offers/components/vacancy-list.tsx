@@ -70,6 +70,18 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
     setPage(1);
   };
 
+  // Solo puede haber un diálogo abierto: evita que una acción del fondo abra otro encima.
+  const isAnyDialogOpen =
+    selectedOfferId !== null || offerToDelete !== null || offerToReopen !== null;
+
+  const openDetails = (jobOfferId: string) => {
+    if (!isAnyDialogOpen) setSelectedOfferId(jobOfferId);
+  };
+
+  const openDeleteDialog = (offer: JobOffer) => {
+    if (!isAnyDialogOpen) setOfferToDelete(offer);
+  };
+
   const closeDeleteDialog = () => {
     if (!deletion.isPending) setOfferToDelete(null);
   };
@@ -83,6 +95,7 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
   };
 
   const openReopenDialog = (jobOfferId: string) => {
+    if (isAnyDialogOpen) return;
     setOfferToReopen(offers.find((offer) => offer.id === jobOfferId) ?? null);
   };
 
@@ -172,10 +185,10 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
               <VacancyCard
                 key={offer.id}
                 offer={offer}
-                onDetails={setSelectedOfferId}
+                onDetails={openDetails}
                 showStatus={isHistory}
                 onReopen={isHistory ? openReopenDialog : undefined}
-                onDelete={setOfferToDelete}
+                onDelete={openDeleteDialog}
               />
             ))}
           </ul>

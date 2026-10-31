@@ -93,7 +93,7 @@ describe("InformationStep", () => {
     expect(fireEvent.keyDown(input(/Título del puesto/), { key: "b" })).toBe(false);
   });
 
-  it("solo admite dígitos en el número de vacantes sin recortar el valor", () => {
+  it("solo admite dígitos en el número de vacantes", () => {
     const { updateField } = renderStep();
     const count = input(/Número de vacantes/);
 
@@ -108,6 +108,17 @@ describe("InformationStep", () => {
 
     fireEvent.change(count, { target: { value: "1a2" } });
     expect(updateField).toHaveBeenLastCalledWith("vacancyCount", "12");
+  });
+
+  it("limita el número de vacantes a 4 dígitos aunque se pegue un valor enorme", () => {
+    const { updateField } = renderStep();
+    const count = input(/Número de vacantes/);
+
+    expect(count).toHaveAttribute("maxLength", "4");
+    fireEvent.change(count, {
+      target: { value: "42342342342342342342342342342342gr45345345345345" },
+    });
+    expect(updateField).toHaveBeenLastCalledWith("vacancyCount", "4234");
   });
 
   it("marca en tiempo real un número de vacantes mayor a 500", () => {

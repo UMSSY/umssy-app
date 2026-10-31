@@ -10,6 +10,7 @@ export async function seedJobOfferStatusesCatalog(
       { title: 'Pausada' },
       { title: 'Cerrada' },
       { title: 'Archivada' },
+      { title: 'Eliminada' },
     ],
     skipDuplicates: true,
   });

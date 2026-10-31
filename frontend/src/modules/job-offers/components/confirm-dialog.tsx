@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { ConfirmDialogProps } from "../types/confirm-dialog-props.types";
+import { trapTabFocus } from "../utils/trap-tab-focus";
 
 export function ConfirmDialog({
   isOpen,
@@ -31,7 +32,7 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent showCloseButton={false}>
+      <DialogContent showCloseButton={false} onKeyDown={trapTabFocus}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
