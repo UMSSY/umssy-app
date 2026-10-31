@@ -89,12 +89,11 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
   }
 
   const careerName = statistics.career?.title ?? "Todas las carreras";
-  const period = statistics.academicPeriod ?? "Sin gestión";
 
   return (
     <WorkspacePage
       title={`Analíticas de ${statistics.title}`}
-      description={`${careerName} · Gestión ${period} · ${statistics.questions.length} preguntas`}
+      description={`Resultados de las ${statistics.questions.length} preguntas: ${careerName}`}
       actions={
         <div className="flex items-center gap-2">
           <Button
