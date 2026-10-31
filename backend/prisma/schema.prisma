@@ -150,27 +150,26 @@ model User {
   eventRegistrations   EventRegistration[]
   checkedInAttendances EventAttendance[]
 
-  exportHistories        AdminExportHistory[] @relation("AdminExportHistories")
-  openedAccessRequests   AccessRequest[]      @relation("AccessRequestOpenedBy")
-  reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
-  approvedAccessRequest  AccessRequest?       @relation("ApprovedGraduateAccount")
-  mentorSlotOffers       MentorSlotOffer[]
-  mentorParticipationRequests MentorParticipationRequest[]
+  exportHistories                 AdminExportHistory[]             @relation("AdminExportHistories")
+  openedAccessRequests            AccessRequest[]                  @relation("AccessRequestOpenedBy")
+  reviewedAccessRequests          AccessRequest[]                  @relation("AccessRequestReviewedBy")
+  approvedAccessRequest           AccessRequest?                   @relation("ApprovedGraduateAccount")
+  mentorSlotOffers                MentorSlotOffer[]
+  mentorParticipationRequests     MentorParticipationRequest[]
   mentorParticipationAttemptLimit MentorParticipationAttemptLimit?
-  createdSurveys         Survey[]             @relation("SurveyCreatedBy")
-  surveyResponses        SurveyResponse[]     @relation("SurveyRespondent")
+  createdSurveys                  Survey[]                         @relation("SurveyCreatedBy")
+  surveyResponses                 SurveyResponse[]                 @relation("SurveyRespondent")
 
   conversationsAsUserA Conversation[]            @relation("UserAConversations")
   conversationsAsUserB Conversation[]            @relation("UserBConversations")
   chatMessages         Message[]
   chatParticipants     ConversationParticipant[]
   presence             UserPresence?
-  auditEvents         AuditEvent[]         @relation("AuditEventActor")
-  revertedValidations DocumentValidation[] @relation("DocumentValidationRevertedBy")
+  auditEvents          AuditEvent[]              @relation("AuditEventActor")
+  revertedValidations  DocumentValidation[]      @relation("DocumentValidationRevertedBy")
+  jobApplications      JobApplication[]
 
   @@index([cityId])
-  jobApplications JobApplication[]
-
   @@map("users")
 }
 
@@ -629,13 +628,12 @@ model JobOffer {
   contractType JobOfferContractType @relation(fields: [contractTypeId], references: [id], onDelete: Restrict)
   status       JobOfferStatus       @relation(fields: [statusId], references: [id], onDelete: Restrict)
   skills       JobOfferSkill[]
+  applications JobApplication[]
 
   @@index([companyId])
   @@index([modalityId])
   @@index([contractTypeId])
   @@index([statusId])
-  applications JobApplication[]
-
   @@map("job_offers")
 }
 
@@ -772,7 +770,7 @@ model AccessRequest {
   approvedUser User?                      @relation("ApprovedGraduateAccount", fields: [approvedUserId], references: [id], onDelete: SetNull)
   career       Career                     @relation(fields: [careerId], references: [id], onDelete: Restrict)
 
-  activationOtps ActivationOtp[]
+  activationOtps     ActivationOtp[]
   auditEvents        AuditEvent[]
   documentValidation DocumentValidation?
 
@@ -980,28 +978,44 @@ model SurveyQuestionType {
   @@map("survey_question_types")
 }
 
-model Survey {
-  id             String    @id @default(uuid()) @db.Uuid
-  title          String    @db.VarChar(150)
-  description    String?   @db.VarChar(500)
-  careerId       String?   @map("career_id") @db.Uuid
-  academicPeriod String?   @map("academic_period") @db.VarChar(7)
-  opensAt        DateTime? @map("opens_at") @db.Timestamptz(6)
-  closesAt       DateTime? @map("closes_at") @db.Timestamptz(6)
-  statusId       String    @map("status_id") @db.Uuid
-  createdById    String    @map("created_by_id") @db.Uuid
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+model SurveyTargetAudience {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  career    Career?          @relation(fields: [careerId], references: [id], onDelete: Restrict)
-  status    SurveyStatus     @relation(fields: [statusId], references: [id], onDelete: Restrict)
-  createdBy User             @relation("SurveyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  questions SurveyQuestion[]
-  responses SurveyResponse[]
+  surveys Survey[]
+
+  @@map("survey_target_audiences")
+}
+
+model Survey {
+  id                String    @id @default(uuid()) @db.Uuid
+  title             String    @db.VarChar(150)
+  description       String?   @db.VarChar(500)
+  careerId          String?   @map("career_id") @db.Uuid
+  targetsAllCareers Boolean   @default(false) @map("targets_all_careers")
+  academicPeriod    String?   @map("academic_period") @db.VarChar(7)
+  targetAudienceId  String?   @map("target_audience_id") @db.Uuid
+  opensAt           DateTime? @map("opens_at") @db.Timestamptz(6)
+  closesAt          DateTime? @map("closes_at") @db.Timestamptz(6)
+  statusId          String    @map("status_id") @db.Uuid
+  createdById       String    @map("created_by_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  career         Career?               @relation(fields: [careerId], references: [id], onDelete: Restrict)
+  status         SurveyStatus          @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  targetAudience SurveyTargetAudience? @relation(fields: [targetAudienceId], references: [id], onDelete: Restrict)
+  createdBy      User                  @relation("SurveyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  questions      SurveyQuestion[]
+  responses      SurveyResponse[]
 
   @@index([careerId, academicPeriod])
   @@index([createdById])
   @@index([statusId])
+  @@index([targetAudienceId])
   @@map("surveys")
 }
 

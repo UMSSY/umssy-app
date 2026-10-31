@@ -3,6 +3,7 @@ import { apiClient } from "@/shared/services/api-client";
 import { apiResponse, CAREERS, CREATED_SURVEY, SURVEY_SUMMARIES } from "../testing/survey-fixtures";
 import type { CreateSurveyPayload } from "../types/survey.types";
 import { surveysService } from "./surveys.service";
+import { SURVEY_SAVE_TIMEOUT_MS } from "../constants/surveys-query-keys.constants";
 
 describe("surveysService", () => {
   afterEach(() => {
@@ -14,7 +15,14 @@ describe("surveysService", () => {
     const payload: CreateSurveyPayload = { title: "Encuesta", status: "draft", questions: [] };
 
     await expect(surveysService.createSurvey(payload)).resolves.toEqual(apiResponse(CREATED_SURVEY, 201));
-    expect(post).toHaveBeenCalledWith("/surveys", payload);
+    expect(post).toHaveBeenCalledWith("/surveys", payload, { timeout: SURVEY_SAVE_TIMEOUT_MS });
+  });
+
+  it("inhabilita una encuesta publicada con PATCH /surveys/:id/unpublish", async () => {
+    const patch = vi.spyOn(apiClient, "patch").mockResolvedValue({ data: undefined });
+
+    await expect(surveysService.unpublishSurvey("survey-1")).resolves.toBeUndefined();
+    expect(patch).toHaveBeenCalledWith("/surveys/survey-1/unpublish", undefined, { timeout: SURVEY_SAVE_TIMEOUT_MS });
   });
 
   it("lista encuestas y carreras con GET", async () => {

@@ -13,6 +13,15 @@ export const SURVEY_QUESTION_TYPES = [
 
 export type SurveyQuestionTypeValue = (typeof SURVEY_QUESTION_TYPES)[number];
 
+export const SURVEY_TARGET_AUDIENCES = [
+  'all',
+  'graduates',
+  'students',
+  'mentors',
+] as const;
+
+export type SurveyTargetAudienceValue = (typeof SURVEY_TARGET_AUDIENCES)[number];
+
 export const SurveyStatus = {
   DRAFT: 'draft',
   PUBLISHED: 'published',
@@ -27,3 +36,13 @@ export const SurveyQuestionType = {
 
 export type SurveyQuestionType =
   (typeof SurveyQuestionType)[keyof typeof SurveyQuestionType];
+
+export const SurveyTargetAudience = {
+  ALL: 'all',
+  GRADUATES: 'graduates',
+  STUDENTS: 'students',
+  MENTORS: 'mentors',
+} as const;
+
+export type SurveyTargetAudience =
+  (typeof SurveyTargetAudience)[keyof typeof SurveyTargetAudience];

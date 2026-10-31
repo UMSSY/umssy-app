@@ -15,6 +15,7 @@ const VALID_PUBLISHED = {
   description: 'Esta encuesta nos ayuda a conocer tu situación laboral.',
   careerId: randomUUID(),
   academicPeriod: '2026',
+  targetAudience: 'graduates',
   opensAt: '2026-11-03T04:00:00.000Z',
   closesAt: '2026-12-16T03:59:59.999Z',
   status: 'published',
@@ -114,6 +115,32 @@ describe('createSurveySchema', () => {
       path: 'careerId',
       message: MESSAGES.INVALID_CAREER_ID,
     });
+  });
+
+  it('acepta Todas las carreras como carrera dirigida', () => {
+    const result = parse({ careerId: 'all' });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.careerId).toBe('all');
+  });
+
+  it.each(['all', 'graduates', 'students', 'mentors'])('acepta el público objetivo %s', (targetAudience) => {
+    expect(parse({ targetAudience }).success).toBe(true);
+  });
+
+  it('rechaza un público objetivo desconocido', () => {
+    expect(issues({ targetAudience: 'empresas' })).toContainEqual({
+      path: 'targetAudience',
+      message: MESSAGES.INVALID_TARGET_AUDIENCE,
+    });
+  });
+
+  it('exige el público objetivo al publicar pero no en borrador', () => {
+    expect(issues({ targetAudience: undefined })).toContainEqual({
+      path: 'targetAudience',
+      message: MESSAGES.TARGET_AUDIENCE_REQUIRED,
+    });
+    expect(parse({ targetAudience: null, status: 'draft' }).success).toBe(true);
   });
 
   it.each(['2026', 'Todas'])('acepta la gestión %s', (academicPeriod) => {

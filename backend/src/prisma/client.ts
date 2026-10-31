@@ -322,6 +322,11 @@ export type SurveyStatus = Prisma.SurveyStatusModel
  */
 export type SurveyQuestionType = Prisma.SurveyQuestionTypeModel
 /**
+ * Model SurveyTargetAudience
+ * 
+ */
+export type SurveyTargetAudience = Prisma.SurveyTargetAudienceModel
+/**
  * Model Survey
  * 
  */
@@ -363,16 +368,16 @@ export type AuditEvent = Prisma.AuditEventModel
 export type DocumentValidation = Prisma.DocumentValidationModel
 /**
  * Model MentorIntakeAttempt
- *
+ * 
  */
 export type MentorIntakeAttempt = Prisma.MentorIntakeAttemptModel
 /**
  * Model MentorParticipationSanction
- *
+ * 
  */
 export type MentorParticipationSanction = Prisma.MentorParticipationSanctionModel
 /**
  * Model MentorIntakeOperation
- *
+ * 
  */
 export type MentorIntakeOperation = Prisma.MentorIntakeOperationModel
