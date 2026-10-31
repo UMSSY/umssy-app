@@ -26,3 +26,5 @@ export interface JobOfferResponse {
   skills: JobOfferSkillResponse[];
   applicantsCount: number;
 }
+
+export type PublishedJobOfferResponse = Omit<JobOfferResponse, 'applicantsCount'>;

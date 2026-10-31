@@ -47,6 +47,13 @@ describe('JobOfferMapper', () => {
     });
   });
 
+  it('no incluye la cantidad de postulantes en la respuesta pública', () => {
+    const { applicantsCount: _applicantsCount, ...expected } = mapper.toResponse(RECORD);
+
+    expect(mapper.toPublishedResponse(RECORD)).toEqual(expected);
+    expect(mapper.toPublishedResponse(RECORD)).not.toHaveProperty('applicantsCount');
+  });
+
   it('convierte la fecha de vencimiento a texto ISO', () => {
     const expiresAt = new Date('2026-12-31T00:00:00.000Z');
 
