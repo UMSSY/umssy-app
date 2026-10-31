@@ -11,7 +11,7 @@ export function buildRejectionUrl(grant: DocumentCorrectionGrant): string {
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) {
     throw new RejectionMailContextException();
   }
-  // El correo no va en la URL. El permiso solo está en el fragmento que lee F2.
+  // El correo no va en la URL. El permiso solo viaja en el fragmento.
   url.hash = new URLSearchParams({ correctionToken: grant.token }).toString();
   return url.toString();
 }
