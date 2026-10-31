@@ -125,3 +125,14 @@ export function toActivationCodeSentAuditEvent(source: AccessRequestAuditSource,
     detail: `Código de activación enviado a ${maskEmail(email)}.`,
   };
 }
+
+// La evidencia apunta al archivo sustituido para conservarlo incluso si no había
+// eventos anteriores. El archivo nuevo queda asociado a la solicitud y su ID al evento.
+export function toDocumentReplacedAuditEvent(source: AccessRequestAuditSource, newFileId: string): RecordAuditEventInput {
+  return {
+    ...baseEvent(source),
+    action: AUDIT_ACTION.DOCUMENT_REPLACED,
+    actor: { id: null, name: fullName(source), role: AUDIT_ACTOR_ROLE.GRADUATE },
+    detail: `Documento anterior sustituido. Nuevo documento: ${newFileId}.`,
+  };
+}

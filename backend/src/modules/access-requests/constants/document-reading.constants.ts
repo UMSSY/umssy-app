@@ -9,6 +9,7 @@ export const OCR_ENGINE_MODE = 1;
 
 // Carpeta temporal donde Tesseract guarda el modelo de idioma descargado (fuera del repositorio)
 export const OCR_CACHE_PATH = join(tmpdir(), 'umssy-ocr');
+export const OCR_TESSERACT_MODEL_PATH = resolve(process.env.OCR_MODEL_DIR ?? 'ocr-models', '4.0.0_best');
 
 // Directorio y archivos de modelos PaddleOCR
 export const PADDLE_MODEL_DIR = resolve(process.env.OCR_MODEL_DIR ?? 'ocr-models', 'paddle');

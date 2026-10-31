@@ -6,6 +6,7 @@ import { rejectAccessRequestSchema } from '../requests/reject-access-request.sch
 import { MAX_REJECTION_REASON_LENGTH } from '../constants/reject-access-request.constants.js';
 import { AccessRequestsService } from '../services/access-requests.service.js';
 import { RejectionNotificationService } from '../services/rejection-notification.service.js';
+import { RejectionMailContextService } from '../mail/rejection-mail-context.service.js';
 
 const messagesOf = (input: unknown) => {
   const result = rejectAccessRequestSchema.safeParse(input);
@@ -32,7 +33,7 @@ describe('RejectionNotificationService', () => {
 
   it('envía el motivo al correo del titulado', async () => {
     const mail = { sendRejection: vi.fn().mockResolvedValue(undefined) };
-    const service = new RejectionNotificationService(mail as any);
+    const service = new RejectionNotificationService(mail as any, new RejectionMailContextService());
 
     await expect(service.notify('ana@umss.test', 'Documento ilegible', 'req-1')).resolves.toBe(true);
     expect(mail.sendRejection).toHaveBeenCalledWith('ana@umss.test', 'Documento ilegible');
@@ -41,7 +42,7 @@ describe('RejectionNotificationService', () => {
   it.each([new Error('smtp caído'), 'texto'])('si el envío falla registra el error y devuelve false (%s)', async (failure) => {
     const logError = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     const mail = { sendRejection: vi.fn().mockRejectedValue(failure) };
-    const service = new RejectionNotificationService(mail as any);
+    const service = new RejectionNotificationService(mail as any, new RejectionMailContextService());
 
     await expect(service.notify('ana@umss.test', 'Motivo', 'req-1')).resolves.toBe(false);
     expect(logError).toHaveBeenCalledOnce();

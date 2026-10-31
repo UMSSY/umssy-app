@@ -1,5 +1,9 @@
 import { readFile } from 'node:fs/promises';
-import { PaddleOcrService, type OrtModule } from 'paddleocr';
+import {
+  PaddleOcrService,
+  type OrtModule,
+  type RecognitionResult,
+} from 'paddleocr';
 import type { PaddleModelFiles, PaddleOcrInput } from './paddle-ocr.types.js';
 
 export type { PaddleModelFiles, PaddleOcrInput } from './paddle-ocr.types.js';
@@ -7,7 +11,7 @@ export type { PaddleModelFiles, PaddleOcrInput } from './paddle-ocr.types.js';
 export async function createPaddleWorker(files: PaddleModelFiles) {
   const ort = await import('onnxruntime-node').catch((cause: unknown) => {
     throw new Error(
-      'PaddleOCR requires onnxruntime-node on a supported platform; node:22-alpine is not supported. Use Tesseract or a glibc image.',
+      'PaddleOCR requires onnxruntime-node on a supported platform; node:22-alpine is not supported. Use a supported glibc image.',
       { cause },
     );
   });
@@ -38,7 +42,7 @@ export async function createPaddleWorker(files: PaddleModelFiles) {
 export async function recognizeWithPaddle(
   worker: PaddleOcrService,
   input: PaddleOcrInput,
-): Promise<{ text: string; confidence: number }> {
+): Promise<{ text: string; confidence: number; regions: RecognitionResult[] }> {
   const data =
     input.data instanceof Uint8Array && !(input.data instanceof Uint8ClampedArray)
       ? input.data
@@ -56,7 +60,7 @@ export async function recognizeWithPaddle(
   const text = results.map((item) => item.text).filter(Boolean).join('\n');
   const confidence =
     results.length > 0
-      ? results.reduce((sum, item) => sum + item.confidence, 0) / results.length
+      ? results.reduce((sum, item) => sum + (Number.isFinite(item.confidence) ? Math.min(1, Math.max(0, item.confidence)) : 0), 0) / results.length
       : 0;
-  return { text, confidence };
+  return { text, confidence, regions: results };
 }

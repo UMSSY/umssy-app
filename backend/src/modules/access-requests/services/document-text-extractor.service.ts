@@ -1,155 +1,121 @@
-import { access } from 'node:fs/promises';
-import { Injectable, Logger, type OnModuleDestroy } from '@nestjs/common';
+import { Injectable, type OnModuleDestroy } from '@nestjs/common';
 import * as mupdf from 'mupdf';
 import type { PaddleOcrService } from 'paddleocr';
-import { createWorker, type Worker } from 'tesseract.js';
 import { createPaddleWorker, recognizeWithPaddle } from '../../../common/ocr/paddle-ocr.js';
 import type { FileContent } from '../../files/types/file.types.js';
 import {
-  MIN_PDF_TEXT_LENGTH,
-  OCR_CACHE_PATH,
-  OCR_ENGINE_MODE,
-  OCR_LANGUAGE,
-  PADDLE_DETECTION_MODEL,
-  PADDLE_DICTIONARY,
-  PADDLE_PRESET,
-  PADDLE_RECOGNITION_MODEL,
-  PDF_MIME_TYPE,
-  PDF_RENDER_SCALE,
-  PDF_TEXT_CONFIDENCE,
+  PADDLE_DETECTION_MODEL, PADDLE_DICTIONARY, PADDLE_PRESET,
+  PADDLE_RECOGNITION_MODEL, PDF_MIME_TYPE, PDF_RENDER_SCALE,
 } from '../constants/document-reading.constants.js';
 import type { DocumentText } from '../types/document-text.types.js';
 
 @Injectable()
 export class DocumentTextExtractorService implements OnModuleDestroy {
-  private readonly logger = new Logger(DocumentTextExtractorService.name);
-  private paddleWorker: Promise<PaddleOcrService | null> | null = null;
-  private tesseractWorker: Promise<Worker> | null = null;
+  private paddleWorker: Promise<PaddleOcrService> | null = null;
+  private queue: Promise<unknown> = Promise.resolve();
+  private closing = false;
 
-  async extract(file: FileContent): Promise<DocumentText> {
-    if (file.mimeType === PDF_MIME_TYPE) {
-      const embedded = this.readPdfText(file.content);
-      if (embedded.replace(/\s/g, '').length >= MIN_PDF_TEXT_LENGTH) {
-        return { text: embedded, confidence: PDF_TEXT_CONFIDENCE };
+  extract(file: FileContent): Promise<DocumentText> {
+    if (this.closing) return Promise.reject(new Error('OCR service is shutting down'));
+    const job = this.queue.then(async () => {
+      if (process.env.OCR_ENGINE && process.env.OCR_ENGINE !== 'paddle') {
+        throw new Error('This document flow requires OCR_ENGINE=paddle');
       }
-      // PDF escaneado: la primera página se convierte en imagen y se lee con OCR
-      return this.recognizePdfPage(file.content);
-    }
-    return this.recognizeImage(file.content);
+      const worker = await this.getPaddleWorker();
+      try {
+        return file.mimeType === PDF_MIME_TYPE
+          ? await this.recognizePdf(worker, file.content)
+          : await this.recognizeImage(worker, file.content);
+      } catch (error) {
+        this.paddleWorker = null;
+        await worker.destroy().catch(() => undefined);
+        throw error;
+      }
+    });
+    this.queue = job.then(() => undefined, () => undefined);
+    return job;
   }
 
   async onModuleDestroy() {
-    if (this.paddleWorker) {
-      try {
-        const paddle = await this.paddleWorker;
-        await paddle?.destroy?.();
-      } catch (error) {
-        this.logger.warn(`Error al destruir worker de PaddleOCR: ${(error as Error).message}`);
-      }
-    }
-    if (this.tesseractWorker) {
-      try {
-        const tesseract = await this.tesseractWorker;
-        await tesseract.terminate();
-      } catch (error) {
-        this.logger.warn(`Error al destruir worker de Tesseract: ${(error as Error).message}`);
-      }
-    }
+    this.closing = true;
+    await this.queue;
+    const pending = this.paddleWorker;
+    this.paddleWorker = null;
+    if (pending) await (await pending).destroy();
   }
 
-  private readPdfText(content: Buffer): string {
-    const document = mupdf.Document.openDocument(content, PDF_MIME_TYPE);
-    const pages: string[] = [];
-    for (let index = 0; index < document.countPages(); index += 1) {
-      pages.push(document.loadPage(index).toStructuredText('preserve-whitespace').asText());
-    }
-    return pages.join('\n');
-  }
-
-  private async recognizeImage(imageBuffer: Buffer): Promise<DocumentText> {
-    const paddle = await this.getPaddleWorker();
-    if (paddle) {
-      try {
-        const image = new mupdf.Image(imageBuffer);
-        const pixmap = image.toPixmap().convertToColorSpace(mupdf.ColorSpace.DeviceRGB, false);
-        return await recognizeWithPaddle(paddle, {
-          width: pixmap.getWidth(),
-          height: pixmap.getHeight(),
-          data: pixmap.getPixels(),
-        });
-      } catch (error) {
-        this.logger.warn(`PaddleOCR falló en imagen, aplicando fallback a Tesseract: ${(error as Error).message}`);
-      }
-    }
-    return this.recognizeWithTesseract(imageBuffer);
-  }
-
-  private async recognizePdfPage(content: Buffer): Promise<DocumentText> {
-    const document = mupdf.Document.openDocument(content, PDF_MIME_TYPE);
-    const matrix = mupdf.Matrix.scale(PDF_RENDER_SCALE, PDF_RENDER_SCALE);
-    const pixmap = document.loadPage(0).toPixmap(matrix, mupdf.ColorSpace.DeviceRGB, false, true);
-
-    const paddle = await this.getPaddleWorker();
-    if (paddle) {
-      try {
-        const rgbPixmap = pixmap.convertToColorSpace(mupdf.ColorSpace.DeviceRGB, false);
-        return await recognizeWithPaddle(paddle, {
-          width: rgbPixmap.getWidth(),
-          height: rgbPixmap.getHeight(),
-          data: rgbPixmap.getPixels(),
-        });
-      } catch (error) {
-        this.logger.warn(`PaddleOCR falló en página PDF, aplicando fallback a Tesseract: ${(error as Error).message}`);
-      }
-    }
-    return this.recognizeWithTesseract(Buffer.from(pixmap.asPNG()));
-  }
-
-  private async getPaddleWorker(): Promise<PaddleOcrService | null> {
-    if (this.paddleWorker !== null) {
-      return this.paddleWorker;
-    }
-
-    this.paddleWorker = (async () => {
-      try {
-        const [detExists, recExists, dictExists] = await Promise.all([
-          this.fileExists(PADDLE_DETECTION_MODEL),
-          this.fileExists(PADDLE_RECOGNITION_MODEL),
-          this.fileExists(PADDLE_DICTIONARY),
-        ]);
-
-        if (!detExists || !recExists || !dictExists) {
-          this.logger.log('Modelos de PaddleOCR no encontrados localmente. Se usará Tesseract como fallback.');
-          return null;
-        }
-
-        return await createPaddleWorker({
-          detection: PADDLE_DETECTION_MODEL,
-          recognition: PADDLE_RECOGNITION_MODEL,
-          dictionary: PADDLE_DICTIONARY,
-          preset: PADDLE_PRESET,
-        });
-      } catch (error) {
-        this.logger.warn(`No se pudo inicializar PaddleOCR: ${(error as Error).message}. Se usará Tesseract.`);
-        return null;
-      }
-    })();
-
-    return this.paddleWorker;
-  }
-
-  private async recognizeWithTesseract(image: Buffer): Promise<DocumentText> {
-    this.tesseractWorker ??= createWorker(OCR_LANGUAGE, OCR_ENGINE_MODE, { cachePath: OCR_CACHE_PATH });
-    const { data } = await (await this.tesseractWorker).recognize(image);
-    return { text: data.text, confidence: data.confidence / 100 };
-  }
-
-  private async fileExists(path: string): Promise<boolean> {
+  private async getPaddleWorker(): Promise<PaddleOcrService> {
+    this.paddleWorker ??= createPaddleWorker({
+      detection: PADDLE_DETECTION_MODEL,
+      recognition: PADDLE_RECOGNITION_MODEL,
+      dictionary: PADDLE_DICTIONARY,
+      preset: PADDLE_PRESET,
+    });
     try {
-      await access(path);
-      return true;
-    } catch {
-      return false;
+      return await this.paddleWorker;
+    } catch (cause) {
+      this.paddleWorker = null;
+      throw new Error('PaddleOCR initialization failed: check models and ONNX Runtime', { cause });
     }
+  }
+
+  private async recognizeImage(worker: PaddleOcrService, content: Buffer): Promise<DocumentText> {
+    const image = new mupdf.Image(content);
+    try {
+      const source = image.toPixmap();
+      try {
+        const rgb = source.convertToColorSpace(mupdf.ColorSpace.DeviceRGB, false);
+        try {
+          return await this.recognizePixmap(worker, rgb, 1);
+        } finally {
+          if (rgb !== source) rgb.destroy();
+        }
+      } finally {
+        source.destroy();
+      }
+    } finally {
+      image.destroy();
+    }
+  }
+
+  private async recognizePdf(worker: PaddleOcrService, content: Buffer): Promise<DocumentText> {
+    const document = mupdf.Document.openDocument(content, PDF_MIME_TYPE);
+    const pages: DocumentText[] = [];
+    try {
+      // Render every page, including mixed PDFs: embedded headers must not hide scanned names.
+      for (let index = 0; index < document.countPages(); index += 1) {
+        const page = document.loadPage(index);
+        try {
+          const pixmap = page.toPixmap(
+            mupdf.Matrix.scale(PDF_RENDER_SCALE, PDF_RENDER_SCALE),
+            mupdf.ColorSpace.DeviceRGB, false, true,
+          );
+          try {
+            pages.push(await this.recognizePixmap(worker, pixmap, index + 1));
+          } finally {
+            pixmap.destroy();
+          }
+        } finally {
+          page.destroy();
+        }
+      }
+    } finally {
+      document.destroy();
+    }
+    const nonempty = pages.filter((page) => page.text.trim());
+    return {
+      engine: 'paddle',
+      text: pages.map((page) => page.text).join('\n'),
+      confidence: nonempty.length ? Math.min(...nonempty.map((page) => page.confidence)) : 0,
+      regions: pages.flatMap((page) => page.regions ?? []),
+    };
+  }
+
+  private async recognizePixmap(worker: PaddleOcrService, pixmap: mupdf.Pixmap, page: number): Promise<DocumentText> {
+    const result = await recognizeWithPaddle(worker, {
+      width: pixmap.getWidth(), height: pixmap.getHeight(),
+      data: Uint8Array.from(pixmap.getPixels()),
+    });
+    return { ...result, engine: 'paddle', regions: result.regions.map((region) => ({ ...region, page })) };
   }
 }

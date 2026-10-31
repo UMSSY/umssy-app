@@ -48,9 +48,9 @@ describe('evaluateDocumentReading', () => {
     expect(evaluation.matchScore).toBeLessThan(20);
   });
 
-  it('CA4: un documento ilegible se rechaza automáticamente', () => {
+  it('un documento ilegible requiere revisión manual', () => {
     const evaluation = evaluateDocumentReading(DECLARED, reading({ confidence: 0.12, fullName: null, career: null, graduationYear: null }));
-    expect(evaluation).toMatchObject({ result: 'auto_rejected', matchScore: 0, reason: 'El documento es ilegible' });
+    expect(evaluation).toMatchObject({ result: 'manual_review', matchScore: 0, reason: 'Documento poco legible' });
   });
 
   it('CA5 y CA6: compara nombre, carrera y año uno a uno; Carnet y Código SIS no se comparan', () => {
@@ -73,4 +73,41 @@ describe('evaluateDocumentReading', () => {
     expect(evaluateDocumentReading(DECLARED, reading({ confidence: 1.7 })).matchScore).toBe(100);
     expect(evaluateDocumentReading(DECLARED, reading({ confidence: -1 })).matchScore).toBe(0);
   });
+});
+
+
+describe('lecturas incompletas y equivalencias controladas', () => {
+  it.each(['Ingeniero de Sistemas', 'Ing. de Sistemas', 'Licenciado en Ingeniería de Sistemas'])('compara %s sin modificar lo leído', (career) => {
+    const result = evaluateDocumentReading(DECLARED, reading({ career }));
+    expect(result.result).toBe('auto_approved');
+    expect(result.fields[1].read).toBe(career);
+  });
+  it('no confunde Informática con Sistemas', () => {
+    expect(evaluateDocumentReading(DECLARED, reading({ career: 'Ingeniería Informática' })).result).toBe('manual_review');
+  });
+  it('compara el nombre completo en orden de apellidos', () => {
+    expect(evaluateDocumentReading(DECLARED, reading({ fullName: 'Quispe Mamani María' })).result).toBe('auto_approved');
+  });
+  it('no aprueba un nombre con palabras adicionales', () => {
+    const result = evaluateDocumentReading(DECLARED, reading({ fullName: 'María Quispe Mamani Rosa' }));
+    expect(result.result).toBe('manual_review');
+    expect(result.fields[0].result).toBe('mismatch');
+  });
+  it('un campo ausente se representa como no comparado', () => {
+    const result = evaluateDocumentReading(DECLARED, reading({ fullName: null }));
+    expect(result.result).toBe('manual_review');
+    expect(result.fields[0]).toMatchObject({ read: null, result: 'not_compared' });
+  });
+  it('un encabezado no reconocido requiere revisión, no rechazo automático', () => {
+    expect(evaluateDocumentReading(DECLARED, reading({ isDiploma: false, documentKind: 'unknown' })).result).toBe('manual_review');
+  });
+  it('una confianza no finita nunca aprueba', () => {
+    expect(evaluateDocumentReading(DECLARED, reading({ confidence: NaN })).result).toBe('manual_review');
+  });
+});
+
+it('admite la denominación de Informática usada por el catálogo del repositorio', () => {
+  const declared = { ...DECLARED, career: 'Licenciatura Ingeniería en Informática' };
+  const result = evaluateDocumentReading(declared, reading({ career: 'Ingeniería Informática' }));
+  expect(result.result).toBe('auto_approved');
 });
