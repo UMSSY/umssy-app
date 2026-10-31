@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { OTP_LENGTH } from "../../constants/account-activation.constants";
 import type { ActivationStatus } from "../../types/account-activation.types";
 import { formatCountdown } from "../../utils/format-countdown";
-import { maskEmail } from "../../utils/mask-email";
-import { FieldError } from "../personal-data/field-error";
-import { OtpInput } from "./otp-input";
+import { maskEmail } from "@/shared/utils/mask-email";
+import { FieldError } from "@/shared/components/field-error";
+import { OtpInput } from "@/shared/components/otp-input";
 
 interface ActivationCodeStepProps {
   email: string;

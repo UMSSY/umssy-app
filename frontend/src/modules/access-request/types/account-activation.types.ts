@@ -1,8 +1,7 @@
-import type { LoginResponse } from "@/modules/auth/types/auth-types";
+import type { LoginResponse } from "@/modules/auth";
 
 export type ActivationState = "no_code" | "ready" | "expired" | "locked" | "activated";
 
-// Respuesta de GET /account-activation/status; los instantes llegan en ISO 8601
 export interface ActivationStatus {
   state: ActivationState;
   serverTime: string;
@@ -12,7 +11,6 @@ export interface ActivationStatus {
   remainingAttempts: number;
 }
 
-// Respuesta de POST /account-activation/resend
 export interface ActivationResend {
   serverTime: string;
   expiresAt: string;
@@ -20,7 +18,6 @@ export interface ActivationResend {
   resendsRemaining: number;
 }
 
-// Razones que el backend informa en data.reason
 export type ActivationReason =
   | "not_found"
   | "already_activated"
@@ -45,11 +42,4 @@ export type ActivationResult<T> = { ok: true; data: T } | ActivationFailure;
 
 export type ActivationSession = LoginResponse;
 
-// Pasos internos de la pantalla: primero el código, luego la contraseña
 export type ActivationStep = "code" | "password";
-
-export interface PasswordRule {
-  id: "length" | "uppercase" | "digit";
-  label: string;
-  met: boolean;
-}

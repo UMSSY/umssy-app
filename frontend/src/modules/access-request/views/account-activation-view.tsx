@@ -6,7 +6,7 @@ import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { resolvePostLoginPath } from "@/modules/auth/utils/resolve-post-login-path";
+import { resolvePostLoginPath } from "@/modules/auth";
 import { ActivationCodeStep } from "../components/activation/activation-code-step";
 import { ActivationNotice } from "../components/activation/activation-notice";
 import { ActivationPasswordStep } from "../components/activation/activation-password-step";
@@ -91,7 +91,7 @@ function ActivationFlow({ email }: { email: string }) {
     return (
       <ActivationNotice
         title="Superaste los intentos permitidos"
-        message="Por seguridad bloqueamos este código. Pide uno nuevo para continuar."
+        message={feedback.general ?? "Por seguridad bloqueamos este código. Pide uno nuevo para continuar."}
         actionLabel="Enviar un código nuevo"
         onAction={() => void flow.resend()}
         disabled={busy !== null || status.resendsRemaining === 0 || resendIn > 0}
@@ -102,7 +102,7 @@ function ActivationFlow({ email }: { email: string }) {
     return (
       <ActivationNotice
         title={status.state === "expired" ? "Tu código venció" : "Aún no tienes un código"}
-        message="Solicita un código nuevo y llegará a tu correo en unos segundos."
+        message={feedback.general ?? "Solicita un código nuevo y llegará a tu correo en unos segundos."}
         actionLabel="Enviar un código nuevo"
         onAction={() => void flow.resend()}
         disabled={busy !== null || status.resendsRemaining === 0 || resendIn > 0}
