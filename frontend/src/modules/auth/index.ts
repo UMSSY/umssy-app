@@ -12,3 +12,5 @@ export type { RoleTag } from "./types/auth-types";
 export { getRolesLabel } from "./utils/get-session-role-label";
 
 export { SessionLogoutMenuItem } from "./components/session-logout-menu-item";
+export { resolvePostLoginPath } from "./utils/resolve-post-login-path";
+

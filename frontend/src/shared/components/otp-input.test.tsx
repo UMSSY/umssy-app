@@ -6,13 +6,14 @@ describe("OtpInput", () => {
   afterEach(() => {
     cleanup();
   });
-  it("renders 6 digits by default", () => {
+
+  it("renderiza 6 casillas por defecto", () => {
     render(<OtpInput value="" onChange={vi.fn()} />);
     const inputs = screen.getAllByRole("textbox");
     expect(inputs).toHaveLength(6);
   });
 
-  it("handles typing digits and moving forward", () => {
+  it("permite escribir dígitos y avanza a la siguiente casilla", () => {
     const onChange = vi.fn();
     render(<OtpInput value="1" onChange={onChange} />);
 
@@ -21,18 +22,16 @@ describe("OtpInput", () => {
     expect(onChange).toHaveBeenCalledWith("12");
   });
 
-  it("redirects digit to the first empty slot if typed in a later slot with previous slots empty", () => {
+  it("redirige el dígito a la primera casilla vacía si se escribe en una posterior", () => {
     const onChange = vi.fn();
     render(<OtpInput value="" onChange={onChange} />);
 
     const inputs = screen.getAllByRole("textbox");
-    // User tries to type "5" directly into slot 2 (casilla 3)
     fireEvent.change(inputs[2], { target: { value: "5" } });
-    // It should place it in slot 0, calling onChange with "5"
     expect(onChange).toHaveBeenCalledWith("5");
   });
 
-  it("handles backspace to delete previous digit", () => {
+  it("borra el dígito anterior con backspace cuando la casilla actual está vacía", () => {
     const onChange = vi.fn();
     render(<OtpInput value="12" onChange={onChange} />);
 
@@ -41,7 +40,7 @@ describe("OtpInput", () => {
     expect(onChange).toHaveBeenCalledWith("1");
   });
 
-  it("handles arrow navigation", () => {
+  it("permite navegar con flechas izquierda y derecha", () => {
     render(<OtpInput value="123" onChange={vi.fn()} />);
     const inputs = screen.getAllByRole("textbox");
 
@@ -49,7 +48,7 @@ describe("OtpInput", () => {
     fireEvent.keyDown(inputs[1], { key: "ArrowLeft" });
   });
 
-  it("handles paste of 6 digits", () => {
+  it("soporta pegar un código de 6 dígitos completo", () => {
     const onChange = vi.fn();
     render(<OtpInput value="" onChange={onChange} />);
 
@@ -63,9 +62,11 @@ describe("OtpInput", () => {
     expect(onChange).toHaveBeenCalledWith("654321");
   });
 
-  it("applies aria-invalid when invalid", () => {
-    render(<OtpInput value="" onChange={vi.fn()} isInvalid />);
+  it("aplica aria-invalid y aria-describedby cuando está en estado inválido", () => {
+    render(<OtpInput value="" onChange={vi.fn()} invalid describedBy="error-id" />);
     const inputs = screen.getAllByRole("textbox");
     expect(inputs[0]).toHaveAttribute("aria-invalid", "true");
+    expect(inputs[0]).toHaveAttribute("aria-describedby", "error-id");
   });
 });
+

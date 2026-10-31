@@ -14,3 +14,5 @@ export interface ResetPasswordPayload {
   code: string;
   password: string;
 }
+
+export type PasswordResetResult = { ok: true } | { ok: false; error: string };
