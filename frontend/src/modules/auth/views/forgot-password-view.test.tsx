@@ -69,7 +69,7 @@ describe("ForgotPasswordView", () => {
       expect(screen.getByRole("heading", { name: "Revisa tu correo" })).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/e\*+@umss\.edu/)).toBeInTheDocument();
+    expect(screen.getByText(/es\*+@umss\.edu/)).toBeInTheDocument();
     expect(screen.getByText(/Vence en 5 minutos\./)).toBeInTheDocument();
     expect(screen.getByText(/05:00/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cambiar correo" })).toBeInTheDocument();
@@ -105,7 +105,7 @@ describe("ForgotPasswordView", () => {
     fireEvent.click(screen.getByRole("button", { name: "¿No te llegó? Reenviar código" }));
 
     await waitFor(() => {
-      const msg = screen.getByText(/Código reenviado a e\*+@umss\.edu/);
+      const msg = screen.getByText(/Código reenviado a es\*+@umss\.edu/);
       expect(msg).toBeInTheDocument();
       expect(msg).toHaveClass("text-accent");
     });
@@ -197,5 +197,82 @@ describe("ForgotPasswordView", () => {
     // Clicking "IR A INICIAR SESIÓN →" navigates to /login
     fireEvent.click(screen.getByRole("button", { name: "IR A INICIAR SESIÓN →" }));
     expect(push).toHaveBeenCalledWith("/login");
+  });
+
+  describe("errores del servidor", () => {
+    async function goToVerifyStep() {
+      fireEvent.change(screen.getByLabelText("Correo electrónico"), { target: { value: "estudiante@umss.edu" } });
+      fireEvent.click(screen.getByRole("button", { name: "ENVIAR CÓDIGO →" }));
+      await waitFor(() => expect(screen.getByRole("heading", { name: "Revisa tu correo" })).toBeInTheDocument());
+    }
+
+    function enterCode() {
+      const otpInputs = screen.getAllByRole("textbox");
+      fireEvent.paste(otpInputs[0], { clipboardData: { getData: () => "123456" } });
+    }
+
+    async function goToResetStep() {
+      await goToVerifyStep();
+      enterCode();
+      fireEvent.click(screen.getByRole("button", { name: "VERIFICAR CÓDIGO →" }));
+      await waitFor(() => expect(screen.getByRole("heading", { name: "Crea una nueva contraseña" })).toBeInTheDocument());
+    }
+
+    it("muestra el error del servidor cuando falla la solicitud del código", async () => {
+      vi.mocked(authService.requestPasswordResetCode).mockRejectedValue(new Error("Servicio no disponible"));
+      render(<ForgotPasswordView />);
+
+      fireEvent.change(screen.getByLabelText("Correo electrónico"), { target: { value: "estudiante@umss.edu" } });
+      fireEvent.click(screen.getByRole("button", { name: "ENVIAR CÓDIGO →" }));
+
+      expect(await screen.findByText("Servicio no disponible")).toBeInTheDocument();
+      expect(screen.queryByRole("heading", { name: "Revisa tu correo" })).not.toBeInTheDocument();
+    });
+
+    it("muestra el error del servidor cuando el código es incorrecto y no avanza de paso", async () => {
+      vi.mocked(authService.verifyPasswordResetCode).mockRejectedValue(new Error("El código ingresado es incorrecto"));
+      render(<ForgotPasswordView />);
+      await goToVerifyStep();
+
+      enterCode();
+      fireEvent.click(screen.getByRole("button", { name: "VERIFICAR CÓDIGO →" }));
+
+      expect(await screen.findByText("El código ingresado es incorrecto")).toBeInTheDocument();
+      expect(screen.queryByRole("heading", { name: "Crea una nueva contraseña" })).not.toBeInTheDocument();
+    });
+
+    it("muestra el error del servidor cuando falla el reenvío del código", async () => {
+      render(<ForgotPasswordView />);
+      await goToVerifyStep();
+
+      vi.mocked(authService.requestPasswordResetCode).mockRejectedValue(new Error("No se pudo reenviar el código"));
+      fireEvent.click(screen.getByRole("button", { name: "¿No te llegó? Reenviar código" }));
+
+      expect(await screen.findByText("No se pudo reenviar el código")).toBeInTheDocument();
+    });
+
+    it("muestra el error del servidor cuando falla el cambio de contraseña y no llega al éxito", async () => {
+      vi.mocked(authService.resetPassword).mockRejectedValue(new Error("El código ya expiró"));
+      render(<ForgotPasswordView />);
+      await goToResetStep();
+
+      fireEvent.change(screen.getByLabelText("Nueva contraseña"), { target: { value: "Segura123" } });
+      fireEvent.change(screen.getByLabelText("Confirmar contraseña"), { target: { value: "Segura123" } });
+      fireEvent.click(screen.getByRole("button", { name: "GUARDAR CONTRASEÑA →" }));
+
+      expect(await screen.findByText("El código ya expiró")).toBeInTheDocument();
+      expect(screen.queryByRole("heading", { name: "¡Contraseña actualizada!" })).not.toBeInTheDocument();
+    });
+
+    it("muestra un mensaje por defecto cuando el rechazo no trae un Error", async () => {
+      vi.mocked(authService.verifyPasswordResetCode).mockRejectedValue("fallo");
+      render(<ForgotPasswordView />);
+      await goToVerifyStep();
+
+      enterCode();
+      fireEvent.click(screen.getByRole("button", { name: "VERIFICAR CÓDIGO →" }));
+
+      expect(await screen.findByText("El código de verificación es incorrecto o ha expirado.")).toBeInTheDocument();
+    });
   });
 });
