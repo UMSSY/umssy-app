@@ -8,10 +8,10 @@ export enum ApplicationStatus {
 
 export interface ApplicationItemResponse {
   id: string;
-  vacancy: string;
-  company: string;
-  affinity: number;
+  jobOfferId: string;
+  vacancyTitle: string;
+  companyName: string;
+  affinityPercentage: number;
   status: string;
-  canWithdraw: boolean;
-  createdAt: Date;
+  appliedDate: string;
 }

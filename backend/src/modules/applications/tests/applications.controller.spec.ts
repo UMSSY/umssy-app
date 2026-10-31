@@ -1,3 +1,6 @@
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../../../common/guards/roles.guard.js';
+import { findApplicationsQuerySchema } from '../requests/find-applications.request.js';
 import { Test, TestingModule } from '@nestjs/testing';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 import { ApplicationsController } from '../controllers/applications.controller.js';
@@ -6,13 +9,16 @@ import { ApplicationStatus } from '../types/applications.types.js';
 
 describe('ApplicationsController', () => {
   let controller: ApplicationsController;
-  let serviceMock: any;
+  let serviceMock: {
+    findMyApplications: ReturnType<typeof vi.fn>;
+    withdrawApplication: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     serviceMock = {
       findMyApplications: vi.fn(),
       withdrawApplication: vi.fn(),
-};
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ApplicationsController],
@@ -22,18 +28,24 @@ describe('ApplicationsController', () => {
           useValue: serviceMock,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<ApplicationsController>(ApplicationsController);
   });
 
   describe('findMyApplications', () => {
     it('debe llamar al servicio con el id de usuario y query (incluyendo sortOrder por defecto)', async () => {
-      const mockUser = { id: 'user-1' };
-      const query = { status: ApplicationStatus.IN_REVIEW };
+      const query = findApplicationsQuerySchema.parse({
+        status: ApplicationStatus.IN_REVIEW,
+      });
       serviceMock.findMyApplications.mockResolvedValue([]);
 
-      const result = await controller.findMyApplications(mockUser, query as any);
+      const result = await controller.findMyApplications('user-1', query);
 
       expect(serviceMock.findMyApplications).toHaveBeenCalledWith('user-1', {
         status: ApplicationStatus.IN_REVIEW,
@@ -45,14 +57,15 @@ describe('ApplicationsController', () => {
 
   describe('withdrawApplication', () => {
     it('debe solicitar el retiro de la postulacion', async () => {
-      const mockUser = { id: 'user-1' };
-      const mockUpdatedApp = { id: 'app-1', status: ApplicationStatus.WITHDRAWN };
-      serviceMock.withdrawApplication.mockResolvedValue(mockUpdatedApp);
+      serviceMock.withdrawApplication.mockResolvedValue(undefined);
 
-      const result = await controller.withdrawApplication('app-1', mockUser);
+      const result = await controller.withdrawApplication('app-1', 'user-1');
 
-      expect(serviceMock.withdrawApplication).toHaveBeenCalledWith('app-1', 'user-1');
-      expect(result).toEqual(mockUpdatedApp);
+      expect(serviceMock.withdrawApplication).toHaveBeenCalledWith(
+        'app-1',
+        'user-1',
+      );
+      expect(result).toBeUndefined();
     });
   });
 });

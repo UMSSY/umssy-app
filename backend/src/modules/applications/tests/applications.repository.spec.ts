@@ -6,16 +6,25 @@ import { ApplicationStatus } from '../types/applications.types.js';
 
 describe('ApplicationsRepository', () => {
   let repository: ApplicationsRepository;
-  let prismaMock: any;
+  const transaction = {
+    jobApplicationStatus: { findUniqueOrThrow: vi.fn() },
+    jobApplication: { updateMany: vi.fn() },
+  };
+  const prismaMock = {
+    jobApplication: { findMany: vi.fn(), findUnique: vi.fn() },
+    $transaction: vi.fn(
+      async (operation: (tx: typeof transaction) => Promise<unknown>) =>
+        operation(transaction),
+    ),
+  };
 
   beforeEach(async () => {
-    prismaMock = {
-      jobApplication: {
-        findMany: vi.fn(),
-        findUnique: vi.fn(),
-        update: vi.fn(),
-      },
-    };
+    vi.clearAllMocks();
+    prismaMock.jobApplication.findMany.mockResolvedValue([]);
+    transaction.jobApplicationStatus.findUniqueOrThrow.mockResolvedValue({
+      id: 'withdrawn-status-id',
+    });
+    transaction.jobApplication.updateMany.mockResolvedValue({ count: 1 });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -31,18 +40,21 @@ describe('ApplicationsRepository', () => {
   });
 
   describe('findByUserId', () => {
-    it('debe consultar con filtros por defecto y sort por createdAt', async () => {
+    it('debe consultar con filtros por defecto y sort por appliedAt', async () => {
       prismaMock.jobApplication.findMany.mockResolvedValue([]);
 
       await repository.findByUserId('user-1', { sortOrder: 'desc' });
 
       expect(prismaMock.jobApplication.findMany).toHaveBeenCalledWith({
         where: { userId: 'user-1' },
-        orderBy: { createdAt: 'desc' },
-        include: {
-          status: true,
+        orderBy: [{ appliedAt: 'desc' }, { id: 'desc' }],
+        select: {
+          id: true,
+          jobOfferId: true,
+          appliedAt: true,
+          status: { select: { title: true } },
           jobOffer: {
-            include: { company: true },
+            select: { title: true, company: { select: { title: true } } },
           },
         },
       });
@@ -62,11 +74,14 @@ describe('ApplicationsRepository', () => {
           userId: 'user-1',
           status: { title: ApplicationStatus.IN_REVIEW },
         },
-        orderBy: { jobOffer: { title: 'asc' } },
-        include: {
-          status: true,
+        orderBy: [{ jobOffer: { title: 'asc' } }, { id: 'asc' }],
+        select: {
+          id: true,
+          jobOfferId: true,
+          appliedAt: true,
+          status: { select: { title: true } },
           jobOffer: {
-            include: { company: true },
+            select: { title: true, company: { select: { title: true } } },
           },
         },
       });
@@ -75,11 +90,37 @@ describe('ApplicationsRepository', () => {
     it('debe aplicar sort por company, affinity y status', async () => {
       prismaMock.jobApplication.findMany.mockResolvedValue([]);
 
-      await repository.findByUserId('user-1', { sortBy: 'company', sortOrder: 'asc' });
-      await repository.findByUserId('user-1', { sortBy: 'affinity', sortOrder: 'desc' });
-      await repository.findByUserId('user-1', { sortBy: 'status', sortOrder: 'asc' });
+      await repository.findByUserId('user-1', {
+        sortBy: 'company',
+        sortOrder: 'asc',
+      });
+      await repository.findByUserId('user-1', {
+        sortBy: 'affinity',
+        sortOrder: 'desc',
+      });
+      await repository.findByUserId('user-1', {
+        sortBy: 'status',
+        sortOrder: 'asc',
+      });
 
-      expect(prismaMock.jobApplication.findMany).toHaveBeenCalledTimes(3);
+      expect(prismaMock.jobApplication.findMany).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          orderBy: [{ jobOffer: { company: { title: 'asc' } } }, { id: 'asc' }],
+        }),
+      );
+      expect(prismaMock.jobApplication.findMany).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          orderBy: [{ appliedAt: 'desc' }, { id: 'desc' }],
+        }),
+      );
+      expect(prismaMock.jobApplication.findMany).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          orderBy: [{ status: { title: 'asc' } }, { id: 'asc' }],
+        }),
+      );
     });
   });
 
@@ -91,28 +132,41 @@ describe('ApplicationsRepository', () => {
 
       expect(prismaMock.jobApplication.findUnique).toHaveBeenCalledWith({
         where: { id: 'app-1' },
-        include: {
-          status: true,
-          jobOffer: {
-            include: { company: true },
-          },
-        },
+        select: { id: true, userId: true, status: { select: { title: true } } },
       });
       expect(result).toEqual({ id: 'app-1' });
     });
   });
 
-  describe('updateStatus', () => {
-    it('debe actualizar el estado', async () => {
-      prismaMock.jobApplication.update.mockResolvedValue({ id: 'app-1', statusId: ApplicationStatus.WITHDRAWN });
+  describe('withdraw', () => {
+    it('resuelve el UUID del catálogo y condiciona el retiro al usuario y al estado actual', async () => {
+      const statuses = [
+        ApplicationStatus.IN_REVIEW,
+        ApplicationStatus.INTERVIEW,
+      ];
+      const result = await repository.withdraw(
+        'app-1',
+        'user-1',
+        statuses,
+        ApplicationStatus.WITHDRAWN,
+      );
 
-      const result = await repository.updateStatus('app-1', ApplicationStatus.WITHDRAWN);
-
-      expect(prismaMock.jobApplication.update).toHaveBeenCalledWith({
-        where: { id: 'app-1' },
-        data: { statusId: ApplicationStatus.WITHDRAWN },
+      expect(prismaMock.$transaction).toHaveBeenCalledOnce();
+      expect(
+        transaction.jobApplicationStatus.findUniqueOrThrow,
+      ).toHaveBeenCalledWith({
+        where: { title: ApplicationStatus.WITHDRAWN },
+        select: { id: true },
       });
-      expect(result).toEqual({ id: 'app-1', statusId: ApplicationStatus.WITHDRAWN });
+      expect(transaction.jobApplication.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'app-1',
+          userId: 'user-1',
+          status: { title: { in: statuses } },
+        },
+        data: { statusId: 'withdrawn-status-id' },
+      });
+      expect(result).toEqual({ count: 1 });
     });
   });
 });
