@@ -58,12 +58,12 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
         <div className="flex flex-col gap-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: SURVEY_STATISTICS_SUMMARY_SKELETONS }).map((_, i) => (
-              <Skeleton key={i} className="h-24 rounded-xl" />
+              <Skeleton key={i} className="h-24 rounded-xl bg-border" />
             ))}
           </div>
           <div className="flex flex-col gap-4">
             {Array.from({ length: SURVEY_STATISTICS_QUESTION_SKELETONS }).map((_, i) => (
-              <Skeleton key={i} className="h-48 rounded-xl" />
+              <Skeleton key={i} className="h-48 rounded-xl bg-border" />
             ))}
           </div>
         </div>
