@@ -1,4 +1,10 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  Logger,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { ZodValidationException } from 'nestjs-zod';
 import { RequestValidationException } from '../exceptions/request-validation.exception.js';
@@ -20,16 +26,36 @@ export class DomainExceptionFilter implements ExceptionFilter {
     }
 
     if (!(exception instanceof DomainException)) {
-      const statusCode = exception instanceof HttpException ? exception.getStatus() : 500;
+      const statusCode =
+        exception instanceof HttpException ? exception.getStatus() : 500;
       const error = HTTP_ERRORS[statusCode] ?? {
         code: statusCode >= 500 ? 'INTERNAL_ERROR' : 'HTTP_ERROR',
-        detail: statusCode >= 500 ? HTTP_ERRORS[500].detail : 'No se pudo completar la solicitud.',
+        detail:
+          statusCode >= 500
+            ? HTTP_ERRORS[500].detail
+            : 'No se pudo completar la solicitud.',
       };
       if (statusCode >= 500) {
-        this.logger.error(exception instanceof Error ? exception.stack : 'Unexpected request failure');
+        this.logger.error(
+          exception instanceof Error
+            ? exception.stack
+            : 'Unexpected request failure',
+        );
       }
-      response.status(statusCode).json({ statusCode, ok: false, ...error, data: null });
+      response
+        .status(statusCode)
+        .json({ statusCode, ok: false, ...error, data: null });
       return;
+    }
+
+    if (
+      'retryAfterSeconds' in exception &&
+      typeof exception.retryAfterSeconds === 'number'
+    ) {
+      response.setHeader(
+        'Retry-After',
+        String(Math.max(0, Math.ceil(exception.retryAfterSeconds))),
+      );
     }
 
     response.status(exception.statusCode).json({
