@@ -165,6 +165,10 @@ model User {
   chatMessages         Message[]
   chatParticipants     ConversationParticipant[]
   presence             UserPresence?
+  chatBlocksMade       ChatUserBlock[]          @relation("ChatBlocker")
+  chatBlocksReceived   ChatUserBlock[]          @relation("ChatBlocked")
+  sentRequests         ConnectionRequest[]      @relation("SentConnectionRequests")
+  receivedRequests     ConnectionRequest[]      @relation("ReceivedConnectionRequests")
   passwordResetOtps    PasswordResetOtp[]
   auditEvents          AuditEvent[]              @relation("AuditEventActor")
   revertedValidations  DocumentValidation[]      @relation("DocumentValidationRevertedBy")
@@ -558,6 +562,8 @@ model Event {
 
   registrations EventRegistration[]
 
+  chatRoom Conversation?
+
   @@unique([createdById, proposalKey])
   @@index([categoryId])
   @@index([modalityId])
@@ -846,17 +852,43 @@ model MessageStatus {
   @@map("message_statuses")
 }
 
+model ConnectionRequestStatus {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(30)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  connectionRequests ConnectionRequest[]
+
+  @@map("connection_request_statuses")
+}
+
+model AttachmentType {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(30)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  messageAttachments MessageAttachment[]
+
+  @@map("attachment_types")
+}
+
 model Conversation {
   id            String    @id @default(uuid()) @db.Uuid
-  userAId       String    @map("user_a_id") @db.Uuid
-  userBId       String    @map("user_b_id") @db.Uuid
+  userAId       String?    @map("user_a_id") @db.Uuid
+  userBId       String?    @map("user_b_id") @db.Uuid
   lastMessageId String?   @map("last_message_id") @db.Uuid
   lastMessageAt DateTime? @map("last_message_at") @db.Timestamptz(6)
+  eventId       String?   @unique @map("event_id") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  userA User @relation("UserAConversations", fields: [userAId], references: [id], onDelete: Cascade)
-  userB User @relation("UserBConversations", fields: [userBId], references: [id], onDelete: Cascade)
+  userA User? @relation("UserAConversations", fields: [userAId], references: [id], onDelete: Cascade)
+  userB User? @relation("UserBConversations", fields: [userBId], references: [id], onDelete: Cascade)
+  event Event? @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   participants ConversationParticipant[]
   messages     Message[]                 @relation("ConversationMessages")
@@ -887,7 +919,7 @@ model Message {
   id             String    @id @default(uuid()) @db.Uuid
   conversationId String    @map("conversation_id") @db.Uuid
   senderId       String    @map("sender_id") @db.Uuid
-  content        String    @db.VarChar(500)
+  content        String?    @db.VarChar(4000)
   statusId       String    @map("status_id") @db.Uuid
   sentAt         DateTime  @default(now()) @map("sent_at") @db.Timestamptz(6)
   deliveredAt    DateTime? @map("delivered_at") @db.Timestamptz(6)
@@ -899,10 +931,66 @@ model Message {
   sender       User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
   status       MessageStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
 
+  attachments  MessageAttachment[]
+
   @@index([conversationId, sentAt(sort: Desc)])
   @@index([senderId])
   @@index([statusId])
   @@map("messages")
+}
+
+model MessageAttachment {
+  id        String   @id @default(uuid()) @db.Uuid
+  messageId String   @map("message_id") @db.Uuid
+  typeId    String   @map("type_id") @db.Uuid
+  fileName  String   @map("file_name") @db.VarChar(255)
+  mimeType  String   @map("mime_type") @db.VarChar(100)
+  fileSize  Int      @map("file_size")
+  fileData  Bytes?   @map("file_data")
+  url       String?  @db.VarChar(1000)
+  thumbnailUrl String?  @map("thumbnail_url") @db.VarChar(1000)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  message Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  type    AttachmentType @relation(fields: [typeId], references: [id], onDelete: Restrict)
+
+  @@index([messageId])
+  @@index([typeId])
+  @@map("message_attachments")
+}
+
+model ChatUserBlock {
+  id        String   @id @default(uuid()) @db.Uuid
+  blockerId String   @map("blocker_id") @db.Uuid
+  blockedId String   @map("blocked_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  blocker User @relation("ChatBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("ChatBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+  @@map("chat_user_blocks")
+}
+
+model ConnectionRequest {
+  id         String   @id @default(uuid()) @db.Uuid
+  senderId   String   @map("sender_id") @db.Uuid
+  receiverId String   @map("receiver_id") @db.Uuid
+  statusId   String   @map("status_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  sender   User                    @relation("SentConnectionRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User                    @relation("ReceivedConnectionRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  status   ConnectionRequestStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([receiverId, statusId])
+  @@map("connection_requests")
 }
 
 model UserPresence {
