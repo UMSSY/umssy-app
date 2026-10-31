@@ -1,4 +1,4 @@
-import { CircleDot, SquareCheck } from "lucide-react";
+import { CircleDot, SquareCheck, SquareChevronDown } from "lucide-react";
 import type { QuestionTypeOption } from "../types/question-type-option.types";
 import type { QuestionType, SurveyDisplayStatus, SurveyTargetAudience } from "../types/survey.types";
 
@@ -34,6 +34,7 @@ export const SURVEY_TARGET_AUDIENCE_ITEMS = (Object.keys(SURVEY_TARGET_AUDIENCE_
 export const QUESTION_TYPE_OPTIONS: readonly QuestionTypeOption[] = [
   { value: "single_choice", label: "Opción única", icon: CircleDot },
   { value: "multiple_choice", label: "Opción múltiple", icon: SquareCheck },
+  { value: "dropdown", label: "Lista desplegable", icon: SquareChevronDown },
 ];
 
 export const QUESTION_TYPE_ITEMS = QUESTION_TYPE_OPTIONS.map(({ value, label }) => ({ value, label }));
@@ -41,6 +42,7 @@ export const QUESTION_TYPE_ITEMS = QUESTION_TYPE_OPTIONS.map(({ value, label }) 
 export const QUESTION_TYPE_LABELS: Readonly<Record<QuestionType, string>> = {
   single_choice: "Opción única",
   multiple_choice: "Opción múltiple",
+  dropdown: "Lista desplegable",
 };
 
 export const SURVEY_STATUS_LABELS: Readonly<Record<SurveyDisplayStatus, string>> = {

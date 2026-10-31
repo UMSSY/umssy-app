@@ -9,6 +9,7 @@ export type SurveyDisplayStatusValue = (typeof SURVEY_DISPLAY_STATUSES)[number];
 export const SURVEY_QUESTION_TYPES = [
   'single_choice',
   'multiple_choice',
+  'dropdown',
 ] as const;
 
 export type SurveyQuestionTypeValue = (typeof SURVEY_QUESTION_TYPES)[number];
@@ -32,6 +33,7 @@ export type SurveyStatus = (typeof SurveyStatus)[keyof typeof SurveyStatus];
 export const SurveyQuestionType = {
   SINGLE_CHOICE: 'single_choice',
   MULTIPLE_CHOICE: 'multiple_choice',
+  DROPDOWN: 'dropdown',
 } as const;
 
 export type SurveyQuestionType =

@@ -3,7 +3,7 @@ export type SurveyStatus = "draft" | "published";
 
 export type SurveyDisplayStatus = SurveyStatus | "closed";
 
-export type QuestionType = "single_choice" | "multiple_choice";
+export type QuestionType = "single_choice" | "multiple_choice" | "dropdown";
 
 export type SurveyTargetAudience = "all" | "graduates" | "students" | "mentors";
 

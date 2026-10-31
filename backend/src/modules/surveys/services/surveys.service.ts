@@ -24,7 +24,7 @@ import type { SurveyStatisticsResponse } from '../responses/survey-statistics.re
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
 import { SURVEYS_ROLE } from '../constants/surveys-access.constants.js';
 import type { UpdateSurveyData } from '../types/create-survey-data.type.js';
-import { SurveyStatus } from '../types/survey.enum.js';
+import { SurveyQuestionType, SurveyStatus } from '../types/survey.enum.js';
 import {
   getSurveyAudiencesForRoles,
   isSurveyForGraduate,
@@ -185,7 +185,7 @@ export class SurveysService {
 
     for (const ans of request.answers) {
       const q = survey.questions.find((question) => question.id === ans.questionId);
-      if (q && q.type === 'single_choice' && ans.optionIds.length > 1) {
+      if (q && q.type !== SurveyQuestionType.MULTIPLE_CHOICE && ans.optionIds.length > 1) {
         throw new BadRequestException(`La pregunta "${q.statement}" solo permite una respuesta`);
       }
     }
