@@ -7,8 +7,6 @@ export function isDocumentCorrectionToken(value: unknown): value is string {
   return typeof value === "string" && DOCUMENT_CORRECTION_TOKEN_PATTERN.test(value);
 }
 
-// El fragmento no se envía al servidor al abrir la página. B3 debe entregar el
-// permiso; leerlo aquí no prueba su validez ni autoriza una sustitución.
 export function getDocumentCorrectionToken(fragment: string): string | null {
   if (!fragment.startsWith("#")) return null;
   const params = new URLSearchParams(fragment.slice(1));

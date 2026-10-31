@@ -20,8 +20,6 @@ export class DocumentCorrectionAuthorizationService {
     private readonly config: ConfigService,
   ) {}
 
-  // API interna para B3. No se expone un endpoint que entregue permisos por
-  // conocer solamente el código SOL o el correo de una persona.
   async issueFor(accessRequestId: string): Promise<DocumentCorrectionGrant> {
     const context = this.getContext(await this.repository.findById(accessRequestId));
     return { requestCode: context.requestCode, token: createDocumentCorrectionToken(context, this.getSecret()) };
