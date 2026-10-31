@@ -115,12 +115,13 @@ describe('ActivationOtpRepository', () => {
 });
 
 describe('AccountActivationRepository', () => {
-  const USER = { firstName: 'Ana', lastName: 'Pérez', email: 'ana@umss.test', phone: '71234567', passwordHash: '$2b$hash' };
+  const USER = { accessRequestId: 'req-1', firstName: 'Ana', lastName: 'Pérez', email: 'ana@umss.test', phone: '71234567', passwordHash: '$2b$hash' };
 
   function build(consumed = 1) {
     const tx = {
       activationOtp: { updateMany: vi.fn().mockResolvedValue({ count: consumed }) },
       user: { create: vi.fn().mockResolvedValue({ id: 'user-1' }) },
+      accessRequest: { update: vi.fn().mockResolvedValue({ id: 'req-1' }) },
     };
     const prisma = {
       accessRequest: { findFirst: vi.fn() },
@@ -164,6 +165,10 @@ describe('AccountActivationRepository', () => {
 
     expect(prisma.$transaction).toHaveBeenCalledOnce();
     expect(tx.activationOtp.updateMany).toHaveBeenCalledWith({ where: { id: 'otp-1', usedAt: null }, data: { usedAt: NOW } });
+    expect(tx.accessRequest.update).toHaveBeenCalledWith({
+      where: { id: 'req-1' },
+      data: { approvedUserId: 'user-1' },
+    });
     expect(tx.user.create).toHaveBeenCalledWith({
       data: {
         firstName: 'Ana',
@@ -183,6 +188,7 @@ describe('AccountActivationRepository', () => {
 
     await expect(repository.createUserAndConsumeOtp('otp-1', USER, NOW)).resolves.toBe('already_used');
     expect(tx.user.create).not.toHaveBeenCalled();
+    expect(tx.accessRequest.update).not.toHaveBeenCalled();
   });
 
   it('si el correo ya tiene usuario (violación de unicidad) responde already_used', async () => {
@@ -198,4 +204,10 @@ describe('AccountActivationRepository', () => {
 
     await expect(repository.createUserAndConsumeOtp('otp-1', USER, NOW)).rejects.toThrow('base caída');
   });
+  it('propaga el fallo al vincular la solicitud para revertir la transacción', async () => {
+    const { tx, repository } = build();
+    tx.accessRequest.update.mockRejectedValue(new Error('fallo al vincular'));
+    await expect(repository.createUserAndConsumeOtp('otp-1', USER, NOW)).rejects.toThrow('fallo al vincular');
+  });
+
 });
