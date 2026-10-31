@@ -109,11 +109,11 @@ describe("RequestStepsSidebar", () => {
     expect(container.querySelector("svg.lucide-shield-check")).not.toBeNull();
   });
 
-  it("mantiene un lateral de escritorio independiente del contenido", () => {
+  it("mantiene un lateral de escritorio independiente del contenido y arriba en celular", () => {
     const { container } = render(<RequestStepsSidebar />);
 
     const aside = container.querySelector("aside");
-    expect(aside).toHaveClass("w-72", "shrink-0", "border-r");
+    expect(aside).toHaveClass("w-full", "lg:w-72", "shrink-0", "border-b", "lg:border-r");
     expect(aside?.className).not.toMatch(/\bmd:/);
   });
 

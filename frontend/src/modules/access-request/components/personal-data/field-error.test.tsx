@@ -10,7 +10,7 @@ describe("FieldError", () => {
 
     const message = screen.getByText("El correo es obligatorio");
     expect(message).toHaveAttribute("id", "email-error");
-    expect(message).toHaveClass("text-destructive");
+    expect(message).toHaveClass("text-danger");
   });
 
   it("no renderiza nada sin mensaje", () => {
