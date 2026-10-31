@@ -68,7 +68,7 @@ describe('Mis pases', () => {
     expect(within(screen.getByRole('complementary', { name: 'Detalle de la inscripción' })).getByText('reg-2')).toBeInTheDocument();
     expect(screen.getAllByText('Lab 2')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /Prisma/ })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: /Prisma/ })).toHaveClass('bg-accent', 'text-surface');
+    expect(screen.getByRole('button', { name: /Prisma/ })).toHaveClass('bg-accent', 'text-accent-foreground');
     expect(screen.getByRole('button', { name: /React/ })).toHaveClass('bg-surface');
     expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'false');
     expect(within(screen.getByRole('complementary', { name: 'Detalle de la inscripción' })).queryByText('reg-1')).not.toBeInTheDocument();
