@@ -1,4 +1,8 @@
-import type { SurveyQuestionType, SurveyStatus } from './survey.enum.js';
+import type {
+  SurveyQuestionType,
+  SurveyStatus,
+  SurveyTargetAudience,
+} from './survey.enum.js';
 
 export interface CreateSurveyOptionData {
   label: string;
@@ -15,7 +19,9 @@ export interface CreateSurveyData {
   title: string;
   description: string | null;
   careerId: string | null;
+  targetsAllCareers: boolean;
   academicPeriod: string | null;
+  targetAudience: SurveyTargetAudience | null;
   opensAt: Date | null;
   closesAt: Date | null;
   status: SurveyStatus;
