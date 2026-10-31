@@ -461,7 +461,10 @@ export const ModelName = {
   SurveyAnswer: 'SurveyAnswer',
   AuditAction: 'AuditAction',
   AuditEvent: 'AuditEvent',
-  DocumentValidation: 'DocumentValidation'
+  DocumentValidation: 'DocumentValidation',
+  MentorIntakeAttempt: 'MentorIntakeAttempt',
+  MentorParticipationSanction: 'MentorParticipationSanction',
+  MentorIntakeOperation: 'MentorIntakeOperation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -477,7 +480,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -5291,6 +5294,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MentorIntakeAttempt: {
+      payload: Prisma.$MentorIntakeAttemptPayload<ExtArgs>
+      fields: Prisma.MentorIntakeAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorIntakeAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorIntakeAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorIntakeAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorIntakeAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.MentorIntakeAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.MentorIntakeAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.MentorIntakeAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorIntakeAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorIntakeAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeAttemptPayload>
+        }
+        update: {
+          args: Prisma.MentorIntakeAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorIntakeAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorIntakeAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorIntakeAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorIntakeAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorIntakeAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorIntakeAttempt>
+        }
+        groupBy: {
+          args: Prisma.MentorIntakeAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorIntakeAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorIntakeAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorIntakeAttemptCountAggregateOutputType> | number
+        }
+      }
+    }
+    MentorParticipationSanction: {
+      payload: Prisma.$MentorParticipationSanctionPayload<ExtArgs>
+      fields: Prisma.MentorParticipationSanctionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorParticipationSanctionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationSanctionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorParticipationSanctionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationSanctionPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorParticipationSanctionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationSanctionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorParticipationSanctionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationSanctionPayload>
+        }
+        findMany: {
+          args: Prisma.MentorParticipationSanctionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationSanctionPayload>[]
+        }
+        create: {
+          args: Prisma.MentorParticipationSanctionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationSanctionPayload>
+        }
+        createMany: {
+          args: Prisma.MentorParticipationSanctionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorParticipationSanctionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationSanctionPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorParticipationSanctionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationSanctionPayload>
+        }
+        update: {
+          args: Prisma.MentorParticipationSanctionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationSanctionPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorParticipationSanctionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorParticipationSanctionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorParticipationSanctionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationSanctionPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorParticipationSanctionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorParticipationSanctionPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorParticipationSanctionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorParticipationSanction>
+        }
+        groupBy: {
+          args: Prisma.MentorParticipationSanctionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorParticipationSanctionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorParticipationSanctionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorParticipationSanctionCountAggregateOutputType> | number
+        }
+      }
+    }
+    MentorIntakeOperation: {
+      payload: Prisma.$MentorIntakeOperationPayload<ExtArgs>
+      fields: Prisma.MentorIntakeOperationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MentorIntakeOperationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MentorIntakeOperationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        findFirst: {
+          args: Prisma.MentorIntakeOperationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MentorIntakeOperationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        findMany: {
+          args: Prisma.MentorIntakeOperationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>[]
+        }
+        create: {
+          args: Prisma.MentorIntakeOperationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        createMany: {
+          args: Prisma.MentorIntakeOperationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MentorIntakeOperationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>[]
+        }
+        delete: {
+          args: Prisma.MentorIntakeOperationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        update: {
+          args: Prisma.MentorIntakeOperationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        deleteMany: {
+          args: Prisma.MentorIntakeOperationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MentorIntakeOperationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MentorIntakeOperationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>[]
+        }
+        upsert: {
+          args: Prisma.MentorIntakeOperationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MentorIntakeOperationPayload>
+        }
+        aggregate: {
+          args: Prisma.MentorIntakeOperationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMentorIntakeOperation>
+        }
+        groupBy: {
+          args: Prisma.MentorIntakeOperationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorIntakeOperationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MentorIntakeOperationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MentorIntakeOperationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -6203,6 +6428,44 @@ export const DocumentValidationScalarFieldEnum = {
 export type DocumentValidationScalarFieldEnum = (typeof DocumentValidationScalarFieldEnum)[keyof typeof DocumentValidationScalarFieldEnum]
 
 
+export const MentorIntakeAttemptScalarFieldEnum = {
+  operationId: 'operationId',
+  id: 'id',
+  userId: 'userId',
+  operation: 'operation',
+  idempotencyKey: 'idempotencyKey',
+  payloadHash: 'payloadHash',
+  occurredAt: 'occurredAt',
+  counted: 'counted',
+  responseStatus: 'responseStatus',
+  responseData: 'responseData'
+} as const
+
+export type MentorIntakeAttemptScalarFieldEnum = (typeof MentorIntakeAttemptScalarFieldEnum)[keyof typeof MentorIntakeAttemptScalarFieldEnum]
+
+
+export const MentorParticipationSanctionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  triggerAttemptId: 'triggerAttemptId',
+  startedAt: 'startedAt',
+  endsAt: 'endsAt'
+} as const
+
+export type MentorParticipationSanctionScalarFieldEnum = (typeof MentorParticipationSanctionScalarFieldEnum)[keyof typeof MentorParticipationSanctionScalarFieldEnum]
+
+
+export const MentorIntakeOperationScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorIntakeOperationScalarFieldEnum = (typeof MentorIntakeOperationScalarFieldEnum)[keyof typeof MentorIntakeOperationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -6217,6 +6480,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -6556,6 +6826,9 @@ export type GlobalOmitConfig = {
   auditAction?: Prisma.AuditActionOmit
   auditEvent?: Prisma.AuditEventOmit
   documentValidation?: Prisma.DocumentValidationOmit
+  mentorIntakeAttempt?: Prisma.MentorIntakeAttemptOmit
+  mentorParticipationSanction?: Prisma.MentorParticipationSanctionOmit
+  mentorIntakeOperation?: Prisma.MentorIntakeOperationOmit
 }
 
 /* Types for Logging */

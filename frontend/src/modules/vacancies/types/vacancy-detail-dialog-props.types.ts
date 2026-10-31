@@ -1,4 +1,4 @@
-import type { Vacancy } from "../data/vacancies";
+import type { Vacancy } from "./vacancy.types";
 
 export interface VacancyDetailDialogProps {
   vacancy: Vacancy | null;
