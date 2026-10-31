@@ -8,17 +8,8 @@ import { Label } from "@/components/ui/label";
 import { PASSWORD_MAX_LENGTH } from "../constants/password.constants";
 import { FieldError } from "./field-error";
 
-export interface PasswordFieldProps {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  error?: string | undefined;
-  describedBy?: string;
-  disabled?: boolean;
-  autoComplete?: string;
-  toggleAriaLabel?: string;
-}
+import type { PasswordFieldProps } from "../types/password-field-props.types";
+
 
 export function PasswordField({
   id,

@@ -4,15 +4,8 @@ import { useRef, type KeyboardEvent, type ClipboardEvent, type ChangeEvent, type
 import { cn } from "cn";
 import { Input } from "@/components/ui/input";
 
-export interface OtpInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  length?: number;
-  disabled?: boolean;
-  invalid?: boolean;
-  id?: string;
-  describedBy?: string;
-}
+import type { OtpInputProps } from "../types/otp-input-props.types";
+
 
 export function OtpInput({
   value,
