@@ -11,13 +11,9 @@ export const PASSWORD_RESET_EMAIL_MJML = `
       Recibimos una solicitud para restablecer la contraseña de tu cuenta institucional en UMSSY. Tu código de verificación es:
     </mj-text>
 
-    <mj-section background-color="#EEF3F8" border-radius="8px" padding="16px">
-      <mj-column>
-        <mj-text align="center" font-size="34px" font-weight="800" letter-spacing="8px" color="#003770" padding="0">
-          {{code}}
-        </mj-text>
-      </mj-column>
-    </mj-section>
+    <mj-text align="center" font-size="34px" font-weight="800" letter-spacing="8px" color="#003770" padding="16px" container-background-color="#EEF3F8">
+      {{code}}
+    </mj-text>
 
     <mj-text font-size="13.5px" color="#5B6470" padding-top="16px">
       Este código vence en <strong>{{expirationMinutes}} minutos</strong>. Por tu seguridad, no compartas este código con ninguna otra persona.

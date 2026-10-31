@@ -9,7 +9,6 @@ import {
   InvalidResetCodeException,
   ExpiredResetCodeException,
   TooManyAttemptsException,
-  ResetCodeCooldownException,
 } from '../exceptions/index.js';
 import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.js';
 import { MailService } from '../../mail/services/mail.service.js';
@@ -70,7 +69,6 @@ export class AuthService {
   async requestPasswordReset(dto: RequestPasswordResetDto): Promise<{ ok: boolean; message: string }> {
     const user = await this.authRepository.findUserByEmail(dto.email);
 
-    // Si el usuario no existe o está inactivo, retornamos éxito genérico para no filtrar existencia de correos
     if (!user || !user.isActive) {
       this.logger.warn(`Solicitud de recuperación de contraseña para correo inexistente o inactivo: ${dto.email}`);
       return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.' };
@@ -85,15 +83,12 @@ export class AuthService {
       }
     }
 
-    // Generar código aleatorio criptográfico de 6 dígitos
     const code = crypto.randomInt(100000, 1000000).toString();
     const codeHash = await bcrypt.hash(code, 10);
     const expiresAt = new Date(Date.now() + OTP_EXPIRATION_MINUTES * 60 * 1000);
 
-    // Guardar en base de datos
     await this.authRepository.createPasswordResetOtp(user.id, codeHash, expiresAt);
 
-    // Enviar correo mediante plantilla MJML y Gmail SMTP
     const recipientName = `${user.firstName} ${user.lastName}`.trim() || 'Usuario';
     await this.mailService.send({
       to: user.email,
@@ -110,8 +105,8 @@ export class AuthService {
     return { ok: true, message: 'Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.' };
   }
 
-  async verifyPasswordReset(dto: VerifyPasswordResetDto): Promise<{ ok: boolean; message: string }> {
-    const user = await this.authRepository.findUserByEmail(dto.email);
+  private async validateResetCode(email: string, code: string) {
+    const user = await this.authRepository.findUserByEmail(email);
     if (!user) {
       throw new InvalidResetCodeException();
     }
@@ -129,44 +124,23 @@ export class AuthService {
       throw new ExpiredResetCodeException();
     }
 
-    const isMatch = await bcrypt.compare(dto.code, otp.codeHash);
+    const isMatch = await bcrypt.compare(code, otp.codeHash);
     if (!isMatch) {
       await this.authRepository.incrementOtpAttempts(otp.id);
       throw new InvalidResetCodeException();
     }
 
+    return { user, otp };
+  }
+
+  async verifyPasswordReset(dto: VerifyPasswordResetDto): Promise<{ ok: boolean; message: string }> {
+    await this.validateResetCode(dto.email, dto.code);
     return { ok: true, message: 'Código de verificación validado con éxito.' };
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<{ ok: boolean; message: string }> {
-    const user = await this.authRepository.findUserByEmail(dto.email);
-    if (!user) {
-      throw new InvalidResetCodeException();
-    }
-
-    const otp = await this.authRepository.findLatestValidOtp(user.id);
-    if (!otp) {
-      throw new InvalidResetCodeException();
-    }
-
-    if (otp.attempts >= MAX_OTP_ATTEMPTS) {
-      throw new TooManyAttemptsException();
-    }
-
-    if (otp.expiresAt < new Date()) {
-      throw new ExpiredResetCodeException();
-    }
-
-    const isMatch = await bcrypt.compare(dto.code, otp.codeHash);
-    if (!isMatch) {
-      await this.authRepository.incrementOtpAttempts(otp.id);
-      throw new InvalidResetCodeException();
-    }
-
-    // Hashear nueva contraseña
+    const { user, otp } = await this.validateResetCode(dto.email, dto.code);
     const newPasswordHash = await bcrypt.hash(dto.password, 10);
-
-    // Actualizar contraseña y marcar código como usado
     await this.authRepository.updateUserPasswordAndInvalidateOtp(user.id, newPasswordHash, otp.id);
 
     return { ok: true, message: 'Contraseña actualizada correctamente.' };
