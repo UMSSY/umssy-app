@@ -1,8 +1,4 @@
-
-import {
-  renderWithQuery as render,
-} from "@/shared/testing/render-with-query";
-
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import {
   describe,
   test,
@@ -11,9 +7,7 @@ import {
   afterEach,
   vi,
 } from "vitest";
-
 import * as matchers from "@testing-library/jest-dom/matchers";
-
 import {
   screen,
   fireEvent,
@@ -29,12 +23,16 @@ vi.mock("../hooks/use-contact-search", () => ({
   useContactSearch: vi.fn(),
 }));
 
+type SearchResult = ReturnType<typeof useContactSearch>;
+
+const mockRefetch = vi.fn<SearchResult["refetch"]>();
+
 const mockUsers = [
   {
     id: "1",
     fullName: "Maria Peredo",
     headline: "Senior Developer",
-    role: "MENTOR",
+    role: "STUDENT",
     avatarUrl: null,
     isActive: true,
   },
@@ -46,7 +44,20 @@ const mockUsers = [
     avatarUrl: null,
     isActive: true,
   },
-];
+] as SearchResult["results"];
+
+function createSearchResult(
+  overrides: Partial<SearchResult> = {},
+): SearchResult {
+  return {
+    results: [],
+    isSearching: false,
+    isError: false,
+    error: null,
+    refetch: mockRefetch,
+    ...overrides,
+  };
+}
 
 describe("ContactSearchModal - Interfaz y búsqueda", () => {
   const mockOnClose = vi.fn();
@@ -54,152 +65,131 @@ describe("ContactSearchModal - Interfaz y búsqueda", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    vi.mocked(useContactSearch).mockReturnValue(
+      createSearchResult(),
+    );
   });
 
   afterEach(() => {
     cleanup();
   });
 
-  // 1. Estructura del modal
   test("debe mostrar los elementos principales del modal", () => {
-    vi.mocked(useContactSearch).mockReturnValue({
-      results: [],
-      isSearching: false,
-    });
-
     render(
       <ContactSearchModal
-        isOpen={true}
+        isOpen
         onClose={mockOnClose}
         onSelectContact={mockOnSelectContact}
-      />
+      />,
     );
 
     expect(
-      screen.getByText("Nueva conversación")
+      screen.getByText("Nueva conversación"),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByPlaceholderText("Buscar por nombre...")
+      screen.getByPlaceholderText("Buscar por nombre..."),
     ).toBeInTheDocument();
   });
 
-  // 2. Búsqueda de contactos
   test("debe mostrar los usuarios encontrados", () => {
     vi.mocked(useContactSearch).mockImplementation(
       (term: string) =>
-        ({
-          results:
-            term && term.length >= 2
-              ? mockUsers
-              : [],
-          isSearching: false,
-        }) as ReturnType<typeof useContactSearch>
+        createSearchResult({
+          results: term.trim().length >= 2 ? mockUsers : [],
+        }),
     );
 
     render(
       <ContactSearchModal
-        isOpen={true}
+        isOpen
         onClose={mockOnClose}
         onSelectContact={mockOnSelectContact}
-      />
+      />,
     );
 
-    const input = screen.getByPlaceholderText(
-      "Buscar por nombre..."
+    fireEvent.change(
+      screen.getByPlaceholderText("Buscar por nombre..."),
+      {
+        target: { value: "Mari" },
+      },
     );
-
-    fireEvent.change(input, {
-      target: { value: "Maria" },
-    });
 
     expect(
-      screen.getByText("Maria Peredo")
+      screen.getByText("Maria Peredo"),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText("Mario Alcocer")
+      screen.getByText("Mario Alcocer"),
     ).toBeInTheDocument();
   });
 
-  // 3. Estado de carga
   test('debe mostrar "Buscando..." mientras busca usuarios', () => {
-    vi.mocked(useContactSearch).mockReturnValue({
-      results: [],
-      isSearching: true,
-    });
+    vi.mocked(useContactSearch).mockReturnValue(
+      createSearchResult({
+        isSearching: true,
+      }),
+    );
 
     render(
       <ContactSearchModal
-        isOpen={true}
+        isOpen
         onClose={mockOnClose}
         onSelectContact={mockOnSelectContact}
-      />
+      />,
     );
 
-    const input = screen.getByPlaceholderText(
-      "Buscar por nombre..."
+    fireEvent.change(
+      screen.getByPlaceholderText("Buscar por nombre..."),
+      {
+        target: { value: "Maria" },
+      },
     );
-
-    fireEvent.change(input, {
-      target: { value: "Maria" },
-    });
 
     expect(
-      screen.getByRole("status")
+      screen.getByRole("status"),
     ).toHaveTextContent("Buscando...");
   });
 
-  // 4. Sin resultados
   test("debe mostrar un mensaje cuando no encuentra usuarios", () => {
-    vi.mocked(useContactSearch).mockReturnValue({
-      results: [],
-      isSearching: false,
-    });
-
     render(
       <ContactSearchModal
-        isOpen={true}
+        isOpen
         onClose={mockOnClose}
         onSelectContact={mockOnSelectContact}
-      />
+      />,
     );
 
-    const input = screen.getByPlaceholderText(
-      "Buscar por nombre..."
+    fireEvent.change(
+      screen.getByPlaceholderText("Buscar por nombre..."),
+      {
+        target: { value: "UsuarioInexistente" },
+      },
     );
-
-    fireEvent.change(input, {
-      target: { value: "UsuarioInexistente" },
-    });
 
     expect(
-      screen.getByText(/no se encontraron usuarios/i)
-    ).toBeInTheDocument();
+      screen.getByRole("status"),
+    ).toHaveTextContent(
+      "No hay contactos disponibles que coincidan con tu búsqueda.",
+    );
   });
 
-  // 5. Cerrar modal
   test("debe cerrar el modal al presionar Escape", () => {
-    vi.mocked(useContactSearch).mockReturnValue({
-      results: [],
-      isSearching: false,
-    });
-
     render(
       <ContactSearchModal
-        isOpen={true}
+        isOpen
         onClose={mockOnClose}
         onSelectContact={mockOnSelectContact}
-      />
+      />,
     );
 
-    const input = screen.getByPlaceholderText(
-      "Buscar por nombre..."
+    fireEvent.keyDown(
+      screen.getByPlaceholderText("Buscar por nombre..."),
+      {
+        key: "Escape",
+      },
     );
-
-    fireEvent.keyDown(input, {
-      key: "Escape",
-    });
 
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });

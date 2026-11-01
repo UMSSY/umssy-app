@@ -7,6 +7,7 @@ import { ConnectionRequestRepository } from '../repositories/connection-request.
 
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
+import { ChatRolePolicyService } from './chat-role-policy.service.js';
 import { ConversationMapper } from '../mappers/conversation.mapper.js';
 import type { RawConversationRecord } from '../types/raw-conversation-record.types.js';
 
@@ -14,6 +15,7 @@ import {
   InactiveUserException,
   SelfConversationException,
   UserNotFoundException,
+  UserBlockedException,
 } from '../exceptions/index.js';
 
 import type { ConversationResponse } from '../responses/conversation.response.js';
@@ -28,6 +30,7 @@ export class ConversationService {
     private readonly connectionRequestRepository: ConnectionRequestRepository,
     private readonly blockService: BlockService,
     private readonly conversationMapper: ConversationMapper,
+    private readonly chatRolePolicyService: ChatRolePolicyService,
   ) {}
 
   async getOrCreate(
@@ -77,11 +80,26 @@ export class ConversationService {
       normalizedCurrentUserId,
     );
 
-    const existing =
-      await this.conversationRepository.findByOrderedPair(
-        userAId,
-        userBId,
-      );
+    // HU-13: impedir abrir o crear conversaciones con usuarios bloqueados.
+    if (
+      await this.blockService.isBlockedBetween(
+        normalizedCurrentUserId,
+        normalizedContactId,
+      )
+    ) {
+      throw new UserBlockedException();
+    }
+
+    // HU-08: consultar los roles vigentes antes de abrir o crear una conversación.
+    await this.chatRolePolicyService.assertCanCommunicate(
+      normalizedCurrentUserId,
+      normalizedContactId,
+    );
+
+    const existing = await this.conversationRepository.findByOrderedPair(
+      userAId,
+      userBId,
+    );
 
     if (existing) {
       const conversation = await this.toResponse(
@@ -96,6 +114,7 @@ export class ConversationService {
       };
     }
 
+    // HU-09: exigir una conexión aceptada antes de crear una conversación.
     const acceptedRequest =
       await this.connectionRequestRepository.findAcceptedRequest(
         userAId,
@@ -109,12 +128,11 @@ export class ConversationService {
     }
 
     try {
-      const created =
-        await this.conversationRepository.createWithParticipants(
-          userAId,
-          userBId,
-          new Date(),
-        );
+      const created = await this.conversationRepository.createWithParticipants(
+        userAId,
+        userBId,
+        new Date(),
+      );
 
       const conversation = await this.toResponse(
         created,
@@ -127,6 +145,7 @@ export class ConversationService {
         isCreated: true,
       };
     } catch (error: unknown) {
+      // Recuperación ante creación concurrente.
       const err = error as {
         code?: string;
         message?: string;
@@ -194,13 +213,18 @@ export class ConversationService {
     currentUserId: string,
     blockedIds: ReadonlySet<string>,
   ): Promise<ConversationResponse> {
-    if (conversation.event?.id || (!conversation.userAId && !conversation.userBId)) {
+    // Las salas de eventos no se convierten como conversaciones privadas.
+    if (
+      conversation.event?.id ||
+      (!conversation.userAId && !conversation.userBId)
+    ) {
       return this.conversationMapper.toEventConversationResponse(conversation);
     }
 
-    const contact = conversation.userAId === currentUserId
-      ? conversation.userB
-      : conversation.userA;
+    const contact =
+      conversation.userAId === currentUserId
+        ? conversation.userB
+        : conversation.userA;
 
     if (!contact) {
       throw new UserNotFoundException();

@@ -5,6 +5,7 @@ import type { ConversationRepository } from '../repositories/conversation.reposi
 import type { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import type { MessageStatusService } from './message-status.service.js';
 import type { BlockService } from './block.service.js';
+import type { ChatRolePolicyService } from './chat-role-policy.service.js';
 import {
   ConversationNotFoundException,
   InvalidMessageContentException,
@@ -37,12 +38,18 @@ describe('MessageService', () => {
       isBlockedBetween: vi.fn().mockResolvedValue(false),
     } as unknown as BlockService;
 
+    // HU-08: simular la política de roles para mantener los casos anteriores.
+    const chatRolePolicyService = {
+      assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+    } as unknown as ChatRolePolicyService;
+
     const service = new MessageService(
       messageRepository,
       conversationRepository,
       participantRepository,
       messageStatusService,
       blockService,
+      chatRolePolicyService,
     );
 
     return {

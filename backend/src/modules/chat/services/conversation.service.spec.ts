@@ -1,4 +1,5 @@
 import { ForbiddenException } from '@nestjs/common';
+import { UserBlockedException } from '../exceptions/index.js';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ConversationService } from './conversation.service.js';
@@ -11,11 +12,18 @@ import type { ConnectionRequestRepository } from '../repositories/connection-req
 import type { UserPresenceService } from './user-presence.service.js';
 
 import type { BlockService } from './block.service.js';
+import type { ChatRolePolicyService } from './chat-role-policy.service.js';
 
 const noBlocks = () =>
   ({
     findBlockedIdsBy: vi.fn().mockResolvedValue(new Set<string>()),
+    isBlockedBetween: vi.fn().mockResolvedValue(false),
   }) as unknown as BlockService;
+
+const allowedRoles = () =>
+  ({
+    assertCanCommunicate: vi.fn().mockResolvedValue(undefined),
+  }) as unknown as ChatRolePolicyService;
 
 describe('ConversationService', () => {
   it('findAllForUser maps and returns conversations for the current user', async () => {
@@ -75,6 +83,7 @@ describe('ConversationService', () => {
       connectionRequestRepositoryMock,
       noBlocks(),
       new ConversationMapper(),
+      allowedRoles(),
     );
 
     const result = await service.findAllForUser('user-current');
@@ -97,6 +106,7 @@ describe('ConversationService', () => {
       {} as unknown as ConnectionRequestRepository,
       noBlocks(),
       new ConversationMapper(),
+      allowedRoles(),
     );
 
     await expect(
@@ -172,6 +182,7 @@ describe('ConversationService', () => {
       connectionRequestRepositoryMock,
       noBlocks(),
       new ConversationMapper(),
+      allowedRoles(),
     );
 
     const result = await service.getOrCreateWithStatus(
@@ -226,6 +237,7 @@ describe('ConversationService', () => {
       {} as unknown as ConnectionRequestRepository,
       noBlocks(),
       new ConversationMapper(),
+      allowedRoles(),
     );
 
     const conversations =
@@ -248,7 +260,13 @@ describe('ConversationService', () => {
     });
 
     const buildService = (blockedIds: string[], conversations: unknown[]) => {
-      const blockService = { findBlockedIdsBy: vi.fn().mockResolvedValue(new Set(blockedIds)) };
+      const blockService = {
+        findBlockedIdsBy: vi.fn().mockResolvedValue(new Set(blockedIds)),
+        isBlockedBetween: vi.fn().mockImplementation(
+          async (_userId: string, contactId: string) =>
+            blockedIds.includes(contactId),
+        ),
+      };
       const service = new ConversationService(
         {
           findUserConversations: vi.fn().mockResolvedValue(conversations),
@@ -265,6 +283,7 @@ describe('ConversationService', () => {
         } as unknown as ConnectionRequestRepository,
         blockService as unknown as BlockService,
         new ConversationMapper(),
+        allowedRoles(),
       );
       return { service, blockService };
     };
@@ -289,11 +308,15 @@ describe('ConversationService', () => {
       expect(result[0]?.isBlockedByMe).toBe(false);
     });
 
-    it('includes isBlockedByMe in POST /chat/conversations (getOrCreate)', async () => {
-      const { service } = buildService(['user-blocked'], [buildConversation('conv-1', 'user-blocked')]);
-      const result = await service.getOrCreateWithStatus('user-me', 'user-blocked');
-      expect(result.isCreated).toBe(false);
-      expect(result.conversation.isBlockedByMe).toBe(true);
+    it('impide abrir una conversación con un usuario bloqueado', async () => {
+      const { service } = buildService(
+        ['user-blocked'],
+        [buildConversation('conv-1', 'user-blocked')],
+      );
+
+      await expect(
+        service.getOrCreateWithStatus('user-me', 'user-blocked'),
+      ).rejects.toThrow(UserBlockedException);
     });
   });
 
@@ -322,6 +345,7 @@ describe('ConversationService', () => {
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
       new ConversationMapper(),
+      allowedRoles(),
     );
 
     await expect(
@@ -397,6 +421,7 @@ describe('ConversationService', () => {
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
       new ConversationMapper(),
+      allowedRoles(),
     );
 
     const result = await service.getOrCreateWithStatus(
@@ -472,6 +497,7 @@ describe('ConversationService', () => {
       connectionRequestRepositoryMock as unknown as ConnectionRequestRepository,
       noBlocks(),
       new ConversationMapper(),
+      allowedRoles(),
     );
 
     const result = await service.getOrCreateWithStatus(
