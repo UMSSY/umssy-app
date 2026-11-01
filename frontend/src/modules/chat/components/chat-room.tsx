@@ -343,6 +343,7 @@ function ChatRoomContent({
   ]);
 
   const handleSend = async () => {
+    if (connectionStatus !== "connected") return;
     if (isBlockedByMe) return;
 
     const hasText = isContentValidForSend(inputText);
