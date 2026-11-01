@@ -25,8 +25,6 @@ export class SkillAnalysisService {
   ): Promise<boolean> {
     const rows = await this.repository.findProfileSkillRows(userId, context);
 
-    // Se incluyen también las habilidades manuales para poder asociarles
-    // evidencias NLP sin alterar su origen ni su estado de verificación.
     const plan = planSkillReconciliation(rows, detected);
 
     await this.repository.applyReconciliation(userId, plan, context);

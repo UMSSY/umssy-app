@@ -83,9 +83,6 @@ export function planSkillReconciliation(
     const isManualRow = row.source === USER_SKILL_SOURCES.manual;
     const isApproved = row.verificationStatus === 'approved';
 
-    // Las habilidades manuales nunca se eliminan.
-    // Si tienen una detección, se actualizan sus evidencias.
-    // Si ya no tienen detección, se limpian las evidencias antiguas.
     if (isManualRow) {
       const nextEvidence = detection?.evidenceRefs ?? [];
       const nextIsHighRelevance = nextEvidence.length > 0;
@@ -105,8 +102,6 @@ export function planSkillReconciliation(
       continue;
     }
 
-    // Una habilidad NLP sin detección se elimina si sigue pendiente.
-    // Si está aprobada, se conserva y únicamente se limpian sus evidencias.
     if (!detection) {
       if (!isApproved) {
         plan.deleteIds.push(row.id);
@@ -126,7 +121,6 @@ export function planSkillReconciliation(
       continue;
     }
 
-    // Una habilidad NLP detectada conserva su fila y actualiza evidencias.
     const nextEvidence = detection.evidenceRefs;
     const nextIsHighRelevance = nextEvidence.length > 0;
     const currentEvidence = parseEvidenceRefs(row.evidenceRefs);
@@ -143,8 +137,6 @@ export function planSkillReconciliation(
     }
   }
 
-  // Las detecciones que no corresponden a una habilidad existente
-  // se crean como nuevas habilidades NLP.
   for (const detection of detectedById.values()) {
     if (consumedSkillIds.has(detection.skillId)) {
       continue;

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -15,9 +14,6 @@ export function SkillsProfileSection() {
   const skills = useSkills();
   const [isAdding, setIsAdding] = useState(false);
 
-  // Las habilidades se obtienen exclusivamente del backend.
-  // El backend consulta Prisma y devuelve las habilidades
-  // asociadas al perfil del usuario.
   const selectedSkills = skills.selectedSkills;
 
   async function addSkill(skill: SkillItem) {
