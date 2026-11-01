@@ -4,6 +4,7 @@ import { JOB_OFFER_NOT_AVAILABLE_MESSAGE } from '../constants/job-match.constant
 import { JobOfferNotAvailableException } from '../exceptions/job-offer-not-available.exception.js';
 import type { JobMatchRepository } from '../repositories/job-match.repository.js';
 import type { CandidateProfileService } from '../services/candidate-profile.service.js';
+import type { RequirementTermsService } from '../services/requirement-terms.service.js';
 import { JobMatchService } from '../services/job-match.service.js';
 import { WeightedScoreService } from '../services/weighted-score.service.js';
 import type { JobMatchRecord } from '../types/job-match.types.js';
@@ -56,6 +57,9 @@ describe('JobMatchService', () => {
       userSkillService as unknown as UserSkillService,
       candidateProfile as unknown as CandidateProfileService,
       new WeightedScoreService(),
+      {
+        extractAndMatchRequirements: vi.fn().mockResolvedValue([]),
+      } as unknown as RequirementTermsService,
     );
   });
 
@@ -212,9 +216,21 @@ describe('JobMatchService', () => {
         hasPendingRequirements: true,
         requirements: [
           { name: 'Docker', status: 'Cumple', category: 'skill' },
-          { name: 'Ingeniería de Sistemas', status: 'Cumple', category: 'academic' },
-          { name: 'Experiencia mínima: 3 años', status: 'Pendiente', category: 'academic' },
-          { name: 'Carta de motivación', status: 'Pendiente', category: 'other' },
+          {
+            name: 'Ingeniería de Sistemas',
+            status: 'Cumple',
+            category: 'academic',
+          },
+          {
+            name: 'Experiencia mínima: 3 años',
+            status: 'Pendiente',
+            category: 'academic',
+          },
+          {
+            name: 'Carta de motivación',
+            status: 'Pendiente',
+            category: 'other',
+          },
         ],
       });
     });
