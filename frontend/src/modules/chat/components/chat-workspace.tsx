@@ -447,6 +447,7 @@ const handleSendMessage = async (
 
   const handleBlockUser = async (): Promise<void> => {
     if (!selectedConversation) return;
+    if (!selectedConversation.contact) return;
     await blockUser(selectedConversation.contact.id);
     setConversationBlocked(selectedConversation.id, true);
   };
@@ -454,6 +455,7 @@ const handleSendMessage = async (
   const handleUnblockUser = async (): Promise<void> => {
     if (!selectedConversation) return;
    try {
+      if (!selectedConversation.contact) return;
       await unblockUser(selectedConversation.contact.id);
     } catch (error) {
       void retryConversations();

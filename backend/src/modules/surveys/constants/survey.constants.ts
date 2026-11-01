@@ -8,6 +8,7 @@ export const SURVEY_MIN_QUESTIONS_TO_PUBLISH = 1;
 export const SURVEY_ALL_ACADEMIC_PERIODS = 'Todas';
 export const SURVEY_ACADEMIC_PERIOD_PATTERN = /^(\d{4}|Todas)$/;
 export const SURVEY_ACADEMIC_PERIOD_YEAR_PATTERN = /(\d{4})$/;
+export const SURVEY_ALL_CAREERS = 'all';
 
 export const SURVEY_VALIDATION_MESSAGES = {
   TITLE_REQUIRED: 'El título de la encuesta es obligatorio',
@@ -20,6 +21,8 @@ export const SURVEY_VALIDATION_MESSAGES = {
   CAREER_REQUIRED: 'La carrera dirigida es obligatoria',
   INVALID_ACADEMIC_PERIOD: 'La gestión debe ser un año, por ejemplo 2026, o Todas',
   ACADEMIC_PERIOD_REQUIRED: 'La gestión es obligatoria',
+  TARGET_AUDIENCE_REQUIRED: 'El público objetivo es obligatorio',
+  INVALID_TARGET_AUDIENCE: 'El público objetivo no es válido',
   INVALID_DATE: 'La fecha no es válida',
   OPENS_AT_REQUIRED: 'La fecha de apertura es obligatoria',
   CLOSES_AT_REQUIRED: 'La fecha de cierre es obligatoria',
@@ -43,8 +46,12 @@ export const SURVEY_ERROR_MESSAGES = {
   CAREER_NOT_FOUND: 'La carrera seleccionada no existe',
   SURVEY_NOT_FOUND: 'La encuesta solicitada no existe',
   SURVEY_NOT_EDITABLE: 'Solo se pueden editar las encuestas en borrador',
+  SURVEY_NOT_PUBLISHED: 'Solo se pueden inhabilitar las encuestas publicadas',
+  SURVEY_HAS_RESPONSES:
+    'No se puede inhabilitar una encuesta que ya tiene respuestas registradas',
+  SURVEY_NOT_OPEN: 'La encuesta todavía no está abierta para recibir respuestas',
   SURVEY_NOT_AVAILABLE:
-    'Esta encuesta no está dirigida a tu carrera o año de egreso',
+    'Esta encuesta no está dirigida a tu perfil, carrera o año de egreso',
   STORAGE_UNAVAILABLE:
     'El registro de encuestas todavía no está disponible. Intente más tarde',
 } as const;
@@ -54,6 +61,12 @@ export const SURVEY_DISPLAY_STATUS_LABELS = {
   published: 'Publicada',
   closed: 'Cerrada',
 } as const;
+
+export const SURVEY_QUESTION_TYPE_LABELS: Readonly<Record<string, string>> = {
+  single_choice: 'Opción única',
+  multiple_choice: 'Opción múltiple',
+  dropdown: 'Lista desplegable',
+};
 
 export const CATALOG_TITLE_SELECT = { select: { title: true } } as const;
 
@@ -69,6 +82,7 @@ export const SURVEY_SUMMARY_SELECT = {
   title: true,
   status: CATALOG_TITLE_SELECT,
   academicPeriod: true,
+  targetAudience: CATALOG_TITLE_SELECT,
   opensAt: true,
   closesAt: true,
   createdAt: true,
@@ -82,6 +96,7 @@ export const CAREER_SELECT = { id: true, title: true } as const;
 export const SURVEY_DETAIL_INCLUDE = {
   career: { select: CAREER_SELECT },
   status: CATALOG_TITLE_SELECT,
+  targetAudience: CATALOG_TITLE_SELECT,
   questions: {
     orderBy: { position: 'asc' },
     include: {

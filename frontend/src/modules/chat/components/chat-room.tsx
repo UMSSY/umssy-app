@@ -92,6 +92,10 @@ function ChatRoomContent({
   isLoadingOlderError = false, onRetryMessages, isCompact = false,
   onBlockUser, onUnblockUser, connectionStatus = "connected",
 }: ChatRoomProps) {
+  const isEventConversation = Boolean(conversation.eventId);
+  const conversationName = conversation.eventId
+    ? conversation.eventTitle ?? 'Chat del evento'
+    : conversation.contact?.fullName ?? '';
   const ui = useMessagingUi();
   const [localInputText, setLocalInputText] = useState("");
   const [selectedAttachment, setSelectedAttachment] = useState<File | null>(null);
@@ -297,14 +301,15 @@ function ChatRoomContent({
             data-testid="chat-contact-profile-trigger"
             title="Ver perfil de usuario"
             aria-label="Ver perfil de usuario"
+            disabled={isEventConversation}
             onClick={() => setIsProfileModalOpen(true)}
             className="flex h-auto items-center gap-3 p-1 transition-colors hover:bg-surface-soft"
           >
             <div className="relative shrink-0">
-              {conversation.contact.avatarUrl ? (
+              {conversation.contact?.avatarUrl ? (
                 <Image
-                  src={conversation.contact.avatarUrl}
-                  alt={conversation.contact.fullName}
+                  src={conversation.contact?.avatarUrl}
+                  alt={conversationName}
                   width={40}
                   height={40}
                   unoptimized
@@ -312,10 +317,10 @@ function ChatRoomContent({
                 />
               ) : (
                 <div className="flex size-10 items-center justify-center rounded-full border border-border bg-border text-xs font-bold text-ink">
-                  {getInitials(conversation.contact.fullName)}
+                  {getInitials(conversationName)}
                 </div>
               )}
-              {conversation.contact.isOnline && !isBlockedByMe && (
+              {conversation.contact?.isOnline && !isBlockedByMe && (
                 <span
                   data-testid="online-indicator"
                   className="absolute right-0 bottom-0 size-2.5 rounded-full border-2 border-surface bg-emerald-500"
@@ -328,7 +333,7 @@ function ChatRoomContent({
                 data-testid="chat-contact-name"
                 className="text-sm leading-tight font-bold text-ink md:text-base"
               >
-                {conversation.contact.fullName}
+                {conversationName}
               </h3>
               {isBlockedByMe ? (
                 <span data-testid="chat-blocked-status" className="inline-flex items-center gap-1 text-xs font-medium text-ink-soft">
@@ -337,7 +342,7 @@ function ChatRoomContent({
                 </span>
               ) : (
                 <span className="text-xs font-medium text-ink-soft">
-                  {conversation.contact.isOnline
+                  {isEventConversation ? "Chat del evento" : conversation.contact?.isOnline
                     ? "En línea"
                     : "Desconectado"}
                 </span>
@@ -345,7 +350,7 @@ function ChatRoomContent({
             </div>
           </Button>
         </div>
-        {onBlockUser && onUnblockUser && (
+        {!isEventConversation && onBlockUser && onUnblockUser && (
           <ChatOptionsMenu
             isBlocked={isBlockedByMe}
             disabled={isUnblocking}
@@ -354,12 +359,11 @@ function ChatRoomContent({
           />
         )}
       </header>
-      {connectionStatus !== "connected" && <ChatConnectionBanner key={connectionStatus} status={connectionStatus} />}
-      {onBlockUser && (
+      {!isEventConversation && onBlockUser && (
         <BlockUserDialog
           open={isBlockDialogOpen}
           onOpenChange={setIsBlockDialogOpen}
-          contactName={conversation.contact.fullName}
+          contactName={conversationName}
           onConfirm={onBlockUser}
         />
       )}
@@ -407,7 +411,7 @@ function ChatRoomContent({
             <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-surface text-ink">
               <MessageCircle className="size-6" aria-hidden="true" />
             </div>
-            <p className="text-sm font-medium">Sala de chat con {conversation.contact.fullName}</p>
+            <p className="text-sm font-medium">Sala de chat con {conversationName}</p>
             <p className="mt-1 text-xs">Aún no hay mensajes. Envía el primero para comenzar la conversación.</p>
           </div>
         ) : (
@@ -432,7 +436,7 @@ function ChatRoomContent({
       </div>
       {isBlockedByMe ? (
         <BlockedConversationNotice
-          contactName={conversation.contact.fullName}
+          contactName={conversationName}
           isUnblocking={isUnblocking}
           onUnblock={() => void handleUnblock()}
         />

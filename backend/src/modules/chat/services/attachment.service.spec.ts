@@ -46,6 +46,28 @@ describe('AttachmentService', () => {
         type: rec.type?.title ?? 'FILE',
         createdAt: rec.createdAt instanceof Date ? rec.createdAt.toISOString() : String(rec.createdAt),
       })),
+      toMessageResponse: vi.fn().mockImplementation((params: any) => ({
+        id: params.message.id,
+        conversationId: params.message.conversationId,
+        senderId: params.message.senderId,
+        content: params.message.content ?? '',
+        timestamp: params.message.sentAt.toISOString(),
+        createdAt: params.message.sentAt.toISOString(),
+        status: 'sent' as const,
+        isAttachment: true,
+        attachmentType: params.isImage ? ('image' as const) : ('file' as const),
+        attachment: {
+          id: params.attachmentRecord.id,
+          messageId: params.attachmentRecord.messageId,
+          fileName: params.attachmentRecord.fileName,
+          mimeType: params.attachmentRecord.mimeType,
+          fileSize: params.attachmentRecord.fileSize,
+          url: params.attachmentRecord.url ?? `/api/chat/attachments/${params.attachmentRecord.id}/download`,
+          thumbnailUrl: params.attachmentRecord.thumbnailUrl ?? null,
+          type: params.isImage ? 'IMAGE' : 'PDF',
+          createdAt: params.attachmentRecord.createdAt instanceof Date ? params.attachmentRecord.createdAt.toISOString() : String(params.attachmentRecord.createdAt),
+        },
+      })),
     } as unknown as AttachmentMapper;
 
     const conversationRepository = {

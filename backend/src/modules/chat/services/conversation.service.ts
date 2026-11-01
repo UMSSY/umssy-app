@@ -7,6 +7,8 @@ import { ConnectionRequestRepository } from '../repositories/connection-request.
 
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
+import { ConversationMapper } from '../mappers/conversation.mapper.js';
+import type { RawConversationRecord } from '../types/raw-conversation-record.types.js';
 
 import {
   InactiveUserException,
@@ -25,6 +27,7 @@ export class ConversationService {
     private readonly userPresenceService: UserPresenceService,
     private readonly connectionRequestRepository: ConnectionRequestRepository,
     private readonly blockService: BlockService,
+    private readonly conversationMapper: ConversationMapper,
   ) {}
 
   async getOrCreate(
@@ -49,12 +52,10 @@ export class ConversationService {
     const normalizedCurrentUserId = currentUserId.trim().toLowerCase();
     const normalizedContactId = contactId.trim().toLowerCase();
 
-    // Evitar conversaciones consigo mismo
     if (normalizedCurrentUserId === normalizedContactId) {
       throw new SelfConversationException();
     }
 
-    // Verificar que el destinatario exista
     const contact = await this.userLookupRepository.findById(
       normalizedContactId,
     );
@@ -63,23 +64,19 @@ export class ConversationService {
       throw new UserNotFoundException();
     }
 
-    // Verificar que el destinatario esté activo
     if (!contact.isActive) {
       throw new InactiveUserException();
     }
 
-    // Normalizar el orden de los usuarios
     const [userAId, userBId] =
       normalizedCurrentUserId < normalizedContactId
         ? [normalizedCurrentUserId, normalizedContactId]
         : [normalizedContactId, normalizedCurrentUserId];
 
-    // HU-13: ids bloqueados por el usuario actual (una sola consulta)
     const blockedIds = await this.blockService.findBlockedIdsBy(
       normalizedCurrentUserId,
     );
 
-    // Buscar una conversación existente
     const existing =
       await this.conversationRepository.findByOrderedPair(
         userAId,
@@ -99,7 +96,6 @@ export class ConversationService {
       };
     }
 
-   
     const acceptedRequest =
       await this.connectionRequestRepository.findAcceptedRequest(
         userAId,
@@ -111,7 +107,6 @@ export class ConversationService {
         'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
       );
     }
-
 
     try {
       const created =
@@ -132,7 +127,6 @@ export class ConversationService {
         isCreated: true,
       };
     } catch (error: unknown) {
-      // Recuperación ante creación concurrente
       const err = error as {
         code?: string;
         message?: string;
@@ -183,7 +177,6 @@ export class ConversationService {
   async findAllForUser(
     currentUserId: string,
   ): Promise<ConversationResponse[]> {
-    // HU-13: una sola consulta de bloqueos por petición (sin N+1)
     const [list, blockedIds] = await Promise.all([
       this.conversationRepository.findUserConversations(currentUserId),
       this.blockService.findBlockedIdsBy(currentUserId),
@@ -197,96 +190,30 @@ export class ConversationService {
   }
 
   private async toResponse(
-    conversation: {
-      id: string;
-      userAId: string | null;
-      userBId: string | null;
-      updatedAt: Date;
-
-      userA: {
-        id: string;
-        firstName: string;
-        lastName: string;
-        photoUrl?: Uint8Array | null;
-      } | null;
-
-      userB: {
-        id: string;
-        firstName: string;
-        lastName: string;
-        photoUrl?: Uint8Array | null;
-      } | null;
-
-      messages: Array<{
-        id: string;
-        senderId: string;
-        content: string | null;
-        sentAt: Date;
-      }>;
-
-      event?: {
-        id: string;
-        title: string;
-      } | null;
-    },
+    conversation: RawConversationRecord,
     currentUserId: string,
     blockedIds: ReadonlySet<string>,
   ): Promise<ConversationResponse> {
-if (conversation.event?.id) {
-  const lastMessage = conversation.messages[0];
-  const safeContent = lastMessage?.content ?? '';
-  const isAttachment = Boolean(safeContent.startsWith('[Archivo] '));
-  const content = isAttachment
-    ? safeContent.slice(10)
-    : safeContent;
-  const attachmentType = isAttachment ? ('file' as const) : null;
+    if (conversation.event?.id || (!conversation.userAId && !conversation.userBId)) {
+      return this.conversationMapper.toEventConversationResponse(conversation);
+    }
 
-  return {
-    id: conversation.id,
-    eventId: conversation.event.id,
-
-    lastMessage: lastMessage
-      ? {
-          id: lastMessage.id,
-          senderId: lastMessage.senderId,
-          content,
-          isAttachment,
-          attachmentType,
-          createdAt: lastMessage.sentAt.toISOString(),
-        }
-      : null,
-    unreadCount: 0,
-    isBlockedByMe: false, 
-    updatedAt: conversation.updatedAt.toISOString(),
-  };
-}
-
-const contact = (
-      conversation.userAId === currentUserId
-        ? conversation.userB
-        : conversation.userA
-    ) as {
-      id: string;
-      firstName: string;
-      lastName: string;
-      photoUrl?: Uint8Array | null;
-    };
+    const contact = conversation.userAId === currentUserId
+      ? conversation.userB
+      : conversation.userA;
 
     if (!contact) {
       throw new UserNotFoundException();
     }
 
-    const onlineMap = await this.userPresenceService.mapOnlineStatus([
-      contact.id,
-    ]);
-
-    const participant =
-      await this.participantRepository.findByConversationAndUser(
+    const [onlineMap, participant] = await Promise.all([
+      this.userPresenceService.mapOnlineStatus([contact.id]),
+      this.participantRepository.findByConversationAndUser(
         conversation.id,
         currentUserId,
-      );
+      ),
+    ]);
 
-    // Calcular mensajes no leídos
     const unreadCount = participant
       ? await this.participantRepository.countUnread(
           conversation.id,
@@ -295,53 +222,12 @@ const contact = (
         )
       : 0;
 
-    const lastMessage = conversation.messages[0];
-
-    const safeContent = lastMessage?.content ?? '';
-
-    // Detectar archivos adjuntos
-    const isAttachment = safeContent.startsWith('[Archivo] ');
-
-    const content = isAttachment
-      ? safeContent.slice(10)
-      : safeContent;
-
-    const attachmentType = isAttachment
-      ? ('file' as const)
-      : null;
-
-    // Convertir foto binaria a base64
-    const contactPhoto = contact.photoUrl;
-
-    const avatarUrl = contactPhoto
-      ? `data:image/jpeg;base64,${Buffer.from(contactPhoto).toString('base64')}`
-      : null;
-
-    return {
-      id: conversation.id,
-
-      contact: {
-        id: contact.id,
-        fullName: `${contact.firstName} ${contact.lastName}`.trim(),
-        avatarUrl,
-        isOnline: onlineMap.get(contact.id) ?? false,
-      },
-
-      lastMessage: lastMessage
-        ? {
-            id: lastMessage.id,
-            senderId: lastMessage.senderId,
-            content,
-            isAttachment,
-            attachmentType,
-            createdAt: lastMessage.sentAt.toISOString(),
-          }
-        : null,
-
+    return this.conversationMapper.toDirectConversationResponse({
+      conversation,
+      contact,
+      isOnline: onlineMap.get(contact.id) ?? false,
       unreadCount,
-      // HU-13: solo quien bloquea recibe true; al bloqueado no se le revela.
       isBlockedByMe: blockedIds.has(contact.id.toLowerCase()),
-      updatedAt: conversation.updatedAt.toISOString(),
-    };
+    });
   }
 }

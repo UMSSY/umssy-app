@@ -24,4 +24,5 @@ export interface JobOfferResponse {
   createdAt: string;
   company: JobOfferCompanyResponse;
   skills: JobOfferSkillResponse[];
+  applicantsCount: number;
 }

@@ -23,6 +23,7 @@ import { ChatService } from './services/chat.service.js';
 import { LinkPreviewService } from './services/link-preview.service.js';
 import { AttachmentService } from './services/attachment.service.js';
 import { AttachmentMapper } from './mappers/attachment.mapper.js';
+import { ConversationMapper } from './mappers/conversation.mapper.js';
 import { AttachmentUploadInterceptor } from './interceptors/attachment-upload.interceptor.js';
 import { EventRoomService } from './services/event-room.service.js';
 import { ConnectionRequestService } from './services/connection-request.service.js';
@@ -64,6 +65,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     LinkPreviewService,
     AttachmentService,
     AttachmentMapper,
+    ConversationMapper,
     AttachmentUploadInterceptor,
     FileValidationService,
     EventRoomService,

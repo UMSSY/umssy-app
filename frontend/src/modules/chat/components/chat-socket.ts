@@ -2,7 +2,30 @@ import { io, type Socket } from 'socket.io-client';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import { ENV_CONFIG } from '@/shared/config/env.config';
 
-let chatSocket: Socket | null = null;
+let sharedSocket: Socket | null = null;
+
+export function resolveSocketEndpoint(apiUrl: string = ENV_CONFIG.apiUrl || 'http://localhost:8080'): {
+  serverUrl: string;
+  path?: string;
+} {
+  try {
+    const parsed = new URL(apiUrl);
+    const serverUrl = parsed.origin;
+    return { serverUrl, path: '/api/socket.io' };
+  } catch {
+    return { serverUrl: apiUrl, path: '/api/socket.io' };
+  }
+}
+
+export function createChatSocket(token: string): Socket {
+  const { serverUrl, path } = resolveSocketEndpoint();
+  return io(`${serverUrl}/chat`, {
+    autoConnect: false,
+    auth: { token },
+    transports: ['websocket'],
+    ...(path ? { path } : {}),
+  });
+}
 
 export function getChatSocket(): Socket {
   const token = getAccessToken();
@@ -11,21 +34,22 @@ export function getChatSocket(): Socket {
     throw new Error('No hay una sesión iniciada.');
   }
 
-  if (!ENV_CONFIG.apiUrl) throw new Error('Falta la URL del backend.');
-
-  if (!chatSocket) {
-    chatSocket = io(`${new URL(ENV_CONFIG.apiUrl).origin}/chat`, {
-      autoConnect: false,
-      auth: (callback) => callback({ token: getAccessToken() }),
-      transports: ['websocket'],
-    });
+  if (!sharedSocket) {
+    sharedSocket = createChatSocket(token);
   }
 
-  chatSocket.auth = (callback) => callback({ token: getAccessToken() });
+  sharedSocket.auth = { token };
 
-  if (!chatSocket.connected) {
-    chatSocket.connect();
+  if (!sharedSocket.connected) {
+    sharedSocket.connect();
   }
 
-  return chatSocket;
+  return sharedSocket;
+}
+
+export function resetChatSocket(): void {
+  if (sharedSocket) {
+    sharedSocket.disconnect();
+    sharedSocket = null;
+  }
 }

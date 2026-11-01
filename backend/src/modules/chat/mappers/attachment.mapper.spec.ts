@@ -82,4 +82,58 @@ describe('AttachmentMapper', () => {
       expect(res.type).toBe('FILE');
     });
   });
+
+  describe('toMessageResponse', () => {
+    it('maps message and attachmentRecord to full MessageResponse', () => {
+      const sentAt = new Date('2026-10-28T10:00:00Z');
+      const record: AttachmentRecord = {
+        id: 'att-1',
+        messageId: 'msg-1',
+        typeId: 'type-1',
+        fileName: 'image.png',
+        mimeType: 'image/png',
+        fileSize: 2048,
+        url: null,
+        thumbnailUrl: null,
+        createdAt: sentAt,
+        type: { title: 'IMAGE' },
+      };
+
+      const result = mapper.toMessageResponse({
+        message: {
+          id: 'msg-1',
+          conversationId: 'conv-1',
+          senderId: 'user-1',
+          content: 'caption',
+          sentAt,
+          createdAt: sentAt,
+        },
+        attachmentRecord: record,
+        isImage: true,
+      });
+
+      expect(result).toEqual({
+        id: 'msg-1',
+        conversationId: 'conv-1',
+        senderId: 'user-1',
+        content: 'caption',
+        timestamp: sentAt.toISOString(),
+        createdAt: sentAt.toISOString(),
+        status: 'sent',
+        isAttachment: true,
+        attachmentType: 'image',
+        attachment: {
+          id: 'att-1',
+          messageId: 'msg-1',
+          fileName: 'image.png',
+          mimeType: 'image/png',
+          fileSize: 2048,
+          url: '/api/chat/attachments/att-1/download',
+          thumbnailUrl: null,
+          type: 'IMAGE',
+          createdAt: sentAt.toISOString(),
+        },
+      });
+    });
+  });
 });

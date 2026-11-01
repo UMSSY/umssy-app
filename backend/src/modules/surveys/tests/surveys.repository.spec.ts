@@ -29,6 +29,12 @@ function createPrisma() {
         { id: 'type-multiple', title: 'multiple_choice' },
       ]),
     },
+    surveyTargetAudience: {
+      findMany: vi.fn().mockResolvedValue([
+        { id: 'audience-all', title: 'all' },
+        { id: 'audience-graduates', title: 'graduates' },
+      ]),
+    },
   };
   return {
     tx,
@@ -46,7 +52,9 @@ const BASE_DATA: CreateSurveyData = {
   title: 'Encuesta',
   description: null,
   careerId: 'career-1',
+  targetsAllCareers: false,
   academicPeriod: 'II-2026',
+  targetAudience: 'graduates',
   opensAt: null,
   closesAt: null,
   status: 'published',
@@ -67,10 +75,12 @@ describe('SurveysRepository', () => {
     prisma.survey.findFirst
       .mockResolvedValueOnce({ id: 'survey-1' })
       .mockResolvedValueOnce(null);
+    const now = new Date('2026-10-29T12:00:00.000Z');
     const scope = {
       title: 'Encuesta',
       careerId: 'career-1',
       academicPeriod: 'II-2026',
+      now,
     };
 
     expect(await repository.existsWithTitle(scope)).toBe(true);
@@ -80,6 +90,7 @@ describe('SurveysRepository', () => {
         title: { equals: 'Encuesta', mode: 'insensitive' },
         careerId: 'career-1',
         academicPeriod: 'II-2026',
+        OR: [{ status: { title: 'draft' } }, { closesAt: null }, { closesAt: { gte: now } }],
       },
       select: { id: true },
     });
@@ -110,10 +121,12 @@ describe('SurveysRepository', () => {
         title: 'Encuesta',
         description: null,
         careerId: 'career-1',
+        targetsAllCareers: false,
         academicPeriod: 'II-2026',
         opensAt: null,
         closesAt: null,
         statusId: 'status-published',
+        targetAudienceId: 'audience-graduates',
         createdById: 'admin-1',
       },
       select: SURVEY_CREATED_SELECT,
@@ -215,10 +228,17 @@ describe('SurveysRepository', () => {
       },
     ]);
 
-    const notifications = await repository.findNotificationsForUser('user-1', {
-      careerId: 'career-sistemas',
-      graduationYear: 2024,
-    });
+    const notifications = await repository.findNotificationsForUser(
+      'user-1',
+      { careerId: 'career-sistemas', graduationYear: 2024 },
+      ['all', 'graduates'],
+    );
+
+    expect(prisma.survey.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ targetAudience: { title: { in: ['all', 'graduates'] } } }),
+      }),
+    );
 
     expect(notifications).toEqual([
       {

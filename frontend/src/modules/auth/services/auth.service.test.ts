@@ -52,4 +52,25 @@ describe('authService', () => {
     expect(apiClient.get).toHaveBeenCalledWith('/auth/session', { headers: { Authorization: 'Bearer session-token' } });
   });
 
+  it('requestPasswordResetCode llama al endpoint y retorna resultado', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { ok: true, message: 'Código enviado' } });
+    const res = await authService.requestPasswordResetCode({ email: 'user@test.com' });
+    expect(res).toEqual({ ok: true, message: 'Código enviado' });
+    expect(apiClient.post).toHaveBeenCalledWith('/auth/forgot-password/request', { email: 'user@test.com' });
+  });
+
+  it('verifyPasswordResetCode llama al endpoint y retorna resultado', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { ok: true } });
+    const res = await authService.verifyPasswordResetCode({ email: 'user@test.com', code: '123456' });
+    expect(res).toEqual({ ok: true });
+    expect(apiClient.post).toHaveBeenCalledWith('/auth/forgot-password/verify', { email: 'user@test.com', code: '123456' });
+  });
+
+  it('resetPassword llama al endpoint y retorna resultado', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { ok: true } });
+    const res = await authService.resetPassword({ email: 'user@test.com', code: '123456', password: 'NewPassword1' });
+    expect(res).toEqual({ ok: true });
+    expect(apiClient.post).toHaveBeenCalledWith('/auth/forgot-password/reset', { email: 'user@test.com', code: '123456', password: 'NewPassword1' });
+  });
+
 });
