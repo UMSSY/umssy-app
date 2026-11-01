@@ -20,6 +20,15 @@ const mockBlock: AvailabilityBlock = {
 }
 
 describe("availabilityApi", () => {
+  it("consulta fechas futuras sin limitar el rango a una semana", async () => {
+    const spy = vi.spyOn(apiClient, "get").mockResolvedValue(envelope([]));
+    await expect(availabilityApi.getFutureBlockedDates("2026-10-31T00:00:00-04:00")).resolves.toEqual([]);
+    const url = new URL(spy.mock.calls[0][0], "http://localhost");
+    expect(url.pathname).toBe("/blocked-dates");
+    expect(url.searchParams.get("from")).toBe("2026-10-31T00:00:00-04:00");
+    expect(url.searchParams.has("to")).toBe(false);
+  });
+
   beforeEach(() => {
     vi.restoreAllMocks()
   })

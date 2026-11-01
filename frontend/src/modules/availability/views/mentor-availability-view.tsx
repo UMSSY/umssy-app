@@ -15,6 +15,7 @@ import {
 import { AvailabilityLoading } from "../components/availability-loading";
 import { BlockForm } from "../components/block-form";
 import { BlockedDatePanel } from "../components/blocked-date-panel";
+import { BlockedDatesList } from "../components/blocked-dates-list";
 import { EditBlockPanel } from "../components/edit-block-panel";
 import { ReceiveRequestsSwitch } from "../components/receive-requests-switch";
 import { WeekGrid } from "../components/week-grid/week-grid";
@@ -174,7 +175,7 @@ export function MentorAvailabilityView({
         </div>
 
         <div
-          className="min-w-0 min-[1200px]:sticky min-[1200px]:top-[calc(var(--spacing-app-header)+1rem)] min-[1200px]:max-h-[calc(100dvh-var(--spacing-app-header)-2rem)] min-[1200px]:overflow-y-auto"
+          className="min-w-0 space-y-4 min-[1200px]:sticky min-[1200px]:top-[calc(var(--spacing-app-header)+1rem)] min-[1200px]:max-h-[calc(100dvh-var(--spacing-app-header)-2rem)] min-[1200px]:overflow-y-auto"
         >
           {showBlockedPanel && (
             <BlockedDatePanel
@@ -208,6 +209,7 @@ export function MentorAvailabilityView({
               onCancel={handleCancelCreate}
             />
           </div>
+          <BlockedDatesList />
         </div>
       </div>
     </div>
