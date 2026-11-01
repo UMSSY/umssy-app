@@ -20,14 +20,14 @@ describe("Cancelación persistida", () => {
     expect(cancel).not.toHaveBeenCalled();
   });
 
-  it("muestra el éxito tras la respuesta real", async () => {
+  it("delega el éxito a la vista tras la respuesta real sin duplicar el aviso", async () => {
     const onCancelled = vi.fn();
     vi.spyOn(mentorParticipationService, "cancel").mockResolvedValue({ ...request, status: "CANCELLED" });
     renderWithQuery(<PendingParticipation request={request} onCancelled={onCancelled} />);
     fireEvent.click(screen.getByRole("button", { name: "Cancelar solicitud" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirmar cancelación" }));
     await waitFor(() => expect(onCancelled).toHaveBeenCalledTimes(1));
-    expect(screen.getByRole("status")).toHaveTextContent("Solicitud cancelada correctamente");
+    expect(screen.queryByText("Solicitud cancelada correctamente")).not.toBeInTheDocument();
   });
 
   it("conserva la solicitud si falla la cancelación", async () => {

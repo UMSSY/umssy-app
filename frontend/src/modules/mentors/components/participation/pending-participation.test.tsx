@@ -149,6 +149,10 @@ describe("Participación pendiente HU7-2", () => {
   });
 
   it("cancela la solicitud mediante el servicio", async () => {
+    const onCancelled = vi.fn();
+    vi.mocked(participationService.mentorParticipationService.getHistory).mockResolvedValue([
+      { ...pendingRequest, status: "CANCELLED" },
+    ]);
     const cancel = vi
       .spyOn(
         participationService.mentorParticipationService,
@@ -160,7 +164,7 @@ describe("Participación pendiente HU7-2", () => {
       });
 
     renderWithQuery(
-      <PendingParticipation request={pendingRequest} />,
+      <PendingParticipation request={pendingRequest} onCancelled={onCancelled} />,
     );
 
     fireEvent.click(
@@ -175,7 +179,11 @@ describe("Participación pendiente HU7-2", () => {
 
     await waitFor(() => {
       expect(cancel).toHaveBeenCalledTimes(1);
+      expect(onCancelled).toHaveBeenCalledTimes(1);
     });
+    expect(screen.queryByText("Solicitud cancelada correctamente")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Ver historial" }));
+    expect(await screen.findByText("Estado: CANCELLED")).toBeInTheDocument();
   });
 
   it("consulta el historial de solicitudes", async () => {

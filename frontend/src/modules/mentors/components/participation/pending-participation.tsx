@@ -169,7 +169,6 @@ export function PendingParticipation({
         queryKey: ["mentor-participation-history"],
       });
       onCancelled?.();
-      setSuccessMessage("Solicitud cancelada correctamente");
     },
   });
 
