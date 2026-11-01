@@ -131,10 +131,10 @@ function createRepositories(store: ReturnType<typeof createStore>) {
         ) ?? null,
       ),
     findById: (id: string) => Promise.resolve(store.blockedDates.find((item) => item.id === id) ?? null),
-    findInRange: (mentorId: string, fromDay: Date, toDay: Date) =>
+    findInRange: (mentorId: string, fromDay: Date, toDay?: Date) =>
       Promise.resolve(
         store.blockedDates
-          .filter((item) => item.mentorId === mentorId && item.blockedOn >= fromDay && item.blockedOn <= toDay)
+          .filter((item) => item.mentorId === mentorId && item.blockedOn >= fromDay && (!toDay || item.blockedOn <= toDay))
           .sort((first, second) => first.blockedOn.getTime() - second.blockedOn.getTime()),
       ),
     hasActiveAppointmentBetween: (mentorId: string, from: Date, to: Date) =>
@@ -281,6 +281,26 @@ describe('Fechas bloqueadas (integración HTTP con el plan del seed B-08)', () =
   });
 
   const http = () => request(app.getHttpServer());
+  it('lista desde hoy a meses futuros en orden, excluye pasado y otros mentores y permite desbloquear', async () => {
+    const template = store.blockedDates[0];
+    store.blockedDates = [
+      { ...template, id: '00000000-0000-4000-8000-000000000901', blockedOn: new Date('2027-03-01T00:00:00Z') },
+      { ...template, id: 'past', blockedOn: new Date('2026-10-21T00:00:00Z') },
+      { ...template, id: 'today', blockedOn: new Date('2026-10-22T00:00:00Z'), reason: null },
+      { ...template, id: 'other', mentorId: MENTOR_B, blockedOn: new Date('2026-11-01T00:00:00Z') },
+    ];
+    const path = '/api/blocked-dates?from=2026-10-22T00:00:00-04:00';
+    const response = await http().get(path).set('Authorization', `Bearer ${tokens.mentorA}`).expect(200);
+    expect(response.body.data.map((item: { blockedOn: string }) => item.blockedOn)).toEqual(['2026-10-22', '2027-03-01']);
+    expect(response.body.data[0].reason).toBeNull();
+    await http().delete(`/api/blocked-dates/${response.body.data[1].id}`)
+      .set('Authorization', `Bearer ${tokens.mentorA}`).expect(200);
+    const updated = await http().get(path).set('Authorization', `Bearer ${tokens.mentorA}`).expect(200);
+    expect(updated.body.data).toHaveLength(1);
+    await http().get(path).expect(401);
+    await http().get(path).set('Authorization', `Bearer ${tokens.graduate}`).expect(403);
+  });
+
   const weeklyPayload = {
     startAt: '2026-11-02T09:00:00-04:00',
     endAt: '2026-11-02T10:00:00-04:00',

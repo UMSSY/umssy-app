@@ -13,7 +13,7 @@ import {
 } from '../constants/availability-docs.constants.js';
 import { BlockDateDto } from '../requests/block-date.request.js';
 import { blockedDateIdSchema } from '../requests/blocked-date-id.request.js';
-import { WeekQueryDto } from '../requests/week-query.request.js';
+import { BlockedDatesQueryDto } from '../requests/blocked-dates-query.request.js';
 import { BlockedDatesService } from '../services/blocked-dates.service.js';
 import type { BlockedDateResponse } from '../types/blocked-date-response.types.js';
 import type { DeletedBlockedDateResponse } from '../types/deleted-blocked-date-response.types.js';
@@ -39,10 +39,10 @@ export class BlockedDatesController {
   @Roles('mentor')
   @ApiOperation({ summary: FIND_BLOCKED_DATES_DOCS.summary })
   @ApiQuery({ name: 'from', description: FIND_BLOCKED_DATES_DOCS.fromDescription })
-  @ApiQuery({ name: 'to', description: FIND_BLOCKED_DATES_DOCS.toDescription })
+  @ApiQuery({ name: 'to', required: false, description: FIND_BLOCKED_DATES_DOCS.toDescription })
   findBlockedDates(
     @CurrentUser() user: AuthenticatedUser,
-    @Query() query: WeekQueryDto,
+    @Query() query: BlockedDatesQueryDto,
   ): Promise<BlockedDateResponse[]> {
     return this.blockedDatesService.findBlockedDates(user.id, query);
   }
