@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -50,7 +49,6 @@ export function WorkExperienceProfileSection() {
     void reload();
   });
 
-  // Obtiene las habilidades asociadas a cada experiencia mediante evidenceRefs.
   const skillsByExperience = useMemo(() => {
     const result: Record<string, string[]> = {};
 
