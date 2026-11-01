@@ -24,7 +24,7 @@ function makeAppointment(
     blockId: "block-1",
     startAt: "2026-10-27T00:00:00.000Z",
     endAt: "2026-10-27T01:00:00.000Z",
-    counterpart: { id: "mentor-1", fullName: "Ana Pérez" },
+    counterpart: { id: "mentor-1", fullName: "Ana Pérez", role: "mentor" },
     orientationType: { id: "topic-1", name: "Desarrollo profesional" },
     status: "CONFIRMED",
     ...overrides,
@@ -48,6 +48,33 @@ afterEach(() => {
 });
 
 describe("AppointmentsView", () => {
+  it.each(["upcoming", "past"] as const)(
+    "en %s enlaza al mentor y conserva al egresado como texto para usuarios con ambos roles",
+    async (scope) => {
+      vi.mocked(useAuth).mockReturnValue({
+        roles: ["mentor", "titulado"],
+        isLoading: false,
+        refreshRoles: vi.fn().mockResolvedValue(undefined),
+      });
+      vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue([
+        makeAppointment(),
+        makeAppointment({
+          id: "as-mentor",
+          counterpart: { id: "student-1", fullName: "Luis Flores", role: "student" },
+        }),
+      ]);
+      const user = userEvent.setup();
+      renderWithQuery(<AppointmentsView />);
+      if (scope === "past") {
+        await user.click(screen.getByRole("tab", { name: "Pasadas" }));
+      }
+      expect(await screen.findByRole("link", { name: "Ana Pérez" })).toHaveAttribute("href", "/mentors/mentor-1");
+      expect(screen.getByText("Luis Flores")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "Luis Flores" })).not.toBeInTheDocument();
+      expect(appointmentsApi.getMyAppointments).toHaveBeenCalledWith(scope);
+    },
+  );
+
   it("muestra próximas inicialmente y ofrece buscar mentores al titulado sin citas", async () => {
     renderWithQuery(<AppointmentsView />);
 
@@ -189,13 +216,13 @@ describe("AppointmentsView", () => {
           ? [
               makeAppointment({
                 id: "next-1",
-                counterpart: { id: "m1", fullName: "Primera próxima" },
+                counterpart: { id: "m1", fullName: "Primera próxima", role: "mentor" },
               }),
               makeAppointment({
                 id: "next-2",
                 startAt: "2026-10-28T00:00:00.000Z",
                 endAt: "2026-10-28T01:00:00.000Z",
-                counterpart: { id: "m2", fullName: "Segunda próxima" },
+                counterpart: { id: "m2", fullName: "Segunda próxima", role: "mentor" },
               }),
             ]
           : [
@@ -203,13 +230,13 @@ describe("AppointmentsView", () => {
                 id: "past-1",
                 startAt: "2026-10-25T00:00:00.000Z",
                 endAt: "2026-10-25T01:00:00.000Z",
-                counterpart: { id: "m3", fullName: "Pasada reciente" },
+                counterpart: { id: "m3", fullName: "Pasada reciente", role: "mentor" },
               }),
               makeAppointment({
                 id: "past-2",
                 startAt: "2026-10-24T00:00:00.000Z",
                 endAt: "2026-10-24T01:00:00.000Z",
-                counterpart: { id: "m4", fullName: "Pasada anterior" },
+                counterpart: { id: "m4", fullName: "Pasada anterior", role: "mentor" },
               }),
             ],
     );

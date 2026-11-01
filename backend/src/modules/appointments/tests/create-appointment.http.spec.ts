@@ -238,7 +238,7 @@ describe('POST /appointments (integración HTTP)', () => {
       id: APPOINTMENT_ID,
       blockId: BLOCK_ID,
       orientationType: { id: TOPIC_ID },
-      counterpart: { id: MENTOR_ID, fullName: 'Ana Pérez' },
+      counterpart: { id: MENTOR_ID, fullName: 'Ana Pérez', role: 'mentor' },
       status: AppointmentStatusTitle.CONFIRMED,
     });
     expect(findStatusIdByTitle).toHaveBeenCalledWith(

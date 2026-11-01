@@ -7,6 +7,10 @@ import * as service from "@/modules/mentorship/services/mentor-profile.service";
 import { MENTOR_PROFILE_FIXTURE } from "@/modules/mentorship/testing/mentor-profile.fixture";
 import MentorProfilePage from "./page";
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 afterEach(() => {
   vi.restoreAllMocks();
 });
