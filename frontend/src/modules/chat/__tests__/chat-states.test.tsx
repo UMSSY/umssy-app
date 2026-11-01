@@ -334,3 +334,8 @@ describe("Chat Components", () => {
     expect(screen.getByText("Aún no tienes conversaciones ni solicitudes registradas.")).toBeDefined();
   });
 });
+
+// These suites exercise panel/UI behavior; transport recovery has its own tests.
+vi.mock('../hooks/use-chat-connection', () => ({
+  useChatConnection: () => ({ status: 'connected', refreshMessages: vi.fn() }),
+}));

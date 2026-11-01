@@ -59,17 +59,35 @@ export class UserLookupRepository {
           SELECT r.name
           FROM user_roles ur
           JOIN roles r ON r.id = ur.role_id
-          WHERE ur.user_id = u.id AND ur.deleted_at IS NULL
-          ORDER BY ur.created_at ASC
+          WHERE ur.user_id = u.id
+            AND ur.deleted_at IS NULL
+            AND r.name IN ('estudiante', 'titulado')
+          ORDER BY ur.created_at ASC, r.name ASC
           LIMIT 1
         ) AS role_name
       FROM users u
       LEFT JOIN user_presences up ON up.user_id = u.id
       WHERE u.id <> ${excludeUserId}::uuid
         AND u.is_active = true
+        AND EXISTS (
+          SELECT 1
+          FROM user_roles ur
+          JOIN roles r ON r.id = ur.role_id
+          WHERE ur.user_id = u.id
+            AND ur.deleted_at IS NULL
+            AND r.name IN ('estudiante', 'titulado')
+        )
+        AND NOT EXISTS (
+          SELECT 1
+          FROM user_roles ur
+          JOIN roles r ON r.id = ur.role_id
+          WHERE ur.user_id = u.id
+            AND ur.deleted_at IS NULL
+            AND r.name = 'empresa'
+        )
         AND lower(u.first_name || ' ' || u.last_name)
             LIKE lower(${pattern}) ESCAPE '\\'
-      ORDER BY u.first_name ASC, u.last_name ASC
+      ORDER BY u.first_name ASC, u.last_name ASC, u.id ASC
       LIMIT ${limit};
     `;
   }

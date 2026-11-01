@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -27,6 +27,10 @@ import {
   getReceivedConnectionRequests,
   getAcceptedConnectionRequests,
 } from "../services/connection-request-api";
+import {
+  getChatActionErrorMessage,
+  getChatHttpStatus,
+} from "../utils/chat-action-error";
 import { getInitials } from "../utils/date-formatter";
 import type { User } from "../types/user.types";
 import type { ConnectionRequest } from "../types/connection-request.types";
@@ -34,7 +38,13 @@ import type { ConnectionRequest } from "../types/connection-request.types";
 interface ContactSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectContact: (user: User) => void;
+  onSelectContact: (user: User) => void | Promise<void>;
+}
+
+function shouldRetry(failureCount: number, error: unknown): boolean {
+  const status = getChatHttpStatus(error);
+
+  return status !== 401 && status !== 403 && failureCount < 2;
 }
 
 export function ContactSearchModal({
@@ -43,31 +53,42 @@ export function ContactSearchModal({
   onSelectContact,
 }: ContactSearchModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const [sendingUserId, setSendingUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const actionPendingRef = useRef(false);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const { results, isSearching } = useContactSearch(searchTerm);
+  const {
+    results,
+    isSearching,
+    isError: isSearchError,
+    error: searchError,
+    refetch: retrySearch,
+  } = useContactSearch(searchTerm, isOpen);
+
   const sendRequest = useSendConnectionRequest();
 
   const sentQuery = useQuery({
     queryKey: ["chat", "connection-requests", "sent"],
     queryFn: getSentConnectionRequests,
     enabled: isOpen,
+    retry: shouldRetry,
   });
 
   const receivedQuery = useQuery({
     queryKey: ["chat", "connection-requests", "received"],
     queryFn: getReceivedConnectionRequests,
     enabled: isOpen,
+    retry: shouldRetry,
   });
 
   const acceptedQuery = useQuery({
     queryKey: ["chat", "connection-requests", "accepted"],
     queryFn: getAcceptedConnectionRequests,
     enabled: isOpen,
+    retry: shouldRetry,
   });
 
   const sentRequests = sentQuery.data ?? [];
@@ -84,17 +105,28 @@ export function ContactSearchModal({
     receivedQuery.isError ||
     acceptedQuery.isError;
 
+  const statusErrors = [
+    sentQuery.error,
+    receivedQuery.error,
+    acceptedQuery.error,
+  ];
+
+  const statusError =
+    statusErrors.find((item) => getChatHttpStatus(item) === 401) ??
+    statusErrors.find((item) => getChatHttpStatus(item) === 403) ??
+    statusErrors.find((item) => item != null);
+
   useEffect(() => {
-    if (selectedIndex >= 0 && optionRefs.current[selectedIndex]) {
+    if (selectedIndex >= 0) {
       optionRefs.current[selectedIndex]?.scrollIntoView({
-        block: 'nearest',
-        behavior: 'smooth',
+        block: "nearest",
+        behavior: "smooth",
       });
     }
   }, [selectedIndex]);
 
   const handleClose = () => {
-    if (sendingUserId) return;
+    if (actionPendingRef.current) return;
 
     setSearchTerm("");
     setSelectedIndex(-1);
@@ -106,8 +138,7 @@ export function ContactSearchModal({
     const accepted = acceptedRequests.some(
       (request: ConnectionRequest) =>
         request.status?.title === "ACCEPTED" &&
-        (request.senderId === userId ||
-          request.receiverId === userId),
+        (request.senderId === userId || request.receiverId === userId),
     );
 
     if (accepted) return "ACCEPTED";
@@ -130,8 +161,7 @@ export function ContactSearchModal({
 
     const rejected = [...sentRequests, ...receivedRequests].some(
       (request: ConnectionRequest) =>
-        (request.senderId === userId ||
-          request.receiverId === userId) &&
+        (request.senderId === userId || request.receiverId === userId) &&
         request.status?.title === "REJECTED",
     );
 
@@ -140,66 +170,81 @@ export function ContactSearchModal({
     return "NONE";
   };
 
-  const handleSendRequest = async (user: User) => {
-    if (sendingUserId || hasStatusError || isLoadingStatuses) {
+  const handleUserAction = async (user: User) => {
+    if (
+      actionPendingRef.current ||
+      isSearching ||
+      isSearchError ||
+      hasStatusError ||
+      isLoadingStatuses
+    ) {
       return;
     }
 
-    setError(null);
+    const status = getRequestStatus(user.id);
+
+    if (status !== "ACCEPTED" && status !== "NONE") return;
+
+    actionPendingRef.current = true;
     setSendingUserId(user.id);
+    setError(null);
 
     try {
-      await sendRequest.mutateAsync(user.id);
+      if (status === "ACCEPTED") {
+        await onSelectContact(user);
+
+        actionPendingRef.current = false;
+        handleClose();
+      } else {
+        await sendRequest.mutateAsync(user.id);
+      }
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "No se pudo enviar la solicitud.",
+        getChatActionErrorMessage(
+          err,
+          status === "ACCEPTED"
+            ? "No se pudo abrir la conversación. Intenta nuevamente."
+            : "No se pudo enviar la solicitud. Intenta nuevamente.",
+        ),
       );
     } finally {
+      actionPendingRef.current = false;
       setSendingUserId(null);
     }
   };
 
-  const handleUserAction = (user: User) => {
-    const status = getRequestStatus(user.id);
-
-    if (status === "ACCEPTED") {
-      onSelectContact(user);
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
       handleClose();
       return;
     }
 
-    if (status === "NONE") {
-      void handleSendRequest(user);
-    }
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      e.stopPropagation();
-      handleClose();
+    if (
+      results.length === 0 ||
+      isSearching ||
+      isSearchError ||
+      actionPendingRef.current
+    ) {
       return;
     }
 
-    if (results.length === 0) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSelectedIndex((prev) =>
-        prev < results.length - 1 ? prev + 1 : 0,
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setSelectedIndex((previous) =>
+        previous < results.length - 1 ? previous + 1 : 0,
       );
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSelectedIndex((prev) =>
-        prev > 0 ? prev - 1 : results.length - 1,
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setSelectedIndex((previous) =>
+        previous > 0 ? previous - 1 : results.length - 1,
       );
-    } else if (e.key === "Enter") {
-      e.preventDefault();
+    } else if (event.key === "Enter") {
+      event.preventDefault();
 
       if (selectedIndex >= 0 && selectedIndex < results.length) {
-        handleUserAction(results[selectedIndex]);
+        void handleUserAction(results[selectedIndex]);
       }
     }
   };
@@ -221,11 +266,13 @@ export function ContactSearchModal({
         <div className="py-2">
           <Input
             autoFocus
+            disabled={Boolean(sendingUserId)}
             placeholder="Buscar por nombre..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
+            onChange={(event) => {
+              setSearchTerm(event.target.value);
               setSelectedIndex(-1);
+              setError(null);
             }}
             onKeyDown={handleKeyDown}
             aria-label="Buscar contactos"
@@ -240,12 +287,18 @@ export function ContactSearchModal({
 
         {hasStatusError && (
           <div role="alert" className="text-sm text-destructive">
-            No se pudieron consultar las solicitudes.
+            <p>
+              {getChatActionErrorMessage(
+                statusError,
+                "No se pudieron consultar las solicitudes.",
+              )}
+            </p>
+
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="ml-2"
+              className="mt-2"
               onClick={() => {
                 void sentQuery.refetch();
                 void receivedQuery.refetch();
@@ -258,7 +311,26 @@ export function ContactSearchModal({
         )}
 
         <div className="mt-2 flex max-h-[320px] flex-col overflow-y-auto">
-          {isSearching ? (
+          {isSearchError ? (
+            <div role="alert" className="py-4 text-sm text-destructive">
+              <p>
+                {getChatActionErrorMessage(
+                  searchError,
+                  "No se pudo realizar la búsqueda. Intenta nuevamente.",
+                )}
+              </p>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => void retrySearch()}
+              >
+                Reintentar búsqueda
+              </Button>
+            </div>
+          ) : isSearching ? (
             <div role="status" className="py-6 text-center text-sm">
               Buscando...
             </div>
@@ -277,7 +349,9 @@ export function ContactSearchModal({
                 status === "REJECTED";
 
               const buttonText = isSendingThisUser
-                ? "Enviando..."
+                ? status === "ACCEPTED"
+                  ? "Abriendo..."
+                  : "Enviando..."
                 : isLoadingStatuses
                   ? "Consultando..."
                   : hasStatusError
@@ -316,28 +390,28 @@ export function ContactSearchModal({
                     <p className="truncate text-sm font-medium text-ink">
                       {user.fullName}
                     </p>
+
                     {user.headline && (
                       <p className="truncate text-xs text-text-secondary">
                         {user.headline}
                       </p>
                     )}
                   </div>
-<Button
-                    ref={(el) => {
-                      optionRefs.current[index] = el;
+
+                  <Button
+                    ref={(element) => {
+                      optionRefs.current[index] = element;
                     }}
                     type="button"
                     size="sm"
                     variant={status === "NONE" ? "default" : "secondary"}
                     disabled={isDisabled}
-                    onClick={() => handleUserAction(user)}
+                    onClick={() => void handleUserAction(user)}
                     className={`shrink-0 gap-2 text-xs ${
-                      status === "PENDING"
-                        ? "bg-gray-400 text-white"
-                        : ""
+                      status === "PENDING" ? "bg-gray-400 text-white" : ""
                     }`}
                   >
-                    <UserRoundPlus className="size-4" />
+                    <UserRoundPlus className="size-4" aria-hidden="true" />
                     {buttonText}
                   </Button>
                 </div>
@@ -345,8 +419,11 @@ export function ContactSearchModal({
             })
           ) : (
             searchTerm.trim().length >= 2 && (
-              <div className="py-6 text-center text-sm text-slate-500">
-                No se encontraron usuarios
+              <div
+                role="status"
+                className="py-6 text-center text-sm text-text-secondary"
+              >
+                No hay contactos disponibles que coincidan con tu búsqueda.
               </div>
             )
           )}
