@@ -130,6 +130,7 @@ function ChatRoomContent({
   isCompact = false,
   onBlockUser,
   onUnblockUser,
+  connectionStatus = "connected",
 }: ChatRoomProps) {
   const isEventConversation = Boolean(conversation.eventId);
   const conversationName = conversation.eventId
