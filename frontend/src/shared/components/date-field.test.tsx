@@ -68,3 +68,10 @@ describe("DateField", () => {
   });
 
 });
+
+it('opens at the nearest allowed month instead of the upper boundary', async () => {
+  render(<DateField aria-label="Fecha" value="" min="2026-11-10" max="2027-04-30" initialMonth="2026-11-10" />);
+  fireEvent.click(screen.getByRole('button', { name: 'Elegir fecha en el calendario' }));
+  expect(await screen.findByRole('combobox', { name: 'Mes' })).toHaveValue('10');
+  expect(screen.getByRole('combobox', { name: 'Año' })).toHaveValue('2026');
+});

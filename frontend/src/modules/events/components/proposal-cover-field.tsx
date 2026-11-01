@@ -4,8 +4,9 @@ import type { ProposalCoverFieldProps } from '../types/proposal-cover-field-prop
 
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
-import { ImagePlus, Upload, X, Sparkles } from 'lucide-react';
+import { ImagePlus, Upload, X, Expand, FileImage, HardDrive, Ratio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { PROPOSAL_COVER_ACCEPT } from '../constants/proposal.constants';
 import { readProposalCover } from '../utils/read-proposal-cover';
@@ -16,6 +17,7 @@ export function ProposalCoverField({ value, onChange, error, disabled, onBusyCha
   const request = useRef(0);
   const [busy, setBusy] = useState(false);
   const [fileError, setFileError] = useState<string>();
+  const [expanded, setExpanded] = useState(false);
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => () => { request.current += 1; }, []);
@@ -42,70 +44,85 @@ export function ProposalCoverField({ value, onChange, error, disabled, onBusyCha
   return (
     <ProposalField id="proposal-cover" label="Imagen de portada del taller">
       <div 
-        className={`relative flex w-full flex-col items-center gap-6 overflow-hidden rounded-xl border border-dashed p-6 transition-colors sm:flex-row sm:p-8 ${dragging ? 'border-accent bg-availability' : message ? 'border-danger bg-brand-soft/30' : 'border-border bg-surface-soft'}`}
+        className={`@container w-full min-w-0 rounded-xl border p-3 ${dragging ? 'border-accent bg-availability' : message ? 'border-danger bg-brand-soft/30' : 'border-availability-border/40 bg-availability/40'}`}
         onDragOver={(event) => { event.preventDefault(); if (!disabled) setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={(event) => { event.preventDefault(); setDragging(false); void selectFiles(Array.from(event.dataTransfer.files)); }}
       >
-        <div className="pointer-events-none absolute -top-16 -right-16 size-64 rounded-full bg-availability/50" />
 
-        <div className="group relative z-10 flex h-[120px] w-[200px] shrink-0 items-center justify-center rounded-lg border border-border-strong bg-surface-soft shadow-sm">
+        <div className="grid min-w-0 grid-cols-1 items-center gap-4 @min-[36rem]:grid-cols-[200px_minmax(0,1fr)]">
+        <div className="relative mx-auto flex aspect-workshop-cover w-full max-w-[200px] items-center justify-center rounded-lg border border-availability-border/40 bg-surface shadow-sm">
           {value ? (
             <>
-              <Image src={value.previewUrl} alt="Vista previa" fill unoptimized sizes="200px" className="rounded-lg object-cover" />
+              <Button type="button" variant="ghost" onClick={() => setExpanded(true)} aria-label="Ampliar imagen de portada" aria-haspopup="dialog" className="group absolute inset-0 size-full cursor-zoom-in overflow-hidden rounded-lg border-0 p-0 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2">
+                <Image src={value.previewUrl} alt="Vista previa de la portada" fill unoptimized sizes="200px" className="object-cover" />
+                <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 bg-accent/85 py-1.5 text-xs font-medium text-white transition-colors group-hover:bg-accent group-focus-visible:bg-accent"><Expand className="size-3.5" aria-hidden="true" />Ampliar imagen</span>
+              </Button>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={() => { setFileError(undefined); onChange(null); }}
+                onClick={() => { setExpanded(false); setFileError(undefined); onChange(null); }}
                 disabled={disabled || busy}
-                className="absolute -top-2 -right-2 z-20 size-7 rounded-full border border-border bg-surface text-text-secondary shadow-md transition hover:bg-brand-soft hover:text-danger disabled:opacity-50"
+                className="absolute top-1 right-1 z-20 size-11 rounded-full border border-border bg-surface text-text-secondary shadow-md transition hover:bg-brand-soft hover:text-danger disabled:opacity-50"
                 aria-label="Quitar imagen de portada"
               >
                 <X className="size-3.5" />
               </Button>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center gap-2 text-text-secondary">
-              <ImagePlus className="size-8" />
-              <span className="text-[11px] font-bold tracking-widest uppercase">Vista Previa</span>
+            <div className="flex flex-col items-center justify-center gap-2 text-accent">
+              <ImagePlus className="size-8" aria-hidden="true" />
+              <span className="text-xs font-medium">Vista Previa</span>
             </div>
           )}
         </div>
 
-        <div className="z-10 min-w-0 flex-1 space-y-4 text-center sm:text-left">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-availability/80 px-3 py-1 text-[11px] font-bold tracking-wide text-accent uppercase">
-            <Sparkles className="size-3" /> Imagen de portada
+        <div className="min-w-0 space-y-3 text-left">
+          <div className="min-w-0 space-y-1.5">
+            <p className="text-sm font-semibold text-ink">Dale una identidad a tu taller</p>
+            <p className="text-sm text-text-secondary">Elige una imagen que represente el tema. Se mostrará en la tarjeta del taller y en su ficha de detalles.</p>
+            <div id="proposal-cover-help" className="flex min-w-0 flex-wrap justify-start gap-1.5 text-xs font-medium text-accent">
+              <span className="inline-flex max-w-full min-w-0 items-center gap-1 rounded-md border border-availability-border/25 bg-surface px-1.5 py-0.5"><FileImage className="size-3" aria-hidden="true" />JPG / PNG</span>
+              <span className="inline-flex max-w-full min-w-0 items-center gap-1 rounded-md border border-availability-border/25 bg-surface px-1.5 py-0.5"><HardDrive className="size-3" aria-hidden="true" />Máx. 2 MB</span>
+              <span className="inline-flex max-w-full min-w-0 items-center gap-1 rounded-md border border-availability-border/25 bg-surface px-1.5 py-0.5"><Ratio className="size-3 shrink-0" aria-hidden="true" /><span className="min-w-0 wrap-anywhere">1200 × 600 px</span></span>
+            </div>
+            {value && <p className="text-xs wrap-anywhere text-text-secondary">{value.file.name}</p>}
           </div>
-          <h3 className="text-[17px] font-bold text-ink">Dale una identidad a tu taller</h3>
-          <p className="max-w-lg text-sm text-text-secondary">Elige una imagen que represente el tema. Se mostrará en la tarjeta del taller y en su ficha de detalles.</p>
-          
-          <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-semibold text-text-secondary sm:justify-start">
-            <span className="rounded-md bg-surface-soft/80 px-2.5 py-1">JPG / PNG</span>
-            <span className="rounded-md bg-surface-soft/80 px-2.5 py-1">Máx. 5 MB</span>
-            <span className="rounded-md bg-surface-soft/80 px-2.5 py-1">1200 × 600 px</span>
+          <div className="flex min-w-0 flex-col items-stretch gap-2 @min-[36rem]:flex-row @min-[36rem]:flex-wrap @min-[36rem]:items-center">
+            <Button type="button" variant="outline" disabled={disabled || busy} onClick={() => input.current?.click()} className="min-h-11 w-full min-w-0 border-availability-border/60 bg-surface text-accent hover:bg-availability hover:text-accent focus-visible:bg-availability active:bg-availability @min-[36rem]:w-auto"
+              aria-describedby={`proposal-cover-help proposal-cover-recommendation${message ? ' proposal-cover-error' : ''}`} aria-invalid={Boolean(message)}>
+              <Upload className="size-4" aria-hidden="true" />
+              {busy ? 'Comprobando...' : value ? 'Cambiar imagen' : 'Seleccionar imagen'}
+            </Button>
+            <span className="hidden text-xs text-text-secondary @min-[36rem]:block">o arrastra y suelta una imagen aquí</span>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-1 sm:justify-start">
-            <Button type="button" variant="outline" disabled={disabled || busy} onClick={() => input.current?.click()} className="bg-surface hover:bg-surface-soft">
-              <Upload className="mr-2 size-4" />
-              {busy ? 'Comprobando...' : 'Seleccionar imagen'}
-            </Button>
-            <span className="text-xs text-text-secondary">o arrastra y suelta una imagen aquí</span>
-          </div>
-          
-          <Input ref={input} id="proposal-cover" type="file" accept={PROPOSAL_COVER_ACCEPT} className="sr-only" disabled={disabled || busy}
+          <Input ref={input} id="proposal-cover" type="file" accept={PROPOSAL_COVER_ACCEPT} className="sr-only" tabIndex={-1} disabled={disabled || busy}
             onChange={(event) => { const files = Array.from(event.target.files ?? []); event.target.value = ''; if (files.length) void selectFiles(files); }} />
+        </div>
         </div>
       </div>
       
+      <p id="proposal-cover-recommendation" className="text-xs text-text-secondary">Recomendado: imagen horizontal de 1200 × 600 px, relacionada con el contenido del taller.</p>
       {message && (
         <p id="proposal-cover-error" role="alert" className="mt-2 text-sm text-danger">
           {message}
         </p>
       )}
-      {value && <p className="mt-2 text-xs text-text-secondary">{value.file.name}</p>}
-      <p className="mt-1 text-xs text-text-secondary">Recomendado: imagen horizontal relacionada con el contenido del taller.</p>
+      <Dialog open={expanded && Boolean(value)} onOpenChange={setExpanded}>
+        <DialogContent showCloseButton={false} className="max-h-[90dvh] overflow-y-auto sm:max-w-4xl">
+          <DialogHeader className="pr-12">
+            <DialogTitle>Vista previa de la portada</DialogTitle>
+            <DialogDescription className="wrap-anywhere">{value?.file.name}</DialogDescription>
+          </DialogHeader>
+          <DialogClose render={<Button type="button" variant="ghost" size="icon-lg" className="absolute top-2 right-2 text-accent" aria-label="Cerrar vista previa" />}><X aria-hidden="true" /></DialogClose>
+          {value && <div className="relative h-[60dvh] min-h-40 overflow-hidden rounded-lg border border-availability-border/30 bg-availability/40">
+            <Image src={value.previewUrl} alt="Portada completa del taller" fill unoptimized sizes="(max-width: 640px) 90vw, 850px" className="object-contain" />
+          </div>}
+          <p className="text-xs text-text-secondary">Imagen completa, sin recorte. La tarjeta del taller puede mostrar un recorte para ajustarse a su formato.</p>
+        </DialogContent>
+      </Dialog>
       {busy && <p role="status" className="mt-2 text-xs text-accent">Comprobando que la imagen se pueda visualizar...</p>}
     </ProposalField>
   );

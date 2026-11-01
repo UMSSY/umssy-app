@@ -5,4 +5,5 @@ export interface WorkspacePageProps {
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
+  headingClassName?: string;
 }

@@ -67,7 +67,7 @@ describe('proposal errors through the shared HTTP filter', () => {
   it('associates missing categories with categoryId', async () => {
     prisma.tx.eventCategory.findUnique.mockResolvedValue(null);
     const { body } = await submit().expect(400);
-    expect(body).toMatchObject({ code: 'VALIDATION_ERROR', errors: [{ field: 'categoryId', message: 'Selecciona una categoría disponible.' }] });
+    expect(body).toMatchObject({ code: 'VALIDATION_ERROR', errors: [{ field: 'categoryId', message: 'Esta categoría ya no está disponible. Elige otra.' }] });
     expect(prisma.tx.event.create).not.toHaveBeenCalled();
   });
   it('preserves success, replay and the domain conflict response', async () => {
@@ -89,4 +89,9 @@ describe('proposal errors through the shared HTTP filter', () => {
   it('returns a domain error for a missing cover', async () => {
     expect((await request(app.getHttpServer()).get(`/api/events/${KEY}/cover`).expect(404)).body).toMatchObject({ code: 'PROPOSAL_COVER_NOT_FOUND', detail: 'Portada no disponible.' });
   });
+});
+
+it('rejects a cover over 2 MiB before persistence', async () => {
+  await submit(VALID, KEY, Buffer.alloc(2 * 1024 * 1024 + 1)).expect(413);
+  expect(prisma.tx.event.create).not.toHaveBeenCalled();
 });
