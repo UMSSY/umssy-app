@@ -80,6 +80,7 @@ export class WorkExperienceService {
     if (!deleted) {
       throw new WorkExperienceNotFoundException();
     }
+    // Forzamos el reanálisis y purga de habilidades huérfanas asociadas a esta experiencia
     await this.skillsAnalysis.refreshAfterChange(userId);
   }
 
