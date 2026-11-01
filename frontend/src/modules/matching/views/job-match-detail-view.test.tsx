@@ -21,7 +21,7 @@ vi.mock("../services/job-matching.service", () => ({
 }));
 
 const JOB_ID = "11111111-1111-4111-8111-111111111111";
-const NO_PENDING = "No tienes habilidades ni requisitos visibles pendientes para esta oportunidad";
+const NO_PENDING = "Para esta oportunidad no tienes habilidades ni requisitos pendientes";
 
 function getGroup(title: string) {
   const heading = screen.getByRole("heading", { name: title, level: 4 });
@@ -70,8 +70,11 @@ describe("JobMatchDetailView: faltantes (T4.3)", () => {
 
     expect(await screen.findByRole("status")).toHaveTextContent(NO_PENDING);
     expect(screen.queryByText("Falta")).not.toBeInTheDocument();
-    expect(screen.getAllByText("Coincide")).toHaveLength(2);
+    expect(screen.getAllByText("Coincide")).toHaveLength(3);
     expect(screen.getByText("100%")).toBeInTheDocument();
+    expect(screen.getByRole("progressbar", { name: "Afinidad" })).toHaveAttribute("aria-valuenow", "100");
+    expect(screen.getByText("de afinidad con tu perfil")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Volver" })).toHaveAttribute("href", "/vacancies/recommended");
   });
 
   it("lists what is missing by group when there are gaps (AC-04.3, AC-04.5, AC-04.6)", async () => {
@@ -81,8 +84,8 @@ describe("JobMatchDetailView: faltantes (T4.3)", () => {
 
     expect(await screen.findByText("Kubernetes")).toBeInTheDocument();
     expect(screen.queryByText(NO_PENDING)).not.toBeInTheDocument();
-    expect(screen.queryByText("Ingeniería de Sistemas")).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Académicos y experiencia" })).not.toBeInTheDocument();
+    expect(screen.getByText("Ingeniería de Sistemas")).toBeInTheDocument();
+    expect(getGroup("Académicos y experiencia").getByText("Falta")).toBeInTheDocument();
 
     const others = getGroup("Otros requisitos");
     expect(others.getByText("Carta de motivación")).toBeInTheDocument();
@@ -95,7 +98,7 @@ describe("JobMatchDetailView: faltantes (T4.3)", () => {
     const { client } = render(<JobMatchDetailView jobOfferId={JOB_ID} />);
 
     expect(await screen.findByText("Kubernetes")).toBeInTheDocument();
-    expect(screen.getAllByText("Falta")).toHaveLength(2);
+    expect(screen.getAllByText("Falta")).toHaveLength(3);
     expect(screen.getByText("40%")).toBeInTheDocument();
 
     await act(async () => {

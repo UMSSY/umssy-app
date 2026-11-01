@@ -16,15 +16,8 @@ export function MissingRequirements({
   requirements,
   title = JOB_MATCHING_MESSAGES.requirementsTitle,
 }: MissingRequirementsProps) {
-  const visibleRequirements = requirements.filter(
-    ({ category }) => category !== "academic",
-  );
-
-  const hasPending = visibleRequirements.some(
-    ({ status }) => status === "Pendiente",
-  );
-
-  const groups = groupRequirements(visibleRequirements);
+  const hasPending = requirements.some(({ status }) => status === "Pendiente");
+  const groups = groupRequirements(requirements);
 
   return (
     <section className="flex flex-col gap-2">

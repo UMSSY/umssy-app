@@ -84,26 +84,15 @@ export class JobRecommendationsService {
   }
 
   private async evaluate(vacancy: JobMatchRecord, candidate: CandidateProfile) {
-    const vacancyRequirements = toVacancyRequirements(vacancy);
-
     const extractedSkills =
       await this.requirementTermsService.extractAndMatchRequirements(
         vacancy.description ?? '',
       );
-
-    const existingSkillNames = vacancyRequirements.skills.map((skill) =>
-      skill.toLowerCase(),
+    const vacancyRequirements = toVacancyRequirements(
+      vacancy,
+      extractedSkills.map((skill) => skill.name),
     );
-    const newSkillNames = extractedSkills
-      .map((skill) => skill.name)
-      .filter((name) => !existingSkillNames.includes(name.toLowerCase()));
-
-    const mergedRequirements = {
-      ...vacancyRequirements,
-      skills: [...vacancyRequirements.skills, ...newSkillNames],
-    };
-
-    const requirements = buildScoreRequirements(mergedRequirements, candidate);
+    const requirements = buildScoreRequirements(vacancyRequirements, candidate);
     const score = this.score.calculate(requirements);
     const matchedSkills = requirements.skills
       .filter(({ status }) => status === 'Cumple')

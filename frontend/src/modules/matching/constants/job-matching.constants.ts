@@ -41,7 +41,7 @@ export const JOB_MATCHING_MESSAGES = {
   requirementsTitle: "Requisitos vs. tu perfil",
   descriptionTitle: "Descripción",
   scoreCaption: "de afinidad con tu perfil",
-  noPendingRequirements: "No tienes habilidades ni requisitos visibles pendientes para esta oportunidad",
+  noPendingRequirements: "Para esta oportunidad no tienes habilidades ni requisitos pendientes",
   loadError: "No pudimos cargar la información. Intenta nuevamente.",
   retry: "Reintentar",
   notFound: "Esta vacante ya no está disponible.",

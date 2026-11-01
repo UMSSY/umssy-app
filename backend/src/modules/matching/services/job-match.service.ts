@@ -9,6 +9,7 @@ import {
   hasPendingRequirements,
   toCategorizedRequirements,
 } from '../utils/build-score-requirements.js';
+import { RequirementTermsService } from './requirement-terms.service.js';
 import { CandidateProfileService } from './candidate-profile.service.js';
 import { WeightedScoreService } from './weighted-score.service.js';
 
@@ -19,6 +20,7 @@ export class JobMatchService {
     private readonly userSkillService: UserSkillService,
     private readonly candidateProfileService: CandidateProfileService,
     private readonly weightedScoreService: WeightedScoreService,
+    private readonly requirementTermsService: RequirementTermsService,
   ) {}
 
   async getMatch(
@@ -33,16 +35,25 @@ export class JobMatchService {
       throw new JobOfferNotAvailableException();
     }
 
-    const [userSkills, profile] = await Promise.all([
+    const [userSkills, profile, extractedSkills] = await Promise.all([
       this.userSkillService.getUserSkills(userId),
       this.candidateProfileService.findCandidateProfile(userId),
+      this.requirementTermsService.extractAndMatchRequirements(
+        vacancy.description ?? '',
+      ),
     ]);
 
-    const requirements = buildScoreRequirements(toVacancyRequirements(vacancy), {
-      skills: userSkills.map(({ name }) => name),
-      career: profile.career,
-      experienceYears: profile.experienceYears,
-    });
+    const requirements = buildScoreRequirements(
+      toVacancyRequirements(
+        vacancy,
+        extractedSkills.map((skill) => skill.name),
+      ),
+      {
+        skills: userSkills.map(({ name }) => name),
+        career: profile.career,
+        experienceYears: profile.experienceYears,
+      },
+    );
 
     return {
       jobOfferId: vacancy.id,
