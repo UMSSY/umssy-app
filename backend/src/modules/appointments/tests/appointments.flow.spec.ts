@@ -480,7 +480,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
       data: {
         blockId: plan.free.id,
         status: AppointmentStatusTitle.CONFIRMED,
-        counterpart: { id: MENTOR_A, fullName: 'Ana Pérez' },
+        counterpart: { id: MENTOR_A, fullName: 'Ana Pérez', role: 'mentor' },
         orientationType: { id: TOPIC_ID },
       },
     });
