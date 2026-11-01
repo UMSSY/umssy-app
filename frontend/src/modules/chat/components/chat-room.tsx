@@ -23,7 +23,11 @@ import {
   getChatHttpStatus,
 } from "../utils/chat-action-error";
 
+import { ChatConnectionBanner } from './chat-connection-banner';
+import type { ChatConnectionStatus } from '../types/chat-connection-status.types';
+
 interface ChatRoomProps {
+  connectionStatus?: ChatConnectionStatus;
   conversation: Conversation;
   messages: Message[];
   currentUserId: string;
@@ -126,6 +130,7 @@ function ChatRoomContent({
   isCompact = false,
   onBlockUser,
   onUnblockUser,
+  connectionStatus = "connected",
 }: ChatRoomProps) {
   const isEventConversation = Boolean(conversation.eventId);
   const conversationName = conversation.eventId
@@ -338,6 +343,7 @@ function ChatRoomContent({
   ]);
 
   const handleSend = async () => {
+    if (connectionStatus !== "connected") return;
     if (isBlockedByMe) return;
 
     const hasText = isContentValidForSend(inputText);
@@ -538,7 +544,15 @@ function ChatRoomContent({
             onUnblockSelect={() => void handleUnblock()}
           />
         )}
-      </header>
+            </header>
+
+      {connectionStatus !== "connected" && (
+        <ChatConnectionBanner
+          key={connectionStatus}
+          status={connectionStatus}
+        />
+      )}
+
       {!isEventConversation && onBlockUser && (
         <BlockUserDialog
           open={isBlockDialogOpen}
@@ -706,6 +720,7 @@ function ChatRoomContent({
             onKeyDown={handleInputKeyDown}
             isSending={isSending || isSubmitting}
             isUploading={isUploading}
+            sendDisabled={connectionStatus !== "connected"}
             attachment={selectedAttachment}
             onAttachmentChange={setSelectedAttachment}
             disabled={
