@@ -51,7 +51,7 @@ export function ProposalCoverField({ value, onChange, error, disabled, onBusyCha
       >
 
         <div className="grid min-w-0 grid-cols-1 items-center gap-4 @min-[36rem]:grid-cols-[200px_minmax(0,1fr)]">
-        <div className="relative mx-auto flex aspect-[5/3] w-full max-w-[200px] items-center justify-center rounded-lg border border-availability-border/40 bg-surface shadow-sm">
+        <div className="relative mx-auto flex aspect-workshop-cover w-full max-w-[200px] items-center justify-center rounded-lg border border-availability-border/40 bg-surface shadow-sm">
           {value ? (
             <>
               <Button type="button" variant="ghost" onClick={() => setExpanded(true)} aria-label="Ampliar imagen de portada" aria-haspopup="dialog" className="group absolute inset-0 size-full cursor-zoom-in overflow-hidden rounded-lg border-0 p-0 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2">

@@ -28,10 +28,10 @@ describe('proposal shared date field', () => {
   });
 });
 
- it('shows the physical location limit and reveals the counter near the limit', () => {
+ it('shows the physical location counter from the first render', () => {
     const { rerender } = render(<ProposalForm />);
     expect(screen.getByRole('textbox', { name: /Ubicación/ })).toHaveAttribute('maxlength', '150');
-    expect(screen.queryByText('130/150')).not.toBeInTheDocument();
+    expect(screen.getByText('0/150')).toBeInTheDocument();
     state.values.location = 'a'.repeat(130);
     rerender(<ProposalForm />);
     expect(screen.getByText('130/150')).toBeInTheDocument();

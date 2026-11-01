@@ -145,11 +145,15 @@ export function ProposalForm() {
           </div>
           
           <ProposalField id="proposal-location" label={values.modality === 'virtual' ? 'Enlace de la reunión' : 'Ubicación'} error={errors.location}>
-            <Input id="proposal-location" name="location" type={values.modality === 'virtual' ? 'url' : 'text'} required maxLength={values.modality === 'presencial' ? PROPOSAL_LOCATION_LIMIT : 2000} value={values.location} onChange={(event) => change('location', event.target.value)} placeholder={values.modality === 'virtual' ? 'https://…' : 'Ej. Edificio de Tecnología, piso 2, laboratorio 1'} className="h-11" {...feedback('location')} aria-describedby={['proposal-location-help', values.modality === 'presencial' && values.location.length >= 130 ? 'proposal-location-count' : '', errors.location ? 'proposal-location-error' : ''].filter(Boolean).join(' ') || undefined} />
-            {values.modality === 'presencial' && <div className="flex flex-wrap justify-between gap-2">
-              <p id="proposal-location-help" className="text-xs text-text-secondary">Indica el lugar. Si agregas edificio, piso o aula, sepáralos con comas.</p>
-              {values.location.length >= 130 && <span id="proposal-location-count" className="ml-auto text-xs text-text-secondary tabular-nums">{values.location.length}/{PROPOSAL_LOCATION_LIMIT}{values.location.length >= PROPOSAL_LOCATION_LIMIT ? ' · Límite alcanzado' : ''}</span>}
-            </div>}
+            <div className="relative">
+              <Input id="proposal-location" name="location" type={values.modality === 'virtual' ? 'url' : 'text'} required maxLength={values.modality === 'presencial' ? PROPOSAL_LOCATION_LIMIT : 2000} value={values.location} onChange={(event) => change('location', event.target.value)} placeholder={values.modality === 'virtual' ? 'https://…' : 'Ej. Edificio de Tecnología, piso 2, laboratorio 1'} className={values.modality === 'presencial' ? 'h-11 pr-16' : 'h-11'} {...feedback('location')} aria-describedby={['proposal-location-help', values.modality === 'presencial' ? 'proposal-location-count' : '', errors.location ? 'proposal-location-error' : ''].filter(Boolean).join(' ') || undefined} />
+              {values.modality === 'presencial' && (
+                <span id="proposal-location-count" className="pointer-events-none absolute right-3 bottom-2 text-xs text-text-secondary tabular-nums">
+                  {values.location.length}/{PROPOSAL_LOCATION_LIMIT}
+                </span>
+              )}
+            </div>
+            {values.modality === 'presencial' && <p id="proposal-location-help" className="text-xs text-text-secondary">Indica el lugar. Si agregas edificio, piso o aula, sepáralos con comas.</p>}
             {values.modality === 'virtual' && <p id="proposal-location-help" className="text-xs text-text-secondary">Pega el enlace completo de la reunión, comenzando con https://.</p>}
           </ProposalField>
         </fieldset>
