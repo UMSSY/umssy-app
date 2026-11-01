@@ -18,11 +18,16 @@ beforeEach(() => {
 describe("socket de chat de la epic", () => {
   it("usa el namespace /chat y actualiza el token antes de cada handshake", async () => {
     const socket = {
-      connected: false,
-      connect: vi.fn(),
-      auth: undefined as unknown,
-    };
-    vi.mocked(io).mockReturnValue(socket as unknown as ReturnType<typeof io>);
+  connected: false,
+  connect: vi.fn(),
+  auth: undefined as unknown,
+};
+
+vi.mocked(io).mockImplementation((_url, options) => {
+  socket.auth = options?.auth;
+
+  return socket as unknown as ReturnType<typeof io>;
+});
     vi.mocked(getAccessToken).mockReturnValue("first-token");
     const { getChatSocket } = await import("../components/chat-socket");
     expect(getChatSocket()).toBe(socket);

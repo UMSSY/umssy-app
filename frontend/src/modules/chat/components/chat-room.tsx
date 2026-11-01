@@ -358,7 +358,15 @@ function ChatRoomContent({
             onUnblockSelect={() => void handleUnblock()}
           />
         )}
-      </header>
+            </header>
+
+      {connectionStatus !== "connected" && (
+        <ChatConnectionBanner
+          key={connectionStatus}
+          status={connectionStatus}
+        />
+      )}
+
       {!isEventConversation && onBlockUser && (
         <BlockUserDialog
           open={isBlockDialogOpen}
