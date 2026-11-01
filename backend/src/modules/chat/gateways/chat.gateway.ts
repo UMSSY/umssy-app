@@ -17,10 +17,14 @@ import { UserPresenceService } from '../services/user-presence.service.js';
 import { MessageService } from '../services/message.service.js';
 import { EventRoomService } from '../services/event-room.service.js';
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
-import type { SocketMessagePayload, EventRoomJoinPayload } from '../types/chat-gateway.types.js';
+import type {
+  SocketMessagePayload,
+  EventRoomJoinPayload,
+} from '../types/chat-gateway.types.js';
 
 @WebSocketGateway({
   namespace: '/chat',
+  path: '/api/socket.io',
   cors: {
     origin: '*',
   },
@@ -43,7 +47,7 @@ export class ChatGateway
   ) {}
 
   afterInit(server: Server) {
-    server.use(async (socket: Socket, next) => {
+    server.use(async (socket: Socket, next: (error?: Error) => void) => {
       try {
         const token = socket.handshake.auth?.token;
         if (!token) {
@@ -81,8 +85,9 @@ export class ChatGateway
     }
 
     try {
-      const conversationIds =
-        await this.chatService.getActiveConversationIds(user.id);
+      const conversationIds = await this.chatService.getActiveConversationIds(
+        user.id,
+      );
 
       for (const convId of conversationIds) {
         await client.join(convId);
@@ -131,8 +136,9 @@ export class ChatGateway
     }
 
     try {
-      const conversationIds =
-        await this.chatService.getActiveConversationIds(user.id);
+      const conversationIds = await this.chatService.getActiveConversationIds(
+        user.id,
+      );
 
       if (!conversationIds.includes(body.conversationId)) {
         return {
@@ -185,7 +191,8 @@ export class ChatGateway
       }
       return {
         ok: false,
-        error: error instanceof Error ? error.message : 'Error al unirse a la sala',
+        error:
+          error instanceof Error ? error.message : 'Error al unirse a la sala',
       };
     }
   }
@@ -215,9 +222,7 @@ export class ChatGateway
         content: body.content,
       });
 
-      this.server
-        .to(body.conversationId)
-        .emit('message:new', message);
+      this.server.to(body.conversationId).emit('message:new', message);
 
       return {
         ok: true,

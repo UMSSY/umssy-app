@@ -21,9 +21,11 @@ import type {
 } from '../types/survey-record.type.js';
 import { calculatePercentage } from '../utils/calculate-percentage.js';
 import { resolveSurveyStatus } from '../utils/resolve-survey-status.js';
+import { SURVEY_ALL_CAREERS } from '../constants/survey.constants.js';
 import {
   toSurveyQuestionTypeValue,
   toSurveyStatusValue,
+  toSurveyTargetAudienceValue,
 } from '../utils/survey-catalog-values.js';
 
 @Injectable()
@@ -39,8 +41,10 @@ export class SurveyMapper {
     return {
       title: request.title,
       description: request.description ?? null,
-      careerId: request.careerId ?? null,
+      careerId: request.careerId && request.careerId !== SURVEY_ALL_CAREERS ? request.careerId : null,
+      targetsAllCareers: request.careerId === SURVEY_ALL_CAREERS,
       academicPeriod: request.academicPeriod ?? null,
+      targetAudience: request.targetAudience ?? null,
       opensAt: request.opensAt ? new Date(request.opensAt) : null,
       closesAt: request.closesAt ? new Date(request.closesAt) : null,
       status: request.status,
@@ -73,6 +77,7 @@ export class SurveyMapper {
         email: record.createdBy.email,
       },
       academicPeriod: record.academicPeriod,
+      targetAudience: toSurveyTargetAudienceValue(record.targetAudience),
       opensAt: record.opensAt?.toISOString() ?? null,
       closesAt: record.closesAt?.toISOString() ?? null,
       questionCount: record._count.questions,
@@ -92,7 +97,9 @@ export class SurveyMapper {
       description: record.description,
       status: resolveSurveyStatus(record.status.title, record.closesAt, now),
       career: record.career ? this.toCareerResponse(record.career) : null,
+      targetsAllCareers: record.targetsAllCareers,
       academicPeriod: record.academicPeriod,
+      targetAudience: toSurveyTargetAudienceValue(record.targetAudience),
       opensAt: record.opensAt?.toISOString() ?? null,
       closesAt: record.closesAt?.toISOString() ?? null,
       questions: record.questions.map((question) => ({

@@ -107,6 +107,8 @@ model Company {
 }
 
 model User {
+  mentorIntakeAttempts MentorIntakeAttempt[]
+  mentorParticipationSanctions MentorParticipationSanction[]
   id                      String   @id @default(uuid()) @db.Uuid
   firstName               String   @map("first_name") @db.VarChar(100)
   lastName                String   @map("last_name") @db.VarChar(100)
@@ -148,15 +150,15 @@ model User {
   eventRegistrations   EventRegistration[]
   checkedInAttendances EventAttendance[]
 
-  exportHistories        AdminExportHistory[] @relation("AdminExportHistories")
-  openedAccessRequests   AccessRequest[]      @relation("AccessRequestOpenedBy")
-  reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
-  approvedAccessRequest  AccessRequest?       @relation("ApprovedGraduateAccount")
-  mentorSlotOffers       MentorSlotOffer[]
-  mentorParticipationRequests MentorParticipationRequest[]
+  exportHistories                 AdminExportHistory[]             @relation("AdminExportHistories")
+  openedAccessRequests            AccessRequest[]                  @relation("AccessRequestOpenedBy")
+  reviewedAccessRequests          AccessRequest[]                  @relation("AccessRequestReviewedBy")
+  approvedAccessRequest           AccessRequest?                   @relation("ApprovedGraduateAccount")
+  mentorSlotOffers                MentorSlotOffer[]
+  mentorParticipationRequests     MentorParticipationRequest[]
   mentorParticipationAttemptLimit MentorParticipationAttemptLimit?
-  createdSurveys         Survey[]             @relation("SurveyCreatedBy")
-  surveyResponses        SurveyResponse[]     @relation("SurveyRespondent")
+  createdSurveys                  Survey[]                         @relation("SurveyCreatedBy")
+  surveyResponses                 SurveyResponse[]                 @relation("SurveyRespondent")
 
   conversationsAsUserA Conversation[]            @relation("UserAConversations")
   conversationsAsUserB Conversation[]            @relation("UserBConversations")
@@ -167,13 +169,13 @@ model User {
   chatBlocksReceived   ChatUserBlock[]          @relation("ChatBlocked")
   sentRequests         ConnectionRequest[]      @relation("SentConnectionRequests")
   receivedRequests     ConnectionRequest[]      @relation("ReceivedConnectionRequests")
+  passwordResetOtps    PasswordResetOtp[]
+  auditEvents          AuditEvent[]              @relation("AuditEventActor")
+  revertedValidations  DocumentValidation[]      @relation("DocumentValidationRevertedBy")
+  jobApplications      JobApplication[]
 
-  auditEvents         AuditEvent[]         @relation("AuditEventActor")
-  revertedValidations DocumentValidation[] @relation("DocumentValidationRevertedBy")
 
   @@index([cityId])
-  jobApplications JobApplication[]
-
   @@map("users")
 }
 
@@ -634,13 +636,12 @@ model JobOffer {
   contractType JobOfferContractType @relation(fields: [contractTypeId], references: [id], onDelete: Restrict)
   status       JobOfferStatus       @relation(fields: [statusId], references: [id], onDelete: Restrict)
   skills       JobOfferSkill[]
+  applications JobApplication[]
 
   @@index([companyId])
   @@index([modalityId])
   @@index([contractTypeId])
   @@index([statusId])
-  applications JobApplication[]
-
   @@map("job_offers")
 }
 
@@ -777,7 +778,7 @@ model AccessRequest {
   approvedUser User?                      @relation("ApprovedGraduateAccount", fields: [approvedUserId], references: [id], onDelete: SetNull)
   career       Career                     @relation(fields: [careerId], references: [id], onDelete: Restrict)
 
-  activationOtps ActivationOtp[]
+  activationOtps     ActivationOtp[]
   auditEvents        AuditEvent[]
   documentValidation DocumentValidation?
 
@@ -796,7 +797,7 @@ model MentorParticipationRequest {
   status             String   @default("PENDING") @db.VarChar(20)
   queuedAt           DateTime @default(now()) @map("queued_at") @db.Timestamptz(6)
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  technicalAreaIds    String[] @map("technical_area_ids") @db.Uuid
+  technicalAreaIds   String[] @map("technical_area_ids") @db.Uuid
   orientationTypeIds String[] @map("orientation_type_ids") @db.Uuid
 
   user  User             @relation(fields: [userId], references: [id], onDelete: Restrict)
@@ -807,15 +808,15 @@ model MentorParticipationRequest {
 }
 
 model MentorSlotOffer {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  status    String   @default("OFFERED") @db.VarChar(20)
-  offeredAt DateTime @default(now()) @map("offered_at") @db.Timestamptz(6)
-  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
-  requestId String?  @unique @map("request_id") @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  status      String    @default("OFFERED") @db.VarChar(20)
+  offeredAt   DateTime  @default(now()) @map("offered_at") @db.Timestamptz(6)
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(6)
+  requestId   String?   @unique @map("request_id") @db.Uuid
   confirmedAt DateTime? @map("confirmed_at") @db.Timestamptz(6)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user    User                        @relation(fields: [userId], references: [id], onDelete: Restrict)
   request MentorParticipationRequest? @relation(fields: [requestId], references: [id], onDelete: Restrict)
 
   @@index([status, expiresAt])
@@ -1002,6 +1003,23 @@ model UserPresence {
   @@map("user_presences")
 }
 
+model PasswordResetOtp {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  codeHash  String    @map("code_hash") @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  attempts  Int       @default(0) @db.SmallInt
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_otps")
+}
+
 model MentorParticipationAttemptLimit {
   userId          String    @id @map("user_id") @db.Uuid
   attemptCount    Int       @default(0) @map("attempt_count")
@@ -1067,28 +1085,44 @@ model SurveyQuestionType {
   @@map("survey_question_types")
 }
 
-model Survey {
-  id             String    @id @default(uuid()) @db.Uuid
-  title          String    @db.VarChar(150)
-  description    String?   @db.VarChar(500)
-  careerId       String?   @map("career_id") @db.Uuid
-  academicPeriod String?   @map("academic_period") @db.VarChar(7)
-  opensAt        DateTime? @map("opens_at") @db.Timestamptz(6)
-  closesAt       DateTime? @map("closes_at") @db.Timestamptz(6)
-  statusId       String    @map("status_id") @db.Uuid
-  createdById    String    @map("created_by_id") @db.Uuid
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+model SurveyTargetAudience {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  career    Career?          @relation(fields: [careerId], references: [id], onDelete: Restrict)
-  status    SurveyStatus     @relation(fields: [statusId], references: [id], onDelete: Restrict)
-  createdBy User             @relation("SurveyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  questions SurveyQuestion[]
-  responses SurveyResponse[]
+  surveys Survey[]
+
+  @@map("survey_target_audiences")
+}
+
+model Survey {
+  id                String    @id @default(uuid()) @db.Uuid
+  title             String    @db.VarChar(150)
+  description       String?   @db.VarChar(500)
+  careerId          String?   @map("career_id") @db.Uuid
+  targetsAllCareers Boolean   @default(false) @map("targets_all_careers")
+  academicPeriod    String?   @map("academic_period") @db.VarChar(7)
+  targetAudienceId  String?   @map("target_audience_id") @db.Uuid
+  opensAt           DateTime? @map("opens_at") @db.Timestamptz(6)
+  closesAt          DateTime? @map("closes_at") @db.Timestamptz(6)
+  statusId          String    @map("status_id") @db.Uuid
+  createdById       String    @map("created_by_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  career         Career?               @relation(fields: [careerId], references: [id], onDelete: Restrict)
+  status         SurveyStatus          @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  targetAudience SurveyTargetAudience? @relation(fields: [targetAudienceId], references: [id], onDelete: Restrict)
+  createdBy      User                  @relation("SurveyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  questions      SurveyQuestion[]
+  responses      SurveyResponse[]
 
   @@index([careerId, academicPeriod])
   @@index([createdById])
   @@index([statusId])
+  @@index([targetAudienceId])
   @@map("surveys")
 }
 
@@ -1226,4 +1260,50 @@ model DocumentValidation {
   @@index([result])
   @@index([revertedById])
   @@map("document_validations")
+}
+
+model MentorIntakeAttempt {
+  operationId     String                @default(dbgenerated("mentor_intake_operation('LEGACY'::text)")) @map("operation_id") @db.Uuid
+  intakeOperation MentorIntakeOperation @relation(fields: [operationId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  id              String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String                @map("user_id") @db.Uuid
+  operation       String                @db.VarChar(20)
+  idempotencyKey  String                @map("idempotency_key") @db.Uuid
+  payloadHash     String                @map("payload_hash") @db.VarChar(64)
+  occurredAt      DateTime              @default(dbgenerated("clock_timestamp()")) @map("occurred_at") @db.Timestamptz(6)
+  counted         Boolean               @default(true)
+  responseStatus  Int                   @map("response_status")
+  responseData    Json                  @map("response_data")
+
+  user     User                         @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  sanction MentorParticipationSanction?
+
+  @@unique([userId, operation, idempotencyKey], map: "mentor_intake_attempts_identity")
+  @@index([operationId])
+  @@map("mentor_intake_attempts")
+}
+
+model MentorParticipationSanction {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String   @map("user_id") @db.Uuid
+  triggerAttemptId String?  @unique @map("trigger_attempt_id") @db.Uuid
+  startedAt        DateTime @map("started_at") @db.Timestamptz(6)
+  endsAt           DateTime @map("ends_at") @db.Timestamptz(6)
+
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  triggerAttempt MentorIntakeAttempt? @relation(fields: [triggerAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@index([userId, endsAt], map: "mentor_participation_sanctions_active")
+  @@map("mentor_participation_sanctions")
+}
+
+model MentorIntakeOperation {
+  id          String                @id @default(uuid()) @db.Uuid
+  title       String                @unique @db.VarChar(30)
+  description String?
+  createdAt   DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  attempts    MentorIntakeAttempt[]
+
+  @@map("mentor_intake_operations")
 }

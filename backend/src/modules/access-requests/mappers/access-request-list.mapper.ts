@@ -1,4 +1,5 @@
 import type { AccessRequestsRepository } from '../repositories/access-requests.repository.js';
+import { toValidationSummary } from './document-validation.mapper.js';
 
 type ListRow = Awaited<ReturnType<AccessRequestsRepository['findPage']>>['rows'][number];
 
@@ -13,5 +14,6 @@ export function toAccessRequestListItem(row: ListRow) {
     documentType: row.documentType?.title ?? null,
     submittedAt: row.submittedAt?.toISOString() ?? null,
     status: row.status.title,
+    validation: toValidationSummary(row.documentValidation),
   };
 }

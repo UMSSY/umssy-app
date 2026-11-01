@@ -14,6 +14,7 @@ export interface SurveyCreatedRecord {
 
 export interface SurveySummaryRecord extends SurveyCreatedRecord {
   academicPeriod: string | null;
+  targetAudience: { title: string } | null;
   opensAt: Date | null;
   closesAt: Date | null;
   career: { id: string; title: string } | null;
@@ -38,4 +39,5 @@ export interface SurveyTitleScope {
   careerId: string | null;
   academicPeriod: string | null;
   excludedId?: string;
+  now: Date;
 }

@@ -9,6 +9,8 @@ import { ConversationMapper, type RawConversationRecord } from '../mappers/conve
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
 import { ChatRolePolicyService } from './chat-role-policy.service.js';
+import { ConversationMapper } from '../mappers/conversation.mapper.js';
+import type { RawConversationRecord } from '../types/raw-conversation-record.types.js';
 
 import {
   InactiveUserException,

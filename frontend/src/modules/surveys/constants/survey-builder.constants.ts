@@ -1,6 +1,6 @@
-import { CircleDot, SquareCheck } from "lucide-react";
+import { CircleDot, SquareCheck, SquareChevronDown } from "lucide-react";
 import type { QuestionTypeOption } from "../types/question-type-option.types";
-import type { QuestionType, SurveyDisplayStatus } from "../types/survey.types";
+import type { QuestionType, SurveyDisplayStatus, SurveyTargetAudience } from "../types/survey.types";
 
 export const SURVEY_LIMITS = {
   titleMin: 5,
@@ -17,10 +17,24 @@ export const DEFAULT_OPTION_COUNT = 2;
 export const FIRST_SURVEY_YEAR = 2020;
 export const ALL_ACADEMIC_PERIODS_VALUE = "Todas";
 export const ALL_ACADEMIC_PERIODS_OPTION_LABEL = "Todas";
+export const ALL_CAREERS_VALUE = "all";
+export const ALL_CAREERS_LABEL = "Todas las carreras";
+
+export const SURVEY_TARGET_AUDIENCE_LABELS: Readonly<Record<SurveyTargetAudience, string>> = {
+  all: "Todos",
+  graduates: "Titulados",
+  students: "Estudiantes",
+  mentors: "Mentores",
+};
+
+export const SURVEY_TARGET_AUDIENCE_ITEMS = (Object.keys(SURVEY_TARGET_AUDIENCE_LABELS) as SurveyTargetAudience[]).map(
+  (value) => ({ value, label: SURVEY_TARGET_AUDIENCE_LABELS[value] }),
+);
 
 export const QUESTION_TYPE_OPTIONS: readonly QuestionTypeOption[] = [
   { value: "single_choice", label: "Opción única", icon: CircleDot },
   { value: "multiple_choice", label: "Opción múltiple", icon: SquareCheck },
+  { value: "dropdown", label: "Lista desplegable", icon: SquareChevronDown },
 ];
 
 export const QUESTION_TYPE_ITEMS = QUESTION_TYPE_OPTIONS.map(({ value, label }) => ({ value, label }));
@@ -28,6 +42,7 @@ export const QUESTION_TYPE_ITEMS = QUESTION_TYPE_OPTIONS.map(({ value, label }) 
 export const QUESTION_TYPE_LABELS: Readonly<Record<QuestionType, string>> = {
   single_choice: "Opción única",
   multiple_choice: "Opción múltiple",
+  dropdown: "Lista desplegable",
 };
 
 export const SURVEY_STATUS_LABELS: Readonly<Record<SurveyDisplayStatus, string>> = {
@@ -55,6 +70,7 @@ export const SURVEY_TEXT = {
   addQuestion: "Añadir pregunta",
   required: "Obligatoria",
   selectCareer: "Seleccione una carrera",
+  selectAudience: "Seleccione el público",
   loading: "Cargando...",
   selectPeriod: "Seleccione la gestión",
   cancel: "Cancelar",
@@ -63,6 +79,8 @@ export const SURVEY_TEXT = {
   publish: "Publicar encuesta",
   confirmPublish: "Publicar",
   publishing: "Publicando...",
+  unpublish: "Inhabilitar",
+  unpublishing: "Inhabilitando...",
   saving: "Guardando...",
   discard: "Descartar",
   keepEditing: "Seguir editando",
@@ -75,7 +93,8 @@ export const SURVEY_TEXT = {
 
 export const SURVEY_SUMMARY_LABELS = {
   survey: "Encuesta",
-  career: "Dirigida a",
+  career: "Carrera",
+  audience: "Dirigido a",
   schedule: "Vigencia",
   questions: "Preguntas",
 } as const;

@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { NLP_SKILL_SOURCE } from '../constants/experience-skills.constants.js';
+import {
+  MANUAL_SKILL_SOURCE,
+  NLP_SKILL_SOURCE,
+} from '../constants/experience-skills.constants.js';
+import { appendEvidenceRef } from '../utils/append-evidence-ref.js';
 import { buildExperienceRef } from '../utils/build-experience-ref.js';
 import { readEvidenceRefs } from '../utils/read-evidence-refs.js';
 
@@ -48,7 +52,7 @@ export class ExperienceSkillsRepository {
 
       const existing = await tx.userSkill.findMany({
         where: { userId, skillId: { in: skillIds } },
-        select: { id: true, skillId: true, evidenceRefs: true },
+        select: { id: true, skillId: true, source: true, evidenceRefs: true },
       });
       const existingBySkill = new Map(existing.map((row) => [row.skillId, row]));
 
@@ -59,19 +63,24 @@ export class ExperienceSkillsRepository {
             data: {
               userId,
               skillId,
-              source: NLP_SKILL_SOURCE,
+              source: MANUAL_SKILL_SOURCE,
               evidenceRefs: [ref],
             },
           });
           continue;
         }
-        const refs = readEvidenceRefs(row.evidenceRefs);
-        if (!refs.includes(ref)) {
-          await tx.userSkill.update({
-            where: { id: row.id },
-            data: { evidenceRefs: [...refs, ref] },
-          });
-        }
+        const needsPromotion = row.source !== MANUAL_SKILL_SOURCE;
+        const needsRef = !readEvidenceRefs(row.evidenceRefs).includes(ref);
+        if (!needsPromotion && !needsRef) continue;
+        await tx.userSkill.update({
+          where: { id: row.id },
+          data: {
+            ...(needsPromotion ? { source: MANUAL_SKILL_SOURCE } : {}),
+            ...(needsRef
+              ? { evidenceRefs: appendEvidenceRef(row.evidenceRefs, ref) }
+              : {}),
+          },
+        });
       }
     });
   }
