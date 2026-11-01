@@ -41,7 +41,7 @@ export function ProposalReviewDialog({ open, values, cover, tutor, category, pen
               </dl>
               <p className="text-xs text-text-secondary">Duración: {formatProposalDuration(values.startTime, values.endTime)}</p>
               <div className="space-y-2 border-t border-border pt-3"><h4 className="text-xs font-semibold text-ink">DESCRIPCIÓN</h4><p className="text-sm wrap-anywhere whitespace-pre-wrap text-text-secondary">{values.description}</p></div>
-              <p className="flex justify-between gap-2 text-sm text-ink"><span>Cupo máximo</span><strong>{values.capacity} participantes</strong></p>
+              <p className="flex justify-between gap-2 text-sm text-ink"><span>Cupo del taller</span><strong>{values.capacity} participantes</strong></p>
             </div>
           </article>
           <div className="flex gap-3 rounded-lg border border-availability-border bg-availability p-4">

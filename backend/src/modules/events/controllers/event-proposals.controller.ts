@@ -20,7 +20,7 @@ export class EventProposalsController {
   @ApiConsumes('multipart/form-data')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('titulado')
-  @UseInterceptors(FileInterceptor('cover', { limits: { fileSize: 5 * 1024 * 1024, files: 1, fields: 9, fieldSize: 10000 } }))
+  @UseInterceptors(FileInterceptor('cover', { limits: { fileSize: 2 * 1024 * 1024, files: 1, fields: 9, fieldSize: 10000 } }))
   create(@CurrentUserId() userId: string, @Body() body: unknown, @UploadedFile() file: MulterFile | undefined, @Headers('idempotency-key') key: string | undefined) {
     return this.proposals.create(userId, body, file, key);
   }

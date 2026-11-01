@@ -6,7 +6,7 @@ import { ProposalForm } from './proposal-form';
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('../hooks/use-proposal-form', () => ({ useProposalForm: () => state }));
 const state = {
-  values: { ...EMPTY_PROPOSAL, eventDate: '2026-11-12' }, errors: {}, change: vi.fn(),
+  values: { ...EMPTY_PROPOSAL, eventDate: '2026-11-12' }, errors: {}, touch: vi.fn(), change: vi.fn(),
   categories: { categories: [], isLoading: false, error: null, retry: vi.fn() },
   tutor: 'Ana López', profile: { isPending: false, isError: false, refetch: vi.fn() },
   pending: false, restoring: false, created: null, draftWarning: null, cover: null,
@@ -26,4 +26,20 @@ describe('proposal shared date field', () => {
     fireEvent.change(date, { target: { value: '13/11/2026' } });
     expect(state.change).toHaveBeenCalledWith('eventDate', '2026-11-13');
   });
+});
+
+ it('shows the physical location limit and reveals the counter near the limit', () => {
+    const { rerender } = render(<ProposalForm />);
+    expect(screen.getByRole('textbox', { name: /Ubicación/ })).toHaveAttribute('maxlength', '150');
+    expect(screen.queryByText('130/150')).not.toBeInTheDocument();
+    state.values.location = 'a'.repeat(130);
+    rerender(<ProposalForm />);
+    expect(screen.getByText('130/150')).toBeInTheDocument();
+    state.values.location = '';
+  });
+
+it('marks a field for validation when leaving it', () => {
+  render(<ProposalForm />);
+  fireEvent.blur(screen.getByRole('textbox', { name: /Título del taller/ }));
+  expect(state.touch).toHaveBeenCalledWith('title');
 });

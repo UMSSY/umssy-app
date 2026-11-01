@@ -21,3 +21,16 @@ describe('proposal field errors', () => {
     expect(getProposalError(apiError(null)).message).toBe('Revisa los datos de la propuesta e inténtalo nuevamente.');
   });
 });
+
+it.each([
+  ['INVALID_FILE_TYPE', 'Selecciona una imagen JPG o PNG.'],
+  ['CORRUPTED_FILE', 'La imagen está dañada. Selecciona otra.'],
+  ['FILE_TOO_LARGE', 'Selecciona una imagen de hasta 2 MB.'],
+])('maps %s to the cover field', (code, message) => {
+  expect(getProposalError({ isAxiosError: true, response: { status: 400, data: { code } } })).toEqual({
+    fields: { cover: message }, message: 'Corrige los campos indicados.',
+  });
+});
+it('does not claim an unconfirmed network request was not saved', () => {
+  expect(getProposalError({ isAxiosError: true }).message).toBe('No pudimos confirmar el envío. Revisa tu conexión y reintenta.');
+});
