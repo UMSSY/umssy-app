@@ -48,6 +48,7 @@ beforeEach(() => {
     block,
   ]);
   vi.spyOn(availabilityApi, "getBlockedDates").mockResolvedValue([]);
+  vi.spyOn(availabilityApi, "getFutureBlockedDates").mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -56,14 +57,38 @@ afterEach(() => {
 });
 
 describe("blocked dates flow", () => {
+  it("desbloquea desde la lista y refresca la grilla y las fechas de otras semanas", async () => {
+    const later = { ...date, id: "later", blockedOn: "2027-02-10", reason: "Congreso" };
+    vi.mocked(availabilityApi.getBlockedDates).mockResolvedValue([date]);
+    vi.mocked(availabilityApi.getFutureBlockedDates).mockResolvedValue([date, later]);
+    vi.spyOn(availabilityApi, "unblockDate").mockImplementation(async () => {
+      vi.mocked(availabilityApi.getBlockedDates).mockResolvedValue([]);
+      vi.mocked(availabilityApi.getFutureBlockedDates).mockResolvedValue([later]);
+    });
+    const user = userEvent.setup();
+    renderWithQuery(<MentorAvailabilityView />);
+    const list = screen.getByRole("region", { name: "Fechas bloqueadas" });
+    expect(await within(list).findByText("Congreso")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "libre, 18:00 a 19:00" })).not.toBeInTheDocument();
+    await user.click(within(list).getByRole("button", { name: /Desbloquear fecha:.*8 de octubre/i }));
+    expect(await screen.findByRole("button", { name: "libre, 18:00 a 19:00" })).toBeInTheDocument();
+    await waitFor(() => expect(within(list).queryByText("Viaje")).not.toBeInTheDocument());
+    expect(within(list).getByText("Congreso")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Semana siguiente" }));
+    expect(within(list).getByText("Congreso")).toBeInTheDocument();
+    expect(availabilityApi.getFutureBlockedDates).toHaveBeenCalledTimes(2);
+  });
+
   it("bloquea desde la grilla, muestra el motivo en ambas vistas y conserva los bloques al desbloquear", async () => {
     vi.spyOn(availabilityApi, "blockDate").mockImplementation(async () => {
       vi.mocked(availabilityApi.getBlockedDates).mockResolvedValue([date]);
+      vi.mocked(availabilityApi.getFutureBlockedDates).mockResolvedValue([date]);
       return date;
     });
 
     vi.spyOn(availabilityApi, "unblockDate").mockImplementation(async () => {
       vi.mocked(availabilityApi.getBlockedDates).mockResolvedValue([]);
+      vi.mocked(availabilityApi.getFutureBlockedDates).mockResolvedValue([]);
     });
 
     const user = userEvent.setup();
@@ -91,7 +116,7 @@ describe("blocked dates flow", () => {
         screen.queryByRole("complementary", { name: "Bloquear fecha" })
       ).not.toBeInTheDocument();
 
-      expect(screen.getAllByText("Viaje")).toHaveLength(2);
+      expect(screen.getAllByText("Viaje")).toHaveLength(3);
     });
 
     expect(availabilityApi.blockDate).toHaveBeenCalledWith({

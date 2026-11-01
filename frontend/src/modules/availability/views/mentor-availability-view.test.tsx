@@ -27,6 +27,7 @@ describe("MentorAvailabilityView", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     vi.spyOn(availabilityApi, "getBlockedDates").mockResolvedValue([])
+    vi.spyOn(availabilityApi, "getFutureBlockedDates").mockResolvedValue([])
     vi.mocked(toast.success).mockClear()
     vi.mocked(toast.error).mockClear()
     vi.useFakeTimers({ toFake: ["Date"], now: NOW })
@@ -285,7 +286,7 @@ describe("MentorAvailabilityView", () => {
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Cancelar" }))
 
-    expect(screen.getByLabelText(/Fecha/)).toHaveValue("Viernes 9 de octubre de 2026")
+    expect(screen.getByLabelText(/Fecha/, { selector: "input" })).toHaveValue("Viernes 9 de octubre de 2026")
     expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("15:00")
   })
 
