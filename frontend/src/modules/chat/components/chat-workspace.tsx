@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRef, useState } from "react";
@@ -6,7 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
 
 import { useMessagingUi } from "../contexts/messaging-ui-context";
 
@@ -36,6 +34,7 @@ import {
   getCurrentSessionUserId,
   blockUser,
   unblockUser,
+  sendMessage,
 } from '../services/chat-api';
 import { getChatSocket } from './chat-socket';
 import { useChatConnection } from '../hooks/use-chat-connection';
@@ -93,7 +92,6 @@ export function ChatWorkspace({
   const [isStartingConversation, setIsStartingConversation] =
     useState(false);
 
-  // Evita selecciones simultáneas antes del siguiente render.
   const startingConversationRef = useRef(false);
 
   const ui = useMessagingUi();
@@ -199,15 +197,6 @@ export function ChatWorkspace({
     setIsSearchModalOpen(true);
   };
 
-  /**
-   * HU-09: Iniciar una conversación según el estado
-   * de conexión entre los usuarios.
-   *
-   * 1. Si existe un chat, abrirlo.
-   * 2. Si la conexión está aceptada, crear el chat.
-   * 3. Si no está aceptada, mostrar el diálogo
-   *    para enviar una solicitud.
-   */
   const handleStartChatWithContact = async (
     contactUser: User,
   ): Promise<void> => {
@@ -236,7 +225,6 @@ export function ChatWorkspace({
         return;
       }
 
-      // Consultar el estado actualizado desde el backend.
       const result = await refetchAcceptedConnections();
 
       if (result.isError) {
@@ -260,20 +248,14 @@ export function ChatWorkspace({
       );
 
       if (hasAcceptedConnection) {
-        // Reutilizar la lógica existente de TanStack Query.
         await startConversationWithContact(contactUser);
-
-        // Asegurar que se muestre la conversación.
         setSelectedRequestId(null);
         setResponseError(null);
         return;
       }
 
-      // No existe conexión aceptada.
       setSelectedContactForRequest(contactUser);
     } catch (error) {
-      // No mostrar el diálogo de solicitud si falla
-      // la consulta o la creación de la conversación.
       setSelectedContactForRequest(null);
 
       setContactSelectionError(
@@ -364,15 +346,15 @@ export function ChatWorkspace({
     }
   };
 
-const handleSendMessage = async (
-  content: string,
-  file?: File | null
-): Promise<void> => {
-  if (!selectedId || selectedRequestId || isSending || connectionStatus !== "connected") {
-    throw new Error(
-      "No hay una conversación seleccionada o ya se está enviando un mensaje."
-    );
-  }
+  const handleSendMessage = async (
+    content: string,
+    file?: File | null
+  ): Promise<void> => {
+    if (!selectedId || selectedRequestId || isSending || connectionStatus !== "connected") {
+      throw new Error(
+        "No hay una conversación seleccionada o ya se está enviando un mensaje."
+      );
+    }
 
     const trimmedContent = content.trim();
 
@@ -392,46 +374,74 @@ const handleSendMessage = async (
           currentUserId,
         );
       } else {
+        let sentContent = trimmedContent;
+        let sentSenderId = currentUserId;
+
         const socket = getChatSocket();
+        if (socket.connected) {
+          let socketTimedOut = false;
+          try {
+            const response = await new Promise<SocketSendResponse>(
+              (resolve, reject) => {
+                const timeoutId = setTimeout(() => {
+                  socketTimedOut = true;
+                  reject(new Error('SOCKET_TIMEOUT'));
+                }, 4000);
 
-        if (!socket.connected) {
-          throw new Error(
-            'No hay conexión con el chat. Comprueba la conexión e inténtalo de nuevo.',
-          );
-        }
-
-        const response = await new Promise<SocketSendResponse>(
-          (resolve, reject) => {
-            const timeout = setTimeout(() => reject(new Error('El chat no confirmó el envío.')), 15000);
-            socket.emit(
-              'message:send',
-              {
-                conversationId: selectedId,
-                content: trimmedContent,
-              },
-              (result: SocketSendResponse) => {
-                clearTimeout(timeout);
-                const acknowledgement = result?.data ?? result;
-                if (acknowledgement?.ok && acknowledgement.message) {
-                  resolve(acknowledgement);
-                } else {
-                  reject(
-                    new Error(
-                      acknowledgement?.error || 'No se pudo enviar el mensaje.',
-                    ),
-                  );
-                }
+                socket.emit(
+                  'message:send',
+                  {
+                    conversationId: selectedId,
+                    content: trimmedContent,
+                  },
+                  (result: SocketSendResponse) => {
+                    clearTimeout(timeoutId);
+                    const acknowledgement = result?.data ?? result;
+                    if (acknowledgement?.ok && acknowledgement.message) {
+                      resolve(acknowledgement);
+                    } else {
+                      reject(
+                        new Error(
+                          acknowledgement?.error || 'No se pudo enviar el mensaje.',
+                        ),
+                      );
+                    }
+                  },
+                );
               },
             );
-          },
-        );
 
-        const message = response.message!;
+            sentContent = response.message?.content || trimmedContent;
+            sentSenderId = response.message?.senderId || currentUserId;
+          } catch (error) {
+            if (socketTimedOut) {
+              const httpResponse = await sendMessage({
+                conversationId: selectedId,
+                content: trimmedContent,
+              });
+              if (httpResponse?.data) {
+                sentContent = httpResponse.data.content || trimmedContent;
+                sentSenderId = httpResponse.data.senderId || currentUserId;
+              }
+            } else {
+              throw error;
+            }
+          }
+        } else {
+          const httpResponse = await sendMessage({
+            conversationId: selectedId,
+            content: trimmedContent,
+          });
+          if (httpResponse?.data) {
+            sentContent = httpResponse.data.content || trimmedContent;
+            sentSenderId = httpResponse.data.senderId || currentUserId;
+          }
+        }
 
         updateConversationLastMessage(
           selectedId,
-          message.content || trimmedContent,
-          message.senderId || currentUserId,
+          sentContent,
+          sentSenderId,
         );
       }
 
@@ -454,7 +464,7 @@ const handleSendMessage = async (
 
   const handleUnblockUser = async (): Promise<void> => {
     if (!selectedConversation) return;
-   try {
+    try {
       if (!selectedConversation.contact) return;
       await unblockUser(selectedConversation.contact.id);
     } catch (error) {
@@ -511,12 +521,12 @@ const handleSendMessage = async (
             activeFilter={activeFilter}
             searchQuery={searchQuery}
             onSelectConversation={handleSelectChat}
-onSelectRequest={handleSelectRequest}
-onFilterChange={setActiveFilter}
-onSearchChange={setSearchQuery}
-onLoadMore={loadMore}
-onStartNewChat={handleStartNewChat}
-/>
+            onSelectRequest={handleSelectRequest}
+            onFilterChange={setActiveFilter}
+            onSearchChange={setSearchQuery}
+            onLoadMore={loadMore}
+            onStartNewChat={handleStartNewChat}
+          />
         )}
       </aside>
 
@@ -564,7 +574,6 @@ onStartNewChat={handleStartNewChat}
             onRetryMessages={() => {
               void retryMessages();
             }}
-
             onBlockUser={handleBlockUser}
             onUnblockUser={handleUnblockUser}
           />

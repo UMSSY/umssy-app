@@ -384,9 +384,8 @@ function ChatRoomContent({
       // Limpiar el borrador únicamente cuando el envío se confirma.
       if (ui) {
         ui.clearSubmittedDraft(conversation.id, inputText);
-      } else {
-        setLocalInputText("");
       }
+      setLocalInputText("");
 
       setSelectedAttachment(null);
     } catch (error) {
