@@ -31,16 +31,36 @@ export function WorkExperienceProfileSection() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formVersion, setFormVersion] = useState(0);
 
+  const resetForm = () => {
+    setHasChanges(false);
+    setIsFormOpen(false);
+    setEditingExperience(null);
+    setFormVersion((version) => version + 1);
+  };
+
+  const saveMutation = useSaveWorkExperience(() => {
+    resetForm();
+    void reload();
+  });
+
+  const deleteMutation = useDeleteWorkExperience((deleted) => {
+    if (editingExperience?.id === deleted.id) {
+      resetForm();
+    }
+    void reload();
+  });
+
+  // Obtiene las habilidades asociadas a cada experiencia mediante evidenceRefs.
   const skillsByExperience = useMemo(() => {
     const result: Record<string, string[]> = {};
 
     for (const skill of radar?.skills ?? []) {
-      if (skill.source !== "nlp") {
+      if (!Array.isArray(skill.evidenceRefs)) {
         continue;
       }
 
       for (const ref of skill.evidenceRefs) {
-        if (ref.type !== "work-experience") {
+        if (ref.type !== "work-experience" || !ref.id) {
           continue;
         }
 
@@ -59,34 +79,12 @@ export function WorkExperienceProfileSection() {
     return result;
   }, [radar]);
 
-  const resetForm = () => {
-    setHasChanges(false);
-    setIsFormOpen(false);
-    setEditingExperience(null);
-    setFormVersion((version) => version + 1);
-  };
-
-  const saveMutation = useSaveWorkExperience(() => {
-    resetForm();
-    void reload();
-  });
-
-  const deleteMutation = useDeleteWorkExperience((deleted) => {
-    if (editingExperience?.id === deleted.id) {
-      resetForm();
-    }
-
-    void reload();
-  });
-
   const isBusy = saveMutation.isSaving || deleteMutation.isDeleting;
 
   const listFeedback: Feedback | null =
     deleteMutation.feedback ??
     (!isFormOpen ? saveMutation.feedback : null) ??
-    (error
-      ? { type: "error", message: error }
-      : null);
+    (error ? { type: "error", message: error } : null);
 
   const handleEdit = (experience: WorkExperienceItem) => {
     if (isBusy) {
@@ -160,7 +158,6 @@ export function WorkExperienceProfileSection() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         skillsByExperience={skillsByExperience}
-        analysis={saveMutation.analysis}
       />
 
       {isFormOpen ? (

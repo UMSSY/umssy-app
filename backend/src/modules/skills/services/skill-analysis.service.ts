@@ -18,10 +18,24 @@ export class SkillAnalysisService {
     return this.repository.findProfileSkillRows(userId);
   }
 
-  async reconcileDetected(userId: string, detected: readonly DetectedSkillPayload[], context: TransactionContext): Promise<boolean> {
+  async reconcileDetected(
+    userId: string,
+    detected: readonly DetectedSkillPayload[],
+    context: TransactionContext,
+  ): Promise<boolean> {
     const rows = await this.repository.findProfileSkillRows(userId, context);
+
+    // Se incluyen también las habilidades manuales para poder asociarles
+    // evidencias NLP sin alterar su origen ni su estado de verificación.
     const plan = planSkillReconciliation(rows, detected);
+
     await this.repository.applyReconciliation(userId, plan, context);
-    return plan.creates.length + plan.updates.length + plan.deleteIds.length > 0;
+
+    return (
+      plan.creates.length +
+        plan.updates.length +
+        plan.deleteIds.length >
+      0
+    );
   }
 }
