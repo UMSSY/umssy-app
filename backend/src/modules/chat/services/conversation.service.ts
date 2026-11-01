@@ -4,7 +4,6 @@ import { ConversationRepository } from '../repositories/conversation.repository.
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
-import { ConversationMapper, type RawConversationRecord } from '../mappers/conversation.mapper.js';
 
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
