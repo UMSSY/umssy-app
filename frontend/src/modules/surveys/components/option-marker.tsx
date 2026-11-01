@@ -5,10 +5,10 @@ export function OptionMarker({ questionType, className }: OptionMarkerProps) {
   return (
     <span
       aria-hidden="true"
-      data-marker={questionType === "single_choice" ? "circle" : "square"}
+      data-marker={questionType === "multiple_choice" ? "square" : "circle"}
       className={cn(
         "size-4.5 shrink-0 border-2 border-border-strong",
-        questionType === "single_choice" ? "rounded-full" : "rounded-[4px]",
+        questionType === "multiple_choice" ? "rounded-[4px]" : "rounded-full",
         className,
       )}
     />

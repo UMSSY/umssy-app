@@ -253,6 +253,16 @@ export type ActivationOtp = Prisma.ActivationOtpModel
  */
 export type MessageStatus = Prisma.MessageStatusModel
 /**
+ * Model ConnectionRequestStatus
+ * 
+ */
+export type ConnectionRequestStatus = Prisma.ConnectionRequestStatusModel
+/**
+ * Model AttachmentType
+ * 
+ */
+export type AttachmentType = Prisma.AttachmentTypeModel
+/**
  * Model Conversation
  * 
  */
@@ -267,6 +277,21 @@ export type ConversationParticipant = Prisma.ConversationParticipantModel
  * 
  */
 export type Message = Prisma.MessageModel
+/**
+ * Model MessageAttachment
+ * 
+ */
+export type MessageAttachment = Prisma.MessageAttachmentModel
+/**
+ * Model ChatUserBlock
+ * 
+ */
+export type ChatUserBlock = Prisma.ChatUserBlockModel
+/**
+ * Model ConnectionRequest
+ * 
+ */
+export type ConnectionRequest = Prisma.ConnectionRequestModel
 /**
  * Model UserPresence
  * 
@@ -302,6 +327,11 @@ export type SurveyStatus = Prisma.SurveyStatusModel
  * 
  */
 export type SurveyQuestionType = Prisma.SurveyQuestionTypeModel
+/**
+ * Model SurveyTargetAudience
+ * 
+ */
+export type SurveyTargetAudience = Prisma.SurveyTargetAudienceModel
 /**
  * Model Survey
  * 

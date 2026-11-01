@@ -29,4 +29,5 @@ export interface SeedConversationDefinition {
   lastReadAtByA: 'now' | { minutesAgo: number };
   lastReadAtByB: 'now' | { minutesAgo: number };
   messages: SeedMessageDefinition[];
+  eventId?: string;
 }
