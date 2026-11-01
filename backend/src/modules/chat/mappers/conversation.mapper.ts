@@ -54,6 +54,15 @@ export class ConversationMapper {
     const { conversation, contact, isOnline, unreadCount, isBlockedByMe } =
       params;
     const avatarUrl = this.toAvatarUrl(contact.photoUrl);
+    const roleName = contact.roles?.[0]?.role?.name ?? null;
+    const academicTitle = contact.educations?.[0]
+      ? `${contact.educations[0].degree} / ${contact.educations[0].institution}`
+      : (contact.headline ?? null);
+    const skills = contact.userSkills
+      ? contact.userSkills
+          .map((us) => us.skill?.name)
+          .filter((name): name is string => Boolean(name))
+      : [];
 
     return {
       id: conversation.id,
@@ -62,6 +71,11 @@ export class ConversationMapper {
         fullName: `${contact.firstName} ${contact.lastName}`.trim(),
         avatarUrl,
         isOnline,
+        role: roleName,
+        roleName,
+        email: contact.email ?? null,
+        academicTitle,
+        skills,
       },
       lastMessage: this.toLastMessage(conversation.messages[0]),
       unreadCount,

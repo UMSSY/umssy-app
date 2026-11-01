@@ -1,6 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
+const CONTACT_USER_SELECT = {
+  select: {
+    id: true,
+    firstName: true,
+    lastName: true,
+    photoUrl: true,
+    email: true,
+    headline: true,
+    roles: {
+      where: { deletedAt: null },
+      select: {
+        role: {
+          select: { name: true },
+        },
+      },
+    },
+    educations: {
+      orderBy: { startDate: 'desc' as const },
+      take: 1,
+      select: { degree: true, institution: true },
+    },
+    userSkills: {
+      select: {
+        skill: {
+          select: { name: true },
+        },
+      },
+    },
+  },
+};
+
 @Injectable()
 export class ConversationRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -15,8 +46,8 @@ export class ConversationRepository {
     return this.prisma.conversation.findUnique({
       where: { userAId_userBId: { userAId, userBId } },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
-        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userA: CONTACT_USER_SELECT,
+        userB: CONTACT_USER_SELECT,
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
@@ -45,8 +76,8 @@ export class ConversationRepository {
         },
       },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
-        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userA: CONTACT_USER_SELECT,
+        userB: CONTACT_USER_SELECT,
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
@@ -58,7 +89,6 @@ export class ConversationRepository {
 
   async upsertByEventId(eventId: string, userId: string, now: Date) {
     return this.prisma.$transaction(async tx => {
-      // Conversación grupal: unique sobre eventId, userAId/userBId opcionales
       const conversation = await tx.conversation.upsert({
         where: { eventId },
         update: {},
@@ -72,7 +102,6 @@ export class ConversationRepository {
         select: { id: true, userAId: true, userBId: true },
       });
 
-      // Participante: misma clave única (conversationId, userId), por lo que es idempotente
       await tx.conversationParticipant.upsert({
         where: { conversationId_userId: { conversationId: conversation.id, userId } },
         update: { lastReadAt: now },
@@ -110,8 +139,8 @@ export class ConversationRepository {
         ],
       },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
-        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userA: CONTACT_USER_SELECT,
+        userB: CONTACT_USER_SELECT,
         event: { select: { id: true, title: true } },
         messages: {
           orderBy: { sentAt: 'desc' },
@@ -125,5 +154,4 @@ export class ConversationRepository {
       ],
     });
   }
-
 }

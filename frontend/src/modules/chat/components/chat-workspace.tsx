@@ -36,6 +36,7 @@ import {
   getCurrentSessionUserId,
   blockUser,
   unblockUser,
+  sendMessage,
 } from '../services/chat-api';
 import { getChatSocket } from './chat-socket';
 
@@ -431,43 +432,73 @@ const handleSendMessage = async (
           currentUserId,
         );
       } else {
+        let sentContent = trimmedContent;
+        let sentSenderId = currentUserId;
+
         const socket = getChatSocket();
+        if (socket.connected) {
+          let socketTimedOut = false;
+          try {
+            const response = await new Promise<SocketSendResponse>(
+              (resolve, reject) => {
+                const timeoutId = setTimeout(() => {
+                  socketTimedOut = true;
+                  reject(new Error('SOCKET_TIMEOUT'));
+                }, 3500);
 
-        if (!socket.connected) {
-          throw new Error(
-            'No hay conexión con el chat. Comprueba la conexión e inténtalo de nuevo.',
-          );
-        }
-
-        const response = await new Promise<SocketSendResponse>(
-          (resolve, reject) => {
-            socket.emit(
-              'message:send',
-              {
-                conversationId: selectedId,
-                content: trimmedContent,
-              },
-              (result: SocketSendResponse) => {
-                if (result?.ok && result.message) {
-                  resolve(result);
-                } else {
-                  reject(
-                    new Error(
-                      result?.error || 'No se pudo enviar el mensaje.',
-                    ),
-                  );
-                }
+                socket.emit(
+                  'message:send',
+                  {
+                    conversationId: selectedId,
+                    content: trimmedContent,
+                  },
+                  (result: SocketSendResponse) => {
+                    clearTimeout(timeoutId);
+                    if (result?.ok && result.message) {
+                      resolve(result);
+                    } else {
+                      reject(
+                        new Error(
+                          result?.error || 'No se pudo enviar el mensaje.',
+                        ),
+                      );
+                    }
+                  },
+                );
               },
             );
-          },
-        );
 
-        const message = response.message!;
+            sentContent = response.message?.content || trimmedContent;
+            sentSenderId = response.message?.senderId || currentUserId;
+          } catch (error) {
+            if (socketTimedOut) {
+              const httpResponse = await sendMessage({
+                conversationId: selectedId,
+                content: trimmedContent,
+              });
+              if (httpResponse?.data) {
+                sentContent = httpResponse.data.content || trimmedContent;
+                sentSenderId = httpResponse.data.senderId || currentUserId;
+              }
+            } else {
+              throw error;
+            }
+          }
+        } else {
+          const httpResponse = await sendMessage({
+            conversationId: selectedId,
+            content: trimmedContent,
+          });
+          if (httpResponse?.data) {
+            sentContent = httpResponse.data.content || trimmedContent;
+            sentSenderId = httpResponse.data.senderId || currentUserId;
+          }
+        }
 
         updateConversationLastMessage(
           selectedId,
-          message.content || trimmedContent,
-          message.senderId || currentUserId,
+          sentContent,
+          sentSenderId,
         );
       }
 
