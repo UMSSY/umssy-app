@@ -75,7 +75,7 @@ describe("Vacancy routes", () => {
     renderWithQuery(<AppLayout>{page}</AppLayout>);
 
     const dialog = await screen.findByRole("dialog", {}, ASYNC_RENDER);
-    expect(within(dialog).getByRole("heading", { name: VACANCY.cargo })).toBeDefined();
+    expect(within(dialog).getByRole("heading", { name: VACANCY.title })).toBeDefined();
     expect(within(dialog).getByRole("button", { name: "Volver al listado" })).toBeDefined();
   });
 

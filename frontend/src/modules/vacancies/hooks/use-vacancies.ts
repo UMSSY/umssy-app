@@ -23,12 +23,12 @@ export function useVacancies() {
 
     return vacancies.filter((vacancy) => {
       const searchableText = [
-        vacancy.cargo,
-        vacancy.empresa,
-        vacancy.descripcion,
-        vacancy.modalidad,
-        vacancy.tipoContrato,
-        ...vacancy.requisitos,
+        vacancy.title,
+        vacancy.companyName,
+        vacancy.description,
+        vacancy.modality,
+        vacancy.contractType,
+        ...vacancy.requirements,
       ]
         .join(" ")
         .toLowerCase();

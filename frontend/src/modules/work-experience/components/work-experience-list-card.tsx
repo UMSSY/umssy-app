@@ -1,12 +1,12 @@
-
-/* eslint-disable tailwindcss/classnames-order */
 'use client';
 
-import { BriefcaseBusiness } from 'lucide-react';
+import { ArrowDown, Building2, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SectionCard } from '@/modules/profile';
+import { cn } from '@/lib/utils';
 import type { WorkExperienceListCardProps } from '../types/work-experience-list-card-props.types';
 import { formatWorkPeriod } from '../utils/format-work-period';
+import { groupWorkExperiences } from '../utils/group-work-experiences';
 
 export function WorkExperienceListCard({
   experiences = [],
@@ -17,17 +17,7 @@ export function WorkExperienceListCard({
   onDelete,
   skillsByExperience = {},
 }: WorkExperienceListCardProps) {
-  if (isLoading) {
-    return (
-      <section className="px-5 py-4 font-medium text-slate-700">
-        Cargando experiencia laboral...
-      </section>
-    );
-  }
-
-  const safeExperiences = [...experiences].sort(
-    (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime(),
-  );
+  const groups = groupWorkExperiences(experiences);
 
   return (
     <SectionCard
@@ -35,110 +25,167 @@ export function WorkExperienceListCard({
       action={
         onAdd ? (
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={onAdd}
             disabled={isBusy}
-            className="shrink-0 gap-2 border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
           >
+            <Plus aria-hidden="true" className="size-4" />
             Añadir experiencia
           </Button>
         ) : null
       }
     >
-      {safeExperiences.length === 0 ? (
-        <section className="pt-2 text-sm italic text-slate-600">
+      {isLoading ? (
+        <p className="text-sm text-text-secondary">
+          Cargando experiencia laboral...
+        </p>
+      ) : groups.length === 0 ? (
+        <p className="text-sm text-text-secondary">
           Aún no registraste experiencia laboral.
-        </section>
+        </p>
       ) : (
-        <ul className="mt-4 space-y-6">
-          {safeExperiences.map((experience, index) => {
-            const periodText = formatWorkPeriod(
-              experience.startDate,
-              experience.endDate,
-              experience.isCurrent,
-            );
+        <ul className="relative divide-y divide-border">
+          {groups.map((group) => (
+            <li
+              key={group.positions[0].id}
+              className="group/timeline relative flex items-start gap-4 py-6 first:pt-0 last:pb-0"
+            >
+              <span
+                aria-hidden="true"
+                className="absolute top-12 -bottom-6 left-6 border-l border-border-strong group-last/timeline:hidden"
+              />
 
-            const skillsList = experience.id
-              ? skillsByExperience[experience.id] ?? []
-              : [];
+              <ArrowDown
+                aria-hidden="true"
+                className="absolute bottom-1 left-4 hidden size-4 text-accent group-last/timeline:block"
+              />
 
-            return (
-              <li
-                key={experience.id ?? index}
-                className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all hover:shadow"
+              <div
+                aria-hidden="true"
+                className="relative flex size-12 shrink-0 items-center justify-center rounded-md bg-interaction text-accent"
               >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="flex min-w-0 flex-1 items-start gap-3.5">
-                    <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                      <BriefcaseBusiness aria-hidden="true" className="size-5" />
-                    </div>
+                <Building2 className="size-6" strokeWidth={1.5} />
+              </div>
 
-                    <div className="min-w-0 flex-1">
-                      <h4 className="wrap-anywhere text-base font-semibold text-slate-900">
-                        {experience.position}
-                      </h4>
-                      <p className="wrap-anywhere text-sm font-medium text-slate-700">
-                        {experience.companyName}
-                      </p>
-                      <p className="mt-0.5 text-xs font-medium text-slate-500">
-                        {periodText}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEdit?.(experience)}
-                      aria-label={`Editar ${experience.position}`}
-                      disabled={isBusy || !onEdit}
-                      className="h-8 gap-1.5 border-slate-300 text-xs text-slate-700 hover:bg-slate-100"
-                    >
-                      Editar
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDelete?.(experience)}
-                      aria-label={`Eliminar ${experience.position}`}
-                      disabled={isBusy || !onDelete}
-                      className="h-8 text-xs text-red-600 hover:bg-red-50 hover:text-red-700"
-                    >
-                      Eliminar
-                    </Button>
-                  </div>
-                </div>
-
-                {experience.description && (
-                  <p className="mt-3.5 whitespace-pre-line wrap-anywhere text-sm text-slate-700">
-                    {experience.description}
-                  </p>
+              <div className="min-w-0 flex-1">
+                {group.positions.length > 1 && (
+                  <h3 className="mb-5 text-lg font-bold wrap-anywhere text-ink">
+                    {group.companyName}
+                  </h3>
                 )}
 
-                {skillsList.length > 0 && (
-                  <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-                    <span className="mr-1 text-xs font-semibold text-slate-500">
-                      Habilidades:
-                    </span>
+                <ol className="space-y-5">
+                  {group.positions.map((experience) => {
+                    const Heading =
+                      group.positions.length > 1 ? 'h4' : 'h3';
 
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {skillsList.map((skill) => (
-                        <span
-                          key={skill.toLowerCase()}
-                          className="inline-flex items-center rounded-full border border-slate-100 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-600"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </li>
-            );
-          })}
+                    const skillsList =
+                      skillsByExperience[experience.id] ?? [];
+
+                    return (
+                      <li
+                        key={experience.id}
+                        className={cn(
+                          'group/position relative min-w-0',
+                          group.positions.length > 1 && 'ml-2 pl-6',
+                        )}
+                      >
+                        {group.positions.length > 1 && (
+                          <>
+                            <span
+                              aria-hidden="true"
+                              className="absolute top-2 -bottom-7 left-0 border-l border-border-strong group-last/position:hidden"
+                            />
+                            <span
+                              aria-hidden="true"
+                              className="absolute top-2 -left-1 size-2 rounded-full bg-accent"
+                            />
+                          </>
+                        )}
+
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0 flex-1">
+                            <Heading className="text-base font-bold wrap-anywhere text-ink">
+                              {experience.position}
+                            </Heading>
+
+                            {group.positions.length === 1 && (
+                              <p className="mt-1 text-sm wrap-anywhere text-ink-soft">
+                                {experience.companyName}
+                              </p>
+                            )}
+
+                            <p className="mt-1 text-sm text-text-secondary">
+                              {formatWorkPeriod(
+                                experience.startDate,
+                                experience.endDate,
+                                experience.isCurrent,
+                              )}
+                            </p>
+                          </div>
+
+                          <div className="flex shrink-0 items-center gap-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              aria-label={`Editar ${experience.position}`}
+                              className="size-9 p-0 text-ink-soft"
+                              disabled={isBusy || !onEdit}
+                              onClick={() => onEdit?.(experience)}
+                            >
+                              <Pencil
+                                className="size-4"
+                                aria-hidden="true"
+                              />
+                            </Button>
+
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              aria-label={`Eliminar ${experience.position}`}
+                              className="size-9 p-0 text-danger hover:bg-brand-red/10 hover:text-danger"
+                              disabled={isBusy || !onDelete}
+                              onClick={() => onDelete?.(experience)}
+                            >
+                              <Trash2
+                                className="size-4"
+                                aria-hidden="true"
+                              />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {experience.description && (
+                          <p className="mt-3 max-w-prose text-sm leading-relaxed wrap-anywhere whitespace-pre-line text-ink-soft">
+                            {experience.description}
+                          </p>
+                        )}
+
+                        {skillsList.length > 0 && (
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-semibold text-ink-soft">
+                              Habilidades:
+                            </span>
+
+                            {skillsList.map((skill) => (
+                              <span
+                                key={skill.toLowerCase()}
+                                className="inline-flex items-center rounded-full border border-border bg-interaction px-2.5 py-0.5 text-xs font-medium text-ink"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+            </li>
+          ))}
         </ul>
       )}
     </SectionCard>

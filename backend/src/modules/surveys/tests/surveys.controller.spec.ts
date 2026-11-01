@@ -136,6 +136,7 @@ describe('SurveysController', () => {
       description: null,
       status: 'published' as const,
       academicPeriod: null,
+      targetAudience: 'graduates' as const,
       opensAt: null,
       closesAt: null,
       hasAnswered: false,

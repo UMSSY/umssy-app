@@ -25,13 +25,14 @@ import { TechnicalAreasModule } from './modules/technical-areas/technical-areas.
 import { WorkExperienceModule } from './modules/work-experience/work-experience.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js';
+import { AuditEventsModule } from './modules/audit-events/audit-events.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
+import { ApplicationsModule } from './modules/applications/applications.module.js';
 import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
 import { NlpModule } from './modules/nlp/nlp.module.js';
 import { SurveysModule } from './modules/surveys/surveys.module.js';
 import { AppointmentsModule } from './modules/appointments/appointments.module.js';
-
 
 @Module({
   imports: [
@@ -55,13 +56,14 @@ import { AppointmentsModule } from './modules/appointments/appointments.module.j
     OrientationTypesModule,
     MentorsModule,
     AccessRequestsModule,
+    AuditEventsModule,
     ReportsModule,
     ChatModule,
     MatchingModule,
+    ApplicationsModule,
     JobOffersModule,
     NlpModule,
     SurveysModule,
-
   ],
   controllers: [AppController],
   providers: [

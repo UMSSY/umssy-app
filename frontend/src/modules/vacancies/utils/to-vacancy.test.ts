@@ -29,16 +29,16 @@ describe("toVacancy", () => {
   it("convierte una vacante publicada de la API al modelo del listado", () => {
     expect(toVacancy(OFFER)).toEqual({
       id: "offer-1",
-      cargo: "DevOps Senior",
-      empresa: "TechBolivia S.R.L.",
-      descripcion: "Infraestructura en la nube",
-      requisitos: ["Docker", "Kubernetes"],
-      salario: "Bs 6.500 - 8.000",
-      modalidad: "Híbrido",
-      tipoContrato: "Tiempo completo",
-      idiomas: "Español, Inglés",
-      vacantes: 2,
-      ubicacionUrl: "https://maps.app.goo.gl/abc",
+      title: "DevOps Senior",
+      companyName: "TechBolivia S.R.L.",
+      description: "Infraestructura en la nube",
+      requirements: ["Docker", "Kubernetes"],
+      salary: "Bs 6.500 - 8.000",
+      modality: "Híbrido",
+      contractType: "Tiempo completo",
+      languages: "Español, Inglés",
+      positionsAvailable: 2,
+      locationUrl: "https://maps.app.goo.gl/abc",
     });
   });
 });

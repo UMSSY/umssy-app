@@ -15,6 +15,7 @@ import type { JobOfferCreatedResponse } from '../responses/job-offer-created.res
 import type {
   JobOfferResponse,
   JobOfferSkillResponse,
+  PublishedJobOfferResponse,
 } from '../responses/job-offer.response.js';
 import { JobOfferStatus } from '../types/job-offer.enum.js';
 import { formatSalaryRange } from '../utils/format-salary-range.js';
@@ -28,17 +29,22 @@ export class JobOffersService {
     private readonly jobOfferMapper: JobOfferMapper,
   ) {}
 
-  async create(companyId: string, request: CreateJobOfferRequest): Promise<JobOfferCreatedResponse> {
+  async create(
+    companyId: string,
+    request: CreateJobOfferRequest,
+  ): Promise<JobOfferCreatedResponse> {
     await this.ensureCompanyExists(companyId);
     await this.jobOfferSkillsService.validateSkillIds(request.skillIds);
 
-    const { modalityId, contractTypeId, statusId } = await this.jobOffersRepository.findCatalogIds(
-      request.modality,
-      request.contractType,
-      JobOfferStatus.PUBLISHED,
-    );
+    const { modalityId, contractTypeId, statusId } =
+      await this.jobOffersRepository.findCatalogIds(
+        request.modality,
+        request.contractType,
+        JobOfferStatus.PUBLISHED,
+      );
     if (!modalityId) throw new JobOfferCatalogNotFoundException('modalidad');
-    if (!contractTypeId) throw new JobOfferCatalogNotFoundException('tipo de contrato');
+    if (!contractTypeId)
+      throw new JobOfferCatalogNotFoundException('tipo de contrato');
     if (!statusId) throw new JobOfferCatalogNotFoundException('estado');
 
     const record = await this.jobOffersRepository.create({
@@ -52,20 +58,26 @@ export class JobOffersService {
     return this.jobOfferMapper.toCreatedResponse(record);
   }
 
-  async listPublished(): Promise<JobOfferResponse[]> {
+  async listPublished(): Promise<PublishedJobOfferResponse[]> {
     const records = await this.jobOffersRepository.findPublished(new Date());
-    return records.map((record) => this.jobOfferMapper.toResponse(record));
+    return records.map((record) => this.jobOfferMapper.toPublishedResponse(record));
   }
   async listByCompany(
     companyId: string,
     filters: ListCompanyJobOffersRequest = DEFAULT_COMPANY_JOB_OFFERS_FILTERS,
   ): Promise<JobOfferResponse[]> {
     await this.ensureCompanyExists(companyId);
-    const records = await this.jobOffersRepository.findByCompany(companyId, filters);
+    const records = await this.jobOffersRepository.findByCompany(
+      companyId,
+      filters,
+    );
     return records.map((record) => this.jobOfferMapper.toResponse(record));
   }
 
-  async getByCompanyAndId(companyId: string, jobOfferId: string): Promise<JobOfferResponse> {
+  async getByCompanyAndId(
+    companyId: string,
+    jobOfferId: string,
+  ): Promise<JobOfferResponse> {
     await this.ensureCompanyExists(companyId);
     const record = await this.jobOffersRepository.findHistoryByCompanyAndId(
       companyId,
@@ -83,17 +95,22 @@ export class JobOffersService {
     request: CreateJobOfferRequest,
   ): Promise<JobOfferResponse> {
     await this.ensureCompanyExists(companyId);
-    const existing = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
+    const existing = await this.jobOffersRepository.findByCompanyAndId(
+      companyId,
+      jobOfferId,
+    );
     if (!existing) throw new JobOfferNotFoundException();
     await this.jobOfferSkillsService.validateSkillIds(request.skillIds);
 
-    const { modalityId, contractTypeId } = await this.jobOffersRepository.findCatalogIds(
-      request.modality,
-      request.contractType,
-      JobOfferStatus.PUBLISHED,
-    );
+    const { modalityId, contractTypeId } =
+      await this.jobOffersRepository.findCatalogIds(
+        request.modality,
+        request.contractType,
+        JobOfferStatus.PUBLISHED,
+      );
     if (!modalityId) throw new JobOfferCatalogNotFoundException('modalidad');
-    if (!contractTypeId) throw new JobOfferCatalogNotFoundException('tipo de contrato');
+    if (!contractTypeId)
+      throw new JobOfferCatalogNotFoundException('tipo de contrato');
 
     const record = await this.jobOffersRepository.update(jobOfferId, {
       modalityId,
@@ -105,7 +122,10 @@ export class JobOffersService {
 
   async softDelete(companyId: string, jobOfferId: string): Promise<void> {
     await this.ensureCompanyExists(companyId);
-    const existing = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
+    const existing = await this.jobOffersRepository.findByCompanyAndId(
+      companyId,
+      jobOfferId,
+    );
     if (!existing) {
       throw new JobOfferNotFoundException();
     }
@@ -120,6 +140,14 @@ export class JobOffersService {
     }
 
     await this.jobOffersRepository.updateStatus(jobOfferId, statusId);
+  }
+
+  findScoringOffers(ids: string[]) {
+    return this.jobOffersRepository.findScoringOffers(ids);
+  }
+
+  findCompanyOffer(companyId: string, id: string) {
+    return this.jobOffersRepository.findCompanyOffer(companyId, id);
   }
 
   listSkillCatalog(): Promise<JobOfferSkillResponse[]> {

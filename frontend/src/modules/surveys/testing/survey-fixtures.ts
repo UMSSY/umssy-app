@@ -53,6 +53,7 @@ export function buildSurveyState(overrides: Partial<SurveyBuilderState> = {}): S
     title: "Encuesta de Empleabilidad",
     description: "Situación laboral",
     careerId: CAREERS[0].id,
+    targetAudience: "graduates",
     academicPeriod: "II-2026",
     opensAt: "2026-11-03",
     closesAt: "2026-12-15",
