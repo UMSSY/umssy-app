@@ -358,8 +358,8 @@ describe('Mis citas (integración HTTP con el plan del seed B-08)', () => {
       orientationType: TOPIC,
       status: 'CONFIRMED',
     });
-    expect(mentorCounterpart).toEqual({ id: GRADUATE, fullName: 'Titulado Uno' });
-    expect(graduateCounterpart).toEqual({ id: MENTOR_A, fullName: 'Mentor Alfa' });
+    expect(mentorCounterpart).toEqual({ id: GRADUATE, fullName: 'Titulado Uno', role: 'student' });
+    expect(graduateCounterpart).toEqual({ id: MENTOR_A, fullName: 'Mentor Alfa', role: 'mentor' });
 
     for (const [token, detail] of [
       [tokens.mentorA, mentor],

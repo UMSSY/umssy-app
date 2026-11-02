@@ -1,10 +1,6 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import { formatBlockRange } from "@/shared/utils/date-time";
 import {
@@ -23,7 +19,16 @@ export function AppointmentCard({ appointment }: AppointmentCardProps) {
     <Card className="min-w-0">
       <CardHeader className="min-w-0">
         <CardTitle className="min-w-0 wrap-anywhere">
-          {appointment.counterpart.fullName}
+          {appointment.counterpart.role === "mentor" ? (
+            <Link
+              href={`/mentors/${appointment.counterpart.id}`}
+              className="rounded-sm text-primary hover:text-primary/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              {appointment.counterpart.fullName}
+            </Link>
+          ) : (
+            appointment.counterpart.fullName
+          )}
         </CardTitle>
         <Badge variant="outline">
           {APPOINTMENT_STATUS_LABELS[appointment.status]}
@@ -34,12 +39,8 @@ export function AppointmentCard({ appointment }: AppointmentCardProps) {
         <p>
           <time dateTime={appointment.startAt}>{dateLabel}</time>
         </p>
-        <p>
-          {formatBlockRange(appointment.startAt, appointment.endAt)}
-        </p>
-        <p className="text-muted-foreground">
-          {BOLIVIA_TIME_LABEL}
-        </p>
+        <p>{formatBlockRange(appointment.startAt, appointment.endAt)}</p>
+        <p className="text-muted-foreground">{BOLIVIA_TIME_LABEL}</p>
         <p className="wrap-anywhere">
           {`${APPOINTMENTS_TEXT.topicLabel} ${appointment.orientationType?.name ?? APPOINTMENTS_TEXT.noTopic}`}
         </p>

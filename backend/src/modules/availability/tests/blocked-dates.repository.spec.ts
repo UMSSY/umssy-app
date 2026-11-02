@@ -63,6 +63,14 @@ describe('BlockedDatesRepository', () => {
     expect(prisma.blockedDate.findUnique).not.toHaveBeenCalled();
   });
 
+  it('consulta todas las fechas desde hoy sin perder el filtro de propietario ni el orden', async () => {
+    await repository.findInRange('mentor-1', DAY);
+    expect(prisma.blockedDate.findMany).toHaveBeenCalledWith({
+      where: { mentorId: 'mentor-1', blockedOn: { gte: DAY } },
+      orderBy: { blockedOn: 'asc' },
+    });
+  });
+
   it('busca por id', async () => {
     await repository.findById('blocked-1');
     expect(prisma.blockedDate.findUnique).toHaveBeenCalledWith({ where: { id: 'blocked-1' } });

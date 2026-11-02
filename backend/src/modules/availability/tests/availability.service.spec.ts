@@ -157,7 +157,7 @@ describe('AvailabilityService', () => {
         null,
         {
           id: 'appointment-1',
-          counterpart: { id: 'student-1', fullName: 'Luis Flores' },
+          counterpart: { id: 'student-1', fullName: 'Luis Flores', role: 'student' },
           orientationType: { id: 'orientation-1', name: 'Orientación profesional' },
         },
       ]);
