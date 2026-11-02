@@ -1,3 +1,9 @@
+import { ApplicationStatus } from '../../applications/types/applications.types.js';
+
+export const ACTIVE_APPLICATION_WHERE = {
+  status: { title: { not: ApplicationStatus.WITHDRAWN } },
+} as const;
+
 export const JOB_OFFER_TITLE_MAX_LENGTH = 60;
 export const JOB_OFFER_DESCRIPTION_MAX_LENGTH = 3000;
 export const JOB_OFFER_LANGUAGES_MAX_LENGTH = 100;
@@ -62,7 +68,7 @@ export const JOB_OFFER_SELECT = {
     select: { skill: { select: { id: true, name: true } } },
     orderBy: { skill: { name: 'asc' } },
   },
-  _count: { select: { applications: true } },
+  _count: { select: { applications: { where: ACTIVE_APPLICATION_WHERE } } },
 } as const;
 
 export const JOB_OFFER_CREATED_SELECT = { id: true, createdAt: true } as const;
