@@ -22,6 +22,18 @@ beforeEach(() => {
 });
 
 describe('useEvents', () => {
+  it('merges repeated event IDs across pages using the latest counter without merging different workshops', async () => {
+    const first = Array.from({ length: 50 }, (_, index) => ({ id: `event-${index}`, title: 'Same title', registrationCount: 1 }));
+    getEventsMock.mockResolvedValueOnce({ data: first, page: 1, offset: 0 })
+      .mockResolvedValueOnce({ data: [{ ...first[0], registrationCount: 2 }, { ...first[0], id: 'other-event' }], page: 2, offset: 50 });
+    const { result } = renderHook(() => useEvents());
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+    act(() => result.current.loadMore());
+    await waitFor(() => expect(result.current.events).toHaveLength(51));
+    expect(result.current.events.filter(event => event.id === 'event-0')).toHaveLength(1);
+    expect(result.current.events.find(event => event.id === 'event-0')?.registrationCount).toBe(2);
+    expect(result.current.events.some(event => event.id === 'other-event')).toBe(true);
+  });
   it('carga la primera pagina y actualiza el estado', async () => {
     const response: EventsListResponse = {
       data: [],

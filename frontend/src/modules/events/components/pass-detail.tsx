@@ -1,5 +1,6 @@
 'use client';
 
+import { useEventFinished } from '../hooks/use-event-finished';
 import { useQuery } from '@tanstack/react-query';
 import { useRegistrationSession } from '@/modules/registrations';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,7 @@ export function PassDetail({ registration }: PassDetailProps) {
   });
   const detail = pass.data ?? registration;
 
-  const effectiveStatus = getEffectiveRegistrationStatus(detail.status, detail.date);
+  const effectiveStatus = getEffectiveRegistrationStatus(detail.status, useEventFinished({ eventDate: detail.date, endTime: detail.endTime }));
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-5">
@@ -35,7 +36,7 @@ export function PassDetail({ registration }: PassDetailProps) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-1.5">
-          <h2 
+          <h2
             className="line-clamp-2 text-2xl leading-tight font-bold [overflow-wrap:anywhere] break-words"
             title={detail.eventName}
           >
@@ -46,15 +47,18 @@ export function PassDetail({ registration }: PassDetailProps) {
           <div className="flex min-w-0 items-center gap-2 text-sm text-surface/85">
             <Calendar className="size-4 shrink-0 opacity-80" />
             <span className="min-w-0 [overflow-wrap:anywhere] break-words">
-              {formatRegistrationDate(detail.date)} ·{' '}
-              {formatTimeRange(detail.startTime, detail.endTime)}
+              {formatRegistrationDate(detail.date)}
             </span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-surface/85">
+            <Clock className="size-4 shrink-0" aria-hidden="true" />
+            <span>{formatTimeRange(detail.startTime, detail.endTime)}</span>
           </div>
         </div>
 
         <div className="flex min-w-0 items-center gap-2 text-sm text-surface/85">
           <MapPin className="size-4 shrink-0" />
-          <span 
+          <span
             className="line-clamp-1 min-w-0 [overflow-wrap:anywhere] break-words"
             title={formatEventLocation(detail.location)}
           >
@@ -71,16 +75,12 @@ export function PassDetail({ registration }: PassDetailProps) {
                 <Loader2 className="size-8 animate-spin" />
                 <span className="text-xs">Generando pase...</span>
               </div>
+            ) : effectiveStatus.isPast ? (
+              <p className="text-center text-ink">Pase finalizado. Este taller ya concluyó.</p>
             ) : pass.isError ? (
               <div role="alert" className="space-y-3 text-center text-ink">
                 <p>No se pudo cargar el pase. Inténtalo nuevamente.</p>
                 <Button variant="outline" onClick={() => { void pass.refetch(); }}>Reintentar</Button>
-              </div>
-            ) : effectiveStatus.isPast ? (
-              <div className="flex flex-col items-center justify-center space-y-2 p-4 text-center text-ink">
-                <Clock className="size-10 text-gray-400" />
-                <p className="text-base font-semibold text-gray-700">Pase Finalizado</p>
-                <p className="max-w-xs text-xs text-gray-500">Este taller ya concluyó. El código QR ya no está activo ni disponible.</p>
               </div>
             ) : (
               <PassQr token={pass.data.qrToken} />

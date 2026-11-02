@@ -12,7 +12,7 @@ import { EventsModule } from '../events.module.js';
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 const KEY = '22222222-2222-4222-8222-222222222222';
 const COVER = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==', 'base64');
-const VALID = { title: 'Python', description: 'Taller práctico', categoryId: USER_ID, eventDate: '2027-12-12', startTime: '09:00', endTime: '12:00', capacity: '31', modality: 'presencial', location: 'Aula 1' };
+const VALID = { title: 'Python', description: 'Taller práctico', categoryId: USER_ID, eventDate: '2027-12-12', startTime: '09:00', endTime: '12:00', capacity: '31', modality: 'presencial', location: 'Facultad de Tecnología, Aula 1' };
 let app: INestApplication;
 let token: string;
 let record: Record<string, unknown>;

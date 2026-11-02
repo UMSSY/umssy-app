@@ -1,5 +1,6 @@
 export interface MyRegistrationResponse {
   id: string;
+  eventId: string;
   eventName: string;
   date: Date;
   startTime: Date;
