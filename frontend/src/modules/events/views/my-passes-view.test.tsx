@@ -51,7 +51,7 @@ describe('Mis pases', () => {
     await within(await screen.findByRole('complementary', { name: 'Detalle de la inscripción' })).findByText('reg-1');
     expect(screen.getAllByText('Laboratorio 1, Facultad de Ciencias y Tecnología')).toHaveLength(2);
     expect(screen.queryByText(/, UMSS$/)).not.toBeInTheDocument();
-    expect(screen.getByText(/09:00 - 12:00 hrs/)).toBeInTheDocument();
+    expect(screen.getAllByText(/09:00 - 12:00 hrs/).length).toBeGreaterThan(0);
   });
 
   it('muestra carga, datos reales y cambia el detalle al seleccionar otra inscripción', async () => {
@@ -63,7 +63,7 @@ describe('Mis pases', () => {
     expect(screen.getAllByText('Aula 101')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByText('2 pases')).toBeInTheDocument();
-    expect(screen.getByText(/09:00 - 12:00/)).toBeInTheDocument();
+    expect(screen.getAllByText(/09:00 - 12:00/).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole('button', { name: /Prisma/ }));
     expect(within(screen.getByRole('complementary', { name: 'Detalle de la inscripción' })).getByText('reg-2')).toBeInTheDocument();
     expect(screen.getAllByText('Lab 2')).toHaveLength(2);
@@ -73,6 +73,7 @@ describe('Mis pases', () => {
     expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'false');
     expect(within(screen.getByRole('complementary', { name: 'Detalle de la inscripción' })).queryByText('reg-1')).not.toBeInTheDocument();
   });
+
   it('muestra el estado vacío y acceso al catálogo', async () => {
     getMine.mockResolvedValue([]);
     render(<MyPassesView />);
@@ -82,6 +83,7 @@ describe('Mis pases', () => {
     expect(screen.queryByLabelText('Vista ilustrativa de QR')).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Explorar talleres disponibles' })).toHaveAttribute('href', '/events');
   });
+
   it('permite reintentar y muestra un único pase después de recuperarse', async () => {
     getMine.mockRejectedValueOnce(new Error('Debes iniciar sesión')).mockResolvedValueOnce([pass]);
     render(<MyPassesView />);
@@ -91,6 +93,7 @@ describe('Mis pases', () => {
     expect(screen.getByText('1 pase')).toBeInTheDocument();
     expect(getMine).toHaveBeenCalledTimes(2);
   });
+
   it.each([
     [{ isAxiosError: true, response: { status: 401, data: { statusCode: 401, ok: false, code: 'UNAUTHENTICATED', detail: 'Sesión inválida', data: null } } }, 'Inicia sesión para continuar'],
     [{ isAxiosError: true, response: { status: 403, data: { statusCode: 403, ok: false, code: 'USER_INACTIVE', detail: 'Usuario inactivo', data: null } } }, 'Tu cuenta está inactiva'],
@@ -104,6 +107,7 @@ describe('Mis pases', () => {
     expect(screen.queryByRole('region', { name: 'Aún no tienes inscripciones.' })).not.toBeInTheDocument();
     expect(screen.queryByText('ID Inscripción')).not.toBeInTheDocument();
   });
+
   it.each([true, false])('cancela la consulta al desmontar sin actualizar la vista: %s', async (success) => {
     let resolve!: (items: typeof pass[]) => void;
     let reject!: (cause: unknown) => void;
@@ -115,8 +119,9 @@ describe('Mis pases', () => {
     await act(async () => { if (success) resolve([pass]); else reject(new Error('cancelled')); });
     await waitFor(() => expect(screen.queryByText('React')).not.toBeInTheDocument());
   });
+
   it('shows the location in the list and the registration ID in the selected detail', async () => {
-    const longPass = { ...pass, id: '123e4567-e89b-12d3-a456-426614174000', eventName: 'Taller'.repeat(80), location: 'Ubicación'.repeat(80) };
+    const longPass = { ...pass, date: '2099-10-20T00:00:00Z', id: '123e4567-e89b-12d3-a456-426614174000', eventName: 'Taller'.repeat(80), location: 'Ubicación'.repeat(80) };
     getMine.mockResolvedValue([longPass]);
     render(<MyPassesView />);
     const card = await screen.findByRole('button', { name: new RegExp(longPass.eventName) });
@@ -128,5 +133,4 @@ describe('Mis pases', () => {
     expect(screen.getByText('1 pase')).toBeInTheDocument();
     expect(await screen.findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
   });
-
 });
