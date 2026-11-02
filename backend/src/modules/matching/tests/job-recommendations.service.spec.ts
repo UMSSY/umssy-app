@@ -89,13 +89,12 @@ describe('HU-06 recommendations contract', () => {
     expect(findPublished).not.toHaveBeenCalled();
   });
 
-  it('orders by affinity and keeps matching skill count as tie breaker', async () => {
+  it('AC-06.1 and AC-02.5: orders by affinity and does not list offers with 0 %', async () => {
     const result = await service.recommendations('user');
     expect(result.items.map((item) => [item.jobOfferId, item.score])).toEqual([
-      ['perfect', 100],
       ['unrestricted', 100],
+      ['perfect', 100],
       ['partial', 50],
-      ['none', 0],
     ]);
     expect(getUserSkills).toHaveBeenCalledWith('user');
     expect(findCandidateProfile).toHaveBeenCalledWith('user');
