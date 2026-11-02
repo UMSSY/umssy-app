@@ -1,14 +1,15 @@
-import Link from "next/link";
 import { GraduationCap, UserPlus } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { REQUEST_MENTORSHIP_TEXT, useRequestMentorship } from "@/modules/availability";
 
 import type { MentorProfile } from "../../types/mentor-profile.types";
 
@@ -31,6 +32,7 @@ export function MentorProfileHeader({
   showRequestAction = true,
 }: MentorProfileHeaderProps) {
   const primaryEducation = mentor.educations[0];
+  const { requestMentorship, isChecking, hasNoSlots } = useRequestMentorship(mentor.id);
 
   return (
     <Card className="gap-0 overflow-visible rounded-xl border border-border bg-white py-0 text-base ring-0">
@@ -87,26 +89,34 @@ export function MentorProfileHeader({
           </div>
         </div>
 
-        {!showRequestAction ? null : mentor.isAvailable ? (
-          <Link
-            href={`/mentors/${mentor.id}/availability`}
-            className={cn(
-              buttonVariants(),
-              "h-auto w-full shrink-0 gap-2 rounded-lg border-0 bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:brightness-90 active:translate-y-0 sm:px-6 sm:text-base xl:w-auto",
+        {showRequestAction && (
+          <div className="flex w-full shrink-0 flex-col gap-2 xl:w-auto">
+            {mentor.isAvailable ? (
+              <Button
+                type="button"
+                onClick={requestMentorship}
+                disabled={isChecking}
+                className="h-auto w-full gap-2 rounded-lg border-0 bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:brightness-90 active:translate-y-0 sm:px-6 sm:text-base xl:w-auto"
+              >
+                <UserPlus className="size-5" />
+                Solicitar mentoría
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                disabled
+                className="h-auto w-full gap-2 rounded-lg border-0 bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-90 active:translate-y-0 sm:px-6 sm:text-base xl:w-auto"
+              >
+                <UserPlus className="size-5" />
+                {REQUEST_MENTORSHIP_TEXT.disabledHint}
+              </Button>
             )}
-          >
-            <UserPlus className="size-5" />
-            Solicitar mentoría
-          </Link>
-        ) : (
-          <Button
-            type="button"
-            disabled
-            className="h-auto w-full shrink-0 gap-2 rounded-lg border-0 bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-90 active:translate-y-0 sm:px-6 sm:text-base xl:w-auto"
-          >
-            <UserPlus className="size-5" />
-            Solicitar mentoría
-          </Button>
+            {hasNoSlots && (
+              <Alert variant="destructive">
+                <AlertTitle>{REQUEST_MENTORSHIP_TEXT.noSlots}</AlertTitle>
+              </Alert>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>
