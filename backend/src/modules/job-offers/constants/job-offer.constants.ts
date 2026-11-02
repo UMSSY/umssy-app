@@ -62,6 +62,7 @@ export const JOB_OFFER_SELECT = {
     select: { skill: { select: { id: true, name: true } } },
     orderBy: { skill: { name: 'asc' } },
   },
+  _count: { select: { applications: true } },
 } as const;
 
 export const JOB_OFFER_CREATED_SELECT = { id: true, createdAt: true } as const;

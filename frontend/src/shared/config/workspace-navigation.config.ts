@@ -1,4 +1,4 @@
-import { BookOpen, BriefcaseBusiness, Building2, CalendarClock, ClipboardList, FileText, GraduationCap, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
+import { Bell, BookOpen, BriefcaseBusiness, Building2, CalendarClock, ClipboardList, FileText, GraduationCap, History, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
 import type { WorkspaceArea, WorkspaceTask } from "@/shared/types/workspace-navigation.types";
 
 export const WORKSPACE_AREAS: readonly WorkspaceArea[] = [
@@ -15,6 +15,7 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
   { label: "Usuarios rechazados", href: "/backoffice/reports/rejected-users", icon: FileText, area: "management", keywords: "reporte motivos" },
   { label: "Historial de reportes", href: "/backoffice/reports/history", icon: CalendarClock, area: "management" },
   { label: "Revisión de radares", href: "/affinity-radar/review-queue", icon: Radar, area: "management" },
+  { label: "Registro de auditoría", href: "/backoffice/audit", icon: History, area: "management", keywords: "auditoría historial eventos trazabilidad" },
   { label: "Encuestas", href: "/backoffice/surveys", icon: ClipboardList, area: "management", keywords: "formularios cuestionarios satisfacción historial resultados estadísticas" },
   { label: "Crear encuesta", href: "/backoffice/surveys/create", icon: SquarePlus, area: "management", keywords: "nueva encuesta formulario preguntas" },
   { label: "Portal de empresa", href: "/recruiters", icon: Building2, area: "company" },
@@ -35,6 +36,7 @@ export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
   { label: "Áreas técnicas", href: "/mentors/participation/technical-areas", icon: BookOpen, area: "community", keywords: "especialidades mentor experiencia" },
   { label: "Tipos de orientación", href: "/mentorship/orientation", icon: Users, area: "community", keywords: "asesoría mentor empleo orientación" },
   { label: "Mensajes", href: "/chat", icon: MessageCircle, area: "community", keywords: "chat mensajes conversaciones" },
+  { label: "Notificaciones de encuestas", href: "/surveys", icon: Bell, area: "community", keywords: "encuestas formularios cuestionarios responder pendientes" },
   { label: "Talleres disponibles", href: "/events", icon: BookOpen, area: "opportunities", keywords: "eventos actividades formación" },
   { label: "Proponer taller", href: "/events/propose", icon: SquarePlus, area: "opportunities", keywords: "propuesta crear taller portada" },
   { label: "Mis inscripciones", href: "/events/my-passes", icon: Ticket, area: "opportunities", keywords: "pases talleres entradas" },

@@ -298,6 +298,11 @@ export type UserWhereInput = {
   chatMessages?: Prisma.MessageListRelationFilter
   chatParticipants?: Prisma.ConversationParticipantListRelationFilter
   presence?: Prisma.XOR<Prisma.UserPresenceNullableScalarRelationFilter, Prisma.UserPresenceWhereInput> | null
+  chatBlocksMade?: Prisma.ChatUserBlockListRelationFilter
+  chatBlocksReceived?: Prisma.ChatUserBlockListRelationFilter
+  sentRequests?: Prisma.ConnectionRequestListRelationFilter
+  receivedRequests?: Prisma.ConnectionRequestListRelationFilter
+  passwordResetOtps?: Prisma.PasswordResetOtpListRelationFilter
   auditEvents?: Prisma.AuditEventListRelationFilter
   revertedValidations?: Prisma.DocumentValidationListRelationFilter
   jobApplications?: Prisma.JobApplicationListRelationFilter
@@ -355,6 +360,11 @@ export type UserOrderByWithRelationInput = {
   chatMessages?: Prisma.MessageOrderByRelationAggregateInput
   chatParticipants?: Prisma.ConversationParticipantOrderByRelationAggregateInput
   presence?: Prisma.UserPresenceOrderByWithRelationInput
+  chatBlocksMade?: Prisma.ChatUserBlockOrderByRelationAggregateInput
+  chatBlocksReceived?: Prisma.ChatUserBlockOrderByRelationAggregateInput
+  sentRequests?: Prisma.ConnectionRequestOrderByRelationAggregateInput
+  receivedRequests?: Prisma.ConnectionRequestOrderByRelationAggregateInput
+  passwordResetOtps?: Prisma.PasswordResetOtpOrderByRelationAggregateInput
   auditEvents?: Prisma.AuditEventOrderByRelationAggregateInput
   revertedValidations?: Prisma.DocumentValidationOrderByRelationAggregateInput
   jobApplications?: Prisma.JobApplicationOrderByRelationAggregateInput
@@ -415,6 +425,11 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   chatMessages?: Prisma.MessageListRelationFilter
   chatParticipants?: Prisma.ConversationParticipantListRelationFilter
   presence?: Prisma.XOR<Prisma.UserPresenceNullableScalarRelationFilter, Prisma.UserPresenceWhereInput> | null
+  chatBlocksMade?: Prisma.ChatUserBlockListRelationFilter
+  chatBlocksReceived?: Prisma.ChatUserBlockListRelationFilter
+  sentRequests?: Prisma.ConnectionRequestListRelationFilter
+  receivedRequests?: Prisma.ConnectionRequestListRelationFilter
+  passwordResetOtps?: Prisma.PasswordResetOtpListRelationFilter
   auditEvents?: Prisma.AuditEventListRelationFilter
   revertedValidations?: Prisma.DocumentValidationListRelationFilter
   jobApplications?: Prisma.JobApplicationListRelationFilter
@@ -513,6 +528,11 @@ export type UserCreateInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -569,6 +589,11 @@ export type UserUncheckedCreateInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -625,6 +650,11 @@ export type UserUpdateInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -681,6 +711,11 @@ export type UserUncheckedUpdateInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -1239,18 +1274,22 @@ export type UserCreateNestedOneWithoutConversationsAsUserBInput = {
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutConversationsAsUserANestedInput = {
+export type UserUpdateOneWithoutConversationsAsUserANestedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutConversationsAsUserAInput, Prisma.UserUncheckedCreateWithoutConversationsAsUserAInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutConversationsAsUserAInput
   upsert?: Prisma.UserUpsertWithoutConversationsAsUserAInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutConversationsAsUserAInput, Prisma.UserUpdateWithoutConversationsAsUserAInput>, Prisma.UserUncheckedUpdateWithoutConversationsAsUserAInput>
 }
 
-export type UserUpdateOneRequiredWithoutConversationsAsUserBNestedInput = {
+export type UserUpdateOneWithoutConversationsAsUserBNestedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutConversationsAsUserBInput, Prisma.UserUncheckedCreateWithoutConversationsAsUserBInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutConversationsAsUserBInput
   upsert?: Prisma.UserUpsertWithoutConversationsAsUserBInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutConversationsAsUserBInput, Prisma.UserUpdateWithoutConversationsAsUserBInput>, Prisma.UserUncheckedUpdateWithoutConversationsAsUserBInput>
 }
@@ -1283,6 +1322,62 @@ export type UserUpdateOneRequiredWithoutChatMessagesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutChatMessagesInput, Prisma.UserUpdateWithoutChatMessagesInput>, Prisma.UserUncheckedUpdateWithoutChatMessagesInput>
 }
 
+export type UserCreateNestedOneWithoutChatBlocksMadeInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutChatBlocksMadeInput, Prisma.UserUncheckedCreateWithoutChatBlocksMadeInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutChatBlocksMadeInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutChatBlocksReceivedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutChatBlocksReceivedInput, Prisma.UserUncheckedCreateWithoutChatBlocksReceivedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutChatBlocksReceivedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutChatBlocksMadeNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutChatBlocksMadeInput, Prisma.UserUncheckedCreateWithoutChatBlocksMadeInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutChatBlocksMadeInput
+  upsert?: Prisma.UserUpsertWithoutChatBlocksMadeInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutChatBlocksMadeInput, Prisma.UserUpdateWithoutChatBlocksMadeInput>, Prisma.UserUncheckedUpdateWithoutChatBlocksMadeInput>
+}
+
+export type UserUpdateOneRequiredWithoutChatBlocksReceivedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutChatBlocksReceivedInput, Prisma.UserUncheckedCreateWithoutChatBlocksReceivedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutChatBlocksReceivedInput
+  upsert?: Prisma.UserUpsertWithoutChatBlocksReceivedInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutChatBlocksReceivedInput, Prisma.UserUpdateWithoutChatBlocksReceivedInput>, Prisma.UserUncheckedUpdateWithoutChatBlocksReceivedInput>
+}
+
+export type UserCreateNestedOneWithoutSentRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentRequestsInput, Prisma.UserUncheckedCreateWithoutSentRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutReceivedRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReceivedRequestsInput, Prisma.UserUncheckedCreateWithoutReceivedRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReceivedRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSentRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentRequestsInput, Prisma.UserUncheckedCreateWithoutSentRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentRequestsInput
+  upsert?: Prisma.UserUpsertWithoutSentRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSentRequestsInput, Prisma.UserUpdateWithoutSentRequestsInput>, Prisma.UserUncheckedUpdateWithoutSentRequestsInput>
+}
+
+export type UserUpdateOneRequiredWithoutReceivedRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReceivedRequestsInput, Prisma.UserUncheckedCreateWithoutReceivedRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReceivedRequestsInput
+  upsert?: Prisma.UserUpsertWithoutReceivedRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReceivedRequestsInput, Prisma.UserUpdateWithoutReceivedRequestsInput>, Prisma.UserUncheckedUpdateWithoutReceivedRequestsInput>
+}
+
 export type UserCreateNestedOneWithoutPresenceInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutPresenceInput, Prisma.UserUncheckedCreateWithoutPresenceInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutPresenceInput
@@ -1295,6 +1390,20 @@ export type UserUpdateOneRequiredWithoutPresenceNestedInput = {
   upsert?: Prisma.UserUpsertWithoutPresenceInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPresenceInput, Prisma.UserUpdateWithoutPresenceInput>, Prisma.UserUncheckedUpdateWithoutPresenceInput>
+}
+
+export type UserCreateNestedOneWithoutPasswordResetOtpsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetOtpsInput, Prisma.UserUncheckedCreateWithoutPasswordResetOtpsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetOtpsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPasswordResetOtpsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetOtpsInput, Prisma.UserUncheckedCreateWithoutPasswordResetOtpsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPasswordResetOtpsInput
+  upsert?: Prisma.UserUpsertWithoutPasswordResetOtpsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetOtpsInput, Prisma.UserUpdateWithoutPasswordResetOtpsInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetOtpsInput>
 }
 
 export type UserCreateNestedOneWithoutMentorParticipationAttemptLimitInput = {
@@ -1463,6 +1572,11 @@ export type UserCreateWithoutCityInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -1518,6 +1632,11 @@ export type UserUncheckedCreateWithoutCityInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -1620,6 +1739,11 @@ export type UserCreateWithoutRolesInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -1675,6 +1799,11 @@ export type UserUncheckedCreateWithoutRolesInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -1746,6 +1875,11 @@ export type UserUpdateWithoutRolesInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -1801,6 +1935,11 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -1856,6 +1995,11 @@ export type UserCreateWithoutEducationsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -1911,6 +2055,11 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -1982,6 +2131,11 @@ export type UserUpdateWithoutEducationsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -2037,6 +2191,11 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -2092,6 +2251,11 @@ export type UserCreateWithoutWorkExperiencesInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2147,6 +2311,11 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2218,6 +2387,11 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -2273,6 +2447,11 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -2328,6 +2507,11 @@ export type UserCreateWithoutUserSkillsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2383,6 +2567,11 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2454,6 +2643,11 @@ export type UserUpdateWithoutUserSkillsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -2509,6 +2703,11 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -2564,6 +2763,11 @@ export type UserCreateWithoutCertificationsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2619,6 +2823,11 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2690,6 +2899,11 @@ export type UserUpdateWithoutCertificationsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -2745,6 +2959,11 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -2800,6 +3019,11 @@ export type UserCreateWithoutCvFilesInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -2855,6 +3079,11 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -2926,6 +3155,11 @@ export type UserUpdateWithoutCvFilesInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -2981,6 +3215,11 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -3036,6 +3275,11 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -3091,6 +3335,11 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -3162,6 +3411,11 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -3217,6 +3471,11 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -3272,6 +3531,11 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -3327,6 +3591,11 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -3398,6 +3667,11 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -3453,6 +3727,11 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -3508,6 +3787,11 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -3563,6 +3847,11 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -3634,6 +3923,11 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -3689,6 +3983,11 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -3744,6 +4043,11 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -3799,6 +4103,11 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -3870,6 +4179,11 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -3925,6 +4239,11 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -3980,6 +4299,11 @@ export type UserCreateWithoutBlockedDatesInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4035,6 +4359,11 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -4106,6 +4435,11 @@ export type UserUpdateWithoutBlockedDatesInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -4161,6 +4495,11 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -4216,6 +4555,11 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4271,6 +4615,11 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -4331,6 +4680,11 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4386,6 +4740,11 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -4446,6 +4805,11 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4501,6 +4865,11 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -4572,6 +4941,11 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -4627,6 +5001,11 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -4693,6 +5072,11 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -4748,6 +5132,11 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -4814,6 +5203,11 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -4869,6 +5263,11 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -4924,6 +5323,11 @@ export type UserCreateWithoutAppointmentChangesInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -4979,6 +5383,11 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5050,6 +5459,11 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -5105,6 +5519,11 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -5160,6 +5579,11 @@ export type UserCreateWithoutCreatedEventsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -5215,6 +5639,11 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5275,6 +5704,11 @@ export type UserCreateWithoutModeratedEventsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -5330,6 +5764,11 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5401,6 +5840,11 @@ export type UserUpdateWithoutCreatedEventsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -5456,6 +5900,11 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -5522,6 +5971,11 @@ export type UserUpdateWithoutModeratedEventsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -5577,6 +6031,11 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -5632,6 +6091,11 @@ export type UserCreateWithoutEventRegistrationsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -5687,6 +6151,11 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5758,6 +6227,11 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -5813,6 +6287,11 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -5868,6 +6347,11 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -5923,6 +6407,11 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -5994,6 +6483,11 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6049,6 +6543,11 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -6104,6 +6603,11 @@ export type UserCreateWithoutExportHistoriesInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -6159,6 +6663,11 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -6230,6 +6739,11 @@ export type UserUpdateWithoutExportHistoriesInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6285,6 +6799,11 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -6340,6 +6859,11 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -6395,6 +6919,11 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -6455,6 +6984,11 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -6510,6 +7044,11 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -6570,6 +7109,11 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -6625,6 +7169,11 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -6696,6 +7245,11 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6751,6 +7305,11 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -6817,6 +7376,11 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6872,6 +7436,11 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -6938,6 +7507,11 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -6993,6 +7567,11 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7048,6 +7627,11 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -7103,6 +7687,11 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -7174,6 +7763,11 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -7229,6 +7823,11 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7284,6 +7883,11 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -7339,6 +7943,11 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -7410,6 +8019,11 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -7465,6 +8079,11 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7520,6 +8139,11 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -7575,6 +8199,11 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -7635,6 +8264,11 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -7690,6 +8324,11 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -7761,6 +8400,11 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -7816,6 +8460,11 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7882,6 +8531,11 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -7937,6 +8591,11 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -7992,6 +8651,11 @@ export type UserCreateWithoutChatParticipantsInput = {
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8047,6 +8711,11 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -8118,6 +8787,11 @@ export type UserUpdateWithoutChatParticipantsInput = {
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -8173,6 +8847,11 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -8228,6 +8907,11 @@ export type UserCreateWithoutChatMessagesInput = {
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8283,6 +8967,11 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -8354,6 +9043,11 @@ export type UserUpdateWithoutChatMessagesInput = {
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -8409,6 +9103,1035 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutChatBlocksMadeInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutChatBlocksMadeInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutChatBlocksMadeInput, Prisma.UserUncheckedCreateWithoutChatBlocksMadeInput>
+}
+
+export type UserCreateWithoutChatBlocksReceivedInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutChatBlocksReceivedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutChatBlocksReceivedInput, Prisma.UserUncheckedCreateWithoutChatBlocksReceivedInput>
+}
+
+export type UserUpsertWithoutChatBlocksMadeInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutChatBlocksMadeInput, Prisma.UserUncheckedUpdateWithoutChatBlocksMadeInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutChatBlocksMadeInput, Prisma.UserUncheckedCreateWithoutChatBlocksMadeInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutChatBlocksMadeInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutChatBlocksMadeInput, Prisma.UserUncheckedUpdateWithoutChatBlocksMadeInput>
+}
+
+export type UserUpdateWithoutChatBlocksMadeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUpsertWithoutChatBlocksReceivedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutChatBlocksReceivedInput, Prisma.UserUncheckedUpdateWithoutChatBlocksReceivedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutChatBlocksReceivedInput, Prisma.UserUncheckedCreateWithoutChatBlocksReceivedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutChatBlocksReceivedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutChatBlocksReceivedInput, Prisma.UserUncheckedUpdateWithoutChatBlocksReceivedInput>
+}
+
+export type UserUpdateWithoutChatBlocksReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSentRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSentRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSentRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentRequestsInput, Prisma.UserUncheckedCreateWithoutSentRequestsInput>
+}
+
+export type UserCreateWithoutReceivedRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutReceivedRequestsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutReceivedRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReceivedRequestsInput, Prisma.UserUncheckedCreateWithoutReceivedRequestsInput>
+}
+
+export type UserUpsertWithoutSentRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSentRequestsInput, Prisma.UserUncheckedUpdateWithoutSentRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentRequestsInput, Prisma.UserUncheckedCreateWithoutSentRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSentRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSentRequestsInput, Prisma.UserUncheckedUpdateWithoutSentRequestsInput>
+}
+
+export type UserUpdateWithoutSentRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSentRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserUpsertWithoutReceivedRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReceivedRequestsInput, Prisma.UserUncheckedUpdateWithoutReceivedRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReceivedRequestsInput, Prisma.UserUncheckedCreateWithoutReceivedRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReceivedRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReceivedRequestsInput, Prisma.UserUncheckedUpdateWithoutReceivedRequestsInput>
+}
+
+export type UserUpdateWithoutReceivedRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -8464,6 +10187,11 @@ export type UserCreateWithoutPresenceInput = {
   conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8519,6 +10247,11 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -8590,6 +10323,11 @@ export type UserUpdateWithoutPresenceInput = {
   conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -8645,6 +10383,267 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutPasswordResetOtpsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPasswordResetOtpsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetOtpsInput, Prisma.UserUncheckedCreateWithoutPasswordResetOtpsInput>
+}
+
+export type UserUpsertWithoutPasswordResetOtpsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetOtpsInput, Prisma.UserUncheckedUpdateWithoutPasswordResetOtpsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPasswordResetOtpsInput, Prisma.UserUncheckedCreateWithoutPasswordResetOtpsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPasswordResetOtpsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPasswordResetOtpsInput, Prisma.UserUncheckedUpdateWithoutPasswordResetOtpsInput>
+}
+
+export type UserUpdateWithoutPasswordResetOtpsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -8700,6 +10699,11 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -8755,6 +10759,11 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -8826,6 +10835,11 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -8881,6 +10895,11 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -8937,6 +10956,11 @@ export type UserCreateWithoutJobApplicationsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
 }
@@ -8992,6 +11016,11 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
 }
@@ -9063,6 +11092,11 @@ export type UserUpdateWithoutJobApplicationsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
 }
@@ -9118,6 +11152,11 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
 }
@@ -9172,6 +11211,11 @@ export type UserCreateWithoutCreatedSurveysInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -9227,6 +11271,11 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -9298,6 +11347,11 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -9353,6 +11407,11 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -9408,6 +11467,11 @@ export type UserCreateWithoutSurveyResponsesInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -9463,6 +11527,11 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -9534,6 +11603,11 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -9589,6 +11663,11 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -9645,6 +11724,11 @@ export type UserCreateWithoutAuditEventsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
@@ -9700,6 +11784,11 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -9771,6 +11860,11 @@ export type UserUpdateWithoutAuditEventsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
@@ -9826,6 +11920,11 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -9881,6 +11980,11 @@ export type UserCreateWithoutRevertedValidationsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
 }
@@ -9936,6 +12040,11 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -10007,6 +12116,11 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
 }
@@ -10062,6 +12176,11 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -10116,6 +12235,11 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -10171,6 +12295,11 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -10242,6 +12371,11 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -10297,6 +12431,11 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -10352,6 +12491,11 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
@@ -10407,6 +12551,11 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
   presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
@@ -10478,6 +12627,11 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -10533,6 +12687,11 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -10605,6 +12764,11 @@ export type UserUpdateWithoutCityInput = {
   chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
@@ -10660,6 +12824,11 @@ export type UserUncheckedUpdateWithoutCityInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
@@ -10719,6 +12888,11 @@ export type UserCountOutputType = {
   conversationsAsUserB: number
   chatMessages: number
   chatParticipants: number
+  chatBlocksMade: number
+  chatBlocksReceived: number
+  sentRequests: number
+  receivedRequests: number
+  passwordResetOtps: number
   auditEvents: number
   revertedValidations: number
   jobApplications: number
@@ -10756,6 +12930,11 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   conversationsAsUserB?: boolean | UserCountOutputTypeCountConversationsAsUserBArgs
   chatMessages?: boolean | UserCountOutputTypeCountChatMessagesArgs
   chatParticipants?: boolean | UserCountOutputTypeCountChatParticipantsArgs
+  chatBlocksMade?: boolean | UserCountOutputTypeCountChatBlocksMadeArgs
+  chatBlocksReceived?: boolean | UserCountOutputTypeCountChatBlocksReceivedArgs
+  sentRequests?: boolean | UserCountOutputTypeCountSentRequestsArgs
+  receivedRequests?: boolean | UserCountOutputTypeCountReceivedRequestsArgs
+  passwordResetOtps?: boolean | UserCountOutputTypeCountPasswordResetOtpsArgs
   auditEvents?: boolean | UserCountOutputTypeCountAuditEventsArgs
   revertedValidations?: boolean | UserCountOutputTypeCountRevertedValidationsArgs
   jobApplications?: boolean | UserCountOutputTypeCountJobApplicationsArgs
@@ -10991,6 +13170,41 @@ export type UserCountOutputTypeCountChatParticipantsArgs<ExtArgs extends runtime
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountChatBlocksMadeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ChatUserBlockWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountChatBlocksReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ChatUserBlockWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSentRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConnectionRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountReceivedRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConnectionRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPasswordResetOtpsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PasswordResetOtpWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountAuditEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AuditEventWhereInput
 }
@@ -11062,6 +13276,11 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
   chatParticipants?: boolean | Prisma.User$chatParticipantsArgs<ExtArgs>
   presence?: boolean | Prisma.User$presenceArgs<ExtArgs>
+  chatBlocksMade?: boolean | Prisma.User$chatBlocksMadeArgs<ExtArgs>
+  chatBlocksReceived?: boolean | Prisma.User$chatBlocksReceivedArgs<ExtArgs>
+  sentRequests?: boolean | Prisma.User$sentRequestsArgs<ExtArgs>
+  receivedRequests?: boolean | Prisma.User$receivedRequestsArgs<ExtArgs>
+  passwordResetOtps?: boolean | Prisma.User$passwordResetOtpsArgs<ExtArgs>
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   revertedValidations?: boolean | Prisma.User$revertedValidationsArgs<ExtArgs>
   jobApplications?: boolean | Prisma.User$jobApplicationsArgs<ExtArgs>
@@ -11162,6 +13381,11 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   chatMessages?: boolean | Prisma.User$chatMessagesArgs<ExtArgs>
   chatParticipants?: boolean | Prisma.User$chatParticipantsArgs<ExtArgs>
   presence?: boolean | Prisma.User$presenceArgs<ExtArgs>
+  chatBlocksMade?: boolean | Prisma.User$chatBlocksMadeArgs<ExtArgs>
+  chatBlocksReceived?: boolean | Prisma.User$chatBlocksReceivedArgs<ExtArgs>
+  sentRequests?: boolean | Prisma.User$sentRequestsArgs<ExtArgs>
+  receivedRequests?: boolean | Prisma.User$receivedRequestsArgs<ExtArgs>
+  passwordResetOtps?: boolean | Prisma.User$passwordResetOtpsArgs<ExtArgs>
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   revertedValidations?: boolean | Prisma.User$revertedValidationsArgs<ExtArgs>
   jobApplications?: boolean | Prisma.User$jobApplicationsArgs<ExtArgs>
@@ -11213,6 +13437,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     chatMessages: Prisma.$MessagePayload<ExtArgs>[]
     chatParticipants: Prisma.$ConversationParticipantPayload<ExtArgs>[]
     presence: Prisma.$UserPresencePayload<ExtArgs> | null
+    chatBlocksMade: Prisma.$ChatUserBlockPayload<ExtArgs>[]
+    chatBlocksReceived: Prisma.$ChatUserBlockPayload<ExtArgs>[]
+    sentRequests: Prisma.$ConnectionRequestPayload<ExtArgs>[]
+    receivedRequests: Prisma.$ConnectionRequestPayload<ExtArgs>[]
+    passwordResetOtps: Prisma.$PasswordResetOtpPayload<ExtArgs>[]
     auditEvents: Prisma.$AuditEventPayload<ExtArgs>[]
     revertedValidations: Prisma.$DocumentValidationPayload<ExtArgs>[]
     jobApplications: Prisma.$JobApplicationPayload<ExtArgs>[]
@@ -11663,6 +13892,11 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   chatMessages<T extends Prisma.User$chatMessagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   chatParticipants<T extends Prisma.User$chatParticipantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatParticipantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   presence<T extends Prisma.User$presenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$presenceArgs<ExtArgs>>): Prisma.Prisma__UserPresenceClient<runtime.Types.Result.GetResult<Prisma.$UserPresencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  chatBlocksMade<T extends Prisma.User$chatBlocksMadeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatBlocksMadeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatUserBlockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  chatBlocksReceived<T extends Prisma.User$chatBlocksReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatBlocksReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatUserBlockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sentRequests<T extends Prisma.User$sentRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConnectionRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  receivedRequests<T extends Prisma.User$receivedRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$receivedRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConnectionRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  passwordResetOtps<T extends Prisma.User$passwordResetOtpsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetOtpsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetOtpPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditEvents<T extends Prisma.User$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   revertedValidations<T extends Prisma.User$revertedValidationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$revertedValidationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentValidationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   jobApplications<T extends Prisma.User$jobApplicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$jobApplicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12947,6 +15181,126 @@ export type User$presenceArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    */
   include?: Prisma.UserPresenceInclude<ExtArgs> | null
   where?: Prisma.UserPresenceWhereInput
+}
+
+/**
+ * User.chatBlocksMade
+ */
+export type User$chatBlocksMadeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ChatUserBlock
+   */
+  select?: Prisma.ChatUserBlockSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ChatUserBlock
+   */
+  omit?: Prisma.ChatUserBlockOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ChatUserBlockInclude<ExtArgs> | null
+  where?: Prisma.ChatUserBlockWhereInput
+  orderBy?: Prisma.ChatUserBlockOrderByWithRelationInput | Prisma.ChatUserBlockOrderByWithRelationInput[]
+  cursor?: Prisma.ChatUserBlockWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ChatUserBlockScalarFieldEnum | Prisma.ChatUserBlockScalarFieldEnum[]
+}
+
+/**
+ * User.chatBlocksReceived
+ */
+export type User$chatBlocksReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ChatUserBlock
+   */
+  select?: Prisma.ChatUserBlockSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ChatUserBlock
+   */
+  omit?: Prisma.ChatUserBlockOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ChatUserBlockInclude<ExtArgs> | null
+  where?: Prisma.ChatUserBlockWhereInput
+  orderBy?: Prisma.ChatUserBlockOrderByWithRelationInput | Prisma.ChatUserBlockOrderByWithRelationInput[]
+  cursor?: Prisma.ChatUserBlockWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ChatUserBlockScalarFieldEnum | Prisma.ChatUserBlockScalarFieldEnum[]
+}
+
+/**
+ * User.sentRequests
+ */
+export type User$sentRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ConnectionRequest
+   */
+  select?: Prisma.ConnectionRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ConnectionRequest
+   */
+  omit?: Prisma.ConnectionRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConnectionRequestInclude<ExtArgs> | null
+  where?: Prisma.ConnectionRequestWhereInput
+  orderBy?: Prisma.ConnectionRequestOrderByWithRelationInput | Prisma.ConnectionRequestOrderByWithRelationInput[]
+  cursor?: Prisma.ConnectionRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConnectionRequestScalarFieldEnum | Prisma.ConnectionRequestScalarFieldEnum[]
+}
+
+/**
+ * User.receivedRequests
+ */
+export type User$receivedRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ConnectionRequest
+   */
+  select?: Prisma.ConnectionRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ConnectionRequest
+   */
+  omit?: Prisma.ConnectionRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConnectionRequestInclude<ExtArgs> | null
+  where?: Prisma.ConnectionRequestWhereInput
+  orderBy?: Prisma.ConnectionRequestOrderByWithRelationInput | Prisma.ConnectionRequestOrderByWithRelationInput[]
+  cursor?: Prisma.ConnectionRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConnectionRequestScalarFieldEnum | Prisma.ConnectionRequestScalarFieldEnum[]
+}
+
+/**
+ * User.passwordResetOtps
+ */
+export type User$passwordResetOtpsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PasswordResetOtp
+   */
+  select?: Prisma.PasswordResetOtpSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PasswordResetOtp
+   */
+  omit?: Prisma.PasswordResetOtpOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PasswordResetOtpInclude<ExtArgs> | null
+  where?: Prisma.PasswordResetOtpWhereInput
+  orderBy?: Prisma.PasswordResetOtpOrderByWithRelationInput | Prisma.PasswordResetOtpOrderByWithRelationInput[]
+  cursor?: Prisma.PasswordResetOtpWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PasswordResetOtpScalarFieldEnum | Prisma.PasswordResetOtpScalarFieldEnum[]
 }
 
 /**

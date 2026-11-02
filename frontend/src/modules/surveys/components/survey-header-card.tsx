@@ -8,11 +8,18 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   ALL_ACADEMIC_PERIODS_OPTION_LABEL,
   ALL_ACADEMIC_PERIODS_VALUE,
+  ALL_CAREERS_LABEL,
+  ALL_CAREERS_VALUE,
   SURVEY_LIMITS,
+  SURVEY_TARGET_AUDIENCE_ITEMS,
   SURVEY_TEXT,
 } from "../constants/survey-builder.constants";
 import { SURVEY_FIELD_LABELS } from "../constants/survey-messages.constants";
-import { SURVEY_SELECT_TRIGGER_CLASS } from "../constants/survey-styles.constants";
+import {
+  SURVEY_SELECT_CONTENT_CLASS,
+  SURVEY_SELECT_ITEM_CLASS,
+  SURVEY_SELECT_TRIGGER_CLASS,
+} from "../constants/survey-styles.constants";
 import type { SurveyHeaderCardProps } from "../types/survey-component-props.types";
 import { FieldErrorMessage } from "./field-error-message";
 import { RequiredMark } from "./required-mark";
@@ -28,7 +35,10 @@ export function SurveyHeaderCard({
   errors,
   onFieldChange,
 }: SurveyHeaderCardProps) {
-  const careerItems = (careers ?? []).map(({ id, title }) => ({ value: id, label: title }));
+  const careerItems = [
+    { value: ALL_CAREERS_VALUE, label: ALL_CAREERS_LABEL },
+    ...(careers ?? []).map(({ id, title }) => ({ value: id, label: title })),
+  ];
   const periodItems = [
     { value: ALL_ACADEMIC_PERIODS_VALUE, label: ALL_ACADEMIC_PERIODS_OPTION_LABEL },
     ...(academicPeriods ?? []).map((period) => ({ value: period, label: period })),
@@ -68,7 +78,7 @@ export function SurveyHeaderCard({
         className="mt-3 min-h-0 resize-none rounded-none border-0 border-b border-border bg-transparent px-0 py-1.5 text-sm text-ink-soft focus-visible:border-accent focus-visible:ring-0 dark:bg-transparent"
       />
 
-      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="min-w-0">
           <Label id="survey-career-label" htmlFor="survey-career" className="mb-1.5 gap-1 text-xs font-medium text-ink-soft">
             {SURVEY_FIELD_LABELS.careerId}
@@ -89,15 +99,46 @@ export function SurveyHeaderCard({
             >
               <SelectValue placeholder={isLoadingCareers ? SURVEY_TEXT.loading : SURVEY_TEXT.selectCareer} />
             </SelectTrigger>
-            <SelectContent alignItemWithTrigger={false} className="bg-surface">
+            <SelectContent alignItemWithTrigger={false} className={SURVEY_SELECT_CONTENT_CLASS}>
               {careerItems.map((item) => (
-                <SelectItem key={item.value} value={item.value} variant="subtle">
+                <SelectItem key={item.value} value={item.value} variant="subtle" className={SURVEY_SELECT_ITEM_CLASS}>
                   {item.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <FieldErrorMessage id="survey-career-error" message={errors.careerId ?? careersErrorMessage} />
+        </div>
+
+        <div className="min-w-0">
+          <Label id="survey-audience-label" htmlFor="survey-audience" className="mb-1.5 gap-1 text-xs font-medium text-ink-soft">
+            {SURVEY_FIELD_LABELS.targetAudience}
+            <RequiredMark />
+          </Label>
+          <Select
+            items={SURVEY_TARGET_AUDIENCE_ITEMS}
+            value={values.targetAudience || null}
+            onValueChange={(value) => onFieldChange("targetAudience", typeof value === "string" ? value : "")}
+          >
+            <SelectTrigger
+              id="survey-audience"
+              aria-labelledby="survey-audience-label"
+              aria-required="true"
+              aria-invalid={errors.targetAudience ? true : undefined}
+              aria-describedby={errors.targetAudience ? "survey-audience-error" : undefined}
+              className={SURVEY_SELECT_TRIGGER_CLASS}
+            >
+              <SelectValue placeholder={SURVEY_TEXT.selectAudience} />
+            </SelectTrigger>
+            <SelectContent alignItemWithTrigger={false} className={SURVEY_SELECT_CONTENT_CLASS}>
+              {SURVEY_TARGET_AUDIENCE_ITEMS.map((item) => (
+                <SelectItem key={item.value} value={item.value} variant="subtle" className={SURVEY_SELECT_ITEM_CLASS}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FieldErrorMessage id="survey-audience-error" message={errors.targetAudience} />
         </div>
 
         <div className="min-w-0">
@@ -120,9 +161,9 @@ export function SurveyHeaderCard({
             >
               <SelectValue placeholder={SURVEY_TEXT.selectPeriod} />
             </SelectTrigger>
-            <SelectContent alignItemWithTrigger={false} className="bg-surface">
+            <SelectContent alignItemWithTrigger={false} className={SURVEY_SELECT_CONTENT_CLASS}>
               {periodItems.map((item) => (
-                <SelectItem key={item.value} value={item.value} variant="subtle">
+                <SelectItem key={item.value} value={item.value} variant="subtle" className={SURVEY_SELECT_ITEM_CLASS}>
                   {item.label}
                 </SelectItem>
               ))}
@@ -131,22 +172,24 @@ export function SurveyHeaderCard({
           <FieldErrorMessage id="survey-period-error" message={errors.academicPeriod} />
         </div>
 
-        <SurveyDateField
-          id="survey-opens-at"
-          label="Apertura"
-          value={values.opensAt}
-          minDate={minDate}
-          error={errors.opensAt}
-          onChange={(value) => onFieldChange("opensAt", value)}
-        />
-        <SurveyDateField
-          id="survey-closes-at"
-          label="Cierre"
-          value={values.closesAt}
-          minDate={minDate}
-          error={errors.closesAt}
-          onChange={(value) => onFieldChange("closesAt", value)}
-        />
+        <div className="grid min-w-0 grid-cols-2 gap-3">
+          <SurveyDateField
+            id="survey-opens-at"
+            label="Apertura"
+            value={values.opensAt}
+            minDate={minDate}
+            error={errors.opensAt}
+            onChange={(value) => onFieldChange("opensAt", value)}
+          />
+          <SurveyDateField
+            id="survey-closes-at"
+            label="Cierre"
+            value={values.closesAt}
+            minDate={minDate}
+            error={errors.closesAt}
+            onChange={(value) => onFieldChange("closesAt", value)}
+          />
+        </div>
       </div>
     </Card>
   );

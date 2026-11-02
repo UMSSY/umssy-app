@@ -1,10 +1,13 @@
 "use client";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeading } from "@/shared/components/layout/page-heading";
 import { DetailHeader } from "../components/layout/backoffice-page-header";
 import { DataContrastPanel } from "../components/detail/data-contrast-panel";
 import { DocumentViewer } from "../components/detail/document-viewer";
-import { HistoryCard } from "../components/detail/history-card";
+import { AutomaticValidationPanel } from "../components/detail/automatic-validation-panel";
+import { RequestTimeline } from "../components/detail/request-timeline";
+import { RevertApprovalPanel } from "../components/detail/revert-approval-panel";
 import { StatusBadge } from "../components/common/status-badge";
 import { VerdictPanel } from "../components/detail/verdict-panel";
 import { DOCUMENT_TYPE_LABELS } from "../constants/request-review.constants";
@@ -38,18 +41,11 @@ export function RequestDetailView({ id }: RequestDetailViewProps) {
 
         {detail && (
           <>
-            <div className="flex flex-col gap-1">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="font-tight text-3xl font-bold text-ink">
-                  {detail.firstName} {detail.lastName}
-                </h1>
-                <StatusBadge status={detail.status} />
-              </div>
-              <p className="text-base text-text-secondary">
-                {detail.career}
-                {sentAt ? `. Solicitud enviada el ${sentAt}.` : "."}
-              </p>
-            </div>
+            <PageHeading
+              title={`${detail.firstName} ${detail.lastName}`}
+              description={`${detail.career}${sentAt ? `. Solicitud enviada el ${sentAt}.` : "."}`}
+              actions={<StatusBadge status={detail.status} />}
+            />
 
             <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.37fr)_minmax(0,1fr)]">
               <div className="min-w-0">
@@ -74,9 +70,10 @@ export function RequestDetailView({ id }: RequestDetailViewProps) {
                 )}
               </div>
               <div className="flex min-w-0 flex-col gap-6">
-                <DataContrastPanel detail={detail} />
+                {detail.validation ? <AutomaticValidationPanel detail={detail} /> : <DataContrastPanel detail={detail} />}
                 <VerdictPanel detail={detail} />
-                <HistoryCard detail={detail} />
+                <RevertApprovalPanel detail={detail} />
+                <RequestTimeline detail={detail} />
               </div>
             </div>
           </>

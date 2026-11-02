@@ -4,3 +4,6 @@ export { RequestDetailView } from "./views/request-detail-view";
 
 export { DOCUMENT_TYPE_LABELS, OTHER_REJECTION_REASON, INBOX_PATH } from "./constants/request-review.constants";
 export { REJECTION_REASONS } from "./constants/request-review.constants";
+
+export { DocumentViewer } from "./components/detail/document-viewer";
+export type { DocumentViewerProps } from "./types/document-viewer-props.types";
