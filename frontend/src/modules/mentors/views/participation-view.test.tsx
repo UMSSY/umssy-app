@@ -354,7 +354,7 @@ describe("ParticipationView HU-MEN-06", () => {
       return cancelled;
     });
     const view = renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Cancelar solicitud" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Cancelar cupo" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirmar cancelación" }));
     expect(await screen.findByRole("link", { name: "Participa como mentor" })).toBeInTheDocument();
     await waitFor(() => expect(toast.success).toHaveBeenCalledTimes(1));
