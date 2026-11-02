@@ -66,19 +66,19 @@ export function SlotOfferParticipation({ request, onConfirmed, showHeading = tru
     </section>
     <Dialog open={open} onOpenChange={(value) => { if (!inFlight.current) setOpen(value); }}>
       <DialogContent showCloseButton={!confirmation.isPending} aria-busy={confirmation.isPending} className="max-h-[calc(100dvh-2rem)] grid-cols-1 gap-0 overflow-y-auto p-0 sm:max-w-xl">
-        <header className="flex items-center gap-4 border-b border-border px-5 py-5 pr-12 sm:px-7 sm:pr-12">
+        <header className="flex items-center gap-4 border-b border-border p-5 pr-12 sm:px-7 sm:pr-12">
           <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
             <Bell aria-hidden="true" size={28} />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-xs font-bold uppercase text-text-secondary">Notificación prioritaria</p>
+              <p className="text-xs font-bold text-text-secondary uppercase">Notificación prioritaria</p>
               <span className="rounded-md bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">Cupo ofrecido</span>
             </div>
             <DialogTitle className="mt-1 text-xl leading-tight font-bold text-ink sm:text-2xl">¡Tienes un cupo disponible!</DialogTitle>
           </div>
         </header>
-        <div className="space-y-4 px-5 py-5 sm:px-7">
+        <div className="space-y-4 p-5 sm:px-7">
           <DialogDescription className="text-base leading-relaxed text-text-secondary">Se ha liberado un cupo para ti. Tienes 24 horas desde su asignación para confirmar tu participación en el programa de mentores.</DialogDescription>
           <div className="space-y-3 rounded-lg border border-border bg-surface-soft p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">

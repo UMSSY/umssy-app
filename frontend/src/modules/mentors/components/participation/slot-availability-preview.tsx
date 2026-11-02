@@ -40,17 +40,17 @@ export function SlotUnavailableDialog({ open, onOpenChange, isSubmitting, isRegi
           <Button onClick={() => onOpenChange(false)} className="min-h-10 px-8">Cerrar</Button>
         </footer>
       </> : <>
-      <header className="flex items-center gap-4 border-b border-border px-5 py-5 pr-12 sm:px-7 sm:pr-12">
+      <header className="flex items-center gap-4 border-b border-border p-5 pr-12 sm:px-7 sm:pr-12">
         <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-notice/50 text-gold">
           <Hourglass aria-hidden="true" size={28} />
         </div>
         <div>
-          <p className="text-xs font-bold uppercase text-text-secondary">Disponibilidad del programa</p>
+          <p className="text-xs font-bold text-text-secondary uppercase">Disponibilidad del programa</p>
           <DialogTitle className="mt-1 text-xl leading-tight font-bold text-ink sm:text-2xl">No hay cupos disponibles</DialogTitle>
         </div>
       </header>
 
-      <div className="space-y-5 px-5 py-5 sm:px-7">
+      <div className="space-y-5 p-5 sm:px-7">
         <DialogDescription className="text-base leading-relaxed text-text-secondary">
           Actualmente todos los cupos para mentores están ocupados. Puedes solicitar un cupo y consultar el estado de tu solicitud en Mi participación.
         </DialogDescription>
