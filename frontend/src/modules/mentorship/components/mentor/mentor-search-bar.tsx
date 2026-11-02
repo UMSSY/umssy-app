@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
@@ -16,6 +16,8 @@ export function MentorSearchBar({
   onSearchChange,
 }: MentorSearchBarProps) {
   const [inputValue, setInputValue] = useState(value);
+  const inputValueRef = useRef(value);
+  const syncingExternalValueRef = useRef(false);
 
   const debouncedValue = useDebouncedValue(
     inputValue,
@@ -23,12 +25,26 @@ export function MentorSearchBar({
   );
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza filtros externos sin remontar el input
+    if (inputValueRef.current === value) {
+      return;
+    }
+
+    syncingExternalValueRef.current = true;
+    inputValueRef.current = value;
+
     setInputValue(value);
   }, [value]);
 
   useEffect(() => {
     const trimmedValue = debouncedValue.trim();
+
+    if (syncingExternalValueRef.current) {
+      if (trimmedValue === value) {
+        syncingExternalValueRef.current = false;
+      }
+
+      return;
+    }
 
     if (trimmedValue !== value) {
       onSearchChange(trimmedValue);
@@ -42,7 +58,10 @@ export function MentorSearchBar({
       aria-label="Buscar mentores por nombre"
       placeholder="Buscar por nombre"
       value={inputValue}
-      onChange={(event) => setInputValue(event.target.value)}
+      onChange={(event) => {
+        inputValueRef.current = event.target.value;
+        setInputValue(event.target.value);
+      }}
     />
   );
 }

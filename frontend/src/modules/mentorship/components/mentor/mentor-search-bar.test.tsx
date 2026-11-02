@@ -67,6 +67,44 @@ describe("MentorSearchBar", () => {
     expect(input).toHaveValue("And");
   });
 
+  it("limpia el texto externo sin restaurar la búsqueda anterior", () => {
+    vi.useFakeTimers();
+    const onSearchChange = vi.fn();
+
+    const { rerender } = render(
+      <MentorSearchBar value="" onSearchChange={onSearchChange} />,
+    );
+
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "Andres" },
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(onSearchChange).toHaveBeenCalledWith("Andres");
+
+    rerender(
+      <MentorSearchBar value="Andres" onSearchChange={onSearchChange} />,
+    );
+
+    onSearchChange.mockClear();
+
+    rerender(
+      <MentorSearchBar value="" onSearchChange={onSearchChange} />,
+    );
+
+    expect(screen.getByRole("searchbox")).toHaveValue("");
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(onSearchChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("searchbox")).toHaveValue("");
+  });
+
   it("elimina espacios de los extremos", () => {
     vi.useFakeTimers();
     const onSearchChange = vi.fn();

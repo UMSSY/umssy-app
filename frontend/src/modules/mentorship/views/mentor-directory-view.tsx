@@ -26,6 +26,7 @@ import type {
   MentorSort,
 } from "../types/mentor-directory.types";
 import {
+  MENTOR_DIRECTORY_DEFAULTS,
   normalizeMentorDirectoryParams,
   parseMentorDirectoryState,
   updateMentorDirectoryParams,
@@ -93,7 +94,12 @@ export function MentorDirectoryView({
 
   const affinityStatus =
     directory?.affinityStatus ?? directoryState?.affinityStatus;
-  const hasFilters = Boolean(search.trim() || area || orientation || isAvailableOnly);
+  const hasFilters = Boolean(
+    search.trim() ||
+      area ||
+      orientation ||
+      isAvailableOnly !== MENTOR_DIRECTORY_DEFAULTS.available
+  );
 
   useEffect(() => {
     if (!directory && directoryState?.totalPages === undefined) {
@@ -160,7 +166,7 @@ export function MentorDirectoryView({
       search: "",
       area: "",
       orientation: "",
-      available: false,
+      available: true,
     });
   }
 
