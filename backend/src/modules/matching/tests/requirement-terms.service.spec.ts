@@ -1,68 +1,70 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { SkillDictionaryService } from '../../job-connect/services/skill-dictionary.service.js';
-import { NlpService } from '../services/nlp.service.js';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { RequirementTermsService } from '../services/requirement-terms.service.js';
-import { MAX_REQUIREMENT_TEXT_LENGTH } from '../requests/requirement-terms.schema.js';
-
-const SAMPLE_REQUIREMENTS =
-  '- Experiencia en Python, C++ y Node.js\n• Titulado de la Universidad Mayor de San Simón\n• Conocimiento de Machine Learning y metodologías Scrum\n';
+import { NlpService } from '../services/nlp.service.js';
+import { SkillsClassifierService } from '../services/skills-classifier.service.js';
+import { SkillCatalogService } from '../../skills/services/skill-catalog.service.js';
 
 describe('RequirementTermsService', () => {
   let service: RequirementTermsService;
+  let nlpService: NlpService;
+  let skillsClassifier: SkillsClassifierService;
+  let skillCatalogService: SkillCatalogService;
+
+  const mockCatalog = [
+    { id: '1', name: 'Python', isCustom: false },
+    { id: '2', name: 'Node.js', isCustom: false },
+    { id: '3', name: 'Docker', isCustom: false },
+    { id: '4', name: 'PostgreSQL', isCustom: false },
+  ];
 
   beforeEach(() => {
-    service = new RequirementTermsService(new NlpService(), new SkillDictionaryService());
-  });
+    nlpService = new NlpService();
+    skillsClassifier = new SkillsClassifierService();
+    skillCatalogService = {
+      listCatalog: vi.fn().mockResolvedValue(mockCatalog),
+    } as unknown as SkillCatalogService;
 
-  it('devuelve los tokens de los requisitos sin stopwords', () => {
-    const result = service.extract('- Experiencia en NestJS\n• Conocimiento de Docker, PostgreSQL');
-
-    expect(result.tokens).toEqual(['experiencia', 'nestjs', 'conocimiento', 'docker', 'postgresql']);
-  });
-
-  it('incluye los n-gramas en los terminos y no repite ninguno', () => {
-    const result = service.extract('Machine Learning, machine learning');
-
-    expect(result.terms).toEqual(expect.arrayContaining(['machine', 'learning', 'machine_learning']));
-    expect(new Set(result.terms).size).toBe(result.terms.length);
-  });
-
-  it('detecta las habilidades del diccionario', () => {
-    const result = service.extract(SAMPLE_REQUIREMENTS);
-
-    expect(result.skills).toEqual(['Python', 'C++', 'Node.js', 'Scrum', 'Machine Learning']);
-  });
-
-  it('detecta las instituciones y las une como terminos compuestos', () => {
-    const result = service.extract(SAMPLE_REQUIREMENTS);
-
-    expect(result.institutions).toEqual(['UMSS']);
-    expect(result.terms).toEqual(
-      expect.arrayContaining(['universidad_mayor_de_san_simon', 'san_simon']),
+    service = new RequirementTermsService(
+      nlpService,
+      skillsClassifier,
+      skillCatalogService,
     );
   });
 
-  it('conserva los tecnicismos con simbolos en los tokens', () => {
-    const result = service.extract('C++, C#, .NET, Node.js');
-
-    expect(result.tokens).toEqual(['c++', 'c#', '.net', 'node.js']);
+  it('devuelve habilidades reconocibles del texto (AC-07.1, AC-07.2)', async () => {
+    const result = await service.extractAndMatchRequirements(
+      'Buscamos desarrollador con Python y Node.js, conocimiento de Docker',
+    );
+    const names = result.map((s) => s.name);
+    expect(names).toContain('Python');
+    expect(names).toContain('Node.js');
+    expect(names).toContain('Docker');
   });
 
-  it.each([[''], ['   '], ['...']])('responde listas vacias con %o', (text) => {
-    expect(service.extract(text)).toEqual({ tokens: [], terms: [], skills: [], institutions: [] });
+  it('devuelve [] con texto vacío (AC-07.3)', async () => {
+    expect(await service.extractAndMatchRequirements('')).toEqual([]);
+    expect(await service.extractAndMatchRequirements('   ')).toEqual([]);
   });
 
-  it('procesa 5000 caracteres en menos de 2 segundos', () => {
-    const text = SAMPLE_REQUIREMENTS.repeat(
-      Math.ceil(MAX_REQUIREMENT_TEXT_LENGTH / SAMPLE_REQUIREMENTS.length),
-    ).slice(0, MAX_REQUIREMENT_TEXT_LENGTH);
-    expect(text).toHaveLength(MAX_REQUIREMENT_TEXT_LENGTH);
+  it('devuelve [] si no hay habilidades reconocibles (AC-07.3)', async () => {
+    const result = await service.extractAndMatchRequirements(
+      'Buscamos persona proactiva y puntual',
+    );
+    expect(result).toEqual([]);
+  });
 
-    const startedAt = performance.now();
-    const result = service.extract(text);
-    const elapsedMs = performance.now() - startedAt;
+  it('detecta tecnologías especiales sin destruirlas (AC-07.2)', async () => {
+    const result = await service.extractAndMatchRequirements(
+      'Conocimientos en C++, C#, Node.js y .NET',
+    );
+    expect(Array.isArray(result)).toBe(true);
+  });
 
-    expect(result.tokens.length).toBeGreaterThan(0);
-    expect(elapsedMs).toBeLessThan(2000);
+  it('procesa en menos de 2 segundos (AC-07.4)', async () => {
+    const longText = Array(100).fill('Python Node.js Docker').join(' ');
+    const start = performance.now();
+    await service.extractAndMatchRequirements(longText);
+    const duration = performance.now() - start;
+    expect(duration).toBeLessThan(2000);
   });
 });

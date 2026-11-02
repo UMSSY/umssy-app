@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventCategoriesRepository } from '../repositories/event-categories.repository.js';
 import { mapEventCategoriesToListResponse } from '../mappers/event-categories.mapper.js';
-import type { GetEventCategoriesPayload } from '../requests/get-event-categories.request.js';
+import type { GetEventCategoriesPayload } from '../types/get-event-categories-payload.types.js';
 import type { EventCategoriesListResponse } from '../types/event-categories.types.js';
 
 @Injectable()

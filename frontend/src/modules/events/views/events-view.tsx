@@ -1,6 +1,19 @@
 'use client';
 
+import type { EventsViewProps } from '../types/events-view-props.types';
+
+import { cn } from "@/lib/utils";
+import { PageHeading } from "@/shared/components/layout";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Ticket } from "lucide-react";
+import { toast } from "sonner";
+import { buttonVariants } from "@/components/ui/button";
 import { Button } from '@/components/ui/button';
+import { buildLoginUrl } from '@/modules/auth/utils/safe-next-path';
+import { useRegistrationSession } from '@/modules/registrations';
+import { useAuth } from '@/shared/contexts/auth-context';
+import { parseApiError } from '@/shared/utils/parse-api-error';
 import { useEffect, useRef, useState } from 'react';
 import { RequestFeedback } from '../components/request-feedback';
 import { EventDetailState } from '../components/event-detail-state';
@@ -9,12 +22,18 @@ import { EventDetailPanel } from '../components/event-detail-panel';
 import { useEvent } from '../hooks/use-event';
 import { useEvents } from '../hooks/use-events';
 import { useEventsFilters } from '../hooks/use-events-filters';
-import { useEventCategories } from '../../event-categories/hooks/use-event-categories';
+import { useProposalSupport } from '../hooks/use-proposal-support';
+import { useEventCategories } from '@/modules/event-categories';
 import { EventsSearchInput } from '../components/events-search-input';
-import { CategoryFilterChips } from '../../event-categories/components/category-filter-chips';
+import { CategoryFilterChips } from '@/modules/event-categories';
 import type { EventItem } from '../types/event.types';
+import type { EventDetail } from '../types/event-detail.types';
+import { getProposalSupportErrorMessage } from '../utils/proposal-support-error';
 
-export function EventsView() {
+export function EventsView({ initialProposalId = null }: EventsViewProps) {
+  const router = useRouter();
+  const session = useRegistrationSession();
+  const { roles, isLoading: rolesLoading } = useAuth();
   const { searchInput, setSearchInput, categoryId, setCategoryId, filters } =
     useEventsFilters();
   const {
@@ -25,22 +44,66 @@ export function EventsView() {
   } = useEventCategories();
   const { events, error, hasMore, isLoading, isLoadingMore, loadMore, retry } =
     useEvents(filters);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const viewRef = useRef<HTMLDivElement>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(initialProposalId);
+  const viewRef = useRef<HTMLElement>(null);
 
   const handleSelectEvent = (selectedEvent: EventItem) => {
     setSelectedEventId(selectedEvent.id);
   };
 
   const detail = useEvent(selectedEventId);
+  const support = useProposalSupport(selectedEventId);
+  const alreadySupported = support.errorCode === 'ALREADY_SUPPORTED';
+  const displayedDetail = alreadySupported && detail.event
+    ? { ...detail.event, hasSupported: true }
+    : detail.event;
+  const supportBlocked = [
+    'ALREADY_SUPPORTED', 'PROPOSAL_EXPIRED', 'EVENT_NOT_SUPPORTABLE',
+    'FORBIDDEN_ROLE', 'USER_INACTIVE',
+  ].includes(support.errorCode ?? '');
+  const supportNotice = !session
+    ? 'Inicia sesión para apoyar esta propuesta.'
+    : rolesLoading
+      ? 'Verificando permisos para apoyar...'
+      : !roles.includes('titulado')
+        ? 'Solo los usuarios con perfil Titulado pueden apoyar propuestas.'
+        : null;
+  const supportRetryable = !support.errorCode || ['INTERNAL_ERROR', 'VALIDATION_ERROR'].includes(support.errorCode);
+
+  async function handleSupport(event: EventDetail) {
+    const returnToProposal = `/events?proposal=${encodeURIComponent(event.id)}`;
+    if (!session) {
+      router.push(buildLoginUrl(returnToProposal));
+      return;
+    }
+    if (rolesLoading || !roles.includes('titulado') || support.isPending || event.hasSupported || supportBlocked) return;
+
+    const result = await support.support();
+    if (!result?.error) return;
+    const code = parseApiError(result.error)?.code;
+    if (code === 'EVENT_NOT_FOUND') {
+      toast.error(getProposalSupportErrorMessage(result.error));
+      setSelectedEventId(null);
+    } else if (code === 'AUTH_REQUIRED' || code === 'UNAUTHENTICATED') {
+      toast.info(getProposalSupportErrorMessage(result.error));
+      router.push(buildLoginUrl(returnToProposal));
+    }
+  }
+  const listedEvents = initialProposalId && displayedDetail?.id === initialProposalId && !filters.search.trim() && !filters.categoryId && !events.some((event) => event.id === initialProposalId)
+    ? [displayedDetail, ...events] : events;
+  const visibleEvents = alreadySupported
+    ? listedEvents.map((event) => event.id === selectedEventId ? { ...event, hasSupported: true } : event)
+    : listedEvents;
 
   useEffect(() => {
     if (!selectedEventId) return;
     function handleKeyDown(event: KeyboardEvent) {
+      if (document.querySelector('[data-registration-dialog]') || event.target instanceof Element && event.target.closest('[data-registration-dialog]')) return;
       if (event.key === 'Escape') setSelectedEventId(null);
     }
     function handleOutsideClick(event: MouseEvent) {
       const target = event.target;
+      if (document.querySelector('[data-registration-dialog]') || target instanceof Element && target.closest('[data-registration-dialog], [data-slot="dialog-overlay"]')) return;
       if (!(target instanceof Element)) return;
       if (
         viewRef.current?.contains(target) &&
@@ -49,6 +112,7 @@ export function EventsView() {
       setSelectedEventId(null);
     }
     function handleSearchFocus(event: FocusEvent) {
+      if (document.querySelector('[data-registration-dialog]')) return;
       const target = event.target;
       if (target instanceof Element && viewRef.current?.contains(target) && target.matches('input[type="search"]')) {
         setSelectedEventId(null);
@@ -65,21 +129,14 @@ export function EventsView() {
   }, [selectedEventId]);
 
   return (
-    <div ref={viewRef} className="flex h-dvh min-h-0 w-full flex-col overflow-hidden bg-surface-soft text-foreground lg:flex-row">
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-6 pb-8 pt-20 sm:px-10">
-        <header className="flex flex-col gap-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
-            Talleres disponibles
-          </h1>
-          <p className="text-sm text-text-secondary">
-            {events.length} talleres cargados
-          </p>
-        </header>
-
+    <main ref={viewRef} className="@container/events mx-auto w-full max-w-browse space-y-8">
+      <PageHeading title="Talleres y eventos" description={isLoading && !events.length ? "Cargando actividades de la comunidad…" : `${events.length} talleres disponibles`} actions={<Link href="/events/my-passes" className={buttonVariants({ variant: "outline" })}><Ticket aria-hidden="true" />Mis inscripciones</Link>} />
+      <div className={cn("grid items-start transition-[grid-template-columns,gap] duration-300 ease-out", selectedEventId ? "grid-cols-1 gap-6 @4xl/events:grid-cols-(--grid-template-columns-event-browser-open)" : "grid-cols-1 gap-0 @4xl/events:grid-cols-(--grid-template-columns-event-browser)")}>
+      <div className="min-w-0 space-y-6">
         <div
           role="search"
           aria-label="Filtros de talleres"
-          className="flex flex-wrap items-center gap-2.5"
+          className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-4"
         >
           <EventsSearchInput value={searchInput} onChange={(value) => {
             setSelectedEventId(null);
@@ -108,8 +165,8 @@ export function EventsView() {
         )}
 
         <section aria-label="Listado de talleres">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {events.map((eventItem) => (
+          <div className="grid grid-cols-(--grid-template-columns-event-cards) gap-5">
+            {visibleEvents.map((eventItem) => (
               <EventCard
                 key={eventItem.id}
                 event={eventItem}
@@ -123,7 +180,7 @@ export function EventsView() {
               Cargando talleres...
             </p>
           )}
-          {!isLoading && !error && events.length === 0 && (
+          {!isLoading && !error && visibleEvents.length === 0 && (
             <p className="py-10 text-center text-text-secondary">
               {filters.search.trim() || filters.categoryId
                 ? 'No se encontraron talleres con esos filtros. Prueba otra búsqueda o categoría.'
@@ -134,6 +191,7 @@ export function EventsView() {
           {hasMore && !error && (
             <div className="flex justify-center pt-6">
               <Button
+                variant="outline"
                 type="button"
                 onClick={loadMore}
                 disabled={isLoadingMore}
@@ -146,8 +204,23 @@ export function EventsView() {
         </section>
       </div>
 
-      {selectedEventId && (detail.event ? (
-        <EventDetailPanel event={detail.event} onClose={() => setSelectedEventId(null)} />
+      <div className="order-first min-w-0 @4xl/events:sticky @4xl/events:top-24 @4xl/events:order-none @4xl/events:max-h-event-detail @4xl/events:overflow-x-hidden @4xl/events:overflow-y-auto @4xl/events:overscroll-contain">
+      {selectedEventId && (displayedDetail ? (
+        <EventDetailPanel
+          event={displayedDetail}
+          onClose={() => setSelectedEventId(null)}
+          onSupport={(event) => { void handleSupport(event); }}
+          isSupportPending={support.isPending}
+          isSupportDisabled={Boolean(session && (rolesLoading || !roles.includes('titulado'))) || supportBlocked}
+          supportNotice={supportNotice}
+          supportError={alreadySupported || support.errorCode === 'EVENT_NOT_FOUND' || support.errorCode === 'AUTH_REQUIRED' || support.errorCode === 'UNAUTHENTICATED' ? null : support.error}
+          supportSuccessMessage={support.isSuccess && support.data?.status === 'Publicado'
+            ? 'La propuesta fue publicada y tu inscripción quedó confirmada. Puedes ver tu pase en Mis inscripciones.'
+            : null}
+          onRetrySupport={supportRetryable && !support.isPending && !supportBlocked
+            ? () => { if (detail.event) void handleSupport(detail.event); }
+            : undefined}
+        />
       ) : (
         <EventDetailState
           selectedId={selectedEventId}
@@ -158,6 +231,8 @@ export function EventsView() {
           onClose={() => setSelectedEventId(null)}
         />
       ))}
-    </div>
+      </div>
+      </div>
+    </main>
   );
 }

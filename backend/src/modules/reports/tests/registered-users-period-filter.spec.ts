@@ -53,6 +53,7 @@ function buildUser(
     identifier: `ID-${id}`,
     documentType: 'academic_diploma',
     registeredAt: PERIOD_DATES[period],
+    listedAt: PERIOD_DATES[period],
     registrationStatus: 'APPROVED',
     rejectionReason: null,
     ...overrides,

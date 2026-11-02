@@ -107,6 +107,7 @@ describe('Certification documents API', () => {
 
       expect(response.body).toEqual({
         statusCode: 400,
+        code: 'CORRUPTED_FILE',
         data: { code: 'CORRUPTED_FILE' },
         detail: 'File content is incomplete or corrupted',
         ok: false,

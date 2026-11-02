@@ -1,3 +1,5 @@
+import type { ValidationDetail, ValidationSummary } from "./automatic-validation.types";
+
 export type ReviewStatus = "pending" | "in_review" | "approved" | "rejected";
 
 export interface ReviewListItem {
@@ -10,6 +12,7 @@ export interface ReviewListItem {
   documentType: string | null;
   submittedAt: string | null;
   status: ReviewStatus;
+  validation?: ValidationSummary | null;
 }
 
 export interface ReviewListResult {
@@ -54,6 +57,7 @@ export interface ReviewDetail {
     reviewedBy: string | null;
     rejectionReason: string | null;
   };
+  validation?: ValidationDetail | null;
 }
 
 export interface ApproveResult {

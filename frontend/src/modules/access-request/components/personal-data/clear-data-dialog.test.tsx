@@ -115,7 +115,7 @@ describe("ClearDataDialog", () => {
     expect(within(dialog).getByText("¿Limpiar los datos del formulario?")).toBeInTheDocument();
     expect(within(dialog).getByText(SHORT_DESCRIPTION)).toBeInTheDocument();
     expect(within(dialog).getByRole("button", { name: "Cancelar" })).toBeInTheDocument();
-    expect(confirmButton(dialog)).toHaveClass("bg-ink", "text-surface", "hover:bg-ink/90");
+    expect(confirmButton(dialog)).toHaveClass("bg-critical-action", "text-critical-action-foreground", "hover:bg-critical-action/90");
   });
 
   it("cancelar cierra el diálogo y no borra nada ni llama al servicio", async () => {
@@ -198,7 +198,7 @@ describe("ClearDataDialog", () => {
 
     const alert = await within(dialog).findByRole("alert");
     expect(alert).toHaveTextContent(failed.ok ? "" : failed.message);
-    expect(alert).toHaveClass("text-destructive");
+    expect(alert).toHaveClass("text-danger");
     expect(screen.getByRole("alertdialog")).toBeInTheDocument();
     expect(screen.getByLabelText(/^Nombres/)).toHaveValue("Ana María");
 

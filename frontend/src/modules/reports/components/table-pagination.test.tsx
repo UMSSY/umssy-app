@@ -36,7 +36,7 @@ describe("TablePagination", () => {
     rerender(<TablePagination currentPage={20} totalPages={20} onPageChange={onPageChange} />);
 
     expect(screen.getAllByRole("button", { name: /^Página \d+$/ }).map((button) => button.textContent)).toEqual([
-      "1", "16", "17", "18", "19", "20",
+      "1", "17", "18", "19", "20",
     ]);
     expect(screen.getByRole("button", { name: "Página siguiente" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "Página siguiente" }));

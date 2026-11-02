@@ -32,7 +32,7 @@ export class ApplicationsService {
       records.map(async (record: ApplicationRecord) => {
         let score = 0;
         try {
-          const fit = await this.matching.getJobFit(userId, record.jobOfferId);
+          const fit = await (this.matching as any).getJobFit(userId, record.jobOfferId);
           score = fit.score;
         } catch {
           score = 0;

@@ -1,10 +1,66 @@
 import { describe, expect, it, vi } from 'vitest';
-import { INTERCEPTORS_METADATA } from '@nestjs/common/constants.js';
+import {
+  GUARDS_METADATA,
+  INTERCEPTORS_METADATA,
+} from '@nestjs/common/constants.js';
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { MentorsController } from '../controllers/mentors.controller.js';
 import type { MentorsService } from '../services/mentors.service.js';
 
 describe('MentorsController', () => {
+  it('consulta los cupos con JWT sin modificar información', async () => {
+    const capacity = vi
+      .fn()
+      .mockResolvedValue({ capacity: 1, occupied: 0, available: 1 });
+    const controller = new MentorsController({
+      capacity,
+    } as unknown as MentorsService);
+    expect(
+      Reflect.getMetadata(
+        GUARDS_METADATA,
+        MentorsController.prototype.capacity,
+      ),
+    ).toEqual([JwtAuthGuard]);
+    await expect(controller.capacity()).resolves.toEqual({
+      capacity: 1,
+      occupied: 0,
+      available: 1,
+    });
+    expect(capacity).toHaveBeenCalledTimes(1);
+  });
+
+  it('protege la ruta paginada con JWT', () => {
+    const directoryMethod = Object.getOwnPropertyDescriptor(
+      MentorsController.prototype,
+      'findDirectory',
+    )?.value;
+    expect(Reflect.getMetadata(GUARDS_METADATA, directoryMethod)).toEqual([
+      JwtAuthGuard,
+    ]);
+  });
+  it('transmite al directorio la identidad obtenida de la sesión', async () => {
+    const query = {
+      page: 1,
+      search: '',
+      orientation: 'Orientación técnica',
+      available: false,
+      sort: 'affinity' as const,
+    };
+    const user = {
+      id: 'session-user',
+      email: 'user@test.com',
+      roles: ['graduate'],
+    };
+    const findDirectory = vi.fn().mockResolvedValue({ items: [] });
+    const controller = new MentorsController({
+      findDirectory,
+    } as unknown as MentorsService);
+
+    await controller.findDirectory(query, user);
+
+    expect(findDirectory).toHaveBeenCalledWith(query, user.id);
+  });
   it('aplica Standard Response a todos sus endpoints', () => {
     expect(
       Reflect.getMetadata(INTERCEPTORS_METADATA, MentorsController),
@@ -112,10 +168,18 @@ describe('MentorsController', () => {
       orientationTypeIds: ['0fa5e6de-63a4-430e-87fb-22f5eb700ecd'],
     };
 
-    const result = await controller.activate(user, body);
+    const result = await controller.activate(
+      user,
+      body,
+      '11111111-1111-4111-8111-111111111111',
+    );
 
     expect(activate).toHaveBeenCalledTimes(1);
-    expect(activate).toHaveBeenCalledWith('user-1', body);
+    expect(activate).toHaveBeenCalledWith(
+      'user-1',
+      body,
+      '11111111-1111-4111-8111-111111111111',
+    );
     expect(result).toBe(activationResult);
   });
 });

@@ -36,6 +36,15 @@ describe('GetEventsSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('accepts 50 characters and rejects the 51st character', () => {
+    expect(GetEventsSchema.safeParse({ search: 'a'.repeat(50) }).success).toBe(true);
+    const result = GetEventsSchema.safeParse({ search: 'a'.repeat(51) });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('search no puede tener más de 50 caracteres');
+    }
+  });
+
   it('accepts valid categoryId and statusId UUIDs', () => {
     const parsed = GetEventsSchema.parse({
       categoryId: '123e4567-e89b-12d3-a456-426614174000',

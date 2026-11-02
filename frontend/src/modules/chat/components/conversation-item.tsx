@@ -1,8 +1,15 @@
-/* eslint-disable @next/next/no-img-element */
-'use client';
 
-import { Conversation } from '../types/conversation.types';
-import { formatConversationDate, getInitials } from '../utils/date-formatter';
+"use client";
+/* eslint-disable @next/next/no-img-element */
+
+import { Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+import type { Conversation } from "../types/conversation.types";
+import {
+  formatConversationDate,
+  getInitials,
+} from "../utils/date-formatter";
 
 interface ConversationItemProps {
   conversation: Conversation;
@@ -15,23 +22,41 @@ export function ConversationItem({
   isSelected,
   onSelect,
 }: ConversationItemProps) {
-  const { contact, lastMessage, unreadCount } = conversation;
+  const { lastMessage, unreadCount } = conversation;
+  const contact = conversation.eventId
+    ? { fullName: conversation.eventTitle ?? 'Chat del evento', avatarUrl: null, isOnline: false }
+    : conversation.contact;
+  if (!contact) return null;
   const hasUnread = unreadCount > 0;
 
   const renderMessagePreview = () => {
+    if (conversation.isBlockedByMe) {
+      return (
+        <span data-testid="conversation-blocked-label" className="inline-flex items-center gap-1 font-medium text-ink-soft">
+          <Lock className="size-3" aria-hidden="true" />
+          Bloqueado
+        </span>
+      );
+    }
+
     if (!lastMessage) {
-      return <span className="text-slate-400 italic">Conversacion iniciada</span>;
+      return (
+        <span className="text-text-secondary italic">
+          Conversación iniciada
+        </span>
+      );
     }
 
     if (lastMessage.isAttachment) {
       const label =
-        lastMessage.attachmentType === 'image'
-          ? 'Foto'
-          : lastMessage.attachmentType === 'audio'
-          ? 'Audio'
-          : 'Archivo';
+        lastMessage.attachmentType === "image"
+          ? "Foto"
+          : lastMessage.attachmentType === "audio"
+            ? "Audio"
+            : "Archivo";
+
       return (
-        <span className="text-blue-700 font-medium">
+        <span className="font-medium text-ink-soft">
           [{label}] {lastMessage.content}
         </span>
       );
@@ -41,73 +66,81 @@ export function ConversationItem({
   };
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       onClick={() => onSelect(conversation)}
-      className={`w-full text-left p-3.5 flex items-center gap-3 transition-all border-b border-slate-100 hover:bg-slate-50 focus:outline-none ${
+      aria-pressed={isSelected}
+      className={`flex h-auto w-full items-center justify-start gap-3 rounded-none border-0 border-b border-border p-3.5 text-left font-normal whitespace-normal transition-all hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent ${
         isSelected
-          ? 'bg-blue-50/80 border-l-4 border-l-[#0B2545]'
-          : 'border-l-4 border-l-transparent'
+          ? "bg-interaction ring-1 ring-border-strong ring-inset"
+          : "bg-surface"
       }`}
     >
-      {}
       <div className="relative shrink-0">
         {contact.avatarUrl ? (
           <img
             src={contact.avatarUrl}
             alt={contact.fullName}
-            className="w-12 h-12 rounded-full object-cover border border-slate-200"
+            className="size-12 rounded-full border border-border object-cover"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm border border-slate-300">
+          <div className="flex size-12 items-center justify-center rounded-full border border-border-strong bg-border text-sm font-bold text-ink-soft">
             {getInitials(contact.fullName)}
           </div>
         )}
 
-        {contact.isOnline && (
+        {contact.isOnline && !conversation.isBlockedByMe && (
           <span
-            className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full shadow-xs"
-            title="En linea"
+            className="absolute right-0 bottom-0 size-3.5 rounded-full border-2 border-surface bg-ink-soft shadow-xs"
+            title="En línea"
           />
         )}
       </div>
 
-      {}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-1 mb-1">
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 flex items-center justify-between gap-1">
           <h4
-            className={`text-sm truncate ${
-              hasUnread ? 'font-bold text-slate-900' : 'font-semibold text-slate-800'
+            className={`truncate text-sm ${
+              hasUnread
+                ? "font-bold text-ink"
+                : "font-semibold text-ink"
             }`}
           >
             {contact.fullName}
           </h4>
+
           <span
-            className={`text-xs whitespace-nowrap shrink-0 ${
-              hasUnread ? 'text-red-600 font-semibold' : 'text-slate-400'
+            className={`shrink-0 text-xs whitespace-nowrap ${
+              hasUnread
+                ? "font-semibold text-accent"
+                : "text-text-secondary"
             }`}
           >
-            {formatConversationDate(lastMessage?.createdAt || conversation.updatedAt)}
+            {formatConversationDate(
+              lastMessage?.createdAt || conversation.updatedAt
+            )}
           </span>
         </div>
 
         <div className="flex items-center justify-between gap-2">
           <p
-            className={`text-xs truncate flex-1 ${
-              hasUnread ? 'text-slate-900 font-medium' : 'text-slate-500'
+            className={`min-w-0 flex-1 truncate text-xs ${
+              hasUnread
+                ? "font-medium text-ink"
+                : "text-text-secondary"
             }`}
           >
             {renderMessagePreview()}
           </p>
 
-          {}
           {hasUnread && (
-            <span className="shrink-0 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center shadow-xs">
-              {unreadCount > 99 ? '99+' : unreadCount}
+            <span className="min-w-4 shrink-0 rounded-full bg-accent px-1.5 py-0.5 text-center text-[10px] font-bold text-surface shadow-xs">
+              {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}
         </div>
       </div>
-    </button>
+    </Button>
   );
 }

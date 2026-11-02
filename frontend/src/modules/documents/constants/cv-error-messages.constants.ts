@@ -1,7 +1,10 @@
-import { FILE_VALIDATION_MESSAGES } from "@/modules/profile/config/file-validation-messages.config";
+import { FILE_VALIDATION_MESSAGES } from "@/modules/profile";
 
 export const CV_ERROR_MESSAGES = {
   load: "No se pudo cargar tu CV. Intenta de nuevo más tarde.",
+  history: "No se pudo cargar el historial de CVs. Intenta de nuevo más tarde.",
+  open: "No se pudo abrir el CV. Intenta de nuevo.",
+  download: "No se pudo descargar el CV. Intenta de nuevo.",
   upload: "No se pudo subir tu CV. Intenta de nuevo.",
   delete: "No se pudo eliminar tu CV. Intenta de nuevo.",
 };

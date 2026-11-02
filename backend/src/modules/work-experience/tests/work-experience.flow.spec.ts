@@ -3,9 +3,10 @@ import { APP_FILTER } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { WorkExperienceRepository } from '../repositories/work-experience.repository.js';
 import type { WorkExperiencePeriodSnapshot } from '../types/work-experience-period-snapshot.type.js';
 import type { WorkExperienceRecord } from '../types/work-experience-record.type.js';
@@ -95,8 +96,10 @@ describe('Work experience flow', () => {
   let ownerToken: string;
   let otherToken: string;
   const jwt = new JwtService({ secret: 'work-experience-flow-secret' });
+  const skillsAnalysis = { refreshAfterChange: vi.fn() };
 
   beforeEach(async () => {
+    skillsAnalysis.refreshAfterChange.mockReset().mockResolvedValue(undefined);
     const moduleRef = await Test.createTestingModule({
       imports: [WorkExperienceModule],
       providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
@@ -113,6 +116,8 @@ describe('Work experience flow', () => {
       .useValue(jwt)
       .overrideProvider(WorkExperienceRepository)
       .useValue(createInMemoryRepository())
+      .overrideProvider(ProfileSkillsAnalysisService)
+      .useValue(skillsAnalysis)
       .compile();
 
     app = moduleRef.createNestApplication();
@@ -207,6 +212,32 @@ describe('Work experience flow', () => {
         companyName: 'UMSS FCyT',
       }),
     ]);
+  });
+
+  it('runs the skill analysis of the owner after each saved change only', async () => {
+    const created = await createAs(ownerToken, {
+      companyName: 'Synapse Labs',
+      position: 'Desarrolladora web junior',
+      startDate: '2025-03-01',
+      isCurrent: true,
+      description: 'APIs con Node.js',
+    });
+    await request(app.getHttpServer())
+      .patch(`/api/work-experiences/${created.id}`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ description: 'APIs con Node.js y Docker' })
+      .expect(200);
+    await request(app.getHttpServer())
+      .patch(`/api/work-experiences/${created.id}`)
+      .set('Authorization', `Bearer ${otherToken}`)
+      .send({ description: 'Otro texto' })
+      .expect(404);
+    await request(app.getHttpServer())
+      .delete(`/api/work-experiences/${created.id}`)
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+
+    expect(skillsAnalysis.refreshAfterChange.mock.calls).toEqual([[ownerId], [ownerId], [ownerId]]);
   });
 
   it('keeps each user experiences separated', async () => {

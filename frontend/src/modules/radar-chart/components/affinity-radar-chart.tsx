@@ -45,7 +45,7 @@ export function AffinityRadarChart({
             <p className="font-heading text-3xl leading-none font-semibold text-accent tabular-nums">
               {formatDecimal(average, 2)}
             </p>
-            <p className="mt-1 text-[11px] font-semibold tracking-[0.12em] text-text-secondary uppercase">
+            <p className="mt-1 text-xs font-semibold tracking-[0.12em] text-text-secondary uppercase">
               Promedio
             </p>
           </div>

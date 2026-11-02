@@ -1,265 +1,200 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { JobOfferResponse } from '../../job-offers/responses/job-offer.response.js';
 import type { JobOffersService } from '../../job-offers/services/job-offers.service.js';
-import { JobOfferNotFoundException } from '../exceptions/index.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
+import type { JobMatchRepository } from '../repositories/job-match.repository.js';
+import type { CandidateProfileService } from '../services/candidate-profile.service.js';
 import { JobRecommendationsService } from '../services/job-recommendations.service.js';
+import { VacancyRankingService } from '../services/vacancy-ranking.service.js';
+import { WeightedScoreService } from '../services/weighted-score.service.js';
+import type { JobMatchRecord } from '../types/job-match.types.js';
+import type { RequirementTermsService } from '../services/requirement-terms.service.js';
 
-const USER_ID = '5b1f0c3e-8a4d-4f0b-9a52-1d6c7e2a9b10';
-
-const PYTHON = { id: 's1', name: 'Python' };
-const DOCKER = { id: 's2', name: 'Docker' };
-const SQL = { id: 's3', name: 'SQL' };
-const REACT = { id: 's4', name: 'React' };
-
-function buildOffer(
-  id: string,
-  skills: { id: string; name: string }[],
-  createdAt = '2026-10-01T00:00:00.000Z',
-): JobOfferResponse {
-  return {
-    id,
-    title: `Vacante ${id}`,
-    description: 'Descripcion',
-    category: 'Tecnologia',
-    modality: 'Remoto',
-    contractType: 'Tiempo completo',
-    status: 'Publicada',
-    positionsAvailable: 1,
-    salaryRange: '1000',
-    languages: 'Espanol',
-    locationUrl: 'https://maps.example/x',
-    expiresAt: null,
-    createdAt,
-    company: { id: 'c1', name: 'Empresa SA' },
-    skills,
-  };
+interface OfferOptions {
+  careers?: string[];
+  minExperienceYears?: number | null;
 }
 
-describe('JobRecommendationsService', () => {
+function offer(
+  id: string,
+  skills: string[],
+  options: OfferOptions = {},
+): JobMatchRecord {
+  return {
+    id,
+    title: id,
+    description: 'Descripción',
+    locationUrl: 'https://maps.google.com/?q=x',
+    requiredCareers: options.careers ?? [],
+    minExperienceYears: options.minExperienceYears ?? null,
+    otherRequirements: [],
+    company: { title: 'Empresa' },
+    modality: { title: 'Remoto' },
+    skills: skills.map((name) => ({ skill: { name } })),
+  } as JobMatchRecord;
+}
+
+const skill = (name: string) => ({ id: `id-${name}`, name, isCustom: false });
+
+describe('HU-06 recommendations contract', () => {
+  const findScoringOffers = vi.fn();
+  const getUserSkills = vi.fn();
+  const findPublished = vi.fn();
+  const findCandidateProfile = vi.fn();
   let service: JobRecommendationsService;
-  let jobOffersService: { listPublished: ReturnType<typeof vi.fn> };
-  let userSkillService: { getUserSkills: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    jobOffersService = { listPublished: vi.fn().mockResolvedValue([]) };
-    userSkillService = {
-      getUserSkills: vi.fn().mockResolvedValue([{ ...PYTHON, isCustom: false }, DOCKER]),
-    };
+    findScoringOffers.mockReset().mockResolvedValue([]);
+    getUserSkills.mockReset().mockResolvedValue([skill('Python')]);
+    findPublished
+      .mockReset()
+      .mockResolvedValue([
+        offer('partial', ['Python', 'SQL']),
+        offer('none', ['Java']),
+        offer('perfect', ['python']),
+        offer('unrestricted', []),
+      ]);
+    findCandidateProfile
+      .mockReset()
+      .mockResolvedValue({ career: null, experienceYears: 0 });
+    const requirementTermsService = {
+      extractAndMatchRequirements: vi.fn().mockResolvedValue([]),
+    } as unknown as RequirementTermsService;
     service = new JobRecommendationsService(
-      jobOffersService as unknown as JobOffersService,
-      userSkillService as unknown as UserSkillService,
+      { findScoringOffers } as unknown as JobOffersService,
+      { getUserSkills } as unknown as UserSkillService,
+      { findCandidateProfile } as unknown as CandidateProfileService,
+      { findPublished } as unknown as JobMatchRepository,
+      new VacancyRankingService(),
+      new WeightedScoreService(),
+      requirementTermsService,
     );
   });
 
-  it('pide las habilidades del usuario autenticado', async () => {
-    await service.getRecommendations(USER_ID);
+  it('calculates scores for the requested offers through the job offers service', async () => {
+    findScoringOffers.mockResolvedValue([
+      offer('partial', ['Python', 'SQL']),
+      offer('perfect', ['Python']),
+    ]);
 
-    expect(userSkillService.getUserSkills).toHaveBeenCalledWith(USER_ID);
+    await expect(
+      service.scoresForOffers('user', ['partial', 'perfect']),
+    ).resolves.toEqual(
+      new Map([
+        ['partial', 50],
+        ['perfect', 100],
+      ]),
+    );
+    expect(findScoringOffers).toHaveBeenCalledWith(['partial', 'perfect']);
+    expect(findPublished).not.toHaveBeenCalled();
   });
 
-  it('calcula el porcentaje entero de habilidades requeridas que el usuario tiene', async () => {
-    jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [PYTHON, SQL, REACT])]);
+  it('orders by affinity and keeps matching skill count as tie breaker', async () => {
+    const result = await service.recommendations('user');
+    expect(result.items.map((item) => [item.jobOfferId, item.score])).toEqual([
+      ['perfect', 100],
+      ['unrestricted', 100],
+      ['partial', 50],
+      ['none', 0],
+    ]);
+    expect(getUserSkills).toHaveBeenCalledWith('user');
+    expect(findCandidateProfile).toHaveBeenCalledWith('user');
+  });
 
-    const result = await service.getRecommendations(USER_ID);
+  it('returns the location link and the skills of every offer', async () => {
+    const result = await service.recommendations('user');
+    const partial = result.items.find((item) => item.jobOfferId === 'partial');
 
-    expect(result).toEqual({
+    expect(partial).toEqual({
+      jobOfferId: 'partial',
+      title: 'partial',
+      companyName: 'Empresa',
+      modality: 'Remoto',
+      locationUrl: 'https://maps.google.com/?q=x',
+      score: 50,
+      skills: ['Python', 'SQL'],
+      matchedSkills: ['Python'],
+    });
+  });
+
+  it('recalculates on every request after profile skills change', async () => {
+    const scoreOf = async () =>
+      (await service.recommendations('user')).items.find(
+        (item) => item.jobOfferId === 'partial',
+      )?.score;
+    expect(await scoreOf()).toBe(50);
+    getUserSkills.mockResolvedValue([skill('Python'), skill('SQL')]);
+    expect(await scoreOf()).toBe(100);
+  });
+
+  it('uses the career and the experience of the profile in the score and in the tie break', async () => {
+    findCandidateProfile.mockResolvedValue({
+      career: 'Ingeniería de Sistemas',
+      experienceYears: 1,
+    });
+    findPublished.mockResolvedValue([
+      offer('other-career', ['Python'], { careers: ['Ingeniería Comercial'] }),
+      offer('needs-experience', ['Python'], { minExperienceYears: 5 }),
+      offer('match', ['Python'], { careers: ['Ingeniería de Sistemas'] }),
+    ]);
+
+    const result = await service.recommendations('user');
+
+    expect(result.items.map((item) => [item.jobOfferId, item.score])).toEqual([
+      ['match', 100],
+      ['needs-experience', 86],
+      ['other-career', 71],
+    ]);
+  });
+
+  it('breaks a tie by career first and by experience second', async () => {
+    findCandidateProfile.mockResolvedValue({
+      career: 'Ingeniería de Sistemas',
+      experienceYears: 0,
+    });
+    findPublished.mockResolvedValue([
+      offer('other-career', ['Python'], { careers: ['Ingeniería Comercial'] }),
+      offer('same-career', ['Python'], { careers: ['Ingeniería de Sistemas'] }),
+    ]);
+
+    const result = await service.recommendations('user');
+
+    expect(result.items.map((item) => item.jobOfferId)).toEqual([
+      'same-career',
+      'other-career',
+    ]);
+  });
+
+  it('returns an incomplete profile without listing offers when there are no skills', async () => {
+    getUserSkills.mockResolvedValue([]);
+    await expect(service.recommendations('user')).resolves.toEqual({
+      isProfileComplete: false,
+      items: [],
+    });
+    expect(findPublished).not.toHaveBeenCalled();
+  });
+
+  it('returns an incomplete profile when the person has no profile yet', async () => {
+    getUserSkills.mockRejectedValue(new ProfileNotFoundException());
+    await expect(service.recommendations('user')).resolves.toEqual({
+      isProfileComplete: false,
+      items: [],
+    });
+    expect(findPublished).not.toHaveBeenCalled();
+  });
+
+  it('returns an empty feed when there are no published offers', async () => {
+    findPublished.mockResolvedValue([]);
+    await expect(service.recommendations('user')).resolves.toEqual({
       isProfileComplete: true,
-      items: [
-        {
-          jobOfferId: 'o1',
-          title: 'Vacante o1',
-          companyName: 'Empresa SA',
-          modality: 'Remoto',
-          score: 33,
-          matchedSkills: ['Python'],
-          matchedSkillIds: ['s1'],
-          missingSkills: ['SQL', 'React'],
-          missingSkillIds: ['s3', 's4'],
-          skills: ['Python', 'SQL', 'React'],
-        },
-      ],
+      items: [],
     });
   });
 
-  it('da 100 cuando el usuario tiene todas las habilidades requeridas', async () => {
-    jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [PYTHON, DOCKER])]);
-
-    const result = await service.getRecommendations(USER_ID);
-
-    expect(result.items[0]?.score).toBe(100);
-    expect(result.items[0]?.matchedSkills).toEqual(['Python', 'Docker']);
-    expect(result.items[0]?.missingSkills).toEqual([]);
-    expect(result.items[0]?.missingSkillIds).toEqual([]);
-  });
-
-  it('separa las habilidades que coinciden de las que faltan, con nombres e ids', async () => {
-    jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [DOCKER, SQL, REACT])]);
-
-    const result = await service.getRecommendations(USER_ID);
-    const item = result.items[0];
-
-    expect(item?.matchedSkills).toEqual(['Docker']);
-    expect(item?.matchedSkillIds).toEqual(['s2']);
-    expect(item?.missingSkills).toEqual(['SQL', 'React']);
-    expect(item?.missingSkillIds).toEqual(['s3', 's4']);
-    expect(item?.skills).toEqual(['Docker', 'SQL', 'React']);
-  });
-
-  it('mantiene el orden original de las habilidades requeridas en cada grupo', async () => {
-    jobOffersService.listPublished.mockResolvedValue([
-      buildOffer('o1', [REACT, PYTHON, SQL, DOCKER]),
-    ]);
-
-    const result = await service.getRecommendations(USER_ID);
-
-    expect(result.items[0]?.matchedSkills).toEqual(['Python', 'Docker']);
-    expect(result.items[0]?.missingSkills).toEqual(['React', 'SQL']);
-  });
-
-  it('ordena de mayor a menor porcentaje', async () => {
-    jobOffersService.listPublished.mockResolvedValue([
-      buildOffer('bajo', [PYTHON, SQL, REACT]),
-      buildOffer('alto', [PYTHON, DOCKER]),
-      buildOffer('medio', [PYTHON, SQL]),
-    ]);
-
-    const result = await service.getRecommendations(USER_ID);
-
-    expect(result.items.map((item) => item.jobOfferId)).toEqual(['alto', 'medio', 'bajo']);
-  });
-
-  it('a igualdad de porcentaje pone primero la oferta mas reciente', async () => {
-    jobOffersService.listPublished.mockResolvedValue([
-      buildOffer('vieja', [PYTHON], '2026-09-01T00:00:00.000Z'),
-      buildOffer('nueva', [PYTHON], '2026-10-10T00:00:00.000Z'),
-      buildOffer('media', [PYTHON], '2026-09-20T00:00:00.000Z'),
-    ]);
-
-    const result = await service.getRecommendations(USER_ID);
-
-    expect(result.items.map((item) => item.jobOfferId)).toEqual(['nueva', 'media', 'vieja']);
-  });
-
-  it('omite las ofertas que no coinciden con ninguna habilidad del usuario', async () => {
-    jobOffersService.listPublished.mockResolvedValue([
-      buildOffer('o1', [SQL, REACT]),
-      buildOffer('o2', []),
-      buildOffer('o3', [PYTHON]),
-    ]);
-
-    const result = await service.getRecommendations(USER_ID);
-
-    expect(result.items.map((item) => item.jobOfferId)).toEqual(['o3']);
-  });
-
-  it('marca el perfil como incompleto, sin lista, cuando el usuario no tiene habilidades', async () => {
-    userSkillService.getUserSkills.mockResolvedValue([]);
-    jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [PYTHON])]);
-
-    const result = await service.getRecommendations(USER_ID);
-
-    expect(result).toEqual({ isProfileComplete: false, items: [] });
-    expect(jobOffersService.listPublished).not.toHaveBeenCalled();
-  });
-
-  it('trata la falta de perfil como perfil incompleto', async () => {
-    userSkillService.getUserSkills.mockRejectedValue(new ProfileNotFoundException());
-
-    const result = await service.getRecommendations(USER_ID);
-
-    expect(result).toEqual({ isProfileComplete: false, items: [] });
-  });
-
-  it('propaga cualquier otro error al leer las habilidades', async () => {
-    userSkillService.getUserSkills.mockRejectedValue(new Error('fallo'));
-
-    await expect(service.getRecommendations(USER_ID)).rejects.toThrow('fallo');
-  });
-
-  it('responde perfil completo y lista vacia cuando no hay ofertas publicadas', async () => {
-    const result = await service.getRecommendations(USER_ID);
-
-    expect(result).toEqual({ isProfileComplete: true, items: [] });
-  });
-
-  describe('getJobFit', () => {
-    it('devuelve la vacante con el porcentaje y las habilidades que coinciden o faltan', async () => {
-      jobOffersService.listPublished.mockResolvedValue([
-        buildOffer('o1', [PYTHON, SQL, REACT]),
-        buildOffer('o2', [DOCKER]),
-      ]);
-
-      const result = await service.getJobFit(USER_ID, 'o1');
-
-      expect(result).toEqual({
-        jobOfferId: 'o1',
-        title: 'Vacante o1',
-        companyName: 'Empresa SA',
-        modality: 'Remoto',
-        description: 'Descripcion',
-        score: 33,
-        matchedSkills: ['Python'],
-        matchedSkillIds: ['s1'],
-        missingSkills: ['SQL', 'React'],
-        missingSkillIds: ['s3', 's4'],
-        skills: ['Python', 'SQL', 'React'],
-      });
-      expect(userSkillService.getUserSkills).toHaveBeenCalledWith(USER_ID);
-    });
-
-    it('da el mismo porcentaje que la lista de recomendaciones', async () => {
-      jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [PYTHON, DOCKER, SQL, REACT])]);
-
-      const list = await service.getRecommendations(USER_ID);
-      const detail = await service.getJobFit(USER_ID, 'o1');
-
-      expect(detail.score).toBe(list.items[0]?.score);
-      expect(detail.matchedSkills).toEqual(list.items[0]?.matchedSkills);
-    });
-
-    it('devuelve score 0 y todo faltante cuando el usuario no tiene habilidades', async () => {
-      userSkillService.getUserSkills.mockResolvedValue([]);
-      jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [PYTHON, SQL])]);
-
-      const result = await service.getJobFit(USER_ID, 'o1');
-
-      expect(result.score).toBe(0);
-      expect(result.matchedSkills).toEqual([]);
-      expect(result.missingSkills).toEqual(['Python', 'SQL']);
-    });
-
-    it('trata la falta de perfil como usuario sin habilidades', async () => {
-      userSkillService.getUserSkills.mockRejectedValue(new ProfileNotFoundException());
-      jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [PYTHON])]);
-
-      const result = await service.getJobFit(USER_ID, 'o1');
-
-      expect(result.score).toBe(0);
-    });
-
-    it('devuelve score 0 para una vacante sin habilidades requeridas', async () => {
-      jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [])]);
-
-      const result = await service.getJobFit(USER_ID, 'o1');
-
-      expect(result.score).toBe(0);
-      expect(result.skills).toEqual([]);
-    });
-
-    it('lanza JobOfferNotFoundException cuando la vacante no está entre las publicadas', async () => {
-      jobOffersService.listPublished.mockResolvedValue([buildOffer('o1', [PYTHON])]);
-
-      await expect(service.getJobFit(USER_ID, 'inexistente')).rejects.toBeInstanceOf(
-        JobOfferNotFoundException,
-      );
-    });
-
-    it('propaga cualquier otro error al leer las habilidades', async () => {
-      userSkillService.getUserSkills.mockRejectedValue(new Error('fallo'));
-
-      await expect(service.getJobFit(USER_ID, 'o1')).rejects.toThrow('fallo');
-    });
+  it('propagates connection failures so the UI can offer retry', async () => {
+    getUserSkills.mockRejectedValue(new Error('Database unavailable'));
+    await expect(service.recommendations('user')).rejects.toThrow(
+      'Database unavailable',
+    );
   });
 });

@@ -1,5 +1,6 @@
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, renderHook, waitFor } from '@testing-library/react';
+import { cleanup, waitFor } from "@testing-library/react";
 
 import { useEvents } from './use-events';
 import { eventsService } from '../services/events.service';
@@ -47,11 +48,12 @@ describe('useEvents with filters', () => {
       expect(eventsService.getEvents).toHaveBeenCalledWith(
         {
           page: 1,
-          limit: 50,
+          includeProposals: true, limit: 50,
           search: 'React',
           categoryId: 'category-1',
         },
         expect.any(AbortSignal),
+        null,
       );
     });
   });
@@ -72,9 +74,10 @@ describe('useEvents with filters', () => {
       expect(eventsService.getEvents).toHaveBeenCalledWith(
         {
           page: 1,
-          limit: 50,
+          includeProposals: true, limit: 50,
         },
         expect.any(AbortSignal),
+        null,
       );
     });
   });
@@ -111,11 +114,12 @@ describe('useEvents with filters', () => {
       expect(eventsService.getEvents).toHaveBeenCalledWith(
         {
           page: 1,
-          limit: 50,
+          includeProposals: true, limit: 50,
           search: 'Python',
           categoryId: 'category-2',
         },
         expect.any(AbortSignal),
+        null,
       );
     });
   });
@@ -174,6 +178,7 @@ describe('useEvents with filters', () => {
           page: 2,
         }),
         expect.any(AbortSignal),
+        null,
       );
     });
 
@@ -189,6 +194,7 @@ describe('useEvents with filters', () => {
           search: 'React',
         }),
         expect.any(AbortSignal),
+        null,
       );
     });
   });

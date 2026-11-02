@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InboxHeader } from "../components/layout/backoffice-page-header";
 import { InboxFilters } from "../components/inbox/inbox-filters";
+import { AutomationSummaryCards } from "../components/inbox/automation-summary-cards";
+import { useAutomationSummary } from "../hooks/use-automation-summary";
 import { RequestPagination } from "../components/inbox/request-pagination";
 import { RequestTable } from "../components/inbox/request-table";
-import { SummaryCards } from "../components/inbox/summary-cards";
 import { REVIEW_TABS } from "../constants/request-review.constants";
-import { useInboxSummary } from "../hooks/use-inbox-summary";
 import { useRequestList } from "../hooks/use-request-list";
 import { useStatusCounts } from "../hooks/use-status-counts";
 import type { ReviewStatus } from "../types/request-review.types";
@@ -18,24 +18,29 @@ const ALL_STATUSES: readonly ReviewStatus[] = REVIEW_TABS.map((tab) => tab.value
 export function RequestInboxView() {
   const list = useRequestList();
   const counts = useStatusCounts(ALL_STATUSES);
-  const summary = useInboxSummary();
+  const automation = useAutomationSummary();
 
   return (
-    <div className="w-full min-w-0 [contain:inline-size]">
+    <main className="mx-auto w-full max-w-7xl min-w-0 [contain:inline-size]">
       <InboxHeader />
 
-      <section className="flex w-full min-w-0 flex-col gap-6 p-8">
-        <SummaryCards summary={summary.summary} isLoading={summary.isLoading} error={summary.error} onRetry={summary.retry} />
-
-        <div className="relative w-full min-w-0 overflow-hidden rounded-[10px] border border-border bg-surface">
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-3 pb-3 xl:pb-0 xl:pt-1.5">
+      <section className="flex w-full min-w-0 flex-col gap-6">
+        <AutomationSummaryCards
+          automation={automation.automation}
+          inbox={automation.inbox}
+          isLoading={automation.isLoading}
+          error={automation.error}
+          onRetry={automation.retry}
+        />
+        <div className="relative w-full min-w-0 overflow-hidden rounded-lg border border-border bg-surface">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-border bg-surface px-4 py-3">
             <Tabs value={list.status} onValueChange={(value) => list.changeStatus(value as ReviewStatus)} className="max-w-full">
-              <TabsList variant="line" className="max-w-full gap-2 overflow-x-auto overflow-y-hidden p-0 group-data-horizontal/tabs:h-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <TabsList variant="line" className="max-w-full [scrollbar-width:none] gap-2 overflow-x-auto overflow-y-hidden p-0 group-data-horizontal/tabs:h-12 [&::-webkit-scrollbar]:hidden">
                 {REVIEW_TABS.map((tab) => (
                   <TabsTrigger
                     key={tab.value}
                     value={tab.value}
-                    className="h-full flex-none px-4 text-[15px] font-semibold text-text-secondary data-active:text-ink group-data-horizontal/tabs:after:bottom-0 after:bg-accent"
+                    className="h-full flex-none px-4 text-base font-semibold text-text-secondary after:bg-accent group-data-horizontal/tabs:after:bottom-0 data-active:text-ink"
                   >
                     {tab.label}
                     {typeof counts[tab.value] === "number" && (
@@ -54,9 +59,11 @@ export function RequestInboxView() {
               search={list.searchInput}
               career={list.career}
               period={list.period}
+              validation={list.validation}
               onSearchChange={list.changeSearch}
               onCareerChange={list.changeCareer}
               onPeriodChange={list.changePeriod}
+              onValidationChange={list.changeValidation}
             />
           </div>
 
@@ -70,7 +77,7 @@ export function RequestInboxView() {
                 {list.hasActiveFilters ? "No hay solicitudes que coincidan con los filtros." : "No hay solicitudes en este estado."}
               </p>
               {list.hasActiveFilters ? (
-                <Button type="button" variant="outline" onClick={list.clearFilters} className="h-[34px] rounded-lg border-border bg-surface px-4 text-[14px] font-semibold text-ink">
+                <Button type="button" variant="brand" onClick={list.clearFilters} className="h-[34px] rounded-lg px-4 text-sm font-semibold">
                   Limpiar filtros
                 </Button>
               ) : null}
@@ -93,6 +100,6 @@ export function RequestInboxView() {
           )}
         </div>
       </section>
-    </div>
+    </main>
   );
 }

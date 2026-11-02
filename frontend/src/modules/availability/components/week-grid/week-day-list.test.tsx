@@ -28,11 +28,11 @@ function makeBlock(overrides: Partial<AvailabilityBlock>): AvailabilityBlock {
 }
 
 const lateFree = makeBlock({ id: "1" });
-const earlyPending = makeBlock({
+const earlyConfirmed = makeBlock({
   id: "2",
   startAt: "2026-10-06T14:00:00.000Z",
   endAt: "2026-10-06T15:00:00.000Z",
-  state: "pending",
+  state: "confirmed",
 });
 
 function blocksOnTuesday(blocks: AvailabilityBlock[]): AvailabilityBlock[][] {
@@ -47,7 +47,7 @@ describe("WeekDayList", () => {
   it("agrupa los bloques por día y los ordena por hora", () => {
     render(
       <WeekDayList
-        blocksByDay={blocksOnTuesday([lateFree, earlyPending])}
+        blocksByDay={blocksOnTuesday([lateFree, earlyConfirmed])}
         dayDates={DAY_DATES}
         variant="owner"
         onBlockClick={vi.fn()}
@@ -57,7 +57,7 @@ describe("WeekDayList", () => {
     expect(screen.getByRole("heading", { name: "Martes 6 de octubre" })).toBeInTheDocument();
     const buttons = screen.getAllByRole("button");
     expect(buttons.map((button) => button.getAttribute("aria-label"))).toEqual([
-      "Martes 6 de octubre, 10:00 a 11:00, pendiente",
+      "Martes 6 de octubre, 10:00 a 11:00, confirmada",
       "Martes 6 de octubre, 18:00 a 19:00, libre",
     ]);
   });
@@ -79,15 +79,15 @@ describe("WeekDayList", () => {
     const onBlockClick = vi.fn();
     render(
       <WeekDayList
-        blocksByDay={blocksOnTuesday([lateFree, earlyPending])}
+        blocksByDay={blocksOnTuesday([lateFree, earlyConfirmed])}
         dayDates={DAY_DATES}
         variant="selectable"
         onBlockClick={onBlockClick}
       />
     );
 
-    const pending = screen.getByRole("button", { name: /pendiente$/ });
-    expect(pending).toBeDisabled();
+    const confirmed = screen.getByRole("button", { name: /confirmada$/ });
+    expect(confirmed).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: /libre$/ }));
     expect(onBlockClick).toHaveBeenCalledWith(lateFree);
@@ -109,7 +109,7 @@ describe("WeekDayList", () => {
   it("resalta el bloque seleccionado", () => {
     render(
       <WeekDayList
-        blocksByDay={blocksOnTuesday([lateFree, earlyPending])}
+        blocksByDay={blocksOnTuesday([lateFree, earlyConfirmed])}
         dayDates={DAY_DATES}
         variant="selectable"
         selectedBlockId="1"
@@ -120,7 +120,7 @@ describe("WeekDayList", () => {
     const selected = screen.getByRole("button", { name: /libre$/ });
     expect(selected).toHaveAttribute("aria-pressed", "true");
     expect(selected).toHaveClass("ring-accent");
-    expect(screen.getByRole("button", { name: /pendiente$/ })).not.toHaveAttribute("aria-pressed");
+    expect(screen.getByRole("button", { name: /confirmada$/ })).not.toHaveAttribute("aria-pressed");
   });
 
   it("solo se muestra en pantallas menores a md", () => {

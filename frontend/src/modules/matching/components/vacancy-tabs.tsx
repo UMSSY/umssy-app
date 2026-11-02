@@ -1,6 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import type { Vacancy } from "../types/matching-types";
 
 interface VacancyTabsProps {
@@ -10,28 +11,5 @@ interface VacancyTabsProps {
 }
 
 export function VacancyTabs({ vacancies, activeVacancyId, onChange }: VacancyTabsProps) {
-  return (
-    <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
-      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        Vacante activa
-      </span>
-      <div className="flex flex-wrap gap-1.5">
-        {vacancies.map((vacancy) => (
-          <button
-            key={vacancy.id}
-            type="button"
-            onClick={() => onChange(vacancy.id)}
-            className={cn(
-              "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
-              vacancy.id === activeVacancyId
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-background text-foreground hover:bg-muted"
-            )}
-          >
-            {vacancy.title}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+  return <div className="flex items-center gap-3 rounded-lg border border-border bg-surface-soft p-4"><Label htmlFor="matching-vacancy">Vacante activa</Label><NativeSelect id="matching-vacancy" value={activeVacancyId} onChange={(event) => onChange(event.target.value)}>{vacancies.map((vacancy) => <NativeSelectOption key={vacancy.id} value={vacancy.id}>{vacancy.title}</NativeSelectOption>)}</NativeSelect><span className="ml-auto text-xs text-text-secondary">Los candidatos se muestran para esta vacante.</span></div>;
 }

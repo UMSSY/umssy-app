@@ -21,9 +21,10 @@ export function RefreshButton({ label = "actualizar", onClick, isRefreshing = fa
   return (
     <Button
       type="button"
+      variant="outline"
       onClick={handleClick}
       disabled={isRefreshing}
-      className="h-auto gap-2 rounded-md bg-ink px-5 py-2.5 text-base font-semibold text-surface hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-70"
+      className="gap-2 disabled:cursor-wait"
     >
       <RefreshCw
         data-testid="refresh-icon"

@@ -76,4 +76,15 @@ export const SEED_CONVERSATIONS: SeedConversationDefinition[] = [
       { fromA: true,  content: 'Estimado estudiante, muchas gracias por la información compartida en el webinar dictado el mes pasado.', minutesAgo: 20160, status: 'READ' },
     ],
   },
+  {
+    key: 'conv-grupo-evento-nestjs',
+    userAEmail: 'mentor.a@umssy.test',
+    userBEmail: 'mentor.b@umssy.test',
+    eventId: '33333333-3333-3333-3333-333333333331', // Taller de NestJS
+    lastReadAtByA: 'now',
+    lastReadAtByB: 'now',
+    messages: [
+      { fromA: true, content: 'Bienvenidos a la sala del taller de NestJS', minutesAgo: 10, status: 'SENT' },
+    ],
+  },
 ];

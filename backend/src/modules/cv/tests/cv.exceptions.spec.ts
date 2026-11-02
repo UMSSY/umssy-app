@@ -24,6 +24,7 @@ describe('cv exceptions', () => {
     expect(status).toHaveBeenCalledWith(404);
     expect(json).toHaveBeenCalledWith({
       statusCode: 404,
+      code: 'CV_NOT_FOUND',
       data: null,
       detail: 'CV not found',
       ok: false,

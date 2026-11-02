@@ -6,7 +6,7 @@ import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { UPDATE_BLOCK_ERROR } from "../constants/availability.constants";
 import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
 import { AVAILABILITY_TOAST_TEXT } from "../constants/availability-toast.constants";
-import { availabilityApi } from "../services/availability.api";
+import { availabilityApi } from "../services/availability.service";
 import type { AvailabilityBlock } from "../types/availability-block.types";
 import type { CreateAvailabilityBlockInput } from "../types/create-availability-block-input.types";
 import type { UpdateBlockVariables } from "../types/update-block-variables.types";

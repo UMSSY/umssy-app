@@ -1,36 +1,56 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { Breadcrumbs } from "@/shared/components/layout";
-import { MENTOR_PROFILE_BREADCRUMB_ITEMS } from "../../constants/mentor-profile-breadcrumb.constants";
 
-type MentorProfileNavigationProps = {
+interface MentorProfileNavigationProps {
   mentorName: string;
-};
+  returnTo?: string;
+}
+
+function getSafeReturnTo(returnTo?: string): string {
+  const fallback = "/mentorship/mentors";
+
+  if (
+    !returnTo ||
+    !returnTo.startsWith("/mentorship/mentors") ||
+    returnTo.startsWith("//") ||
+    returnTo.includes("\\") ||
+    returnTo.includes("://")
+  ) {
+    return fallback;
+  }
+
+  const [pathname, query = ""] = returnTo.split("?");
+
+  if (pathname !== fallback) {
+    return fallback;
+  }
+
+  return query ? `${pathname}?${query}` : pathname;
+}
 
 export function MentorProfileNavigation({
   mentorName,
+  returnTo = "/mentorship/mentors",
 }: MentorProfileNavigationProps) {
-  const breadcrumbItems = [
-    ...MENTOR_PROFILE_BREADCRUMB_ITEMS,
-    { label: mentorName },
-  ];
+  const safeReturnTo = getSafeReturnTo(returnTo);
 
   return (
-    <div className="mb-6 [&>nav]:mb-0 [&>nav]:text-umssy-secondary [&_svg]:size-4 [&_[aria-current=page]]:text-umssy-ink">
+    <nav
+      aria-label={`Navegación del perfil de ${mentorName}`}
+      className="mb-5"
+    >
       <Link
-        href="/mentorship/mentors"
+        href={safeReturnTo}
         className={buttonVariants({
-          variant: "outline",
+          variant: "ghost",
           className:
-            "mb-4 h-auto gap-2 rounded-lg border-umssy-border bg-white px-4 py-2 text-sm font-semibold text-umssy-ink shadow-sm transition hover:bg-umssy-background hover:text-umssy-ink hover:shadow-md active:translate-y-0 focus-visible:ring-2 focus-visible:ring-umssy-red",
+            "gap-2 px-0 text-text-secondary hover:bg-transparent hover:text-accent",
         })}
       >
-        <ArrowLeft size={16} />
+        <ArrowLeft aria-hidden="true" />
         Volver al directorio
       </Link>
-
-      <Breadcrumbs items={breadcrumbItems} />
-    </div>
+    </nav>
   );
 }

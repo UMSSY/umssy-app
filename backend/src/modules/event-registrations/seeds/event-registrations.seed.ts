@@ -1,3 +1,6 @@
+import { repairSeededQrTokens } from './repair-seeded-qr-tokens.js';
+import { randomBytes } from 'node:crypto';
+import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { SEED_EVENTS } from '../../events/constants/seed-events.constants.js';
 import { CONFIRMED_REGISTRATION_TITLE } from '../constants/event-registrations.constants.js';
@@ -5,6 +8,7 @@ export async function seedEventRegistrations(
   tx: Prisma.TransactionClient,
   userId: string,
 ): Promise<void> {
+  await repairSeededQrTokens(tx);
   const regStatus = await tx.registrationStatus.upsert({
     where: { title: CONFIRMED_REGISTRATION_TITLE },
     update: {},
@@ -12,6 +16,11 @@ export async function seedEventRegistrations(
       id: '22222222-2222-2222-2222-222222222225',
       title: CONFIRMED_REGISTRATION_TITLE,
     },
+  });
+  await tx.registrationStatus.upsert({
+    where: { title: REGISTRATION_STATUS_TITLES.cancelled },
+    update: {},
+    create: { title: REGISTRATION_STATUS_TITLES.cancelled },
   });
   for (const e of SEED_EVENTS) {
     if (e.enroll) {
@@ -22,7 +31,7 @@ export async function seedEventRegistrations(
           eventId: e.id,
           userId: userId,
           statusId: regStatus.id,
-          qrToken: `qr-seed-${e.id.slice(-4)}`,
+          qrToken: randomBytes(32).toString('hex'),
         },
       });
     }

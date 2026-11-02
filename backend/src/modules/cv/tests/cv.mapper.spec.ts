@@ -2,14 +2,18 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { CvMapper } from '../mappers/cv.mapper.js';
 import type { CvMetadataRecord } from '../types/cv-metadata-record.type.js';
 
+const cvId = '22222222-2222-4222-8222-222222222222';
+
 const buildRecord = (
   overrides: Partial<CvMetadataRecord> = {},
 ): CvMetadataRecord => ({
+  id: cvId,
   firstName: 'Test',
   lastName: 'User',
   fileName: 'mi-cv.pdf',
   sizeBytes: 1258291,
   uploadedAt: new Date('2026-10-03T12:00:00.000Z'),
+  isCurrent: true,
   ...overrides,
 });
 
@@ -40,15 +44,53 @@ describe('CvMapper', () => {
 
   it('maps a stored cv to the response with an iso date', () => {
     expect(mapper.toResponse(buildRecord())).toEqual({
+      id: cvId,
       fileName: 'mi-cv.pdf',
       fileType: 'application/pdf',
       sizeInBytes: 1258291,
       updatedAt: '2026-10-03T12:00:00.000Z',
+      isCurrent: true,
     });
   });
 
+  it('keeps an older cv flagged as not current', () => {
+    expect(mapper.toResponse(buildRecord({ isCurrent: false }))?.isCurrent).toBe(false);
+  });
+
   it('returns null when the user has no cv', () => {
+    expect(mapper.toResponse(buildRecord({ id: null }))).toBeNull();
+  });
+
+  it('returns null when the cv has no size', () => {
     expect(mapper.toResponse(buildRecord({ sizeBytes: null }))).toBeNull();
+  });
+
+  it('maps a page of cvs with its totals', () => {
+    const page = mapper.toPage([buildRecord()], 6, 1, 5);
+
+    expect(page).toEqual({
+      items: [mapper.toResponse(buildRecord())],
+      totalItems: 6,
+      totalPages: 2,
+      page: 1,
+      limit: 5,
+    });
+  });
+
+  it('leaves out of the page the records without a cv', () => {
+    const page = mapper.toPage([buildRecord(), buildRecord({ id: null })], 1, 1, 5);
+
+    expect(page.items).toHaveLength(1);
+  });
+
+  it('maps an empty page when the user has no cvs', () => {
+    expect(mapper.toPage([], 0, 1, 5)).toEqual({
+      items: [],
+      totalItems: 0,
+      totalPages: 0,
+      page: 1,
+      limit: 5,
+    });
   });
 
   it('returns null when the cv has no upload date', () => {

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
+import { NlpModule } from '../nlp/nlp.module.js';
 import { ProfileModule } from '../profile/profile.module.js';
 import { SkillController } from './controllers/skill.controller.js';
 import { UserSkillController } from './controllers/user-skill.controller.js';
@@ -12,7 +13,7 @@ import { UserSkillService } from './services/user-skill.service.js';
 import { SkillDictionaryService } from '../job-connect/services/skill-dictionary.service.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule, ProfileModule],
+  imports: [PrismaModule, JwtAuthModule, ProfileModule, NlpModule],
   controllers: [SkillController, UserSkillController],
   providers: [
     SkillCatalogService,

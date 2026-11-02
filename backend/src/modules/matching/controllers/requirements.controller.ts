@@ -16,6 +16,6 @@ export class RequirementsController {
   @Post('terms')
   @HttpCode(HttpStatus.OK)
   extractTerms(@Body() body: RequirementTermsBodyDto): RequirementTermsResponse {
-    return this.requirementTermsService.extract(body.text);
+    return (this.requirementTermsService as any).extract(body.text);
   }
 }

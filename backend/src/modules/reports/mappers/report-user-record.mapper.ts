@@ -39,6 +39,7 @@ export function toRegisteredReportUser(
     identifier: request?.idCardNumber ?? '',
     documentType: toDocumentType(request),
     registeredAt: user.createdAt.toISOString(),
+    listedAt: user.createdAt.toISOString(),
     registrationStatus: 'APPROVED',
     rejectionReason: null,
   };
@@ -56,6 +57,11 @@ export function toAccessRequestReportUser(
     identifier: request.idCardNumber ?? '',
     documentType: toDocumentType(request),
     registeredAt: (request.submittedAt ?? request.createdAt).toISOString(),
+    listedAt: (
+      request.reviewedAt ??
+      request.submittedAt ??
+      request.createdAt
+    ).toISOString(),
     registrationStatus,
     rejectionReason:
       registrationStatus === 'REJECTED' ? request.rejectionReason : null,

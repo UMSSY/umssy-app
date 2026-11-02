@@ -1,1 +1,1 @@
-export type AvailabilityBlockState = "free" | "pending" | "confirmed";
+export type AvailabilityBlockState = "free" | "confirmed";

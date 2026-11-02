@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { AxiosError, isAxiosError } from "axios";
+import { ApiError as AxiosError, isApiError as isAxiosError } from "@/shared/services/api-client";
 import { toast } from "sonner";
 import { isConnectionError } from "@/shared/utils/is-connection-error";
 import {
@@ -16,6 +16,9 @@ import {
 } from "../constants/reports.constants";
 import { REPORTS_QUERY_KEYS } from "../constants/reports-query-keys.constants";
 import { reportsService } from "../services/reports.service";
+import { useReportSnapshot } from "./use-report-snapshot";
+import type { AcademicPeriod } from "../types/registered-user.types";
+import type { RoleTag } from "@/modules/auth";
 
 function notifyRequestError(error: unknown, id: string) {
   if (!isAxiosError(error)) return;
@@ -33,10 +36,17 @@ function notifyRequestError(error: unknown, id: string) {
   }
 }
 
-export function useRejectedUsers(page: number, search = "") {
+export function useRejectedUsers(page: number, userType?: RoleTag, period?: AcademicPeriod, search = "") {
+  const { resolveSnapshotAt, renewSnapshot } = useReportSnapshot();
   const query = useQuery({
-    queryKey: REPORTS_QUERY_KEYS.rejectedUsers(page, search),
-    queryFn: ({ signal }) => reportsService.getRejectedUsers({ page, limit: REJECTED_USERS_PAGE_SIZE, search }, signal),
+    queryKey: REPORTS_QUERY_KEYS.rejectedUsers(page, userType, period, search),
+    queryFn: ({ signal }) => {
+      const snapshotAt = resolveSnapshotAt(page);
+      return reportsService.getRejectedUsers(
+        { page, limit: REJECTED_USERS_PAGE_SIZE, userType, period, search, ...(snapshotAt && { snapshotAt }) },
+        signal,
+      );
+    },
     placeholderData: keepPreviousData,
   });
   const { error, errorUpdatedAt, refetch } = query;
@@ -46,8 +56,9 @@ export function useRejectedUsers(page: number, search = "") {
   }, [error, errorUpdatedAt]);
 
   const refresh = useCallback(() => {
+    renewSnapshot();
     void refetch();
-  }, [refetch]);
+  }, [refetch, renewSnapshot]);
 
   const result = query.isError ? undefined : query.data?.data;
   const totalItems = result?.totalItems ?? 0;

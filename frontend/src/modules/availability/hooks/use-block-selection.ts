@@ -12,6 +12,14 @@ export function useBlockSelection(fetchFreeBlocks: () => Promise<AvailabilityBlo
   const [error, setError] = useState<string | null>(null);
   const lastRequestRef = useRef(0);
 
+  const markUnavailable = (block: AvailabilityBlock) => {
+    setUnavailableBlock(block);
+    setUnavailableBlockIds((prev) => (prev.includes(block.id) ? prev : [...prev, block.id]));
+    setSelectedBlock((prev) => (prev?.id === block.id ? null : prev));
+  };
+
+  const clearSelection = () => setSelectedBlock(null);
+
   const selectBlock = async (block: AvailabilityBlock) => {
     const requestId = ++lastRequestRef.current;
     setIsChecking(true);
@@ -30,9 +38,7 @@ export function useBlockSelection(fetchFreeBlocks: () => Promise<AvailabilityBlo
         return;
       }
 
-      setUnavailableBlock(block);
-      setUnavailableBlockIds((prev) => (prev.includes(block.id) ? prev : [...prev, block.id]));
-      setSelectedBlock((prev) => (prev?.id === block.id ? null : prev));
+      markUnavailable(block);
     } catch {
       if (requestId === lastRequestRef.current) setError(BLOCK_SELECTION_TEXT.checkError);
     } finally {
@@ -40,5 +46,14 @@ export function useBlockSelection(fetchFreeBlocks: () => Promise<AvailabilityBlo
     }
   };
 
-  return { selectedBlock, unavailableBlock, unavailableBlockIds, isChecking, error, selectBlock };
+  return {
+    selectedBlock,
+    unavailableBlock,
+    unavailableBlockIds,
+    isChecking,
+    error,
+    selectBlock,
+    markUnavailable,
+    clearSelection,
+  };
 }

@@ -53,6 +53,7 @@ vi.mock('../../modules/chat/seeds/chat.seed.js', () => ({
 
 const users = {
   mentorA: { id: 'mentor' },
+  mentorB: { id: 'performance-mentor' },
   graduate: { id: 'availability-graduate' },
   eventGraduate: { id: 'event-graduate' },
   emptyGraduate: { id: 'without-passes' },
@@ -71,8 +72,10 @@ beforeEach(() => {
     weeks: {},
     plan: [],
     statuses: 3,
-    blocks: 9,
-    appointments: 2,
+    blocks: 58,
+    appointments: 53,
+    blockedDates: 1,
+    series: 1,
     warnings: [],
   } as unknown as Awaited<ReturnType<typeof seedAvailability>>);
   vi.mocked(seedAccessRequests).mockResolvedValue({
@@ -108,6 +111,17 @@ function buildClient() {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('combined events and availability seed', () => {
+  it('rejects production before hashing passwords or opening transactions', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    const { client, prisma } = buildClient();
+    await expect(runSeed(prisma)).rejects.toThrow(
+      'no se pueden cargar en producción',
+    );
+    expect(hashSeedPassword).not.toHaveBeenCalled();
+    expect(client.$transaction).not.toHaveBeenCalled();
+    expect(seedUsers).not.toHaveBeenCalled();
+  });
+
   it('seeds passes for the original event user while retaining the availability user', async () => {
     vi.stubEnv('SEED_TRANSACTION_TIMEOUT_MS', undefined);
     const { tx, client, prisma } = buildClient();
@@ -126,6 +140,7 @@ describe('combined events and availability seed', () => {
       tx,
       expect.objectContaining({
         mentorId: 'mentor',
+        performanceMentorId: 'performance-mentor',
         graduateId: 'availability-graduate',
       }),
       expect.any(Date),

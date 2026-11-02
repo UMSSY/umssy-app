@@ -7,11 +7,11 @@ describe("Textarea", () => {
 
   it("renderiza un textarea con su marca data-slot y avisa de los cambios", () => {
     const onChange = vi.fn()
-    render(<Textarea aria-label="Motivo" className="extra" onChange={onChange} />)
+    render(<Textarea aria-label="Motivo" className="mt-2" onChange={onChange} />)
     const field = screen.getByLabelText("Motivo")
 
     expect(field).toHaveAttribute("data-slot", "textarea")
-    expect(field).toHaveClass("extra")
+    expect(field).toHaveClass("mt-2")
     fireEvent.change(field, { target: { value: "texto" } })
     expect(onChange).toHaveBeenCalledOnce()
   })

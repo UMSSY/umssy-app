@@ -37,6 +37,10 @@ export type EventSumAggregateOutputType = {
 }
 
 export type EventMinAggregateOutputType = {
+  coverData: runtime.Bytes | null
+  coverMimeType: string | null
+  proposalKey: string | null
+  proposalHash: string | null
   id: string | null
   title: string | null
   description: string | null
@@ -60,6 +64,10 @@ export type EventMinAggregateOutputType = {
 }
 
 export type EventMaxAggregateOutputType = {
+  coverData: runtime.Bytes | null
+  coverMimeType: string | null
+  proposalKey: string | null
+  proposalHash: string | null
   id: string | null
   title: string | null
   description: string | null
@@ -83,6 +91,10 @@ export type EventMaxAggregateOutputType = {
 }
 
 export type EventCountAggregateOutputType = {
+  coverData: number
+  coverMimeType: number
+  proposalKey: number
+  proposalHash: number
   id: number
   title: number
   description: number
@@ -118,6 +130,10 @@ export type EventSumAggregateInputType = {
 }
 
 export type EventMinAggregateInputType = {
+  coverData?: true
+  coverMimeType?: true
+  proposalKey?: true
+  proposalHash?: true
   id?: true
   title?: true
   description?: true
@@ -141,6 +157,10 @@ export type EventMinAggregateInputType = {
 }
 
 export type EventMaxAggregateInputType = {
+  coverData?: true
+  coverMimeType?: true
+  proposalKey?: true
+  proposalHash?: true
   id?: true
   title?: true
   description?: true
@@ -164,6 +184,10 @@ export type EventMaxAggregateInputType = {
 }
 
 export type EventCountAggregateInputType = {
+  coverData?: true
+  coverMimeType?: true
+  proposalKey?: true
+  proposalHash?: true
   id?: true
   title?: true
   description?: true
@@ -274,6 +298,10 @@ export type EventGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 }
 
 export type EventGroupByOutputType = {
+  coverData: runtime.Bytes | null
+  coverMimeType: string | null
+  proposalKey: string | null
+  proposalHash: string | null
   id: string
   title: string
   description: string | null
@@ -320,6 +348,10 @@ export type EventWhereInput = {
   AND?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
   OR?: Prisma.EventWhereInput[]
   NOT?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
+  coverData?: Prisma.BytesNullableFilter<"Event"> | runtime.Bytes | null
+  coverMimeType?: Prisma.StringNullableFilter<"Event"> | string | null
+  proposalKey?: Prisma.StringNullableFilter<"Event"> | string | null
+  proposalHash?: Prisma.StringNullableFilter<"Event"> | string | null
   id?: Prisma.UuidFilter<"Event"> | string
   title?: Prisma.StringFilter<"Event"> | string
   description?: Prisma.StringNullableFilter<"Event"> | string | null
@@ -347,9 +379,14 @@ export type EventWhereInput = {
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   moderatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   registrations?: Prisma.EventRegistrationListRelationFilter
+  chatRoom?: Prisma.XOR<Prisma.ConversationNullableScalarRelationFilter, Prisma.ConversationWhereInput> | null
 }
 
 export type EventOrderByWithRelationInput = {
+  coverData?: Prisma.SortOrderInput | Prisma.SortOrder
+  coverMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
+  proposalKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  proposalHash?: Prisma.SortOrderInput | Prisma.SortOrder
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -377,13 +414,19 @@ export type EventOrderByWithRelationInput = {
   createdBy?: Prisma.UserOrderByWithRelationInput
   moderatedBy?: Prisma.UserOrderByWithRelationInput
   registrations?: Prisma.EventRegistrationOrderByRelationAggregateInput
+  chatRoom?: Prisma.ConversationOrderByWithRelationInput
 }
 
 export type EventWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  createdById_proposalKey?: Prisma.EventCreatedByIdProposalKeyCompoundUniqueInput
   AND?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
   OR?: Prisma.EventWhereInput[]
   NOT?: Prisma.EventWhereInput | Prisma.EventWhereInput[]
+  coverData?: Prisma.BytesNullableFilter<"Event"> | runtime.Bytes | null
+  coverMimeType?: Prisma.StringNullableFilter<"Event"> | string | null
+  proposalKey?: Prisma.StringNullableFilter<"Event"> | string | null
+  proposalHash?: Prisma.StringNullableFilter<"Event"> | string | null
   title?: Prisma.StringFilter<"Event"> | string
   description?: Prisma.StringNullableFilter<"Event"> | string | null
   categoryId?: Prisma.UuidFilter<"Event"> | string
@@ -410,9 +453,14 @@ export type EventWhereUniqueInput = Prisma.AtLeast<{
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   moderatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   registrations?: Prisma.EventRegistrationListRelationFilter
-}, "id">
+  chatRoom?: Prisma.XOR<Prisma.ConversationNullableScalarRelationFilter, Prisma.ConversationWhereInput> | null
+}, "id" | "createdById_proposalKey">
 
 export type EventOrderByWithAggregationInput = {
+  coverData?: Prisma.SortOrderInput | Prisma.SortOrder
+  coverMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
+  proposalKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  proposalHash?: Prisma.SortOrderInput | Prisma.SortOrder
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -444,6 +492,10 @@ export type EventScalarWhereWithAggregatesInput = {
   AND?: Prisma.EventScalarWhereWithAggregatesInput | Prisma.EventScalarWhereWithAggregatesInput[]
   OR?: Prisma.EventScalarWhereWithAggregatesInput[]
   NOT?: Prisma.EventScalarWhereWithAggregatesInput | Prisma.EventScalarWhereWithAggregatesInput[]
+  coverData?: Prisma.BytesNullableWithAggregatesFilter<"Event"> | runtime.Bytes | null
+  coverMimeType?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  proposalKey?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
+  proposalHash?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
   id?: Prisma.UuidWithAggregatesFilter<"Event"> | string
   title?: Prisma.StringWithAggregatesFilter<"Event"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Event"> | string | null
@@ -467,6 +519,10 @@ export type EventScalarWhereWithAggregatesInput = {
 }
 
 export type EventCreateInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -488,9 +544,14 @@ export type EventCreateInput = {
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
   moderatedBy?: Prisma.UserCreateNestedOneWithoutModeratedEventsInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationCreateNestedOneWithoutEventInput
 }
 
 export type EventUncheckedCreateInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -512,9 +573,14 @@ export type EventUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationUncheckedCreateNestedOneWithoutEventInput
 }
 
 export type EventUpdateInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -536,9 +602,14 @@ export type EventUpdateInput = {
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
   moderatedBy?: Prisma.UserUpdateOneWithoutModeratedEventsNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -560,9 +631,14 @@ export type EventUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUncheckedUpdateOneWithoutEventNestedInput
 }
 
 export type EventCreateManyInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -586,6 +662,10 @@ export type EventCreateManyInput = {
 }
 
 export type EventUpdateManyMutationInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -603,6 +683,10 @@ export type EventUpdateManyMutationInput = {
 }
 
 export type EventUncheckedUpdateManyInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -635,7 +719,16 @@ export type EventOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type EventCreatedByIdProposalKeyCompoundUniqueInput = {
+  createdById: string
+  proposalKey: string
+}
+
 export type EventCountOrderByAggregateInput = {
+  coverData?: Prisma.SortOrder
+  coverMimeType?: Prisma.SortOrder
+  proposalKey?: Prisma.SortOrder
+  proposalHash?: Prisma.SortOrder
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -664,6 +757,10 @@ export type EventAvgOrderByAggregateInput = {
 }
 
 export type EventMaxOrderByAggregateInput = {
+  coverData?: Prisma.SortOrder
+  coverMimeType?: Prisma.SortOrder
+  proposalKey?: Prisma.SortOrder
+  proposalHash?: Prisma.SortOrder
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -687,6 +784,10 @@ export type EventMaxOrderByAggregateInput = {
 }
 
 export type EventMinOrderByAggregateInput = {
+  coverData?: Prisma.SortOrder
+  coverMimeType?: Prisma.SortOrder
+  proposalKey?: Prisma.SortOrder
+  proposalHash?: Prisma.SortOrder
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -717,6 +818,11 @@ export type EventSumOrderByAggregateInput = {
 export type EventScalarRelationFilter = {
   is?: Prisma.EventWhereInput
   isNot?: Prisma.EventWhereInput
+}
+
+export type EventNullableScalarRelationFilter = {
+  is?: Prisma.EventWhereInput | null
+  isNot?: Prisma.EventWhereInput | null
 }
 
 export type EventCreateNestedManyWithoutModalityInput = {
@@ -971,14 +1077,6 @@ export type EventUncheckedUpdateManyWithoutCategoryNestedInput = {
   deleteMany?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type EventCreateNestedOneWithoutRegistrationsInput = {
   create?: Prisma.XOR<Prisma.EventCreateWithoutRegistrationsInput, Prisma.EventUncheckedCreateWithoutRegistrationsInput>
   connectOrCreate?: Prisma.EventCreateOrConnectWithoutRegistrationsInput
@@ -993,7 +1091,27 @@ export type EventUpdateOneRequiredWithoutRegistrationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutRegistrationsInput, Prisma.EventUpdateWithoutRegistrationsInput>, Prisma.EventUncheckedUpdateWithoutRegistrationsInput>
 }
 
+export type EventCreateNestedOneWithoutChatRoomInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutChatRoomInput, Prisma.EventUncheckedCreateWithoutChatRoomInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutChatRoomInput
+  connect?: Prisma.EventWhereUniqueInput
+}
+
+export type EventUpdateOneWithoutChatRoomNestedInput = {
+  create?: Prisma.XOR<Prisma.EventCreateWithoutChatRoomInput, Prisma.EventUncheckedCreateWithoutChatRoomInput>
+  connectOrCreate?: Prisma.EventCreateOrConnectWithoutChatRoomInput
+  upsert?: Prisma.EventUpsertWithoutChatRoomInput
+  disconnect?: Prisma.EventWhereInput | boolean
+  delete?: Prisma.EventWhereInput | boolean
+  connect?: Prisma.EventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EventUpdateToOneWithWhereWithoutChatRoomInput, Prisma.EventUpdateWithoutChatRoomInput>, Prisma.EventUncheckedUpdateWithoutChatRoomInput>
+}
+
 export type EventCreateWithoutModalityInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1014,9 +1132,14 @@ export type EventCreateWithoutModalityInput = {
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
   moderatedBy?: Prisma.UserCreateNestedOneWithoutModeratedEventsInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationCreateNestedOneWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutModalityInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1037,6 +1160,7 @@ export type EventUncheckedCreateWithoutModalityInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationUncheckedCreateNestedOneWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutModalityInput = {
@@ -1069,6 +1193,10 @@ export type EventScalarWhereInput = {
   AND?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
   OR?: Prisma.EventScalarWhereInput[]
   NOT?: Prisma.EventScalarWhereInput | Prisma.EventScalarWhereInput[]
+  coverData?: Prisma.BytesNullableFilter<"Event"> | runtime.Bytes | null
+  coverMimeType?: Prisma.StringNullableFilter<"Event"> | string | null
+  proposalKey?: Prisma.StringNullableFilter<"Event"> | string | null
+  proposalHash?: Prisma.StringNullableFilter<"Event"> | string | null
   id?: Prisma.UuidFilter<"Event"> | string
   title?: Prisma.StringFilter<"Event"> | string
   description?: Prisma.StringNullableFilter<"Event"> | string | null
@@ -1092,6 +1220,10 @@ export type EventScalarWhereInput = {
 }
 
 export type EventCreateWithoutOriginInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1112,9 +1244,14 @@ export type EventCreateWithoutOriginInput = {
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
   moderatedBy?: Prisma.UserCreateNestedOneWithoutModeratedEventsInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationCreateNestedOneWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutOriginInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1135,6 +1272,7 @@ export type EventUncheckedCreateWithoutOriginInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationUncheckedCreateNestedOneWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutOriginInput = {
@@ -1164,6 +1302,10 @@ export type EventUpdateManyWithWhereWithoutOriginInput = {
 }
 
 export type EventCreateWithoutStatusInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1184,9 +1326,14 @@ export type EventCreateWithoutStatusInput = {
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
   moderatedBy?: Prisma.UserCreateNestedOneWithoutModeratedEventsInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationCreateNestedOneWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutStatusInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1207,6 +1354,7 @@ export type EventUncheckedCreateWithoutStatusInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationUncheckedCreateNestedOneWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutStatusInput = {
@@ -1236,6 +1384,10 @@ export type EventUpdateManyWithWhereWithoutStatusInput = {
 }
 
 export type EventCreateWithoutCreatedByInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1256,9 +1408,14 @@ export type EventCreateWithoutCreatedByInput = {
   status: Prisma.EventStatusCreateNestedOneWithoutEventsInput
   moderatedBy?: Prisma.UserCreateNestedOneWithoutModeratedEventsInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationCreateNestedOneWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutCreatedByInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1279,6 +1436,7 @@ export type EventUncheckedCreateWithoutCreatedByInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationUncheckedCreateNestedOneWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutCreatedByInput = {
@@ -1292,6 +1450,10 @@ export type EventCreateManyCreatedByInputEnvelope = {
 }
 
 export type EventCreateWithoutModeratedByInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1312,9 +1474,14 @@ export type EventCreateWithoutModeratedByInput = {
   status: Prisma.EventStatusCreateNestedOneWithoutEventsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationCreateNestedOneWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutModeratedByInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1335,6 +1502,7 @@ export type EventUncheckedCreateWithoutModeratedByInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationUncheckedCreateNestedOneWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutModeratedByInput = {
@@ -1380,6 +1548,10 @@ export type EventUpdateManyWithWhereWithoutModeratedByInput = {
 }
 
 export type EventCreateWithoutCategoryInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1400,9 +1572,14 @@ export type EventCreateWithoutCategoryInput = {
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
   moderatedBy?: Prisma.UserCreateNestedOneWithoutModeratedEventsInput
   registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationCreateNestedOneWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutCategoryInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1423,6 +1600,7 @@ export type EventUncheckedCreateWithoutCategoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+  chatRoom?: Prisma.ConversationUncheckedCreateNestedOneWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutCategoryInput = {
@@ -1452,6 +1630,10 @@ export type EventUpdateManyWithWhereWithoutCategoryInput = {
 }
 
 export type EventCreateWithoutRegistrationsInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1472,9 +1654,14 @@ export type EventCreateWithoutRegistrationsInput = {
   status: Prisma.EventStatusCreateNestedOneWithoutEventsInput
   createdBy: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
   moderatedBy?: Prisma.UserCreateNestedOneWithoutModeratedEventsInput
+  chatRoom?: Prisma.ConversationCreateNestedOneWithoutEventInput
 }
 
 export type EventUncheckedCreateWithoutRegistrationsInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1495,6 +1682,7 @@ export type EventUncheckedCreateWithoutRegistrationsInput = {
   createdById: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  chatRoom?: Prisma.ConversationUncheckedCreateNestedOneWithoutEventInput
 }
 
 export type EventCreateOrConnectWithoutRegistrationsInput = {
@@ -1514,6 +1702,10 @@ export type EventUpdateToOneWithWhereWithoutRegistrationsInput = {
 }
 
 export type EventUpdateWithoutRegistrationsInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1534,9 +1726,14 @@ export type EventUpdateWithoutRegistrationsInput = {
   status?: Prisma.EventStatusUpdateOneRequiredWithoutEventsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
   moderatedBy?: Prisma.UserUpdateOneWithoutModeratedEventsNestedInput
+  chatRoom?: Prisma.ConversationUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutRegistrationsInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1557,9 +1754,142 @@ export type EventUncheckedUpdateWithoutRegistrationsInput = {
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  chatRoom?: Prisma.ConversationUncheckedUpdateOneWithoutEventNestedInput
+}
+
+export type EventCreateWithoutChatRoomInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
+  id?: string
+  title: string
+  description?: string | null
+  instructorName?: string | null
+  eventDate: Date | string
+  startTime: Date | string
+  endTime: Date | string
+  location?: string | null
+  capacity?: number | null
+  supportThreshold?: number | null
+  votingDeadline?: Date | string | null
+  moderationReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  category: Prisma.EventCategoryCreateNestedOneWithoutEventsInput
+  modality: Prisma.EventModalityCreateNestedOneWithoutEventsInput
+  origin: Prisma.EventOriginCreateNestedOneWithoutEventsInput
+  status: Prisma.EventStatusCreateNestedOneWithoutEventsInput
+  createdBy: Prisma.UserCreateNestedOneWithoutCreatedEventsInput
+  moderatedBy?: Prisma.UserCreateNestedOneWithoutModeratedEventsInput
+  registrations?: Prisma.EventRegistrationCreateNestedManyWithoutEventInput
+}
+
+export type EventUncheckedCreateWithoutChatRoomInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
+  id?: string
+  title: string
+  description?: string | null
+  categoryId: string
+  instructorName?: string | null
+  eventDate: Date | string
+  startTime: Date | string
+  endTime: Date | string
+  modalityId: string
+  location?: string | null
+  capacity?: number | null
+  originId: string
+  statusId: string
+  supportThreshold?: number | null
+  votingDeadline?: Date | string | null
+  moderatedById?: string | null
+  moderationReason?: string | null
+  createdById: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  registrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutEventInput
+}
+
+export type EventCreateOrConnectWithoutChatRoomInput = {
+  where: Prisma.EventWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventCreateWithoutChatRoomInput, Prisma.EventUncheckedCreateWithoutChatRoomInput>
+}
+
+export type EventUpsertWithoutChatRoomInput = {
+  update: Prisma.XOR<Prisma.EventUpdateWithoutChatRoomInput, Prisma.EventUncheckedUpdateWithoutChatRoomInput>
+  create: Prisma.XOR<Prisma.EventCreateWithoutChatRoomInput, Prisma.EventUncheckedCreateWithoutChatRoomInput>
+  where?: Prisma.EventWhereInput
+}
+
+export type EventUpdateToOneWithWhereWithoutChatRoomInput = {
+  where?: Prisma.EventWhereInput
+  data: Prisma.XOR<Prisma.EventUpdateWithoutChatRoomInput, Prisma.EventUncheckedUpdateWithoutChatRoomInput>
+}
+
+export type EventUpdateWithoutChatRoomInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  instructorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  supportThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  votingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  moderationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  category?: Prisma.EventCategoryUpdateOneRequiredWithoutEventsNestedInput
+  modality?: Prisma.EventModalityUpdateOneRequiredWithoutEventsNestedInput
+  origin?: Prisma.EventOriginUpdateOneRequiredWithoutEventsNestedInput
+  status?: Prisma.EventStatusUpdateOneRequiredWithoutEventsNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
+  moderatedBy?: Prisma.UserUpdateOneWithoutModeratedEventsNestedInput
+  registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+}
+
+export type EventUncheckedUpdateWithoutChatRoomInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoryId?: Prisma.StringFieldUpdateOperationsInput | string
+  instructorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  modalityId?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  originId?: Prisma.StringFieldUpdateOperationsInput | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
+  supportThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  votingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  moderatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type EventCreateManyModalityInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1582,6 +1912,10 @@ export type EventCreateManyModalityInput = {
 }
 
 export type EventUpdateWithoutModalityInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1602,9 +1936,14 @@ export type EventUpdateWithoutModalityInput = {
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
   moderatedBy?: Prisma.UserUpdateOneWithoutModeratedEventsNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutModalityInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1625,9 +1964,14 @@ export type EventUncheckedUpdateWithoutModalityInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUncheckedUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateManyWithoutModalityInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1650,6 +1994,10 @@ export type EventUncheckedUpdateManyWithoutModalityInput = {
 }
 
 export type EventCreateManyOriginInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1672,6 +2020,10 @@ export type EventCreateManyOriginInput = {
 }
 
 export type EventUpdateWithoutOriginInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1692,9 +2044,14 @@ export type EventUpdateWithoutOriginInput = {
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
   moderatedBy?: Prisma.UserUpdateOneWithoutModeratedEventsNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutOriginInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1715,9 +2072,14 @@ export type EventUncheckedUpdateWithoutOriginInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUncheckedUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateManyWithoutOriginInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1740,6 +2102,10 @@ export type EventUncheckedUpdateManyWithoutOriginInput = {
 }
 
 export type EventCreateManyStatusInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1762,6 +2128,10 @@ export type EventCreateManyStatusInput = {
 }
 
 export type EventUpdateWithoutStatusInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1782,9 +2152,14 @@ export type EventUpdateWithoutStatusInput = {
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
   moderatedBy?: Prisma.UserUpdateOneWithoutModeratedEventsNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutStatusInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1805,9 +2180,14 @@ export type EventUncheckedUpdateWithoutStatusInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUncheckedUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateManyWithoutStatusInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1830,6 +2210,10 @@ export type EventUncheckedUpdateManyWithoutStatusInput = {
 }
 
 export type EventCreateManyCreatedByInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1852,6 +2236,10 @@ export type EventCreateManyCreatedByInput = {
 }
 
 export type EventCreateManyModeratedByInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -1874,6 +2262,10 @@ export type EventCreateManyModeratedByInput = {
 }
 
 export type EventUpdateWithoutCreatedByInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1894,9 +2286,14 @@ export type EventUpdateWithoutCreatedByInput = {
   status?: Prisma.EventStatusUpdateOneRequiredWithoutEventsNestedInput
   moderatedBy?: Prisma.UserUpdateOneWithoutModeratedEventsNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutCreatedByInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1917,9 +2314,14 @@ export type EventUncheckedUpdateWithoutCreatedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUncheckedUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateManyWithoutCreatedByInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1942,6 +2344,10 @@ export type EventUncheckedUpdateManyWithoutCreatedByInput = {
 }
 
 export type EventUpdateWithoutModeratedByInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1962,9 +2368,14 @@ export type EventUpdateWithoutModeratedByInput = {
   status?: Prisma.EventStatusUpdateOneRequiredWithoutEventsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutModeratedByInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1985,9 +2396,14 @@ export type EventUncheckedUpdateWithoutModeratedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUncheckedUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateManyWithoutModeratedByInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2010,6 +2426,10 @@ export type EventUncheckedUpdateManyWithoutModeratedByInput = {
 }
 
 export type EventCreateManyCategoryInput = {
+  coverData?: runtime.Bytes | null
+  coverMimeType?: string | null
+  proposalKey?: string | null
+  proposalHash?: string | null
   id?: string
   title: string
   description?: string | null
@@ -2032,6 +2452,10 @@ export type EventCreateManyCategoryInput = {
 }
 
 export type EventUpdateWithoutCategoryInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2052,9 +2476,14 @@ export type EventUpdateWithoutCategoryInput = {
   createdBy?: Prisma.UserUpdateOneRequiredWithoutCreatedEventsNestedInput
   moderatedBy?: Prisma.UserUpdateOneWithoutModeratedEventsNestedInput
   registrations?: Prisma.EventRegistrationUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateWithoutCategoryInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2075,9 +2504,14 @@ export type EventUncheckedUpdateWithoutCategoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   registrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutEventNestedInput
+  chatRoom?: Prisma.ConversationUncheckedUpdateOneWithoutEventNestedInput
 }
 
 export type EventUncheckedUpdateManyWithoutCategoryInput = {
+  coverData?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  coverMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  proposalHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2131,6 +2565,10 @@ export type EventCountOutputTypeCountRegistrationsArgs<ExtArgs extends runtime.T
 
 
 export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  coverData?: boolean
+  coverMimeType?: boolean
+  proposalKey?: boolean
+  proposalHash?: boolean
   id?: boolean
   title?: boolean
   description?: boolean
@@ -2158,10 +2596,15 @@ export type EventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   moderatedBy?: boolean | Prisma.Event$moderatedByArgs<ExtArgs>
   registrations?: boolean | Prisma.Event$registrationsArgs<ExtArgs>
+  chatRoom?: boolean | Prisma.Event$chatRoomArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  coverData?: boolean
+  coverMimeType?: boolean
+  proposalKey?: boolean
+  proposalHash?: boolean
   id?: boolean
   title?: boolean
   description?: boolean
@@ -2191,6 +2634,10 @@ export type EventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  coverData?: boolean
+  coverMimeType?: boolean
+  proposalKey?: boolean
+  proposalHash?: boolean
   id?: boolean
   title?: boolean
   description?: boolean
@@ -2220,6 +2667,10 @@ export type EventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 }, ExtArgs["result"]["event"]>
 
 export type EventSelectScalar = {
+  coverData?: boolean
+  coverMimeType?: boolean
+  proposalKey?: boolean
+  proposalHash?: boolean
   id?: boolean
   title?: boolean
   description?: boolean
@@ -2242,7 +2693,7 @@ export type EventSelectScalar = {
   updatedAt?: boolean
 }
 
-export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "categoryId" | "instructorName" | "eventDate" | "startTime" | "endTime" | "modalityId" | "location" | "capacity" | "originId" | "statusId" | "supportThreshold" | "votingDeadline" | "moderatedById" | "moderationReason" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
+export type EventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"coverData" | "coverMimeType" | "proposalKey" | "proposalHash" | "id" | "title" | "description" | "categoryId" | "instructorName" | "eventDate" | "startTime" | "endTime" | "modalityId" | "location" | "capacity" | "originId" | "statusId" | "supportThreshold" | "votingDeadline" | "moderatedById" | "moderationReason" | "createdById" | "createdAt" | "updatedAt", ExtArgs["result"]["event"]>
 export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.EventCategoryDefaultArgs<ExtArgs>
   modality?: boolean | Prisma.EventModalityDefaultArgs<ExtArgs>
@@ -2251,6 +2702,7 @@ export type EventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   moderatedBy?: boolean | Prisma.Event$moderatedByArgs<ExtArgs>
   registrations?: boolean | Prisma.Event$registrationsArgs<ExtArgs>
+  chatRoom?: boolean | Prisma.Event$chatRoomArgs<ExtArgs>
   _count?: boolean | Prisma.EventCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type EventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2280,8 +2732,13 @@ export type $EventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     createdBy: Prisma.$UserPayload<ExtArgs>
     moderatedBy: Prisma.$UserPayload<ExtArgs> | null
     registrations: Prisma.$EventRegistrationPayload<ExtArgs>[]
+    chatRoom: Prisma.$ConversationPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    coverData: runtime.Bytes | null
+    coverMimeType: string | null
+    proposalKey: string | null
+    proposalHash: string | null
     id: string
     title: string
     description: string | null
@@ -2385,8 +2842,8 @@ export interface EventDelegate<ExtArgs extends runtime.Types.Extensions.Internal
    * // Get first 10 Events
    * const events = await prisma.event.findMany({ take: 10 })
    * 
-   * // Only select the `id`
-   * const eventWithIdOnly = await prisma.event.findMany({ select: { id: true } })
+   * // Only select the `coverData`
+   * const eventWithCoverDataOnly = await prisma.event.findMany({ select: { coverData: true } })
    * 
    */
   findMany<T extends EventFindManyArgs>(args?: Prisma.SelectSubset<T, EventFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -2430,9 +2887,9 @@ export interface EventDelegate<ExtArgs extends runtime.Types.Extensions.Internal
    *   ]
    * })
    * 
-   * // Create many Events and only return the `id`
-   * const eventWithIdOnly = await prisma.event.createManyAndReturn({
-   *   select: { id: true },
+   * // Create many Events and only return the `coverData`
+   * const eventWithCoverDataOnly = await prisma.event.createManyAndReturn({
+   *   select: { coverData: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -2521,9 +2978,9 @@ export interface EventDelegate<ExtArgs extends runtime.Types.Extensions.Internal
    *   ]
    * })
    * 
-   * // Update zero or more Events and only return the `id`
-   * const eventWithIdOnly = await prisma.event.updateManyAndReturn({
-   *   select: { id: true },
+   * // Update zero or more Events and only return the `coverData`
+   * const eventWithCoverDataOnly = await prisma.event.updateManyAndReturn({
+   *   select: { coverData: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -2703,6 +3160,7 @@ export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Ty
   createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   moderatedBy<T extends Prisma.Event$moderatedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$moderatedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   registrations<T extends Prisma.Event$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventRegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  chatRoom<T extends Prisma.Event$chatRoomArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Event$chatRoomArgs<ExtArgs>>): Prisma.Prisma__ConversationClient<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2732,6 +3190,10 @@ export interface Prisma__EventClient<T, Null = never, ExtArgs extends runtime.Ty
  * Fields of the Event model
  */
 export interface EventFieldRefs {
+  readonly coverData: Prisma.FieldRef<"Event", 'Bytes'>
+  readonly coverMimeType: Prisma.FieldRef<"Event", 'String'>
+  readonly proposalKey: Prisma.FieldRef<"Event", 'String'>
+  readonly proposalHash: Prisma.FieldRef<"Event", 'String'>
   readonly id: Prisma.FieldRef<"Event", 'String'>
   readonly title: Prisma.FieldRef<"Event", 'String'>
   readonly description: Prisma.FieldRef<"Event", 'String'>
@@ -3193,6 +3655,25 @@ export type Event$registrationsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.EventRegistrationScalarFieldEnum | Prisma.EventRegistrationScalarFieldEnum[]
+}
+
+/**
+ * Event.chatRoom
+ */
+export type Event$chatRoomArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Conversation
+   */
+  select?: Prisma.ConversationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Conversation
+   */
+  omit?: Prisma.ConversationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConversationInclude<ExtArgs> | null
+  where?: Prisma.ConversationWhereInput
 }
 
 /**

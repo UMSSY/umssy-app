@@ -1,116 +1,111 @@
-import { cleanup, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { act, cleanup, screen, within } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { JOB_MATCHING_QUERY_KEYS } from "../constants/job-matching.constants";
 import { jobMatchingService } from "../services/job-matching.service";
-import { buildMatch } from "../testing/job-fixtures";
-import { renderWithQuery } from "../testing/render-with-query";
+import type { JobMatch } from "../types/job-matching.types";
+import type { CategorizedJobRequirement } from "../types/requirement-category.types";
 import { JobMatchDetailView } from "./job-match-detail-view";
 
-let getJobMatch: ReturnType<typeof vi.spyOn>;
+vi.mock("next/link", () => ({
+  default: ({ href, children, ...props }: { href: string; children: ReactNode }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
-beforeEach(() => {
-  getJobMatch = vi.spyOn(jobMatchingService, "getJobMatch");
-});
+vi.mock("../services/job-matching.service", () => ({
+  jobMatchingService: { getRecommendations: vi.fn(), getJobMatch: vi.fn() },
+}));
 
-afterEach(() => {
-  cleanup();
-  vi.restoreAllMocks();
-});
+const JOB_ID = "11111111-1111-4111-8111-111111111111";
+const NO_PENDING = "Para esta oportunidad no tienes habilidades pendientes";
 
-function notFoundError() {
-  return Object.assign(new Error("no encontrado"), { isAxiosError: true, response: { status: 404 } });
+function getGroup(title: string) {
+  const heading = screen.getByRole("heading", { name: title, level: 4 });
+  return within(heading.parentElement as HTMLElement);
 }
 
-describe("JobMatchDetailView", () => {
-  it("muestra el breadcrumb, el título, la empresa y la modalidad", async () => {
-    getJobMatch.mockResolvedValue(buildMatch());
-    renderWithQuery(<JobMatchDetailView jobOfferId="o1" />);
+function buildMatch(score: number, requirements: CategorizedJobRequirement[]): JobMatch {
+  return {
+    jobOfferId: JOB_ID,
+    title: "Ingeniero DevOps",
+    companyName: "Acme",
+    modality: "Remoto",
+    description: "Administra la infraestructura.",
+    score,
+    requirements,
+    hasPendingRequirements: requirements.some(({ status }) => status === "Pendiente"),
+  };
+}
 
-    expect(await screen.findByRole("heading", { level: 1, name: "Desarrollador Backend" })).toBeInTheDocument();
-    expect(screen.getByText("Empresa SA · Remoto")).toBeInTheDocument();
-    const breadcrumb = screen.getByRole("navigation", { name: "Ruta de navegación" });
-    expect(within(breadcrumb).getByRole("link", { name: "Vacantes" })).toHaveAttribute("href", "/jobs");
-    expect(within(breadcrumb).getByText("Ver vacante")).toBeInTheDocument();
-    expect(getJobMatch).toHaveBeenCalledWith("o1");
+const WITH_GAPS = buildMatch(40, [
+  { name: "Docker", status: "Cumple", category: "skill" },
+  { name: "Kubernetes", status: "Pendiente", category: "skill" },
+  { name: "Ingeniería de Sistemas", status: "Pendiente", category: "academic" },
+  { name: "Carta de motivación", status: "Pendiente", category: "other" },
+]);
+
+const ZERO_GAP = buildMatch(100, [
+  { name: "Docker", status: "Cumple", category: "skill" },
+  { name: "Kubernetes", status: "Cumple", category: "skill" },
+  { name: "Ingeniería de Sistemas", status: "Cumple", category: "academic" },
+]);
+
+describe("JobMatchDetailView: faltantes (T4.3)", () => {
+  const getJobMatch = vi.mocked(jobMatchingService.getJobMatch);
+
+  beforeEach(() => {
+    getJobMatch.mockReset();
   });
 
-  it("muestra el porcentaje y las habilidades que coinciden", async () => {
-    getJobMatch.mockResolvedValue(buildMatch({ score: 67 }));
-    renderWithQuery(<JobMatchDetailView jobOfferId="o1" />);
+  afterEach(cleanup);
 
-    expect(await screen.findByText("67%")).toBeInTheDocument();
-    expect(screen.getByText(/de afinidad con tu perfil/)).toBeInTheDocument();
-    expect(screen.getByText("según Python, Docker")).toBeInTheDocument();
+  it("shows the zero-gap message when the profile meets every requirement (AC-04.4)", async () => {
+    getJobMatch.mockResolvedValue(ZERO_GAP);
+
+    render(<JobMatchDetailView jobOfferId={JOB_ID} />);
+
+    expect(await screen.findByRole("status")).toHaveTextContent(NO_PENDING);
+    expect(screen.queryByText("Falta")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Coincide")).toHaveLength(2);
+    expect(screen.getByText("100%")).toBeInTheDocument();
   });
 
-  it("omite el según cuando ninguna habilidad coincide", async () => {
-    getJobMatch.mockResolvedValue(
-      buildMatch({ score: 0, matchedSkills: [], missingSkills: ["Python"], skills: ["Python"] }),
-    );
-    renderWithQuery(<JobMatchDetailView jobOfferId="o1" />);
+  it("lists what is missing by group when there are gaps (AC-04.3, AC-04.5, AC-04.6)", async () => {
+    getJobMatch.mockResolvedValue(WITH_GAPS);
 
-    expect(await screen.findByText("0%")).toBeInTheDocument();
-    expect(screen.queryByText(/^según/)).not.toBeInTheDocument();
+    render(<JobMatchDetailView jobOfferId={JOB_ID} />);
+
+    expect(await screen.findByText("Kubernetes")).toBeInTheDocument();
+    expect(screen.queryByText(NO_PENDING)).not.toBeInTheDocument();
+    expect(screen.queryByText("Ingeniería de Sistemas")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Académicos y experiencia" })).not.toBeInTheDocument();
+
+    const others = getGroup("Otros requisitos");
+    expect(others.getByText("Carta de motivación")).toBeInTheDocument();
+    expect(others.getByText("Falta")).toBeInTheDocument();
   });
 
-  it("muestra una fila por requisito con Coincide o No está en tu perfil", async () => {
-    getJobMatch.mockResolvedValue(buildMatch());
-    renderWithQuery(<JobMatchDetailView jobOfferId="o1" />);
+  it("updates the missing list after the missing skill is added to the profile (AC-04.7)", async () => {
+    getJobMatch.mockResolvedValueOnce(WITH_GAPS).mockResolvedValueOnce(ZERO_GAP);
 
-    const heading = await screen.findByRole("heading", { name: "Requisitos vs. tu perfil" });
-    const rows = within(heading.closest("section") as HTMLElement).getAllByRole("listitem");
+    const { client } = render(<JobMatchDetailView jobOfferId={JOB_ID} />);
 
-    expect(rows.map((row) => row.textContent)).toEqual([
-      "PythonCoincide",
-      "DockerCoincide",
-      "ReactNo está en tu perfil",
-    ]);
-  });
+    expect(await screen.findByText("Kubernetes")).toBeInTheDocument();
+    expect(screen.getAllByText("Falta")).toHaveLength(2);
+    expect(screen.getByText("40%")).toBeInTheDocument();
 
-  it("muestra la descripción y el enlace para volver a las vacantes", async () => {
-    getJobMatch.mockResolvedValue(buildMatch());
-    renderWithQuery(<JobMatchDetailView jobOfferId="o1" />);
+    await act(async () => {
+      await client.invalidateQueries({ queryKey: JOB_MATCHING_QUERY_KEYS.match(JOB_ID) });
+    });
 
-    expect(await screen.findByText(/Desarrollo de servicios\./)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Volver" })).toHaveAttribute("href", "/jobs");
-  });
-
-  it("no incluye el botón de postulación ni las pantallas del Sprint 3", async () => {
-    getJobMatch.mockResolvedValue(buildMatch());
-    renderWithQuery(<JobMatchDetailView jobOfferId="o1" />);
-
-    await screen.findByRole("heading", { level: 1 });
-
-    expect(screen.queryByText(/postulaci/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /postular|enviar/i })).not.toBeInTheDocument();
-  });
-
-  it("muestra el estado de carga mientras espera la respuesta", () => {
-    getJobMatch.mockReturnValue(new Promise(() => undefined));
-    renderWithQuery(<JobMatchDetailView jobOfferId="o1" />);
-
-    expect(document.querySelector('[aria-busy="true"]')).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
-  });
-
-  it("muestra un mensaje claro y un enlace a las vacantes cuando la vacante no existe", async () => {
-    getJobMatch.mockRejectedValue(notFoundError());
-    renderWithQuery(<JobMatchDetailView jobOfferId="x" />);
-
-    expect(await screen.findByText("Esta vacante no existe o ya no está publicada.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Volver a vacantes" })).toHaveAttribute("href", "/jobs");
-    expect(screen.queryByRole("button", { name: "Reintentar" })).not.toBeInTheDocument();
-  });
-
-  it("muestra el error y permite reintentar", async () => {
-    getJobMatch.mockRejectedValueOnce(new Error("fallo")).mockResolvedValueOnce(buildMatch());
-    renderWithQuery(<JobMatchDetailView jobOfferId="o1" />);
-
-    expect(await screen.findByText("No pudimos cargar la información. Intenta nuevamente.")).toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole("button", { name: "Reintentar" }));
-
-    expect(await screen.findByRole("heading", { level: 1, name: "Desarrollador Backend" })).toBeInTheDocument();
+    expect(await screen.findByRole("status")).toHaveTextContent(NO_PENDING);
+    expect(screen.queryByText("Falta")).not.toBeInTheDocument();
+    expect(screen.getByText("100%")).toBeInTheDocument();
     expect(getJobMatch).toHaveBeenCalledTimes(2);
+    expect(getJobMatch).toHaveBeenCalledWith(JOB_ID);
   });
 });

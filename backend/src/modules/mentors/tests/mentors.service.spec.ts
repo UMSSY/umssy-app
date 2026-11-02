@@ -31,6 +31,19 @@ describe('MentorsService', () => {
     orientationTypeIds: ['0fa5e6de-63a4-430e-87fb-22f5eb700ecd'],
   };
 
+  it.each([
+    { technicalAreaIds: [], orientationTypeIds: data.orientationTypeIds },
+    { technicalAreaIds: data.technicalAreaIds, orientationTypeIds: [] },
+  ])(
+    'rechaza el formulario incompleto antes de consultar o escribir',
+    async (form) => {
+      const service = new MentorsService({} as MentorsRepository, mapper);
+      await expect(service.activate(userId, form)).rejects.toMatchObject({
+        statusCode: 400,
+      });
+    },
+  );
+
   it('transforma mentores activos al contrato del directorio', async () => {
     const findActiveMentors = vi.fn().mockResolvedValue([
       {
@@ -238,7 +251,9 @@ describe('MentorsService', () => {
       headline: 'Arquitecta de Software',
       aboutMe: 'Mentora de ingeniería de software.',
       isAvailable: true,
-      photoUrl: expect.stringMatching(/^\/mentors\/[^/]+\/photo\?v=[a-f0-9]{64}$/),
+      photoUrl: expect.stringMatching(
+        /^\/mentors\/[^/]+\/photo\?v=[a-f0-9]{64}$/,
+      ),
       city: { id: 'city-1', title: 'Cochabamba' },
       educations: [
         {
@@ -559,16 +574,21 @@ describe('MentorsService', () => {
     const result = await service.activate(userId, data);
 
     expect(findMentorRole).toHaveBeenCalledTimes(1);
-    expect(findActiveUserRole).toHaveBeenCalledWith(userId, roleId);
-    expect(findTechnicalAreas).toHaveBeenCalledWith(data.technicalAreaIds);
+    expect(findActiveUserRole).toHaveBeenCalledWith(userId, roleId, undefined);
+    expect(findTechnicalAreas).toHaveBeenCalledWith(
+      data.technicalAreaIds,
+      undefined,
+    );
     expect(findActiveOrientationTypes).toHaveBeenCalledWith(
       data.orientationTypeIds,
+      undefined,
     );
     expect(activate).toHaveBeenCalledWith(
       userId,
       roleId,
       data.technicalAreaIds,
       data.orientationTypeIds,
+      undefined,
     );
     expect(result).toBe(activationResult);
   });

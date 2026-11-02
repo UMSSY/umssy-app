@@ -1,39 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PageBreadcrumb } from "@/shared/components/layout";
+import { JobFeedFilters } from "../components/job-feed-filters";
 import { JobRecommendationCard } from "../components/job-recommendation-card";
 import { JobsEmptyState } from "../components/jobs-empty-state";
-import { RecommendedJobsFilters } from "../components/recommended-jobs-filters";
 import {
+  EMPTY_JOB_FEED_FILTERS,
+  JOB_FEED_MESSAGES,
   JOB_MATCHING_MESSAGES,
-  RECOMMENDED_JOBS_BREADCRUMB,
 } from "../constants/job-matching.constants";
 import { useRecommendedJobs } from "../hooks/use-recommended-jobs";
-import {
-  DEFAULT_FILTERS,
-  filterRecommendedJobs,
-  getModalityOptions,
-  type RecommendedJobsFilters as Filters,
-} from "../utils/filter-recommended-jobs";
+import { filterRecommendedJobs } from "../utils/filter-recommended-jobs";
 
 const SKELETON_CARDS = ["a", "b", "c", "d"];
 
 export function RecommendedJobsView() {
   const { data, isPending, isError, refetch } = useRecommendedJobs();
-  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
-
-  const items = data?.items ?? [];
-  const visibleJobs = filterRecommendedJobs(items, filters);
-  const clearFilters = () => setFilters(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState(EMPTY_JOB_FEED_FILTERS);
+  const visibleJobs = useMemo(
+    () => filterRecommendedJobs(data?.items ?? [], filters),
+    [data, filters],
+  );
 
   return (
-    <section className="flex flex-col gap-6">
+    <section className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <PageBreadcrumb items={RECOMMENDED_JOBS_BREADCRUMB} />
-        <h1 className="font-tight text-3xl font-extrabold text-ink">
+        <h1 className="font-tight text-3xl font-bold text-ink">
           {JOB_MATCHING_MESSAGES.pageTitle}
         </h1>
         <p className="text-base text-text-secondary">
@@ -50,11 +44,8 @@ export function RecommendedJobsView() {
       )}
 
       {isError && (
-        <div
-          role="alert"
-          className="flex max-w-xl flex-col items-start gap-3 rounded-lg border border-border bg-surface p-4"
-        >
-          <p className="text-sm font-bold text-danger">{JOB_MATCHING_MESSAGES.loadError}</p>
+        <div role="alert" className="flex max-w-xl flex-col items-start gap-3 rounded-lg border border-border bg-surface p-4">
+          <p className="text-sm text-ink">{JOB_MATCHING_MESSAGES.loadError}</p>
           <Button
             variant="outline"
             onClick={() => {
@@ -67,12 +58,12 @@ export function RecommendedJobsView() {
       )}
 
       {data && !data.isProfileComplete && <JobsEmptyState variant="incomplete-profile" />}
-
-      {data && data.isProfileComplete && items.length === 0 && (
+      
+      {data && data.isProfileComplete && data.items.length === 0 && (
         <JobsEmptyState variant="no-matches" />
       )}
 
-      {items.length > 0 && (
+      {data && data.items.length > 0 && (
         <>
           <aside className="rounded-lg border border-border bg-surface-soft p-4 text-sm text-ink-soft">
             <strong className="font-semibold text-ink">
@@ -80,25 +71,28 @@ export function RecommendedJobsView() {
             </strong>{" "}
             {JOB_MATCHING_MESSAGES.scoreInfoText}
           </aside>
-
-          <RecommendedJobsFilters
+          
+          <JobFeedFilters
             filters={filters}
-            modalities={getModalityOptions(items)}
             onChange={setFilters}
-            onClear={clearFilters}
+            onClear={() => setFilters(EMPTY_JOB_FEED_FILTERS)}
           />
 
+          <div className="flex flex-col gap-1">
+            <h2 className="font-tight text-xl font-bold text-ink">{JOB_FEED_MESSAGES.listTitle}</h2>
+            <p className="text-sm text-text-secondary">
+              {visibleJobs.length} {visibleJobs.length === 1 ? "vacante" : "vacantes"} ·{" "}
+              {JOB_FEED_MESSAGES.orderedByAffinity}
+            </p>
+          </div>
+
           {visibleJobs.length === 0 ? (
-            <div
-              role="status"
-              className="flex max-w-xl flex-col items-start gap-2 rounded-xl border border-dashed border-border-strong bg-surface px-6 py-8"
-            >
-              <h2 className="font-tight text-lg font-bold text-ink">
-                {JOB_MATCHING_MESSAGES.noFilterResultsTitle}
-              </h2>
-              <p className="text-sm text-text-secondary">
-                {JOB_MATCHING_MESSAGES.noFilterResultsText}
-              </p>
+            <div className="flex max-w-xl flex-col items-start gap-2 rounded-lg border border-border bg-surface p-4">
+              <p className="text-sm font-semibold text-ink">{JOB_FEED_MESSAGES.noResultsTitle}</p>
+              <p className="text-sm text-text-secondary">{JOB_FEED_MESSAGES.noResultsText}</p>
+              <Button variant="outline" size="sm" onClick={() => setFilters(EMPTY_JOB_FEED_FILTERS)}>
+                {JOB_FEED_MESSAGES.clear}
+              </Button>
             </div>
           ) : (
             <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">

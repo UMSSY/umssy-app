@@ -1,5 +1,7 @@
+import { Button as TestButton } from "@/components/ui/button";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { useState } from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, screen } from "@testing-library/react";
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import { getEducationDegrees } from '../utils/resolve-education-degree';
@@ -9,7 +11,7 @@ function Field({ disabled = false }: { disabled?: boolean }) {
   const [value, setValue] = useState('');
   return <><label htmlFor="degree">Título o carrera</label><EducationDegreeCombobox id="degree" value={value}
     degrees={getEducationDegrees('Universidad Mayor de San Simón (UMSS)')} disabled={disabled} onChange={setValue} />
-    <button type="button">Outside</button></>;
+    <TestButton type="button">Outside</TestButton></>;
 }
 
 describe('EducationDegreeCombobox', () => {

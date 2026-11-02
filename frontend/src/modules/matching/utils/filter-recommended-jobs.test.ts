@@ -1,87 +1,82 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { buildJob } from "../testing/job-fixtures";
-import {
-  ALL_MODALITIES,
-  DEFAULT_FILTERS,
-  filterRecommendedJobs,
-  getModalityOptions,
-  hasActiveFilters,
-  normalizeSearchText,
-} from "./filter-recommended-jobs";
+import { EMPTY_JOB_FEED_FILTERS } from "../constants/job-matching.constants";
+import type { RecommendedJob } from "../types/job-matching.types";
+import { filterRecommendedJobs, hasActiveFilters } from "./filter-recommended-jobs";
 
-const JOBS = [
-  buildJob({ jobOfferId: "a", title: "Desarrollador Backend", score: 90, modality: "Remoto", skills: ["Python", "Docker"] }),
-  buildJob({ jobOfferId: "b", title: "Analista de Datos", companyName: "Andes Data Labs", score: 70, modality: "Presencial", skills: ["SQL"] }),
-  buildJob({ jobOfferId: "c", title: "Diseñador Web", score: 69, modality: "Híbrido", skills: ["React"] }),
-  buildJob({ jobOfferId: "d", title: "Soporte", score: 30, modality: "Remoto", skills: ["Linux"] }),
+function buildJob(overrides: Partial<RecommendedJob>): RecommendedJob {
+  return {
+    jobOfferId: "job",
+    title: "Vacante",
+    companyName: "Empresa",
+    modality: "Remoto",
+    score: 50,
+    matchedSkills: [],
+    skills: [],
+    ...overrides,
+  };
+}
+
+const JOBS: RecommendedJob[] = [
+  buildJob({ jobOfferId: "devops", title: "DevOps Senior", companyName: "TechBolivia", modality: "Remoto", score: 92, skills: ["Docker", "Terraform"] }),
+  buildJob({ jobOfferId: "backend", title: "Backend Developer", companyName: "Sofía Corp", modality: "Híbrido", score: 77, skills: ["Node.js", "PostgreSQL"] }),
+  buildJob({ jobOfferId: "qa", title: "QA Automation Engineer", companyName: "Quantex", modality: "Híbrido", score: 70, skills: ["Cypress"] }),
+  buildJob({ jobOfferId: "data", title: "Data Analyst Jr.", companyName: "Sofía Corp", modality: "Presencial", score: 41, skills: ["SQL"] }),
 ];
 
-const ids = (jobs: typeof JOBS) => jobs.map((job) => job.jobOfferId);
+function ids(jobs: RecommendedJob[]): string[] {
+  return jobs.map((job) => job.jobOfferId);
+}
 
-describe("normalizeSearchText", () => {
-  it.each([
-    ["  Diseñador   WEB ", "disenador web"],
-    ["Análisis", "analisis"],
-    ["", ""],
-  ])("normaliza %o como %o", (value, expected) => {
-    expect(normalizeSearchText(value)).toBe(expected);
+describe("filterRecommendedJobs", () => {
+  it("returns every job in the same order when no filter is active", () => {
+    expect(ids(filterRecommendedJobs(JOBS, EMPTY_JOB_FEED_FILTERS))).toEqual(["devops", "backend", "qa", "data"]);
+  });
+
+  it("searches by title, company or required skill ignoring case and accents", () => {
+    const search = (value: string) => ids(filterRecommendedJobs(JOBS, { ...EMPTY_JOB_FEED_FILTERS, search: value }));
+
+    expect(search("devops")).toEqual(["devops"]);
+    expect(search("sofia corp")).toEqual(["backend", "data"]);
+    expect(search("  CYPRESS ")).toEqual(["qa"]);
+  });
+
+  it("filters by modality without depending on accents", () => {
+    const result = filterRecommendedJobs(JOBS, { ...EMPTY_JOB_FEED_FILTERS, modality: "Hibrido" });
+
+    expect(ids(result)).toEqual(["backend", "qa"]);
+  });
+
+  it("keeps only jobs at or above the high affinity threshold", () => {
+    const result = filterRecommendedJobs(JOBS, { ...EMPTY_JOB_FEED_FILTERS, onlyHighAffinity: true });
+
+    expect(ids(result)).toEqual(["devops", "backend", "qa"]);
+  });
+
+  it("combines filters and keeps the affinity order", () => {
+    const result = filterRecommendedJobs(JOBS, {
+      search: "sofia",
+      modality: "Híbrido",
+      onlyHighAffinity: true,
+    });
+
+    expect(ids(result)).toEqual(["backend"]);
+  });
+
+  it("returns an empty list when nothing matches", () => {
+    expect(filterRecommendedJobs(JOBS, { ...EMPTY_JOB_FEED_FILTERS, search: "cobol" })).toEqual([]);
   });
 });
 
 describe("hasActiveFilters", () => {
-  it("es falso con los filtros por defecto y con una búsqueda de solo espacios", () => {
-    expect(hasActiveFilters(DEFAULT_FILTERS)).toBe(false);
-    expect(hasActiveFilters({ ...DEFAULT_FILTERS, search: "   " })).toBe(false);
+  it("is false for the empty filters", () => {
+    expect(hasActiveFilters(EMPTY_JOB_FEED_FILTERS)).toBe(false);
+    expect(hasActiveFilters({ ...EMPTY_JOB_FEED_FILTERS, search: "   " })).toBe(false);
   });
 
-  it.each([
-    [{ ...DEFAULT_FILTERS, search: "python" }],
-    [{ ...DEFAULT_FILTERS, modality: "Remoto" }],
-    [{ ...DEFAULT_FILTERS, highAffinityOnly: true }],
-  ])("es verdadero con %o", (filters) => {
-    expect(hasActiveFilters(filters)).toBe(true);
-  });
-});
-
-describe("getModalityOptions", () => {
-  it("devuelve las modalidades sin repetir y ordenadas", () => {
-    expect(getModalityOptions(JOBS)).toEqual(["Híbrido", "Presencial", "Remoto"]);
-  });
-
-  it("devuelve una lista vacía sin vacantes", () => {
-    expect(getModalityOptions([])).toEqual([]);
-  });
-});
-
-describe("filterRecommendedJobs", () => {
-  it("devuelve todas las vacantes con los filtros por defecto", () => {
-    expect(ids(filterRecommendedJobs(JOBS, DEFAULT_FILTERS))).toEqual(["a", "b", "c", "d"]);
-  });
-
-  it.each([
-    ["backend", ["a"]],
-    ["ANDES", ["b"]],
-    ["sql", ["b"]],
-    ["disenador", ["c"]],
-    ["remoto", ["a", "d"]],
-    ["inexistente", []],
-  ])("busca %o en título, empresa, modalidad y habilidades", (search, expected) => {
-    expect(ids(filterRecommendedJobs(JOBS, { ...DEFAULT_FILTERS, search }))).toEqual(expected);
-  });
-
-  it("filtra por modalidad", () => {
-    expect(ids(filterRecommendedJobs(JOBS, { ...DEFAULT_FILTERS, modality: "Remoto" }))).toEqual(["a", "d"]);
-    expect(ids(filterRecommendedJobs(JOBS, { ...DEFAULT_FILTERS, modality: ALL_MODALITIES }))).toHaveLength(4);
-  });
-
-  it("con solo alta afinidad incluye 70 % y excluye 69 %", () => {
-    expect(ids(filterRecommendedJobs(JOBS, { ...DEFAULT_FILTERS, highAffinityOnly: true }))).toEqual(["a", "b"]);
-  });
-
-  it("combina búsqueda, modalidad y alta afinidad", () => {
-    const filters = { search: "backend", modality: "Remoto", highAffinityOnly: true };
-
-    expect(ids(filterRecommendedJobs(JOBS, filters))).toEqual(["a"]);
-    expect(ids(filterRecommendedJobs(JOBS, { ...filters, modality: "Presencial" }))).toEqual([]);
+  it("is true when any filter is set", () => {
+    expect(hasActiveFilters({ ...EMPTY_JOB_FEED_FILTERS, search: "qa" })).toBe(true);
+    expect(hasActiveFilters({ ...EMPTY_JOB_FEED_FILTERS, modality: "Remoto" })).toBe(true);
+    expect(hasActiveFilters({ ...EMPTY_JOB_FEED_FILTERS, onlyHighAffinity: true })).toBe(true);
   });
 });

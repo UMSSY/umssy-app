@@ -1,0 +1,46 @@
+import { Bell, BookOpen, BriefcaseBusiness, Building2, CalendarClock, ClipboardList, FileText, GraduationCap, History, Inbox, ListChecks, MessageCircle, Radar, Search, ShieldCheck, Sparkles, SquarePlus, Ticket, UserRound, Users, Award } from "lucide-react";
+import type { WorkspaceArea, WorkspaceTask } from "@/shared/types/workspace-navigation.types";
+
+export const WORKSPACE_AREAS: readonly WorkspaceArea[] = [
+  { id: "management", label: "Administración", icon: ShieldCheck },
+  { id: "company", label: "Mi empresa", icon: Building2 },
+  { id: "profile", label: "Mi perfil", icon: UserRound },
+  { id: "community", label: "Mentorías y comunidad", icon: Users },
+  { id: "opportunities", label: "Oportunidades", icon: BriefcaseBusiness },
+];
+
+export const WORKSPACE_TASKS: readonly WorkspaceTask[] = [
+  { label: "Solicitudes de acceso", href: "/backoffice/solicitudes", icon: Inbox, area: "management", keywords: "aprobar rechazar documentos pendientes" },
+  { label: "Usuarios registrados", href: "/backoffice/reports/registered-users", icon: ListChecks, area: "management", keywords: "reporte exportar csv" },
+  { label: "Usuarios rechazados", href: "/backoffice/reports/rejected-users", icon: FileText, area: "management", keywords: "reporte motivos" },
+  { label: "Historial de reportes", href: "/backoffice/reports/history", icon: CalendarClock, area: "management" },
+  { label: "Revisión de radares", href: "/affinity-radar/review-queue", icon: Radar, area: "management" },
+  { label: "Registro de auditoría", href: "/backoffice/audit", icon: History, area: "management", keywords: "auditoría historial eventos trazabilidad" },
+  { label: "Encuestas", href: "/backoffice/surveys", icon: ClipboardList, area: "management", keywords: "formularios cuestionarios satisfacción historial resultados estadísticas" },
+  { label: "Crear encuesta", href: "/backoffice/surveys/create", icon: SquarePlus, area: "management", keywords: "nueva encuesta formulario preguntas" },
+  { label: "Portal de empresa", href: "/recruiters", icon: Building2, area: "company" },
+  { label: "Publicar vacante", href: "/recruiters/job-offers/new", icon: SquarePlus, area: "company", keywords: "empleo oferta trabajo" },
+  { label: "Buscar candidatos", href: "/matching", icon: Search, area: "company", keywords: "afinidad reclutamiento" },
+  { label: "Resumen del perfil", href: "/profile", icon: UserRound, area: "profile" },
+  { label: "Configuración del perfil", href: "/profile/settings", icon: UserRound, area: "profile", keywords: "ajustes editar datos" },
+  { label: "Datos personales", href: "/profile/settings#personal-info", icon: UserRound, area: "profile", keywords: "contacto teléfono ciudad correo foto" },
+  { label: "Presentación", href: "/profile/settings#presentation", icon: FileText, area: "profile", keywords: "biografía sobre mí titular" },
+  { label: "Formación académica", href: "/profile#education", icon: GraduationCap, area: "profile", keywords: "estudios trayectoria universidad" },
+  { label: "Experiencia laboral", href: "/profile#experience", icon: BriefcaseBusiness, area: "profile", keywords: "trabajo trayectoria" },
+  { label: "Habilidades", href: "/profile#skills", icon: Sparkles, area: "profile", keywords: "competencias tecnologías" },
+  { label: "Certificaciones", href: "/profile#certifications", icon: Award, area: "profile", keywords: "diplomas certificados" },
+  { label: "Documentos y CV", href: "/profile/documents", icon: FileText, area: "profile", keywords: "currículum curriculum archivo" },
+  { label: "Encontrar un mentor", href: "/mentorship/mentors", icon: Users, area: "community", keywords: "directorio orientación" },
+  { label: "Mi participación", href: "/mentors/participation", icon: UserRound, area: "community", keywords: "ser mentor áreas técnicas orientación" },
+  { label: "Mi disponibilidad", href: "/mentor/availability", icon: CalendarClock, area: "community", keywords: "horarios bloques calendario" },
+  { label: "Áreas técnicas", href: "/mentors/participation/technical-areas", icon: BookOpen, area: "community", keywords: "especialidades mentor experiencia" },
+  { label: "Tipos de orientación", href: "/mentorship/orientation", icon: Users, area: "community", keywords: "asesoría mentor empleo orientación" },
+  { label: "Mensajes", href: "/chat", icon: MessageCircle, area: "community", keywords: "chat mensajes conversaciones" },
+  { label: "Notificaciones de encuestas", href: "/surveys", icon: Bell, area: "community", keywords: "encuestas formularios cuestionarios responder pendientes" },
+  { label: "Talleres disponibles", href: "/events", icon: BookOpen, area: "opportunities", keywords: "eventos actividades formación" },
+  { label: "Proponer taller", href: "/events/propose", icon: SquarePlus, area: "opportunities", keywords: "propuesta crear taller portada" },
+  { label: "Mis inscripciones", href: "/events/my-passes", icon: Ticket, area: "opportunities", keywords: "pases talleres entradas" },
+  { label: "Vacantes", href: "/vacancies", icon: BriefcaseBusiness, area: "opportunities", keywords: "empleo trabajo ofertas" },
+  { label: "Vacantes para ti", href: "/vacancies/recommended", icon: Sparkles, area: "opportunities", keywords: "afinidad recomendaciones postular" },
+  { label: "Radar de afinidad", href: "/profile/radar", icon: Radar, area: "opportunities", keywords: "competencias perfil" },
+];

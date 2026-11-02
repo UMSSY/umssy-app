@@ -4,9 +4,10 @@ import { APP_FILTER } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { EducationsModule } from '../educations.module.js';
 import type { CreateEducationRequest } from '../requests/create-education.request.js';
 import type { UpdateEducationRequest } from '../requests/update-education.request.js';
@@ -27,6 +28,7 @@ describe('Education HTTP flow', () => {
   let token: string;
   let otherToken: string;
   const records = new Map<string, EducationRecord>();
+  const skillsAnalysis = { refreshAfterChange: vi.fn() };
 
   function matching(where: { id?: string | { not: string }; userId?: string; startDate?: Date; endDate?: Date | null }) {
     return [...records.values()].filter((record) =>
@@ -39,6 +41,7 @@ describe('Education HTTP flow', () => {
 
   beforeEach(async () => {
     records.clear();
+    skillsAnalysis.refreshAfterChange.mockReset().mockResolvedValue(undefined);
     const jwt = new JwtService({ secret: 'education-flow-test-secret' });
     const moduleRef = await Test.createTestingModule({
       imports: [EducationsModule],
@@ -105,6 +108,8 @@ describe('Education HTTP flow', () => {
           },
         },
       })
+      .overrideProvider(ProfileSkillsAnalysisService)
+      .useValue(skillsAnalysis)
       .compile();
     app = moduleRef.createNestApplication();
     app.setGlobalPrefix('api');
@@ -267,6 +272,21 @@ describe('Education HTTP flow', () => {
       .set('Authorization', `Bearer ${otherToken}`)
       .expect(200);
     expect(otherAfterDelete.body.data).toEqual([other.body.data]);
+  });
+
+  it('runs the skill analysis of the owner after each saved change only', async () => {
+    const api = request(app.getHttpServer());
+    const created = await api.post('/api/educations').set('Authorization', `Bearer ${token}`)
+      .send({ ...body, description: 'Proyecto de grado con Python' }).expect(201);
+    const id = created.body.data.id;
+    await api.post('/api/educations').set('Authorization', `Bearer ${token}`)
+      .send({ ...body, endDate: '2019-12-31' }).expect(400);
+    await api.patch(`/api/educations/${id}`).set('Authorization', `Bearer ${token}`)
+      .send({ description: 'Proyecto de grado con Python y Docker' }).expect(200);
+    await api.delete(`/api/educations/${id}`).set('Authorization', `Bearer ${otherToken}`).expect(404);
+    await api.delete(`/api/educations/${id}`).set('Authorization', `Bearer ${token}`).expect(200);
+
+    expect(skillsAnalysis.refreshAfterChange.mock.calls).toEqual([[userId], [userId], [userId]]);
   });
 
   it('rejects invalid writes without changing stored data and accepts same-day dates without a description', async () => {

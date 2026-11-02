@@ -89,7 +89,7 @@ describe("RegisteredUsersReportView", () => {
   it("muestra el título, los botones y la primera página de usuarios", async () => {
     render(<RegisteredUsersReportView />);
 
-    expect(screen.getByRole("heading", { name: "Reporte de usuarios registrados aceptados" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Usuarios aceptados" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Gestión" })).toBeDefined();
     expect(screen.getByRole("button", { name: "actualizar" })).toBeDefined();
@@ -259,7 +259,7 @@ describe("RegisteredUsersReportView", () => {
     await user.click(screen.getByRole("button", { name: "Página 2" }));
     await screen.findByText("Mostrando 11-20 de 24 usuarios");
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 2, limit: 10, userType: undefined, period: "I-2025", search: "",
+      page: 2, limit: 10, userType: undefined, period: "I-2025", search: "", snapshotAt: expect.any(String),
     });
 
     const requestCount = vi.mocked(reportsService.getRegisteredUsers).mock.calls.length;
@@ -291,7 +291,7 @@ describe("RegisteredUsersReportView", () => {
     await user.click(screen.getByRole("button", { name: "Página 20" }));
     expect(await screen.findByText("Mostrando 191-200 de 200 usuarios", undefined, SLOW_UI_TIMEOUT)).toBeDefined();
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 20, limit: 10, userType: "empresa", period: "I-2025", search: "",
+      page: 20, limit: 10, userType: "empresa", period: "I-2025", search: "", snapshotAt: expect.any(String),
     });
     expect(screen.queryByRole("button", { name: "Página 10" })).toBeNull();
     expect(screen.getByRole("button", { name: "Página siguiente" })).toBeDisabled();
@@ -299,7 +299,7 @@ describe("RegisteredUsersReportView", () => {
     await user.click(screen.getByRole("button", { name: "Página anterior" }));
     expect(await screen.findByText("Mostrando 181-190 de 200 usuarios", undefined, SLOW_UI_TIMEOUT)).toBeDefined();
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 19, limit: 10, userType: "empresa", period: "I-2025", search: "",
+      page: 19, limit: 10, userType: "empresa", period: "I-2025", search: "", snapshotAt: expect.any(String),
     });
   }, SLOW_TEST_TIMEOUT_MS);
 
@@ -381,7 +381,7 @@ describe("RegisteredUsersReportView", () => {
     expect(screen.getByText("La exportación de la tabla ha sido un éxito")).toBeDefined();
   });
 
-  it("muestra el aviso verde solo cuando termina de guardarse el CSV", async () => {
+  it("muestra el aviso de éxito solo cuando termina de guardarse el CSV", async () => {
     const user = userEvent.setup();
     let finishSaving!: () => void;
     const close = vi.fn(() => new Promise<void>((resolve) => { finishSaving = resolve; }));
@@ -408,7 +408,7 @@ describe("RegisteredUsersReportView", () => {
     await act(async () => { finishSaving(); });
 
     const message = await screen.findByText("La exportación de la tabla ha sido un éxito");
-    expect(message.parentElement).toHaveClass("bg-green-50");
+    expect(message.parentElement).toHaveClass("bg-surface-soft");
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeEnabled();
   });
 

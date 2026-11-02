@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor:"--color-foreground",
+  themeColor: "#0B1F2E",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -43,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="es"
       className={`${inter.variable} ${interTight.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col">
         <Providers>
           <RegisterServiceWorker />
           {children}

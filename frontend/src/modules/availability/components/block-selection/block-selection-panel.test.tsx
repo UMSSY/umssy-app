@@ -44,9 +44,17 @@ describe("BlockSelectionPanel", () => {
 
     expect(screen.getByText("Martes 6 de octubre de 2026")).toBeInTheDocument()
     expect(screen.getByText("18:00 - 19:00 · 60 min")).toBeInTheDocument()
-    expect(screen.getByText(BOLIVIA_TIME_LABEL)).toBeInTheDocument()
+    expect(screen.queryByText(BOLIVIA_TIME_LABEL)).not.toBeInTheDocument()
     expect(screen.queryByText(BLOCK_SELECTION_TEXT.empty)).not.toBeInTheDocument()
-    expect(screen.getByRole("button", { name: BLOCK_SELECTION_TEXT.requestAppointment })).toBeDisabled()
+    expect(
+      screen.queryByRole("button", { name: BLOCK_SELECTION_TEXT.requestAppointment }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("muestra el formulario de solicitud debajo del bloque seleccionado", () => {
+    renderPanel({ selectedBlock: tuesdayBlock, children: <p>Formulario de solicitud</p> })
+
+    expect(screen.getByText("Formulario de solicitud")).toBeInTheDocument()
   })
 
   it("muestra no disponible para un bloque tomado", () => {

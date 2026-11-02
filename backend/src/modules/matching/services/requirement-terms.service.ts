@@ -1,23 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { SkillDictionaryService } from '../../job-connect/services/skill-dictionary.service.js';
-import type { RequirementTermsResponse } from '../types/matching.types.js';
-import { findInstitutionTerms } from '../utils/find-institution-terms.js';
 import { NlpService } from './nlp.service.js';
+import { SkillsClassifierService } from './skills-classifier.service.js';
+import { SkillCatalogService } from '../../skills/services/skill-catalog.service.js';
+import type { DetectedSkillResponse } from '../types/matching.types.js';
 
 @Injectable()
 export class RequirementTermsService {
   constructor(
     private readonly nlpService: NlpService,
-    private readonly skillDictionaryService: SkillDictionaryService,
+    private readonly skillsClassifier: SkillsClassifierService,
+    private readonly skillCatalogService: SkillCatalogService,
   ) {}
 
-  extract(text: string): RequirementTermsResponse {
-    const tokens = this.nlpService.tokenizeAndFilter(text);
-    const terms = [
-      ...new Set([...this.nlpService.extractRequirementTerms(text), ...findInstitutionTerms(text)]),
-    ];
-    const { skills, institutions } = this.skillDictionaryService.extract(text);
+  async extractAndMatchRequirements(
+    requirementsText: string,
+  ): Promise<DetectedSkillResponse[]> {
+    if (!requirementsText || requirementsText.trim() === '') {
+      return [];
+    }
 
-    return { tokens, terms, skills, institutions };
+    const terms = this.nlpService.extractRequirementTerms(requirementsText);
+
+    if (terms.length === 0) {
+      return [];
+    }
+
+    const catalogResponse = await this.skillCatalogService.listCatalog({});
+
+    const catalog: DetectedSkillResponse[] = catalogResponse.map((skill) => ({
+      id: skill.id,
+      name: skill.name,
+    }));
+
+    const matchedSkills = this.skillsClassifier.classify(terms, catalog);
+
+    return matchedSkills;
   }
 }

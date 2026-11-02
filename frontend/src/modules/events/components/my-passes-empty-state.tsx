@@ -7,7 +7,7 @@ export function MyPassesEmptyState() {
   return (
     <section
       aria-labelledby="my-passes-empty-title"
-      className="mx-auto flex w-full max-w-2xl flex-col items-center rounded-3xl border border-border bg-surface px-6 py-12 text-center sm:px-10 sm:py-16"
+      className="mx-auto flex w-full max-w-2xl flex-col items-center rounded-lg border border-border bg-surface px-6 py-12 text-center sm:px-10 sm:py-16"
     >
       <div className="mb-6 flex size-20 items-center justify-center rounded-full bg-surface-soft text-ink">
         <Ticket className="size-9" aria-hidden="true" />
@@ -26,7 +26,7 @@ export function MyPassesEmptyState() {
         href="/events"
         className={cn(
           buttonVariants(),
-          'mt-7 h-auto min-h-11 max-w-full gap-2 rounded-xl bg-ink px-5 py-3 text-surface whitespace-normal hover:bg-ink/90',
+          'mt-7 h-auto min-h-11 max-w-full gap-2 rounded-xl bg-primary px-5 py-3 whitespace-normal text-primary-foreground hover:bg-brand-hover',
         )}
       >
         Explorar talleres disponibles

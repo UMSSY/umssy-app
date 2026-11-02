@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import { ProfileSurface } from "../contexts/profile-surface-context";
 import { ContactInfoCard } from "../components/contact-info-card";
 import { FeedbackMessage } from "../components/feedback-message";
 import { PresentationSummaryCard } from "../components/presentation-summary-card";
@@ -12,6 +14,11 @@ import { useProfilePhoto } from "../hooks/use-profile-photo";
 import { isProfileComplete } from "../utils/is-profile-complete";
 import { toProfileSummary } from "../utils/to-profile-summary";
 
+const EducationProfileSection = dynamic(() => import("@/modules/education").then((module) => module.EducationProfileSection));
+const WorkExperienceProfileSection = dynamic(() => import("@/modules/work-experience").then((module) => module.WorkExperienceProfileSection));
+const CertificationProfileSection = dynamic(() => import("@/modules/certifications").then((module) => module.CertificationProfileSection));
+const SkillsProfileSection = dynamic(() => import("@/modules/skills").then((module) => module.SkillsProfileSection));
+
 export function ProfileOverviewView() {
   const { profile, isLoading, error: loadError } = useProfile();
   const { photoUrl, isLoading: isPhotoLoading, loadError: photoLoadError, reloadPhoto } = useProfilePhoto();
@@ -20,10 +27,10 @@ export function ProfileOverviewView() {
   return (
     <ProfilePageLayout
       title="Mi perfil"
-      description="Así ven tu perfil los egresados, mentores y empresas de la comunidad."
+      description="Tu información y trayectoria profesional, en un solo lugar."
     >
       {isLoading ? (
-        <p role="status" className="text-[15px] text-text-secondary">
+        <p role="status" className="text-sm text-text-secondary">
           {PROFILE_FEEDBACK_MESSAGES.loading}
         </p>
       ) : null}
@@ -37,9 +44,15 @@ export function ProfileOverviewView() {
       {summary ? (
         <div className="flex flex-col gap-6">
           <ProfilePhotoFeedback error={photoLoadError} isLoading={isPhotoLoading} onRetry={() => void reloadPhoto()} />
-          {isProfileComplete(summary) ? null : <ProfileCompletionBanner />}
+          {isProfileComplete(summary) ? null : <ProfileCompletionBanner hasContactInfo={[summary.fullName, summary.city, summary.phone, summary.personalEmail].every((value) => value.trim().length > 0)} />}
+          <ProfileSurface>
           <ContactInfoCard profile={summary} photoUrl={photoUrl} />
+          <SkillsProfileSection />
           <PresentationSummaryCard profile={summary} />
+          <WorkExperienceProfileSection />
+          <EducationProfileSection />
+          <CertificationProfileSection />
+          </ProfileSurface>
         </div>
       ) : null}
     </ProfilePageLayout>

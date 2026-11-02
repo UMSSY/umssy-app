@@ -31,6 +31,7 @@ describe('report-user-csv.mapper', () => {
       id: 'user-2',
       fullName: 'Elena Soto',
       email: 'elena@example.com',
+      userType: 'titulado',
       identifier: '201912345',
       documentType: null,
       rejectionReason: 'Documento ilegible',
@@ -40,6 +41,7 @@ describe('report-user-csv.mapper', () => {
     expect(row).toEqual([
       'Elena Soto',
       'elena@example.com',
+      'Titulado',
       '201912345',
       '-',
       '15/03/2026',

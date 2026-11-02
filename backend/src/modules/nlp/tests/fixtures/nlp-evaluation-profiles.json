@@ -1,0 +1,105 @@
+[
+  { "id": "eval-01", "sources": [
+    { "type": "work-experience", "text": "Desarrollador fullstack. Construí una plataforma de pagos con React y Node.js, API GraphQL y base de datos PostgreSQL." },
+    { "type": "work-experience", "text": "Practicante. Mantenimiento de scripts en Python y automatización con Bash en servidores Linux." },
+    { "type": "education", "text": "Ingeniería de Sistemas. Tesis sobre microservicios con Docker y Kubernetes." }
+  ], "expectedSkills": ["React", "Node.js", "PostgreSQL", "Python", "Bash", "Linux", "Docker", "Kubernetes"] },
+  { "id": "eval-02", "sources": [
+    { "type": "work-experience", "text": "Analista de datos. Modelos de machine learning con Python y scikit-learn; limpieza de datos con Pandas y NumPy; tableros en Tableau." },
+    { "type": "education", "text": "Diplomado en Big Data. Consultas SQL avanzadas y uso de MongoDB." }
+  ], "expectedSkills": ["Machine Learning", "Python", "Pandas", "NumPy", "Tableau", "SQL", "MongoDB"] },
+  { "id": "eval-03", "sources": [
+    { "type": "work-experience", "text": "Desarrolladora frontend. Migré una aplicación de AngularJS a Vue.js con TypeScript; estilos con Tailwind CSS." },
+    { "type": "work-experience", "text": "Diseñadora web freelance. Maquetación con HTML y CSS, y animaciones con JavaScript." }
+  ], "expectedSkills": ["Angular", "Vue.js", "TypeScript", "Tailwind CSS", "HTML5", "CSS3", "JavaScript"] },
+  { "id": "eval-04", "sources": [
+    { "type": "work-experience", "text": "Ingeniero DevOps. Diseñé pipelines de CI/CD en GitLab y Jenkins; infraestructura como código con Terraform en AWS." },
+    { "type": "work-experience", "text": "Administrador de sistemas. Servidores Ubuntu con Nginx y monitoreo; no tengo experiencia con Azure." }
+  ], "expectedSkills": ["CI/CD", "GitLab", "Jenkins", "Terraform", "AWS", "Linux", "Nginx"] },
+  { "id": "eval-05", "sources": [
+    { "type": "work-experience", "text": "Desarrollador backend. Servicios en Java con Spring Boot, mensajería y base de datos MySQL; pruebas unitarias con JUnit." },
+    { "type": "education", "text": "Licenciatura en Informática. Cursos de programación orientada a objetos en C++ y estructuras de datos." }
+  ], "expectedSkills": ["Java", "Spring Boot", "MySQL", "JUnit", "C++"] },
+  { "id": "eval-06", "sources": [
+    { "type": "work-experience", "text": "QA Automation. Pruebas end to end con Cypress y Selenium, pruebas de API con Postman y gestión de incidencias en Jira." },
+    { "type": "work-experience", "text": "Tester manual. Casos de prueba y reportes; quiero aprender Jest." }
+  ], "expectedSkills": ["Cypress", "Selenium", "Postman", "Jira"] },
+  { "id": "eval-07", "sources": [
+    { "type": "work-experience", "text": "Desarrollador móvil. Aplicaciones en Flutter y Dart publicadas en tiendas; backend con Firebase." },
+    { "type": "work-experience", "text": "Desarrollador Android. Apps nativas en Kotlin y Java." },
+    { "type": "education", "text": "Técnico superior en sistemas. Proyecto final con React Native." }
+  ], "expectedSkills": ["Flutter", "Dart", "Firebase", "Kotlin", "Java", "React Native"] },
+  { "id": "eval-08", "sources": [
+    { "type": "work-experience", "text": "Consultor de ciberseguridad. Pentesting de aplicaciones web según OWASP, análisis en Linux y scripts en Python." },
+    { "type": "education", "text": "Especialidad en seguridad informática. Gestión de servicios con ITIL." }
+  ], "expectedSkills": ["Pentesting", "OWASP", "Linux", "Python", "ITIL"] },
+  { "id": "eval-09", "sources": [
+    { "type": "work-experience", "text": "Scrum Master. Facilité ceremonias de Scrum y tableros Kanban en Jira para tres equipos." },
+    { "type": "work-experience", "text": "Coordinador de proyectos. Liderazgo de equipos, comunicación con clientes y presupuestos." }
+  ], "expectedSkills": ["Scrum", "Kanban", "Jira"] },
+  { "id": "eval-10", "sources": [
+    { "type": "work-experience", "text": "Desarrollador .NET. Sistemas contables en C# y ASP.NET con SQL Server; reportes en Power BI." },
+    { "type": "work-experience", "text": "Programador junior. Formularios web con HTML, CSS y jQuery." }
+  ], "expectedSkills": ["C#", ".NET", "SQL Server", "Power BI", "HTML5", "CSS3", "jQuery"] },
+  { "id": "eval-11", "sources": [
+    { "type": "work-experience", "text": "Ingeniero de datos. ETL en Python y Scala, almacenamiento en Redis y búsquedas con Elasticsearch, todo desplegado en Google Cloud." },
+    { "type": "education", "text": "Maestría en inteligencia artificial. Deep learning con PyTorch y TensorFlow." }
+  ], "expectedSkills": ["Python", "Scala", "Redis", "Elasticsearch", "Google Cloud", "Deep Learning", "PyTorch", "TensorFlow"] },
+  { "id": "eval-12", "sources": [
+    { "type": "work-experience", "text": "Desarrollador web. Tiendas en línea con PHP y Laravel, base de datos MySQL y servidor Nginx." },
+    { "type": "work-experience", "text": "Soporte. Atención al cliente por teléfono y correo." }
+  ], "expectedSkills": ["PHP", "Laravel", "MySQL", "Nginx"] },
+  { "id": "eval-13", "sources": [
+    { "type": "work-experience", "text": "Fullstack developer. Built dashboards with Next.js and NestJS on top of PostgreSQL, deployed with Docker on Azure." },
+    { "type": "work-experience", "text": "Intern. Never worked with Kubernetes, but wrote unit tests with Jest." }
+  ], "expectedSkills": ["Next.js", "NestJS", "PostgreSQL", "Docker", "Azure", "Jest"] },
+  { "id": "eval-14", "sources": [
+    { "type": "work-experience", "text": "Desarrollador de sistemas embebidos. Firmware en C++ y rutinas en Assembly; simulación de señales en MATLAB." },
+    { "type": "education", "text": "Ingeniería Electrónica. Laboratorios con Python para adquisición de datos." }
+  ], "expectedSkills": ["C++", "Assembly", "MATLAB", "Python"] },
+  { "id": "eval-15", "sources": [
+    { "type": "work-experience", "text": "Backend developer. Microservicios en Go y Rust con APIs REST; base de datos MongoDB." },
+    { "type": "work-experience", "text": "Desarrollador. Despliegues con Docker Compose y control de versiones en GitHub." }
+  ], "expectedSkills": ["Go", "Rust", "MongoDB", "Docker", "GitHub"] },
+  { "id": "eval-16", "sources": [
+    { "type": "work-experience", "text": "Analista BI. Modelado de datos en SQL Server, reportes en Power BI y Tableau; automatización con Python." },
+    { "type": "education", "text": "Diplomado en análisis de datos. Estadística aplicada con R y RStudio." }
+  ], "expectedSkills": ["SQL Server", "Power BI", "Tableau", "Python", "R"] },
+  { "id": "eval-17", "sources": [
+    { "type": "work-experience", "text": "Desarrollador frontend. Aplicaciones con React y TypeScript; pruebas con Jest; no uso Angular desde 2022." },
+    { "type": "work-experience", "text": "Desarrollador web. Sitios con Bootstrap y JavaScript." }
+  ], "expectedSkills": ["React", "TypeScript", "Jest", "Bootstrap", "JavaScript"] },
+  { "id": "eval-18", "sources": [
+    { "type": "work-experience", "text": "Ingeniero cloud. Migración de servidores a AWS y Azure; automatización con Ansible y Terraform; pipelines de integración continua con Jenkins." },
+    { "type": "education", "text": "Certificación en Linux y administración de redes." }
+  ], "expectedSkills": ["AWS", "Azure", "Ansible", "Terraform", "CI/CD", "Jenkins", "Linux"] },
+  { "id": "eval-19", "sources": [
+    { "type": "work-experience", "text": "Docente universitario. Enseñé programación en Java y Python, y bases de datos con PostgreSQL y SQLite." },
+    { "type": "work-experience", "text": "Investigador. Modelos de aprendizaje automático para predicción de cosechas con Pandas." }
+  ], "expectedSkills": ["Java", "Python", "PostgreSQL", "SQLite", "Machine Learning", "Pandas"] },
+  { "id": "eval-20", "sources": [
+    { "type": "work-experience", "text": "Desarrollador fullstack. Plataforma educativa con Django, Vue.js y PostgreSQL; despliegue con Docker en servidores Debian; control de versiones con Git." },
+    { "type": "work-experience", "text": "Practicante de sistemas. Me gustaría aprender Kubernetes y Go." }
+  ], "expectedSkills": ["Django", "Vue.js", "PostgreSQL", "Docker", "Linux", "Git"] },
+  { "id": "eval-21", "sources": [
+    { "type": "work-experience", "text": "Ejecutivo de ventas. Trabajé en Oracle Bolivia como asesor comercial; servicio express de entregas a clientes." }
+  ], "expectedSkills": [] },
+  { "id": "eval-22", "sources": [
+    { "type": "work-experience", "text": "Biólogo. Investigación de serpientes pitón y conservación de osos pandas en reservas." }
+  ], "expectedSkills": [] },
+  { "id": "eval-23", "sources": [
+    { "type": "work-experience", "text": "Marketing digital. Estrategias go to market y campañas en redes sociales; desconozco Python y SQL." }
+  ], "expectedSkills": [] },
+  { "id": "eval-24", "sources": [
+    { "type": "work-experience", "text": "Desarrollador. Uso todos los frameworks del equipo excepto Angular; trabajo con React y Redux." }
+  ], "expectedSkills": ["React"] },
+  { "id": "eval-25", "sources": [
+    { "type": "education", "text": "Ingeniería Industrial. Cursos de Excel avanzado, gestión de calidad y Lean Six Sigma." }
+  ], "expectedSkills": [] },
+  { "id": "eval-26", "sources": [
+    { "type": "work-experience", "text": "Frontend. Componentes en JS y TS para un e-commerce; maquetación con CSS3." }
+  ], "expectedSkills": ["JavaScript", "TypeScript", "CSS3"] },
+  { "id": "eval-27", "sources": [
+    { "type": "work-experience", "text": "Programador. Sistemas con Python 3 y base de datos Postgre; servidor web Apache." }
+  ], "expectedSkills": ["Python", "PostgreSQL"] }
+]

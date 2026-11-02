@@ -24,4 +24,7 @@ export interface JobOfferResponse {
   createdAt: string;
   company: JobOfferCompanyResponse;
   skills: JobOfferSkillResponse[];
+  applicantsCount: number;
 }
+
+export type PublishedJobOfferResponse = Omit<JobOfferResponse, 'applicantsCount'>;

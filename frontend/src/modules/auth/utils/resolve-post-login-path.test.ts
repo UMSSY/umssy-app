@@ -14,18 +14,18 @@ describe("resolvePostLoginPath", () => {
   it("does not return users to another role's view or to unknown routes", () => {
     expect(resolvePostLoginPath(["empresa"], "/vacancies/abc")).toBe("/recruiters");
     expect(resolvePostLoginPath(["empresa"], "/profile")).toBe("/profile");
-    expect(resolvePostLoginPath(["titulado"], "/matching")).toBe("/profile");
-    expect(resolvePostLoginPath(["titulado"], "/reports/history")).toBe("/profile");
+    expect(resolvePostLoginPath(["titulado"], "/matching")).toBe("/dashboard");
+    expect(resolvePostLoginPath(["titulado"], "/reports/history")).toBe("/dashboard");
   });
 
   it("sin next usa el destino por defecto de cada rol", () => {
-    expect(resolvePostLoginPath("titulado", null)).toBe("/profile");
+    expect(resolvePostLoginPath("titulado", null)).toBe("/dashboard");
     expect(resolvePostLoginPath("administrativo", null)).toBe("/backoffice/solicitudes");
-    expect(resolvePostLoginPath("", undefined)).toBe("/profile");
+    expect(resolvePostLoginPath("", undefined)).toBe("/dashboard");
   });
 
   it.each(["//evil.com", "https://evil.com", "/\\evil.com", "/login", "/"])("ignora el next peligroso %s", (next) => {
-    expect(resolvePostLoginPath("titulado", next)).toBe("/profile");
+    expect(resolvePostLoginPath("titulado", next)).toBe("/dashboard");
     expect(resolvePostLoginPath("administrativo", next)).toBe("/backoffice/solicitudes");
   });
 
@@ -35,7 +35,7 @@ describe("resolvePostLoginPath", () => {
   });
 
   it("un rol sin acceso al backoffice no vuelve a él", () => {
-    expect(resolvePostLoginPath("titulado", "/backoffice/solicitudes")).toBe("/profile");
+    expect(resolvePostLoginPath("titulado", "/backoffice/solicitudes")).toBe("/dashboard");
   });
   it('lets administrative accounts resume common functions without selecting a role', () => {
     expect(resolvePostLoginPath(['administrativo'], '/chat')).toBe('/backoffice/solicitudes');

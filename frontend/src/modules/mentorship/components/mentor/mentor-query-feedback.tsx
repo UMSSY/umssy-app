@@ -9,6 +9,7 @@ type MentorQueryFeedbackProps = {
   title: string;
   description: string;
   onRetry?: () => void;
+  onClearFilters?: () => void;
   showDirectoryLink?: boolean;
 };
 
@@ -16,6 +17,7 @@ export function MentorQueryFeedback({
   title,
   description,
   onRetry,
+  onClearFilters,
   showDirectoryLink = false,
 }: MentorQueryFeedbackProps) {
   const Icon = onRetry ? AlertCircle : Users;
@@ -39,6 +41,16 @@ export function MentorQueryFeedback({
           {onRetry && (
             <Button type="button" onClick={onRetry} variant="outline">
               Reintentar
+            </Button>
+          )}
+
+          {onClearFilters && (
+            <Button
+              type="button"
+              onClick={onClearFilters}
+              variant="outline"
+            >
+              Limpiar filtros
             </Button>
           )}
 

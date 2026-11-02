@@ -11,6 +11,8 @@ export interface SeedSummary {
   userRoles: number;
   blocks: number;
   appointments: number;
+  blockedDates: number;
+  series: number;
   legacyRoles: number;
   warnings: string[];
   accessRequests: AccessRequestsSeedResult;

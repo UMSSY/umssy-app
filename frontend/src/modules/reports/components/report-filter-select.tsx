@@ -8,29 +8,31 @@ import type { ReportFilterSelectProps } from "../types/report-filter-select-prop
 export function ReportFilterSelect<TValue extends string>({
   label,
   allLabel,
+  placeholder,
   options,
   value,
   onChange,
 }: ReportFilterSelectProps<TValue>) {
   const labelId = useId();
-  const items = [{ value: ALL_FILTER_VALUE, label: allLabel }, ...options];
+  const items = allLabel ? [{ value: ALL_FILTER_VALUE, label: allLabel }, ...options] : options;
+  const selectedValue = value ?? (allLabel ? ALL_FILTER_VALUE : null);
 
   const handleValueChange = (selectedValue: string | null) => {
     onChange(!selectedValue || selectedValue === ALL_FILTER_VALUE ? undefined : (selectedValue as TValue));
   };
 
   return (
-    <div className="w-full sm:w-72">
-      <Select items={items} value={value ?? ALL_FILTER_VALUE} onValueChange={handleValueChange}>
+    <div className="w-full sm:w-72 sm:shrink-0">
+      <Select items={items} value={selectedValue} onValueChange={handleValueChange}>
         <SelectTrigger
           aria-labelledby={labelId}
-          className="w-full cursor-pointer rounded-md border-border bg-surface px-3 pb-2 pt-1.5 hover:border-ink-soft hover:bg-surface-soft focus-visible:border-accent focus-visible:ring-3 focus-visible:ring-interaction data-[size=default]:h-auto data-popup-open:border-accent data-popup-open:ring-3 data-popup-open:ring-interaction"
+          className="w-full cursor-pointer rounded-md border-border bg-surface px-3 pt-1.5 pb-2 hover:border-ink-soft hover:bg-surface-soft focus-visible:border-accent focus-visible:ring-3 focus-visible:ring-interaction data-popup-open:border-accent data-popup-open:ring-3 data-popup-open:ring-interaction data-[size=default]:h-auto"
         >
           <span className="flex flex-1 flex-col items-start">
             <span id={labelId} className="text-xs text-text-secondary">
               {label}
             </span>
-            <SelectValue className="text-sm text-ink" />
+            <SelectValue placeholder={placeholder} className="text-sm text-ink" />
           </span>
         </SelectTrigger>
 

@@ -1,76 +1,98 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { buildJob } from "../testing/job-fixtures";
 import { JobRecommendationCard } from "./job-recommendation-card";
+import type { RecommendedJob } from "../types/job-matching.types";
 
-afterEach(() => {
-  cleanup();
-});
+const job: RecommendedJob = {
+  jobOfferId: "123",
+  title: "Desarrollador Full Stack",
+  companyName: "Empresa de prueba",
+  modality: "Remoto",
+  locationUrl: "https://maps.google.com/?q=cochabamba",
+  score: 85,
+  matchedSkills: ["React", "TypeScript"],
+  skills: ["React", "TypeScript", "PostgreSQL"],
+};
 
-describe("JobRecommendationCard", () => {
-  it("muestra título, empresa y modalidad", () => {
-    render(<JobRecommendationCard job={buildJob()} />);
+describe("HU-02A T2.4 - JobRecommendationCard", () => {
+  afterEach(cleanup);
 
-    expect(screen.getByRole("heading", { name: "Desarrollador Backend" })).toBeInTheDocument();
-    expect(screen.getByText("Empresa SA · Remoto")).toBeInTheDocument();
+  it("shows the job title, company and modality", () => {
+    render(<JobRecommendationCard job={job} />);
+
+    expect(
+       screen.getByRole("heading", {
+          level: 2,
+          name: "Desarrollador Full Stack",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText(/Empresa de prueba.*Remoto/),
+    ).toBeInTheDocument();
   });
 
-  it("muestra el porcentaje con el texto afinidad", () => {
-    render(<JobRecommendationCard job={buildJob({ score: 67 })} />);
+  it("shows the compatibility percentage", () => {
+    render(<JobRecommendationCard job={job} />);
 
-    expect(screen.getByText("67% afinidad")).toBeInTheDocument();
+    expect(
+      screen.getByText(/85%/),
+    ).toBeInTheDocument();
   });
 
-  it("usa el mismo estilo para cualquier rango de afinidad, sin colores de semáforo", () => {
-    const classesFor = (score: number) => {
-      const { unmount } = render(<JobRecommendationCard job={buildJob({ score })} />);
-      const className = screen.getByText(`${score}% afinidad`).className;
-      unmount();
-      return className;
-    };
+  it("shows matching and pending skills", () => {
+    render(<JobRecommendationCard job={job} />);
 
-    const high = classesFor(90);
-    const medium = classesFor(60);
-    const low = classesFor(30);
-
-    expect(high).toBe(medium);
-    expect(medium).toBe(low);
-    expect(high).toContain("text-ink");
-    expect(high).toContain("font-bold");
-    expect(high).not.toMatch(/green|amber|emerald|yellow|red|bg-/);
+    expect(screen.getByText("React")).toBeInTheDocument();
+    expect(screen.getByText("TypeScript")).toBeInTheDocument();
+    expect(screen.getByText("PostgreSQL")).toBeInTheDocument();
   });
 
-  it("muestra los requisitos que coinciden con icono y los que faltan en otro estilo", () => {
-    render(<JobRecommendationCard job={buildJob()} />);
+  it("links to the existing vacancy detail route", () => {
+    render(<JobRecommendationCard job={job} />);
 
-    const items = within(screen.getByRole("list")).getAllByRole("listitem");
-
-    expect(items.map((item) => item.textContent?.trim())).toEqual([
-      "Python coincide",
-      "Docker coincide",
-      "React no está en tu perfil",
-    ]);
-    expect(items[0]?.querySelector("svg")).toBeInTheDocument();
-    expect(items[0]?.firstElementChild?.className).toContain("text-ink");
-    expect(items[2]?.firstElementChild?.className).toContain("text-text-secondary");
-    expect(items[2]?.firstElementChild?.className).not.toMatch(/(text|bg)-(red|danger|destructive)/);
+    expect(
+      screen.getByRole("link", { name: /Ver vacante/i }),
+    ).toHaveAttribute("href", "/vacancies/recommended/123");
   });
 
-  it("muestra la sección Coincide contigo y el enlace a la vacante", () => {
-    render(<JobRecommendationCard job={buildJob({ jobOfferId: "abc" })} />);
+  it("links to the location of the vacancy in a new tab", () => {
+    render(<JobRecommendationCard job={job} />);
 
-    expect(screen.getByText("Coincide contigo")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Ver vacante/ })).toHaveAttribute("href", "/jobs/abc");
+    const link = screen.getByRole("link", { name: /Ver ubicación/i });
+    expect(link).toHaveAttribute("href", "https://maps.google.com/?q=cochabamba");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
   });
 
-  it("no rompe cuando la vacante no tiene habilidades", () => {
+  it("hides the location link when the vacancy has no location", () => {
+    render(<JobRecommendationCard job={{ ...job, locationUrl: undefined }} />);
+
+    expect(screen.queryByRole("link", { name: /Ver ubicación/i })).not.toBeInTheDocument();
+  });
+
+  it("uses responsive layout classes", () => {
+    const { container } = render(<JobRecommendationCard job={job} />);
+
+    expect(
+      container.querySelector(".sm\\:flex-row"),
+    ).toHaveClass("flex-col", "sm:flex-row");
+  });
+  it("shows required skills instead of a match label when affinity is zero", () => {
     render(
       <JobRecommendationCard
-        job={buildJob({ matchedSkills: [], missingSkills: [], skills: [], score: 0 })}
+        job={{
+          ...job,
+          score: 0,
+          matchedSkills: [],
+        }}
       />,
     );
 
-    expect(screen.getByText("0% afinidad")).toBeInTheDocument();
-    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
-  });
+    expect(screen.getByText("Habilidades requeridas")).toBeInTheDocument();
+    expect(screen.queryByText("Coincide contigo")).not.toBeInTheDocument();
+    expect(screen.getByText("React")).toBeInTheDocument();
+    expect(screen.getByText("TypeScript")).toBeInTheDocument();
+    expect(screen.getByText("0% de afinidad")).toBeInTheDocument();
+});
 });

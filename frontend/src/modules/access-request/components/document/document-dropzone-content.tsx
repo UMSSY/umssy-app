@@ -1,0 +1,111 @@
+"use client";
+
+import { useRef, useState } from "react";
+import type { ChangeEvent, DragEvent } from "react";
+import { FileUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "cn";
+import type { DocumentDropzoneContentProps } from "../../types/document-dropzone-content-props.types";
+import { FieldError } from "../personal-data/field-error";
+
+export function DocumentDropzoneContent({
+  isDisabled = false,
+  isUploading = false,
+  progress = 0,
+  error = null,
+  onFileSelected,
+}: DocumentDropzoneContentProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const errorId = error ? "document-error" : undefined;
+
+  // Solo se toma el primer archivo: el paso admite un único documento
+  function pickFirst(files: FileList | null | undefined) {
+    if (isDisabled) return;
+    const file = files?.[0];
+    if (file) void onFileSelected(file);
+  }
+
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    pickFirst(event.target.files);
+    // Se limpia para poder elegir el mismo archivo otra vez
+    event.target.value = "";
+  }
+
+  function handleDragOver(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    if (!isDisabled) setIsDragging(true);
+  }
+
+  function handleDragLeave(event: DragEvent<HTMLDivElement>) {
+    // Los hijos disparan dragleave al cruzarlos: solo cuenta salir de la zona
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+    setIsDragging(false);
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+    if (isDisabled) return;
+    pickFirst(event.dataTransfer?.files);
+  }
+
+  return (
+    <div>
+      <div
+        data-slot="document-dropzone"
+        data-dragging={isDragging ? "true" : undefined}
+        onDragEnter={handleDragOver}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={cn(
+          "flex flex-col items-center gap-3 rounded-lg border-2 border-dashed border-border-strong bg-surface px-6 py-10 text-center transition-colors focus-within:border-ink focus-within:ring-3 focus-within:ring-interaction",
+          isDragging && "border-ink bg-surface-soft",
+          isDisabled && "opacity-60",
+        )}
+      >
+        <span aria-hidden="true" className="flex size-12 items-center justify-center rounded-lg bg-interaction text-accent">
+          <FileUp className="size-6" />
+        </span>
+        <div className="flex flex-col gap-1">
+          <p className="text-base font-semibold text-ink">Arrastra tu documento aquí o elige un archivo.</p>
+          <p className="text-xs text-text-secondary">JPG, PNG o PDF. Máximo 10 MB.</p>
+        </div>
+
+        <Input
+          ref={inputRef}
+          id="document-file"
+          name="document-file"
+          type="file"
+          accept="image/jpeg,image/png,application/pdf,.jpg,.jpeg,.png,.pdf"
+          aria-label="Archivo del documento"
+          aria-describedby={errorId}
+          aria-invalid={error ? true : undefined}
+          disabled={isDisabled}
+          onChange={handleChange}
+          className="sr-only"
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={isDisabled}
+          onClick={() => inputRef.current?.click()}
+          className="h-11 rounded-md px-5 text-sm font-semibold text-ink"
+        >
+          Elegir archivo
+        </Button>
+
+        {isUploading ? (
+          <div className="flex w-full max-w-sm flex-col gap-2" role="status">
+            <Progress value={progress} aria-label="Progreso de la subida" />
+            <p className="text-xs text-text-secondary">{`Subiendo... ${progress}%`}</p>
+          </div>
+        ) : null}
+      </div>
+      <FieldError id="document-error" message={error ?? undefined} />
+    </div>
+  );
+}

@@ -1,0 +1,77 @@
+<mjml lang="es">
+  <mj-head>
+    <mj-title>{{ brandName }}</mj-title>
+    <mj-font
+      name="Inter"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700"
+    />
+    <mj-font
+      name="Inter Tight"
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800"
+    />
+    <mj-attributes>
+      <mj-all font-family="Inter, Arial, sans-serif" />
+      <mj-text
+        font-size="15px"
+        line-height="24px"
+        color="#0B1F2E"
+        padding="0 0 16px"
+      />
+      <mj-section background-color="#FFFFFF" padding="24px" />
+      <mj-button
+        background-color="#B4050F"
+        color="#FFFFFF"
+        font-family="Inter Tight, Inter, Arial, sans-serif"
+        font-size="15px"
+        font-weight="800"
+        text-transform="uppercase"
+        border-radius="0"
+        inner-padding="14px 24px"
+        align="left"
+        padding="8px 0"
+      />
+      <mj-divider border-color="#E3E7EC" border-width="1px" padding="16px 0" />
+      <mj-class
+        name="heading"
+        font-family="Inter Tight, Inter, Arial, sans-serif"
+        font-size="24px"
+        line-height="30px"
+        font-weight="800"
+        letter-spacing="-0.48px"
+        text-transform="uppercase"
+        color="#003770"
+        padding="0 0 16px"
+      />
+      <mj-class
+        name="secondary"
+        color="#5B6470"
+        font-size="14px"
+        line-height="22px"
+      />
+    </mj-attributes>
+    <mj-style inline="inline">
+      a {
+        color: #003770;
+        text-decoration: underline;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#F6F7F9" width="600px">
+    {{ header }}
+    <mj-wrapper background-color="#FFFFFF" padding="8px 0 16px">
+      {{ content }}
+    </mj-wrapper>
+    <mj-section background-color="#0B1F2E" padding="24px">
+      <mj-column>
+        <mj-text
+          align="left"
+          font-size="13px"
+          line-height="20px"
+          color="#FFFFFF"
+          padding="0"
+          >{{ brandName }} · Este es un mensaje automático.</mj-text
+        >
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

@@ -28,6 +28,9 @@ export type UserSkillMinAggregateOutputType = {
   id: string | null
   userId: string | null
   skillId: string | null
+  source: string | null
+  verificationStatus: string | null
+  isHighRelevance: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -36,6 +39,9 @@ export type UserSkillMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   skillId: string | null
+  source: string | null
+  verificationStatus: string | null
+  isHighRelevance: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +50,10 @@ export type UserSkillCountAggregateOutputType = {
   id: number
   userId: number
   skillId: number
+  source: number
+  verificationStatus: number
+  isHighRelevance: number
+  evidenceRefs: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -54,6 +64,9 @@ export type UserSkillMinAggregateInputType = {
   id?: true
   userId?: true
   skillId?: true
+  source?: true
+  verificationStatus?: true
+  isHighRelevance?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -62,6 +75,9 @@ export type UserSkillMaxAggregateInputType = {
   id?: true
   userId?: true
   skillId?: true
+  source?: true
+  verificationStatus?: true
+  isHighRelevance?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -70,6 +86,10 @@ export type UserSkillCountAggregateInputType = {
   id?: true
   userId?: true
   skillId?: true
+  source?: true
+  verificationStatus?: true
+  isHighRelevance?: true
+  evidenceRefs?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -151,6 +171,10 @@ export type UserSkillGroupByOutputType = {
   id: string
   userId: string
   skillId: string
+  source: string
+  verificationStatus: string
+  isHighRelevance: boolean
+  evidenceRefs: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: UserSkillCountAggregateOutputType | null
@@ -180,6 +204,10 @@ export type UserSkillWhereInput = {
   id?: Prisma.UuidFilter<"UserSkill"> | string
   userId?: Prisma.UuidFilter<"UserSkill"> | string
   skillId?: Prisma.UuidFilter<"UserSkill"> | string
+  source?: Prisma.StringFilter<"UserSkill"> | string
+  verificationStatus?: Prisma.StringFilter<"UserSkill"> | string
+  isHighRelevance?: Prisma.BoolFilter<"UserSkill"> | boolean
+  evidenceRefs?: Prisma.JsonNullableFilter<"UserSkill">
   createdAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -190,6 +218,10 @@ export type UserSkillOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   skillId?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrder
+  isHighRelevance?: Prisma.SortOrder
+  evidenceRefs?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -204,6 +236,10 @@ export type UserSkillWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.UserSkillWhereInput | Prisma.UserSkillWhereInput[]
   userId?: Prisma.UuidFilter<"UserSkill"> | string
   skillId?: Prisma.UuidFilter<"UserSkill"> | string
+  source?: Prisma.StringFilter<"UserSkill"> | string
+  verificationStatus?: Prisma.StringFilter<"UserSkill"> | string
+  isHighRelevance?: Prisma.BoolFilter<"UserSkill"> | boolean
+  evidenceRefs?: Prisma.JsonNullableFilter<"UserSkill">
   createdAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -214,6 +250,10 @@ export type UserSkillOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   skillId?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrder
+  isHighRelevance?: Prisma.SortOrder
+  evidenceRefs?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserSkillCountOrderByAggregateInput
@@ -228,12 +268,20 @@ export type UserSkillScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"UserSkill"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"UserSkill"> | string
   skillId?: Prisma.UuidWithAggregatesFilter<"UserSkill"> | string
+  source?: Prisma.StringWithAggregatesFilter<"UserSkill"> | string
+  verificationStatus?: Prisma.StringWithAggregatesFilter<"UserSkill"> | string
+  isHighRelevance?: Prisma.BoolWithAggregatesFilter<"UserSkill"> | boolean
+  evidenceRefs?: Prisma.JsonNullableWithAggregatesFilter<"UserSkill">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UserSkill"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"UserSkill"> | Date | string
 }
 
 export type UserSkillCreateInput = {
   id?: string
+  source?: string
+  verificationStatus?: string
+  isHighRelevance?: boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutUserSkillsInput
@@ -244,12 +292,20 @@ export type UserSkillUncheckedCreateInput = {
   id?: string
   userId: string
   skillId: string
+  source?: string
+  verificationStatus?: string
+  isHighRelevance?: boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type UserSkillUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  isHighRelevance?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutUserSkillsNestedInput
@@ -260,6 +316,10 @@ export type UserSkillUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   skillId?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  isHighRelevance?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -268,12 +328,20 @@ export type UserSkillCreateManyInput = {
   id?: string
   userId: string
   skillId: string
+  source?: string
+  verificationStatus?: string
+  isHighRelevance?: boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type UserSkillUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  isHighRelevance?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -282,6 +350,10 @@ export type UserSkillUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   skillId?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  isHighRelevance?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -305,6 +377,10 @@ export type UserSkillCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   skillId?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrder
+  isHighRelevance?: Prisma.SortOrder
+  evidenceRefs?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -313,6 +389,9 @@ export type UserSkillMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   skillId?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrder
+  isHighRelevance?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -321,6 +400,9 @@ export type UserSkillMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   skillId?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  verificationStatus?: Prisma.SortOrder
+  isHighRelevance?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -411,6 +493,10 @@ export type UserSkillUncheckedUpdateManyWithoutSkillNestedInput = {
 
 export type UserSkillCreateWithoutUserInput = {
   id?: string
+  source?: string
+  verificationStatus?: string
+  isHighRelevance?: boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   skill: Prisma.SkillCreateNestedOneWithoutUserSkillsInput
@@ -419,6 +505,10 @@ export type UserSkillCreateWithoutUserInput = {
 export type UserSkillUncheckedCreateWithoutUserInput = {
   id?: string
   skillId: string
+  source?: string
+  verificationStatus?: string
+  isHighRelevance?: boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -456,12 +546,20 @@ export type UserSkillScalarWhereInput = {
   id?: Prisma.UuidFilter<"UserSkill"> | string
   userId?: Prisma.UuidFilter<"UserSkill"> | string
   skillId?: Prisma.UuidFilter<"UserSkill"> | string
+  source?: Prisma.StringFilter<"UserSkill"> | string
+  verificationStatus?: Prisma.StringFilter<"UserSkill"> | string
+  isHighRelevance?: Prisma.BoolFilter<"UserSkill"> | boolean
+  evidenceRefs?: Prisma.JsonNullableFilter<"UserSkill">
   createdAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserSkill"> | Date | string
 }
 
 export type UserSkillCreateWithoutSkillInput = {
   id?: string
+  source?: string
+  verificationStatus?: string
+  isHighRelevance?: boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutUserSkillsInput
@@ -470,6 +568,10 @@ export type UserSkillCreateWithoutSkillInput = {
 export type UserSkillUncheckedCreateWithoutSkillInput = {
   id?: string
   userId: string
+  source?: string
+  verificationStatus?: string
+  isHighRelevance?: boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -503,12 +605,20 @@ export type UserSkillUpdateManyWithWhereWithoutSkillInput = {
 export type UserSkillCreateManyUserInput = {
   id?: string
   skillId: string
+  source?: string
+  verificationStatus?: string
+  isHighRelevance?: boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type UserSkillUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  isHighRelevance?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skill?: Prisma.SkillUpdateOneRequiredWithoutUserSkillsNestedInput
@@ -517,6 +627,10 @@ export type UserSkillUpdateWithoutUserInput = {
 export type UserSkillUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   skillId?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  isHighRelevance?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -524,6 +638,10 @@ export type UserSkillUncheckedUpdateWithoutUserInput = {
 export type UserSkillUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   skillId?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  isHighRelevance?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -531,12 +649,20 @@ export type UserSkillUncheckedUpdateManyWithoutUserInput = {
 export type UserSkillCreateManySkillInput = {
   id?: string
   userId: string
+  source?: string
+  verificationStatus?: string
+  isHighRelevance?: boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type UserSkillUpdateWithoutSkillInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  isHighRelevance?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutUserSkillsNestedInput
@@ -545,6 +671,10 @@ export type UserSkillUpdateWithoutSkillInput = {
 export type UserSkillUncheckedUpdateWithoutSkillInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  isHighRelevance?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -552,6 +682,10 @@ export type UserSkillUncheckedUpdateWithoutSkillInput = {
 export type UserSkillUncheckedUpdateManyWithoutSkillInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  verificationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  isHighRelevance?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  evidenceRefs?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -562,6 +696,10 @@ export type UserSkillSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   id?: boolean
   userId?: boolean
   skillId?: boolean
+  source?: boolean
+  verificationStatus?: boolean
+  isHighRelevance?: boolean
+  evidenceRefs?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -572,6 +710,10 @@ export type UserSkillSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   userId?: boolean
   skillId?: boolean
+  source?: boolean
+  verificationStatus?: boolean
+  isHighRelevance?: boolean
+  evidenceRefs?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -582,6 +724,10 @@ export type UserSkillSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   id?: boolean
   userId?: boolean
   skillId?: boolean
+  source?: boolean
+  verificationStatus?: boolean
+  isHighRelevance?: boolean
+  evidenceRefs?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -592,11 +738,15 @@ export type UserSkillSelectScalar = {
   id?: boolean
   userId?: boolean
   skillId?: boolean
+  source?: boolean
+  verificationStatus?: boolean
+  isHighRelevance?: boolean
+  evidenceRefs?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserSkillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "skillId" | "createdAt" | "updatedAt", ExtArgs["result"]["userSkill"]>
+export type UserSkillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "skillId" | "source" | "verificationStatus" | "isHighRelevance" | "evidenceRefs" | "createdAt" | "updatedAt", ExtArgs["result"]["userSkill"]>
 export type UserSkillInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   skill?: boolean | Prisma.SkillDefaultArgs<ExtArgs>
@@ -620,6 +770,10 @@ export type $UserSkillPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     id: string
     userId: string
     skillId: string
+    source: string
+    verificationStatus: string
+    isHighRelevance: boolean
+    evidenceRefs: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["userSkill"]>
@@ -1050,6 +1204,10 @@ export interface UserSkillFieldRefs {
   readonly id: Prisma.FieldRef<"UserSkill", 'String'>
   readonly userId: Prisma.FieldRef<"UserSkill", 'String'>
   readonly skillId: Prisma.FieldRef<"UserSkill", 'String'>
+  readonly source: Prisma.FieldRef<"UserSkill", 'String'>
+  readonly verificationStatus: Prisma.FieldRef<"UserSkill", 'String'>
+  readonly isHighRelevance: Prisma.FieldRef<"UserSkill", 'Boolean'>
+  readonly evidenceRefs: Prisma.FieldRef<"UserSkill", 'Json'>
   readonly createdAt: Prisma.FieldRef<"UserSkill", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"UserSkill", 'DateTime'>
 }

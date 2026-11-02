@@ -1,4 +1,5 @@
-export type RequirementStatus = "matched" | "missing";
+import type { CategorizedJobRequirement } from "./requirement-category.types";
+export type RequirementStatus = "Cumple" | "Pendiente";
 
 export interface JobRequirement {
   name: string;
@@ -10,11 +11,9 @@ export interface RecommendedJob {
   title: string;
   companyName: string;
   modality: string;
+  locationUrl?: string;
   score: number;
   matchedSkills: string[];
-  matchedSkillIds: string[];
-  missingSkills: string[];
-  missingSkillIds: string[];
   skills: string[];
 }
 
@@ -23,6 +22,13 @@ export interface RecommendationsResult {
   items: RecommendedJob[];
 }
 
-export interface JobMatch extends RecommendedJob {
+export interface JobMatch {
+  jobOfferId: string;
+  title: string;
+  companyName: string;
+  modality: string;
   description: string;
+  score: number;
+  requirements: CategorizedJobRequirement[];
+  hasPendingRequirements: boolean;
 }

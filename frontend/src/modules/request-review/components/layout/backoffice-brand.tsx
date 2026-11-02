@@ -1,13 +1,6 @@
-import { SidebarBrandIcon } from "@/shared/components/layout/sidebar-brand";
+import Link from "next/link";
+import { BrandLogo } from "@/shared/components/layout/brand-logo";
 
 export function BackofficeBrand() {
-  return (
-    <div className="flex items-center gap-3 px-4 py-6">
-      <SidebarBrandIcon />
-      <div className="flex min-w-0 flex-col gap-1">
-        <p className="font-tight text-[28px] leading-none font-extrabold tracking-tight text-surface">UMSSY</p>
-        <p className="text-sm text-surface/70">Backoffice de verificación</p>
-      </div>
-    </div>
-  );
+  return <Link href="/dashboard" aria-label="UMSSY, ir al inicio" className="block shrink-0 outline-offset-4"><BrandLogo variant="on-dark" className="w-40" priority /></Link>;
 }

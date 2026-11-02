@@ -9,20 +9,17 @@ export type {
   CandidateWithMatch,
   Vacancy,
 } from "./types/matching-types";
-export * from './types/match-score.types';
+export * from "./types/match-score.types";
 
-export { RecommendedJobsView } from "@/modules/matching/views/recommended-jobs-view";
-export { JobMatchDetailView } from "@/modules/matching/views/job-match-detail-view";
-export { RequirementAnalysisView } from "@/modules/matching/views/requirement-analysis-view";
+export { RecommendedJobsView } from "./views/recommended-jobs-view";
+export { JobMatchDetailView } from "./views/job-match-detail-view";
+export { JobApplicationAction } from "./components/job-application-action";
 export type {
   JobMatch,
   JobRequirement,
   RecommendationsResult,
   RecommendedJob,
   RequirementStatus,
-} from "@/modules/matching/types/job-matching.types";
-export type {
-  RequirementAnalysis,
-  RequirementTermsResult,
-} from "@/modules/matching/types/requirement-terms.types";
-export type { JobDetailPageProps } from "@/modules/matching/types/job-detail-page-props.types";
+} from "./types/job-matching.types";
+export { skillsAnalysisService } from "./services/skills-analysis.service";
+export type { DetectedSkill, SkillsAnalysisResult } from "./types/skills-analysis.types";

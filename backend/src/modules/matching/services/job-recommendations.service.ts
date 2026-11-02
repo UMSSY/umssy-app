@@ -1,80 +1,130 @@
-import { Injectable } from '@nestjs/common';
 import { JobOffersService } from '../../job-offers/services/job-offers.service.js';
-import type { JobOfferResponse } from '../../job-offers/responses/job-offer.response.js';
+import { Injectable } from '@nestjs/common';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import { UserSkillService } from '../../skills/services/user-skill.service.js';
-import { JobOfferNotFoundException } from '../exceptions/index.js';
+import { JobMatchRepository } from '../repositories/job-match.repository.js';
+import type { CandidateProfile } from '../types/gap-analysis.types.js';
+import type { JobMatchRecord } from '../types/job-match.types.js';
 import type {
-  JobFitResponse,
-  RecommendationsResponse,
-  RecommendedJobResponse,
-} from '../types/matching.types.js';
+  JobRecommendation,
+  JobRecommendations,
+} from '../types/job-recommendation.types.js';
+import { toVacancyRequirements } from '../utils/build-vacancy-requirements.js';
+import { buildScoreRequirements } from '../utils/build-score-requirements.js';
+import type { RequirementState } from '../types/requirement-state.types.js';
+import { CandidateProfileService } from './candidate-profile.service.js';
+import { RequirementTermsService } from './requirement-terms.service.js';
+import { VacancyRankingService } from './vacancy-ranking.service.js';
+import { WeightedScoreService } from './weighted-score.service.js';
 
-interface ScoredOffer {
-  item: RecommendedJobResponse;
-  createdAt: number;
+function allFulfilled(requirements: readonly RequirementState[]): boolean {
+  return requirements.every(({ status }) => status === 'Cumple');
 }
 
 @Injectable()
 export class JobRecommendationsService {
   constructor(
-    private readonly jobOffersService: JobOffersService,
+    private readonly jobOffers: JobOffersService,
     private readonly userSkillService: UserSkillService,
+    private readonly candidateProfileService: CandidateProfileService,
+    private readonly jobMatchRepository: JobMatchRepository,
+    private readonly ranking: VacancyRankingService,
+    private readonly score: WeightedScoreService,
+    private readonly requirementTermsService: RequirementTermsService,
   ) {}
 
-  async getRecommendations(userId: string): Promise<RecommendationsResponse> {
-    const userSkillIds = await this.loadUserSkillIds(userId);
-    if (userSkillIds.size === 0) return { isProfileComplete: false, items: [] };
-
-    const offers = await this.jobOffersService.listPublished();
-    const items = offers
-      .map((offer) => this.fit(offer, userSkillIds))
-      .filter(({ item }) => item.score > 0)
-      .sort((left, right) => right.item.score - left.item.score || right.createdAt - left.createdAt)
-      .map(({ item }) => item);
-
-    return { isProfileComplete: true, items };
+  async scoresForOffers(
+    userId: string,
+    ids: string[],
+  ): Promise<Map<string, number>> {
+    const [vacancies, candidate] = await Promise.all([
+      this.jobOffers.findScoringOffers(ids),
+      this.getCandidate(userId),
+    ]);
+    const evaluated = await Promise.all(
+      vacancies.map((vacancy) => this.evaluate(vacancy, candidate)),
+    );
+    return new Map(evaluated.map(({ item }) => [item.jobOfferId, item.score]));
   }
 
-  async getJobFit(userId: string, jobOfferId: string): Promise<JobFitResponse> {
-    const userSkillIds = await this.loadUserSkillIds(userId);
-    const offers = await this.jobOffersService.listPublished();
-    const offer = offers.find((candidate) => candidate.id === jobOfferId);
-    if (offer === undefined) throw new JobOfferNotFoundException();
-
-    return { ...this.fit(offer, userSkillIds).item, description: offer.description };
+  private async getCandidate(userId: string): Promise<CandidateProfile> {
+    const [skills, profile] = await Promise.all([
+      this.profileSkills(userId),
+      this.candidateProfileService.findCandidateProfile(userId),
+    ]);
+    return {
+      skills,
+      career: profile.career,
+      experienceYears: profile.experienceYears,
+    };
   }
 
-  private async loadUserSkillIds(userId: string): Promise<Set<string>> {
+  async recommendations(userId: string): Promise<JobRecommendations> {
+    const candidate = await this.getCandidate(userId);
+    if (!candidate.skills.length)
+      return { isProfileComplete: false, items: [] };
+    const vacancies = await this.jobMatchRepository.findPublished(new Date());
+
+    const evaluated = await Promise.all(
+      vacancies.map((vacancy) => this.evaluate(vacancy, candidate)),
+    );
+
+    const ranked = this.ranking.rank(evaluated);
+    return { isProfileComplete: true, items: ranked.map(({ item }) => item) };
+  }
+
+  private async profileSkills(userId: string): Promise<string[]> {
     try {
       const skills = await this.userSkillService.getUserSkills(userId);
-      return new Set(skills.map((skill) => skill.id));
+      return skills.map(({ name }) => name);
     } catch (error) {
-      if (error instanceof ProfileNotFoundException) return new Set();
+      if (error instanceof ProfileNotFoundException) return [];
       throw error;
     }
   }
 
-  private fit(offer: JobOfferResponse, userSkillIds: Set<string>): ScoredOffer {
-    const matched = offer.skills.filter((skill) => userSkillIds.has(skill.id));
-    const missing = offer.skills.filter((skill) => !userSkillIds.has(skill.id));
-    const score =
-      offer.skills.length === 0 ? 0 : Math.round((matched.length / offer.skills.length) * 100);
+  private async evaluate(vacancy: JobMatchRecord, candidate: CandidateProfile) {
+    const vacancyRequirements = toVacancyRequirements(vacancy);
 
+    const extractedSkills =
+      await this.requirementTermsService.extractAndMatchRequirements(
+        vacancy.description ?? '',
+      );
+
+    const existingSkillNames = vacancyRequirements.skills.map((skill) =>
+      skill.toLowerCase(),
+    );
+    const newSkillNames = extractedSkills
+      .map((skill) => skill.name)
+      .filter((name) => !existingSkillNames.includes(name.toLowerCase()));
+
+    const mergedRequirements = {
+      ...vacancyRequirements,
+      skills: [...vacancyRequirements.skills, ...newSkillNames],
+    };
+
+    const requirements = buildScoreRequirements(mergedRequirements, candidate);
+    const score = this.score.calculate(requirements);
+    const matchedSkills = requirements.skills
+      .filter(({ status }) => status === 'Cumple')
+      .map(({ name }) => name);
+    const item: JobRecommendation = {
+      jobOfferId: vacancy.id,
+      title: vacancy.title,
+      companyName: vacancy.company.title,
+      modality: vacancy.modality.title,
+      locationUrl: vacancy.locationUrl,
+      score,
+      skills: requirements.skills.map(({ name }) => name),
+      matchedSkills,
+    };
     return {
-      createdAt: Date.parse(offer.createdAt),
-      item: {
-        jobOfferId: offer.id,
-        title: offer.title,
-        companyName: offer.company.name,
-        modality: offer.modality,
-        score,
-        matchedSkills: matched.map((skill) => skill.name),
-        matchedSkillIds: matched.map((skill) => skill.id),
-        missingSkills: missing.map((skill) => skill.name),
-        missingSkillIds: missing.map((skill) => skill.id),
-        skills: offer.skills.map((skill) => skill.name),
-      },
+      item,
+      compatibility: score,
+      matchedSkills,
+      careerMatch: allFulfilled(requirements.academicRequirements),
+      experienceMatch: allFulfilled(requirements.experienceRequirements),
+      allRequiredSkillsMatch: allFulfilled(requirements.skills),
     };
   }
 }

@@ -3,7 +3,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import { formatBlockRange } from "@/shared/utils/date-time";
 import { BLOCK_SELECTION_TEXT } from "../../constants/block-selection.constants";
 import type { BlockSelectionPanelProps } from "../../types/block-selection-panel-props.types";
@@ -14,6 +13,7 @@ export function BlockSelectionPanel({
   unavailableBlock,
   isChecking,
   error,
+  children,
 }: BlockSelectionPanelProps) {
   return (
     <Card aria-label={BLOCK_SELECTION_TEXT.title}>
@@ -48,27 +48,35 @@ export function BlockSelectionPanel({
             <Skeleton className="h-4 w-1/2" />
           </div>
         ) : selectedBlock ? (
-          <Card size="sm" className="bg-accent/5 ring-accent">
-            <CardContent className="flex flex-col gap-1">
-              <CardTitle className="font-bold">{formatBlockDate(selectedBlock.startAt)}</CardTitle>
-              <CardDescription>
-                {formatBlockRange(selectedBlock.startAt, selectedBlock.endAt)} ·{" "}
-                {getBlockDurationMinutes(selectedBlock.startAt, selectedBlock.endAt)}{" "}
-                {BLOCK_SELECTION_TEXT.minutesUnit}
-              </CardDescription>
-              <CardDescription className="text-xs">{BOLIVIA_TIME_LABEL}</CardDescription>
-            </CardContent>
-          </Card>
+          <>
+            <Card size="sm" className="bg-accent/5 ring-accent">
+              <CardContent className="flex flex-col gap-1">
+                <CardTitle className="font-bold">{formatBlockDate(selectedBlock.startAt)}</CardTitle>
+                <CardDescription>
+                  {formatBlockRange(selectedBlock.startAt, selectedBlock.endAt)} ·{" "}
+                  {getBlockDurationMinutes(selectedBlock.startAt, selectedBlock.endAt)}{" "}
+                  {BLOCK_SELECTION_TEXT.minutesUnit}
+                </CardDescription>
+              </CardContent>
+            </Card>
+            {children}
+          </>
         ) : (
           <CardDescription>{BLOCK_SELECTION_TEXT.empty}</CardDescription>
         )}
       </CardContent>
 
-      <CardFooter className="bg-transparent">
-        <Button type="button" className="w-full bg-accent text-surface hover:bg-danger" disabled>
-          {BLOCK_SELECTION_TEXT.requestAppointment}
-        </Button>
-      </CardFooter>
+      {!selectedBlock && (
+        <CardFooter className="bg-transparent">
+          <Button
+            type="button"
+            className="w-full bg-primary text-primary-foreground hover:bg-brand-hover"
+            disabled
+          >
+            {BLOCK_SELECTION_TEXT.requestAppointment}
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }

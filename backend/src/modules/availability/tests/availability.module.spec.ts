@@ -3,6 +3,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AvailabilityModule } from '../availability.module.js';
 import { AvailabilityController } from '../controllers/availability.controller.js';
 import { MentorAvailabilityController } from '../controllers/mentor-availability.controller.js';
+import { BlockedDatesController } from '../controllers/blocked-dates.controller.js';
+import { BlockedDatesService } from '../services/blocked-dates.service.js';
+import { BlockedDatesRepository } from '../repositories/blocked-dates.repository.js';
+import { BlockedDateMapper } from '../mappers/blocked-date.mapper.js';
 import { AvailabilityService } from '../services/availability.service.js';
 import { AvailabilityRepository } from '../repositories/availability.repository.js';
 import { AvailabilityMapper } from '../mappers/availability.mapper.js';
@@ -27,6 +31,10 @@ describe('AvailabilityModule', () => {
     AvailabilityService,
     AvailabilityRepository,
     AvailabilityMapper,
+    BlockedDatesController,
+    BlockedDatesService,
+    BlockedDatesRepository,
+    BlockedDateMapper,
   ])('resuelve %o', (provider) => {
     expect(moduleRef.get(provider)).toBeInstanceOf(provider);
   });

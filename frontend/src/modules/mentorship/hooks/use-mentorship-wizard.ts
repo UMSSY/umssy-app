@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type SetStateAction } from "react";
 import { INITIAL_MENTORSHIP_WIZARD_STATE } from "../constants/mentorship-wizard.constants";
 import {
   loadMentorshipWizardDraft,
@@ -14,22 +14,34 @@ export function useMentorshipWizard() {
     INITIAL_MENTORSHIP_WIZARD_STATE,
   );
   const [isDraftHydrated, setIsDraftHydrated] = useState(false);
+  const [hasDraftStorageError, setHasDraftStorageError] = useState(false);
+  const hasUserEdited = useRef(false);
+  const hasDraftLoadFailed = useRef(false);
+
+  const updateState = useCallback((update: SetStateAction<MentorshipWizardState>) => {
+    hasUserEdited.current = true;
+    setState(update);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
 
-    queueMicrotask(() => {
+    void loadMentorshipWizardDraft().then((draft) => {
       if (!isMounted) {
         return;
       }
 
-      const draft = loadMentorshipWizardDraft();
-
-      if (draft) {
+      if (draft && !hasUserEdited.current) {
         setState(draft);
       }
 
       setIsDraftHydrated(true);
+    }).catch(() => {
+      if (isMounted) {
+        hasDraftLoadFailed.current = true;
+        setHasDraftStorageError(true);
+        setIsDraftHydrated(true);
+      }
     });
 
     return () => {
@@ -38,22 +50,28 @@ export function useMentorshipWizard() {
   }, []);
 
   useEffect(() => {
-    if (!isDraftHydrated) {
+    if (!isDraftHydrated || (hasDraftLoadFailed.current && !hasUserEdited.current)) {
       return;
     }
 
-    saveMentorshipWizardDraft(state);
+    let isActive = true;
+    void saveMentorshipWizardDraft(state).then(() => {
+      if (isActive) setHasDraftStorageError(false);
+    }).catch(() => {
+      if (isActive) setHasDraftStorageError(true);
+    });
+    return () => { isActive = false; };
   }, [isDraftHydrated, state]);
 
   const goToStep = useCallback((step: MentorshipStep) => {
-    setState((prev) => ({
+    updateState((prev) => ({
       ...prev,
       currentStep: step,
     }));
-  }, []);
+  }, [updateState]);
 
   const goNext = useCallback(() => {
-    setState((prev) => {
+    updateState((prev) => {
       if (prev.currentStep >= 4) return prev;
 
       return {
@@ -61,10 +79,10 @@ export function useMentorshipWizard() {
         currentStep: (prev.currentStep + 1) as MentorshipStep,
       };
     });
-  }, []);
+  }, [updateState]);
 
   const goBack = useCallback(() => {
-    setState((prev) => {
+    updateState((prev) => {
       if (prev.currentStep <= 1) return prev;
 
       return {
@@ -72,10 +90,10 @@ export function useMentorshipWizard() {
         currentStep: (prev.currentStep - 1) as MentorshipStep,
       };
     });
-  }, []);
+  }, [updateState]);
 
   const toggleTechnicalArea = useCallback((id: string) => {
-    setState((prev) => {
+    updateState((prev) => {
       const alreadySelected =
         prev.selectedTechnicalAreaIds.includes(id);
 
@@ -90,7 +108,7 @@ export function useMentorshipWizard() {
         selectedTechnicalAreaIds,
       };
     });
-  }, []);
+  }, [updateState]);
 
   const canGoNextFromStep2 =
     state.selectedTechnicalAreaIds.length > 0;
@@ -104,6 +122,7 @@ export function useMentorshipWizard() {
     goNext,
     goBack,
     toggleTechnicalArea,
+    hasDraftStorageError,
     canGoBack: state.currentStep > 1,
     canGoNext:
       state.currentStep === 2
@@ -111,6 +130,6 @@ export function useMentorshipWizard() {
         : state.currentStep === 3
           ? canGoNextFromStep3
           : state.currentStep < 4,
-    setState,
+    setState: updateState,
   };
 }

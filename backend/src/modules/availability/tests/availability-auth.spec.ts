@@ -11,6 +11,7 @@ import type { AuthenticatedRequest } from '../../../common/types/authenticated-r
 import { AvailabilityModule } from '../availability.module.js';
 import { AvailabilityController } from '../controllers/availability.controller.js';
 import { MentorAvailabilityController } from '../controllers/mentor-availability.controller.js';
+import { BlockedDatesController } from '../controllers/blocked-dates.controller.js';
 
 describe('Availability authentication', () => {
   const findFirst = vi.fn();
@@ -37,6 +38,9 @@ describe('Availability authentication', () => {
     [AvailabilityController, Object.getOwnPropertyDescriptor(AvailabilityController.prototype, 'updateBlock')!.value],
     [AvailabilityController, Object.getOwnPropertyDescriptor(AvailabilityController.prototype, 'remove')!.value],
     [MentorAvailabilityController, Object.getOwnPropertyDescriptor(MentorAvailabilityController.prototype, 'findMentorFreeBlocks')!.value],
+    [BlockedDatesController, Object.getOwnPropertyDescriptor(BlockedDatesController.prototype, 'blockDate')!.value],
+    [BlockedDatesController, Object.getOwnPropertyDescriptor(BlockedDatesController.prototype, 'findBlockedDates')!.value],
+    [BlockedDatesController, Object.getOwnPropertyDescriptor(BlockedDatesController.prototype, 'unblockDate')!.value],
   ])('uses the shared session and role checks for %p', async (controller, handler) => {
     expect(Reflect.getMetadata(GUARDS_METADATA, handler)).toEqual([JwtAuthGuard, RolesGuard]);
     findFirst.mockResolvedValue({

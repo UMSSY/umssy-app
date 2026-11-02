@@ -1,5 +1,6 @@
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
 import { describe, it, expect, vi } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, waitFor } from "@testing-library/react";
 import { useConversations } from '../hooks/use-conversations';
 import * as chatApi from '../services/chat-api';
 import { User } from '../types/user.types';
@@ -50,14 +51,14 @@ describe('useConversations Hook', () => {
       result.current.setActiveFilter('unread');
     });
     expect(result.current.conversations.length).toBe(1);
-    expect(result.current.conversations[0].contact.fullName).toBe('Ana Gomez');
+    expect(result.current.conversations[0].contact?.fullName).toBe('Ana Gomez');
 
     act(() => {
       result.current.setActiveFilter('all');
       result.current.setSearchQuery('beto');
     });
     expect(result.current.conversations.length).toBe(1);
-    expect(result.current.conversations[0].contact.fullName).toBe('Beto Lopez');
+    expect(result.current.conversations[0].contact?.fullName).toBe('Beto Lopez');
   });
 
   it('debe resetear los no leidos al seleccionar una conversacion y permitir limpiar seleccion', async () => {
@@ -75,7 +76,7 @@ describe('useConversations Hook', () => {
     });
 
     expect(result.current.selectedId).toBe('c1');
-    expect(markSpy).toHaveBeenCalledWith('c1');
+    await waitFor(() => expect(markSpy).toHaveBeenCalledWith('c1'));
     const selectedItem = result.current.conversations.find((c) => c.id === 'c1');
     expect(selectedItem?.unreadCount).toBe(0);
 
@@ -98,7 +99,7 @@ describe('useConversations Hook', () => {
       result.current.simulateIncomingMessage('c1', 'Nuevo mensaje');
     });
 
-    expect(result.current.conversations[0].id).toBe('c1');
+    await waitFor(() => expect(result.current.conversations[0].id).toBe('c1'));
     expect(result.current.conversations[0].lastMessage?.content).toBe('Nuevo mensaje');
   });
 
@@ -161,7 +162,7 @@ describe('useConversations Hook', () => {
 
   // No duplicados
   const matches = result.current.conversations.filter(
-    (c) => c.contact.id === existing.contact.id
+    (c) => c.contact?.id === existing.contact.id
   );
   expect(matches.length).toBe(1);
 });

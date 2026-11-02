@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { profileService } from "../services/profile.service";
 import type { ProfileResponse } from "../types/profile-response.types";
@@ -49,14 +50,12 @@ describe("ProfileOverviewView", () => {
     vi.clearAllMocks();
   });
 
-  it("renders the profile page without an active tab", async () => {
+  it("renders the profile page with a single screen heading and existing edit actions", async () => {
     render(<ProfileOverviewView />);
 
     expect(screen.getByRole("heading", { level: 1, name: "Mi perfil" })).toBeInTheDocument();
     await screen.findByText("Valeria Quispe");
-    for (const link of screen.getAllByRole("link", { name: /Datos personales|Presentación|Trayectoria/ })) {
-      expect(link).not.toHaveAttribute("aria-current");
-    }
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
   });
 
   it("shows a loading message while the profile is requested", () => {
@@ -76,7 +75,7 @@ describe("ProfileOverviewView", () => {
     expect(screen.getByText(/Completa tu perfil/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Completar perfil" })).toHaveAttribute(
       "href",
-      "/profile/personal-info",
+      "/profile/settings#personal-info",
     );
     expect(screen.getByText("Aún no agregaste un titular profesional")).toBeInTheDocument();
     expect(screen.getAllByText("Sin registrar")).toHaveLength(3);
@@ -104,10 +103,10 @@ describe("ProfileOverviewView", () => {
 
     expect(
       await screen.findByRole("link", { name: "Editar datos personales" }),
-    ).toHaveAttribute("href", "/profile/personal-info");
+    ).toHaveAttribute("href", "/profile/settings#personal-info");
     expect(screen.getByRole("link", { name: "Editar presentación profesional" })).toHaveAttribute(
       "href",
-      "/profile/presentation",
+      "/profile/settings#presentation",
     );
   });
 
@@ -120,4 +119,29 @@ describe("ProfileOverviewView", () => {
       "Tu sesión no es válida. Inicia sesión nuevamente.",
     );
   });
+  it("shows trajectory sections rather than a second navigation directory", async () => {
+    render(<ProfileOverviewView />);
+    await screen.findByText("Valeria Quispe");
+    expect(await screen.findByRole("region", { name: "Formación académica" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "Experiencia laboral" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "Habilidades" })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "Certificaciones" })).toBeInTheDocument();
+    expect(screen.queryByRole("complementary", { name: "Tu trayectoria" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Recorrido del perfil" })).not.toBeInTheDocument();
+  });
+
+  it("suggests presentation when contact information is already complete", async () => {
+    vi.mocked(profileService.getProfile).mockResolvedValue({ ...COMPLETE_PROFILE, aboutMe: null });
+    render(<ProfileOverviewView />);
+    expect(await screen.findByRole("link", { name: "Completar perfil" })).toHaveAttribute("href", "/profile/settings#presentation");
+  });
+
 });
+
+vi.mock("@/modules/education", () => ({ EducationProfileSection: () => <section aria-label="Formación académica"><h2>Formación académica</h2></section> }));
+
+vi.mock("@/modules/work-experience", () => ({ WorkExperienceProfileSection: () => <section aria-label="Experiencia laboral"><h2>Experiencia laboral</h2></section> }));
+
+vi.mock("@/modules/skills", () => ({ SkillsProfileSection: () => <section aria-label="Habilidades"><h2>Habilidades</h2></section> }));
+
+vi.mock("@/modules/certifications", () => ({ CertificationProfileSection: () => <section aria-label="Certificaciones"><h2>Certificaciones</h2></section> }));

@@ -37,6 +37,7 @@ export class ReportUsersRepository {
           idCardNumber: true,
           rejectionReason: true,
           submittedAt: true,
+          reviewedAt: true,
           createdAt: true,
           status: { select: { title: true } },
           documentType: { select: { title: true } },
