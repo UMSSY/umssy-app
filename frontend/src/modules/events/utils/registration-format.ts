@@ -31,3 +31,32 @@ export function formatRegistrationTime(time: string | null | undefined) {
     timeZone: 'UTC',
   }).format(value);
 }
+
+export function isRegistrationPast(date: string | null | undefined): boolean {
+  if (!date) return false;
+  const value = new Date(date);
+  if (!Number.isFinite(value.getTime())) return false;
+  return value.getTime() < Date.now();
+}
+
+export function getEffectiveRegistrationStatus(status: string, date: string | null | undefined) {
+  const isPast = isRegistrationPast(date);
+
+  if (isPast && (status === "CONFIRMED" || status === "APPROVED" || status === "Confirmada")) {
+    return { label: "Finalizado", isPast: true, code: "FINALIZED" };
+  }
+
+  const statusLabels: Record<string, string> = {
+    CONFIRMED: "Confirmada",
+    APPROVED: "Confirmada",
+    PENDING: "Pendiente",
+    CANCELLED: "Cancelada",
+    FINALIZED: "Finalizado",
+  };
+
+  return {
+    label: statusLabels[status] ?? status,
+    isPast,
+    code: status,
+  };
+}
