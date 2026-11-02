@@ -16,10 +16,16 @@ export function MentorSearchBar({
   onSearchChange,
 }: MentorSearchBarProps) {
   const [inputValue, setInputValue] = useState(value);
+
   const debouncedValue = useDebouncedValue(
     inputValue,
     SEARCH_DEBOUNCE_MS,
   );
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza filtros externos sin remontar el input
+    setInputValue(value);
+  }, [value]);
 
   useEffect(() => {
     const trimmedValue = debouncedValue.trim();
@@ -32,7 +38,7 @@ export function MentorSearchBar({
   return (
     <Input
       type="search"
-      className="min-w-56 flex-1"
+      className="min-w-56 flex-1 self-end"
       aria-label="Buscar mentores por nombre"
       placeholder="Buscar por nombre"
       value={inputValue}

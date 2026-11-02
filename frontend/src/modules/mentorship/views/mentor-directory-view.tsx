@@ -186,7 +186,6 @@ export function MentorDirectoryView({
           className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-surface p-4"
         >
           <MentorSearchBar
-            key={search}
             value={search}
             onSearchChange={(nextSearch) =>
               navigateWithUpdates({
@@ -208,7 +207,9 @@ export function MentorDirectoryView({
             }
           />
 
-          <Label className="flex items-center gap-2">
+          <Label
+            className={`flex items-center gap-2 ${isAvailableOnly ? "text-primary" : ""}`}
+          >
             <Checkbox
               checked={isAvailableOnly}
               onCheckedChange={(checked) =>
@@ -309,6 +310,7 @@ export function MentorDirectoryView({
               returnTo={returnTo}
               showAffinityBadge={effectiveSort === "affinity"}
               selectedArea={area}
+              highlightAvailability={isAvailableOnly}
             />
 
             <MentorDirectoryPagination

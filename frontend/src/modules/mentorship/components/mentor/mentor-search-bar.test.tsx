@@ -53,6 +53,20 @@ describe("MentorSearchBar", () => {
     expect(onSearchChange).toHaveBeenCalledWith("Mar");
   });
 
+  it("sincroniza el valor externo sin perder el foco", () => {
+    const { rerender } = render(
+      <MentorSearchBar value="" onSearchChange={vi.fn()} />,
+    );
+    const input = screen.getByRole("searchbox");
+
+    input.focus();
+    fireEvent.change(input, { target: { value: "And" } });
+    rerender(<MentorSearchBar value="And" onSearchChange={vi.fn()} />);
+
+    expect(input).toHaveFocus();
+    expect(input).toHaveValue("And");
+  });
+
   it("elimina espacios de los extremos", () => {
     vi.useFakeTimers();
     const onSearchChange = vi.fn();

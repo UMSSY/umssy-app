@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -17,6 +18,7 @@ type MentorCardProps = {
   returnTo?: string;
   showAffinityBadge?: boolean;
   selectedArea?: string;
+  highlightAvailability?: boolean;
 };
 
 function getSafeReturnTo(returnTo?: string): string | null {
@@ -56,6 +58,7 @@ export function MentorCard({
   returnTo,
   showAffinityBadge = false,
   selectedArea,
+  highlightAvailability = false,
 }: MentorCardProps) {
   const hasTechnicalAreas = mentor.technicalAreas.length > 0;
   const safeReturnTo = getSafeReturnTo(returnTo);
@@ -108,15 +111,31 @@ export function MentorCard({
           <div className="ml-auto flex shrink-0 flex-col items-end gap-2">
             {mentor.isAvailable ? (
               <Badge
-                variant="outline"
-                className="gap-1.5 border-availability-border bg-availability px-2.5 whitespace-nowrap text-availability-foreground"
-              >
-                <span
-                  aria-hidden="true"
-                  className="size-1.5 shrink-0 rounded-full bg-accent"
-                />
-                Disponible para mentoría
-              </Badge>
+              variant="outline"
+              aria-current={
+                highlightAvailability && mentor.isAvailable ? "true" : undefined
+              }
+              className={cn(
+                "px-2.5 whitespace-nowrap",
+                highlightAvailability && mentor.isAvailable
+                  ? "border-accent bg-interaction font-semibold text-accent ring-1 ring-accent"
+                  : mentor.isAvailable
+                    ? "border-availability-border bg-availability text-availability-foreground"
+                    : "border-border bg-surface-soft text-ink",
+              )}
+            >
+              {mentor.isAvailable ? (
+                <>
+                  <span
+                    aria-hidden="true"
+                    className="size-1.5 rounded-full bg-accent"
+                  />
+                  Disponible para mentoría
+                </>
+              ) : (
+                "No disponible"
+              )}
+            </Badge>
             ) : null}
             {showAffinityBadge &&
               mentor.sharedInterestsCount !== undefined && (
