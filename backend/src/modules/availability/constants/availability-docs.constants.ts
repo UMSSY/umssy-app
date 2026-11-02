@@ -59,7 +59,7 @@ export const UNBLOCK_DATE_DOCS = {
 } as const;
 
 export const FIND_BLOCKED_DATES_DOCS = {
-  summary: 'Lista las fechas bloqueadas del mentor en sesión dentro de un rango de hasta 7 días',
+  summary: 'Lista las fechas bloqueadas del mentor en sesión desde una fecha o dentro de un rango de hasta 7 días',
   fromDescription: FIND_MY_BLOCKS_DOCS.fromDescription,
-  toDescription: FIND_MY_BLOCKS_DOCS.toDescription,
+  toDescription: `${FIND_MY_BLOCKS_DOCS.toDescription}. Opcional: sin este parámetro se incluyen todas las fechas desde from`,
 } as const;
