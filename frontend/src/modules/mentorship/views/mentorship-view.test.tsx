@@ -214,6 +214,72 @@ describe("MentorshipView", () => {
     expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
   });
 
+  it.each(["Cancelar", "Escape"])(
+    "muestra la sanción solo dentro del modal y la limpia al cerrar con %s",
+    async (closeAction) => {
+      const sanctionMessage =
+        "Tu capacidad para solicitar participación como mentor ha sido suspendida temporalmente. Podrás volver a intentarlo al finalizar la sanción";
+      vi.mocked(mentorParticipationService.capacity).mockResolvedValue({
+        available: 0,
+        capacity: 2,
+        occupied: 2,
+      });
+      const create = vi.spyOn(mentorParticipationService, "create").mockRejectedValue({
+        isAxiosError: true,
+        response: { status: 429, data: { detail: sanctionMessage } },
+      });
+      const { container } = renderWithQuery(<MentorshipView />);
+      advanceToConfirmation();
+      const confirmation = await openActivationDialog();
+      fireEvent.click(within(confirmation).getByRole("button", { name: "Aceptar" }));
+      const dialog = await screen.findByRole("dialog", { name: "No hay cupos disponibles" });
+      fireEvent.click(within(dialog).getByRole("button", { name: "Solicitar cupo" }));
+
+      expect(await within(dialog).findByRole("alert")).toHaveTextContent(sanctionMessage);
+      // Text queries include hidden elements, including the wizard behind the modal.
+      expect(screen.getAllByText(sanctionMessage)).toHaveLength(1);
+      expect(within(container).queryByText(sanctionMessage)).not.toBeInTheDocument();
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(integrationMocks.push).not.toHaveBeenCalled();
+
+      if (closeAction === "Cancelar") {
+        fireEvent.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+      } else {
+        fireEvent.keyDown(dialog, { key: "Escape", code: "Escape" });
+      }
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+      expect(screen.queryByText(sanctionMessage)).not.toBeInTheDocument();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+      const retryConfirmation = await openActivationDialog();
+      fireEvent.click(within(retryConfirmation).getByRole("button", { name: "Aceptar" }));
+      const reopened = await screen.findByRole("dialog", { name: "No hay cupos disponibles" });
+      expect(within(reopened).queryByRole("alert")).not.toBeInTheDocument();
+      expect(screen.queryByText(sanctionMessage)).not.toBeInTheDocument();
+    },
+  );
+
+  it("mantiene el aviso externo cuando se libera un cupo y el modal se cierra", async () => {
+    vi.mocked(mentorParticipationService.capacity).mockResolvedValue({
+      available: 0, capacity: 2, occupied: 2,
+    });
+    vi.spyOn(mentorParticipationService, "create").mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 409, data: { data: { code: "CAPACITY_AVAILABLE" } } },
+    });
+    renderWithQuery(<MentorshipView />);
+    advanceToConfirmation();
+    const confirmation = await openActivationDialog();
+    fireEvent.click(within(confirmation).getByRole("button", { name: "Aceptar" }));
+    const dialog = await screen.findByRole("dialog", { name: "No hay cupos disponibles" });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Solicitar cupo" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Se liberó un cupo. Confirma nuevamente la activación para incorporarte como mentor.",
+    );
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(integrationMocks.push).not.toHaveBeenCalled();
+  });
+
   it("en producción no utiliza la simulación ni bloquea la activación existente", async () => {
     vi.stubEnv("NODE_ENV", "production");
     renderWithQuery(<MentorshipView />);

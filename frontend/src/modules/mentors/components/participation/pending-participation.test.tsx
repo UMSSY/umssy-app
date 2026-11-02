@@ -52,7 +52,8 @@ describe("Participación pendiente HU7-2", () => {
       screen.getByRole("heading", { name: "Solicitud pendiente" }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText("PENDING")).toBeInTheDocument();
+    expect(screen.getByText("Pendiente")).toBeInTheDocument();
+    expect(screen.queryByText("PENDING")).not.toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
 
@@ -149,6 +150,10 @@ describe("Participación pendiente HU7-2", () => {
   });
 
   it("cancela la solicitud mediante el servicio", async () => {
+    const onCancelled = vi.fn();
+    vi.mocked(participationService.mentorParticipationService.getHistory).mockResolvedValue([
+      { ...pendingRequest, status: "CANCELLED" },
+    ]);
     const cancel = vi
       .spyOn(
         participationService.mentorParticipationService,
@@ -160,7 +165,7 @@ describe("Participación pendiente HU7-2", () => {
       });
 
     renderWithQuery(
-      <PendingParticipation request={pendingRequest} />,
+      <PendingParticipation request={pendingRequest} onCancelled={onCancelled} />,
     );
 
     fireEvent.click(
@@ -175,7 +180,11 @@ describe("Participación pendiente HU7-2", () => {
 
     await waitFor(() => {
       expect(cancel).toHaveBeenCalledTimes(1);
+      expect(onCancelled).toHaveBeenCalledTimes(1);
     });
+    expect(screen.queryByText("Solicitud cancelada correctamente")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Ver historial" }));
+    expect(await screen.findByText("Estado: Cancelada")).toBeInTheDocument();
   });
 
   it("consulta el historial de solicitudes", async () => {
@@ -205,7 +214,27 @@ describe("Participación pendiente HU7-2", () => {
     });
 
     expect(
-      await screen.findByText("Estado: CANCELLED"),
+      await screen.findByText("Estado: Cancelada"),
     ).toBeInTheDocument();
   });
+  it.each([
+    ["PENDING", "Pendiente"],
+    ["OFFERED", "Cupo ofrecido"],
+    ["ACTIVE", "Activa"],
+    ["CANCELLED", "Cancelada"],
+    ["EXPIRED", "Vencida"],
+    ["ENDED", "Finalizada"],
+    ["DEACTIVATED", "Desactivada"],
+    ["UNKNOWN", "No disponible"],
+  ])("presenta %s en español en el historial sin alterar el estado", async (status, label) => {
+    const entry = { ...pendingRequest, id: "previous-request", status };
+    vi.mocked(participationService.mentorParticipationService.getHistory)
+      .mockResolvedValue([entry]);
+    renderWithQuery(<PendingParticipation request={pendingRequest} />);
+    fireEvent.click(screen.getByRole("button", { name: "Ver historial" }));
+    expect(await screen.findByText(`Estado: ${label}`)).toBeInTheDocument();
+    expect(screen.queryByText(`Estado: ${status}`)).not.toBeInTheDocument();
+    expect(entry.status).toBe(status);
+  });
+
 });

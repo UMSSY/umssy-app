@@ -20,6 +20,16 @@ import {
   type MentorParticipationRequest,
 } from "../../services/mentor-participation.service";
 
+const requestStatusLabels: Record<string, string> = {
+  PENDING: "Pendiente",
+  OFFERED: "Cupo ofrecido",
+  ACTIVE: "Activa",
+  CANCELLED: "Cancelada",
+  EXPIRED: "Vencida",
+  ENDED: "Finalizada",
+  DEACTIVATED: "Desactivada",
+};
+
 type PendingParticipationProps = {
   request: MentorParticipationRequest;
   onCancelled?: () => void;
@@ -169,7 +179,6 @@ export function PendingParticipation({
         queryKey: ["mentor-participation-history"],
       });
       onCancelled?.();
-      setSuccessMessage("Solicitud cancelada correctamente");
     },
   });
 
@@ -219,7 +228,7 @@ export function PendingParticipation({
               </h2>
 
               <span className="inline-flex rounded-md bg-notice px-3 py-1 text-xs font-semibold text-notice-foreground">
-                PENDING
+                Pendiente
               </span>
 
               <p className="text-sm text-text-secondary">
@@ -495,7 +504,7 @@ export function PendingParticipation({
                   className="rounded-lg border border-border bg-surface-soft p-4"
                 >
                   <p className="font-semibold text-ink">
-                    Estado: {entry.status}
+                    Estado: {requestStatusLabels[entry.status] ?? "No disponible"}
                   </p>
 
                   <p className="mt-2 text-sm text-text-secondary">
