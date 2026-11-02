@@ -51,14 +51,14 @@ describe('useConversations Hook', () => {
       result.current.setActiveFilter('unread');
     });
     expect(result.current.conversations.length).toBe(1);
-    expect(result.current.conversations[0].contact.fullName).toBe('Ana Gomez');
+    expect(result.current.conversations[0].contact?.fullName).toBe('Ana Gomez');
 
     act(() => {
       result.current.setActiveFilter('all');
       result.current.setSearchQuery('beto');
     });
     expect(result.current.conversations.length).toBe(1);
-    expect(result.current.conversations[0].contact.fullName).toBe('Beto Lopez');
+    expect(result.current.conversations[0].contact?.fullName).toBe('Beto Lopez');
   });
 
   it('debe resetear los no leidos al seleccionar una conversacion y permitir limpiar seleccion', async () => {
@@ -162,7 +162,7 @@ describe('useConversations Hook', () => {
 
   // No duplicados
   const matches = result.current.conversations.filter(
-    (c) => c.contact.id === existing.contact.id
+    (c) => c.contact?.id === existing.contact.id
   );
   expect(matches.length).toBe(1);
 });

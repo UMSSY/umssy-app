@@ -51,11 +51,11 @@ describe("Pantallas de encuestas", () => {
 
     renderWithQuery(<SurveyAnalyticsView id="survey-1" />);
 
-    expect(await screen.findByText("Analíticas: Encuesta Inteligencia Artificial")).toBeInTheDocument();
+    expect(await screen.findByText("Analíticas de Encuesta Inteligencia Artificial")).toBeInTheDocument();
     expect(screen.getByText("Respuestas Recibidas")).toBeInTheDocument();
     expect(screen.getByText("105")).toBeInTheDocument();
 
-    const generatePdfButton = screen.getByRole("button", { name: /Generar PDF/i });
+    const generatePdfButton = screen.getByRole("button", { name: /Exportar PDF/i });
     expect(generatePdfButton).toBeInTheDocument();
 
     fireEvent.click(generatePdfButton);

@@ -46,6 +46,7 @@ describe("Participación pendiente HU7-2", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText("PENDIENTE")).toBeInTheDocument();
+    expect(screen.queryByText("PENDING")).not.toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
 
@@ -142,6 +143,7 @@ describe("Participación pendiente HU7-2", () => {
   });
 
   it("cancela la solicitud mediante el servicio", async () => {
+    const onCancelled = vi.fn();
     const cancel = vi
       .spyOn(
         participationService.mentorParticipationService,
@@ -153,7 +155,7 @@ describe("Participación pendiente HU7-2", () => {
       });
 
     renderWithQuery(
-      <PendingParticipation request={pendingRequest} />,
+      <PendingParticipation request={pendingRequest} onCancelled={onCancelled} />,
     );
 
     fireEvent.click(
@@ -168,7 +170,9 @@ describe("Participación pendiente HU7-2", () => {
 
     await waitFor(() => {
       expect(cancel).toHaveBeenCalledTimes(1);
+      expect(onCancelled).toHaveBeenCalledTimes(1);
     });
+    expect(screen.queryByText("Solicitud cancelada correctamente")).not.toBeInTheDocument();
   });
 
   it("muestra el detalle pendiente y permite volver sin historial", () => {

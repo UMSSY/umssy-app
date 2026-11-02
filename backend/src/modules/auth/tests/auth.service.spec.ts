@@ -1,16 +1,34 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from '../services/auth.service.js';
-import { InvalidCredentialsException, RoleNotAssignedException } from '../exceptions/index.js';
+import {
+  InvalidCredentialsException,
+  RoleNotAssignedException,
+  InvalidResetCodeException,
+  ExpiredResetCodeException,
+  TooManyAttemptsException,
+  ResetCodeCooldownException,
+} from '../exceptions/index.js';
 
 describe('AuthService', () => {
-  const authRepository = { findUserByEmailWithRoles: vi.fn(), existsByEmail: vi.fn() };
+  const authRepository = {
+    findUserByEmailWithRoles: vi.fn(),
+    existsByEmail: vi.fn(),
+    findUserByEmail: vi.fn(),
+    createPasswordResetOtp: vi.fn(),
+    findLatestOtp: vi.fn(),
+    findLatestValidOtp: vi.fn(),
+    incrementOtpAttempts: vi.fn(),
+    markOtpUsed: vi.fn(),
+    updateUserPasswordAndInvalidateOtp: vi.fn(),
+  };
   const jwtService = { sign: vi.fn() };
+  const mailService = { send: vi.fn().mockResolvedValue(undefined) };
   let service: AuthService;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    service = new AuthService(authRepository as any, jwtService as any);
+    service = new AuthService(authRepository as any, jwtService as any, mailService as any);
   });
 
   it.each([true, false])('existsByEmail delega en el repository y devuelve %s', async (exists) => {
@@ -66,6 +84,7 @@ describe('AuthService', () => {
     expect(result).toEqual({ accessToken: 'token-firmado', roleTag: 'titulado', roles: ['titulado'] });
     expect(jwtService.sign).toHaveBeenCalledWith({ sub: 'user-1', roleTag: 'titulado', roles: ['titulado'] });
   });
+
   it('logs in with credentials and includes every assigned role without duplicates', async () => {
     const password = await bcrypt.hash('Prueba123', 4);
     authRepository.findUserByEmailWithRoles.mockResolvedValue({
@@ -97,4 +116,235 @@ describe('AuthService', () => {
     });
   });
 
+  describe('requestPasswordReset', () => {
+    it('envía correo y guarda OTP si el usuario existe y está activo', async () => {
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+        firstName: 'Juan',
+        lastName: 'Perez',
+        isActive: true,
+      });
+      authRepository.findLatestOtp.mockResolvedValue(null);
+
+      const res = await service.requestPasswordReset({ email: 'user@umss.edu' });
+
+      expect(res.ok).toBe(true);
+      expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.');
+      expect(authRepository.createPasswordResetOtp).toHaveBeenCalled();
+      expect(mailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'user@umss.edu',
+          mjml: expect.any(String),
+          values: expect.objectContaining({recipientName: 'Juan Perez'}),
+        }),
+      );
+    });
+
+    it('retorna la misma respuesta genérica si el usuario no existe para no filtrar correos', async () => {
+      authRepository.findUserByEmail.mockResolvedValue(null);
+
+      const res = await service.requestPasswordReset({ email: 'desconocido@umss.edu' });
+
+      expect(res.ok).toBe(true);
+      expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.');
+      expect(authRepository.createPasswordResetOtp).not.toHaveBeenCalled();
+      expect(mailService.send).not.toHaveBeenCalled();
+    });
+
+    it('retorna respuesta genérica sin enviar correo si se solicita dentro del cooldown de 2 minutos', async () => {
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+        firstName: 'Juan',
+        lastName: 'Perez',
+        isActive: true,
+      });
+      // OTP creado hace 30 segundos
+      authRepository.findLatestOtp.mockResolvedValue({
+        id: 'otp-recent',
+        createdAt: new Date(Date.now() - 30 * 1000),
+      });
+
+      const res = await service.requestPasswordReset({ email: 'user@umss.edu' });
+      expect(res.ok).toBe(true);
+      expect(res.message).toBe('Si el correo está registrado, recibirás un código de verificación. Si ya solicitaste uno, espera 2 minutos.');
+      expect(authRepository.createPasswordResetOtp).not.toHaveBeenCalled();
+      expect(mailService.send).not.toHaveBeenCalled();
+    });
+    it('permite solicitar nuevo código si ya pasaron más de 2 minutos', async () => {
+      authRepository.findUserByEmail.mockResolvedValue({
+        id: 'u-123',
+        email: 'user@umss.edu',
+        firstName: 'Juan',
+        lastName: 'Perez',
+        isActive: true,
+      });
+      // OTP creado hace 130 segundos (más de 2 minutos)
+      authRepository.findLatestOtp.mockResolvedValue({
+        id: 'otp-old',
+        createdAt: new Date(Date.now() - 130 * 1000),
+      });
+
+      const res = await service.requestPasswordReset({ email: 'user@umss.edu' });
+
+      expect(res.ok).toBe(true);
+      expect(authRepository.createPasswordResetOtp).toHaveBeenCalled();
+      expect(mailService.send).toHaveBeenCalled();
+    });
+  });
+
+  describe('verifyPasswordReset', () => {
+    it('valida el código correctamente cuando coincide y no ha expirado', async () => {
+      const code = '123456';
+      const codeHash = await bcrypt.hash(code, 4);
+      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findLatestValidOtp.mockResolvedValue({
+        id: 'otp-1',
+        codeHash,
+        expiresAt: new Date(Date.now() + 300000),
+        attempts: 0,
+      });
+
+      const res = await service.verifyPasswordReset({ email: 'user@umss.edu', code });
+
+      expect(res.ok).toBe(true);
+    });
+
+    it('lanza InvalidResetCodeException si el código no coincide e incrementa intentos', async () => {
+      const codeHash = await bcrypt.hash('654321', 4);
+      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findLatestValidOtp.mockResolvedValue({
+        id: 'otp-1',
+        codeHash,
+        expiresAt: new Date(Date.now() + 300000),
+        attempts: 0,
+      });
+
+      await expect(service.verifyPasswordReset({ email: 'user@umss.edu', code: '123456' })).rejects.toBeInstanceOf(
+        InvalidResetCodeException,
+      );
+      expect(authRepository.incrementOtpAttempts).toHaveBeenCalledWith('otp-1');
+    });
+
+    it('lanza ExpiredResetCodeException si el código ya expiró', async () => {
+      const code = '123456';
+      const codeHash = await bcrypt.hash(code, 4);
+      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findLatestValidOtp.mockResolvedValue({
+        id: 'otp-1',
+        codeHash,
+        expiresAt: new Date(Date.now() - 1000),
+        attempts: 0,
+      });
+
+      await expect(service.verifyPasswordReset({ email: 'user@umss.edu', code })).rejects.toBeInstanceOf(
+        ExpiredResetCodeException,
+      );
+    });
+
+    it('lanza TooManyAttemptsException si ha superado los 5 intentos', async () => {
+      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findLatestValidOtp.mockResolvedValue({
+        id: 'otp-1',
+        codeHash: 'hash',
+        expiresAt: new Date(Date.now() + 300000),
+        attempts: 5,
+      });
+
+      await expect(service.verifyPasswordReset({ email: 'user@umss.edu', code: '123456' })).rejects.toBeInstanceOf(
+        TooManyAttemptsException,
+      );
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('hashea la nueva contraseña y actualiza el usuario e invalida el OTP', async () => {
+      const code = '123456';
+      const codeHash = await bcrypt.hash(code, 4);
+      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findLatestValidOtp.mockResolvedValue({
+        id: 'otp-1',
+        codeHash,
+        expiresAt: new Date(Date.now() + 300000),
+        attempts: 0,
+      });
+
+      const res = await service.resetPassword({
+        email: 'user@umss.edu',
+        code,
+        password: 'NuevaContrasena1',
+      });
+
+      expect(res.ok).toBe(true);
+      expect(authRepository.updateUserPasswordAndInvalidateOtp).toHaveBeenCalledWith(
+        'u-123',
+        expect.any(String),
+        'otp-1',
+      );
+    });
+
+    it('lanza InvalidResetCodeException si el usuario no existe', async () => {
+      authRepository.findUserByEmail.mockResolvedValue(null);
+
+      await expect(
+        service.resetPassword({ email: 'inexistente@umss.edu', code: '123456', password: 'Password1' }),
+      ).rejects.toBeInstanceOf(InvalidResetCodeException);
+    });
+
+    it('lanza InvalidResetCodeException si no hay OTP válido para el usuario', async () => {
+      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findLatestValidOtp.mockResolvedValue(null);
+
+      await expect(
+        service.resetPassword({ email: 'user@umss.edu', code: '123456', password: 'Password1' }),
+      ).rejects.toBeInstanceOf(InvalidResetCodeException);
+    });
+
+    it('lanza InvalidResetCodeException e incrementa intentos si el código no coincide', async () => {
+      const codeHash = await bcrypt.hash('654321', 4);
+      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findLatestValidOtp.mockResolvedValue({
+        id: 'otp-1',
+        codeHash,
+        expiresAt: new Date(Date.now() + 300000),
+        attempts: 0,
+      });
+
+      await expect(
+        service.resetPassword({ email: 'user@umss.edu', code: '111111', password: 'Password1' }),
+      ).rejects.toBeInstanceOf(InvalidResetCodeException);
+      expect(authRepository.incrementOtpAttempts).toHaveBeenCalledWith('otp-1');
+    });
+
+    it('lanza ExpiredResetCodeException si el código está vencido al resetear la contraseña', async () => {
+      const code = '123456';
+      const codeHash = await bcrypt.hash(code, 4);
+      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findLatestValidOtp.mockResolvedValue({
+        id: 'otp-1',
+        codeHash,
+        expiresAt: new Date(Date.now() - 1000),
+        attempts: 0,
+      });
+
+      await expect(
+        service.resetPassword({ email: 'user@umss.edu', code, password: 'Password1' }),
+      ).rejects.toBeInstanceOf(ExpiredResetCodeException);
+    });
+
+    it('lanza TooManyAttemptsException si ha superado los intentos al resetear la contraseña', async () => {
+      authRepository.findUserByEmail.mockResolvedValue({ id: 'u-123', email: 'user@umss.edu' });
+      authRepository.findLatestValidOtp.mockResolvedValue({
+        id: 'otp-1',
+        codeHash: 'hash',
+        expiresAt: new Date(Date.now() + 300000),
+        attempts: 5,
+      });
+
+      await expect(
+        service.resetPassword({ email: 'user@umss.edu', code: '123456', password: 'Password1' }),
+      ).rejects.toBeInstanceOf(TooManyAttemptsException);
+    });
+  });
 });

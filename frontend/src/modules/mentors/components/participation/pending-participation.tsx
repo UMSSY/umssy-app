@@ -164,7 +164,6 @@ export function PendingParticipation({
       });
 
       onCancelled?.();
-      setSuccessMessage("Solicitud cancelada correctamente");
     },
   });
 

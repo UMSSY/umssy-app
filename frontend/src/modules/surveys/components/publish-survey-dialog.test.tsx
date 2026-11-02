@@ -35,7 +35,8 @@ describe("PublishSurveyDialog", () => {
     expect(within(dialog).getByRole("heading", { name: "¿Publicar encuesta?" })).toBeInTheDocument();
     expect(dialog).toHaveTextContent(SURVEY_MESSAGES.publishDialogDescription);
     expect(dialog).toHaveTextContent("EncuestaEncuesta de Empleabilidad");
-    expect(dialog).toHaveTextContent("Dirigida aIngeniería de Sistemas");
+    expect(dialog).toHaveTextContent("CarreraIngeniería de Sistemas");
+    expect(dialog).toHaveTextContent("Dirigido aTitulados");
     expect(dialog).toHaveTextContent("Vigencia03/11/2026 - 15/12/2026");
     expect(dialog).toHaveTextContent("Preguntas4 (3 obligatorias)");
   });

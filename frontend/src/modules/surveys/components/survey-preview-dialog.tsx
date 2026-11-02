@@ -3,9 +3,10 @@
 import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { SURVEY_TEXT } from "../constants/survey-builder.constants";
+import { SURVEY_TARGET_AUDIENCE_LABELS, SURVEY_TEXT } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import type { SurveyPreviewDialogProps } from "../types/survey-component-props.types";
+import type { SurveyTargetAudience } from "../types/survey.types";
 import { formatDisplayDate } from "../utils/survey-dates";
 import { PreviewQuestion } from "./preview-question";
 
@@ -13,6 +14,7 @@ export function SurveyPreviewDialog({ open, survey, careerTitle, onOpenChange }:
   const title = (survey.title ?? "").trim() || SURVEY_TEXT.untitledSurvey;
   const description = (survey.description ?? "").trim();
   const details = [
+    SURVEY_TARGET_AUDIENCE_LABELS[survey.targetAudience as SurveyTargetAudience],
     careerTitle,
     survey.academicPeriod,
     survey.opensAt && survey.closesAt

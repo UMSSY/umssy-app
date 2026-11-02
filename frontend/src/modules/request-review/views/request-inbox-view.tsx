@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InboxHeader } from "../components/layout/backoffice-page-header";
 import { InboxFilters } from "../components/inbox/inbox-filters";
+import { AutomationSummaryCards } from "../components/inbox/automation-summary-cards";
+import { useAutomationSummary } from "../hooks/use-automation-summary";
 import { RequestPagination } from "../components/inbox/request-pagination";
 import { RequestTable } from "../components/inbox/request-table";
 import { REVIEW_TABS } from "../constants/request-review.constants";
@@ -16,12 +18,20 @@ const ALL_STATUSES: readonly ReviewStatus[] = REVIEW_TABS.map((tab) => tab.value
 export function RequestInboxView() {
   const list = useRequestList();
   const counts = useStatusCounts(ALL_STATUSES);
+  const automation = useAutomationSummary();
 
   return (
     <main className="mx-auto w-full max-w-7xl min-w-0 [contain:inline-size]">
       <InboxHeader />
 
       <section className="flex w-full min-w-0 flex-col gap-6">
+        <AutomationSummaryCards
+          automation={automation.automation}
+          inbox={automation.inbox}
+          isLoading={automation.isLoading}
+          error={automation.error}
+          onRetry={automation.retry}
+        />
         <div className="relative w-full min-w-0 overflow-hidden rounded-lg border border-border bg-surface">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-border bg-surface px-4 py-3">
             <Tabs value={list.status} onValueChange={(value) => list.changeStatus(value as ReviewStatus)} className="max-w-full">
@@ -49,9 +59,11 @@ export function RequestInboxView() {
               search={list.searchInput}
               career={list.career}
               period={list.period}
+              validation={list.validation}
               onSearchChange={list.changeSearch}
               onCareerChange={list.changeCareer}
               onPeriodChange={list.changePeriod}
+              onValidationChange={list.changeValidation}
             />
           </div>
 

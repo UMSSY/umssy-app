@@ -388,7 +388,7 @@ export function MentorshipView() {
           selectedTechnicalAreas={selectedTechnicalAreas}
           selectedOrientationTypes={selectedOrientationTypes}
           isActivating={isActivating}
-          activationError={activationError}
+          activationError={unavailableOpen ? null : activationError}
           onEditTechnicalAreas={() => goToStep(2)}
           onEditOrientationTypes={() => goToStep(3)}
           onActivate={handleActivate}

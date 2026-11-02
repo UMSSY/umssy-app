@@ -1,6 +1,6 @@
 import { isApiError } from "@/shared/services/api-client";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
-import { updateBusinessRecord } from "@/shared/services/storage/business-record-storage";
+import { updateIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import {
   readSessionStorage,
   removeSessionStorage,
@@ -56,7 +56,7 @@ export async function clearMentorIntakeIntentions(
   for (const operation of operations) clearLegacyIntention(operation);
   await Promise.all(
     operations.map((operation) =>
-      updateBusinessRecord(storageKey(operation), () => null),
+      updateIndexedDb(storageKey(operation), () => null),
     ),
   );
 }
@@ -72,7 +72,7 @@ export async function withMentorIntakeKey<T>(
     orientationTypeIds: [...preferences.orientationTypeIds].sort(),
   });
   const legacy = legacyIntention(operation);
-  const intention = await updateBusinessRecord<MentorIntakeIntention>(
+  const intention = await updateIndexedDb<MentorIntakeIntention>(
     name,
     (stored) => {
       const saved = stored ?? legacy;
@@ -92,7 +92,7 @@ export async function withMentorIntakeKey<T>(
   const key = intention!.key;
   const clear = () => {
     clearLegacyIntention(operation);
-    return updateBusinessRecord<MentorIntakeIntention>(name, (saved) =>
+    return updateIndexedDb<MentorIntakeIntention>(name, (saved) =>
       saved?.key === key ? null : saved,
     );
   };
@@ -101,7 +101,6 @@ export async function withMentorIntakeKey<T>(
     await clear();
     return result;
   } catch (error) {
-    // Un resultado ambiguo se reintenta con el mismo UUID, incluso tras recargar.
     if (isApiError(error) && error.response && error.response.status < 500)
       await clear();
     throw error;

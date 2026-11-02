@@ -1,8 +1,8 @@
 import { apiClient } from "@/shared/services/api-client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { activateMentor } from "./mentor-activation.service";
-vi.mock("@/shared/services/storage/business-record-storage", () => ({
-  updateBusinessRecord: vi.fn(async (_key, update) => update(null)),
+vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
+  updateIndexedDb: vi.fn(async (_key, update) => update(null)),
 }));
 
 afterEach(() => {

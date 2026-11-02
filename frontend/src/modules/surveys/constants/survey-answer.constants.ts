@@ -5,11 +5,13 @@ export const SURVEY_ANSWER_REDIRECT_DELAY_MS = 1500;
 export const SURVEY_ANSWER_HINTS: Readonly<Record<QuestionType, string>> = {
   single_choice: "Selecciona una opción",
   multiple_choice: "Selecciona una o más opciones",
+  dropdown: "Selecciona una opción de la lista",
 };
 
 export const SURVEY_ANSWER_TEXT = {
   audienceBadge: "Encuesta para Titulados",
   closesAtPrefix: "Vence el:",
+  dropdownPlaceholder: "Selecciona una opción",
   requiredNotice: "Los campos marcados con * son obligatorios.",
   backToSurveys: "Volver a encuestas",
   backToNotifications: "Volver a notificaciones de encuestas",

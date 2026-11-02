@@ -23,7 +23,9 @@ export function JobMatchDetailView({ jobOfferId }: JobMatchDetailViewProps) {
   const { data, error, isPending, isError, refetch } = useJobMatch(jobOfferId);
 
   const isNotFound = isApiError(error) && error.response?.status === 404;
-  const matchedNames = data?.requirements.filter(({ status }) => status === "Cumple").map(({ name }) => name) ?? [];
+  const matchedNames = data?.requirements
+    .filter(({ category, status }) => category === "skill" && status === "Cumple")
+    .map(({ name }) => name) ?? [];
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6">

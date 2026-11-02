@@ -158,6 +158,12 @@ export interface SurveyRowActionsProps {
   survey: SurveySummary;
 }
 
+export interface UnpublishSurveyActionProps {
+  survey: Pick<SurveySummary, "id" | "title" | "responseCount">;
+  compact?: boolean;
+  className?: string;
+}
+
 export interface SurveySummaryRowProps {
   label: string;
   children: ReactNode;
