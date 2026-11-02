@@ -124,6 +124,7 @@ export function MentorshipView() {
   const [activationError, setActivationError] = useState<string | null>(null);
   const [hasIntakeConflict, setHasIntakeConflict] = useState(false);
   const [unavailableOpen, setUnavailableOpen] = useState(false);
+  const [requestRegistered, setRequestRegistered] = useState(false);
   const inFlight = useRef(false);
 
   const canAdvance = currentStep === 1 ? wantsToParticipate : canGoNext;
@@ -303,8 +304,7 @@ export function MentorshipView() {
       await queryClient.invalidateQueries({
         queryKey: ["mentor-participation-requests"],
       });
-      setUnavailableOpen(false);
-      router.push("/mentors/participation?registered=1");
+      setRequestRegistered(true);
     } catch (error) {
       const code = participationErrorCode(error);
       if (code === "REQUEST_ALREADY_EXISTS") {
@@ -509,8 +509,12 @@ export function MentorshipView() {
         onOpenChange={(open) => {
           setUnavailableOpen(open);
           setActivationError(null);
+          if (!open && requestRegistered) {
+            router.push("/mentors/participation?registered=1");
+          }
         }}
         isSubmitting={isActivating}
+        isRegistered={requestRegistered}
         error={activationError}
         onSubmit={() => void handleRequest()}
       />

@@ -74,7 +74,9 @@ describe("ParticipationView HU-MEN-06", () => {
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Editar áreas técnicas" }),
-    ).toBeInTheDocument();
+    ).toHaveAttribute("href", "/mentors/participation/technical-areas");
+    expect(screen.getByRole("link", { name: "Editar tipos de orientación" }))
+      .toHaveAttribute("href", "/mentorship/orientation");
     expect(
       screen.getByRole("button", { name: "Desactivar participación" }),
     ).toBeInTheDocument();
@@ -93,6 +95,21 @@ describe("ParticipationView HU-MEN-06", () => {
     expect(
       screen.getByRole("button", { name: "Activar participación" }),
     ).toBeInTheDocument();
+  });
+
+  it("muestra solo la solicitud pendiente cuando la participación anterior está desactivada", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(deactivated);
+    vi.mocked(mentorParticipationService.getCurrent).mockResolvedValue({
+      id: "request", userId: "user", status: "PENDING",
+      queuedAt: "2026-10-26T15:00:00Z", createdAt: "2026-10-26T15:00:00Z",
+      technicalAreaIds: [], orientationTypeIds: [],
+    });
+    renderWithQuery(<ParticipationView />);
+    expect(await screen.findByText("PENDIENTE")).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: "Estado de participación" })).toHaveLength(1);
+    expect(screen.getByRole("heading", { name: "Mi participación como mentor" })).toBeInTheDocument();
+    expect(screen.queryByText("Desactivado")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ver detalle" })).toBeInTheDocument();
   });
 
   it("cancelar no llama al servidor; confirmar sale una sola vez", async () => {
@@ -337,7 +354,7 @@ describe("ParticipationView HU-MEN-06", () => {
       return cancelled;
     });
     const view = renderWithQuery(<ParticipationView />);
-    fireEvent.click(await screen.findByRole("button", { name: "Cancelar solicitud" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Cancelar cupo" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirmar cancelación" }));
     expect(await screen.findByRole("link", { name: "Participa como mentor" })).toBeInTheDocument();
     await waitFor(() => expect(toast.success).toHaveBeenCalledTimes(1));
