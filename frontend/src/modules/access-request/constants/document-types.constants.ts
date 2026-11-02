@@ -3,3 +3,8 @@
 export const DOCUMENT_TYPES = ["academic_diploma", "national_title"] as const;
 
 export type DocumentType = (typeof DOCUMENT_TYPES)[number];
+
+export const DOCUMENT_TYPE_OPTIONS: ReadonlyArray<{ value: DocumentType; label: string }> = [
+  { value: "academic_diploma", label: "Diploma académico" },
+  { value: "national_title", label: "Título en provisión nacional" },
+];

@@ -2,6 +2,6 @@ import { DomainException } from '../../../common/exceptions/domain.exception.js'
 
 export class RequestNotInReviewException extends DomainException {
   constructor(message = 'La solicitud no está en revisión') {
-    super(message, 409);
+    super(message, 409, 'REQUEST_NOT_IN_REVIEW');
   }
 }

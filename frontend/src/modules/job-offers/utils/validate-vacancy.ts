@@ -1,5 +1,6 @@
 import {
   GOOGLE_MAPS_LINK_REGEX,
+  INTERNSHIP_CONTRACT_TYPE,
   MAX_DESCRIPTION_CHARS,
   MAX_LANGUAGES_CHARS,
   MAX_SKILLS,
@@ -46,7 +47,10 @@ function validateVacancyCount(value: string): string | undefined {
 export function validateInformation(conditions: VacancyConditions): VacancyErrors {
   const errors: VacancyErrors = {};
 
+  const isInternship = conditions.contractType === INTERNSHIP_CONTRACT_TYPE;
+
   for (const field of INFORMATION_FIELDS_ORDER) {
+    if (field === "salary" && isInternship) continue;
     if (isFieldEmpty(field, conditions)) {
       errors[field] = VACANCY_MESSAGES.required;
     }
@@ -68,7 +72,7 @@ export function validateInformation(conditions: VacancyConditions): VacancyError
     if (message) errors.vacancyCount = message;
   }
 
-  if (!errors.salary) {
+  if (!errors.salary && !isInternship) {
     const message = validateSalary(conditions.salary);
     if (message) errors.salary = message;
   }

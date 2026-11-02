@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { BlockAppointmentDetail } from "./block-appointment-detail";
 import { BlockForm } from "./block-form";
 import { DeleteBlockDialog } from "./delete-block-dialog";
 import { DangerZone } from "@/shared/components/layout/danger-zone";
@@ -34,6 +35,8 @@ export function EditBlockPanel({ block, onClose }: EditBlockPanelProps) {
 
   return (
     <aside aria-label="Panel de edición del bloque" className="flex flex-col gap-4">
+      {block.appointment && <BlockAppointmentDetail block={block} appointment={block.appointment} />}
+
       <BlockForm
         mode="edit"
         initialValues={{ startAt: block.startAt, endAt: block.endAt }}

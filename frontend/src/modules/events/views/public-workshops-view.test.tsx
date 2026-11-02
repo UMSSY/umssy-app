@@ -4,17 +4,19 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { eventsService } from "../services/events.service";
 import { PublicWorkshopsView } from "./public-workshops-view";
 import { PublicWorkshopDetailView } from "./public-workshop-detail-view";
+import { clearAccessToken, saveAccessToken } from '@/shared/services/storage/access-token-storage';
 const event = {id:"taller-1",title:"Diseño de interfaces",category:{id:"cat",name:"Tecnología"},description:"Sesión práctica.",instructorName:"Ana",eventDate:"2026-11-10",startTime:"09:00",endTime:"12:00",location:"Aula 1",capacity:20,availableSpots:10,registrationCount:10,statusId:"open",modalityId:"m",modality:{id:"m",title:"Presencial"}};
-afterEach(() => {cleanup();vi.restoreAllMocks();});
+afterEach(() => {cleanup();clearAccessToken();vi.restoreAllMocks();});
 describe("Public workshops", () => {
  it("opens real details and applies search on submission",async () => {
+  saveAccessToken('signed-token');
   const get = vi.spyOn(eventsService,"getEvents").mockResolvedValue({data:[event],page:1,offset:0});
   render(<PublicWorkshopsView />);
   expect(await screen.findByRole("heading",{name:event.title})).toBeInTheDocument();
   expect(screen.getByRole("link",{name:"Ver taller"})).toHaveAttribute("href","/workshops/taller-1");
   fireEvent.change(screen.getByRole("searchbox"),{target:{value:"interfaces"}});
   fireEvent.click(screen.getByRole("button",{name:"Buscar"}));
-  await waitFor(() => expect(get).toHaveBeenCalledWith({page:1,limit:9,search:"interfaces"},expect.any(AbortSignal)));
+  await waitFor(() => expect(get).toHaveBeenCalledWith({page:1,limit:9,search:"interfaces"},expect.any(AbortSignal),null));
   fireEvent.click(screen.getByRole("button",{name:"Limpiar"}));
   expect(screen.getByRole("searchbox")).toHaveValue("");
  });
@@ -34,12 +36,14 @@ describe("Public workshops", () => {
   expect(screen.getByRole("button",{name:"Siguiente"})).toBeDisabled();
  });
  it("shows public detail and a truthful sign-in destination",async () => {
-  vi.spyOn(eventsService,"getEvent").mockResolvedValue(event);
+  saveAccessToken('signed-token');
+  const get = vi.spyOn(eventsService,"getEvent").mockResolvedValue(event);
   render(<PublicWorkshopDetailView id={event.id} />);
   expect(await screen.findByRole("heading",{name:event.title})).toBeInTheDocument();
   expect(screen.getByText("Sesión práctica.")).toBeInTheDocument();
   expect(screen.getAllByRole("link",{name:"Iniciar sesión"}).some((link)=>link.getAttribute("href")==="/login?next=%2Fevents")).toBe(true);
   expect(screen.queryByRole("button",{name:"Inscribirme"})).not.toBeInTheDocument();
+  expect(get).toHaveBeenCalledWith(event.id,expect.any(AbortSignal),null);
  });
  it("provides a way back for unavailable detail",async () => {
   vi.spyOn(eventsService,"getEvent").mockRejectedValue(new Error("missing"));

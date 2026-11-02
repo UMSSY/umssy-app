@@ -1,64 +1,288 @@
 "use client";
 
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { useParticipation } from "../hooks/use-participation";
+import { useAuth } from "@/shared/contexts/auth-context";
+import {
+  getAccessToken,
+  subscribeAccessToken,
+} from "@/shared/services/storage/access-token-storage";
+import { mentorParticipationService } from "../services/mentor-participation.service";
 import { ParticipationEmptyState } from "../components/participation/participation-empty-state";
 import { ParticipationLoading } from "../components/participation/participation-loading";
 import { ParticipationOverview } from "../components/participation/participation-overview";
-import { SlotAvailabilityPreview } from "../components/participation/slot-availability-preview";
 import { PendingParticipation } from "../components/participation/pending-participation";
-import { useSlotRequestPreview } from "../hooks/use-slot-request-preview";
-import { SlotCancellationFeedback } from "../components/participation/slot-cancellation-feedback";
+import { SlotOfferParticipation } from "../components/participation/slot-offer-participation";
+import { SlotAvailability } from "../components/participation/slot-availability";
+import { ActivateParticipationModal } from "../components/participation/activate-participation-modal";
+import { DeactivateParticipationModal } from "../components/participation/deactivate-participation-modal";
+import { useParticipation } from "../hooks/use-participation";
+import {
+  participationErrorCode,
+  participationErrorMessage,
+} from "../utils/participation-error";
+import {
+  loadMentorshipWizardDraft,
+  saveMentorshipWizardDraft,
+} from "@/modules/mentorship";
 
-export function ParticipationView() {
-  const preview = useSlotRequestPreview();
-  const showAvailabilityPreview = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_APP_ENV !== "prod";
-  if (preview.request) return <PendingParticipation />;
-  if (preview.notice === "cancelled") return <SlotCancellationFeedback />;
+const getServerToken = () => null;
+
+const notifySuccess = (message: string) => {
+  toast.success(message, {
+    id: "mentor-participation-feedback",
+    duration: 4000,
+    closeButton: true,
+  });
+};
+
+export function ParticipationView({
+  registered = false,
+  activated = false,
+}: {
+  registered?: boolean;
+  activated?: boolean;
+}) {
+  const router = useRouter();
+  const client = useQueryClient();
+  const { refreshRoles } = useAuth();
+  const token = useSyncExternalStore(
+    subscribeAccessToken,
+    getAccessToken,
+    getServerToken,
+  );
+  const participation = useParticipation(token);
+  const request = useQuery({
+    queryKey: ["mentor-participation-requests", token],
+    queryFn: () => mentorParticipationService.getCurrent(),
+    enabled: Boolean(token),
+    retry: false,
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+  });
+  const [modal, setModal] = useState<"activate" | "deactivate" | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+  const [hasDraftStorageError, setHasDraftStorageError] = useState(false);
+  const inFlight = useRef(false);
+  const navigationFeedbackHandled = useRef(false);
+
+  useEffect(() => {
+    if (navigationFeedbackHandled.current || (!registered && !activated)) return;
+    if (participation.isLoading || !request.isSuccess) return;
+    navigationFeedbackHandled.current = true;
+
+    const url = new URL(window.location.href);
+    // Read the current URL too: a restored route can retain old server props.
+    const hasActivationFeedback =
+      activated && url.searchParams.get("activated") === "1";
+    const hasRegistrationFeedback =
+      registered && url.searchParams.get("registered") === "1";
+    url.searchParams.delete("registered");
+    url.searchParams.delete("activated");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+
+    if (hasActivationFeedback && participation.state?.status === "ACTIVE") {
+      notifySuccess("Participación activada correctamente");
+    } else if (
+      hasRegistrationFeedback &&
+      !hasActivationFeedback &&
+      participation.state?.status !== "ACTIVE" &&
+      ["PENDING", "OFFERED"].includes(request.data?.status ?? "")
+    ) {
+      notifySuccess("Solicitud de cupo registrada correctamente");
+    }
+  }, [
+    registered,
+    activated,
+    participation.isLoading,
+    participation.state?.status,
+    request.isSuccess,
+    request.data?.status,
+  ]);
+
+  const deactivate = async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setSubmitting(true);
+    setError(null);
+    try {
+      await mentorParticipationService.leave();
+      await Promise.allSettled([
+        refreshRoles(),
+        client.invalidateQueries({ queryKey: ["mentors", "participation"] }),
+        client.invalidateQueries({
+          queryKey: ["mentor-participation-requests"],
+        }),
+        client.invalidateQueries({ queryKey: ["mentorship", "directory"] }),
+        client.invalidateQueries({ queryKey: ["mentorship", "profile"] }),
+      ]);
+      setModal(null);
+      notifySuccess("Participación desactivada correctamente");
+    } catch (failure) {
+      setError(failure);
+    } finally {
+      inFlight.current = false;
+      setSubmitting(false);
+    }
+  };
+
+  if (!token) return <ParticipationLoading />;
+
+  const state = participation.state;
+  const isActive = state?.status === "ACTIVE";
+  const hasHistory = state?.status === "DEACTIVATED";
+  const currentRequest = request.data;
+  const hasOpenRequest = ["PENDING", "OFFERED"].includes(currentRequest?.status ?? "");
 
   return (
-    <>
-      {showAvailabilityPreview && <SlotAvailabilityPreview />}
-      <ParticipationContent />
-    </>
-  );
-}
-
-function ParticipationContent() {
-  const { state, hasLoadError, retry } = useParticipation();
-
-  if (hasLoadError) {
-    return (
-      <main className="mx-auto w-full max-w-7xl">
-        <Alert variant="destructive" className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-7xl space-y-6">
+      {participation.isLoading && <ParticipationLoading />}
+      {(participation.hasLoadError || (!participation.isLoading && !state)) && (
+        <Alert variant="destructive">
           <p>No se pudo cargar tu participación como mentor.</p>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              retry();
-            }}
-          >
-            Reintentar
+          <Button variant="outline" onClick={() => participation.retry()}>
+            Reintentar participación
           </Button>
         </Alert>
-      </main>
-    );
-  }
-
-  if (state === undefined) {
-    return <ParticipationLoading />;
-  }
-
-  if (!state) {
-    return <ParticipationEmptyState />;
-  }
-
-  return (
-    <ParticipationOverview
-      areas={state.areas}
-      orientations={state.orientations}
-    />
+      )}
+      {request.isPending && (
+        <p role="status">Consultando solicitudes de cupo…</p>
+      )}
+      {request.isError && (
+        <Alert variant="destructive">
+          <p>No se pudo consultar tu solicitud de cupo.</p>
+          <Button variant="outline" onClick={() => void request.refetch()}>
+            Reintentar solicitud
+          </Button>
+        </Alert>
+      )}
+      {(isActive || (hasHistory && !request.isPending && !hasOpenRequest)) && (
+        <ParticipationOverview
+          isActive={isActive}
+          actionEnabled={
+            isActive ||
+            (request.isSuccess &&
+              !["PENDING", "OFFERED"].includes(currentRequest?.status ?? ""))
+          }
+          areas={(state?.areas ?? []).map((area) => area.name)}
+          orientations={(state?.orientations ?? []).map(
+            (orientation) => orientation.name,
+          )}
+          onAction={() => {
+            setError(null);
+            setHasDraftStorageError(false);
+            setModal(isActive ? "deactivate" : "activate");
+          }}
+        />
+      )}
+      {!isActive && currentRequest?.status === "PENDING" && (
+        <PendingParticipation
+          request={currentRequest}
+          onCancelled={() => notifySuccess("Solicitud cancelada correctamente")}
+        />
+      )}
+      {!isActive &&
+        currentRequest?.status === "OFFERED" &&
+        (currentRequest.offer ? (
+          <SlotOfferParticipation
+            key={currentRequest.offer.id}
+            request={currentRequest}
+            onConfirmed={() => {
+              void refreshRoles();
+              void client.invalidateQueries({
+                queryKey: ["mentors", "participation"],
+              });
+              void client.invalidateQueries({
+                queryKey: ["mentorship", "directory"],
+              });
+              void client.invalidateQueries({
+                queryKey: ["mentorship", "profile"],
+              });
+              notifySuccess("Participación activada correctamente");
+            }}
+          />
+        ) : (
+          <Alert variant="destructive">
+            No se pudo consultar la oferta. Actualiza la página.
+          </Alert>
+        ))}
+      {state &&
+        !participation.hasLoadError &&
+        request.isSuccess &&
+        !isActive &&
+        !hasHistory &&
+        !["PENDING", "OFFERED"].includes(currentRequest?.status ?? "") && (
+          <div className="space-y-6">
+            <SlotAvailability />
+            <ParticipationEmptyState />
+          </div>
+        )}
+      {!isActive && currentRequest?.status === "EXPIRED" && (
+        <p role="status">
+          La oferta venció. Puedes revisar las condiciones vigentes en el proceso
+          de incorporación.
+        </p>
+      )}
+      <DeactivateParticipationModal
+        isOpen={modal === "deactivate"}
+        onClose={() => setModal(null)}
+        onConfirm={() => void deactivate()}
+        isLoading={submitting}
+        errorMessage={error ? participationErrorMessage(error) : null}
+        hasFutureAppointments={
+          participationErrorCode(error) === "MENTOR_HAS_FUTURE_APPOINTMENTS"
+        }
+        areas={(state?.areas ?? []).map((area) => area.name)}
+        orientations={(state?.orientations ?? []).map(
+          (orientation) => orientation.name,
+        )}
+      />
+      <ActivateParticipationModal
+        isOpen={modal === "activate"}
+        onClose={() => setModal(null)}
+        onConfirm={() => {
+          void (async () => {
+            if (hasDraftStorageError) {
+              setModal(null);
+              router.push("/mentorship");
+              return;
+            }
+            try {
+              const draft = await loadMentorshipWizardDraft();
+              if (!draft)
+                await saveMentorshipWizardDraft({
+                  currentStep: 1,
+                  wantsToParticipate: true,
+                  selectedTechnicalAreaIds: (state?.areas ?? []).map(
+                    (area) => area.id,
+                  ),
+                  selectedOrientationTypeIds: (state?.orientations ?? []).map(
+                    (orientation) => orientation.id,
+                  ),
+                });
+              setModal(null);
+              router.push("/mentorship");
+            } catch {
+              setHasDraftStorageError(true);
+            }
+          })();
+        }}
+        isLoading={false}
+        errorMessage={
+          hasDraftStorageError
+            ? "No se pudo recuperar el borrador. Puedes continuar y seleccionar tus preferencias nuevamente."
+            : null
+        }
+      />
+    </div>
   );
 }

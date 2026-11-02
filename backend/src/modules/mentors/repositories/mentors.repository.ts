@@ -13,6 +13,7 @@ import {
 } from './mentor-capacity.queries.js';
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
+import { MentorIntakeRepository } from './mentor-intake.repository.js';
 
 const directorySelect = {
   id: true,
@@ -75,11 +76,13 @@ function buildAccentInsensitiveVariants(value: string): string[] {
 }
 
 @Injectable()
-export class MentorsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+export class MentorsRepository extends MentorIntakeRepository {
+  constructor(prisma: PrismaService) {
+    super(prisma);
+  }
 
-  findMentorRole() {
-    return this.prisma.role.findUnique({
+  findMentorRole(tx: Prisma.TransactionClient = this.prisma) {
+    return tx.role.findUnique({
       where: {
         name: MENTOR_ROLE_NAME,
       },
@@ -89,8 +92,12 @@ export class MentorsRepository {
     });
   }
 
-  findActiveUserRole(userId: string, roleId: string) {
-    return this.prisma.userRole.findFirst({
+  findActiveUserRole(
+    userId: string,
+    roleId: string,
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
+    return tx.userRole.findFirst({
       where: {
         userId,
         roleId,
@@ -103,8 +110,11 @@ export class MentorsRepository {
     });
   }
 
-  findTechnicalAreas(ids: string[]) {
-    return this.prisma.technicalArea.findMany({
+  findTechnicalAreas(
+    ids: string[],
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
+    return tx.technicalArea.findMany({
       where: {
         id: {
           in: ids,
@@ -116,8 +126,11 @@ export class MentorsRepository {
     });
   }
 
-  findActiveOrientationTypes(ids: string[]) {
-    return this.prisma.orientationType.findMany({
+  findActiveOrientationTypes(
+    ids: string[],
+    tx: Prisma.TransactionClient = this.prisma,
+  ) {
+    return tx.orientationType.findMany({
       where: {
         id: {
           in: ids,
@@ -295,6 +308,30 @@ export class MentorsRepository {
     });
   }
 
+  async findMyParticipation(userId: string) {
+    const [roles, areas, orientations] = await Promise.all([
+      this.prisma.userRole.findMany({
+        where: { userId, role: { name: MENTOR_ROLE_NAME } },
+        select: { deletedAt: true, startAt: true },
+      }),
+      this.findMentorTechnicalAreas(userId),
+      this.findMentorOrientationTypes(userId),
+    ]);
+    const now = new Date();
+    const isActive = roles.some(
+      (role) => role.deletedAt === null && role.startAt <= now,
+    );
+    return {
+      status: isActive
+        ? ('ACTIVE' as const)
+        : roles.length > 0
+          ? ('DEACTIVATED' as const)
+          : ('NEVER' as const),
+      areas: areas.map(({ technicalArea }) => technicalArea),
+      orientations: orientations.map(({ orientationType }) => orientationType),
+    };
+  }
+
   findMentorTechnicalAreas(userId: string) {
     return this.prisma.mentorTechnicalArea.findMany({
       where: {
@@ -470,12 +507,27 @@ export class MentorsRepository {
     roleId: string,
     technicalAreaIds: string[],
     orientationTypeIds: string[],
+    tx?: Prisma.TransactionClient,
   ) {
-    return withMentorCapacityLock(this.prisma, async (transaction) => {
+    const activate = async (transaction: Prisma.TransactionClient) => {
       await reconcileMentorOffers(transaction);
       const eligibility = await readMentorEligibility(transaction, userId);
       if (!eligibility.eligible) throw new MentorEligibilityException();
       if (eligibility.alreadyMentor) throw new AlreadyMentorException();
+      const [intake] = await transaction.$queryRaw<
+        { hasPendingRequest: boolean; hasOffer: boolean }[]
+      >`
+        SELECT EXISTS (
+          SELECT 1 FROM mentor_participation_requests
+          WHERE user_id = ${userId}::uuid AND status IN ('PENDING', 'OFFERED')
+        ) AS "hasPendingRequest", EXISTS (
+          SELECT 1 FROM mentor_slot_offers
+          WHERE user_id = ${userId}::uuid AND status = 'OFFERED'
+            AND expires_at > clock_timestamp()
+        ) AS "hasOffer"`;
+      if (intake.hasOffer) return { result: 'OFFER_EXISTS' as const };
+      if (intake.hasPendingRequest)
+        return { result: 'REQUEST_EXISTS' as const };
       const capacity = await readMentorCapacity(transaction);
       if (capacity.available < 1) throw new MentorCapacityException();
 
@@ -487,6 +539,12 @@ export class MentorsRepository {
         },
       });
 
+      await transaction.mentorTechnicalArea.deleteMany({
+        where: { mentorId: userId },
+      });
+      await transaction.mentorOrientationType.deleteMany({
+        where: { mentorId: userId },
+      });
       await transaction.mentorTechnicalArea.createMany({
         data: technicalAreaIds.map((technicalAreaId) => ({
           mentorId: userId,
@@ -511,7 +569,8 @@ export class MentorsRepository {
       });
 
       return { id: userId };
-    });
+    };
+    return tx ? activate(tx) : withMentorCapacityLock(this.prisma, activate);
   }
 
   updateAvailability(userId: string, isAvailable: boolean) {

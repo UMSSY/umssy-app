@@ -1,10 +1,10 @@
-import { cn } from "@/lib/utils";
 
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { getInitials } from "@/shared/utils/get-initials";
 import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -109,19 +109,16 @@ export function MentorCard({
           </div>
 
           <div className="ml-auto flex shrink-0 flex-col items-end gap-2">
-            {mentor.isAvailable ? (
-              <Badge
+            <Badge
               variant="outline"
               aria-current={
                 highlightAvailability && mentor.isAvailable ? "true" : undefined
               }
               className={cn(
-                "px-2.5 whitespace-nowrap",
-                highlightAvailability && mentor.isAvailable
-                  ? "border-accent bg-interaction font-semibold text-accent ring-1 ring-accent"
-                  : mentor.isAvailable
-                    ? "border-availability-border bg-availability text-availability-foreground"
-                    : "border-border bg-surface-soft text-ink",
+                "border-border bg-surface-soft px-2.5 whitespace-nowrap text-ink",
+                highlightAvailability &&
+                  mentor.isAvailable &&
+                  "border-accent bg-interaction font-semibold text-accent ring-1 ring-accent",
               )}
             >
               {mentor.isAvailable ? (
@@ -136,7 +133,6 @@ export function MentorCard({
                 "No disponible"
               )}
             </Badge>
-            ) : null}
             {showAffinityBadge &&
               mentor.sharedInterestsCount !== undefined && (
                 <Badge variant="secondary" className="whitespace-nowrap">
@@ -157,11 +153,7 @@ export function MentorCard({
                 <li
                   key={area}
                   aria-current={area === selectedArea ? "true" : undefined}
-                  className={`max-w-full min-w-0 rounded-md border bg-interaction px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-accent ${
-                    area === selectedArea
-                      ? "border-accent font-semibold ring-1 ring-accent"
-                      : "border-accent/15"
-                  }`}
+                  className={cn("max-w-full min-w-0 rounded-md border bg-interaction px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-accent", area === selectedArea ? "border-accent font-semibold ring-1 ring-accent" : "border-accent/15")}
                 >
                   {area}
                 </li>

@@ -190,6 +190,7 @@ describe('Mentorship Standard Response HTTP', () => {
   it('POST /api/mentors/activate conserva HTTP 201', async () => {
     await request(server)
       .post('/api/mentors/activate')
+      .set('Idempotency-Key', '11111111-1111-4111-8111-111111111111')
       .send(activationPayload)
       .expect(201)
       .expect({
@@ -202,6 +203,7 @@ describe('Mentorship Standard Response HTTP', () => {
     expect(mentorsService.activate).toHaveBeenCalledWith(
       userId,
       activationPayload,
+      '11111111-1111-4111-8111-111111111111',
     );
   });
 
@@ -223,6 +225,7 @@ describe('Mentorship Standard Response HTTP', () => {
 
     await request(server).get(`/api/mentors/${userId}`).expect(404).expect({
       statusCode: 404,
+      code: 'MENTOR_NOT_FOUND',
       ok: false,
       detail: error.message,
       data: null,
@@ -235,10 +238,12 @@ describe('Mentorship Standard Response HTTP', () => {
 
     await request(server)
       .post('/api/mentors/activate')
+      .set('Idempotency-Key', '11111111-1111-4111-8111-111111111111')
       .send(activationPayload)
       .expect(409)
       .expect({
         statusCode: 409,
+        code: 'ALREADY_MENTOR',
         ok: false,
         detail: error.message,
         data: null,
@@ -281,8 +286,10 @@ describe('Mentorship Standard Response HTTP', () => {
 
     expect(response.body).toEqual({
       statusCode: 400,
-      error: 'Bad Request',
-      message: 'Validation failed (uuid v 4 is expected)',
+      ok: false,
+      code: 'VALIDATION_ERROR',
+      detail: 'Los parámetros de la solicitud no son válidos.',
+      data: null,
     });
   });
 });

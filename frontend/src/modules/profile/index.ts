@@ -4,6 +4,7 @@ export { ProfileOverviewView } from "./views/profile-overview-view";
 export { ProfileSettingsView } from "./views/profile-settings-view";
 
 export { ConfirmDeleteDialog } from "./components/confirm-delete-dialog";
+export { DetectedSkillsChips } from "./components/detected-skills-chips";
 export { FeedbackMessage } from "./components/feedback-message";
 export { FormField } from "./components/form-field";
 export { ProfilePageLayout } from "./components/profile-page-layout";
@@ -27,3 +28,6 @@ export { FILE_VALIDATION_MESSAGES } from "./config/file-validation-messages.conf
 export { validateFile } from "./utils/validate-file";
 export { BUSINESS_TIMEZONE, ISO_DATE_PATTERN } from "./constants/validation.constants";
 export type { HttpError } from "./types/http-error.types";
+
+export { useProfileSkillsRadar, PROFILE_SKILLS_RADAR_QUERY_KEY } from "./hooks/use-profile-skills-radar";
+export { profileSkillsRadarService } from "./services/profile-skills-radar.service";

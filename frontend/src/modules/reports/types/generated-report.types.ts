@@ -7,7 +7,8 @@ export type ReportType =
   | "MENTORS"
   | "COMPANIES"
   | "ADMINS"
-  | "REJECTED_USERS";
+  | "REJECTED_USERS"
+  | "SURVEY_STATISTICS";
 
 export interface GeneratedReport {
   id: string;
@@ -21,6 +22,7 @@ export interface ReportHistoryParams {
   limit: number;
   reportType?: ReportType;
   search?: string;
+  snapshotAt?: string;
 }
 
 export interface ReportHistoryState {

@@ -13,6 +13,10 @@ export type EventWithRelations = Prisma.EventGetPayload<{
     statusId: true;
     instructorName: true;
     modalityId: true;
+    supportThreshold: true;
+    votingDeadline: true;
+    status: { select: { title: true } };
+    origin: { select: { title: true } };
     category: {
       select: {
         id: true;
@@ -25,4 +29,4 @@ export type EventWithRelations = Prisma.EventGetPayload<{
       };
     };
   };
-}>;
+}> & { registrations?: { id: string }[]; coverMimeType?: string | null };

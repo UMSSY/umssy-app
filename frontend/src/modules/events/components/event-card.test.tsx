@@ -76,8 +76,17 @@ describe('EventCard y utilidades de formato', () => {
   });
 
   it('formatea correctamente rangos de hora con o sin segundos', () => {
-    expect(formatTimeRange('09:00:00', '13:00:00')).toBe('09:00 - 13:00');
-    expect(formatTimeRange('inicio', 'fin')).toBe('inicio - fin');
+    expect(formatTimeRange('09:00:00', '13:00:00')).toBe('09:00 - 13:00 hrs');
+    expect(formatTimeRange('inicio', 'fin')).toBe('Horario no disponible');
+  });
+
+  it.each([
+    ['00:00', '12:00', '00:00 - 12:00 hrs'],
+    ['13:00:00', '23:59:00', '13:00 - 23:59 hrs'],
+    ['1970-01-01T09:00:00.000Z', '1970-01-01T12:00:00.000Z', '09:00 - 12:00 hrs'],
+    ['24:00', '12:00', 'Horario no disponible'],
+  ])('shows an unambiguous time range for %s to %s', (start, end, expected) => {
+    expect(formatTimeRange(start, end)).toBe(expected);
   });
 
   it('renderiza el titulo, categoria, fecha, horario y relacion de cupos', () => {
@@ -87,7 +96,7 @@ describe('EventCard y utilidades de formato', () => {
       screen.getByRole('heading', { name: 'Desarrollo Web con React' }),
     ).toBeInTheDocument();
     expect(screen.getByText('Tecnologia')).toBeInTheDocument();
-    expect(screen.getByText('09:00 - 13:00')).toBeInTheDocument();
+    expect(screen.getByText('09:00 - 13:00 hrs')).toBeInTheDocument();
     expect(screen.getByText('24/30')).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toHaveAttribute(
       'aria-valuenow',
@@ -165,5 +174,66 @@ describe('EventCard y utilidades de formato', () => {
     expect(screen.getByTestId('event-capacity-bar')).toHaveStyle({
       width: '100%',
     });
+  });
+
+  it('muestra apoyos y plazo en una propuesta en votación sin confundirlos con cupos', () => {
+    render(<EventCard event={{
+      ...MOCK_EVENT,
+      status: 'voting',
+      capacity: 40,
+      registrationCount: 14,
+      availableSpots: 26,
+      supportCount: 14,
+      supportThreshold: 20,
+      supportsRemaining: 6,
+      progressPercent: 70,
+      votingDeadline: '2026-10-15T02:00:00.000Z',
+      hasSupported: true,
+    }} />);
+
+    expect(screen.getByText('En votación')).toBeInTheDocument();
+    expect(screen.getByText('14 de 20 apoyos')).toBeInTheDocument();
+    expect(screen.getByText('70%')).toBeInTheDocument();
+    expect(screen.getByText('Faltan 6 apoyos para publicar el taller.')).toBeInTheDocument();
+    expect(screen.getByText(/Fecha límite: 14.*oct.*2026/)).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: /apoyos para/i })).toHaveAttribute('aria-valuenow', '70');
+    expect(screen.queryByRole('progressbar', { name: /cupos ocupados/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Tu apoyo ya fue registrado');
+  });
+
+  it('muestra el plazo vencido sin invitar a seguir apoyando', () => {
+    render(<EventCard event={{
+      ...MOCK_EVENT,
+      status: 'Vencido',
+      supportCount: 5,
+      supportThreshold: 20,
+      supportsRemaining: 15,
+      progressPercent: 25,
+      votingDeadline: '2026-10-15T02:00:00.000Z',
+      hasSupported: true,
+    }} />);
+
+    expect(screen.getByText('Vencido')).toBeInTheDocument();
+    expect(screen.getByText('5 de 20 apoyos')).toBeInTheDocument();
+    expect(screen.getByText('Fecha límite superada · vencida automáticamente')).toBeInTheDocument();
+    expect(screen.queryByText(/Faltan .* apoyos/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByRole('progressbar', { name: /cupos ocupados/i })).not.toBeInTheDocument();
+  });
+
+  it('conserva la barra de cupos para un taller publicado', () => {
+    render(<EventCard event={{ ...MOCK_EVENT, status: 'Publicado', supportCount: 24, supportThreshold: 20 }} />);
+
+    expect(screen.getByText('Publicada')).toBeInTheDocument();
+    expect(screen.getByText('24/30')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: /cupos ocupados/i })).toHaveAttribute('aria-valuenow', '80');
+    expect(screen.queryByRole('progressbar', { name: /apoyos para/i })).not.toBeInTheDocument();
+  });
+
+  it('no inventa un progreso si faltan datos de apoyos', () => {
+    render(<EventCard event={{ ...MOCK_EVENT, status: 'voting' }} />);
+
+    expect(screen.getByText('Información de apoyos no disponible.')).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 });

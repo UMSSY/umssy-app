@@ -1,1 +1,1 @@
-export type BlockFormField = "date" | "startAt" | "endAt";
+export type BlockFormField = "date" | "startAt" | "endAt" | "repeatUntil";

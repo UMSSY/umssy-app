@@ -2,12 +2,14 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { isApiError } from "@/shared/services/api-client";
+import { useRegistrationSession } from "@/modules/registrations";
 import { eventsService } from "../services/events.service";
 
 export function useEvent(id: string | null) {
+  const accessToken = useRegistrationSession();
   const query = useQuery({
-    queryKey: ["events", "detail", id],
-    queryFn: ({ signal }) => eventsService.getEvent(id!, signal),
+    queryKey: ["events", "detail", id, accessToken],
+    queryFn: ({ signal }) => eventsService.getEvent(id!, signal, accessToken),
     enabled: id !== null,
   });
   const notFound = isApiError(query.error) && query.error.response?.status === 404;

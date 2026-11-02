@@ -1,0 +1,12 @@
+<mj-section padding="8px 24px">
+  <mj-column>
+    <mj-text mj-class="heading">Necesitamos otro documento</mj-text>
+    <mj-text>La carrera revisó tu solicitud de acceso y observó el documento de respaldo.</mj-text>
+    <mj-text mj-class="secondary">Código de solicitud: {{ requestCode }}</mj-text>
+    <mj-text font-weight="700" color="#B4050F" padding="12px 16px 4px" container-background-color="#FDEEEF">Motivo del rechazo</mj-text>
+    <mj-text padding="0 16px 12px" container-background-color="#FDEEEF"><div style="white-space: pre-wrap;">{{ reason }}</div></mj-text>
+    <mj-text padding="16px 0">Abre «Mi solicitud» e ingresa el correo que registraste para ver el detalle y corregir tu documento.</mj-text>
+    <mj-button href="{{ requestStatusUrl }}">Mi solicitud</mj-button>
+    <mj-text mj-class="secondary" padding="16px 0 0">Este enlace es personal. No lo compartas.</mj-text>
+  </mj-column>
+</mj-section>

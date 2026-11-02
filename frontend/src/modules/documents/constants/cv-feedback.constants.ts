@@ -1,0 +1,1 @@
+export const CV_SUCCESS_FEEDBACK_DURATION_MS = 5000;

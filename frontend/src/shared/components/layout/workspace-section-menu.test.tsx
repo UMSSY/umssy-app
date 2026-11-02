@@ -26,10 +26,27 @@ describe("Area section menu", () => {
     expect(screen.getByRole("menuitem", { name: "Usuarios aceptados" })).toHaveAttribute("href", "/backoffice/reports/registered-users");
     expect(screen.queryByRole("navigation", { name: "Ruta de navegación" })).toBeNull();
   });
-  it("does not render an unnecessary menu for an area with a single permitted destination", () => {
-    render(<WorkspaceSectionMenu pathname="/mentorship/mentors" roles={["estudiante"]} />);
+  it("shows the survey sections in order and marks the current one", async () => {
+    const user = userEvent.setup();
+    render(<WorkspaceSectionMenu pathname="/backoffice/surveys/create" roles={["administrativo"]} />);
+    await user.click(screen.getByRole("button", { name: "Secciones de Encuestas" }));
+    expect((await screen.findAllByRole("menuitem")).map((item) => item.textContent)).toEqual([
+      "Encuestas", "Crear encuesta",
+    ]);
+    expect(screen.getByRole("menuitem", { name: "Crear encuesta" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("menuitem", { name: "Encuestas" })).not.toHaveAttribute("aria-current");
+  });
+  it("does not render an unnecessary menu for an area without enough permitted destinations", () => {
+    render(<WorkspaceSectionMenu pathname="/mentorship/mentors" roles={["empresa"]} />);
     expect(screen.getByText("Mentorías")).toBeInTheDocument();
     expect(screen.queryByRole("button")).toBeNull();
-    expect(screen.queryByText("Mi disponibilidad")).toBeNull();
+  });
+  it("shows students only their permitted mentorship destinations", async () => {
+    const user = userEvent.setup();
+    render(<WorkspaceSectionMenu pathname="/mentorship/mentors" roles={["estudiante"]} />);
+    await user.click(screen.getByRole("button", { name: "Secciones de Mentorías" }));
+    expect(await screen.findByRole("menuitem", { name: "Encontrar mentores" })).toHaveAttribute("href", "/mentorship/mentors");
+    expect(screen.getByRole("menuitem", { name: "Mis citas" })).toHaveAttribute("href", "/appointments");
+    expect(screen.queryByRole("menuitem", { name: "Mi disponibilidad" })).toBeNull();
   });
 });

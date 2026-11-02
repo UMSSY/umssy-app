@@ -49,6 +49,7 @@ describe("Role navigation", () => {
     expect(paths).not.toContain("/chat");
     expect(paths).not.toContain("/profile");
     expect(paths).toContain("/affinity-radar/review-queue");
+    expect(paths).toContain("/backoffice/surveys");
   });
 
   it("hides empty groups from students and users without roles", () => {

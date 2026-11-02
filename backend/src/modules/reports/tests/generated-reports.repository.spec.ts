@@ -38,7 +38,7 @@ describe('GeneratedReportsRepository', () => {
       };
       expect(adminExportHistory.findMany).toHaveBeenCalledWith({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         skip: 0,
         take: 10,
       });

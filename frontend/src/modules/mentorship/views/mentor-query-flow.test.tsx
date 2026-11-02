@@ -118,7 +118,7 @@ describe("Directory and profile query flows", () => {
     renderWithQuery(<MentorDirectoryView />);
 
     expect(
-      await screen.findByText("No hay mentores con estos filtros"),
+      await screen.findByText("No hay mentores disponibles por el momento"),
     ).toBeInTheDocument();
 
     expect(screen.queryByRole("link")).not.toBeInTheDocument();

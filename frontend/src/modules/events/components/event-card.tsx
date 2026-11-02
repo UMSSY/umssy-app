@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Check, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -10,8 +10,11 @@ import {
   formatEventDate,
   formatTimeRange,
 } from '../utils/event-card';
+import { formatVotingDeadline, getEventDisplayStatus } from '../utils/event-display-status';
 import type { EventCardProps } from '../types/event.types';
+import { ProposalProgress } from './proposal-progress';
 import { WorkshopCover } from './workshop-cover';
+import { PROPOSAL_SUPPORT_ERROR_MESSAGES } from '../constants/proposal-support-errors.constants';
 
 const categoryBadge = cva('rounded-full px-3 py-1 text-xs font-semibold', {
   variants: {
@@ -33,6 +36,9 @@ export function EventCard({
 }: EventCardProps) {
   const { enrolledCount, capacity, progressPercentage, isFull } =
     calculateEventCapacityStatus(event);
+  const displayStatus = getEventDisplayStatus(event);
+  const isProposal = displayStatus === 'voting' || displayStatus === 'expired';
+  const votingDeadline = formatVotingDeadline(event.votingDeadline);
 
   const categoryName = event.category.name;
   const normalizedCategory = categoryName
@@ -78,18 +84,39 @@ export function EventCard({
             : 'border-border hover:border-border-strong',
         )}
       >
-        <WorkshopCover eventId={event.id} className="-mx-5 -mt-5 shrink-0 rounded-t-lg" />
+        <WorkshopCover
+          eventId={event.id}
+          coverUrl={event.coverUrl}
+          className="-mx-5 -mt-5 shrink-0 rounded-t-lg"
+        />
         <div className="flex items-center justify-between gap-2">
           <span className={cn(categoryBadge({ category }))}>
             {categoryName}
           </span>
 
-          {isFull && (
+          {displayStatus === 'voting' && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
+              <Clock className="size-3.5" aria-hidden="true" />
+              En votación
+            </span>
+          )}
+          {displayStatus === 'expired' && (
+            <span className="rounded-full bg-surface-soft px-3 py-1 text-xs font-semibold text-text-secondary">
+              Vencido
+            </span>
+          )}
+          {displayStatus === 'full' && isFull && (
             <span
               data-testid="event-full-badge"
-              className="px-3 py-1 text-xs font-semibold text-ink-soft"
+              className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-danger"
             >
               Lleno
+            </span>
+          )}
+          {displayStatus === 'published' && event.status === 'Publicado' && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+              <Check className="size-3.5" aria-hidden="true" />
+              Publicada
             </span>
           )}
         </div>
@@ -100,48 +127,72 @@ export function EventCard({
             {event.title}
           </h2>
 
-          <div className="flex flex-col gap-1.5 text-xs text-text-secondary">
-            <div className="flex items-center gap-2">
-              <Calendar className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
-              <span>{formatEventDate(event.eventDate)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
-              <span>{formatTimeRange(event.startTime, event.endTime)}</span>
-            </div>
-          </div>
-        </div>
+          {isProposal && event.description?.trim() && (
+            <p className="line-clamp-2 text-xs text-text-secondary">
+              {event.description.trim()}
+            </p>
+          )}
 
-        <div className="flex items-center gap-3 pt-1">
-          {progressPercentage === null ? (
-            <span className="flex-1 text-xs text-text-secondary">
-              Sin limite de cupos
-            </span>
+          {isProposal ? (
+            votingDeadline && (
+              <p className="flex items-center gap-2 text-xs text-text-secondary">
+                <Calendar className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
+                <span>{displayStatus === 'expired' ? 'Plazo cerrado:' : 'Fecha límite:'} {votingDeadline}</span>
+              </p>
+            )
           ) : (
-            <div
-              role="progressbar"
-              aria-label={`Cupos ocupados para ${event.title}`}
-              aria-valuenow={progressPercentage}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              className="h-2 flex-1 overflow-hidden rounded-full bg-surface-soft"
-            >
-              <div
-                data-testid="event-capacity-bar"
-                className={cn(
-                  'h-full rounded-full transition-all',
-                  'bg-progress',
-                )}
-                style={{ width: `${progressPercentage}%` }}
-              />
+            <div className="flex flex-col gap-1.5 text-xs text-text-secondary">
+              <div className="flex items-center gap-2">
+                <Calendar className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
+                <span>{formatEventDate(event.eventDate)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="size-3.5 shrink-0 text-accent" aria-hidden="true" />
+                <span>{formatTimeRange(event.startTime, event.endTime)}</span>
+              </div>
             </div>
           )}
-          <span className="shrink-0 text-xs font-medium text-text-secondary">
-            {capacity === null
-              ? `${enrolledCount} inscritos`
-              : `${enrolledCount}/${capacity}`}
-          </span>
         </div>
+
+        {isProposal ? (
+          <div className="space-y-3 pt-1">
+            <ProposalProgress event={event} isExpired={displayStatus === 'expired'} />
+            {displayStatus === 'voting' && event.hasSupported && (
+              <p role="status" className="rounded-md bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800">
+                <Check className="mr-1 inline size-3.5" aria-hidden="true" />
+                {PROPOSAL_SUPPORT_ERROR_MESSAGES.ALREADY_SUPPORTED}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 pt-1">
+            {progressPercentage === null ? (
+              <span className="flex-1 text-xs text-text-secondary">
+                Sin limite de cupos
+              </span>
+            ) : (
+              <div
+                role="progressbar"
+                aria-label={`Cupos ocupados para ${event.title}`}
+                aria-valuenow={progressPercentage}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                className="h-2 flex-1 overflow-hidden rounded-full bg-surface-soft"
+              >
+                <div
+                  data-testid="event-capacity-bar"
+                  className="h-full rounded-full bg-progress transition-all"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+            )}
+            <span className="shrink-0 text-xs font-medium text-text-secondary">
+              {capacity === null
+                ? `${enrolledCount} inscritos`
+                : `${enrolledCount}/${capacity}`}
+            </span>
+          </div>
+        )}
       </Button>
     </Card>
   );

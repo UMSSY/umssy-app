@@ -27,12 +27,12 @@ export function ReplaceCvDialog({
       <AlertDialogContent className="max-w-md gap-0 rounded-lg border border-border bg-surface p-8 text-ink shadow-sm ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
         <AlertDialogHeader className="place-items-start text-left">
           <AlertDialogTitle className="font-tight text-2xl font-bold text-ink">
-            ¿Reemplazar tu CV?
+            ¿Subir una nueva versión?
           </AlertDialogTitle>
-          <AlertDialogDescription className="mt-2 text-base text-text-secondary">
+          <AlertDialogDescription className="mt-2 text-base [overflow-wrap:anywhere] text-text-secondary">
             {currentName
-              ? `Se reemplazará ${currentName} por el archivo seleccionado. El archivo anterior se eliminará.`
-              : "Se reemplazará tu CV actual por el archivo seleccionado. El archivo anterior se eliminará."}
+              ? `El archivo seleccionado será tu CV vigente. ${currentName} pasará al historial.`
+              : "El archivo seleccionado será tu CV vigente. Tu CV actual pasará al historial."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         {file ? (
@@ -61,7 +61,7 @@ export function ReplaceCvDialog({
             onClick={file ? () => onConfirm(file) : undefined}
           >
             {isReplacing ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null}
-            {isReplacing ? "Reemplazando..." : "Reemplazar"}
+            {isReplacing ? "Subiendo..." : "Subir"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

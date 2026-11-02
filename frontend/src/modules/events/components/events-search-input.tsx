@@ -16,7 +16,7 @@ export function EventsSearchInput({ value, onChange }: EventsSearchInputProps) {
       <Input
         type="search"
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => onChange(event.target.value.slice(0, SEARCH_MAX_LENGTH))}
         placeholder="Buscar taller..."
         aria-label="Buscar taller"
         maxLength={SEARCH_MAX_LENGTH}

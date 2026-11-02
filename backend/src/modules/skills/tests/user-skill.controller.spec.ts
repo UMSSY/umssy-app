@@ -101,6 +101,7 @@ describe('UserSkillController', () => {
 
     expect(response.body).toEqual({
       statusCode: 409,
+      code: 'DUPLICATE_SKILL',
       data: null,
       detail: 'The same skill cannot be added twice',
       ok: false,

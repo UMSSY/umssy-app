@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   Patch,
   Param,
   ParseUUIDPipe,
@@ -29,6 +30,7 @@ import {
   type UpdateMentorOrientationTypesDto,
 } from '../requests/update-mentor-orientation-types.schema.js';
 import { MentorsService } from '../services/mentors.service.js';
+import { requireMentorIdempotencyKey } from '../requests/mentor-idempotency-key.schema.js';
 import {
   mentorDirectoryQuerySchema,
   type MentorDirectoryQuery,
@@ -58,6 +60,12 @@ export class MentorsController {
   @UseGuards(JwtAuthGuard)
   findMyTechnicalAreas(@CurrentUser() user: AuthenticatedUser) {
     return this.mentorsService.findMyTechnicalAreas(user.id);
+  }
+
+  @Get('me/participation')
+  @UseGuards(JwtAuthGuard)
+  findMyParticipation(@CurrentUser() user: AuthenticatedUser) {
+    return this.mentorsService.findMyParticipation(user.id);
   }
 
   @Patch('me/technical-areas')
@@ -104,7 +112,12 @@ export class MentorsController {
   activate(
     @CurrentUser() user: AuthenticatedUser,
     @Body(new ZodValidationPipe(activateMentorSchema)) body: ActivateMentorDto,
+    @Headers('idempotency-key') key?: string,
   ) {
-    return this.mentorsService.activate(user.id, body);
+    return this.mentorsService.activate(
+      user.id,
+      body,
+      requireMentorIdempotencyKey(key),
+    );
   }
 }

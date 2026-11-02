@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { MentorProfile } from "../../types/mentor-profile.types";
+import { calculateExperienceYears } from "../../utils/mentor-experience";
 
 type MentorCareerProps = {
   mentor: MentorProfile;
@@ -17,8 +18,9 @@ export function MentorCareer({ mentor }: MentorCareerProps) {
     (experience) => experience.isCurrent,
   );
   const education = mentor.educations[0];
+  const experienceYears = calculateExperienceYears(mentor.workExperiences);
 
-  if (!currentExperience && !education) {
+  if (!currentExperience && !education && mentor.workExperiences.length === 0) {
     return null;
   }
 
@@ -41,6 +43,10 @@ export function MentorCareer({ mentor }: MentorCareerProps) {
       </CardHeader>
 
       <CardContent className="space-y-5 px-6 pt-5 pb-6">
+        <div>
+          <p className="text-xs font-semibold tracking-wide text-text-secondary uppercase">Experiencia profesional</p>
+          <p className="mt-1 text-ink">{experienceYears === null ? "Años de experiencia no disponibles" : experienceYears === 0 ? "Menos de un año de experiencia" : `${experienceYears} ${experienceYears === 1 ? "año" : "años"} de experiencia`}</p>
+        </div>
         {currentExperience && (
           <>
             <div>
@@ -49,7 +55,7 @@ export function MentorCareer({ mentor }: MentorCareerProps) {
               </p>
 
               <p className="mt-1 font-semibold [overflow-wrap:anywhere] text-ink">
-                {currentExperience.position}
+                {currentExperience.position?.trim() || "Cargo no registrado"}
               </p>
             </div>
 
@@ -59,7 +65,7 @@ export function MentorCareer({ mentor }: MentorCareerProps) {
               </p>
 
               <p className="mt-1 [overflow-wrap:anywhere] text-ink">
-                {currentExperience.company.title}
+                {currentExperience.company?.title?.trim() || "Empresa no registrada"}
               </p>
             </div>
           </>
@@ -73,8 +79,8 @@ export function MentorCareer({ mentor }: MentorCareerProps) {
               Formación
             </p>
 
-            <p className="mt-1 font-semibold [overflow-wrap:anywhere] text-ink">{education.degree}</p>
-            <p className="mt-1 [overflow-wrap:anywhere] text-ink">{education.institution}</p>
+            <p className="mt-1 font-semibold [overflow-wrap:anywhere] text-ink">{education.degree?.trim() || "Programa no registrado"}</p>
+            <p className="mt-1 [overflow-wrap:anywhere] text-ink">{education.institution?.trim() || "Institución no registrada"}</p>
           </div>
         )}
       </CardContent>

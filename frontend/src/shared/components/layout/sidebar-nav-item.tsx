@@ -41,7 +41,7 @@ export function SidebarNavItem({
           render={<Link href={item.href ?? "#"} />}
           isActive={isActive}
           aria-current={isActive ? "page" : undefined}
-          className={cn(SIDEBAR_ITEM_CLASS, className)}
+          className={cn(SIDEBAR_ITEM_CLASS, badge && "[&>span:last-child]:whitespace-normal", className)}
         >
           <Icon strokeWidth={1.5} aria-hidden="true" />
           <span className={badge ? "flex-1" : undefined}>{item.label}</span>

@@ -1,0 +1,73 @@
+name: Delete Merged Epic Task Branches
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches: ["epic/**"]
+
+permissions:
+  contents: write
+
+jobs:
+  delete-task-branch:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted automation from the default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Delete the merged internal task branch
+        shell: bash
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_REPOSITORY: ${{ github.event.pull_request.base.repo.full_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          TASK_PATTERN='^(feature|fix|refactor|docs|test)/grupo-([0-9]+)-[a-z0-9]+(-[a-z0-9]+)*$'
+          EPIC_PATTERN='^epic/grupo-([0-9]+)-[a-z0-9]+(-[a-z0-9]+)*$'
+
+          if [[ "$HEAD_REPOSITORY" != "$GITHUB_REPOSITORY" \
+             || "$BASE_REPOSITORY" != "$GITHUB_REPOSITORY" \
+             || "$HEAD_REF" == "$DEFAULT_BRANCH" ]]; then
+            echo "Skipped: fork or default branch."
+            exit 0
+          fi
+
+          if [[ ! "$HEAD_REF" =~ $TASK_PATTERN ]]; then
+            echo "Skipped: not an internal task branch."
+            exit 0
+          fi
+          TASK_GROUP="${BASH_REMATCH[2]}"
+
+          if [[ ! "$BASE_REF" =~ $EPIC_PATTERN ]]; then
+            echo "Skipped: target is not a group epic."
+            exit 0
+          fi
+          if [[ "$TASK_GROUP" != "${BASH_REMATCH[1]}" ]]; then
+            echo "Skipped: task and epic belong to different groups."
+            exit 0
+          fi
+
+          if [[ ! "$HEAD_SHA" =~ ^[a-fA-F0-9]{40}$ ]]; then
+            echo "::error::Invalid merged head SHA."
+            exit 1
+          fi
+
+          REF="refs/heads/$HEAD_REF"
+          REMOTE_REF=$(git ls-remote --heads origin "$REF")
+          if [[ -z "$REMOTE_REF" ]]; then
+            echo "Skipped: the task branch was already deleted."
+            exit 0
+          fi
+          if [[ "${REMOTE_REF%%[[:space:]]*}" != "$HEAD_SHA" ]]; then
+            echo "Skipped: the task branch has changed since the merge."
+            exit 0
+          fi
+
+          git push --force-with-lease="$REF:$HEAD_SHA" origin ":$REF"
+          echo "Deleted merged task branch: $HEAD_REF"

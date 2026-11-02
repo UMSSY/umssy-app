@@ -14,6 +14,10 @@ describe('formatSalaryRange', () => {
     expect(formatSalaryRange(5000)).toBe('Bs 5.000');
   });
 
+  it('muestra a convenir cuando no hay salario', () => {
+    expect(formatSalaryRange()).toBe('A convenir');
+  });
+
   it('muestra el rango con un solo prefijo', () => {
     expect(formatSalaryRange(6500, 8000)).toBe('Bs 6.500 - 8.000');
   });

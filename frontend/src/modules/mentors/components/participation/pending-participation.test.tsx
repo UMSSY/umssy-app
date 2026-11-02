@@ -1,124 +1,188 @@
-import { useState } from "react";
-import { act, cleanup, fireEvent, screen, within } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
-import { useSlotRequestPreview } from "../../hooks/use-slot-request-preview";
-import * as service from "../../services/slot-request-preview.service";
-import { SlotUnavailableDialog } from "./slot-availability-preview";
 import { PendingParticipation } from "./pending-participation";
-import { ParticipationView } from "../../views/participation-view";
+import * as participationService from "../../services/mentor-participation.service";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("@/modules/mentorship/hooks/use-mentorship-catalogs", () => ({
+  useMentorshipCatalogs: () => ({
+    technicalAreas: [
+      { id: "area-backend", name: "Backend" },
+      { id: "area-database", name: "Bases de Datos" },
+    ],
+    orientationTypes: [
+      { id: "orientation-technical", name: "Orientación técnica" },
+      { id: "orientation-cv", name: "Revisión de CV" },
+    ],
+    isTechnicalAreasLoading: false,
+    isOrientationTypesLoading: false,
+  }),
+}));
 
-function TestFlow() {
-  const preview = useSlotRequestPreview();
-  const [open, setOpen] = useState(true);
-  return preview.request ? <PendingParticipation /> : <SlotUnavailableDialog open={open} onOpenChange={setOpen} areas={["Backend"]} orientations={["Revisión de CV"]} />;
-}
+const pendingRequest: participationService.MentorParticipationRequest = {
+  id: "request-1",
+  userId: "user-1",
+  status: "PENDING",
+  queuedAt: "2026-10-26T15:00:00.000Z",
+  createdAt: "2026-10-26T15:00:00.000Z",
+  technicalAreaIds: ["area-backend"],
+  orientationTypeIds: ["orientation-technical"],
+};
 
-async function finishRequest() {
-  await act(async () => { await vi.advanceTimersByTimeAsync(801); });
-}
-
-beforeEach(() => {
-  vi.stubEnv("NODE_ENV", "development");
-  vi.stubEnv("NEXT_PUBLIC_APP_ENV", "local");
-  vi.useFakeTimers();
-  vi.setSystemTime(new Date("2026-10-24T16:00:00Z"));
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
 });
-afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 
-describe("Solicitud pendiente simulada", () => {
-  it("espera la respuesta, bloquea controles y cierre, y cambia a Pendiente con los datos", async () => {
-    const simulate = vi.spyOn(service, "simulateSlotRequest");
-    renderWithQuery(<TestFlow />);
-    const submit = screen.getByRole("button", { name: "Solicitar cupo" });
-    fireEvent.click(submit);
-    fireEvent.click(submit);
-    expect(screen.getByRole("button", { name: "Enviando solicitud..." })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Cerrar modal" })).toBeDisabled();
-    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
-    fireEvent.pointerDown(document.querySelector('[data-slot="dialog-overlay"]')!);
-    expect(screen.getByRole("dialog", { name: "No hay cupos disponibles" })).toBeInTheDocument();
-    expect(screen.queryByText("Solicitud registrada correctamente")).not.toBeInTheDocument();
-    expect(simulate).toHaveBeenCalledTimes(1);
-    await finishRequest();
-    expect(screen.getByRole("dialog", { name: "Solicitud registrada correctamente" })).toBeInTheDocument();
+describe("Participación pendiente HU7-2", () => {
+  it("muestra la solicitud pendiente y sus preferencias", () => {
+    renderWithQuery(
+      <PendingParticipation request={pendingRequest} />,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Estado de participación" }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("PENDIENTE")).toBeInTheDocument();
+    expect(screen.queryByText("PENDING")).not.toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
-    expect(screen.getByText("Revisión de CV")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Cerrar" }));
-    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
-    expect(screen.getByRole("heading", { name: "Mi participación como mentor" })).toBeInTheDocument();
-    expect(screen.getByText("Pendiente")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Solicitar cupo" })).not.toBeInTheDocument();
+    expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Editar áreas técnicas" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Cancelar cupo" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Editar tipos de orientación" }),
+    ).toBeInTheDocument();
   });
 
-  it("muestra error sin éxito ni solicitud y permite reintentar", async () => {
-    renderWithQuery(<TestFlow />);
-    fireEvent.click(screen.getByRole("button", { name: "Error" }));
-    fireEvent.click(screen.getByRole("button", { name: "Solicitar cupo" }));
-    await finishRequest();
-    expect(screen.getByRole("alert")).toHaveTextContent("No se pudo registrar");
-    expect(screen.queryByText("Solicitud registrada correctamente")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Solicitar cupo" })).toBeEnabled();
-    fireEvent.click(screen.getByRole("button", { name: "Éxito" }));
-    fireEvent.click(screen.getByRole("button", { name: "Solicitar cupo" }));
-    await finishRequest();
-    expect(screen.getByRole("dialog", { name: "Solicitud registrada correctamente" })).toBeInTheDocument();
+  it("permite abrir el formulario para modificar preferencias", () => {
+    renderWithQuery(
+      <PendingParticipation request={pendingRequest} />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Editar áreas técnicas" }),
+    );
+
+    expect(
+      screen.getByRole("dialog", {
+        name: "Modificar solicitud pendiente",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("checkbox", { name: "Backend" }),
+    ).toBeChecked();
+
+    expect(
+      screen.getByRole("checkbox", { name: "Orientación técnica" }),
+    ).toBeChecked();
   });
 
-  it("recupera la solicitud duplicada e informa sin mostrar éxito de nuevo registro", async () => {
-    renderWithQuery(<TestFlow />);
-    fireEvent.click(screen.getByRole("button", { name: "Duplicada" }));
-    fireEvent.click(screen.getByRole("button", { name: "Solicitar cupo" }));
-    await finishRequest();
-    expect(screen.getByRole("dialog", { name: "Ya tienes una solicitud pendiente" })).toBeInTheDocument();
-    expect(screen.queryByText("Solicitud registrada correctamente")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Cerrar" }));
-    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
+  it("actualiza las preferencias usando el servicio real", async () => {
+    const update = vi
+      .spyOn(
+        participationService.mentorParticipationService,
+        "update",
+      )
+      .mockResolvedValue({
+        ...pendingRequest,
+        technicalAreaIds: ["area-database"],
+      });
+
+    renderWithQuery(
+      <PendingParticipation request={pendingRequest} />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Editar tipos de orientación" }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "Backend" }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "Bases de Datos" }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Guardar cambios" }),
+    );
+
+    await waitFor(() => {
+      expect(update).toHaveBeenCalledWith({
+        technicalAreaIds: ["area-database"],
+        orientationTypeIds: ["orientation-technical"],
+      });
+    });
+  });
+
+  it("abre la confirmación antes de cancelar", () => {
+    renderWithQuery(
+      <PendingParticipation request={pendingRequest} />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Cancelar cupo" }),
+    );
+
+    expect(
+      screen.getByRole("dialog", {
+        name: "¿Cancelar solicitud de cupo?",
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("cancela la solicitud mediante el servicio", async () => {
+    const onCancelled = vi.fn();
+    const cancel = vi
+      .spyOn(
+        participationService.mentorParticipationService,
+        "cancel",
+      )
+      .mockResolvedValue({
+        ...pendingRequest,
+        status: "CANCELLED",
+      });
+
+    renderWithQuery(
+      <PendingParticipation request={pendingRequest} onCancelled={onCancelled} />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Cancelar cupo" }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Confirmar cancelación",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(cancel).toHaveBeenCalledTimes(1);
+      expect(onCancelled).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.queryByText("Solicitud cancelada correctamente")).not.toBeInTheDocument();
+  });
+
+  it("muestra el detalle pendiente y permite volver sin historial", () => {
+    renderWithQuery(<PendingParticipation request={{ ...pendingRequest, email: "titulado@umssy.test" }} />);
     fireEvent.click(screen.getByRole("button", { name: "Ver detalle" }));
-    expect(screen.getByText("Solicitud enviada hace 3 días")).toBeInTheDocument();
-  });
-
-  it("conserva fecha e identidad, recalcula antigüedad al abrir y consulta desde Mi participación", async () => {
-    const { client, rerender } = renderWithQuery(<TestFlow />);
-    client.setQueryData(["auth-session", null], { id: "user-1", email: "titulado@fcyt.umss.edu.bo", roles: ["titulado"] });
-    fireEvent.click(screen.getByRole("button", { name: "Solicitar cupo" }));
-    await finishRequest();
-    fireEvent.click(screen.getByRole("button", { name: "Cerrar" }));
-    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
-    const original = client.getQueryData(["mentor-slot-request-preview", null]);
-    fireEvent.click(screen.getByRole("button", { name: "Ver detalle" }));
-    expect(screen.getByText("Solicitud enviada hace menos de una hora")).toBeInTheDocument();
-    expect(screen.getByText("titulado@fcyt.umss.edu.bo")).toBeInTheDocument();
-    const date = screen.getByText(/Registrada el/).textContent;
+    expect(screen.getByRole("dialog", { name: "Solicitud pendiente" })).toBeInTheDocument();
+    expect(screen.getByText(/Solicitud enviada hace/)).toBeInTheDocument();
+    expect(screen.getByText("titulado@umssy.test")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ver historial" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Volver" }));
-    act(() => { vi.setSystemTime(Date.now() + 3 * 86400000); });
-    fireEvent.click(screen.getByRole("button", { name: "Ver detalle" }));
-    expect(screen.getByText("Solicitud enviada hace 3 días")).toBeInTheDocument();
-    expect(screen.getByText(/Registrada el/)).toHaveTextContent(date!);
-    fireEvent.click(screen.getByRole("button", { name: "Volver" }));
-    expect(client.getQueryData(["mentor-slot-request-preview", null])).toEqual(original);
-    rerender(<ParticipationView />);
-    expect(screen.getByText("Pendiente")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Ver detalle" })).toBeInTheDocument();
-  });
-
-  it("no envía otra operación si ya hay una solicitud y conserva la fecha original", async () => {
-    const simulate = vi.spyOn(service, "simulateSlotRequest");
-    const { client, rerender } = renderWithQuery(<TestFlow />);
-    fireEvent.click(screen.getByRole("button", { name: "Solicitar cupo" }));
-    await finishRequest();
-    const original = client.getQueryData<{ request: service.PendingSlotRequest }>(["mentor-slot-request-preview", null])!.request;
-    rerender(<SlotUnavailableDialog open onOpenChange={() => {}} />);
-    fireEvent.click(within(screen.getByRole("dialog", { name: "No hay cupos disponibles" })).getByRole("button", { name: "Solicitar cupo" }));
-    expect(simulate).toHaveBeenCalledTimes(1);
-    expect(client.getQueryData<{ request: service.PendingSlotRequest }>(["mentor-slot-request-preview", null])!.request).toEqual(original);
-  });
-
-  it("rechaza la simulación fuera de desarrollo", async () => {
-    vi.stubEnv("NODE_ENV", "production");
-    await expect(service.simulateSlotRequest("success", [], [])).rejects.toThrow("Simulación no disponible");
+    expect(screen.queryByRole("dialog", { name: "Solicitud pendiente" })).not.toBeInTheDocument();
   });
 });

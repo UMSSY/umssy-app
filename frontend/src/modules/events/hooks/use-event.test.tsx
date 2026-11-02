@@ -2,6 +2,7 @@ import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useEvent } from "./use-event";
+import { clearAccessToken, saveAccessToken } from '@/shared/services/storage/access-token-storage';
 import { eventsService } from "../services/events.service";
 import type { EventDetail } from "../types/event-detail.types";
 vi.mock("../services/events.service", () => ({
@@ -9,6 +10,7 @@ vi.mock("../services/events.service", () => ({
 }));
 afterEach(() => {
   cleanup();
+  clearAccessToken();
   vi.resetAllMocks();
 });
 const event = { id: "a", title: "Taller A" } as EventDetail;
@@ -79,5 +81,28 @@ describe("useEvent", () => {
     await waitFor(() => expect(result.current.notFound).toBe(true));
     expect(result.current.event).toBeNull();
     expect(result.current.isLoading).toBe(false);
+  });
+
+  it('loads a fresh personalized detail when the session changes', async () => {
+    vi.mocked(eventsService.getEvent).mockImplementation(async (
+      id,
+      _signal,
+      token,
+    ) => ({ ...event, id, hasSupported: token === 'token-a' }));
+
+    const { result } = renderHook(() => useEvent('a'));
+    await waitFor(() => expect(result.current.event?.hasSupported).toBe(false));
+
+    act(() => saveAccessToken('token-a'));
+    await waitFor(() => expect(result.current.event?.hasSupported).toBe(true));
+
+    act(() => saveAccessToken('token-b'));
+    await waitFor(() => expect(result.current.event?.hasSupported).toBe(false));
+
+    act(() => clearAccessToken());
+    await waitFor(() => expect(result.current.event?.hasSupported).toBe(false));
+
+    expect(eventsService.getEvent).toHaveBeenCalledWith('a', expect.any(AbortSignal), 'token-a');
+    expect(eventsService.getEvent).toHaveBeenCalledWith('a', expect.any(AbortSignal), 'token-b');
   });
 });

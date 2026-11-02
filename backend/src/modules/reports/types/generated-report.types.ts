@@ -8,6 +8,7 @@ export const REPORT_TYPES = [
   'COMPANIES',
   'ADMINS',
   'REJECTED_USERS',
+  'SURVEY_STATISTICS',
 ] as const;
 
 export type ReportType = (typeof REPORT_TYPES)[number];
@@ -35,6 +36,7 @@ export type RegisterGeneratedReportInput = Pick<
 export interface ReportHistoryFilters {
   readonly reportType?: ReportType;
   readonly search?: string;
+  readonly snapshotAt?: string;
 }
 
 export interface GeneratedReportsPage {

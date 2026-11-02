@@ -96,14 +96,27 @@ describe("CvUploadCard", () => {
     expect(screen.queryByRole("button", { name: "Confirmar carga" })).not.toBeInTheDocument();
   });
 
-  it("replaces the upload actions with an informative message when a cv is saved", () => {
-    renderCard(null, false, false, { hasSavedCv: true });
+  it("offers a new version instead of the first upload when a cv is saved", async () => {
+    const { onSelectFile, user } = renderCard(null, false, false, { hasSavedCv: true });
 
-    expect(screen.getByText("Ya tienes un CV guardado")).toBeInTheDocument();
+    expect(screen.getByText("Ya tienes un CV vigente")).toBeInTheDocument();
     expect(
-      screen.getByText("Para cambiarlo, usa «Reemplazar CV» en «Archivo guardado»."),
+      screen.getByText("Sube una nueva versión en PDF. Tu CV actual pasará al historial."),
     ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Seleccionar PDF" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Confirmar carga" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Subir nueva versión" }));
+
+    expect(onSelectFile).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the spinner on the new version button while uploading", () => {
+    renderCard(null, true, true, { hasSavedCv: true });
+
+    const uploadingButton = screen.getByRole("button", { name: "Cargando..." });
+
+    expect(uploadingButton).toBeDisabled();
+    expect(uploadingButton.querySelector("svg.lucide-loader-circle")).toBeInTheDocument();
   });
 });

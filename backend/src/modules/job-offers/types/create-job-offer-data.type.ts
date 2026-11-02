@@ -10,5 +10,8 @@ export interface CreateJobOfferData {
   salaryRange: string;
   languages: string;
   locationUrl: string;
+  requiredCareers: string[];
+  minExperienceYears: number | null;
+  otherRequirements: string[];
   skillIds: string[];
 }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { isConnectionError } from "@/shared/utils/is-connection-error";
 import { REGISTERED_USERS_PAGE_SIZE, SLOW_REQUEST_THRESHOLD_MS } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
+import { useReportSnapshot } from "./use-report-snapshot";
 import type { AcademicPeriod, RegisteredUsersState } from "../types/registered-user.types";
 import type { RoleTag } from "@/modules/auth";
 
@@ -11,6 +12,7 @@ export function useRegisteredUsers(page: number, userType?: RoleTag, period?: Ac
   const [state, setState] = useState<RegisteredUsersState | null>(null);
   const [slowRequestKey, setSlowRequestKey] = useState<string | null>(null);
   const [refreshCount, setRefreshCount] = useState(0);
+  const { resolveSnapshotAt, renewSnapshot } = useReportSnapshot();
   const requestKey = `${page}-${userType ?? "ALL"}-${period ?? "ALL"}-${search}-${refreshCount}`;
 
   useEffect(() => {
@@ -20,8 +22,9 @@ export function useRegisteredUsers(page: number, userType?: RoleTag, period?: Ac
       if (!isCancelled) setSlowRequestKey(requestKey);
     }, SLOW_REQUEST_THRESHOLD_MS);
 
+    const snapshotAt = resolveSnapshotAt(page);
     reportsService
-      .getRegisteredUsers({ page, limit: REGISTERED_USERS_PAGE_SIZE, userType, period, search })
+      .getRegisteredUsers({ page, limit: REGISTERED_USERS_PAGE_SIZE, userType, period, search, ...(snapshotAt && { snapshotAt }) })
       .then((response) => {
         if (!isCancelled) setState({ requestKey, result: response.data });
       })
@@ -42,9 +45,12 @@ export function useRegisteredUsers(page: number, userType?: RoleTag, period?: Ac
       isCancelled = true;
       clearTimeout(slowTimer);
     };
-  }, [page, userType, period, search, requestKey]);
+  }, [page, userType, period, search, requestKey, resolveSnapshotAt]);
 
-  const refresh = useCallback(() => setRefreshCount((count) => count + 1), []);
+  const refresh = useCallback(() => {
+    renewSnapshot();
+    setRefreshCount((count) => count + 1);
+  }, [renewSnapshot]);
 
   const isCurrentRequest = state?.requestKey === requestKey;
   const users = isCurrentRequest ? (state.result?.items ?? []) : [];

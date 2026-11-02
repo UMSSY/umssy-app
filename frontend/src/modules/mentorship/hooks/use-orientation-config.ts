@@ -27,6 +27,9 @@ export function useOrientationConfig() {
     mutationFn: (ids: string[]) => updateMentorOrientationTypes(ids),
     onSuccess: (_data, savedIds) => {
       queryClient.setQueryData<typeof query.data>(queryKey, (current) => current ? { ...current, savedIds } : current);
+      void queryClient.invalidateQueries({ queryKey: ["mentors", "participation"] });
+      void queryClient.invalidateQueries({ queryKey: ["mentorship", "profile"] });
+      void queryClient.invalidateQueries({ queryKey: ["mentorship", "directory"] });
     },
   });
   return {

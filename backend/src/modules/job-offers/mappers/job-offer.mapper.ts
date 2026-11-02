@@ -29,6 +29,7 @@ export class JobOfferMapper {
       createdAt: record.createdAt.toISOString(),
       company: { id: record.company.id, name: record.company.title },
       skills: record.skills.map(({ skill }) => ({ id: skill.id, name: skill.name })),
+      applicantsCount: record._count.applications,
     };
   }
 }

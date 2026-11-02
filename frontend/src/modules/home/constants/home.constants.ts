@@ -9,7 +9,6 @@ export const HOME_HERO = {
     { src: "/images/campus-umss.webp", alt: "Edificio del campus de la UMSS entre árboles", position: "50% 48%" },
   ],
   slideLabel: "Mostrar imagen",
-  switchLockMs: 500,
   autoplayMs: 6000,
 } as const;
 
@@ -57,18 +56,6 @@ export const HOME_SLANT_TAG_CLASS =
 export const HOME_SECTION_TITLE_CLASS = "font-tight text-3xl font-extrabold tracking-tight uppercase md:text-5xl";
 
 export const HOME_SECTION_INNER_CLASS = "mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28";
-
-export const HOME_HERO_SLANT_CLASS = "[--hero-slant:12rem] [--hero-step:3rem] md:[--hero-slant:15.625rem] md:[--hero-step:7rem]";
-
-export const HOME_HERO_SLIDE_CLIP = (index: number, current: number, total: number) => {
-  const edge =
-    index < current
-      ? `calc(var(--hero-step) * ${current - index === 1 ? 1.8 : 0.9})`
-      : index === total - 1
-        ? "calc(200% + var(--hero-slant))"
-        : `calc(100% + var(--hero-slant) - var(--hero-step) * ${total - 1 - index})`;
-  return `polygon(0% 0%, ${edge} 0%, calc(${edge} - var(--hero-slant)) 100%, 0% 100%)`;
-};
 
 export const HOME_SHIELD_LEFT_CLASS = "[clip-path:polygon(0_0,100%_0,0_100%)]";
 

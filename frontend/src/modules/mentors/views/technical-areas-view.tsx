@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import {
@@ -16,13 +17,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { TechnicalAreaCard } from "../components/technical-area-card";
 import { useTechnicalAreas } from "../hooks/use-technical-areas";
 
 export function TechnicalAreasView() {
   const router = useRouter();
 
-  const { areas, savedIds, isSaving, isLoading, hasLoadError, save, retry } = useTechnicalAreas();
+  const { areas, savedIds, isSaving, isLoading, hasLoadError, hasAccessError, save, retry } = useTechnicalAreas();
   const [draftIds, setSelectedIds] = useState<string[] | null>(null);
   const selectedIds = draftIds ?? savedIds;
   const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
@@ -46,7 +49,7 @@ export function TechnicalAreasView() {
   };
 
   const handleSubmit = async () => {
-    if (hasNoSelection) return;
+    if (hasNoSelection || hasAccessError) return;
 
     try {
       await save(selectedIds);
@@ -69,6 +72,7 @@ export function TechnicalAreasView() {
     <WorkspacePage title="Editar áreas técnicas" description="Indica las áreas en las que puedes brindar orientación.">
       {!isLoading &&
         !hasLoadError &&
+        !hasAccessError &&
         (hasNoSelection ? (
           <Alert className="mb-4 rounded-lg border border-danger/30 bg-interaction p-3 text-sm text-danger">
             Debe seleccionarse al menos un área para continuar
@@ -92,7 +96,6 @@ export function TechnicalAreasView() {
             type="button"
             variant="outline"
             onClick={() => {
-              setSelectedIds(null);
               retry();
             }}
           >
@@ -101,7 +104,9 @@ export function TechnicalAreasView() {
         </Alert>
       )}
 
-      {!isLoading && !hasLoadError && (
+      {hasAccessError && <Alert className="space-y-3 rounded-lg border border-border bg-surface-soft p-4 text-ink"><p>Necesitas una participación activa como mentor para editar áreas técnicas.</p><Link href="/mentors/participation" className={buttonVariants({ variant: "outline" })}>Revisar mi participación</Link><Link href="/mentorship" className={buttonVariants()}>Iniciar incorporación</Link></Alert>}
+
+      {!isLoading && !hasLoadError && !hasAccessError && (
         <fieldset
           disabled={isSaving}
           className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-2"
@@ -128,7 +133,7 @@ export function TechnicalAreasView() {
         <Button
           type="button"
           onClick={handleSubmit}
-          disabled={hasNoSelection || isSaving || isLoading || hasLoadError}
+          disabled={hasNoSelection || isSaving || isLoading || hasLoadError || hasAccessError}
           className="h-auto gap-2 rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSaving ? (
@@ -143,9 +148,7 @@ export function TechnicalAreasView() {
 
       {toast && (
         <Alert
-          className={`fixed right-4 bottom-4 w-auto rounded-lg border-0 px-4 py-3 text-white shadow-none ${
-            toast.isError ? "bg-danger" : "bg-ink-soft"
-          }`}
+          className={cn("fixed right-4 bottom-4 w-auto rounded-lg border-0 px-4 py-3 text-white shadow-none", toast.isError ? "bg-danger" : "bg-ink-soft")}
         >
           {toast.text}
         </Alert>

@@ -7,7 +7,7 @@ import {
   FREE_BLOCKS_STALE_TIME_MS,
   MENTOR_FREE_BLOCKS_TEXT,
 } from "../constants/mentor-free-blocks.constants";
-import { availabilityApi } from "../services/availability.api";
+import { availabilityApi } from "../services/availability.service";
 
 export function useMentorFreeBlocks(mentorId: string, weekRange: WeekRange) {
   const query = useQuery({

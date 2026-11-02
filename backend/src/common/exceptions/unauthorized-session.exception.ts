@@ -1,7 +1,7 @@
 import { DomainException } from './domain.exception.js';
 
 export class UnauthorizedSessionException extends DomainException {
-  constructor(message = 'Sesión inválida o expirada') {
-    super(message, 401);
+  constructor(message = 'Se requiere una sesión válida.') {
+    super(message, 401, 'UNAUTHENTICATED');
   }
 }

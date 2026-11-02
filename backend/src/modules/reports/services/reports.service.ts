@@ -47,6 +47,10 @@ function containsSearch(values: string[], search?: string): boolean {
   return values.some((value) => normalizeText(value).includes(term));
 }
 
+function isListedBefore(user: ReportUser, snapshotAt?: string): boolean {
+  return !snapshotAt || new Date(user.listedAt) <= new Date(snapshotAt);
+}
+
 function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -109,7 +113,10 @@ export class ReportsService {
     return {
       fileName: buildExportFileName(
         REJECTED_USERS_CSV_PREFIX,
-        [filters.search],
+        [
+          filters.userType && USER_TYPE_LABELS[filters.userType],
+          filters.search,
+        ],
         filters.period ?? todayIsoDate(),
         CSV_EXTENSION,
       ),
@@ -131,7 +138,8 @@ export class ReportsService {
           filters.period === undefined ||
           getAcademicPeriod(user.registeredAt) === filters.period,
       )
-      .filter((user) => containsSearch([user.email], filters.search));
+      .filter((user) => containsSearch([user.email], filters.search))
+      .filter((user) => isListedBefore(user, filters.snapshotAt));
 
     return sortByNewest(users).map(toRegisteredUserResponse);
   }
@@ -143,10 +151,15 @@ export class ReportsService {
       .filter((user) => user.registrationStatus === 'REJECTED')
       .filter(
         (user) =>
+          filters.userType === undefined || user.userType === filters.userType,
+      )
+      .filter(
+        (user) =>
           filters.period === undefined ||
           getAcademicPeriod(user.registeredAt) === filters.period,
       )
-      .filter((user) => containsSearch([user.email], filters.search));
+      .filter((user) => containsSearch([user.email], filters.search))
+      .filter((user) => isListedBefore(user, filters.snapshotAt));
 
     return sortByNewest(users).map(toRejectedUserResponse);
   }

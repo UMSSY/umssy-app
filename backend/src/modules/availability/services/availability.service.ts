@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { AvailabilityRepository } from '../repositories/availability.repository.js';
 import { AvailabilityMapper } from '../mappers/availability.mapper.js';
 import {
@@ -6,14 +7,25 @@ import {
   BlockNotFoundException,
   BlockNotOwnedException,
   BlockOverlapException,
+  DayBlockedException,
+  MentorAvailabilityNotOwnedException,
 } from '../exceptions/index.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
+import { toBoliviaTime } from '../../../common/utils/date-time.js';
+import type { TransactionClient } from '../../../common/types/transaction-client.types.js';
+import { BlockedDatesService } from './blocked-dates.service.js';
 import { hasOverlapErrorCode } from '../utils/overlap-error.js';
 import type { AvailabilityBlockResponse } from '../types/availability-block-response.types.js';
 import type { CreateBlockDto } from '../requests/create-block.request.js';
 import type { WeekQueryDto } from '../requests/week-query.request.js';
 import type { DeletedBlockResponse } from '../types/deleted-block-response.types.js';
 import type { UpdateBlockDto } from '../requests/update-block.request.js';
+import type { MentorAvailabilityStatusResponse } from '../types/mentor-availability-status-response.types.js';
+import type { WeeklyRepeatResponse } from '../types/weekly-repeat-response.types.js';
+import { weeklyOccurrences } from '../utils/weekly-occurrences.js';
+import { toCalendarDate } from '../utils/bolivia-day.js';
+import type { OwnerAvailabilityBlockResponse } from '../types/owner-availability-block-response.types.js';
+import type { AvailabilityBlockWithAppointments } from '../types/availability-block-with-appointments.types.js';
 
 @Injectable()
 export class AvailabilityService {
@@ -21,7 +33,15 @@ export class AvailabilityService {
     private readonly availabilityRepository: AvailabilityRepository,
     private readonly availabilityMapper: AvailabilityMapper,
     private readonly mentorsService: MentorsService,
+    private readonly blockedDatesService: BlockedDatesService,
   ) {}
+
+  findBlockWithAppointments(
+    blockId: string,
+    client?: TransactionClient,
+  ): Promise<AvailabilityBlockWithAppointments | null> {
+    return this.availabilityRepository.findById(blockId, client);
+  }
 
   async remove(mentorId: string, blockId: string): Promise<DeletedBlockResponse> {
     const block = await this.availabilityRepository.findById(blockId);
@@ -42,13 +62,13 @@ export class AvailabilityService {
   async findMyBlocks(
     mentorId: string,
     query: WeekQueryDto,
-  ): Promise<AvailabilityBlockResponse[]> {
+  ): Promise<OwnerAvailabilityBlockResponse[]> {
     const blocks = await this.availabilityRepository.findMentorBlocksInRange(
       mentorId,
       new Date(query.from),
       new Date(query.to),
     );
-    return this.availabilityMapper.toResponseList(blocks);
+    return this.availabilityMapper.toOwnerResponseList(blocks);
   }
 
   async updateBlock(
@@ -68,11 +88,18 @@ export class AvailabilityService {
       throw new BlockHasAppointmentException();
     }
 
+    const save = (tx?: TransactionClient) =>
+      this.availabilityRepository.update(
+        blockId,
+        { startAt: payload.startAt, endAt: payload.endAt },
+        tx,
+      );
+    const movesToAnotherDay = toBoliviaTime(block.startAt).date !== toBoliviaTime(payload.startAt).date;
+
     try {
-      const updated = await this.availabilityRepository.update(blockId, {
-        startAt: payload.startAt,
-        endAt: payload.endAt,
-      });
+      const updated = movesToAnotherDay
+        ? await this.blockedDatesService.runOnUnblockedDay(mentorId, payload.startAt, save)
+        : await save();
       return this.availabilityMapper.toResponse(updated);
     } catch (error) {
       if (hasOverlapErrorCode(error)) {
@@ -82,12 +109,16 @@ export class AvailabilityService {
     }
   }
 
-  async create(mentorId: string, payload: CreateBlockDto): Promise<AvailabilityBlockResponse> {
+  async create(
+    mentorId: string,
+    payload: CreateBlockDto,
+  ): Promise<AvailabilityBlockResponse | WeeklyRepeatResponse> {
+    if (payload.repeatWeekly && payload.repeatUntil !== undefined) {
+      return this.createWeeklySeries(mentorId, payload, payload.repeatUntil);
+    }
     try {
-      const block = await this.availabilityRepository.create(
-        mentorId,
-        payload.startAt,
-        payload.endAt,
+      const block = await this.blockedDatesService.runOnUnblockedDay(mentorId, payload.startAt, (tx) =>
+        this.availabilityRepository.create(mentorId, payload.startAt, payload.endAt, tx),
       );
       return this.availabilityMapper.toResponse({ ...block, appointments: [] });
     } catch (error) {
@@ -96,6 +127,31 @@ export class AvailabilityService {
       }
       throw error;
     }
+  }
+
+  private async createWeeklySeries(
+    mentorId: string,
+    payload: CreateBlockDto,
+    repeatUntil: string,
+  ): Promise<WeeklyRepeatResponse> {
+    const series = { seriesId: randomUUID(), repeatUntil: toCalendarDate(repeatUntil) };
+    const result: WeeklyRepeatResponse = { created: 0, skipped: [] };
+
+    for (const occurrence of weeklyOccurrences(payload.startAt, payload.endAt, repeatUntil)) {
+      try {
+        await this.blockedDatesService.runOnUnblockedDay(mentorId, occurrence.startAt, (tx) =>
+          this.availabilityRepository.create(mentorId, occurrence.startAt, occurrence.endAt, tx, series),
+        );
+        result.created++;
+      } catch (error) {
+        if (error instanceof DayBlockedException || hasOverlapErrorCode(error)) {
+          result.skipped.push(occurrence.day);
+          continue;
+        }
+        throw error;
+      }
+    }
+    return result;
   }
 
   async findMentorFreeBlocks(mentorId: string, query: WeekQueryDto): Promise<AvailabilityBlockResponse[]> {
@@ -109,7 +165,28 @@ export class AvailabilityService {
       return [];
     }
 
-    const blocks = await this.availabilityRepository.findMentorFreeBlocksInRange(mentorId, from, to);
-    return this.availabilityMapper.toResponseList(blocks);
+    const [blocks, blockedDays] = await Promise.all([
+      this.availabilityRepository.findMentorFreeBlocksInRange(mentorId, from, to),
+      this.blockedDatesService.findBlockedDays(mentorId, from, to),
+    ]);
+    const offeredBlocks = blocks.filter((block) => !blockedDays.has(toBoliviaTime(block.startAt).date));
+    return this.availabilityMapper.toResponseList(offeredBlocks);
+  }
+
+  async findMyAvailabilityStatus(mentorId: string): Promise<MentorAvailabilityStatusResponse> {
+    const mentor = await this.mentorsService.findOne(mentorId);
+    return this.availabilityMapper.toAvailabilityStatusResponse(mentor.id, mentor.isAvailable);
+  }
+
+  async updateAvailabilityStatus(
+    userId: string,
+    mentorId: string,
+    isAvailable: boolean,
+  ): Promise<MentorAvailabilityStatusResponse> {
+    if (userId !== mentorId) {
+      throw new MentorAvailabilityNotOwnedException();
+    }
+    const updated = await this.mentorsService.updateAvailability(mentorId, isAvailable);
+    return this.availabilityMapper.toAvailabilityStatusResponse(updated.id, updated.isAvailableForMentoring);
   }
 }

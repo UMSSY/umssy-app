@@ -32,6 +32,39 @@ afterEach(() => {
 });
 
 describe('mail configuration', () => {
+  it('allows console only for an explicitly configured QA deployment', () => {
+    expect(
+      parseMailConfig({
+        NODE_ENV: 'production',
+        UMSSY_DEPLOYMENT_ENV: 'qa',
+        MAIL_TRANSPORT: 'console',
+      }).MAIL_TRANSPORT,
+    ).toBe('console');
+  });
+
+  it.each(['QA', 'development', undefined])(
+    'keeps production requirements for deployment environment %s',
+    (deployment) => {
+      expect(() =>
+        parseMailConfig({
+          NODE_ENV: 'production',
+          UMSSY_DEPLOYMENT_ENV: deployment,
+          MAIL_TRANSPORT: 'console',
+        }),
+      ).toThrow('Production requires MAIL_TRANSPORT=smtp.');
+    },
+  );
+
+  it('keeps production SMTP validation even when the deployment is QA', () => {
+    expect(() =>
+      parseMailConfig({
+        ...PRODUCTION_ENV,
+        UMSSY_DEPLOYMENT_ENV: 'qa',
+        SMTP_REQUIRE_TLS: 'false',
+      }),
+    ).toThrow('Production SMTP requires');
+  });
+
   it('accepts Brevo STARTTLS and implicit TLS', () => {
     expect(parseMailConfig(PRODUCTION_ENV)).toMatchObject({
       SMTP_PORT: 587,
@@ -117,6 +150,17 @@ describe('MJML rendering', () => {
 });
 
 describe('mail delivery', () => {
+  it('does not create an SMTP connection for the public QA console transport', async () => {
+    const transport = vi.spyOn(nodemailer, 'createTransport');
+    vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    await createService({
+      NODE_ENV: 'production',
+      UMSSY_DEPLOYMENT_ENV: 'qa',
+      MAIL_TRANSPORT: 'console',
+    }).send({ ...MAIL_PAYLOAD, to: 'mentor.alfa@qa.hu67.test' });
+    expect(transport).not.toHaveBeenCalled();
+  });
+
   it('logs local messages without creating an SMTP connection', async () => {
     const transport = vi.spyOn(nodemailer, 'createTransport');
     const log = vi

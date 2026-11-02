@@ -10,6 +10,7 @@ export {
 } from '../constants/events.constants.js';
 
 export const GetEventsSchema = z.object({
+  includeProposals: z.enum(['true', 'false']).transform((value) => value === 'true').optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(10),
   categoryId: z
@@ -26,4 +27,4 @@ export const GetEventsSchema = z.object({
     .optional(),
 });
 
-export type GetEventsPayload = z.infer<typeof GetEventsSchema>;
+export type { GetEventsPayload } from '../types/get-events-payload.types.js';

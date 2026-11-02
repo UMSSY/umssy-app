@@ -6,6 +6,7 @@ import { EMPTY_DOCUMENT_LABEL, USER_TYPE_LABELS } from "../constants/registered-
 import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
 import {
   REGISTERED_USERS_COLUMN_COUNT as COLUMN_COUNT,
+  REGISTERED_USERS_TABLE_MIN_HEIGHT_CLASSES as MIN_HEIGHT_CLASSES,
   TABLE_CELL_CLASSES as CELL_CLASSES,
   TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES,
   USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES,
@@ -49,7 +50,7 @@ export function RegisteredUsersTable({ users, isLoading, errorMessage, searchTer
   };
 
   return (
-    <div className={CONTAINER_CLASSES}>
+    <div className={`${CONTAINER_CLASSES} ${MIN_HEIGHT_CLASSES}`}>
       <Table className="min-w-225 text-left text-base">
         <TableHeader className="bg-surface-soft">
           <TableRow className="border-border hover:bg-transparent">

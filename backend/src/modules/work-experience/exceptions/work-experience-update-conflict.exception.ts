@@ -2,6 +2,6 @@ import { DomainException } from '../../../common/exceptions/domain.exception.js'
 
 export class WorkExperienceUpdateConflictException extends DomainException {
   constructor() {
-    super('Work experience dates changed during the update', 409);
+    super('Work experience dates changed during the update', 409, 'WORK_EXPERIENCE_UPDATE_CONFLICT');
   }
 }

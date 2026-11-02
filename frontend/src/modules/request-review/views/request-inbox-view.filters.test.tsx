@@ -2,13 +2,14 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { automaticValidationService } from "../services/automatic-validation.service";
 import { requestReviewService } from "../services/request-review.service";
 import type { ReviewListItem } from "../types/request-review.types";
 import { RequestInboxView } from "./request-inbox-view";
 
 const listRequests = vi.spyOn(requestReviewService, "listRequests");
 const getSummary = vi.spyOn(requestReviewService, "getSummary");
-
+const getAutomationSummary = vi.spyOn(automaticValidationService, "getAutomationSummary");
 
 function row(index: number): ReviewListItem {
   return {
@@ -34,6 +35,7 @@ describe("RequestInboxView: filtros", () => {
     listRequests.mockReset();
     getSummary.mockReset();
     listRequests.mockResolvedValue(page([row(1)]));
+    getAutomationSummary.mockResolvedValue({ ok: true, data: { manualReviewCount: 0, autoApprovedTodayCount: 0, autoRejectedTodayCount: 0, receivedTodayCount: 0 } });
   });
   afterEach(() => cleanup());
 
@@ -182,7 +184,7 @@ describe("RequestInboxView: filtros", () => {
     expect(await screen.findByText("Persona 1")).toBeInTheDocument();
   });
 
-  it("cambiar de pestaña o de filtro conserva la lista sin cargar el resumen eliminado", async () => {
+  it("cambiar de pestaña o de filtro conserva la lista y no vuelve a pedir el resumen", async () => {
     const user = userEvent.setup();
     renderWithQuery(<RequestInboxView />);
     await screen.findByText("Persona 1");
@@ -196,7 +198,7 @@ describe("RequestInboxView: filtros", () => {
     await user.click(await screen.findByRole("option", { name: "7 días" }));
     await waitFor(() => expect(lastCall()).toEqual(["rejected", 1, { ...EMPTY_FILTERS, period: "7d" }]));
 
-    expect(getSummary).not.toHaveBeenCalled();
+    expect(getSummary).toHaveBeenCalledTimes(1);
     expect(screen.queryByTestId("summary-skeleton")).toBeNull();
   });
 

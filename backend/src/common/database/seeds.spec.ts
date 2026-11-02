@@ -53,6 +53,7 @@ vi.mock('../../modules/chat/seeds/chat.seed.js', () => ({
 
 const users = {
   mentorA: { id: 'mentor' },
+  mentorB: { id: 'performance-mentor' },
   graduate: { id: 'availability-graduate' },
   eventGraduate: { id: 'event-graduate' },
   emptyGraduate: { id: 'without-passes' },
@@ -71,8 +72,10 @@ beforeEach(() => {
     weeks: {},
     plan: [],
     statuses: 3,
-    blocks: 9,
-    appointments: 2,
+    blocks: 58,
+    appointments: 53,
+    blockedDates: 1,
+    series: 1,
     warnings: [],
   } as unknown as Awaited<ReturnType<typeof seedAvailability>>);
   vi.mocked(seedAccessRequests).mockResolvedValue({
@@ -137,6 +140,7 @@ describe('combined events and availability seed', () => {
       tx,
       expect.objectContaining({
         mentorId: 'mentor',
+        performanceMentorId: 'performance-mentor',
         graduateId: 'availability-graduate',
       }),
       expect.any(Date),

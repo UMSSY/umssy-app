@@ -3,18 +3,21 @@
 import { useCallback, useEffect, useState } from "react";
 import { REPORT_HISTORY_PAGE_SIZE } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
+import { useReportSnapshot } from "./use-report-snapshot";
 import type { ReportHistoryState, ReportType } from "../types/generated-report.types";
 
 export function useReportHistory(page: number, reportType?: ReportType, search = "") {
   const [state, setState] = useState<ReportHistoryState | null>(null);
   const [refreshCount, setRefreshCount] = useState(0);
+  const { resolveSnapshotAt, renewSnapshot } = useReportSnapshot();
   const requestKey = `${page}-${reportType ?? "ALL"}-${search}-${refreshCount}`;
 
   useEffect(() => {
     let isCancelled = false;
 
+    const snapshotAt = resolveSnapshotAt(page);
     reportsService
-      .getReportHistory({ page, limit: REPORT_HISTORY_PAGE_SIZE, reportType, search })
+      .getReportHistory({ page, limit: REPORT_HISTORY_PAGE_SIZE, reportType, search, ...(snapshotAt && { snapshotAt }) })
       .then((response) => {
         if (!isCancelled) setState({ requestKey, result: response.data });
       })
@@ -25,9 +28,12 @@ export function useReportHistory(page: number, reportType?: ReportType, search =
     return () => {
       isCancelled = true;
     };
-  }, [page, reportType, search, requestKey]);
+  }, [page, reportType, search, requestKey, resolveSnapshotAt]);
 
-  const refresh = useCallback(() => setRefreshCount((count) => count + 1), []);
+  const refresh = useCallback(() => {
+    renewSnapshot();
+    setRefreshCount((count) => count + 1);
+  }, [renewSnapshot]);
 
   const isCurrentRequest = state?.requestKey === requestKey;
   const totalItems = state?.result?.totalItems ?? 0;

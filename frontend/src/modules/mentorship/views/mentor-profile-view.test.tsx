@@ -30,6 +30,20 @@ function mockCurrentUser(id: string) {
 }
 
 describe("MentorProfileView", () => {
+  it("muestra intereses profesionales reales", async () => {
+    vi.spyOn(service, "getMentorProfile").mockResolvedValue(MENTOR_PROFILE_FIXTURE);
+    render(<MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />);
+    expect(await screen.findByRole("heading", { name: "Intereses profesionales" })).toBeInTheDocument();
+    for (const skill of MENTOR_PROFILE_FIXTURE.skills) expect(screen.getByText(skill.name)).toBeInTheDocument();
+  });
+
+  it("informa un perfil sin nombre en lugar de presentar datos vacíos", async () => {
+    vi.spyOn(service, "getMentorProfile").mockResolvedValue({ ...MENTOR_PROFILE_FIXTURE, fullName: " " });
+    render(<MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />);
+    expect(await screen.findByText("Perfil incompleto")).toBeInTheDocument();
+    expect(screen.queryByText("Solicitar mentoría")).not.toBeInTheDocument();
+  });
+
   it("muestra la información real del mentor", async () => {
     vi.spyOn(service, "getMentorProfile").mockResolvedValue(
       MENTOR_PROFILE_FIXTURE,

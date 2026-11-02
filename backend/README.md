@@ -64,6 +64,24 @@ The API is available at:
 http://localhost:8080/api
 ```
 
+## Local OCR
+
+Tesseract.js supports English and Spanish with two models: `default`
+(integerized `4.0.0_best_int`) and `4.0.0_best` (larger, full precision).
+
+From `backend`, prepare the models and check initialization or recognition:
+
+```bash
+pnpm ocr:models
+pnpm ocr:smoke
+pnpm ocr:smoke /absolute/path/to/image.png
+```
+
+Model preparation requires internet access.
+
+PaddleOCR is available. It requires local ONNX detection/recognition
+models, a matching dictionary and preset.
+
 ## Email configuration
 
 See [.env.example](.env.example) for SMTP credentials, sender and optional logo settings.

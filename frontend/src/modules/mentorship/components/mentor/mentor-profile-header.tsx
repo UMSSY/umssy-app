@@ -56,23 +56,23 @@ export function MentorProfileHeader({
               </h1>
               <Badge
                 variant="outline"
-                className={`gap-1.5 px-2.5 ${mentor.isAvailable ? "border-transparent text-ink-soft" : "border-transparent text-text-secondary"}`}
+                className={cn("gap-1.5 px-2.5", mentor.isAvailable ? "border-transparent text-ink-soft" : "border-transparent text-text-secondary")}
               >
                 <span
                   aria-hidden="true"
-                  className={`size-1.5 shrink-0 rounded-full ${mentor.isAvailable ? "bg-ink-soft" : "bg-text-secondary"}`}
+                  className={cn("size-1.5 shrink-0 rounded-full", mentor.isAvailable ? "bg-ink-soft" : "bg-text-secondary")}
                 />
                 {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
               </Badge>
             </div>
 
-            {mentor.headline && (
+            {mentor.headline?.trim() ? (
               <p className="mt-1 text-lg font-semibold [overflow-wrap:anywhere] text-text-secondary">
                 {mentor.headline}
               </p>
-            )}
+            ) : <p className="mt-1 text-sm text-text-secondary">Especialidad no registrada</p>}
 
-            {primaryEducation && (
+            {primaryEducation && (primaryEducation.degree?.trim() || primaryEducation.institution?.trim()) && (
               <div className="mt-3 flex items-start gap-2 text-sm text-text-secondary">
                 <GraduationCap
                   size={18}
@@ -80,7 +80,7 @@ export function MentorProfileHeader({
                 />
 
                 <p className="min-w-0 [overflow-wrap:anywhere]">
-                  {primaryEducation.degree} · {primaryEducation.institution}
+                  {[primaryEducation.degree?.trim(), primaryEducation.institution?.trim()].filter(Boolean).join(" · ")}
                 </p>
               </div>
             )}
