@@ -29,6 +29,17 @@ const event: EventDetail = {
   modality: { id: "m1", title: "Presencial" },
 };
 describe("EventDetailPanel", () => {
+  it('scales the workshop cover to the detail panel width', () => {
+    const { container } = render(<EventDetailPanel event={event} />);
+    const image = container.querySelector('img');
+
+    expect(image).toHaveAttribute(
+      'sizes',
+      '(min-width: 1280px) 24rem, (min-width: 640px) 50vw, 100vw',
+    );
+    expect(image?.parentElement).toHaveClass('w-full', 'aspect-workshop-cover');
+  });
+
   it('omits the redundant institution from a complete venue', () => {
     render(<EventDetailPanel event={{ ...event, location: 'Laboratorio 1, Facultad de Ciencias y Tecnología, UMSS' }} />);
     expect(screen.getByText('Laboratorio 1, Facultad de Ciencias y Tecnología')).toBeInTheDocument();
@@ -81,6 +92,8 @@ describe("EventDetailPanel", () => {
     const button = screen.getByRole("button", { name: "Inscribirme" });
     expect(button).toBeEnabled();
     expect(screen.getByText("20 cupos disponibles")).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toHaveClass('bg-availability-border');
+    expect(screen.getByRole('progressbar').firstElementChild).toHaveClass('bg-success');
   });
   it("places the registration action before the descriptive content", () => {
     render(<EventDetailPanel event={event} />);
@@ -98,6 +111,7 @@ describe("EventDetailPanel", () => {
     expect(
       screen.getByText("Lleno · Sin cupos disponibles"),
     ).toBeInTheDocument();
+    expect(screen.getByRole('progressbar').firstElementChild).toHaveClass('bg-danger');
   });
   it("handles missing optional values and unlimited capacity", () => {
     render(
