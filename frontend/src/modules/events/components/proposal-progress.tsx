@@ -17,12 +17,12 @@ export function ProposalProgress({ event, isExpired = false }: ProposalProgressP
     <div className="space-y-1.5 text-xs">
       <div className="flex items-center justify-between gap-2 font-semibold text-ink">
         <span>{count} de {threshold} apoyos</span>
-        <span className="text-notice-foreground">{percent}%</span>
+        <span className="text-brand-coral">{percent}%</span>
       </div>
       <Progress
         value={percent}
         aria-label={`Apoyos para ${event.title}`}
-        className="[&_[data-slot=progress-indicator]]:bg-notice-foreground [&_[data-slot=progress-track]]:h-2"
+        className="[&_[data-slot=progress-indicator]]:bg-[var(--color-brand-coral)] [&_[data-slot=progress-track]]:h-2"
       />
       <p className="text-text-secondary">
         {isExpired
