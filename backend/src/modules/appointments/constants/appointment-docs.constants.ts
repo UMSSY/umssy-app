@@ -38,10 +38,11 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
     },
     counterpart: {
       type: 'object' as const,
-      required: ['id', 'fullName'],
+      required: ['id', 'fullName', 'role'],
       properties: {
         id: { type: 'string' as const, format: 'uuid' },
         fullName: { type: 'string' as const },
+        role: { type: 'string' as const, enum: ['mentor', 'student'] },
       },
     },
     status: { type: 'string' as const, example: 'CONFIRMED' },

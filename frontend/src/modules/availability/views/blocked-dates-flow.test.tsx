@@ -49,6 +49,10 @@ beforeEach(() => {
   ]);
   vi.spyOn(availabilityApi, "getBlockedDates").mockResolvedValue([]);
   vi.spyOn(availabilityApi, "getFutureBlockedDates").mockResolvedValue([]);
+  vi.spyOn(availabilityApi, "getMyAvailabilityStatus").mockResolvedValue({
+    mentorId: "m1",
+    isAvailable: true,
+  });
 });
 
 afterEach(() => {

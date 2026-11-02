@@ -213,7 +213,7 @@ describe("MentorAvailabilityView", () => {
         state: "confirmed",
         appointment: {
           id: "a1",
-          counterpart: { id: "s1", fullName: "Titulado Uno" },
+          counterpart: { id: "s1", fullName: "Titulado Uno", role: "student" },
           orientationType: { id: "o1", name: "Orientación profesional" },
         },
       },
