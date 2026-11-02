@@ -1,4 +1,6 @@
 import { formatEventLocation } from '../utils/format-event-location';
+import { getEffectiveRegistrationStatus } from '../utils/registration-format';
+import { formatTimeRange } from '../utils/event-card';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +11,8 @@ import type { PassCardProps } from '../types/pass-card-props.types';
 export function PassCard({
   title,
   date,
+  startTime,
+  endTime,
   status,
   location,
   registrationId,
@@ -16,6 +20,11 @@ export function PassCard({
   onClick,
   onOpenChat,
 }: PassCardProps) {
+  const effectiveStatus = getEffectiveRegistrationStatus(status, date);
+  const timeRange = (startTime || endTime)
+    ? ` · ${formatTimeRange(startTime ?? '', endTime ?? '')}`
+    : '';
+
   return (
     <Card className="relative gap-0 border-0 bg-transparent p-0 shadow-none">
       <Button
@@ -33,14 +42,19 @@ export function PassCard({
           className={cn("flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold",
             isSelected
               ? 'text-accent-foreground/85'
+              : effectiveStatus.isPast
+              ? 'bg-muted text-muted-foreground'
               : 'text-text-secondary'
           )}
         >
-          <Check className="size-3" /> {status}
+          <Check className="size-3" /> {effectiveStatus.label}
         </div>
 
-        <div>
-          <h3 className="mb-1 text-lg leading-tight font-bold [overflow-wrap:anywhere] break-words">
+        <div className="min-w-0">
+          <h3 
+            className="mb-1 line-clamp-2 text-lg leading-tight font-bold [overflow-wrap:anywhere] break-words"
+            title={title}
+          >
             {title}
           </h3>
           <div
@@ -48,10 +62,15 @@ export function PassCard({
               isSelected ? 'text-accent-foreground/85' : 'text-text-secondary'
             )}
           >
-            <Calendar className="size-4 opacity-70" />
-            <span className="min-w-0 break-words">{date}</span>
+            <Calendar className="size-4 shrink-0 opacity-70" />
+            <span className="min-w-0 break-words">
+              {date}{timeRange}
+            </span>
           </div>
-          <p className="mt-2 text-sm [overflow-wrap:anywhere] break-words">
+          <p 
+            className="mt-2 line-clamp-1 text-sm [overflow-wrap:anywhere] break-words"
+            title={formatEventLocation(location)}
+          >
             {formatEventLocation(location)}
           </p>
         </div>
