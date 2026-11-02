@@ -31,6 +31,7 @@ export type RadarAuditEventMinAggregateOutputType = {
   eventType: string | null
   targetId: string | null
   occurredAt: Date | null
+  createdAt: Date | null
 }
 
 export type RadarAuditEventMaxAggregateOutputType = {
@@ -40,6 +41,7 @@ export type RadarAuditEventMaxAggregateOutputType = {
   eventType: string | null
   targetId: string | null
   occurredAt: Date | null
+  createdAt: Date | null
 }
 
 export type RadarAuditEventCountAggregateOutputType = {
@@ -50,6 +52,7 @@ export type RadarAuditEventCountAggregateOutputType = {
   targetId: number
   details: number
   occurredAt: number
+  createdAt: number
   _all: number
 }
 
@@ -61,6 +64,7 @@ export type RadarAuditEventMinAggregateInputType = {
   eventType?: true
   targetId?: true
   occurredAt?: true
+  createdAt?: true
 }
 
 export type RadarAuditEventMaxAggregateInputType = {
@@ -70,6 +74,7 @@ export type RadarAuditEventMaxAggregateInputType = {
   eventType?: true
   targetId?: true
   occurredAt?: true
+  createdAt?: true
 }
 
 export type RadarAuditEventCountAggregateInputType = {
@@ -80,6 +85,7 @@ export type RadarAuditEventCountAggregateInputType = {
   targetId?: true
   details?: true
   occurredAt?: true
+  createdAt?: true
   _all?: true
 }
 
@@ -163,6 +169,7 @@ export type RadarAuditEventGroupByOutputType = {
   targetId: string | null
   details: runtime.JsonValue
   occurredAt: Date
+  createdAt: Date
   _count: RadarAuditEventCountAggregateOutputType | null
   _min: RadarAuditEventMinAggregateOutputType | null
   _max: RadarAuditEventMaxAggregateOutputType | null
@@ -194,6 +201,7 @@ export type RadarAuditEventWhereInput = {
   targetId?: Prisma.UuidNullableFilter<"RadarAuditEvent"> | string | null
   details?: Prisma.JsonFilter<"RadarAuditEvent">
   occurredAt?: Prisma.DateTimeFilter<"RadarAuditEvent"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"RadarAuditEvent"> | Date | string
   subject?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   actor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
@@ -206,6 +214,7 @@ export type RadarAuditEventOrderByWithRelationInput = {
   targetId?: Prisma.SortOrderInput | Prisma.SortOrder
   details?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   subject?: Prisma.UserOrderByWithRelationInput
   actor?: Prisma.UserOrderByWithRelationInput
 }
@@ -221,6 +230,7 @@ export type RadarAuditEventWhereUniqueInput = Prisma.AtLeast<{
   targetId?: Prisma.UuidNullableFilter<"RadarAuditEvent"> | string | null
   details?: Prisma.JsonFilter<"RadarAuditEvent">
   occurredAt?: Prisma.DateTimeFilter<"RadarAuditEvent"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"RadarAuditEvent"> | Date | string
   subject?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   actor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
@@ -233,6 +243,7 @@ export type RadarAuditEventOrderByWithAggregationInput = {
   targetId?: Prisma.SortOrderInput | Prisma.SortOrder
   details?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   _count?: Prisma.RadarAuditEventCountOrderByAggregateInput
   _max?: Prisma.RadarAuditEventMaxOrderByAggregateInput
   _min?: Prisma.RadarAuditEventMinOrderByAggregateInput
@@ -249,6 +260,7 @@ export type RadarAuditEventScalarWhereWithAggregatesInput = {
   targetId?: Prisma.UuidNullableWithAggregatesFilter<"RadarAuditEvent"> | string | null
   details?: Prisma.JsonWithAggregatesFilter<"RadarAuditEvent">
   occurredAt?: Prisma.DateTimeWithAggregatesFilter<"RadarAuditEvent"> | Date | string
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"RadarAuditEvent"> | Date | string
 }
 
 export type RadarAuditEventCreateInput = {
@@ -257,6 +269,7 @@ export type RadarAuditEventCreateInput = {
   targetId?: string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Date | string
+  createdAt?: Date | string
   subject: Prisma.UserCreateNestedOneWithoutRadarAuditSubjectsInput
   actor?: Prisma.UserCreateNestedOneWithoutRadarAuditActorsInput
 }
@@ -269,6 +282,7 @@ export type RadarAuditEventUncheckedCreateInput = {
   targetId?: string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Date | string
+  createdAt?: Date | string
 }
 
 export type RadarAuditEventUpdateInput = {
@@ -277,6 +291,7 @@ export type RadarAuditEventUpdateInput = {
   targetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subject?: Prisma.UserUpdateOneRequiredWithoutRadarAuditSubjectsNestedInput
   actor?: Prisma.UserUpdateOneWithoutRadarAuditActorsNestedInput
 }
@@ -289,6 +304,7 @@ export type RadarAuditEventUncheckedUpdateInput = {
   targetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarAuditEventCreateManyInput = {
@@ -299,6 +315,7 @@ export type RadarAuditEventCreateManyInput = {
   targetId?: string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Date | string
+  createdAt?: Date | string
 }
 
 export type RadarAuditEventUpdateManyMutationInput = {
@@ -307,6 +324,7 @@ export type RadarAuditEventUpdateManyMutationInput = {
   targetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarAuditEventUncheckedUpdateManyInput = {
@@ -317,6 +335,7 @@ export type RadarAuditEventUncheckedUpdateManyInput = {
   targetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarAuditEventListRelationFilter = {
@@ -337,6 +356,7 @@ export type RadarAuditEventCountOrderByAggregateInput = {
   targetId?: Prisma.SortOrder
   details?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type RadarAuditEventMaxOrderByAggregateInput = {
@@ -346,6 +366,7 @@ export type RadarAuditEventMaxOrderByAggregateInput = {
   eventType?: Prisma.SortOrder
   targetId?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type RadarAuditEventMinOrderByAggregateInput = {
@@ -355,6 +376,7 @@ export type RadarAuditEventMinOrderByAggregateInput = {
   eventType?: Prisma.SortOrder
   targetId?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type RadarAuditEventCreateNestedManyWithoutSubjectInput = {
@@ -447,6 +469,7 @@ export type RadarAuditEventCreateWithoutSubjectInput = {
   targetId?: string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Date | string
+  createdAt?: Date | string
   actor?: Prisma.UserCreateNestedOneWithoutRadarAuditActorsInput
 }
 
@@ -457,6 +480,7 @@ export type RadarAuditEventUncheckedCreateWithoutSubjectInput = {
   targetId?: string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Date | string
+  createdAt?: Date | string
 }
 
 export type RadarAuditEventCreateOrConnectWithoutSubjectInput = {
@@ -475,6 +499,7 @@ export type RadarAuditEventCreateWithoutActorInput = {
   targetId?: string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Date | string
+  createdAt?: Date | string
   subject: Prisma.UserCreateNestedOneWithoutRadarAuditSubjectsInput
 }
 
@@ -485,6 +510,7 @@ export type RadarAuditEventUncheckedCreateWithoutActorInput = {
   targetId?: string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Date | string
+  createdAt?: Date | string
 }
 
 export type RadarAuditEventCreateOrConnectWithoutActorInput = {
@@ -524,6 +550,7 @@ export type RadarAuditEventScalarWhereInput = {
   targetId?: Prisma.UuidNullableFilter<"RadarAuditEvent"> | string | null
   details?: Prisma.JsonFilter<"RadarAuditEvent">
   occurredAt?: Prisma.DateTimeFilter<"RadarAuditEvent"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"RadarAuditEvent"> | Date | string
 }
 
 export type RadarAuditEventUpsertWithWhereUniqueWithoutActorInput = {
@@ -549,6 +576,7 @@ export type RadarAuditEventCreateManySubjectInput = {
   targetId?: string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Date | string
+  createdAt?: Date | string
 }
 
 export type RadarAuditEventCreateManyActorInput = {
@@ -558,6 +586,7 @@ export type RadarAuditEventCreateManyActorInput = {
   targetId?: string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Date | string
+  createdAt?: Date | string
 }
 
 export type RadarAuditEventUpdateWithoutSubjectInput = {
@@ -566,6 +595,7 @@ export type RadarAuditEventUpdateWithoutSubjectInput = {
   targetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   actor?: Prisma.UserUpdateOneWithoutRadarAuditActorsNestedInput
 }
 
@@ -576,6 +606,7 @@ export type RadarAuditEventUncheckedUpdateWithoutSubjectInput = {
   targetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarAuditEventUncheckedUpdateManyWithoutSubjectInput = {
@@ -585,6 +616,7 @@ export type RadarAuditEventUncheckedUpdateManyWithoutSubjectInput = {
   targetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarAuditEventUpdateWithoutActorInput = {
@@ -593,6 +625,7 @@ export type RadarAuditEventUpdateWithoutActorInput = {
   targetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subject?: Prisma.UserUpdateOneRequiredWithoutRadarAuditSubjectsNestedInput
 }
 
@@ -603,6 +636,7 @@ export type RadarAuditEventUncheckedUpdateWithoutActorInput = {
   targetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarAuditEventUncheckedUpdateManyWithoutActorInput = {
@@ -612,6 +646,7 @@ export type RadarAuditEventUncheckedUpdateManyWithoutActorInput = {
   targetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   details?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -624,6 +659,7 @@ export type RadarAuditEventSelect<ExtArgs extends runtime.Types.Extensions.Inter
   targetId?: boolean
   details?: boolean
   occurredAt?: boolean
+  createdAt?: boolean
   subject?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.RadarAuditEvent$actorArgs<ExtArgs>
 }, ExtArgs["result"]["radarAuditEvent"]>
@@ -636,6 +672,7 @@ export type RadarAuditEventSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   targetId?: boolean
   details?: boolean
   occurredAt?: boolean
+  createdAt?: boolean
   subject?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.RadarAuditEvent$actorArgs<ExtArgs>
 }, ExtArgs["result"]["radarAuditEvent"]>
@@ -648,6 +685,7 @@ export type RadarAuditEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   targetId?: boolean
   details?: boolean
   occurredAt?: boolean
+  createdAt?: boolean
   subject?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.RadarAuditEvent$actorArgs<ExtArgs>
 }, ExtArgs["result"]["radarAuditEvent"]>
@@ -660,9 +698,10 @@ export type RadarAuditEventSelectScalar = {
   targetId?: boolean
   details?: boolean
   occurredAt?: boolean
+  createdAt?: boolean
 }
 
-export type RadarAuditEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "actorId" | "eventType" | "targetId" | "details" | "occurredAt", ExtArgs["result"]["radarAuditEvent"]>
+export type RadarAuditEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "actorId" | "eventType" | "targetId" | "details" | "occurredAt" | "createdAt", ExtArgs["result"]["radarAuditEvent"]>
 export type RadarAuditEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subject?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   actor?: boolean | Prisma.RadarAuditEvent$actorArgs<ExtArgs>
@@ -690,6 +729,7 @@ export type $RadarAuditEventPayload<ExtArgs extends runtime.Types.Extensions.Int
     targetId: string | null
     details: runtime.JsonValue
     occurredAt: Date
+    createdAt: Date
   }, ExtArgs["result"]["radarAuditEvent"]>
   composites: {}
 }
@@ -1122,6 +1162,7 @@ export interface RadarAuditEventFieldRefs {
   readonly targetId: Prisma.FieldRef<"RadarAuditEvent", 'String'>
   readonly details: Prisma.FieldRef<"RadarAuditEvent", 'Json'>
   readonly occurredAt: Prisma.FieldRef<"RadarAuditEvent", 'DateTime'>
+  readonly createdAt: Prisma.FieldRef<"RadarAuditEvent", 'DateTime'>
 }
     
 

@@ -1,6 +1,14 @@
+import { RadarApplicationsRepository } from './repositories/radar-applications.repository.js';
+import { RadarRecruitmentRepository } from './repositories/radar-recruitment.repository.js';
+import { RadarAccessRepository } from './repositories/radar-access.repository.js';
 import { ProfileSkillsEvents } from '../../common/profile-skills/profile-skills-events.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import { RadarIntegrationService } from './radar-integration.service.js';
+import { RadarRecruitmentService } from './radar-recruitment.service.js';
+import type { RadarCvService } from './radar-cv.service.js';
+import type { RadarReviewService } from './radar-review.service.js';
+import type { RadarPublicationService } from './radar-publication.service.js';
+import type { JobApplicationsService } from '../matching/services/job-applications.service.js';
 import type { PrismaService } from '../../common/prisma/prisma.service.js';
 import type { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-analysis.service.js';
 
@@ -15,7 +23,7 @@ function build(rawResults:unknown[][]){
     workExperience:{findMany:vi.fn().mockResolvedValue([])},
   };
   for(const result of rawResults)db.$queryRaw.mockResolvedValueOnce(result);
-  return {db,service:new RadarIntegrationService(db as unknown as PrismaService,{} as ProfileSkillsAnalysisService,new ProfileSkillsEvents())};
+  return {db,service:new RadarIntegrationService({} as ProfileSkillsAnalysisService,new ProfileSkillsEvents(),{} as RadarPublicationService,{} as RadarCvService,{} as RadarReviewService,new RadarRecruitmentService(new RadarRecruitmentRepository(db as unknown as PrismaService), new RadarAccessRepository(db as unknown as PrismaService), {} as JobApplicationsService, new RadarApplicationsRepository(db as unknown as PrismaService)))};
 }
 
 describe('Detalle documental autorizado para HU4',()=>{

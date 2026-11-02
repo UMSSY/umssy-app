@@ -25,35 +25,47 @@ export type AggregateRadarCompanyAccess = {
 }
 
 export type RadarCompanyAccessMinAggregateOutputType = {
+  id: string | null
   companyId: string | null
   userId: string | null
+  createdAt: Date | null
 }
 
 export type RadarCompanyAccessMaxAggregateOutputType = {
+  id: string | null
   companyId: string | null
   userId: string | null
+  createdAt: Date | null
 }
 
 export type RadarCompanyAccessCountAggregateOutputType = {
+  id: number
   companyId: number
   userId: number
+  createdAt: number
   _all: number
 }
 
 
 export type RadarCompanyAccessMinAggregateInputType = {
+  id?: true
   companyId?: true
   userId?: true
+  createdAt?: true
 }
 
 export type RadarCompanyAccessMaxAggregateInputType = {
+  id?: true
   companyId?: true
   userId?: true
+  createdAt?: true
 }
 
 export type RadarCompanyAccessCountAggregateInputType = {
+  id?: true
   companyId?: true
   userId?: true
+  createdAt?: true
   _all?: true
 }
 
@@ -130,8 +142,10 @@ export type RadarCompanyAccessGroupByArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 export type RadarCompanyAccessGroupByOutputType = {
+  id: string
   companyId: string
   userId: string
+  createdAt: Date
   _count: RadarCompanyAccessCountAggregateOutputType | null
   _min: RadarCompanyAccessMinAggregateOutputType | null
   _max: RadarCompanyAccessMaxAggregateOutputType | null
@@ -156,33 +170,41 @@ export type RadarCompanyAccessWhereInput = {
   AND?: Prisma.RadarCompanyAccessWhereInput | Prisma.RadarCompanyAccessWhereInput[]
   OR?: Prisma.RadarCompanyAccessWhereInput[]
   NOT?: Prisma.RadarCompanyAccessWhereInput | Prisma.RadarCompanyAccessWhereInput[]
+  id?: Prisma.UuidFilter<"RadarCompanyAccess"> | string
   companyId?: Prisma.UuidFilter<"RadarCompanyAccess"> | string
   userId?: Prisma.UuidFilter<"RadarCompanyAccess"> | string
+  createdAt?: Prisma.DateTimeFilter<"RadarCompanyAccess"> | Date | string
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type RadarCompanyAccessOrderByWithRelationInput = {
+  id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   company?: Prisma.CompanyOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type RadarCompanyAccessWhereUniqueInput = Prisma.AtLeast<{
+  id?: string
   companyId_userId?: Prisma.RadarCompanyAccessCompanyIdUserIdCompoundUniqueInput
   AND?: Prisma.RadarCompanyAccessWhereInput | Prisma.RadarCompanyAccessWhereInput[]
   OR?: Prisma.RadarCompanyAccessWhereInput[]
   NOT?: Prisma.RadarCompanyAccessWhereInput | Prisma.RadarCompanyAccessWhereInput[]
   companyId?: Prisma.UuidFilter<"RadarCompanyAccess"> | string
   userId?: Prisma.UuidFilter<"RadarCompanyAccess"> | string
+  createdAt?: Prisma.DateTimeFilter<"RadarCompanyAccess"> | Date | string
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "companyId_userId">
+}, "id" | "companyId_userId">
 
 export type RadarCompanyAccessOrderByWithAggregationInput = {
+  id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   _count?: Prisma.RadarCompanyAccessCountOrderByAggregateInput
   _max?: Prisma.RadarCompanyAccessMaxOrderByAggregateInput
   _min?: Prisma.RadarCompanyAccessMinOrderByAggregateInput
@@ -192,42 +214,57 @@ export type RadarCompanyAccessScalarWhereWithAggregatesInput = {
   AND?: Prisma.RadarCompanyAccessScalarWhereWithAggregatesInput | Prisma.RadarCompanyAccessScalarWhereWithAggregatesInput[]
   OR?: Prisma.RadarCompanyAccessScalarWhereWithAggregatesInput[]
   NOT?: Prisma.RadarCompanyAccessScalarWhereWithAggregatesInput | Prisma.RadarCompanyAccessScalarWhereWithAggregatesInput[]
+  id?: Prisma.UuidWithAggregatesFilter<"RadarCompanyAccess"> | string
   companyId?: Prisma.UuidWithAggregatesFilter<"RadarCompanyAccess"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"RadarCompanyAccess"> | string
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"RadarCompanyAccess"> | Date | string
 }
 
 export type RadarCompanyAccessCreateInput = {
+  id?: string
+  createdAt?: Date | string
   company: Prisma.CompanyCreateNestedOneWithoutRadarCompanyAccessInput
   user: Prisma.UserCreateNestedOneWithoutRadarCompanyAccessInput
 }
 
 export type RadarCompanyAccessUncheckedCreateInput = {
+  id?: string
   companyId: string
   userId: string
+  createdAt?: Date | string
 }
 
 export type RadarCompanyAccessUpdateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   company?: Prisma.CompanyUpdateOneRequiredWithoutRadarCompanyAccessNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutRadarCompanyAccessNestedInput
 }
 
 export type RadarCompanyAccessUncheckedUpdateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCompanyAccessCreateManyInput = {
+  id?: string
   companyId: string
   userId: string
+  createdAt?: Date | string
 }
 
 export type RadarCompanyAccessUpdateManyMutationInput = {
-
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCompanyAccessUncheckedUpdateManyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCompanyAccessListRelationFilter = {
@@ -246,18 +283,24 @@ export type RadarCompanyAccessCompanyIdUserIdCompoundUniqueInput = {
 }
 
 export type RadarCompanyAccessCountOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type RadarCompanyAccessMaxOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type RadarCompanyAccessMinOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   companyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type RadarCompanyAccessCreateNestedManyWithoutCompanyInput = {
@@ -345,11 +388,15 @@ export type RadarCompanyAccessUncheckedUpdateManyWithoutUserNestedInput = {
 }
 
 export type RadarCompanyAccessCreateWithoutCompanyInput = {
+  id?: string
+  createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutRadarCompanyAccessInput
 }
 
 export type RadarCompanyAccessUncheckedCreateWithoutCompanyInput = {
+  id?: string
   userId: string
+  createdAt?: Date | string
 }
 
 export type RadarCompanyAccessCreateOrConnectWithoutCompanyInput = {
@@ -382,16 +429,22 @@ export type RadarCompanyAccessScalarWhereInput = {
   AND?: Prisma.RadarCompanyAccessScalarWhereInput | Prisma.RadarCompanyAccessScalarWhereInput[]
   OR?: Prisma.RadarCompanyAccessScalarWhereInput[]
   NOT?: Prisma.RadarCompanyAccessScalarWhereInput | Prisma.RadarCompanyAccessScalarWhereInput[]
+  id?: Prisma.UuidFilter<"RadarCompanyAccess"> | string
   companyId?: Prisma.UuidFilter<"RadarCompanyAccess"> | string
   userId?: Prisma.UuidFilter<"RadarCompanyAccess"> | string
+  createdAt?: Prisma.DateTimeFilter<"RadarCompanyAccess"> | Date | string
 }
 
 export type RadarCompanyAccessCreateWithoutUserInput = {
+  id?: string
+  createdAt?: Date | string
   company: Prisma.CompanyCreateNestedOneWithoutRadarCompanyAccessInput
 }
 
 export type RadarCompanyAccessUncheckedCreateWithoutUserInput = {
+  id?: string
   companyId: string
+  createdAt?: Date | string
 }
 
 export type RadarCompanyAccessCreateOrConnectWithoutUserInput = {
@@ -421,66 +474,90 @@ export type RadarCompanyAccessUpdateManyWithWhereWithoutUserInput = {
 }
 
 export type RadarCompanyAccessCreateManyCompanyInput = {
+  id?: string
   userId: string
+  createdAt?: Date | string
 }
 
 export type RadarCompanyAccessUpdateWithoutCompanyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutRadarCompanyAccessNestedInput
 }
 
 export type RadarCompanyAccessUncheckedUpdateWithoutCompanyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCompanyAccessUncheckedUpdateManyWithoutCompanyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCompanyAccessCreateManyUserInput = {
+  id?: string
   companyId: string
+  createdAt?: Date | string
 }
 
 export type RadarCompanyAccessUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   company?: Prisma.CompanyUpdateOneRequiredWithoutRadarCompanyAccessNestedInput
 }
 
 export type RadarCompanyAccessUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCompanyAccessUncheckedUpdateManyWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
 
 export type RadarCompanyAccessSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   companyId?: boolean
   userId?: boolean
+  createdAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarCompanyAccess"]>
 
 export type RadarCompanyAccessSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   companyId?: boolean
   userId?: boolean
+  createdAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarCompanyAccess"]>
 
 export type RadarCompanyAccessSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   companyId?: boolean
   userId?: boolean
+  createdAt?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarCompanyAccess"]>
 
 export type RadarCompanyAccessSelectScalar = {
+  id?: boolean
   companyId?: boolean
   userId?: boolean
+  createdAt?: boolean
 }
 
-export type RadarCompanyAccessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"companyId" | "userId", ExtArgs["result"]["radarCompanyAccess"]>
+export type RadarCompanyAccessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyId" | "userId" | "createdAt", ExtArgs["result"]["radarCompanyAccess"]>
 export type RadarCompanyAccessInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -501,8 +578,10 @@ export type $RadarCompanyAccessPayload<ExtArgs extends runtime.Types.Extensions.
     user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    id: string
     companyId: string
     userId: string
+    createdAt: Date
   }, ExtArgs["result"]["radarCompanyAccess"]>
   composites: {}
 }
@@ -586,8 +665,8 @@ export interface RadarCompanyAccessDelegate<ExtArgs extends runtime.Types.Extens
    * // Get first 10 RadarCompanyAccesses
    * const radarCompanyAccesses = await prisma.radarCompanyAccess.findMany({ take: 10 })
    * 
-   * // Only select the `companyId`
-   * const radarCompanyAccessWithCompanyIdOnly = await prisma.radarCompanyAccess.findMany({ select: { companyId: true } })
+   * // Only select the `id`
+   * const radarCompanyAccessWithIdOnly = await prisma.radarCompanyAccess.findMany({ select: { id: true } })
    * 
    */
   findMany<T extends RadarCompanyAccessFindManyArgs>(args?: Prisma.SelectSubset<T, RadarCompanyAccessFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarCompanyAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -631,9 +710,9 @@ export interface RadarCompanyAccessDelegate<ExtArgs extends runtime.Types.Extens
    *   ]
    * })
    * 
-   * // Create many RadarCompanyAccesses and only return the `companyId`
-   * const radarCompanyAccessWithCompanyIdOnly = await prisma.radarCompanyAccess.createManyAndReturn({
-   *   select: { companyId: true },
+   * // Create many RadarCompanyAccesses and only return the `id`
+   * const radarCompanyAccessWithIdOnly = await prisma.radarCompanyAccess.createManyAndReturn({
+   *   select: { id: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -722,9 +801,9 @@ export interface RadarCompanyAccessDelegate<ExtArgs extends runtime.Types.Extens
    *   ]
    * })
    * 
-   * // Update zero or more RadarCompanyAccesses and only return the `companyId`
-   * const radarCompanyAccessWithCompanyIdOnly = await prisma.radarCompanyAccess.updateManyAndReturn({
-   *   select: { companyId: true },
+   * // Update zero or more RadarCompanyAccesses and only return the `id`
+   * const radarCompanyAccessWithIdOnly = await prisma.radarCompanyAccess.updateManyAndReturn({
+   *   select: { id: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -928,8 +1007,10 @@ export interface Prisma__RadarCompanyAccessClient<T, Null = never, ExtArgs exten
  * Fields of the RadarCompanyAccess model
  */
 export interface RadarCompanyAccessFieldRefs {
+  readonly id: Prisma.FieldRef<"RadarCompanyAccess", 'String'>
   readonly companyId: Prisma.FieldRef<"RadarCompanyAccess", 'String'>
   readonly userId: Prisma.FieldRef<"RadarCompanyAccess", 'String'>
+  readonly createdAt: Prisma.FieldRef<"RadarCompanyAccess", 'DateTime'>
 }
     
 

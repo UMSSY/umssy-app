@@ -6,7 +6,7 @@ import { ReviewQueueView } from "@/modules/radar-chart";
 
 const { route } = vi.hoisted(() => ({ route: { pathname: "/profile" } }));
 
-vi.mock("@/modules/radar-chart/sprint2-integration/radar-integration-api", () => ({ radarIntegrationApi: { reviews: vi.fn().mockResolvedValue([]) } }));
+vi.mock("@/modules/radar-chart/integration", () => ({ radarIntegrationApi: { reviews: vi.fn().mockResolvedValue([]) } }));
 const replace = vi.fn();
 vi.mock("next/navigation", () => ({
   usePathname: () => route.pathname,

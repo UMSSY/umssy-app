@@ -4,6 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import AppLayout from "../layout";
+import type { ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+const renderWithQuery=(children:ReactNode)=>render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}>{children}</QueryClientProvider>);
+
 import VacanciesPage from "./page";
 import VacancyDetailPage from "./[id]/page";
 import VacanciesAliasPage from "./vacancies/page";
@@ -19,8 +23,9 @@ vi.mock("@/modules/auth", async (importOriginal) => {
   return { ...actual, SessionUserCard: () => null };
 });
 
+vi.mock("@/modules/vacancies/services/vacancies.service", () => ({ vacanciesService: { list: vi.fn(async () => [JOB_OFFER_FIXTURE]) } }));
 vi.mock("@/shared/services/api-client", () => ({ apiClient: { get: vi.fn(async () => ({ data: { data: [JOB_OFFER_FIXTURE] } })) } }));
-vi.mock("@/modules/radar-chart/sprint2-integration/radar-integration-api", () => ({ radarIntegrationApi: { applications: vi.fn().mockResolvedValue([]) } }));
+vi.mock("@/modules/radar-chart/services/radar-integration.service", () => ({ radarIntegrationApi: { applications: vi.fn().mockResolvedValue([]) } }));
 
 describe("Vacancy routes", () => {
   beforeEach(() => {
@@ -34,7 +39,7 @@ describe("Vacancy routes", () => {
   });
 
   it.each([VacanciesPage])("renders vacancy listings inside one app navigation", async (Page) => {
-    render(<AppLayout><Page /></AppLayout>);
+    renderWithQuery(<AppLayout><Page /></AppLayout>);
 
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Vacantes", level: 1 })).toBeDefined();
@@ -43,7 +48,7 @@ describe("Vacancy routes", () => {
 
   it("opens details over the listing and restores the listing on Escape", async () => {
     const user = userEvent.setup();
-    render(<AppLayout><VacanciesPage /></AppLayout>);
+    renderWithQuery(<AppLayout><VacanciesPage /></AppLayout>);
     await user.click(await screen.findByRole("button", { name: "Detalles y postulaci\u00f3n" }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     await user.keyboard("{Escape}");

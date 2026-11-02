@@ -7,8 +7,8 @@ import { PageHeading } from "@/shared/components/layout";
 import { AffinityRadarChart } from "../components/affinity-radar-chart";
 import { AreaBreakdownPanel } from "../components/area-breakdown-panel";
 import type { AreaId } from "../types/area-detail.types";
-import { RadarEvidencePanel } from "../sprint2/radar-evidence-panel";
-import { useLiveRadar } from "../sprint2/use-live-radar";
+import { RadarEvidencePanel } from "../components/radar-evidence-panel";
+import { useLiveRadar } from "../hooks/use-live-radar";
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short" };
 
@@ -62,7 +62,7 @@ export function RadarProfileView() {
           {selectedArea ? (
             <RadarEvidencePanel key={`${data.userId}:${selectedArea}`} selected={selectedArea} radar={data} onClose={() => setSelectedArea(null)} />
           ) : null}
-          <p className="text-xs text-text-secondary">Cálculo provisional para integración: 1 punto por habilidad aprobada y 0,5 adicional por alta relevancia, máximo 10 por área. Pendiente de aprobación del Product Owner.</p>
+          <p className="text-xs text-text-secondary">Los puntajes y comparaciones se calculan y publican en el servidor, conforme a la rúbrica vigente.</p>
         </>
       ) : (!loading && !error ? <p className="text-text-secondary">Sin respuesta del servicio de afinidad.</p> : null)}
     </main>

@@ -1,38 +1,13 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import { vacancies } from "../data/vacancies";
+import { useQuery } from '@tanstack/react-query';
+import { vacanciesService } from '../services/vacancies.service';
 
-export function useVacancies() {
-  const [search, setSearch] = useState("");
+export const VACANCIES_QUERY_KEY = ['vacancies', 'published'] as const;
 
-  const filteredVacancies = useMemo(() => {
-    const searchTerm = search.toLowerCase().trim();
-
-    if (!searchTerm) {
-      return vacancies;
-    }
-
-    return vacancies.filter((vacancy) => {
-      const searchableText = [
-        vacancy.cargo,
-        vacancy.empresa,
-        vacancy.descripcion,
-        vacancy.ubicacion,
-        vacancy.tipoContrato,
-        vacancy.jornada,
-        ...vacancy.requisitos,
-      ]
-        .join(" ")
-        .toLowerCase();
-
-      return searchableText.includes(searchTerm);
-    });
-  }, [search]);
-
-  return {
-    search,
-    setSearch,
-    filteredVacancies,
-  };
+export function usePublishedVacancies() {
+  return useQuery({
+    queryKey: VACANCIES_QUERY_KEY,
+    queryFn: vacanciesService.list,
+  });
 }

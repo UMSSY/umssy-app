@@ -1,17 +1,30 @@
-import { ENV_CONFIG } from "@/shared/config/env.config";
+import { apiClient } from '@/shared/services/api-client';
+import type { ApiResponse } from '@/shared/types/api-response.types';
 
+export interface VacancyOffer {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  modality: string;
+  contractType: string;
+  status: string;
+  positionsAvailable: number;
+  salaryRange: string;
+  languages: string;
+  expiresAt: string | null;
+  company: { id: string; name: string };
+  skills: { id: string; name: string }[];
+}
+
+export const vacanciesService = {
+  async list(): Promise<VacancyOffer[]> {
+    const response = await apiClient.get<ApiResponse<VacancyOffer[]>>('/job-offers');
+    return response.data.data;
+  },
+};
+
+// Conserva el contrato que consume la administración de vacantes.
 export async function deleteVacancy(companyId: string, id: string): Promise<void> {
-  const token = typeof window !== "undefined" ? sessionStorage.getItem("accessToken") : "";
-
-  const response = await fetch(`${ENV_CONFIG.apiUrl}/companies/${companyId}/job-offers/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Error deleting job vacancy");
-  }
+  await apiClient.delete(`/companies/${encodeURIComponent(companyId)}/job-offers/${encodeURIComponent(id)}`);
 }

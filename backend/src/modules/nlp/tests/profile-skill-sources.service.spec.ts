@@ -1,5 +1,5 @@
-import type { CertificationsRepository } from '../../certifications/repositories/certifications.repository.js';
-import type { RadarEvidenceSourcesRepository } from '../../radar-integration/radar-evidence-sources.repository.js';
+import type { CertificationAnalysisSourcesService } from '../../certifications/services/certification-analysis-sources.service.js';
+import type { RadarEvidenceSourcesService } from '../../radar-integration/radar-evidence-sources.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { EducationSourcesService } from '../../educations/services/education-sources.service.js';
 import type { WorkExperienceSourcesService } from '../../work-experience/services/work-experience-sources.service.js';
@@ -17,7 +17,7 @@ describe('ProfileSkillSourcesService', () => {
   const skills = { findCatalog: vi.fn() };
 
   const certifications = {
-    findManyByUserId: vi.fn(),
+    findAnalysisSources: vi.fn(),
   };
 
   const radarEvidence = {
@@ -29,14 +29,14 @@ describe('ProfileSkillSourcesService', () => {
     workExperience as unknown as WorkExperienceSourcesService,
     profile as unknown as ProfileService,
     skills as unknown as SkillAnalysisService,
-    certifications as unknown as CertificationsRepository,
-    radarEvidence as unknown as RadarEvidenceSourcesRepository,
+    certifications as unknown as CertificationAnalysisSourcesService,
+    radarEvidence as unknown as RadarEvidenceSourcesService,
   );
 
   beforeEach(() => {
     vi.resetAllMocks();
 
-    certifications.findManyByUserId.mockResolvedValue([]);
+    certifications.findAnalysisSources.mockResolvedValue([]);
     radarEvidence.findCurrentCvText.mockResolvedValue([]);
   });
 
@@ -85,7 +85,7 @@ describe('ProfileSkillSourcesService', () => {
   workExperience.findAnalysisSources.mockResolvedValue([]);
   educations.findAnalysisSources.mockResolvedValue([]);
 
-  certifications.findManyByUserId.mockResolvedValue([
+  certifications.findAnalysisSources.mockResolvedValue([
     {
       id: 'cert-1',
       name: 'AWS Certified',
@@ -114,7 +114,7 @@ describe('ProfileSkillSourcesService', () => {
     },
   ]);
 
-    expect(certifications.findManyByUserId).toHaveBeenCalledWith(userId);
+    expect(certifications.findAnalysisSources).toHaveBeenCalledWith(userId);
     expect(radarEvidence.findCurrentCvText).toHaveBeenCalledWith(userId);
   });
 });

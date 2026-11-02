@@ -115,11 +115,13 @@ export const ModelName = {
   AuditAction: 'AuditAction',
   AuditEvent: 'AuditEvent',
   DocumentValidation: 'DocumentValidation',
+  RadarExtractionStatus: 'RadarExtractionStatus',
+  RadarReviewStatus: 'RadarReviewStatus',
   RadarCvEvidence: 'RadarCvEvidence',
   RadarScoreSnapshot: 'RadarScoreSnapshot',
   RadarAuditEvent: 'RadarAuditEvent',
   RadarCompanyAccess: 'RadarCompanyAccess',
-  RadarJobApplication: 'RadarJobApplication'
+  RadarApplicationConsent: 'RadarApplicationConsent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -997,6 +999,26 @@ export const DocumentValidationScalarFieldEnum = {
 export type DocumentValidationScalarFieldEnum = (typeof DocumentValidationScalarFieldEnum)[keyof typeof DocumentValidationScalarFieldEnum]
 
 
+export const RadarExtractionStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarExtractionStatusScalarFieldEnum = (typeof RadarExtractionStatusScalarFieldEnum)[keyof typeof RadarExtractionStatusScalarFieldEnum]
+
+
+export const RadarReviewStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarReviewStatusScalarFieldEnum = (typeof RadarReviewStatusScalarFieldEnum)[keyof typeof RadarReviewStatusScalarFieldEnum]
+
+
 export const RadarCvEvidenceScalarFieldEnum = {
   cvId: 'cvId',
   userId: 'userId',
@@ -1004,6 +1026,7 @@ export const RadarCvEvidenceScalarFieldEnum = {
   extractionStatus: 'extractionStatus',
   reviewStatus: 'reviewStatus',
   submittedAt: 'submittedAt',
+  createdAt: 'createdAt',
   decidedAt: 'decidedAt',
   reviewerId: 'reviewerId'
 } as const
@@ -1032,34 +1055,34 @@ export const RadarAuditEventScalarFieldEnum = {
   eventType: 'eventType',
   targetId: 'targetId',
   details: 'details',
-  occurredAt: 'occurredAt'
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt'
 } as const
 
 export type RadarAuditEventScalarFieldEnum = (typeof RadarAuditEventScalarFieldEnum)[keyof typeof RadarAuditEventScalarFieldEnum]
 
 
 export const RadarCompanyAccessScalarFieldEnum = {
+  id: 'id',
   companyId: 'companyId',
-  userId: 'userId'
+  userId: 'userId',
+  createdAt: 'createdAt'
 } as const
 
 export type RadarCompanyAccessScalarFieldEnum = (typeof RadarCompanyAccessScalarFieldEnum)[keyof typeof RadarCompanyAccessScalarFieldEnum]
 
 
-export const RadarJobApplicationScalarFieldEnum = {
+export const RadarApplicationConsentScalarFieldEnum = {
   id: 'id',
-  jobOfferId: 'jobOfferId',
-  userId: 'userId',
+  applicationId: 'applicationId',
   consentToRecruiter: 'consentToRecruiter',
   consentToCv: 'consentToCv',
   consentToContact: 'consentToContact',
-  state: 'state',
-  appliedAt: 'appliedAt',
-  decidedAt: 'decidedAt',
-  decidedBy: 'decidedBy'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
-export type RadarJobApplicationScalarFieldEnum = (typeof RadarJobApplicationScalarFieldEnum)[keyof typeof RadarJobApplicationScalarFieldEnum]
+export type RadarApplicationConsentScalarFieldEnum = (typeof RadarApplicationConsentScalarFieldEnum)[keyof typeof RadarApplicationConsentScalarFieldEnum]
 
 
 export const SortOrder = {

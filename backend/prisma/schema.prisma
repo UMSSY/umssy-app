@@ -173,8 +173,6 @@ model User {
   radarAuditSubjects RadarAuditEvent[]     @relation("RadarAuditSubject")
   radarAuditActors   RadarAuditEvent[]     @relation("RadarAuditActor")
   radarCompanyAccess RadarCompanyAccess[]
-  radarApplications  RadarJobApplication[] @relation("RadarApplicant")
-  radarDecisions     RadarJobApplication[] @relation("RadarDecision")
   jobApplications    JobApplication[]
 
   @@index([cityId])
@@ -638,7 +636,6 @@ model JobOffer {
   status            JobOfferStatus        @relation(fields: [statusId], references: [id], onDelete: Restrict)
   skills            JobOfferSkill[]
   applications      JobApplication[]
-  radarApplications RadarJobApplication[]
 
   @@index([companyId])
   @@index([modalityId])
@@ -957,6 +954,7 @@ model JobApplication {
   jobOffer JobOffer             @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
   user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   status   JobApplicationStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  radarConsent RadarApplicationConsent?
 
   @@unique([jobOfferId, userId])
   @@index([userId])
@@ -1149,6 +1147,24 @@ model DocumentValidation {
   @@map("document_validations")
 }
 
+model RadarExtractionStatus {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String   @unique @db.VarChar(24)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  cvEvidence RadarCvEvidence[]
+  @@map("radar_extraction_statuses")
+}
+
+model RadarReviewStatus {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String   @unique @db.VarChar(24)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  cvEvidence RadarCvEvidence[]
+  @@map("radar_review_statuses")
+}
+
 model RadarCvEvidence {
   cvId             String    @id @map("cv_id") @db.Uuid
   userId           String    @map("user_id") @db.Uuid
@@ -1156,14 +1172,19 @@ model RadarCvEvidence {
   extractionStatus String    @default("pending") @map("extraction_status") @db.VarChar(24)
   reviewStatus     String    @default("pending") @map("review_status") @db.VarChar(24)
   submittedAt      DateTime  @default(now()) @map("submitted_at") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   decidedAt        DateTime? @map("decided_at") @db.Timestamptz(6)
   reviewerId       String?   @map("reviewer_id") @db.Uuid
 
   cv       UserCvFile @relation(fields: [cvId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   owner    User       @relation("RadarCvOwner", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  reviewer User?      @relation("RadarCvReviewer", fields: [reviewerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewer User?      @relation("RadarCvReviewer", fields: [reviewerId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  extractionStatusCatalog RadarExtractionStatus @relation(fields: [extractionStatus], references: [title], onDelete: Restrict, onUpdate: Cascade)
+  reviewStatusCatalog RadarReviewStatus @relation(fields: [reviewStatus], references: [title], onDelete: Restrict, onUpdate: Cascade)
 
   @@index([reviewStatus, submittedAt], map: "radar_cv_evidence_review_idx")
+  @@index([userId])
+  @@index([reviewerId])
   @@map("radar_cv_evidence")
 }
 
@@ -1191,42 +1212,40 @@ model RadarAuditEvent {
   targetId   String?  @map("target_id") @db.Uuid
   details    Json     @default("{}")
   occurredAt DateTime @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   subject User  @relation("RadarAuditSubject", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  actor   User? @relation("RadarAuditActor", fields: [actorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  actor   User? @relation("RadarAuditActor", fields: [actorId], references: [id], onDelete: SetNull, onUpdate: NoAction)
 
   @@index([userId, occurredAt(sort: Desc)], map: "radar_audit_user_idx")
+  @@index([actorId])
   @@map("radar_audit_events")
 }
 
 model RadarCompanyAccess {
-  companyId String @map("company_id") @db.Uuid
-  userId    String @map("user_id") @db.Uuid
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@id([companyId, userId])
+  @@unique([companyId, userId])
+  @@index([userId])
   @@map("radar_company_access")
 }
 
-model RadarJobApplication {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  jobOfferId         String    @map("job_offer_id") @db.Uuid
-  userId             String    @map("user_id") @db.Uuid
-  consentToRecruiter Boolean   @default(false) @map("consent_to_recruiter")
-  consentToCv        Boolean   @default(false) @map("consent_to_cv")
-  consentToContact   Boolean   @default(false) @map("consent_to_contact")
-  state              String    @default("applied") @db.VarChar(24)
-  appliedAt          DateTime  @default(now()) @map("applied_at") @db.Timestamptz(6)
-  decidedAt          DateTime? @map("decided_at") @db.Timestamptz(6)
-  decidedBy          String?   @map("decided_by") @db.Uuid
+model RadarApplicationConsent {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId      String   @unique @map("application_id") @db.Uuid
+  consentToRecruiter Boolean  @default(false) @map("consent_to_recruiter")
+  consentToCv        Boolean  @default(false) @map("consent_to_cv")
+  consentToContact   Boolean  @default(false) @map("consent_to_contact")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  jobOffer JobOffer @relation(fields: [jobOfferId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  user     User     @relation("RadarApplicant", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  decider  User?    @relation("RadarDecision", fields: [decidedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  application JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([jobOfferId, userId])
-  @@index([jobOfferId, appliedAt(sort: Desc)], map: "radar_job_applications_vacancy_idx")
-  @@map("radar_job_applications")
+  @@map("radar_application_consents")
 }

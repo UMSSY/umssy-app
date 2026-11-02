@@ -2,14 +2,15 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { JOB_OFFER_FIXTURE } from "../testing/job-offer-fixture";
 import { VacanciesView } from "./vacancies-view";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-vi.mock("@/shared/services/api-client", () => ({ apiClient: { get: vi.fn(async () => ({ data: { data: [JOB_OFFER_FIXTURE] } })) } }));
-vi.mock("@/modules/radar-chart/sprint2-integration/radar-integration-api", () => ({ radarIntegrationApi: { applications: vi.fn().mockResolvedValue([]) } }));
+vi.mock("../services/vacancies.service", () => ({ vacanciesService: { list: vi.fn(async () => [JOB_OFFER_FIXTURE]) } }));
+vi.mock("@/modules/radar-chart/services/radar-integration.service", () => ({ radarIntegrationApi: { applications: vi.fn().mockResolvedValue([]) } }));
 afterEach(cleanup);
 
 describe("VacanciesView from the API", () => {
   it("recovers the list when a search is cleared", async () => {
-    render(<VacanciesView />);
+    render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}><VacanciesView /></QueryClientProvider>);
     await screen.findByRole("heading", { name: JOB_OFFER_FIXTURE.title });
     const search = screen.getByRole("searchbox", { name: "Buscar cargo, empresa o tecnología" });
     fireEvent.change(search, { target: { value: "no-match" } });

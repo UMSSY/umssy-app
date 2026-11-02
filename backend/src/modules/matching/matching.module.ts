@@ -58,6 +58,7 @@ import { JobRecommendationsService } from './services/job-recommendations.servic
     JobRecommendationsService,
   ],
   exports: [
+    JobApplicationsService,
     MatchingService,
     ActiveJobOffersService,
     NlpService,
