@@ -98,7 +98,7 @@ export class EventsRepository {
       this.prisma.event.findMany({
         select: buildSelect(userId),
         where,
-        orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }],
+        orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
         skip,
         take,
       }),
