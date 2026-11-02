@@ -1,3 +1,4 @@
+import { readLocalStorage, writeLocalStorage } from "./browser-local-storage";
 import {
   readSessionStorage,
   removeSessionStorage,
@@ -9,8 +10,7 @@ const LOGOUT_KEY = "umssy-session-logout";
 const SESSION_LOGOUT_KEY = "sessionLogoutVersion";
 
 function logoutVersion(): string {
-  try { return window.localStorage.getItem(LOGOUT_KEY) ?? ''; }
-  catch { return ''; }
+  return readLocalStorage(LOGOUT_KEY) ?? '';
 }
 
 export function saveAccessToken(accessToken: string): boolean {
@@ -30,7 +30,7 @@ export function clearAccessToken(): boolean {
   const hadToken = Boolean(getAccessToken());
   const isRemoved = removeSessionStorage(ACCESS_TOKEN_STORAGE_KEY);
   if (hadToken && isRemoved && typeof window !== "undefined") {
-    try { window.localStorage.setItem(LOGOUT_KEY, crypto.randomUUID()); } catch { /* Local logout remains available if storage is blocked. */ }
+    try { writeLocalStorage(LOGOUT_KEY, crypto.randomUUID()); } catch { /* Logout must still finish if UUID generation is unavailable. */ }
   }
   if (isRemoved && typeof window !== "undefined") window.dispatchEvent(new Event("access-token-change"));
   return isRemoved;
