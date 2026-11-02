@@ -23,6 +23,7 @@ export class AppointmentMapper {
       counterpart: {
         id: counterpart.id,
         fullName: `${counterpart.firstName} ${counterpart.lastName}`.trim(),
+        role: appointment.mentorId === userId ? 'student' : 'mentor',
       },
       status:
         appointment.status.title === AppointmentStatusTitle.LEGACY_CONFIRMED

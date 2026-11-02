@@ -125,7 +125,7 @@ describe('AppointmentsService', () => {
     expect(result).toMatchObject({
       id: APPOINTMENT_ID,
       status: AppointmentStatusTitle.CONFIRMED,
-      counterpart: { id: MENTOR_ID, fullName: 'Ana Pérez' },
+      counterpart: { id: MENTOR_ID, fullName: 'Ana Pérez', role: 'mentor' },
       orientationType: { id: TOPIC_ID, name: 'Orientación profesional' },
     });
   });

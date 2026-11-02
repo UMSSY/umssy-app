@@ -26,7 +26,7 @@ describe('AppointmentMapper', () => {
       startAt: '2026-10-23T14:00:00.000Z',
       endAt: '2026-10-23T14:30:00.000Z',
       orientationType: record.orientationType,
-      counterpart: { id: STUDENT_ID, fullName: 'Luis Flores' },
+      counterpart: { id: STUDENT_ID, fullName: 'Luis Flores', role: 'student' },
       status: 'CONFIRMED',
     });
   });
@@ -42,10 +42,12 @@ describe('AppointmentMapper', () => {
     expect(mentorCounterpart).toEqual({
       id: STUDENT_ID,
       fullName: 'Luis Flores',
+      role: 'student',
     });
     expect(studentCounterpart).toEqual({
       id: MENTOR_ID,
       fullName: 'Ana Pérez',
+      role: 'mentor',
     });
   });
 
@@ -98,8 +100,8 @@ describe('AppointmentMapper', () => {
         .toResponseList([asMentor, asStudent], MENTOR_ID)
         .map((row) => row.counterpart),
     ).toEqual([
-      { id: STUDENT_ID, fullName: 'Luis Flores' },
-      { id: OTHER_USER_ID, fullName: 'Marta Vargas' },
+      { id: STUDENT_ID, fullName: 'Luis Flores', role: 'student' },
+      { id: OTHER_USER_ID, fullName: 'Marta Vargas', role: 'mentor' },
     ]);
   });
 
