@@ -1,10 +1,13 @@
+'use client';
+
+import { useEventFinished } from '../hooks/use-event-finished';
 import { formatEventLocation } from '../utils/format-event-location';
-import { getEffectiveRegistrationStatus } from '../utils/registration-format';
+import { formatRegistrationDate, getEffectiveRegistrationStatus } from '../utils/registration-format';
 import { formatTimeRange } from '../utils/event-card';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Check, MessageCircle } from 'lucide-react';
+import { Calendar, Clock, Check, MessageCircle } from 'lucide-react';
 
 import type { PassCardProps } from '../types/pass-card-props.types';
 
@@ -20,10 +23,8 @@ export function PassCard({
   onClick,
   onOpenChat,
 }: PassCardProps) {
-  const effectiveStatus = getEffectiveRegistrationStatus(status, date);
-  const timeRange = (startTime || endTime)
-    ? ` · ${formatTimeRange(startTime ?? '', endTime ?? '')}`
-    : '';
+  const effectiveStatus = getEffectiveRegistrationStatus(status, useEventFinished({ eventDate: date, endTime: endTime ?? '' }));
+  const timeRange = (startTime || endTime) ? formatTimeRange(startTime ?? '', endTime ?? '') : null;
 
   return (
     <Card className="relative gap-0 border-0 bg-transparent p-0 shadow-none">
@@ -51,7 +52,7 @@ export function PassCard({
         </div>
 
         <div className="min-w-0">
-          <h3 
+          <h3
             className="mb-1 line-clamp-2 text-lg leading-tight font-bold [overflow-wrap:anywhere] break-words"
             title={title}
           >
@@ -64,10 +65,14 @@ export function PassCard({
           >
             <Calendar className="size-4 shrink-0 opacity-70" />
             <span className="min-w-0 break-words">
-              {date}{timeRange}
+              {formatRegistrationDate(date)}
             </span>
           </div>
-          <p 
+          {timeRange && <div className="mt-1 flex items-center gap-2 text-sm">
+            <Clock className="size-4 shrink-0" aria-hidden="true" />
+            <span>{timeRange}</span>
+          </div>}
+          <p
             className="mt-2 line-clamp-1 text-sm [overflow-wrap:anywhere] break-words"
             title={formatEventLocation(location)}
           >

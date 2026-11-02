@@ -9,6 +9,7 @@ vi.mock('../services/registrations.service', () => ({ registrationsService: { ge
 const getMine = vi.mocked(registrationsService.getMine);
 const pass = { id: 'reg-1', eventName: 'React', date: '2026-10-20T00:00:00Z', startTime: '1970-01-01T09:00:00Z', endTime: '1970-01-01T12:00:00Z', location: 'Aula 101', status: 'Confirmada' };
 beforeEach(() => {
+  vi.useFakeTimers({ now: new Date("2026-10-19T12:00:00Z"), toFake: ["Date"] });
   getMine.mockReset();
   saveAccessToken('session');
   vi.mocked(registrationsService.getPass).mockImplementation(async (id) => {
@@ -18,9 +19,35 @@ beforeEach(() => {
     return { ...row, qrToken: 'a'.repeat(64) };
   });
 });
-afterEach(() => { cleanup(); clearAccessToken(); });
+afterEach(() => { cleanup(); clearAccessToken(); vi.useRealTimers(); });
 
 describe('Mis pases', () => {
+  it('preserves different workshops with identical names and dates', async () => {
+    getMine.mockResolvedValue([{ ...pass, eventId: 'event-1' }, { ...pass, id: 'reg-2', eventId: 'event-2' }]);
+    render(<MyPassesView />);
+    expect(await screen.findByText('2 pases')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /React/ })).toHaveLength(2);
+  });
+
+  it.each([
+    ['2026-10-20T04:00:00Z', 'Confirmada', true],
+    ['2026-10-20T15:59:59Z', 'Confirmada', true],
+    ['2026-10-20T16:00:00Z', 'Finalizado', false],
+    ['2026-10-21T00:00:00Z', 'Finalizado', false],
+  ])('keeps card and ticket consistent at %s', async (now, status, hasQr) => {
+    vi.setSystemTime(new Date(now));
+    getMine.mockResolvedValue([pass]);
+    render(<MyPassesView />);
+    const panel = await screen.findByRole('complementary');
+    await within(panel).findByText(status);
+    expect(within(screen.getByRole('button', { name: /React/ })).getByText(status)).toBeInTheDocument();
+    if (hasQr) expect(await within(panel).findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
+    else {
+      expect(await within(panel).findByText(/Pase finalizado/)).toBeInTheDocument();
+      expect(within(panel).queryByRole('img', { name: 'Código QR del pase' })).not.toBeInTheDocument();
+    }
+  });
+
   it('keeps chat unavailable until the chat module is connected', async () => {
     getMine.mockResolvedValue([pass, { ...pass, id: 'reg-2', eventName: 'Prisma' }]);
     render(<MyPassesView />);
