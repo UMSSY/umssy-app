@@ -5,4 +5,6 @@ export const JOB_OFFERS_QUERY_KEYS = {
     ["job-offers", "company", companyId, params] as const,
   companyOfferDetails: (companyId: string | null, jobOfferId: string | null) =>
     ["job-offers", "company", companyId, "details", jobOfferId] as const,
+  companyOfferApplicants: (companyId: string | null, jobOfferId: string) =>
+    ["job-offers", "company", companyId, "applicants", jobOfferId] as const,
 };

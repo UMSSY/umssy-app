@@ -46,7 +46,10 @@ describe("VacancyCard", () => {
   it("en una vacante activa mantiene ver postulantes, editar y eliminar", () => {
     renderCard({ offer: buildJobOffer({ id: "offer-9" }), showStatus: true });
 
-    expect(screen.getByRole("link", { name: "Ver postulantes" })).toHaveAttribute("href", "/matching?vacancyId=offer-9");
+    expect(screen.getByRole("link", { name: "Ver postulantes" })).toHaveAttribute(
+      "href",
+      "/recruiters/job-offers/offer-9/applicants",
+    );
     expect(screen.getByRole("link", { name: "Editar" })).toHaveAttribute(
       "href",
       "/recruiters/job-offers/offer-9/edit",

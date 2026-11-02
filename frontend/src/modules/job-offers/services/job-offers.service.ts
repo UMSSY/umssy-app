@@ -6,6 +6,7 @@ import type { JobOfferCreatedResponse } from "../types/job-offer-created-respons
 import type { JobOfferDetailsResponse } from "../types/job-offer-details-response.types";
 import type { SkillOption } from "../types/skill-option.types";
 import type { JobOfferListParams } from "../types/job-offer-list-params.types";
+import type { JobOfferApplicants } from "../types/job-offer-applicants.types";
 
 const SKILL_CATALOG_ENDPOINT = "/job-offers/skills";
 
@@ -53,6 +54,14 @@ export const jobOffersService = {
   reopen: async (companyId: string, jobOfferId: string): Promise<JobOfferDetailsResponse> => {
     const response = await apiClient.patch<ApiResponse<JobOfferDetailsResponse>>(
       `${buildCompanyJobOffersEndpoint(companyId)}/${jobOfferId}/reopen`,
+    );
+    return response.data.data;
+  },
+
+  // Endpoint de Epic 5 (postulaciones), restringido al rol empresa.
+  getApplicants: async (companyId: string, jobOfferId: string): Promise<JobOfferApplicants> => {
+    const response = await apiClient.get<ApiResponse<JobOfferApplicants>>(
+      `${buildCompanyJobOffersEndpoint(companyId)}/${jobOfferId}/applications`,
     );
     return response.data.data;
   },

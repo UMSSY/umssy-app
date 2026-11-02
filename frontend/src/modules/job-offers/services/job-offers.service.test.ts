@@ -133,4 +133,11 @@ describe("jobOffersService", () => {
     await expect(jobOffersService.reopen(COMPANY_ID, "offer-1")).resolves.toEqual(reopened);
     expect(apiClient.patch).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1/reopen`);
   });
+  it("obtiene los postulantes de una vacante de la empresa", async () => {
+    const applicants = { jobOfferId: "offer-1", jobTitle: "DevOps Senior", total: 0, applicants: [] };
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { statusCode: 200, ok: true, detail: "", data: applicants } });
+
+    await expect(jobOffersService.getApplicants(COMPANY_ID, "offer-1")).resolves.toEqual(applicants);
+    expect(apiClient.get).toHaveBeenCalledWith(`/companies/${COMPANY_ID}/job-offers/offer-1/applications`);
+  });
 });

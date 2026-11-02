@@ -170,6 +170,17 @@ export const REOPEN_JOB_OFFER_TEXT = {
   notReopenable: "La vacante ya no está cerrada, por eso no se puede reabrir.",
 } as const;
 
+export const APPLICANTS_TEXT = {
+  title: "Postulantes",
+  back: "Volver a mis vacantes",
+  loading: "Cargando postulantes...",
+  loadError: "No se pudieron cargar los postulantes. Inténtelo más tarde.",
+  notFound: "La vacante no existe o no pertenece a tu empresa.",
+  retry: "Reintentar",
+  empty: "Aún no hay postulantes para esta vacante.",
+  noHeadline: "Sin titular",
+} as const;
+
 export const DEFAULT_COMPANY_ID = "a0000000-0000-4000-8000-000000000001";
 export const DEFAULT_COMPANY_NAME = "TechBolivia S.R.L.";
 export const COMPANY_ROLE_TAG = "empresa";

@@ -11,7 +11,7 @@ import {
   STATUS_LABELS,
 } from "../constants/job-offers.constants";
 import type { VacancyCardProps } from "../types/vacancy-card-props.types";
-import { formatPublicationDate } from "../utils/format-publication-date";
+import { formatBoliviaDate } from "../utils/format-bolivia-date";
 
 export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, onDelete }: VacancyCardProps) {
   const isPublished = offer.status === PUBLISHED_STATUS;
@@ -45,13 +45,13 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, on
           </Button>
         </h3>
         <p className="mt-1 text-sm text-text-secondary">
-          Publicado: {formatPublicationDate(offer.createdAt)} · Modalidad:{" "}
+          Publicado: {formatBoliviaDate(offer.createdAt)} · Modalidad:{" "}
           {offer.modality} · Postulantes: {offer.applicantsCount} candidatos
         </p>
         <p className="mt-1 text-sm text-text-secondary">Tipo de contrato: {offer.contractType}</p>
         {isPublished ? (
           <div className="mt-3 flex flex-wrap gap-2">
-            <Link href={`/matching?vacancyId=${offer.id}`}
+            <Link href={`/recruiters/job-offers/${offer.id}/applicants`}
             className={cn(buttonVariants({ variant: "outline", size: "sm" }), "max-md:h-11")}>
               Ver postulantes
             </Link>
