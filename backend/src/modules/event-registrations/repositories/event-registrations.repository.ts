@@ -1,3 +1,4 @@
+import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { Prisma } from '../../../prisma/client.js';
@@ -25,7 +26,7 @@ export class EventRegistrationsRepository {
     return tx.eventRegistration.findUnique({ where: { id }, select: REGISTRATION_SELECT });
   }
 
-  findScheduleConflict(tx: Prisma.TransactionClient, userId: string, event: { id: string; eventDate: Date; startTime: Date; endTime: Date }) {
+  findScheduleConflict(tx: Prisma.TransactionClient, userId: string, event: RegistrationScheduleEvent) {
     return tx.eventRegistration.findFirst({
       where: {
         userId, eventId: { not: event.id }, cancelledAt: null,
