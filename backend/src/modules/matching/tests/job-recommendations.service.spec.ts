@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 import type { JobMatchRepository } from '../repositories/job-match.repository.js';
+import { VacancyScoringService } from '../services/vacancy-scoring.service.js';
 import type { CandidateProfileService } from '../services/candidate-profile.service.js';
 import { JobRecommendationsService } from '../services/job-recommendations.service.js';
 import { VacancyRankingService } from '../services/vacancy-ranking.service.js';
@@ -62,12 +63,14 @@ describe('HU-06 recommendations contract', () => {
     } as unknown as RequirementTermsService;
     service = new JobRecommendationsService(
       { findScoringOffers } as unknown as JobOffersService,
-      { getUserSkills } as unknown as UserSkillService,
-      { findCandidateProfile } as unknown as CandidateProfileService,
       { findPublished } as unknown as JobMatchRepository,
+      new VacancyScoringService(
+        { getUserSkills } as unknown as UserSkillService,
+        { findCandidateProfile } as unknown as CandidateProfileService,
+        requirementTermsService,
+        new WeightedScoreService(),
+      ),
       new VacancyRankingService(),
-      new WeightedScoreService(),
-      requirementTermsService,
     );
   });
 

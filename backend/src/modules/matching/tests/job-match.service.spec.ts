@@ -3,6 +3,9 @@ import type { UserSkillService } from '../../skills/services/user-skill.service.
 import { JOB_OFFER_NOT_AVAILABLE_MESSAGE } from '../constants/job-match.constants.js';
 import { JobOfferNotAvailableException } from '../exceptions/job-offer-not-available.exception.js';
 import type { JobMatchRepository } from '../repositories/job-match.repository.js';
+import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
+import type { RequirementTermsService } from '../services/requirement-terms.service.js';
+import { VacancyScoringService } from '../services/vacancy-scoring.service.js';
 import type { CandidateProfileService } from '../services/candidate-profile.service.js';
 import { JobMatchService } from '../services/job-match.service.js';
 import { WeightedScoreService } from '../services/weighted-score.service.js';
@@ -53,9 +56,14 @@ describe('JobMatchService', () => {
 
     service = new JobMatchService(
       repository as unknown as JobMatchRepository,
-      userSkillService as unknown as UserSkillService,
-      candidateProfile as unknown as CandidateProfileService,
-      new WeightedScoreService(),
+      new VacancyScoringService(
+        userSkillService as unknown as UserSkillService,
+        candidateProfile as unknown as CandidateProfileService,
+        {
+          extractAndMatchRequirements: vi.fn().mockResolvedValue([]),
+        } as unknown as RequirementTermsService,
+        new WeightedScoreService(),
+      ),
     );
   });
 
@@ -183,6 +191,16 @@ describe('JobMatchService', () => {
     expect(await scoreWith('Docker')).toBe(50);
     expect(await scoreWith('Docker', 'Kubernetes')).toBe(100);
     expect(await scoreWith('Docker')).toBe(50);
+  });
+
+  it('calcula la afinidad de un usuario sin perfil en lugar de responder 404', async () => {
+    repository.findPublishedById.mockResolvedValue(vacancyRecord(['Docker']));
+    userSkillService.getUserSkills.mockRejectedValue(new ProfileNotFoundException());
+
+    await expect(service.getMatch(USER_ID, JOB_OFFER_ID)).resolves.toMatchObject({
+      score: 0,
+      hasPendingRequirements: true,
+    });
   });
 
   describe('requisitos académicos, de experiencia y otros', () => {
