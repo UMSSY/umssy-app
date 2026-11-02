@@ -1,3 +1,4 @@
+
 import { describe, expect, it } from "vitest";
 import { WORK_EXPERIENCE_VALIDATION_MESSAGES } from "../constants/work-experience-validation.constants";
 import type { WorkExperienceFormValues } from "../types/work-experience-form-values.types";
@@ -77,7 +78,7 @@ describe("validateWorkExperience", () => {
       validateWorkExperience({
         ...VALID_VALUES,
         position: "a".repeat(151),
-        description: "b".repeat(2001),
+        description: "b".repeat(5001),
       }),
     ).toEqual({
       position: WORK_EXPERIENCE_VALIDATION_MESSAGES.positionTooLong,

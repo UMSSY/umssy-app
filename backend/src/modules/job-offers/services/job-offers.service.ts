@@ -15,6 +15,7 @@ import type { JobOfferCreatedResponse } from '../responses/job-offer-created.res
 import type {
   JobOfferResponse,
   JobOfferSkillResponse,
+  PublishedJobOfferResponse,
 } from '../responses/job-offer.response.js';
 import { JobOfferStatus } from '../types/job-offer.enum.js';
 import { formatSalaryRange } from '../utils/format-salary-range.js';
@@ -57,9 +58,9 @@ export class JobOffersService {
     return this.jobOfferMapper.toCreatedResponse(record);
   }
 
-  async listPublished(): Promise<JobOfferResponse[]> {
+  async listPublished(): Promise<PublishedJobOfferResponse[]> {
     const records = await this.jobOffersRepository.findPublished(new Date());
-    return records.map((record) => this.jobOfferMapper.toResponse(record));
+    return records.map((record) => this.jobOfferMapper.toPublishedResponse(record));
   }
   async listByCompany(
     companyId: string,

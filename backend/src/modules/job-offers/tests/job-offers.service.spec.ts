@@ -169,6 +169,7 @@ describe('JobOffersService', () => {
 
     expect(repository.findPublished).toHaveBeenCalledWith(expect.any(Date));
     expect(result[0]).toMatchObject({ id: 'offer-1', company: { name: 'TechBolivia S.R.L.' } });
+    expect(result[0]).not.toHaveProperty('applicantsCount');
   });
 
   it('lista las vacantes de una empresa existente sin filtros', async () => {
