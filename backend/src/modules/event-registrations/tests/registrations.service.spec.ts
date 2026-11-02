@@ -8,6 +8,17 @@ afterEach(() => vi.useRealTimers());
 const conflict = (code: string) => new Prisma.PrismaClientKnownRequestError('Database conflict', { code, clientVersion: 'test' });
 
 describe('registration creation', () => {
+  it('rejects schedule conflicts without creating a registration or consuming seats', async () => {
+    const { service, tx } = registrationFixture();
+    tx.eventRegistration.findFirst.mockResolvedValue({ id: 'other-registration' });
+    await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({
+      statusCode: 409, code: 'REGISTRATION_SCHEDULE_CONFLICT',
+      message: 'Posees una inscripción confirmada en el mismo horario',
+    });
+    expect(tx.eventRegistration.create).not.toHaveBeenCalled();
+    expect(tx.eventRegistration.count).not.toHaveBeenCalled();
+  });
+
   it('creates an owned registration with an unpredictable token in the serializable transaction', async () => {
     const { service, prisma, tx, events } = registrationFixture();
     const result = await service.create(EVENT_ID, USER_ID);

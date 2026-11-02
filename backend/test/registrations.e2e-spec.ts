@@ -90,6 +90,38 @@ describe.skipIf(!DATABASE)('registration persistence and concurrent HTTP request
     return () => { clearTimeout(timer); release(); expect(arrived).toBe(2); };
   }
 
+  it('rejects identical and partial overlaps but allows adjacent intervals and different dates', async () => {
+    const first = await fixture.createEvent(30);
+    expect((await create(first.id)).status).toBe(201);
+    expect((await create(first.id, 1)).status).toBe(201);
+    for (const [start, end, expected] of [['09:00', '12:00', 409], ['11:00', '13:00', 409], ['08:00', '10:00', 409], ['12:00', '13:00', 201]]) {
+      const next = await fixture.createEvent(30);
+      await fixture.client.event.update({ where: { id: next.id }, data: {
+        eventDate: first.eventDate, startTime: new Date(`1970-01-01T${start}:00Z`), endTime: new Date(`1970-01-01T${end}:00Z`),
+      } });
+      const response = await create(next.id);
+      expect(response.status).toBe(expected);
+      if (expected === 409) expect(response.body.code).toBe('REGISTRATION_SCHEDULE_CONFLICT');
+    }
+    const otherDate = await fixture.createEvent(30);
+    expect((await create(otherDate.id)).status).toBe(201);
+    const registration = await fixture.client.eventRegistration.findUniqueOrThrow({ where: { eventId_userId: { eventId: first.id, userId: fixture.users[0].id } } });
+    expect((await cancel(registration.id)).status).toBe(200);
+    expect((await create(first.id)).status).toBe(201);
+  });
+
+  it('confirms only one concurrent overlapping workshop for the same user', async () => {
+    const first = await fixture.createEvent(30);
+    const second = await fixture.createEvent(30);
+    await fixture.client.event.update({ where: { id: second.id }, data: { eventDate: first.eventDate } });
+    const release = synchronizeEventLocks();
+    try {
+      const responses = await Promise.all([create(first.id, 2), create(second.id, 2)]);
+      expect(responses.map(response => response.status).sort((left, right) => left - right)).toEqual([201, 409]);
+      expect(await fixture.client.eventRegistration.count({ where: { userId: fixture.users[2].id, eventId: { in: [first.id, second.id] } } })).toBe(1);
+    } finally { release(); }
+  });
+
   it('persists cancellation and reactivation on the same row with a new QR', async () => {
     const event = await fixture.createEvent();
     const created = (await create(event.id).expect(201)).body.data;

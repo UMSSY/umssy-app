@@ -37,6 +37,7 @@ export function registrationFixture() {
     $queryRaw: vi.fn().mockResolvedValue([{ id: EVENT_ID }]),
     eventRegistration: {
       findUnique: vi.fn().mockResolvedValue(null),
+      findFirst: vi.fn().mockResolvedValue(null),
       count: vi.fn().mockResolvedValue(0),
       create: vi.fn().mockImplementation(({ data }) => Promise.resolve(registrationRecord({ qrToken: data.qrToken }))),
       update: vi.fn().mockImplementation(({ data }) => Promise.resolve(registrationRecord({

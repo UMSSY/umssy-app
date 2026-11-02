@@ -25,6 +25,20 @@ export class EventRegistrationsRepository {
     return tx.eventRegistration.findUnique({ where: { id }, select: REGISTRATION_SELECT });
   }
 
+  findScheduleConflict(tx: Prisma.TransactionClient, userId: string, event: { id: string; eventDate: Date; startTime: Date; endTime: Date }) {
+    return tx.eventRegistration.findFirst({
+      where: {
+        userId, eventId: { not: event.id }, cancelledAt: null,
+        status: { title: REGISTRATION_STATUS_TITLES.confirmed },
+        event: {
+          status: { title: PUBLISHED_STATUS_TITLE }, eventDate: event.eventDate,
+          startTime: { lt: event.endTime }, endTime: { gt: event.startTime },
+        },
+      },
+      select: { id: true },
+    });
+  }
+
   countConfirmed(tx: Prisma.TransactionClient, eventId: string) {
     return tx.eventRegistration.count({ where: { eventId, cancelledAt: null, status: { title: REGISTRATION_STATUS_TITLES.confirmed } } });
   }
@@ -99,6 +113,7 @@ export class EventRegistrationsRepository {
       },
       select: {
         id: true,
+        eventId: true,
         registeredAt: true,
         cancelledAt: true,
         status: { select: { title: true } },
