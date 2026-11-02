@@ -68,8 +68,8 @@ export class JobRecommendationsService {
     const evaluated = await Promise.all(
       vacancies.map((vacancy) => this.evaluate(vacancy, candidate)),
     );
-
-    const ranked = this.ranking.rank(evaluated);
+    const listed = evaluated.filter(({ item }) => item.score > 0);
+    const ranked = this.ranking.rank(listed);
     return { isProfileComplete: true, items: ranked.map(({ item }) => item) };
   }
 
