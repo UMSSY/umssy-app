@@ -45,13 +45,15 @@ describe('SurveyNotificationsController', () => {
     surveysService = moduleRef.get(SurveysService);
   });
 
-  it('exige sesión con rol titulado o administrativo', () => {
+  it('exige sesión con rol destinatario de encuestas o administrativo', () => {
     expect(Reflect.getMetadata(GUARDS_METADATA, SurveyNotificationsController)).toEqual([
       JwtAuthGuard,
       RolesGuard,
     ]);
     expect(Reflect.getMetadata(ROLES_KEY, SurveyNotificationsController)).toEqual([
       'titulado',
+      'estudiante',
+      'mentor',
       'administrativo',
     ]);
   });
@@ -70,9 +72,16 @@ describe('SurveyNotificationsController', () => {
     expect(guard.canActivate(context)).toBe(true);
   });
 
-  it('rechaza el acceso a un estudiante o empresa', () => {
+  it.each(['estudiante', 'mentor'])('permite el acceso a un %s', (role) => {
     const guard = new RolesGuard(new Reflector());
-    const context = contextFor(['estudiante'], () => undefined, SurveyNotificationsController);
+    const context = contextFor([role], () => undefined, SurveyNotificationsController);
+
+    expect(guard.canActivate(context)).toBe(true);
+  });
+
+  it('rechaza el acceso a una empresa', () => {
+    const guard = new RolesGuard(new Reflector());
+    const context = contextFor(['empresa'], () => undefined, SurveyNotificationsController);
 
     expect(() => guard.canActivate(context)).toThrow(ForbiddenRoleException);
   });
@@ -101,9 +110,13 @@ describe('SurveyNotificationsController', () => {
 
     const spy = vi.spyOn(surveysService, 'getNotificationsForUser').mockResolvedValue(mockNotifications);
 
-    const result = await controller.getNotifications('user-1');
+    const result = await controller.getNotifications('user-1', {
+      id: 'user-1',
+      email: 'titulado@umssy.test',
+      roles: ['titulado'],
+    } as never);
 
-    expect(spy).toHaveBeenCalledWith('user-1');
+    expect(spy).toHaveBeenCalledWith('user-1', ['titulado']);
     expect(result).toEqual(mockNotifications);
   });
 });

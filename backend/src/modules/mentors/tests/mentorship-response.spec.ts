@@ -190,6 +190,7 @@ describe('Mentorship Standard Response HTTP', () => {
   it('POST /api/mentors/activate conserva HTTP 201', async () => {
     await request(server)
       .post('/api/mentors/activate')
+      .set('Idempotency-Key', '11111111-1111-4111-8111-111111111111')
       .send(activationPayload)
       .expect(201)
       .expect({
@@ -202,6 +203,7 @@ describe('Mentorship Standard Response HTTP', () => {
     expect(mentorsService.activate).toHaveBeenCalledWith(
       userId,
       activationPayload,
+      '11111111-1111-4111-8111-111111111111',
     );
   });
 
@@ -236,6 +238,7 @@ describe('Mentorship Standard Response HTTP', () => {
 
     await request(server)
       .post('/api/mentors/activate')
+      .set('Idempotency-Key', '11111111-1111-4111-8111-111111111111')
       .send(activationPayload)
       .expect(409)
       .expect({

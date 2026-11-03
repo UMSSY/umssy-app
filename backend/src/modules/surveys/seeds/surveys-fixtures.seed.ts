@@ -1,6 +1,7 @@
 import type { Prisma } from '../../../prisma/client.js';
 import type { FixtureContext } from '../../../common/database/fixture-context.js';
 import { SURVEY_FIXTURES } from '../constants/survey-fixtures.constants.js';
+import { SurveyTargetAudience } from '../types/survey.enum.js';
 import {
   surveyFixtureDate,
   surveyFixtureId,
@@ -20,6 +21,7 @@ export async function seedSurveysFixtures(
       opensAt: surveyFixtureDate(context, survey.opensAtDays),
       closesAt: surveyFixtureDate(context, survey.closesAtDays),
       statusId: context.getReference('survey_statuses', survey.status),
+      targetAudienceId: context.getReference('survey_target_audiences', SurveyTargetAudience.GRADUATES),
       createdById: context.adminId,
       createdAt: surveyFixtureDate(context, survey.createdAtDays),
     }),

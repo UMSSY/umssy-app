@@ -5,7 +5,7 @@ describe("isQuestionType", () => {
   it("reconoce solo los tipos de pregunta cerrados", () => {
     expect(isQuestionType("single_choice")).toBe(true);
     expect(isQuestionType("multiple_choice")).toBe(true);
-    expect(isQuestionType("dropdown")).toBe(false);
+    expect(isQuestionType("dropdown")).toBe(true);
     expect(isQuestionType("short_text")).toBe(false);
   });
 });

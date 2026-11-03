@@ -1,3 +1,4 @@
+import type { JobOffersService } from '../../job-offers/services/job-offers.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { UserSkillService } from '../../skills/services/user-skill.service.js';
@@ -7,6 +8,7 @@ import { JobRecommendationsService } from '../services/job-recommendations.servi
 import { VacancyRankingService } from '../services/vacancy-ranking.service.js';
 import { WeightedScoreService } from '../services/weighted-score.service.js';
 import type { JobMatchRecord } from '../types/job-match.types.js';
+import type { RequirementTermsService } from '../services/requirement-terms.service.js';
 
 interface OfferOptions {
   careers?: string[];
@@ -35,12 +37,14 @@ function offer(
 const skill = (name: string) => ({ id: `id-${name}`, name, isCustom: false });
 
 describe('HU-06 recommendations contract', () => {
+  const findScoringOffers = vi.fn();
   const getUserSkills = vi.fn();
   const findPublished = vi.fn();
   const findCandidateProfile = vi.fn();
   let service: JobRecommendationsService;
 
   beforeEach(() => {
+    findScoringOffers.mockReset().mockResolvedValue([]);
     getUserSkills.mockReset().mockResolvedValue([skill('Python')]);
     findPublished
       .mockReset()
@@ -53,13 +57,36 @@ describe('HU-06 recommendations contract', () => {
     findCandidateProfile
       .mockReset()
       .mockResolvedValue({ career: null, experienceYears: 0 });
+    const requirementTermsService = {
+      extractAndMatchRequirements: vi.fn().mockResolvedValue([]),
+    } as unknown as RequirementTermsService;
     service = new JobRecommendationsService(
+      { findScoringOffers } as unknown as JobOffersService,
       { getUserSkills } as unknown as UserSkillService,
       { findCandidateProfile } as unknown as CandidateProfileService,
       { findPublished } as unknown as JobMatchRepository,
       new VacancyRankingService(),
       new WeightedScoreService(),
+      requirementTermsService,
     );
+  });
+
+  it('calculates scores for the requested offers through the job offers service', async () => {
+    findScoringOffers.mockResolvedValue([
+      offer('partial', ['Python', 'SQL']),
+      offer('perfect', ['Python']),
+    ]);
+
+    await expect(
+      service.scoresForOffers('user', ['partial', 'perfect']),
+    ).resolves.toEqual(
+      new Map([
+        ['partial', 50],
+        ['perfect', 100],
+      ]),
+    );
+    expect(findScoringOffers).toHaveBeenCalledWith(['partial', 'perfect']);
+    expect(findPublished).not.toHaveBeenCalled();
   });
 
   it('orders by affinity and keeps matching skill count as tie breaker', async () => {

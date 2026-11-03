@@ -1,9 +1,14 @@
+
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 import { useState } from "react";
-import { skillsAnalysisService, type SkillsAnalysisResult } from "@/modules/matching";
+import {
+  skillsAnalysisService,
+  type SkillsAnalysisResult,
+} from "@/modules/matching";
+import { profileSkillsRadarService } from "@/modules/profile";
+import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
 import type { Feedback } from "@/modules/profile";
@@ -14,39 +19,83 @@ const SKILLS_PROFILE_QUERY_KEY = ["skills", "profile"] as const;
 
 export function useSaveWorkExperience(onSaved: () => void) {
   const queryClient = useQueryClient();
-  const mutation = useMutation({ mutationFn: (request: () => Promise<WorkExperienceItem>) => request() });
+
+  const mutation = useMutation({
+    mutationFn: (request: () => Promise<WorkExperienceItem>) => request(),
+  });
+
   const [isSaving, setIsSaving] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [analysis, setAnalysis] = useState<SkillsAnalysisResult | null>(null);
 
-  async function analyze(saved: WorkExperienceItem, payload: WorkExperiencePayload): Promise<void> {
+  async function refreshSkills(): Promise<void> {
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: SKILLS_PROFILE_QUERY_KEY,
+      }),
+      queryClient.invalidateQueries({
+        queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY,
+      }),
+    ]);
+  }
+
+  async function analyze(
+    saved: WorkExperienceItem,
+    payload: WorkExperiencePayload,
+  ): Promise<void> {
     setIsAnalyzing(true);
+
     try {
-      setAnalysis(await skillsAnalysisService.analyzeExperience(saved.id, payload.description));
-      await queryClient.invalidateQueries({ queryKey: SKILLS_PROFILE_QUERY_KEY });
-    } catch {
-      setAnalysis(null);
+      try {
+        const result = await skillsAnalysisService.analyzeExperience(
+          saved.id,
+          payload.description,
+        );
+
+        setAnalysis(result);
+      } catch {
+        setAnalysis(null);
+      }
+
+      try {
+        await profileSkillsRadarService.analyzeSkills();
+      } catch {
+      }
+
+      await refreshSkills();
     } finally {
       setIsAnalyzing(false);
     }
   }
 
-  async function save(payload: WorkExperiencePayload, id?: string): Promise<void> {
+  async function save(
+    payload: WorkExperiencePayload,
+    id?: string,
+  ): Promise<void> {
     setIsSaving(true);
     setFeedback(null);
     setAnalysis(null);
+
     try {
       const saved = id
-        ? await mutation.mutateAsync(() => workExperienceService.updateWorkExperience(id, payload))
-        : await mutation.mutateAsync(() => workExperienceService.createWorkExperience(payload));
+        ? await mutation.mutateAsync(() =>
+            workExperienceService.updateWorkExperience(id, payload),
+          )
+        : await mutation.mutateAsync(() =>
+            workExperienceService.createWorkExperience(payload),
+          );
+
       setFeedback({
         type: "success",
         message: id
           ? WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateSuccess
           : WORK_EXPERIENCE_FEEDBACK_MESSAGES.createSuccess,
       });
+
       onSaved();
+
+      // El análisis se ejecuta en segundo plano sin invalidar el guardado.
       void analyze(saved, payload);
     } catch {
       setFeedback({
@@ -65,5 +114,12 @@ export function useSaveWorkExperience(onSaved: () => void) {
     setAnalysis(null);
   }
 
-  return { save, isSaving, isAnalyzing, analysis, feedback, clearFeedback };
+  return {
+    save,
+    isSaving,
+    isAnalyzing,
+    analysis,
+    feedback,
+    clearFeedback,
+  };
 }

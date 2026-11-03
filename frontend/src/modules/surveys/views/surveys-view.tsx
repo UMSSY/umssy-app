@@ -9,7 +9,7 @@ import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { SurveysTable } from "../components/surveys-table";
 import {
   ACADEMIC_PERIOD_FILTER_LABEL,
-  ALL_ACADEMIC_PERIODS_LABEL,
+  ACADEMIC_PERIOD_FILTER_PLACEHOLDER,
   CREATE_SURVEY_ACTION_LABEL,
   CREATE_SURVEY_PATH,
   CREATOR_SEARCH_LABEL,
@@ -48,7 +48,7 @@ export function SurveysView() {
         <ReportSearchInput value={creatorSearch} onChange={setCreatorSearch} label={CREATOR_SEARCH_LABEL} />
         <ReportFilterSelect
           label={ACADEMIC_PERIOD_FILTER_LABEL}
-          allLabel={ALL_ACADEMIC_PERIODS_LABEL}
+          placeholder={ACADEMIC_PERIOD_FILTER_PLACEHOLDER}
           options={periodOptions}
           value={academicPeriod}
           onChange={setAcademicPeriod}

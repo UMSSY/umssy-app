@@ -198,7 +198,7 @@ describe("ClearDataDialog", () => {
 
     const alert = await within(dialog).findByRole("alert");
     expect(alert).toHaveTextContent(failed.ok ? "" : failed.message);
-    expect(alert).toHaveClass("text-destructive");
+    expect(alert).toHaveClass("text-danger");
     expect(screen.getByRole("alertdialog")).toBeInTheDocument();
     expect(screen.getByLabelText(/^Nombres/)).toHaveValue("Ana María");
 

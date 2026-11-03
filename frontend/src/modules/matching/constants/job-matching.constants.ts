@@ -30,10 +30,10 @@ export const JOB_DETAIL_BREADCRUMB: BreadcrumbEntry[] = [
 export const JOB_MATCHING_MESSAGES = {
   affinityCaption: "de afinidad",
   pageTitle: "Vacantes para ti",
-  pageDescription: "Encuentra ofertas según las habilidades, la carrera y la experiencia de tu perfil.",
+  pageDescription: "Encuentra ofertas según las habilidades de tu perfil.",
   scoreInfoTitle: "¿Qué es la afinidad?",
   scoreInfoText:
-    "Comparamos tus habilidades, tu carrera y tu experiencia con lo que pide cada vacante; es una guía para priorizar, no una garantía de contratación.",
+    "Comparamos tu perfil con los requisitos de cada vacante para calcular su afinidad; es una guía para priorizar, no una garantía de contratación.",
   matchedLabel: "Coincide contigo",
   viewJob: "Ver vacante",
   viewLocation: "Ver ubicación",
@@ -41,7 +41,7 @@ export const JOB_MATCHING_MESSAGES = {
   requirementsTitle: "Requisitos vs. tu perfil",
   descriptionTitle: "Descripción",
   scoreCaption: "de afinidad con tu perfil",
-  noPendingRequirements: "Para esta oportunidad no tienes habilidades ni requisitos pendientes",
+  noPendingRequirements: "No tienes habilidades ni requisitos visibles pendientes para esta oportunidad",
   loadError: "No pudimos cargar la información. Intenta nuevamente.",
   retry: "Reintentar",
   notFound: "Esta vacante ya no está disponible.",

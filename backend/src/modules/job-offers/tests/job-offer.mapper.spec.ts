@@ -20,6 +20,7 @@ const RECORD: JobOfferRecord = {
   contractType: { title: 'Tiempo completo' },
   status: { title: 'Publicada' },
   skills: [{ skill: { id: 'skill-1', name: 'Docker' } }],
+  _count: { applications: 3 },
 };
 
 describe('JobOfferMapper', () => {
@@ -42,6 +43,7 @@ describe('JobOfferMapper', () => {
       createdAt: CREATED_AT.toISOString(),
       company: { id: 'company-1', name: 'TechBolivia S.R.L.' },
       skills: [{ id: 'skill-1', name: 'Docker' }],
+      applicantsCount: 3,
     });
   });
 

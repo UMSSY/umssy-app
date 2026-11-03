@@ -1,7 +1,8 @@
-export type ApplicationStatus = "En revisión" | "Entrevista" | "Aceptada" | "No seleccionado";
+export type ApplicationStatus = "En revisión" | "Entrevista" | "Aceptada" | "No seleccionado" | "Retirada";
 
 export interface Application {
   id: string;
+  jobOfferId: string;
   vacancyTitle: string;
   companyName: string;
   affinityPercentage: number;

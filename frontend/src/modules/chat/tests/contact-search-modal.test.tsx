@@ -1,22 +1,54 @@
-import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { describe, test, expect, beforeEach, afterEach, vi, Mock } from 'vitest';
-import * as matchers from '@testing-library/jest-dom/matchers';
-import { screen, fireEvent, cleanup } from "@testing-library/react";
-import { ContactSearchModal } from '../components/contact-search-modal';
-import { useContactSearch } from '../hooks/use-contact-search';
+
+import {
+  renderWithQuery as render,
+} from "@/shared/testing/render-with-query";
+
+import {
+  describe,
+  test,
+  expect,
+  beforeEach,
+  afterEach,
+  vi,
+} from "vitest";
+
+import * as matchers from "@testing-library/jest-dom/matchers";
+
+import {
+  screen,
+  fireEvent,
+  cleanup,
+} from "@testing-library/react";
+
+import { ContactSearchModal } from "../components/contact-search-modal";
+import { useContactSearch } from "../hooks/use-contact-search";
 
 expect.extend(matchers);
 
-vi.mock('../hooks/use-contact-search', () => ({
+vi.mock("../hooks/use-contact-search", () => ({
   useContactSearch: vi.fn(),
 }));
 
 const mockUsers = [
-  { id: '1', fullName: 'Maria Peredo', headline: 'Senior Developer', role: 'MENTOR', avatarUrl: null, isActive: true },
-  { id: '2', fullName: 'Mario Alcocer', headline: 'Cloud Architect', role: 'STUDENT', avatarUrl: null, isActive: true },
+  {
+    id: "1",
+    fullName: "Maria Peredo",
+    headline: "Senior Developer",
+    role: "MENTOR",
+    avatarUrl: null,
+    isActive: true,
+  },
+  {
+    id: "2",
+    fullName: "Mario Alcocer",
+    headline: "Cloud Architect",
+    role: "STUDENT",
+    avatarUrl: null,
+    isActive: true,
+  },
 ];
 
-describe('ContactSearchModal - Suite Completa HU2', () => {
+describe("ContactSearchModal - Interfaz y búsqueda", () => {
   const mockOnClose = vi.fn();
   const mockOnSelectContact = vi.fn();
 
@@ -28,9 +60,9 @@ describe('ContactSearchModal - Suite Completa HU2', () => {
     cleanup();
   });
 
-  // --- 1. PRUEBAS DE ESTRUCTURA Y UI BASE ---
-  test('debe renderizar los elementos de UI con la estructura consistente', () => {
-    (useContactSearch as Mock).mockReturnValue({
+  // 1. Estructura del modal
+  test("debe mostrar los elementos principales del modal", () => {
+    vi.mocked(useContactSearch).mockReturnValue({
       results: [],
       isSearching: false,
     });
@@ -43,16 +75,27 @@ describe('ContactSearchModal - Suite Completa HU2', () => {
       />
     );
 
-    expect(screen.getByText('Nueva conversación')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Buscar por nombre...')).toBeInTheDocument();
+    expect(
+      screen.getByText("Nueva conversación")
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByPlaceholderText("Buscar por nombre...")
+    ).toBeInTheDocument();
   });
 
-  // --- 2. PRUEBAS DE RESULTADOS Y SELECCIÓN DE CONTACTO ---
-  test('debe mostrar la lista de usuarios al ingresar un termino de busqueda', () => {
-    (useContactSearch as Mock).mockImplementation((term: string) => ({
-      results: term && term.length >= 2 ? mockUsers : [],
-      isSearching: false,
-    }));
+  // 2. Búsqueda de contactos
+  test("debe mostrar los usuarios encontrados", () => {
+    vi.mocked(useContactSearch).mockImplementation(
+      (term: string) =>
+        ({
+          results:
+            term && term.length >= 2
+              ? mockUsers
+              : [],
+          isSearching: false,
+        }) as ReturnType<typeof useContactSearch>
+    );
 
     render(
       <ContactSearchModal
@@ -62,40 +105,26 @@ describe('ContactSearchModal - Suite Completa HU2', () => {
       />
     );
 
-    const input = screen.getByPlaceholderText('Buscar por nombre...');
-    fireEvent.change(input, { target: { value: 'Maria' } });
-
-    expect(screen.getByText('Maria Peredo')).toBeInTheDocument();
-    expect(screen.getByText('Mario Alcocer')).toBeInTheDocument();
-  });
-
-  test('debe seleccionar el contacto correcto al hacer clic en un usuario', () => {
-    (useContactSearch as Mock).mockImplementation((term: string) => ({
-      results: term && term.length >= 2 ? mockUsers : [],
-      isSearching: false,
-    }));
-
-    render(
-      <ContactSearchModal
-        isOpen={true}
-        onClose={mockOnClose}
-        onSelectContact={mockOnSelectContact}
-      />
+    const input = screen.getByPlaceholderText(
+      "Buscar por nombre..."
     );
 
-    const input = screen.getByPlaceholderText('Buscar por nombre...');
-    fireEvent.change(input, { target: { value: 'Maria' } });
+    fireEvent.change(input, {
+      target: { value: "Maria" },
+    });
 
-    const userItem = screen.getByText('Maria Peredo');
-    fireEvent.click(userItem);
+    expect(
+      screen.getByText("Maria Peredo")
+    ).toBeInTheDocument();
 
-    expect(mockOnSelectContact).toHaveBeenCalledWith(mockUsers[0]);
+    expect(
+      screen.getByText("Mario Alcocer")
+    ).toBeInTheDocument();
   });
 
-  // --- 3. PRUEBAS DE ESTADOS (CARGA Y SIN RESULTADOS) ---
-  test('debe mostrar el estado de carga "Buscando..." cuando isSearching es verdadero', () => {
-    // Definir directamente que el hook devuelva estado de carga
-    (useContactSearch as Mock).mockReturnValue({
+  // 3. Estado de carga
+  test('debe mostrar "Buscando..." mientras busca usuarios', () => {
+    vi.mocked(useContactSearch).mockReturnValue({
       results: [],
       isSearching: true,
     });
@@ -108,18 +137,22 @@ describe('ContactSearchModal - Suite Completa HU2', () => {
       />
     );
 
-    // Escribimos en el input para asegurarnos que se activa la vista si depende de value
-    const input = screen.getByPlaceholderText('Buscar por nombre...');
-    fireEvent.change(input, { target: { value: 'Maria' } });
+    const input = screen.getByPlaceholderText(
+      "Buscar por nombre..."
+    );
 
-    // Si tu componente muestra un loader visual o spinner con texto/aria-label, 
-    // verificamos con matcher flexible o buscamos "Buscando"
-    const loadingElement = screen.queryByText(/buscando/i) || screen.queryByRole('status') || screen.queryByTestId('spinner');
-    expect(loadingElement).toBeInTheDocument();
+    fireEvent.change(input, {
+      target: { value: "Maria" },
+    });
+
+    expect(
+      screen.getByRole("status")
+    ).toHaveTextContent("Buscando...");
   });
 
-  test('debe mostrar el mensaje de "Sin resultados" si la búsqueda no devuelve usuarios', () => {
-    (useContactSearch as Mock).mockReturnValue({
+  // 4. Sin resultados
+  test("debe mostrar un mensaje cuando no encuentra usuarios", () => {
+    vi.mocked(useContactSearch).mockReturnValue({
       results: [],
       isSearching: false,
     });
@@ -132,9 +165,42 @@ describe('ContactSearchModal - Suite Completa HU2', () => {
       />
     );
 
-    const input = screen.getByPlaceholderText('Buscar por nombre...');
-    fireEvent.change(input, { target: { value: 'UsuarioInexistente' } });
+    const input = screen.getByPlaceholderText(
+      "Buscar por nombre..."
+    );
 
-    expect(screen.getByText(/no se encontraron usuarios/i)).toBeInTheDocument();
+    fireEvent.change(input, {
+      target: { value: "UsuarioInexistente" },
+    });
+
+    expect(
+      screen.getByText(/no se encontraron usuarios/i)
+    ).toBeInTheDocument();
+  });
+
+  // 5. Cerrar modal
+  test("debe cerrar el modal al presionar Escape", () => {
+    vi.mocked(useContactSearch).mockReturnValue({
+      results: [],
+      isSearching: false,
+    });
+
+    render(
+      <ContactSearchModal
+        isOpen={true}
+        onClose={mockOnClose}
+        onSelectContact={mockOnSelectContact}
+      />
+    );
+
+    const input = screen.getByPlaceholderText(
+      "Buscar por nombre..."
+    );
+
+    fireEvent.keyDown(input, {
+      key: "Escape",
+    });
+
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 });

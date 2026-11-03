@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Patch,
   Post,
   UseGuards,
@@ -18,6 +19,7 @@ import {
   type CreateMentorParticipationDto,
 } from '../requests/create-mentor-participation.schema.js';
 import { MentorParticipationService } from '../services/mentor-participation.service.js';
+import { requireMentorIdempotencyKey } from '../requests/mentor-idempotency-key.schema.js';
 
 @Controller('mentor-participation/requests')
 @UseGuards(JwtAuthGuard)
@@ -30,8 +32,9 @@ export class MentorParticipationController {
     @CurrentUser() user: AuthenticatedUser,
     @Body(new ZodValidationPipe(createMentorParticipationSchema))
     body: CreateMentorParticipationDto,
+    @Headers('idempotency-key') key?: string,
   ) {
-    return this.service.create(user.id, body);
+    return this.service.create(user.id, body, requireMentorIdempotencyKey(key));
   }
 
   @Get('me')

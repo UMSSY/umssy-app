@@ -29,12 +29,20 @@ describe('contrato de solicitudes HU7-2', () => {
     expect(
       Reflect.getMetadata(GUARDS_METADATA, MentorParticipationController),
     ).toContain(JwtAuthGuard);
-    await controller.create(user, preferences);
+    await controller.create(
+      user,
+      preferences,
+      '11111111-1111-4111-8111-111111111111',
+    );
     await controller.findMyRequest(user);
     await controller.findMyHistory(user);
     await controller.updatePreferences(user, preferences);
     await controller.cancel(user);
-    expect(service.create).toHaveBeenCalledWith(user.id, preferences);
+    expect(service.create).toHaveBeenCalledWith(
+      user.id,
+      preferences,
+      '11111111-1111-4111-8111-111111111111',
+    );
     expect(service.findMyRequest).toHaveBeenCalledWith(user.id);
     expect(service.findMyHistory).toHaveBeenCalledWith(user.id);
     expect(service.updatePreferences).toHaveBeenCalledWith(
@@ -93,7 +101,10 @@ describe('contrato de solicitudes HU7-2', () => {
         request,
       }),
     } as unknown as MentorParticipationRepository);
-    await expect(service.create('user', preferences)).rejects.toMatchObject({ statusCode: 409, data: { code: 'REQUEST_ALREADY_EXISTS' } });
+    await expect(service.create('user', preferences)).rejects.toMatchObject({
+      statusCode: 409,
+      data: { code: 'REQUEST_ALREADY_EXISTS' },
+    });
   });
 
   it('propaga errores de almacenamiento sin convertirlos en respuestas exitosas', async () => {

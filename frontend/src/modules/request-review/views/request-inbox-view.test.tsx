@@ -1,12 +1,14 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { automaticValidationService } from "../services/automatic-validation.service";
 import { requestReviewService } from "../services/request-review.service";
 import type { ReviewListItem } from "../types/request-review.types";
 import { RequestInboxView } from "./request-inbox-view";
 
 const listRequests = vi.spyOn(requestReviewService, "listRequests");
 const getSummary = vi.spyOn(requestReviewService, "getSummary");
+const getAutomationSummary = vi.spyOn(automaticValidationService, "getAutomationSummary");
 const listCalls = () => listRequests.mock.calls.filter((call) => call[2] === undefined).map((call) => [call[0], call[1]]);
 
 function row(index: number, status: ReviewListItem["status"] = "pending"): ReviewListItem {
@@ -42,6 +44,7 @@ describe("RequestInboxView", () => {
     listRequests.mockReset();
     getSummary.mockReset();
     getSummary.mockResolvedValue({ ok: true, data: SUMMARY });
+    getAutomationSummary.mockResolvedValue({ ok: true, data: { manualReviewCount: 0, autoApprovedTodayCount: 0, autoRejectedTodayCount: 0, receivedTodayCount: 0 } });
   });
   afterEach(() => cleanup());
 

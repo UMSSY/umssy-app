@@ -58,11 +58,11 @@ describe("PersonalDataForm", () => {
     expect(row).toContainElement(screen.getByRole("combobox", { name: "Expedido" }));
   });
 
-  it("el select de expedido usa la altura de 42 px en lugar de la de shadcn", () => {
+  it("el select de expedido usa la misma altura que los campos en lugar de la de shadcn", () => {
     renderForm();
 
     const trigger = screen.getByRole("combobox", { name: "Expedido" });
-    expect(trigger).toHaveClass("data-[size=default]:h-10", "2xl:data-[size=default]:h-12", "focus-visible:border-accent");
+    expect(trigger).toHaveClass("data-[size=default]:h-11", "focus-visible:border-accent");
     expect(trigger).not.toHaveClass("data-[size=default]:h-8");
   });
 
@@ -70,7 +70,7 @@ describe("PersonalDataForm", () => {
     const { container } = renderForm();
 
     const button = screen.getByRole("button", { name: "Continuar al siguiente paso" });
-    expect(button).toHaveClass("bg-primary", "text-primary-foreground", "2xl:h-12");
+    expect(button).toHaveClass("bg-primary", "text-primary-foreground", "h-11");
     expect(button.querySelector("svg.lucide-chevron-right")).not.toBeNull();
     // El botón principal es el último de la fila (a la derecha) y la fila va dentro del contenedor con el borde superior
     const row = button.parentElement as HTMLElement;
@@ -140,19 +140,20 @@ describe("PersonalDataForm", () => {
     renderForm();
 
     const trigger = screen.getByRole("combobox", { name: "Carrera" });
-    expect(trigger).toHaveClass("w-full", "data-[size=default]:h-10");
+    expect(trigger).toHaveClass("w-full", "data-[size=default]:h-11");
     expect(trigger.closest("div.md\\:col-span-2")).not.toBeNull();
   });
 
-  it("escala tipografía y separación desde 2xl sin fijar el ancho del formulario", () => {
+  it("usa el título del frontend nuevo sin fijar el ancho del formulario", () => {
     const { container } = renderForm();
 
     expect(container.firstElementChild?.className).not.toMatch(/max-w-/);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveClass("text-3xl", "2xl:text-4xl");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveClass("text-3xl", "text-accent");
     expect(screen.getByRole("group", { name: "Identidad" })).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "Contacto" })).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "Datos complementarios" })).toBeInTheDocument();
-    expect(screen.getByText("Carrera")).toHaveClass("2xl:text-base");
+    expect(screen.getByText("Carrera")).toHaveClass("text-xs");
+    expect(container.innerHTML).not.toMatch(/2xl:/);
   });
 
   it("muestra la leyenda de campo obligatorio antes del formulario", () => {
