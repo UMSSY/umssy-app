@@ -140,7 +140,6 @@ export class JobOffersService {
     await this.jobOffersRepository.updateStatus(jobOfferId, statusId);
   }
 
-  // Reabre una vacante cerrada conservando sus datos: pasa a Publicada con la fecha de hoy.
   async reopen(companyId: string, jobOfferId: string): Promise<JobOfferResponse> {
     await this.ensureCompanyExists(companyId);
     const existing = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
@@ -175,7 +174,6 @@ export class JobOffersService {
     };
   }
 
-  // Los requisitos que la edición no envía se omiten para conservar los valores guardados.
   private toUpdateFields(
     request: UpdateJobOfferRequest,
   ): Omit<UpdateJobOfferData, 'modalityId' | 'contractTypeId'> {

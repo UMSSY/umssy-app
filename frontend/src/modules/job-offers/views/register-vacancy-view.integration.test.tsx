@@ -236,6 +236,7 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
       salaryRange: "Bs 6.500 - 8.000",
       status: "Publicada",
       expiresAt: null,
+      publishedAt: "2026-10-12T00:00:00.000Z",
       createdAt: "2026-10-12T00:00:00.000Z",
       company: { id: COMPANY_ID, name: "TechBolivia" },
       skills: [DOCKER, KUBERNETES],

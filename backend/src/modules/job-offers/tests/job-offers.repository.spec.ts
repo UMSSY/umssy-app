@@ -58,7 +58,7 @@ describe('JobOffersRepository', () => {
 
     expect(prisma.jobOffer.update).toHaveBeenCalledWith({
       where: { id: 'offer-1' },
-      data: { statusId: 'status-published', createdAt: publishedAt },
+      data: { statusId: 'status-published', publishedAt },
       select: JOB_OFFER_SELECT,
     });
   });
@@ -151,18 +151,18 @@ describe('JobOffersRepository', () => {
         status: { title: 'Publicada' },
         OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { publishedAt: 'desc' },
       select: JOB_OFFER_SELECT,
     });
   });
     it('lista las vacantes de una empresa sin filtros, de la más reciente a la más antigua', async () => {
     prisma.jobOffer.findMany.mockResolvedValue([]);
 
-    await repository.findByCompany('company-1', { sortBy: 'createdAt', order: 'desc' });
+    await repository.findByCompany('company-1', { sortBy: 'publishedAt', order: 'desc' });
 
     expect(prisma.jobOffer.findMany).toHaveBeenCalledWith({
       where: { companyId: 'company-1'  },
-      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      orderBy: [{ publishedAt: 'desc' }, { id: 'desc' }],
       select: JOB_OFFER_SELECT,
     });
   });
@@ -176,7 +176,7 @@ describe('JobOffersRepository', () => {
       dateFrom: '2026-10-01',
       dateTo: '2026-10-31',
       search: 'react',
-      sortBy: 'createdAt',
+      sortBy: 'publishedAt',
       order: 'asc',
     });
 
@@ -185,13 +185,13 @@ describe('JobOffersRepository', () => {
         companyId: 'company-1',
         modality: { title: 'Remoto' },
         contractType: { title: 'Medio tiempo' },
-        createdAt: {
+        publishedAt: {
           gte: new Date('2026-10-01T04:00:00.000Z'),
           lt: new Date('2026-11-01T04:00:00.000Z'),
         },
         title: { contains: 'react', mode: 'insensitive' },
       },
-      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      orderBy: [{ publishedAt: 'asc' }, { id: 'asc' }],
       select: JOB_OFFER_SELECT,
     });
   });

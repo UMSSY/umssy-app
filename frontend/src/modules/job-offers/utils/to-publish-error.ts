@@ -18,7 +18,6 @@ function readDetails(body: PublishErrorBody | undefined): string[] {
 }
 
 export function toPublishError(error: unknown, mode: PublishMode = "publish"): PublishError {
-  // En la edición un corte de red y un error del servidor comparten el mensaje acordado con QA.
   const isEdit = mode === "edit";
   const serverMessage = isEdit ? EDIT_MESSAGES.error : PUBLISH_MESSAGES.server;
   const networkMessage = isEdit ? EDIT_MESSAGES.error : PUBLISH_MESSAGES.network;

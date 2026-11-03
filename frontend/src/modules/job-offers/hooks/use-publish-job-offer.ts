@@ -33,7 +33,6 @@ export function usePublishJobOffer(jobOfferId?: string, options: UsePublishJobOf
       }
     },
     networkMode: "always",
-    // La raíz de la empresa cubre el listado y los detalles de sus vacantes.
     onSuccess: (_data, { companyId }) => {
       options.onSuccess?.();
       return queryClient.invalidateQueries({ queryKey: JOB_OFFERS_QUERY_KEYS.company(companyId) });

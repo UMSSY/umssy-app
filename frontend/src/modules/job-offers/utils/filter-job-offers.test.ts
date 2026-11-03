@@ -126,7 +126,7 @@ describe("toListParams", () => {
       contractType: undefined,
       dateFrom: undefined,
       dateTo: undefined,
-      sortBy: "createdAt",
+      sortBy: "publishedAt",
       order: "desc",
     });
   });

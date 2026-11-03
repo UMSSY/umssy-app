@@ -6,7 +6,6 @@ import {
   jobOfferFieldsSchema,
 } from './create-job-offer.request.js';
 
-// En la edición los requisitos que no se envían se conservan, por eso no tienen valor por defecto.
 export const updateJobOfferSchema = jobOfferFieldsSchema
   .refine(hasRequiredSalary, { path: ['salaryMin'], message: MESSAGES.REQUIRED_FIELD })
   .refine(hasValidSalaryRange, { path: ['salaryMin'], message: MESSAGES.SALARY_RANGE_INVALID });

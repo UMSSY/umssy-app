@@ -23,6 +23,7 @@ const OFFER: JobOfferDetailsResponse = {
   languages: "Español",
   locationUrl: "https://maps.app.goo.gl/TechBolivia",
   expiresAt: null,
+  publishedAt: "2026-10-12T00:00:00.000Z",
   createdAt: "2026-10-12T00:00:00.000Z",
   company: { id: COMPANY_ID, name: "TechBolivia" },
   skills: [DOCKER],

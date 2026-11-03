@@ -76,8 +76,6 @@ export function useJobOfferForm(jobOfferId?: string) {
 
     const details = useJobOfferDetails(jobOfferId ? getCurrentCompany().id : null, jobOfferId ?? null);
     const baseline = details.offer ? toConditions(details.offer) : null;
-    // Los datos se copian al formulario una sola vez por vacante, también cuando ya estaban en caché
-    // (por ejemplo, tras abrir su detalle en el listado), y no se pisan si la consulta se repite.
     const [loadedOfferId, setLoadedOfferId] = useState<string | null>(null);
     if (details.offer && details.offer.id !== loadedOfferId) {
         setLoadedOfferId(details.offer.id);
@@ -169,7 +167,6 @@ export function useJobOfferForm(jobOfferId?: string) {
         goNext();
     }
 
-    // En edición se compara contra la vacante cargada; en alta, contra el formulario vacío.
     const hasUnsavedChanges = baseline
         ? JSON.stringify(conditions) !== JSON.stringify(baseline)
         : (Object.keys(INITIAL_CONDITIONS) as (keyof VacancyConditions)[]).some(

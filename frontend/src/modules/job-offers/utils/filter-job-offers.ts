@@ -15,7 +15,6 @@ export const DEFAULT_JOB_OFFER_FILTERS: JobOfferFilters = {
   status: "",
 };
 
-// La búsqueda y el estado no se envían: se filtran en el cliente (ver selectVisibleOffers).
 export function toListParams(filters: JobOfferFilters): JobOfferListParams {
   const byApplicants = filters.applicants !== "none";
 
@@ -24,12 +23,11 @@ export function toListParams(filters: JobOfferFilters): JobOfferListParams {
     contractType: filters.contractType || undefined,
     dateFrom: filters.dateFrom || undefined,
     dateTo: filters.dateTo || undefined,
-    sortBy: byApplicants ? "applicants" : "createdAt",
+    sortBy: byApplicants ? "applicants" : "publishedAt",
     order: filters.applicants === "least" ? "asc" : "desc",
   };
 }
 
-// Se filtra en el cliente para que ambos listados ignoren mayúsculas y tildes por igual.
 export function selectVisibleOffers(
   offers: JobOffer[],
   scope: JobOfferListScope,

@@ -15,8 +15,6 @@ function getTabbableElements(container: HTMLElement): HTMLElement[] {
   );
 }
 
-// Mantiene el foco dentro del diálogo de forma síncrona. La trampa de Base UI mueve el foco
-// en el siguiente frame, así que al mantener Tab presionado el foco podía salir al fondo.
 export function trapTabFocus(event: KeyboardEvent<HTMLElement>): void {
   if (event.key !== "Tab") return;
 

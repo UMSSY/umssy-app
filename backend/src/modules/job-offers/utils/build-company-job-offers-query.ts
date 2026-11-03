@@ -6,7 +6,7 @@ import type { CompanyJobOffersQuery } from '../types/company-job-offers-query.ty
 
 const startOfBoliviaDay = (date: string): Date => new Date(toUtcIso(date, '00:00'));
 
-function buildCreatedAtFilter(
+function buildPublishedAtFilter(
   dateFrom: string | undefined,
   dateTo: string | undefined,
 ): Prisma.DateTimeFilter | undefined {
@@ -22,13 +22,13 @@ export function buildCompanyJobOffersQuery(
   companyId: string,
   filters: ListCompanyJobOffersRequest,
 ): CompanyJobOffersQuery {
-  const createdAt = buildCreatedAtFilter(filters.dateFrom, filters.dateTo);
+  const publishedAt = buildPublishedAtFilter(filters.dateFrom, filters.dateTo);
 
   const where: Prisma.JobOfferWhereInput = {
     companyId,
     ...(filters.modality && { modality: { title: filters.modality } }),
     ...(filters.contractType && { contractType: { title: filters.contractType } }),
-    ...(createdAt && { createdAt }),
+    ...(publishedAt && { publishedAt }),
     ...(filters.search && {
       title: { contains: filters.search, mode: 'insensitive' },
     }),
@@ -36,7 +36,7 @@ export function buildCompanyJobOffersQuery(
 
   const orderBy: Prisma.JobOfferOrderByWithRelationInput[] = [
     ...(filters.sortBy === 'applicants' ? [{ applications: { _count: filters.order } }] : []),
-    { createdAt: filters.order },
+    { publishedAt: filters.order },
     { id: filters.order },
   ];
 

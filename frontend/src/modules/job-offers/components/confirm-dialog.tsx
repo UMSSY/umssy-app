@@ -26,7 +26,6 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  // Mientras la acción está en curso el diálogo no se puede cerrar con Esc ni con Cancelar.
   const handleOpenChange = (open: boolean) => {
     if (!open && !isBusy) onCancel?.();
   };

@@ -70,7 +70,6 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
     setPage(1);
   };
 
-  // Solo puede haber un diálogo abierto: evita que una acción del fondo abra otro encima.
   const isAnyDialogOpen =
     selectedOfferId !== null || offerToDelete !== null || offerToReopen !== null;
 
