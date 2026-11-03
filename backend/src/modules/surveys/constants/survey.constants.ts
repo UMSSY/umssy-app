@@ -1,3 +1,5 @@
+import type { SemesterRange } from '../types/semester-range.type.js';
+
 export const SURVEY_TITLE_MIN_LENGTH = 5;
 export const SURVEY_TITLE_MAX_LENGTH = 150;
 export const SURVEY_DESCRIPTION_MAX_LENGTH = 500;
@@ -19,7 +21,10 @@ export const SURVEY_VALIDATION_MESSAGES = {
   INVALID_CAREER_ID: 'El identificador de la carrera no es válido',
   INVALID_SURVEY_ID: 'El identificador de la encuesta no es válido',
   CAREER_REQUIRED: 'La carrera dirigida es obligatoria',
-  INVALID_ACADEMIC_PERIOD: 'La gestión debe ser un año, por ejemplo 2026, o Todas',
+  INVALID_STATISTICS_PERIOD:
+    'El periodo debe tener el formato I-2026 o II-2026',
+  INVALID_ACADEMIC_PERIOD:
+    'La gestión debe ser un año, por ejemplo 2026, o Todas',
   ACADEMIC_PERIOD_REQUIRED: 'La gestión es obligatoria',
   TARGET_AUDIENCE_REQUIRED: 'El público objetivo es obligatorio',
   INVALID_TARGET_AUDIENCE: 'El público objetivo no es válido',
@@ -49,7 +54,8 @@ export const SURVEY_ERROR_MESSAGES = {
   SURVEY_NOT_PUBLISHED: 'Solo se pueden inhabilitar las encuestas publicadas',
   SURVEY_HAS_RESPONSES:
     'No se puede inhabilitar una encuesta que ya tiene respuestas registradas',
-  SURVEY_NOT_OPEN: 'La encuesta todavía no está abierta para recibir respuestas',
+  SURVEY_NOT_OPEN:
+    'La encuesta todavía no está abierta para recibir respuestas',
   SURVEY_NOT_AVAILABLE:
     'Esta encuesta no está dirigida a tu perfil, carrera o año de egreso',
   STORAGE_UNAVAILABLE:
@@ -105,6 +111,45 @@ export const SURVEY_DETAIL_INCLUDE = {
     },
   },
 } as const;
+
+const buildAnswersCount = (range?: SemesterRange) =>
+  range
+    ? {
+        where: {
+          response: { submittedAt: { gte: range.start, lt: range.end } },
+        },
+      }
+    : true;
+
+// Con un semestre, los conteos solo incluyen las respuestas enviadas dentro de ese rango.
+// La forma del resultado no cambia, por eso se puede tipar igual que SURVEY_STATISTICS_INCLUDE.
+export const buildSurveyStatisticsInclude = (
+  range?: SemesterRange,
+): typeof SURVEY_STATISTICS_INCLUDE =>
+  ({
+    career: { select: CAREER_SELECT },
+    status: CATALOG_TITLE_SELECT,
+    questions: {
+      orderBy: { position: 'asc' },
+      include: {
+        type: CATALOG_TITLE_SELECT,
+        options: {
+          orderBy: { position: 'asc' },
+          include: {
+            _count: { select: { answers: buildAnswersCount(range) } },
+          },
+        },
+        _count: { select: { answers: buildAnswersCount(range) } },
+      },
+    },
+    _count: {
+      select: {
+        responses: range
+          ? { where: { submittedAt: { gte: range.start, lt: range.end } } }
+          : true,
+      },
+    },
+  }) as unknown as typeof SURVEY_STATISTICS_INCLUDE;
 
 export const SURVEY_STATISTICS_INCLUDE = {
   career: { select: CAREER_SELECT },
