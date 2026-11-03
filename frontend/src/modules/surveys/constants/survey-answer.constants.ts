@@ -2,6 +2,8 @@ import type { QuestionType } from "../types/survey.types";
 
 export const SURVEY_ANSWER_REDIRECT_DELAY_MS = 1500;
 
+export const SURVEY_ANSWERS_STORAGE_KEY = (surveyId: string) => `umssy:survey-answers:${surveyId}`;
+
 export const SURVEY_ANSWER_HINTS: Readonly<Record<QuestionType, string>> = {
   single_choice: "Selecciona una opción",
   multiple_choice: "Selecciona una o más opciones",

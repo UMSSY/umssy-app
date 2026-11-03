@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Clock, Loader2, Send } from "lucide-react";
@@ -10,11 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
+import { readLocalStorage, removeLocalStorage, writeLocalStorage } from "@/shared/utils/local-storage";
 import { SurveyQuestionField } from "../components/survey-question-field";
 import {
   SURVEY_ANSWER_HINTS,
   SURVEY_ANSWER_REDIRECT_DELAY_MS,
   SURVEY_ANSWER_TEXT,
+  SURVEY_ANSWERS_STORAGE_KEY,
 } from "../constants/survey-answer.constants";
 import { SURVEY_NOTIFICATIONS_PATH } from "../constants/survey-notifications.constants";
 import { useSurveyDetail } from "../hooks/use-survey-detail";
@@ -28,9 +30,18 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
   const router = useRouter();
   const { survey, isLoading, errorMessage } = useSurveyDetail(id);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>({});
+  const storageKey = SURVEY_ANSWERS_STORAGE_KEY(id);
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>(
+    () => readLocalStorage<Record<string, string[]>>(storageKey) ?? {},
+  );
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isSubmittedSuccess, setIsSubmittedSuccess] = useState(false);
+
+  useEffect(() => {
+    if (isSubmittedSuccess) return;
+    if (Object.keys(selectedAnswers).length === 0) return;
+    writeLocalStorage(storageKey, selectedAnswers);
+  }, [isSubmittedSuccess, selectedAnswers, storageKey]);
 
   const handleAnswerChange = (questionId: string, optionIds: string[]) => {
     setSelectedAnswers((previous) => ({ ...previous, [questionId]: optionIds }));
@@ -67,6 +78,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
         .map(([questionId, optionIds]) => ({ questionId, optionIds }));
 
       await surveysService.submitAnswers(id, { answers });
+      removeLocalStorage(storageKey);
       setIsSubmittedSuccess(true);
       toast.success(SURVEY_ANSWER_TEXT.submitSuccess);
       setTimeout(() => router.push(SURVEY_NOTIFICATIONS_PATH), SURVEY_ANSWER_REDIRECT_DELAY_MS);
@@ -95,7 +107,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
     );
   }
 
-  if (errorMessage || !survey) {
+  if (!survey) {
     return (
       <main className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6">
         <div className="rounded-xl border border-border bg-surface p-8 shadow-xs">
