@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CircleCheck, Clock, FileCheck } from "lucide-react";
+import { ArrowRight, CircleCheck, Clock, FileCheck, FileClock } from "lucide-react";
 import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -22,6 +22,7 @@ export function SurveyNotificationItem({ notification }: SurveyNotificationItemP
     if (isPending) {
       return (
         <Link href={`${SURVEY_NOTIFICATIONS_PATH}/${id}`} className={cn(buttonVariants({ variant: "brand" }), "w-full")}>
+          <FileClock data-icon="inline-start" aria-hidden="true" />
           {ANSWER_SURVEY_LABEL}
           <ArrowRight data-icon="inline-end" aria-hidden="true" />
         </Link>
