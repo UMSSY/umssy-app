@@ -144,7 +144,7 @@ describe("ReportHistoryView", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Aún no se generaron reportes.")).toBeDefined();
-      expect(screen.getByText("Mostrando 0-0 de 0 reportes")).toBeDefined();
+      expect(screen.queryByText(/^Mostrando/)).toBeNull();
     });
   });
 
