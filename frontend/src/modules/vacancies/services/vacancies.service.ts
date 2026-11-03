@@ -1,4 +1,3 @@
-import { ENV_CONFIG } from "@/shared/config/env.config";
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import { PUBLISHED_JOB_OFFERS_ENDPOINT } from "../constants/vacancies.constants";
@@ -11,19 +10,3 @@ export const vacanciesService = {
     return response.data.data.map(toVacancy);
   },
 };
-
-export async function deleteVacancy(companyId: string, id: string): Promise<void> {
-  const token = typeof window !== "undefined" ? sessionStorage.getItem("accessToken") : "";
-
-  const response = await fetch(`${ENV_CONFIG.apiUrl}/companies/${companyId}/job-offers/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Error deleting job vacancy");
-  }
-}

@@ -21,6 +21,7 @@ export interface JobOfferResponse {
   languages: string;
   locationUrl: string;
   expiresAt: string | null;
+  publishedAt: string;
   createdAt: string;
   company: JobOfferCompanyResponse;
   skills: JobOfferSkillResponse[];
