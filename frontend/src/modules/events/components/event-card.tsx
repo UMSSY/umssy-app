@@ -177,11 +177,14 @@ export function EventCard({
                 aria-valuenow={progressPercentage}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                className="h-2 flex-1 overflow-hidden rounded-full bg-surface-soft"
+                className="h-2 flex-1 overflow-hidden rounded-full bg-availability-border"
               >
                 <div
                   data-testid="event-capacity-bar"
-                  className="h-full rounded-full bg-progress transition-all"
+                  className={cn(
+                    'h-full rounded-full transition-all',
+                    isFull ? 'bg-danger' : 'bg-success',
+                  )}
                   style={{ width: `${progressPercentage}%` }}
                 />
               </div>

@@ -28,6 +28,7 @@ describe('EventRegistrationsService', () => {
       },
       select: {
         id: true,
+        eventId: true,
         registeredAt: true,
         cancelledAt: true,
         status: { select: { title: true } },

@@ -165,7 +165,7 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
         )}
 
         <section aria-label="Listado de talleres">
-          <div className="grid grid-cols-(--grid-template-columns-event-cards) gap-5">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
             {visibleEvents.map((eventItem) => (
               <EventCard
                 key={eventItem.id}

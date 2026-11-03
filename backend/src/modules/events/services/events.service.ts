@@ -1,3 +1,4 @@
+import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { EventNotFoundException } from '../exceptions/event-not-found.exception.js';
@@ -52,6 +53,11 @@ export class EventsService {
 
   findById(id: string, userId?: string) {
     return this.repository.findById(id, userId);
+  }
+
+  async hasScheduleConflict(tx: Prisma.TransactionClient, event: RegistrationScheduleEvent, registeredEventIds: string[]): Promise<boolean> {
+    if (!registeredEventIds.length) return false;
+    return Boolean(await this.repository.findScheduleConflict(tx, event, registeredEventIds));
   }
 
   async findForRegistration(id: string, tx?: Prisma.TransactionClient) {
