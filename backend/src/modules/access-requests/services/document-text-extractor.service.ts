@@ -108,8 +108,8 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
     const png = Buffer.from(pixmap.asPNG());
     const { data } = await worker.recognize(png, {}, { text: true, blocks: true });
     const regions: DocumentTextRegion[] = (data.blocks ?? [])
-      .flatMap((block) => block.paragraphs)
-      .flatMap((paragraph) => paragraph.lines)
+      .flatMap((block) => block.paragraphs ?? [])
+      .flatMap((paragraph) => paragraph.lines ?? [])
       .filter((line) => line.text.trim())
       .map((line) => ({
         text: line.text.trim(),

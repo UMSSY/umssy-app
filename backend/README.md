@@ -79,8 +79,8 @@ pnpm ocr:smoke /absolute/path/to/image.png
 
 Model preparation requires internet access.
 
-PaddleOCR is available. It requires local ONNX detection/recognition
-models, a matching dictionary and preset.
+The document reading flow (HU 1.5.1) uses Tesseract.js with the
+`4.0.0_best` Spanish model. Run `pnpm ocr:models` once to download it.
 
 ## Email configuration
 
