@@ -113,3 +113,5 @@ export const SURVEY_ARIA = {
   toolbar: "Acciones de la pregunta",
   editQuestion: (position: number) => `Editar pregunta ${position}`,
 } as const;
+
+export const SURVEY_CREATE_DRAFT_STORAGE_KEY = "umssy:survey-create-draft";
