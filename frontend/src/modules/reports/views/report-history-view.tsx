@@ -27,6 +27,8 @@ export function ReportHistoryView() {
     search,
   );
 
+  const hideSummary = Boolean(search) && !errorMessage && !isLoading && totalItems === 0;
+
   const handleReportTypeChange = (selectedReportType?: ReportType) => {
     setReportType(selectedReportType);
     setCurrentPage(1);
@@ -64,6 +66,7 @@ export function ReportHistoryView() {
         itemLabel="reportes"
         onPageChange={setCurrentPage}
         onRefresh={refresh}
+         hideSummary={hideSummary}
       />
     </WorkspacePage>
   );

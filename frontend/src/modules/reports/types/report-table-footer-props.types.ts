@@ -7,4 +7,5 @@ export interface ReportTableFooterProps {
   itemLabel: string;
   onPageChange: (page: number) => void;
   onRefresh: () => void;
+  hideSummary?: boolean;
 }
