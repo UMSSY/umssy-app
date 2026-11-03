@@ -1,5 +1,13 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
 import { MAX_FILE_SIZE_BYTES } from '../../files/constants/file-rules.constants.js';
@@ -23,6 +31,7 @@ import {
 } from '../requests/request-status.schema.js';
 import { updateAccessRequestSchema, type UpdateAccessRequestDto } from '../requests/update-access-request.schema.js';
 import { BACKOFFICE_ROLE } from '../constants/backoffice.constants.js';
+import { REQUEST_STATUS_OK_RESPONSE } from '../constants/request-status-swagger.constants.js';
 
 interface DocumentResponse {
   set: (headers: Record<string, string>) => unknown;
@@ -52,6 +61,40 @@ export class AccessRequestsController {
   }
 
   @Get('status/:code')
+  @ApiOperation({
+    summary: 'Consultar el estado de una solicitud de acceso',
+    description:
+      'Consulta por código y correo. El nombre completo se devuelve únicamente para solicitudes rechazadas. Si la combinación no coincide, se devuelve el mismo error genérico.',
+  })
+  @ApiParam({
+    name: 'code',
+    required: true,
+    description: 'Código de la solicitud de acceso.',
+    schema: {
+      type: 'string',
+      pattern: '^SOL-\\d{4}-\\d{4,}$',
+    },
+    example: 'SOL-2026-0001',
+  })
+  @ApiQuery({
+    name: 'email',
+    required: true,
+    description:
+      'Correo registrado en la solicitud. Se normaliza eliminando espacios externos y convirtiéndolo a minúsculas.',
+    schema: {
+      type: 'string',
+      format: 'email',
+    },
+    example: 'ana@example.com',
+  })
+  @ApiOkResponse(REQUEST_STATUS_OK_RESPONSE)
+  @ApiBadRequestResponse({
+    description: 'El código o el correo no cumplen el formato requerido.',
+  })
+  @ApiNotFoundResponse({
+    description:
+      'La solicitud de acceso no existe. Se utiliza el mismo error cuando el código no existe o el correo no coincide, sin revelar datos del solicitante.',
+  })
   getStatus(
     @Param(new ZodValidationPipe(requestStatusParamsSchema)) params: RequestStatusParams,
     @Query(new ZodValidationPipe(requestStatusQuerySchema)) query: RequestStatusQuery,

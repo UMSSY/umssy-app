@@ -54,10 +54,11 @@ export interface SubmitRequestResponse {
   submittedAt: string;
 }
 
-// Respuesta de la consulta de estado; no incluye datos personales
+// Respuesta de la consulta de estado; fullName se devuelve únicamente para rejected
 export interface RequestStatusResponse {
   requestCode: string;
   status: string;
+  fullName?: string;
   submittedAt: string | null;
   reviewedAt: string | null;
   rejectionReason: string | null;

@@ -81,13 +81,16 @@ describe("RequestAccessView", () => {
 
     const layout = container.querySelector("main > div");
     expect(layout).toHaveClass("flex", "min-h-screen", "flex-col");
+    expect(container.querySelector("main > div > div")).toHaveClass(
+      "flex-1", "flex-col", "lg:flex-row",
+    );
   });
 
   it("deja el formulario ocupando el espacio restante y alineado para completar los grupos de campos", () => {
     const { container } = render(<RequestAccessView />);
 
     const section = container.querySelector("section");
-    expect(section).toHaveClass("flex-1", "flex-col");
+    expect(section).toHaveClass("flex-1", "flex-col", "px-4", "py-6", "md:p-8");
   });
 
   it("centra horizontalmente el contenido con un ancho máximo", () => {

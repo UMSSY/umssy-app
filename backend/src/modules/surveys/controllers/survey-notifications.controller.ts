@@ -1,23 +1,32 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
+import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
+import {
+  SURVEY_RESPONDENT_ROLES,
+  SURVEYS_ROLE,
+} from '../constants/surveys-access.constants.js';
 import type { SurveyNotificationResponse } from '../responses/survey-notification.response.js';
 import { SurveysService } from '../services/surveys.service.js';
 
 @ApiTags('Encuestas')
 @Controller('surveys/notifications')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('titulado', 'administrativo')
+@Roles(...SURVEY_RESPONDENT_ROLES, SURVEYS_ROLE)
 export class SurveyNotificationsController {
   constructor(private readonly surveysService: SurveysService) {}
 
   @Get()
   @ApiOperation({ summary: 'Obtiene las notificaciones de encuestas asignadas al usuario actual' })
   @ApiOkResponse({ description: 'Listado de avisos de encuestas con estado clasificado automáticamente' })
-  getNotifications(@CurrentUserId() userId: string): Promise<SurveyNotificationResponse[]> {
-    return this.surveysService.getNotificationsForUser(userId);
+  getNotifications(
+    @CurrentUserId() userId: string,
+    @CurrentUser() user?: AuthenticatedUser,
+  ): Promise<SurveyNotificationResponse[]> {
+    return this.surveysService.getNotificationsForUser(userId, user?.roles);
   }
 }

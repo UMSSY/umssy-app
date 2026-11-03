@@ -13,12 +13,20 @@ export interface BuilderQuestion {
   options: BuilderOption[];
 }
 
-export type SurveyFieldName = "title" | "description" | "careerId" | "academicPeriod" | "opensAt" | "closesAt";
+export type SurveyFieldName =
+  | "title"
+  | "description"
+  | "careerId"
+  | "targetAudience"
+  | "academicPeriod"
+  | "opensAt"
+  | "closesAt";
 
 export interface SurveyHeaderValues {
   title: string;
   description: string;
   careerId: string;
+  targetAudience: string;
   academicPeriod: string;
   opensAt: string;
   closesAt: string;

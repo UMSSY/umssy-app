@@ -1,4 +1,5 @@
 import type { AccessRequestsRepository } from '../repositories/access-requests.repository.js';
+import { toValidationDetail } from './document-validation.mapper.js';
 
 type DetailRow = NonNullable<Awaited<ReturnType<AccessRequestsRepository['findDetailById']>>>;
 
@@ -35,5 +36,12 @@ export function toAccessRequestDetail(row: DetailRow) {
       reviewedBy: row.reviewedBy ? `${row.reviewedBy.firstName} ${row.reviewedBy.lastName}`.trim() : null,
       rejectionReason: row.rejectionReason,
     },
+    validation: toValidationDetail(row.documentValidation, {
+      fullName: `${row.firstName} ${row.lastName}`.trim(),
+      career: row.career.title,
+      graduationYear: String(row.graduationYear),
+      idCardNumber: row.idCardNumber,
+      sisCode: row.sisCode,
+    }),
   };
 }

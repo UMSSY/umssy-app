@@ -33,6 +33,7 @@ export function createInitialSurveyState(): SurveyBuilderState {
     title: "",
     description: "",
     careerId: "",
+    targetAudience: "",
     academicPeriod: "",
     opensAt: "",
     closesAt: "",

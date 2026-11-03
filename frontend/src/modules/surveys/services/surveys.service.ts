@@ -10,10 +10,13 @@ import type {
   SurveySummary,
 } from "../types/survey.types";
 import type { SubmitSurveyPayload } from "../types/survey-answer.types";
+import { SURVEY_SAVE_TIMEOUT_MS } from "../constants/surveys-query-keys.constants";
 
 export const surveysService = {
   createSurvey: async (payload: CreateSurveyPayload): Promise<ApiResponse<CreatedSurvey>> => {
-    const { data } = await apiClient.post<ApiResponse<CreatedSurvey>>("/surveys", payload);
+    const { data } = await apiClient.post<ApiResponse<CreatedSurvey>>("/surveys", payload, {
+      timeout: SURVEY_SAVE_TIMEOUT_MS,
+    });
     return data;
   },
 
@@ -33,8 +36,14 @@ export const surveysService = {
   },
 
   updateSurvey: async (id: string, payload: CreateSurveyPayload): Promise<ApiResponse<CreatedSurvey>> => {
-    const { data } = await apiClient.patch<ApiResponse<CreatedSurvey>>(`/surveys/${id}`, payload);
+    const { data } = await apiClient.patch<ApiResponse<CreatedSurvey>>(`/surveys/${id}`, payload, {
+      timeout: SURVEY_SAVE_TIMEOUT_MS,
+    });
     return data;
+  },
+
+  unpublishSurvey: async (id: string): Promise<void> => {
+    await apiClient.patch(`/surveys/${id}/unpublish`, undefined, { timeout: SURVEY_SAVE_TIMEOUT_MS });
   },
 
   getSurveyStatistics: async (id: string): Promise<ApiResponse<SurveyStatistics>> => {

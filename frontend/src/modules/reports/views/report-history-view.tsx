@@ -42,7 +42,7 @@ export function ReportHistoryView() {
   return (
     <WorkspacePage title="Historial de reportes" description="Revisa los reportes generados y filtra por tipo de exportación.">
 
-      <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 min-[560px]:flex-row min-[560px]:items-center">
         <ReportTypeFilter value={reportType} onChange={handleReportTypeChange} />
         <ReportSearchInput value={searchInput} onChange={handleSearchChange} label={FILE_NAME_SEARCH_LABEL} />
       </div>

@@ -4,6 +4,8 @@ import { cn } from "cn";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SURVEY_ANSWER_TEXT } from "../constants/survey-answer.constants";
 import type { SurveyQuestionFieldProps } from "../types/survey-component-props.types";
 import { RequiredMark } from "./required-mark";
 
@@ -47,7 +49,27 @@ export function SurveyQuestionField({
 
       {hint && <p className="clear-both mb-4 text-xs font-normal text-text-secondary">{hint}</p>}
 
-      {question.type === "single_choice" ? (
+      {question.type === "dropdown" ? (
+        <div className="clear-both">
+          <Select
+            items={options.map(({ id, label }) => ({ value: id, label }))}
+            disabled={isReadOnly}
+            {...(isControlled && { value: selected[0] ?? null })}
+            onValueChange={(value) => onChange?.(typeof value === "string" ? [value] : [])}
+          >
+            <SelectTrigger id={`${baseId}-select`} aria-labelledby={`${baseId}-legend`} className="w-full">
+              <SelectValue placeholder={SURVEY_ANSWER_TEXT.dropdownPlaceholder} />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option.id} value={option.id}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ) : question.type === "single_choice" ? (
         <RadioGroup
           aria-labelledby={`${baseId}-legend`}
           disabled={isReadOnly}

@@ -27,6 +27,7 @@ describe("toCreateSurveyPayload", () => {
       description: undefined,
       careerId: "career-systems",
       academicPeriod: "II-2026",
+      targetAudience: "graduates",
       opensAt: "2026-11-03T04:00:00.000Z",
       closesAt: "2026-12-16T03:59:59.999Z",
       status: "published",

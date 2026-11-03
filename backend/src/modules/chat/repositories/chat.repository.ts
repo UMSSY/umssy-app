@@ -17,6 +17,23 @@ export class ChatRepository {
           { userAId: userId },
           { userBId: userId },
         ],
+        // Validar particiapción en participants (válido para 1:1 y grupales)
+        participants: {
+          some: {
+            conversationId,
+            userId,
+          },
+        },
+      },
+      include: {
+        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        event: { select: { id: true, title: true } },
+        messages: {
+          orderBy: { sentAt: 'desc' },
+          take: 1,
+          include: { status: { select: { title: true } } },
+        },
       },
     });
   }

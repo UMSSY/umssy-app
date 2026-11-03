@@ -8,8 +8,16 @@ import type {
   SubmitRequestResponse,
   UploadDocumentResponse,
 } from "../types/access-request.types";
-import type { DocumentType } from "../constants/document-types.constants";
-import { FILE_TOO_LARGE_MESSAGE } from "../utils/validate-document-file";
+import { DOCUMENT_TYPES, type DocumentType } from "../constants/document-types.constants";
+import type { DocumentCorrectionResponse } from "../types/document-correction.types";
+import { getRequestCodeFromLink } from "../utils/get-request-code-from-link";
+import { isDocumentCorrectionToken } from "../utils/document-correction-link";
+import {
+  CORRECTION_AUTHORIZATION_MESSAGE, CORRECTION_CONFLICT_MESSAGE,
+  CORRECTION_FILE_ERROR_MESSAGE, CORRECTION_MISSING_FILE_MESSAGE,
+  CORRECTION_MISSING_TYPE_MESSAGE, CORRECTION_RETRY_MESSAGE,
+} from "../constants/document-correction.constants";
+import { FILE_TOO_LARGE_MESSAGE, validateDocumentFile } from "../utils/validate-document-file";
 import type { SendOptions } from "../types/access-request-send-options.types";
 
 const NETWORK_ERROR_MESSAGE = "No se pudo conectar con el servidor. Inténtalo de nuevo.";
@@ -108,10 +116,12 @@ async function send<T>(
       url,
       data: payload,
       ...(options.params && { params: options.params }),
+      ...(options.headers && { headers: options.headers }),
       ...(options.onUploadProgress && { onUploadProgress: options.onUploadProgress }),
       validateStatus: () => true,
     });
     if (response.status >= 200 && response.status < 300) {
+      if (isRecord(response.data) && response.data.ok === false) return failure(0, GENERIC_ERROR_MESSAGE);
       const body = unwrapBody(response.data);
       if (!isRecord(body)) return failure(0, NETWORK_ERROR_MESSAGE);
       return { ok: true, data: body as T };
@@ -180,7 +190,51 @@ async function getRequestStatus(code: string, email: string): Promise<ApiResult<
   return { ok: true, data: result.data as unknown as RequestStatusResponse };
 }
 
+function correctionFailure(status: number): ApiResult<never> {
+  const message = status === 401 || status === 403
+    ? CORRECTION_AUTHORIZATION_MESSAGE
+    : status === 409
+      ? CORRECTION_CONFLICT_MESSAGE
+      : status === 413
+        ? FILE_TOO_LARGE_MESSAGE
+        : status === 400
+          ? CORRECTION_FILE_ERROR_MESSAGE
+          : CORRECTION_RETRY_MESSAGE;
+  return failure(status, message);
+}
+
+async function resubmitDocument(
+  code: string,
+  token: string,
+  file: File,
+  documentType: DocumentType,
+  onProgress?: (percent: number) => void,
+): Promise<ApiResult<DocumentCorrectionResponse>> {
+  const requestCode = getRequestCodeFromLink(code);
+  if (!requestCode) return correctionFailure(400);
+  if (!isDocumentCorrectionToken(token)) return correctionFailure(401);
+  if (!file) return failure(400, CORRECTION_MISSING_FILE_MESSAGE);
+  const invalid = validateDocumentFile(file);
+  if (invalid) return failure(400, invalid);
+  if (!DOCUMENT_TYPES.includes(documentType)) return failure(400, CORRECTION_MISSING_TYPE_MESSAGE);
+
+  const form = new FormData();
+  form.append("file", file);
+  form.append("documentType", documentType);
+  const result = await send<Record<string, unknown>>("post", `/access-requests/${requestCode}/resubmit`, form, {
+    headers: { Authorization: `Bearer ${token}` },
+    onUploadProgress: (event) => {
+      if (!onProgress || !event.total) return;
+      onProgress(Math.min(100, Math.max(0, Math.round((event.loaded / event.total) * 100))));
+    },
+  });
+  if (!result.ok) return correctionFailure(result.status);
+  if (result.data.requestCode !== requestCode || result.data.status !== "pending") return correctionFailure(0);
+  return { ok: true, data: { requestCode, status: "pending" } };
+}
+
 export const accessRequestService = {
+  resubmitDocument,
   createAccessRequest,
   updateAccessRequest: (id: string, payload: AccessRequestPayload) =>
     send<Partial<CreateAccessRequestResponse>>("patch", `/access-requests/${id}`, payload),

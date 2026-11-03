@@ -11,7 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { SURVEY_SUMMARY_LABELS, SURVEY_TEXT } from "../constants/survey-builder.constants";
+import { SURVEY_SUMMARY_LABELS, SURVEY_TARGET_AUDIENCE_LABELS, SURVEY_TEXT } from "../constants/survey-builder.constants";
+import type { SurveyTargetAudience } from "../types/survey.types";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import type { PublishSurveyDialogProps } from "../types/survey-component-props.types";
 import { formatDisplayDate } from "../utils/survey-dates";
@@ -45,6 +46,9 @@ export function PublishSurveyDialog({
         <dl className="rounded-lg border border-border bg-surface-soft px-3 py-1">
           <SurveySummaryRow label={SURVEY_SUMMARY_LABELS.survey}>{(survey.title ?? "").trim()}</SurveySummaryRow>
           <SurveySummaryRow label={SURVEY_SUMMARY_LABELS.career}>{careerTitle}</SurveySummaryRow>
+          <SurveySummaryRow label={SURVEY_SUMMARY_LABELS.audience}>
+            {SURVEY_TARGET_AUDIENCE_LABELS[survey.targetAudience as SurveyTargetAudience] ?? ""}
+          </SurveySummaryRow>
           <SurveySummaryRow label={SURVEY_SUMMARY_LABELS.schedule}>
             {formatDisplayDate(survey.opensAt)} - {formatDisplayDate(survey.closesAt)}
           </SurveySummaryRow>

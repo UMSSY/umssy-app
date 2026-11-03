@@ -302,11 +302,16 @@ export function AccessRequestProvider({ children }: AccessRequestProviderProps) 
     const result = await accessRequestService.getRequestStatus(current.requestCode, valuesRef.current.email.trim().toLowerCase());
     if (!result.ok || !submissionRef.current) return;
 
-    const next: Submission = {
-      ...submissionRef.current,
+     const next: Submission = {
+      requestCode: submissionRef.current.requestCode,
+      submittedAt: submissionRef.current.submittedAt,
       status: result.data.status,
       reviewedAt: result.data.reviewedAt ?? null,
       rejectionReason: result.data.rejectionReason ?? null,
+      ...(result.data.status === "rejected" &&
+      typeof result.data.fullName === "string"
+        ? { fullName: result.data.fullName }
+        : {}),
     };
     submissionRef.current = next;
     setSubmission(next);

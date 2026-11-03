@@ -21,7 +21,7 @@ vi.mock("../services/job-matching.service", () => ({
 }));
 
 const JOB_ID = "11111111-1111-4111-8111-111111111111";
-const NO_PENDING = "Para esta oportunidad no tienes habilidades ni requisitos pendientes";
+const NO_PENDING = "No tienes habilidades ni requisitos visibles pendientes para esta oportunidad";
 
 function getGroup(title: string) {
   const heading = screen.getByRole("heading", { name: title, level: 4 });
@@ -70,7 +70,7 @@ describe("JobMatchDetailView: faltantes (T4.3)", () => {
 
     expect(await screen.findByRole("status")).toHaveTextContent(NO_PENDING);
     expect(screen.queryByText("Falta")).not.toBeInTheDocument();
-    expect(screen.getAllByText("Coincide")).toHaveLength(3);
+    expect(screen.getAllByText("Coincide")).toHaveLength(2);
     expect(screen.getByText("100%")).toBeInTheDocument();
   });
 
@@ -81,10 +81,8 @@ describe("JobMatchDetailView: faltantes (T4.3)", () => {
 
     expect(await screen.findByText("Kubernetes")).toBeInTheDocument();
     expect(screen.queryByText(NO_PENDING)).not.toBeInTheDocument();
-
-    const academic = getGroup("Académicos y experiencia");
-    expect(academic.getByText("Ingeniería de Sistemas")).toBeInTheDocument();
-    expect(academic.getByText("Falta")).toBeInTheDocument();
+    expect(screen.queryByText("Ingeniería de Sistemas")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Académicos y experiencia" })).not.toBeInTheDocument();
 
     const others = getGroup("Otros requisitos");
     expect(others.getByText("Carta de motivación")).toBeInTheDocument();
@@ -97,7 +95,7 @@ describe("JobMatchDetailView: faltantes (T4.3)", () => {
     const { client } = render(<JobMatchDetailView jobOfferId={JOB_ID} />);
 
     expect(await screen.findByText("Kubernetes")).toBeInTheDocument();
-    expect(screen.getAllByText("Falta")).toHaveLength(3);
+    expect(screen.getAllByText("Falta")).toHaveLength(2);
     expect(screen.getByText("40%")).toBeInTheDocument();
 
     await act(async () => {

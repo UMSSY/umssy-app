@@ -14,8 +14,8 @@ export function PersonalDataFormActions() {
       {notice ? (
         <p
           role={notice.type === "error" ? "alert" : "status"}
-          className={`self-stretch text-[13.5px] 2xl:text-base ${
-            notice.type === "error" ? "text-destructive" : "text-ink"
+          className={`self-stretch text-sm ${
+            notice.type === "error" ? "text-danger" : "text-ink"
           }`}
         >
           {notice.text}
@@ -26,7 +26,7 @@ export function PersonalDataFormActions() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="h-10 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover 2xl:h-12"
+          className="h-11 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-brand-hover"
         >
           {isSubmitting ? (
             "Guardando..."

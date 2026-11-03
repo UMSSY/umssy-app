@@ -132,7 +132,7 @@ export class JobOffersController {
     name: 'sortBy',
     required: false,
     enum: JOB_OFFER_SORT_FIELDS,
-    description: 'Por defecto createdAt. applicants ordena por fecha hasta que existan postulaciones',
+    description: 'Por defecto createdAt. applicants ordena por cantidad de postulantes y desempata por fecha',
   })
   @ApiQuery({
     name: 'order',

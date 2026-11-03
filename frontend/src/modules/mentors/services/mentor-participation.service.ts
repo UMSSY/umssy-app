@@ -1,4 +1,7 @@
-
+import {
+  clearMentorIntakeIntentions,
+  withMentorIntakeKey,
+} from "@/shared/services/mentor-intake-idempotency";
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 
@@ -11,7 +14,12 @@ export type MentorParticipationRequest = {
   technicalAreaIds: string[];
   orientationTypeIds: string[];
   email?: string;
-  offer?: { id: string; status: string; offeredAt: string; expiresAt: string } | null;
+  offer?: {
+    id: string;
+    status: string;
+    offeredAt: string;
+    expiresAt: string;
+  } | null;
 };
 
 export type MentorCapacity = {
@@ -34,33 +42,51 @@ export type MyMentorParticipation = {
 const BASE_PATH = "/mentor-participation/requests";
 
 export const mentorParticipationService = {
-  async getMyParticipation(signal?: AbortSignal): Promise<MyMentorParticipation> {
+  async getMyParticipation(
+    signal?: AbortSignal,
+  ): Promise<MyMentorParticipation> {
     const response = await apiClient.get<ApiResponse<MyMentorParticipation>>(
-      "/mentors/me/participation", { signal },
+      "/mentors/me/participation",
+      { signal },
     );
     const result = response.data.data;
-    const validItems = (items: unknown): items is { id: string; name: string }[] =>
-      Array.isArray(items) && items.every((item: unknown) =>
-        typeof item === "object" && item !== null &&
-        "id" in item && typeof item.id === "string" &&
-        "name" in item && typeof item.name === "string");
-    if (!result || !["ACTIVE", "DEACTIVATED", "NEVER"].includes(result.status) ||
-        !validItems(result.areas) || !validItems(result.orientations)) {
+    const validItems = (
+      items: unknown,
+    ): items is { id: string; name: string }[] =>
+      Array.isArray(items) &&
+      items.every(
+        (item: unknown) =>
+          typeof item === "object" &&
+          item !== null &&
+          "id" in item &&
+          typeof item.id === "string" &&
+          "name" in item &&
+          typeof item.name === "string",
+      );
+    if (
+      !result ||
+      !["ACTIVE", "DEACTIVATED", "NEVER"].includes(result.status) ||
+      !validItems(result.areas) ||
+      !validItems(result.orientations)
+    ) {
       throw new Error("Respuesta de participación inválida");
     }
     return result;
   },
   async capacity(): Promise<MentorCapacity> {
-    const response = await apiClient.get<ApiResponse<MentorCapacity>>("/mentors/capacity");
+    const response =
+      await apiClient.get<ApiResponse<MentorCapacity>>("/mentors/capacity");
     return response.data.data;
   },
 
   async confirm(offerId: string): Promise<void> {
     await apiClient.post(`/mentors/offers/${offerId}/confirm`);
+    await clearMentorIntakeIntentions().catch(() => {});
   },
 
   async leave(): Promise<void> {
     await apiClient.post("/mentors/me/leave");
+    await clearMentorIntakeIntentions().catch(() => {});
   },
   async getCurrent(): Promise<MentorParticipationRequest | null> {
     const response = await apiClient.get<
@@ -81,11 +107,12 @@ export const mentorParticipationService = {
   async create(
     preferences: MentorParticipationPreferences,
   ): Promise<MentorParticipationRequest> {
-    const response = await apiClient.post<
-      ApiResponse<MentorParticipationRequest>
-    >(BASE_PATH, preferences);
-
-    return response.data.data;
+    return withMentorIntakeKey("request", preferences, async (key) => {
+      const response = await apiClient.post<
+        ApiResponse<MentorParticipationRequest>
+      >(BASE_PATH, preferences, { headers: { "Idempotency-Key": key } });
+      return response.data.data;
+    });
   },
 
   async update(
@@ -103,6 +130,7 @@ export const mentorParticipationService = {
       ApiResponse<MentorParticipationRequest>
     >(`${BASE_PATH}/me`);
 
+    await clearMentorIntakeIntentions(["request"]).catch(() => {});
     return response.data.data;
   },
 };

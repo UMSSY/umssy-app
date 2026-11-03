@@ -1,3 +1,5 @@
+import type { MessageAttachment } from './attachment.types';
+
 export type AttachmentType = 'image' | 'file' | 'audio';
 
 export interface UserSummary {
@@ -5,9 +7,17 @@ export interface UserSummary {
   fullName: string;
   avatarUrl?: string | null;
   isOnline: boolean;
+  role?: string | null;
+  roleName?: string | null;
+  email?: string | null;
+  isEmailVisible?: boolean;
+  academicTitle?: string | null;
+  isAcademicTitleVisible?: boolean;
+  skills?: string[];
+  areSkillsVisible?: boolean;
 }
 
-export type MessageStatus = 'sending' | 'sent' | 'error';
+export type MessageStatus = 'sending' | 'sent' | 'error' | 'read';
 
 export interface LastMessage {
   id: string;
@@ -18,6 +28,7 @@ export interface LastMessage {
   status?: MessageStatus;
   isAttachment?: boolean;
   attachmentType?: AttachmentType | null;
+  attachment?: MessageAttachment | null;
 }
 
 export interface Message {
@@ -31,15 +42,27 @@ export interface Message {
   sentAt?: string;
   isAttachment?: boolean;
   attachmentType?: AttachmentType | null;
+  attachment?: MessageAttachment | null;
+  attachments?: MessageAttachment[];
 }
 
-export interface Conversation {
+export interface DirectConversation {
+  eventId?: never;
   id: string;
   contact: UserSummary;
   lastMessage?: LastMessage | null;
   unreadCount: number;
   updatedAt: string;
+  isBlockedByMe?: boolean;
 }
+
+export interface EventConversation extends Omit<DirectConversation, 'contact' | 'eventId'> {
+  eventId: string;
+  eventTitle?: string;
+  contact?: never;
+}
+
+export type Conversation = DirectConversation | EventConversation;
 
 export type ConversationFilter = 'all' | 'unread';
 

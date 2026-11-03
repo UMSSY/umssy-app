@@ -32,8 +32,8 @@ interface NewFile {
 export class FilesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(data: NewFile) {
-    return this.prisma.file.create({
+  create(data: NewFile, tx?: Prisma.TransactionClient) {
+    return (tx ?? this.prisma).file.create({
       data: { ...data, content: new Uint8Array(data.content) },
       select: FILE_METADATA_SELECT,
     });

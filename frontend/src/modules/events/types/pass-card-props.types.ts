@@ -6,4 +6,5 @@ export interface PassCardProps {
   registrationId: string;
   isSelected?: boolean;
   onClick?: () => void;
+  onOpenChat?: (registrationId: string) => void;
 }

@@ -168,10 +168,18 @@ describe('MentorsController', () => {
       orientationTypeIds: ['0fa5e6de-63a4-430e-87fb-22f5eb700ecd'],
     };
 
-    const result = await controller.activate(user, body);
+    const result = await controller.activate(
+      user,
+      body,
+      '11111111-1111-4111-8111-111111111111',
+    );
 
     expect(activate).toHaveBeenCalledTimes(1);
-    expect(activate).toHaveBeenCalledWith('user-1', body);
+    expect(activate).toHaveBeenCalledWith(
+      'user-1',
+      body,
+      '11111111-1111-4111-8111-111111111111',
+    );
     expect(result).toBe(activationResult);
   });
 });
