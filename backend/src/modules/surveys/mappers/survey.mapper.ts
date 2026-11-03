@@ -19,7 +19,12 @@ import type {
   SurveyStatisticsRecord,
   SurveySummaryRecord,
 } from '../types/survey-record.type.js';
-import { calculatePercentage } from '../utils/calculate-percentage.js';
+import {
+  buildQuestionTrend,
+  type TrendComparison,
+} from '../utils/build-question-trend.js';
+import { distributePercentages } from '../utils/distribute-percentages.js';
+import { listSemesters } from '../utils/academic-semester.js';
 import { resolveSurveyStatus } from '../utils/resolve-survey-status.js';
 import { SURVEY_ALL_CAREERS } from '../constants/survey.constants.js';
 import {
@@ -27,6 +32,11 @@ import {
   toSurveyStatusValue,
   toSurveyTargetAudienceValue,
 } from '../utils/survey-catalog-values.js';
+
+export interface StatisticsContext {
+  period?: string | null;
+  previous?: { period: string; record: SurveyStatisticsRecord };
+}
 
 @Injectable()
 export class SurveyMapper {
@@ -41,7 +51,10 @@ export class SurveyMapper {
     return {
       title: request.title,
       description: request.description ?? null,
-      careerId: request.careerId && request.careerId !== SURVEY_ALL_CAREERS ? request.careerId : null,
+      careerId:
+        request.careerId && request.careerId !== SURVEY_ALL_CAREERS
+          ? request.careerId
+          : null,
       targetsAllCareers: request.careerId === SURVEY_ALL_CAREERS,
       academicPeriod: request.academicPeriod ?? null,
       targetAudience: request.targetAudience ?? null,
@@ -66,14 +79,18 @@ export class SurveyMapper {
     };
   }
 
-  toSummaryResponse(record: SurveySummaryRecord, now: Date = new Date()): SurveySummaryResponse {
+  toSummaryResponse(
+    record: SurveySummaryRecord,
+    now: Date = new Date(),
+  ): SurveySummaryResponse {
     return {
       id: record.id,
       title: record.title,
       status: resolveSurveyStatus(record.status.title, record.closesAt, now),
       career: record.career ? this.toCareerResponse(record.career) : null,
       createdBy: {
-        fullName: `${record.createdBy.firstName} ${record.createdBy.lastName}`.trim(),
+        fullName:
+          `${record.createdBy.firstName} ${record.createdBy.lastName}`.trim(),
         email: record.createdBy.email,
       },
       academicPeriod: record.academicPeriod,
@@ -90,7 +107,10 @@ export class SurveyMapper {
     return { id: record.id, title: record.title };
   }
 
-  toDetailResponse(record: SurveyDetailRecord, now: Date = new Date()): SurveyDetailResponse {
+  toDetailResponse(
+    record: SurveyDetailRecord,
+    now: Date = new Date(),
+  ): SurveyDetailResponse {
     return {
       id: record.id,
       title: record.title,
@@ -108,12 +128,22 @@ export class SurveyMapper {
         statement: question.statement,
         type: toSurveyQuestionTypeValue(question.type.title),
         isRequired: question.isRequired,
-        options: question.options.map(({ id, position, label }) => ({ id, position, label })),
+        options: question.options.map(({ id, position, label }) => ({
+          id,
+          position,
+          label,
+        })),
       })),
     };
   }
 
-  toStatisticsResponse(record: SurveyStatisticsRecord, now: Date = new Date()): SurveyStatisticsResponse {
+  // period: semestre consultado (null = todas las respuestas). previous: el mismo cálculo del semestre anterior,
+  // que solo sirve para decir si la opción principal de cada pregunta sube o baja.
+  toStatisticsResponse(
+    record: SurveyStatisticsRecord,
+    now: Date = new Date(),
+    { period = null, previous }: StatisticsContext = {},
+  ): SurveyStatisticsResponse {
     const totalResponses = record._count.responses;
 
     return {
@@ -126,32 +156,87 @@ export class SurveyMapper {
       opensAt: record.opensAt?.toISOString() ?? null,
       closesAt: record.closesAt?.toISOString() ?? null,
       totalResponses,
+      hasData: totalResponses > 0,
+      period,
+      availablePeriods: this.getAvailablePeriods(record, now),
       questions: record.questions.map((question) =>
-        this.toQuestionStatisticResponse(question, totalResponses),
+        this.toQuestionStatisticResponse(
+          question,
+          previous ? this.toTrendComparison(question.id, previous) : undefined,
+        ),
+      ),
+    };
+  }
+
+  // Semestres consultables: desde la apertura (o creación) hasta hoy o el cierre, lo que ocurra primero.
+  private getAvailablePeriods(
+    record: SurveyStatisticsRecord,
+    now: Date,
+  ): string[] {
+    const from = record.opensAt ?? record.createdAt;
+    const closed =
+      record.closesAt && record.closesAt < now ? record.closesAt : now;
+    return listSemesters(from, closed < from ? from : closed);
+  }
+
+  private toTrendComparison(
+    questionId: string,
+    previous: StatisticsContext['previous'],
+  ): TrendComparison | undefined {
+    const question = previous?.record.questions.find(
+      ({ id }) => id === questionId,
+    );
+    if (!previous || !question) return undefined;
+
+    const counts = question.options.map((option) => option._count.answers);
+    const percentages = distributePercentages(counts);
+    const hasAnswers = counts.some((count) => count > 0);
+
+    return {
+      period: previous.period,
+      percentageByOption: new Map(
+        hasAnswers
+          ? question.options.map((option, index) => [
+              option.id,
+              percentages[index],
+            ])
+          : [],
       ),
     };
   }
 
   private toQuestionStatisticResponse(
     question: SurveyStatisticsRecord['questions'][number],
-    totalResponses: number,
+    comparison?: TrendComparison,
   ): SurveyQuestionStatisticResponse {
-    const options = question.options.map((option) => ({
+    const counts = question.options.map((option) => option._count.answers);
+    const totalSelections = counts.reduce((total, count) => total + count, 0);
+    // El porcentaje se calcula sobre las selecciones de la pregunta, así los de un card siempre suman 100%
+    // (en opción múltiple cada persona puede elegir varias opciones).
+    const percentages = distributePercentages(counts);
+    const options = question.options.map((option, index) => ({
       id: option.id,
       label: option.label,
-      count: option._count.answers,
-      percentage: calculatePercentage(option._count.answers, totalResponses),
+      count: counts[index],
+      percentage: percentages[index],
     }));
+    const type = toSurveyQuestionTypeValue(question.type.title);
 
     return {
       id: question.id,
       position: question.position,
       statement: question.statement,
-      type: toSurveyQuestionTypeValue(question.type.title),
+      type,
       isRequired: question.isRequired,
       answeredCount: question._count.answers,
-      totalSelections: options.reduce((total, option) => total + option.count, 0),
+      totalSelections,
       options,
+      trend: buildQuestionTrend({
+        options,
+        totalSelections,
+        isMultipleChoice: type === 'multiple_choice',
+        comparison,
+      }),
     };
   }
 }
