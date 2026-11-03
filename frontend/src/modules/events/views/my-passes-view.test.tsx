@@ -30,22 +30,43 @@ describe('Mis pases', () => {
   });
 
   it.each([
-    ['2026-10-20T04:00:00Z', 'Confirmada', true],
-    ['2026-10-20T15:59:59Z', 'Confirmada', true],
-    ['2026-10-20T16:00:00Z', 'Finalizado', false],
-    ['2026-10-21T00:00:00Z', 'Finalizado', false],
-  ])('keeps card and ticket consistent at %s', async (now, status, hasQr) => {
+    ['2026-10-20T04:00:00Z', true],
+    ['2026-10-20T15:59:59.999Z', true],
+    ['2026-10-20T16:00:00Z', false],
+    ['2026-10-21T00:00:00Z', false],
+  ])('shows only unfinished passes at %s', async (now, visible) => {
     vi.setSystemTime(new Date(now));
     getMine.mockResolvedValue([pass]);
     render(<MyPassesView />);
-    const panel = await screen.findByRole('complementary');
-    await within(panel).findByText(status);
-    expect(within(screen.getByRole('button', { name: /React/ })).getByText(status)).toBeInTheDocument();
-    if (hasQr) expect(await within(panel).findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
-    else {
-      expect(await within(panel).findByText(/Pase finalizado/)).toBeInTheDocument();
-      expect(within(panel).queryByRole('img', { name: 'Código QR del pase' })).not.toBeInTheDocument();
+    if (visible) {
+      const panel = await screen.findByRole('complementary');
+      expect(await within(panel).findByRole('img', { name: 'Código QR del pase' })).toBeInTheDocument();
+      expect(screen.getByText('1 pase')).toBeInTheDocument();
+    } else {
+      expect(await screen.findByRole('region', { name: 'No tienes pases vigentes.' })).toBeInTheDocument();
+      expect(screen.getByText('0 pases')).toBeInTheDocument();
+      expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     }
+  });
+
+  it('removes a selected pass at its deadline, selects another and finally shows the empty state', async () => {
+    vi.useFakeTimers({ now: new Date('2026-10-20T15:59:59Z') });
+    getMine.mockResolvedValue([pass, { ...pass, id: 'reg-2', eventName: 'Prisma', endTime: '12:01' }]);
+    render(<MyPassesView />);
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    expect(screen.getByText('2 pases')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'true');
+    await act(async () => { await vi.advanceTimersByTimeAsync(999); });
+    expect(screen.getByText('2 pases')).toBeInTheDocument();
+    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
+    expect(screen.queryByRole('button', { name: /React/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Prisma/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('1 pase')).toBeInTheDocument();
+    await act(async () => { await vi.advanceTimersByTimeAsync(60_000); });
+    expect(screen.getByText('0 pases')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Explorar talleres disponibles' })).toBeInTheDocument();
+    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    expect(getMine).toHaveBeenCalledTimes(1);
   });
 
   it('keeps chat unavailable until the chat module is connected', async () => {
@@ -85,7 +106,7 @@ describe('Mis pases', () => {
     getMine.mockResolvedValue([pass, { ...pass, id: 'reg-2', eventName: 'Prisma', location: 'Lab 2' }]);
     render(<MyPassesView />);
     expect(screen.getByRole('status')).toHaveTextContent('Cargando');
-    expect(screen.queryByRole('region', { name: 'Aún no tienes inscripciones.' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'No tienes pases vigentes.' })).not.toBeInTheDocument();
     await within(await screen.findByRole('complementary', { name: 'Detalle de la inscripción' })).findByText('reg-1');
     expect(screen.getAllByText('Aula 101')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /React/ })).toHaveAttribute('aria-pressed', 'true');
@@ -104,7 +125,7 @@ describe('Mis pases', () => {
   it('muestra el estado vacío y acceso al catálogo', async () => {
     getMine.mockResolvedValue([]);
     render(<MyPassesView />);
-    expect(await screen.findByRole('region', { name: 'Aún no tienes inscripciones.' })).toBeInTheDocument();
+    expect(await screen.findByRole('region', { name: 'No tienes pases vigentes.' })).toBeInTheDocument();
     expect(screen.getByText('0 pases')).toBeInTheDocument();
     expect(screen.queryByText('ID Inscripción')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Vista ilustrativa de QR')).not.toBeInTheDocument();
@@ -131,7 +152,7 @@ describe('Mis pases', () => {
     getMine.mockRejectedValue(cause);
     render(<MyPassesView />);
     expect(await screen.findByRole('alert')).toHaveTextContent(message);
-    expect(screen.queryByRole('region', { name: 'Aún no tienes inscripciones.' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'No tienes pases vigentes.' })).not.toBeInTheDocument();
     expect(screen.queryByText('ID Inscripción')).not.toBeInTheDocument();
   });
 

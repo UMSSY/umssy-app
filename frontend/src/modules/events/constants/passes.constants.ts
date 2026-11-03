@@ -1,0 +1,1 @@
+export const MAX_PASS_TIMER_DELAY_MS = 2_147_483_647;

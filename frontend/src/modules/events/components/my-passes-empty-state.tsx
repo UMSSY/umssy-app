@@ -16,11 +16,11 @@ export function MyPassesEmptyState() {
         id="my-passes-empty-title"
         className="text-xl font-bold text-ink sm:text-2xl"
       >
-        Aún no tienes inscripciones.
+        No tienes pases vigentes.
       </h2>
       <p className="mt-3 max-w-sm text-sm leading-relaxed text-text-secondary">
-        Explora los talleres disponibles. Cuando tengas una inscripción, podrás
-        consultar aquí los detalles de tu pase.
+        Explora los talleres disponibles. Tus pases aparecerán aquí hasta que
+        finalice cada taller.
       </p>
       <Link
         href="/events"

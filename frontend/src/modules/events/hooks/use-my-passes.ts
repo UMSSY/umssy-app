@@ -7,6 +7,7 @@ import {
   REGISTRATION_QUERY_KEYS,
   useRegistrationSession,
 } from "@/modules/registrations";
+import { useActivePasses } from './use-active-passes';
 import { registrationsService } from "../services/registrations.service";
 
 export function useMyPasses() {
@@ -15,9 +16,10 @@ export function useMyPasses() {
     queryKey: [...REGISTRATION_QUERY_KEYS.passes, accessToken],
     queryFn: ({ signal }) => registrationsService.getMine(signal, accessToken),
   });
+  const activeRegistrations = useActivePasses(query.data ?? []);
   const cause = query.error;
   return {
-    registrations: query.data ?? [],
+    registrations: activeRegistrations,
     isLoading: query.isFetching,
     error: query.isError && !query.isFetching
       ? cause instanceof Error && !isApiError(cause)
