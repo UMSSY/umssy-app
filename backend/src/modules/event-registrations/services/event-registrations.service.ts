@@ -58,7 +58,8 @@ export class EventRegistrationsService {
       }
       if (event.status.title !== PUBLISHED_STATUS_TITLE) throw new EventNotOpenException();
       assertRegistrationOpen(event);
-      if (await this.repository.findScheduleConflict(tx, userId, event)) {
+      const registeredEventIds = await this.repository.findConfirmedEventIds(tx, userId);
+      if (await this.eventsService.hasScheduleConflict(tx, event, registeredEventIds)) {
         throw new RegistrationScheduleConflictException();
       }
       if (event.capacity !== null) {
