@@ -18,8 +18,8 @@ export function RecruitersHomeView() {
           </Link>
         }
       />
-      <div className="grid grid-cols-3 items-start gap-8">
-        <div className="col-span-2 min-w-0 space-y-6">
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           <VacancyList />
           <section className="rounded-lg border border-border bg-surface">
             <header className="border-b border-border px-5 py-4">

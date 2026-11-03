@@ -1,6 +1,8 @@
-import { INTERNSHIP_CONTRACT_TYPE } from "../constants/vacancies.constants";
-import type { ContractType, Modality, VacancyConditions } from "../types/vacancy-conditions.types";
-import type { CreateJobOfferPayload } from "../types/job-offer.types";
+import { INTERNSHIP_CONTRACT_TYPE } from "../constants/job-offers.constants";
+import type { VacancyConditions } from "../types/vacancy-conditions.types";
+import type { ContractType } from "../types/contract-type.types";
+import type { Modality } from "../types/modality.types";
+import type { CreateJobOfferPayload } from "../types/create-job-offer-payload.types";
 import { parseSalary } from "./parse-salary";
 
 export function toJobOfferPayload(conditions: VacancyConditions): CreateJobOfferPayload {
