@@ -45,7 +45,7 @@ export function VacancyCard({ offer, onDetails, showStatus = false, onReopen, on
           </Button>
         </h3>
         <p className="mt-1 text-sm text-text-secondary">
-          Publicado: {formatPublicationDate(offer.createdAt)} · Modalidad:{" "}
+          Publicado: {formatPublicationDate(offer.publishedAt)} · Modalidad:{" "}
           {offer.modality} · Postulantes: {offer.applicantsCount} candidatos
         </p>
         <p className="mt-1 text-sm text-text-secondary">Tipo de contrato: {offer.contractType}</p>

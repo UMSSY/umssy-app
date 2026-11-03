@@ -43,6 +43,7 @@ const RECORD: JobOfferRecord = {
   languages: 'Español',
   locationUrl: 'https://maps.google.com/?q=x',
   expiresAt: null,
+  publishedAt: CREATED_AT,
   createdAt: CREATED_AT,
   company: { id: 'company-1', title: 'TechBolivia S.R.L.' },
   modality: { title: 'Híbrido' },
@@ -180,7 +181,7 @@ describe('JobOffersService', () => {
     const result = await service.listByCompany('company-1');
 
     expect(repository.findByCompany).toHaveBeenCalledWith('company-1', {
-      sortBy: 'createdAt',
+      sortBy: 'publishedAt',
       order: 'desc',
     });
     expect(result).toHaveLength(1);
@@ -191,7 +192,7 @@ describe('JobOffersService', () => {
     const filters = {
       modality: JobOfferModality.REMOTE,
       dateFrom: '2026-10-01',
-      sortBy: 'createdAt' as const,
+      sortBy: 'publishedAt' as const,
       order: 'asc' as const,
     };
 
@@ -206,7 +207,7 @@ describe('JobOffersService', () => {
     expect(
       await service.listByCompany('company-1', {
         contractType: JobOfferContractType.INTERNSHIP,
-        sortBy: 'createdAt',
+        sortBy: 'publishedAt',
         order: 'desc',
       }),
     ).toEqual([]);

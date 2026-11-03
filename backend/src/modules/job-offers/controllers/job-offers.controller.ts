@@ -140,7 +140,7 @@ export class JobOffersController {
     name: 'sortBy',
     required: false,
     enum: JOB_OFFER_SORT_FIELDS,
-    description: 'Por defecto createdAt. applicants ordena por cantidad de postulantes y desempata por fecha',
+    description: 'Por defecto publishedAt (fecha de publicación). applicants ordena por cantidad de postulantes y desempata por fecha',
   })
   @ApiQuery({
     name: 'order',

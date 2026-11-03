@@ -14,6 +14,7 @@ export interface JobOfferDetailsResponse {
   languages: string;
   locationUrl: string;
   expiresAt: string | null;
+  publishedAt: string;
   createdAt: string;
   company: {
     id: string;

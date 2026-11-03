@@ -116,7 +116,7 @@ export function RequirementsStep({
                     pressed={selected}
                     disabled={!selected && isSkillLimitReached}
                     onPressedChange={() => toggleSkill(skill)}
-                    className="h-auto rounded-full px-4 py-1.5 text-sm font-medium text-text-secondary data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-surface"
+                    className="h-auto rounded-full px-4 py-1.5 text-sm font-medium text-text-secondary data-[pressed]:border-primary data-[pressed]:bg-primary data-[pressed]:text-primary-foreground"
                   >
                     {skill.name}
                   </Toggle>

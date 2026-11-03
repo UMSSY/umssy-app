@@ -37,7 +37,6 @@ export function JobOfferDetailsDialog({
   const { offer, status, errorMessage } = useJobOfferDetails(companyId, jobOfferId);
   const safeMapsUrl = offer ? getSafeMapsUrl(offer.locationUrl) : null;
 
-  // Si la vacante no se puede cargar se avisa y se vuelve a la lista sin dejar el pop-up abierto.
   useEffect(() => {
     if (status !== "error") return;
     toast.error(errorMessage, TOAST_OPTIONS);

@@ -14,6 +14,7 @@ import {
   JOB_OFFER_VALIDATION_MESSAGES as MESSAGES,
 } from '../constants/job-offer.constants.js';
 import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
+import type { SalaryFields } from '../types/salary-fields.type.js';
 
 const salarySchema = z
   .number()
@@ -78,8 +79,6 @@ export const jobOfferFieldsSchema = z.object({
     .optional(),
   otherRequirements: requirementListSchema.optional(),
 });
-
-type SalaryFields = Pick<z.infer<typeof jobOfferFieldsSchema>, 'contractType' | 'salaryMin' | 'salaryMax'>;
 
 export const hasRequiredSalary = (data: SalaryFields): boolean =>
   data.salaryMin !== undefined ||

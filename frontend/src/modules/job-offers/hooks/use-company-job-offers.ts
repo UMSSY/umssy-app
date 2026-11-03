@@ -28,7 +28,6 @@ export function useCompanyJobOffers(
     select: (offers) => selectVisibleOffers(offers, scope, filters),
   });
 
-  // Aviso temporal ante un fallo de red o del servidor; el listado muestra además el botón de reintento.
   useEffect(() => {
     if (query.isError) toast.error(VACANCY_LIST_TEXT[scope].loadError, TOAST_OPTIONS);
   }, [query.isError, query.errorUpdatedAt, scope]);

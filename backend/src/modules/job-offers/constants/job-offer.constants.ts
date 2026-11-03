@@ -44,7 +44,7 @@ export const JOB_OFFER_VALIDATION_MESSAGES = {
   SEARCH_TOO_LONG: `La búsqueda no debe exceder los ${JOB_OFFER_TITLE_MAX_LENGTH} caracteres`,
 } as const;
 
-export const JOB_OFFER_SORT_FIELDS = ['createdAt', 'applicants'] as const;
+export const JOB_OFFER_SORT_FIELDS = ['publishedAt', 'applicants'] as const;
 export const JOB_OFFER_SORT_ORDERS = ['asc', 'desc'] as const;
 
 export const JOB_OFFER_SELECT = {
@@ -57,6 +57,7 @@ export const JOB_OFFER_SELECT = {
   languages: true,
   locationUrl: true,
   expiresAt: true,
+  publishedAt: true,
   createdAt: true,
   company: { select: { id: true, title: true } },
   modality: { select: { title: true } },

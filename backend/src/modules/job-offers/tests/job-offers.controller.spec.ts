@@ -47,7 +47,7 @@ describe('JobOffersController', () => {
     await controller.listPublished();
     await controller.listByCompany('company-1', {
       modality: JobOfferModality.REMOTE,
-      sortBy: 'createdAt',
+      sortBy: 'publishedAt',
       order: 'desc',
     });
     await expect(controller.listSkillCatalog()).resolves.toEqual([{ id: 'skill-1', name: 'Docker' }]);
@@ -55,7 +55,7 @@ describe('JobOffersController', () => {
     expect(service.listPublished).toHaveBeenCalledOnce();
     expect(service.listByCompany).toHaveBeenCalledWith('company-1', {
       modality: JobOfferModality.REMOTE,
-      sortBy: 'createdAt',
+      sortBy: 'publishedAt',
       order: 'desc',
     });
   });

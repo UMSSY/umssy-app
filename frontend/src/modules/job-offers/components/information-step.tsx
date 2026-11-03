@@ -93,7 +93,6 @@ export function InformationStep({
   const vacancyCountMessage =
     errors.vacancyCount ??
     (Number(conditions.vacancyCount) > MAX_VACANCIES ? VACANCY_MESSAGES.maxVacancies : undefined);
-  // El enlace se valida mientras se escribe para avisar en tiempo real.
   const mapsLinkMessage =
     errors.mapsLink ?? (conditions.mapsLink.trim() ? getMapsLinkError(conditions.mapsLink) : undefined);
 
@@ -146,7 +145,7 @@ export function InformationStep({
                 key={modality}
                 value={modality}
                 variant="outline"
-                className="h-auto w-full rounded-md px-3 py-2 text-sm font-semibold text-ink data-[pressed]:border-accent data-[pressed]:bg-accent data-[pressed]:text-surface"
+                className="h-auto w-full rounded-md px-3 py-2 text-sm font-semibold text-ink data-[pressed]:border-primary data-[pressed]:bg-primary data-[pressed]:text-primary-foreground"
               >
                 {modality}
               </ToggleGroupItem>

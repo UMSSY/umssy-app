@@ -3,6 +3,6 @@ export interface JobOfferListParams {
   contractType?: string;
   dateFrom?: string;
   dateTo?: string;
-  sortBy: "createdAt" | "applicants";
+  sortBy: "publishedAt" | "applicants";
   order: "asc" | "desc";
 }
