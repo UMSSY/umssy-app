@@ -110,6 +110,7 @@ describe("SurveyAnalyticsView", () => {
 
       const select = screen.getByRole("combobox", { name: "Gestión académica" });
       expect(select).toHaveTextContent("Todos");
+      expect(screen.getByText("Semestre en que se recibieron las respuestas")).toBeInTheDocument();
 
       await user.click(select);
       const options = within(await screen.findByRole("listbox")).getAllByRole("option");

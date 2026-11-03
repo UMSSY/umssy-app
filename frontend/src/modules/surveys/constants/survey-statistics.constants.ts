@@ -4,6 +4,7 @@ export const SURVEY_PDF_FEEDBACK_DURATION_MS = 4000;
 
 export const SURVEY_PERIOD_FILTER_LABEL = "Gestión académica";
 export const SURVEY_PERIOD_FILTER_ALL_LABEL = "Todos";
+export const SURVEY_PERIOD_FILTER_HINT = "Semestre en que se recibieron las respuestas";
 
 export const SURVEY_STATISTICS_TEXT = {
   pageTitle: "Analíticas de la encuesta",
