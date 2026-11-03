@@ -35,14 +35,14 @@ export function PassCard({
         onClick={onClick}
         className={cn("flex h-auto w-full min-w-0 flex-col items-stretch gap-4 rounded-lg p-5 pb-20 text-left whitespace-normal transition-all",
           isSelected
-            ? 'border border-accent bg-accent text-surface hover:bg-accent hover:text-surface'
+            ? 'border border-accent bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground'
             : 'border border-border bg-surface text-ink hover:border-border-strong'
         )}
       >
         <div
           className={cn("flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold",
             isSelected
-              ? 'text-surface/85'
+              ? 'text-accent-foreground/85'
               : effectiveStatus.isPast
               ? 'bg-muted text-muted-foreground'
               : 'text-text-secondary'
@@ -60,7 +60,7 @@ export function PassCard({
           </h3>
           <div
             className={cn("flex items-center gap-2 text-sm",
-              isSelected ? 'text-surface/85' : 'text-text-secondary'
+              isSelected ? 'text-accent-foreground/85' : 'text-text-secondary'
             )}
           >
             <Calendar className="size-4 shrink-0 opacity-70" />

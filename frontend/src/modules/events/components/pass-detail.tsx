@@ -1,5 +1,7 @@
 'use client';
 
+import { cn } from '@/lib/utils';
+
 import { useEventFinished } from '../hooks/use-event-finished';
 import { useQuery } from '@tanstack/react-query';
 import { useRegistrationSession } from '@/modules/registrations';
@@ -29,8 +31,8 @@ export function PassDetail({ registration }: PassDetailProps) {
     <div className="flex w-full min-w-0 flex-col gap-5">
       <Card className="flex flex-col gap-6 rounded-lg border-0 bg-accent p-8 text-surface shadow-none">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-amber-400 uppercase">
-            <div className="size-2 rounded-full bg-amber-400" />
+          <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-gold uppercase">
+            <div className="size-2 rounded-full bg-gold" />
             PASE UMSS · OFICIAL
           </div>
         </div>
@@ -43,7 +45,6 @@ export function PassDetail({ registration }: PassDetailProps) {
             {detail.eventName}
           </h2>
 
-          {/* Fecha y horario precedidos por el icono de Calendario */}
           <div className="flex min-w-0 items-center gap-2 text-sm text-surface/85">
             <Calendar className="size-4 shrink-0 opacity-80" />
             <span className="min-w-0 [overflow-wrap:anywhere] break-words">
@@ -67,7 +68,7 @@ export function PassDetail({ registration }: PassDetailProps) {
         </div>
 
         <div className="flex flex-col gap-2">
-          <div className="flex min-h-[220px] items-center justify-center rounded-xl bg-white p-6 shadow-inner">
+          <div className="flex min-h-[220px] items-center justify-center rounded-xl bg-surface p-6 shadow-inner">
             {!accessToken ? (
               <p role="alert">Inicia sesión para consultar el pase.</p>
             ) : pass.isPending ? (
@@ -92,7 +93,7 @@ export function PassDetail({ registration }: PassDetailProps) {
           </p>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-start justify-between gap-4 border-t border-white/10 pt-5">
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-4 border-t border-surface/10 pt-5">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <span className="text-[10px] tracking-widest text-surface/80 uppercase">
               ID INSCRIPCIÓN
@@ -105,9 +106,9 @@ export function PassDetail({ registration }: PassDetailProps) {
             <span className="text-[10px] tracking-widest text-surface/80 uppercase">
               ESTADO
             </span>
-            <span className={`flex items-center justify-end gap-1 text-sm font-bold ${
-              effectiveStatus.isPast ? 'text-gray-300' : 'text-emerald-400'
-            }`}>
+            <span className={cn('flex items-center justify-end gap-1 text-sm font-bold',
+              effectiveStatus.isPast ? 'text-surface/80' : 'text-gold'
+            )}>
               {effectiveStatus.isPast ? <Clock className="size-4" /> : <Check className="size-4" />}
               {effectiveStatus.label}
             </span>

@@ -10,7 +10,8 @@ const conflict = (code: string) => new Prisma.PrismaClientKnownRequestError('Dat
 describe('registration creation', () => {
   it('rejects schedule conflicts without creating a registration or consuming seats', async () => {
     const { service, tx } = registrationFixture();
-    tx.eventRegistration.findFirst.mockResolvedValue({ id: 'other-registration' });
+    tx.eventRegistration.findMany.mockResolvedValue([{ eventId: 'other-event' }]);
+    tx.event.findFirst.mockResolvedValue({ id: 'other-event' });
     await expect(service.create(EVENT_ID, USER_ID)).rejects.toMatchObject({
       statusCode: 409, code: 'REGISTRATION_SCHEDULE_CONFLICT',
       message: 'Posees una inscripción confirmada en el mismo horario',
