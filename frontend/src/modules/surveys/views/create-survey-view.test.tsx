@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
+import { SURVEY_CREATE_DRAFT_STORAGE_KEY } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import { surveysService } from "../services/surveys.service";
 import { apiResponse, buildAxiosError, CAREERS, CREATED_SURVEY, FIXED_NOW } from "../testing/survey-fixtures";
@@ -59,6 +60,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     cleanup();
     vi.useRealTimers();
     vi.restoreAllMocks();
+    window.localStorage.clear();
     push.mockReset();
     vi.mocked(toast.success).mockReset();
     vi.mocked(toast.error).mockReset();
@@ -451,6 +453,29 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     await user.click(screen.getByRole("button", { name: /Guardar borrador/ }));
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Fallo interno", { richColors: true }));
+  });
+
+  it("TC-HU6-25: autoguarda el formulario y lo recupera al volver a montar la vista", async () => {
+    const user = renderView();
+    await user.type(screen.getByLabelText("Título"), "Encuesta sin conexión");
+
+    await waitFor(() => expect(window.localStorage.getItem(SURVEY_CREATE_DRAFT_STORAGE_KEY)).toContain("Encuesta sin conexión"));
+
+    cleanup();
+    renderView();
+
+    expect(screen.getByLabelText("Título")).toHaveValue("Encuesta sin conexión");
+  });
+
+  it("TC-HU6-25: limpia el autoguardado al guardar el borrador en el servidor", async () => {
+    const user = renderView();
+    await user.type(screen.getByLabelText("Título"), "Borrador persistido");
+    await waitFor(() => expect(window.localStorage.getItem(SURVEY_CREATE_DRAFT_STORAGE_KEY)).not.toBeNull());
+
+    await user.click(screen.getByRole("button", { name: /Guardar borrador/ }));
+
+    await waitFor(() => expect(toast.success).toHaveBeenCalled());
+    expect(window.localStorage.getItem(SURVEY_CREATE_DRAFT_STORAGE_KEY)).toBeNull();
   });
 
   it("CA12: guarda un borrador solo con el título sin validar la publicación", async () => {

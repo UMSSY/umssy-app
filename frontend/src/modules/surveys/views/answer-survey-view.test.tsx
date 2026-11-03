@@ -2,6 +2,7 @@ import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
+import { SURVEY_ANSWERS_STORAGE_KEY } from "../constants/survey-answer.constants";
 import { surveysService } from "../services/surveys.service";
 import { apiResponse } from "../testing/survey-fixtures";
 import type { SurveyDetail } from "../types/survey.types";
@@ -59,6 +60,35 @@ describe("AnswerSurveyView", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    window.localStorage.clear();
+  });
+
+  it("BUG-HU2-01: conserva las respuestas seleccionadas tras volver a montar la vista", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(surveysService, "getSurvey").mockResolvedValue(apiResponse(MOCK_SURVEY));
+
+    renderWithQuery(<AnswerSurveyView id="survey-123" />);
+    await user.click(await screen.findByText("Sí, a tiempo completo"));
+
+    expect(window.localStorage.getItem(SURVEY_ANSWERS_STORAGE_KEY("survey-123"))).toContain("opt-1a");
+
+    cleanup();
+    renderWithQuery(<AnswerSurveyView id="survey-123" />);
+
+    expect(await screen.findByRole("radio", { name: "Sí, a tiempo completo" })).toBeChecked();
+  });
+
+  it("BUG-HU2-01: limpia las respuestas guardadas al enviarlas correctamente", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(surveysService, "getSurvey").mockResolvedValue(apiResponse(MOCK_SURVEY));
+    vi.spyOn(surveysService, "submitAnswers").mockResolvedValue(apiResponse({ success: true, message: "Guardado" }));
+
+    renderWithQuery(<AnswerSurveyView id="survey-123" />);
+    await user.click(await screen.findByText("Sí, a tiempo completo"));
+    await user.click(screen.getByRole("button", { name: /enviar respuestas/i }));
+
+    expect(await screen.findByRole("heading", { name: "¡Encuesta completada!" })).toBeInTheDocument();
+    expect(window.localStorage.getItem(SURVEY_ANSWERS_STORAGE_KEY("survey-123"))).toBeNull();
   });
 
   it("muestra el título, descripción y preguntas de la encuesta", async () => {

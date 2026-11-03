@@ -190,6 +190,7 @@ export interface SurveyAnalyticsViewProps {
 export interface SurveyEditorProps {
   title: string;
   initialState?: SurveyBuilderState;
+  autosaveKey?: string;
   isSaving: boolean;
   pendingStatus?: SurveyStatus;
   draftSavedMessage: string;

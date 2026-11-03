@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CONNECTION_ERROR_MESSAGE } from "@/modules/reports";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { isConnectionError } from "@/shared/utils/is-connection-error";
+import { removeSurveyStorage, writeSurveyStorage } from "../utils/survey-draft-storage";
 import { AddQuestionButton } from "./add-question-button";
 import { DiscardChangesDialog } from "./discard-changes-dialog";
 import { PublishSurveyDialog } from "./publish-survey-dialog";
@@ -32,7 +33,7 @@ import { getBoliviaTodayValue, toCalendarDate } from "../utils/survey-dates";
 import { toCreateSurveyPayload } from "../utils/to-create-survey-payload";
 import { toErrorMap, validateDraft, validateSurvey } from "../utils/validate-survey";
 
-export function SurveyEditor({ title, initialState, isSaving, pendingStatus, draftSavedMessage, onSave }: SurveyEditorProps) {
+export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendingStatus, draftSavedMessage, onSave }: SurveyEditorProps) {
   const router = useRouter();
   const builder = useSurveyBuilder(initialState);
   const { state } = builder;
@@ -47,6 +48,19 @@ export function SurveyEditor({ title, initialState, isSaving, pendingStatus, dra
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
   const { pendingHref, clearPendingHref } = useUnsavedChangesGuard(state.isDirty);
+
+  useEffect(() => {
+    if (!autosaveKey) return;
+    if (state.isDirty) {
+      writeSurveyStorage(autosaveKey, { ...state, pendingFocus: null });
+      return;
+    }
+    removeSurveyStorage(autosaveKey);
+  }, [autosaveKey, state]);
+
+  const clearAutosave = () => {
+    if (autosaveKey) removeSurveyStorage(autosaveKey);
+  };
 
   const minDate = toCalendarDate(today) ?? new Date();
   const careerTitle =
@@ -90,6 +104,7 @@ export function SurveyEditor({ title, initialState, isSaving, pendingStatus, dra
 
     try {
       await onSave(toCreateSurveyPayload(state, status));
+      clearAutosave();
       builder.markSaved();
       setIsPublishDialogOpen(false);
       toast.success(status === "published" ? SURVEY_MESSAGES.publishSuccess : draftSavedMessage, {
@@ -160,6 +175,7 @@ export function SurveyEditor({ title, initialState, isSaving, pendingStatus, dra
     const target = pendingHref ?? SURVEYS_PATH;
     setIsDiscardDialogOpen(false);
     clearPendingHref();
+    clearAutosave();
     builder.markSaved();
     router.push(target);
   };
