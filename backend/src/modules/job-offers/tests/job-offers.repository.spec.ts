@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { Prisma } from '../../../prisma/client.js';
 import { JOB_OFFER_CREATED_SELECT, JOB_OFFER_SELECT } from '../constants/job-offer.constants.js';
+import { JobOfferNotFoundException } from '../exceptions/index.js';
 import { JobOffersRepository } from '../repositories/job-offers.repository.js';
 import { JobOfferContractType, JobOfferModality, JobOfferStatus } from '../types/job-offer.enum.js';
 
@@ -44,6 +46,52 @@ describe('JobOffersRepository', () => {
     expect(ids).toEqual({ modalityId: 'modality-1', contractTypeId: null, statusId: 'status-1' });
     expect(prisma.jobOfferModality.findUnique).toHaveBeenCalledWith({
       where: { title: 'Híbrido' },
+      select: { id: true },
+    });
+  });
+
+  it('al reabrir cambia el estado y renueva la fecha de publicación', async () => {
+    const publishedAt = new Date('2026-10-28T14:00:00.000Z');
+    prisma.jobOffer.update.mockResolvedValue({ id: 'offer-1' });
+
+    await repository.reopen('offer-1', 'status-published', publishedAt);
+
+    expect(prisma.jobOffer.update).toHaveBeenCalledWith({
+      where: { id: 'offer-1' },
+      data: { statusId: 'status-published', publishedAt },
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('responde vacante no encontrada si se borró antes de escribir', async () => {
+    const recordNotFound = new Prisma.PrismaClientKnownRequestError('Record not found', {
+      code: 'P2025',
+      clientVersion: 'test',
+    });
+    prisma.jobOffer.update.mockRejectedValue(recordNotFound);
+
+    await expect(repository.updateStatus('offer-1', 'status-deleted')).rejects.toBeInstanceOf(
+      JobOfferNotFoundException,
+    );
+    await expect(
+      repository.reopen('offer-1', 'status-published', new Date()),
+    ).rejects.toBeInstanceOf(JobOfferNotFoundException);
+  });
+
+  it('no oculta otros errores de la base de datos al escribir', async () => {
+    const failure = new Error('connection lost');
+    prisma.jobOffer.update.mockRejectedValue(failure);
+
+    await expect(repository.updateStatus('offer-1', 'status-deleted')).rejects.toBe(failure);
+  });
+
+  it('busca el id de un estado por su título', async () => {
+    prisma.jobOfferStatus.findUnique.mockResolvedValueOnce({ id: 'status-1' }).mockResolvedValueOnce(null);
+
+    expect(await repository.findStatusId(JobOfferStatus.DELETED)).toBe('status-1');
+    expect(await repository.findStatusId(JobOfferStatus.CLOSED)).toBeNull();
+    expect(prisma.jobOfferStatus.findUnique).toHaveBeenCalledWith({
+      where: { title: 'Eliminada' },
       select: { id: true },
     });
   });
@@ -103,18 +151,18 @@ describe('JobOffersRepository', () => {
         status: { title: 'Publicada' },
         OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { publishedAt: 'desc' },
       select: JOB_OFFER_SELECT,
     });
   });
     it('lista las vacantes de una empresa sin filtros, de la más reciente a la más antigua', async () => {
     prisma.jobOffer.findMany.mockResolvedValue([]);
 
-    await repository.findByCompany('company-1', { sortBy: 'createdAt', order: 'desc' });
+    await repository.findByCompany('company-1', { sortBy: 'publishedAt', order: 'desc' });
 
     expect(prisma.jobOffer.findMany).toHaveBeenCalledWith({
       where: { companyId: 'company-1'  },
-      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      orderBy: [{ publishedAt: 'desc' }, { id: 'desc' }],
       select: JOB_OFFER_SELECT,
     });
   });
@@ -128,7 +176,7 @@ describe('JobOffersRepository', () => {
       dateFrom: '2026-10-01',
       dateTo: '2026-10-31',
       search: 'react',
-      sortBy: 'createdAt',
+      sortBy: 'publishedAt',
       order: 'asc',
     });
 
@@ -137,13 +185,13 @@ describe('JobOffersRepository', () => {
         companyId: 'company-1',
         modality: { title: 'Remoto' },
         contractType: { title: 'Medio tiempo' },
-        createdAt: {
+        publishedAt: {
           gte: new Date('2026-10-01T04:00:00.000Z'),
           lt: new Date('2026-11-01T04:00:00.000Z'),
         },
         title: { contains: 'react', mode: 'insensitive' },
       },
-      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      orderBy: [{ publishedAt: 'asc' }, { id: 'asc' }],
       select: JOB_OFFER_SELECT,
     });
   });
