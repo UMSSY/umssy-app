@@ -45,6 +45,36 @@ interface DirectoryFilters {
 
 type MentorDirectorySort = 'name_asc' | 'name_desc';
 
+const SEARCH_CHARACTER_VARIANTS: Readonly<Record<string, readonly string[]>> = {
+  a: ['a', 'á'],
+  e: ['e', 'é'],
+  i: ['i', 'í'],
+  o: ['o', 'ó'],
+  u: ['u', 'ú', 'ü'],
+  n: ['n', 'ñ'],
+};
+
+function removeDiacritics(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function buildAccentInsensitiveVariants(value: string): string[] {
+  const normalized = removeDiacritics(value);
+  let variants = [''];
+
+  for (const character of normalized) {
+    const options = SEARCH_CHARACTER_VARIANTS[character] ?? [character];
+    variants = variants.flatMap((prefix) =>
+      options.map((option) => `${prefix}${option}`),
+    );
+  }
+
+  return [...new Set(variants)];
+}
+
 @Injectable()
 export class MentorsRepository extends MentorIntakeRepository {
   constructor(prisma: PrismaService) {
@@ -234,10 +264,10 @@ export class MentorsRepository extends MentorIntakeRepository {
 
     if (filters.search) {
       where.AND = filters.search.split(/\s+/).map((word) => ({
-        OR: [
-          { firstName: { contains: word, mode: 'insensitive' } },
-          { lastName: { contains: word, mode: 'insensitive' } },
-        ],
+        OR: buildAccentInsensitiveVariants(word).flatMap((variant) => [
+          { firstName: { contains: variant, mode: 'insensitive' as const } },
+          { lastName: { contains: variant, mode: 'insensitive' as const } },
+        ]),
       }));
     }
 

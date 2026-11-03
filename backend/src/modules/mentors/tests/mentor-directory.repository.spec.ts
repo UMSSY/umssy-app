@@ -62,23 +62,19 @@ describe('MentorsRepository directory page', () => {
 
     expect(where.AND).toHaveLength(2);
 
-    expect(where.AND[0].OR).toEqual([
-      {
-        firstName: { contains: 'Ana', mode: 'insensitive' },
-      },
-      {
-        lastName: { contains: 'Ana', mode: 'insensitive' },
-      },
-    ]);
+    expect(where.AND[0].OR).toEqual(
+      expect.arrayContaining([
+        { firstName: { contains: 'ana', mode: 'insensitive' } },
+        { lastName: { contains: 'ana', mode: 'insensitive' } },
+      ]),
+    );
 
-    expect(where.AND[1].OR).toEqual([
-      {
-        firstName: { contains: 'Rojas', mode: 'insensitive' },
-      },
-      {
-        lastName: { contains: 'Rojas', mode: 'insensitive' },
-      },
-    ]);
+    expect(where.AND[1].OR).toEqual(
+      expect.arrayContaining([
+        { firstName: { contains: 'rojas', mode: 'insensitive' } },
+        { lastName: { contains: 'rojas', mode: 'insensitive' } },
+      ]),
+    );
 
     expect(findMany.mock.calls[0]?.[0]).toMatchObject({
       orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
@@ -102,49 +98,44 @@ describe('MentorsRepository directory page', () => {
     } as unknown as PrismaService);
 
     await repository.countDirectoryMentors(
-      {
-        search: 'Rojas Ana',
-        available: false,
-      },
+      { search: 'Rojas Ana', available: false },
       now,
     );
 
     const where = count.mock.calls[0]?.[0].where;
 
-    expect(where.AND).toEqual([
-      {
-        OR: [
-          {
-            firstName: {
-              contains: 'Rojas',
-              mode: 'insensitive',
-            },
-          },
-          {
-            lastName: {
-              contains: 'Rojas',
-              mode: 'insensitive',
-            },
-          },
-        ],
-      },
-      {
-        OR: [
-          {
-            firstName: {
-              contains: 'Ana',
-              mode: 'insensitive',
-            },
-          },
-          {
-            lastName: {
-              contains: 'Ana',
-              mode: 'insensitive',
-            },
-          },
-        ],
-      },
-    ]);
+    expect(where.AND).toHaveLength(2);
+    expect(where.AND[0].OR).toEqual(
+      expect.arrayContaining([
+        { firstName: { contains: 'rojas', mode: 'insensitive' } },
+        { lastName: { contains: 'rojas', mode: 'insensitive' } },
+      ]),
+    );
+    expect(where.AND[1].OR).toEqual(
+      expect.arrayContaining([
+        { firstName: { contains: 'ana', mode: 'insensitive' } },
+        { lastName: { contains: 'ana', mode: 'insensitive' } },
+      ]),
+    );
+  });
+
+  it('genera variantes con y sin tilde para la búsqueda por nombre', async () => {
+    const count = vi.fn().mockResolvedValue(1);
+
+    const repository = new MentorsRepository({
+      user: { count },
+    } as unknown as PrismaService);
+
+    await repository.countDirectoryMentors(
+      { search: 'andres', available: false },
+      now,
+    );
+
+    const searchConditions = count.mock.calls[0]?.[0].where.AND;
+    const serialized = JSON.stringify(searchConditions);
+
+    expect(serialized).toContain('andres');
+    expect(serialized).toContain('andrés');
   });
 
   it('no incluye titular profesional ni áreas técnicas dentro de search', async () => {
@@ -165,20 +156,12 @@ describe('MentorsRepository directory page', () => {
     const searchConditions = count.mock.calls[0]?.[0].where.AND;
 
     expect(searchConditions).toHaveLength(1);
-    expect(searchConditions[0].OR).toEqual([
-      {
-        firstName: {
-          contains: 'Backend',
-          mode: 'insensitive',
-        },
-      },
-      {
-        lastName: {
-          contains: 'Backend',
-          mode: 'insensitive',
-        },
-      },
-    ]);
+    expect(searchConditions[0].OR).toEqual(
+      expect.arrayContaining([
+        { firstName: { contains: 'backend', mode: 'insensitive' } },
+        { lastName: { contains: 'backend', mode: 'insensitive' } },
+      ]),
+    );
 
     expect(JSON.stringify(searchConditions)).not.toContain('headline');
     expect(JSON.stringify(searchConditions)).not.toContain(

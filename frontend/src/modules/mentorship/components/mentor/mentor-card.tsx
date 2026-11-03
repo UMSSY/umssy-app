@@ -18,6 +18,7 @@ type MentorCardProps = {
   returnTo?: string;
   showAffinityBadge?: boolean;
   selectedArea?: string;
+  highlightAvailability?: boolean;
 };
 
 function getSafeReturnTo(returnTo?: string): string | null {
@@ -57,6 +58,7 @@ export function MentorCard({
   returnTo,
   showAffinityBadge = false,
   selectedArea,
+  highlightAvailability = false,
 }: MentorCardProps) {
   const hasTechnicalAreas = mentor.technicalAreas.length > 0;
   const safeReturnTo = getSafeReturnTo(returnTo);
@@ -107,9 +109,25 @@ export function MentorCard({
           </div>
 
           <div className="ml-auto flex shrink-0 flex-col items-end gap-2">
-            <Badge variant="outline" className="border-border bg-surface-soft px-2.5 whitespace-nowrap text-ink">
-              {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
-            </Badge>
+            {mentor.isAvailable ? (
+              <Badge
+                variant="outline"
+                aria-current={
+                  highlightAvailability ? "true" : undefined
+                }
+                className={cn(
+                  "border-border bg-surface-soft px-2.5 whitespace-nowrap text-ink",
+                  highlightAvailability &&
+                    "border-accent bg-interaction font-semibold text-accent ring-1 ring-accent",
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 rounded-full bg-accent"
+                />
+                Disponible para mentoría
+              </Badge>
+            ) : null}
             {showAffinityBadge &&
               mentor.sharedInterestsCount !== undefined && (
                 <Badge variant="secondary" className="whitespace-nowrap">
