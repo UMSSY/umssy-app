@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { CONNECTION_ERROR_MESSAGE } from "@/modules/reports";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { isConnectionError } from "@/shared/utils/is-connection-error";
-import { removeLocalStorage, writeLocalStorage } from "@/shared/utils/local-storage";
+import { removeSurveyStorage, writeSurveyStorage } from "../utils/survey-draft-storage";
 import { AddQuestionButton } from "./add-question-button";
 import { DiscardChangesDialog } from "./discard-changes-dialog";
 import { PublishSurveyDialog } from "./publish-survey-dialog";
@@ -52,14 +52,14 @@ export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendi
   useEffect(() => {
     if (!autosaveKey) return;
     if (state.isDirty) {
-      writeLocalStorage(autosaveKey, { ...state, pendingFocus: null });
+      writeSurveyStorage(autosaveKey, { ...state, pendingFocus: null });
       return;
     }
-    removeLocalStorage(autosaveKey);
+    removeSurveyStorage(autosaveKey);
   }, [autosaveKey, state]);
 
   const clearAutosave = () => {
-    if (autosaveKey) removeLocalStorage(autosaveKey);
+    if (autosaveKey) removeSurveyStorage(autosaveKey);
   };
 
   const minDate = toCalendarDate(today) ?? new Date();

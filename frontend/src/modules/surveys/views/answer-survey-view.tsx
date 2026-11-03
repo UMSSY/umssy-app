@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
-import { readLocalStorage, removeLocalStorage, writeLocalStorage } from "@/shared/utils/local-storage";
+import { readSurveyStorage, removeSurveyStorage, writeSurveyStorage } from "../utils/survey-draft-storage";
 import { SurveyQuestionField } from "../components/survey-question-field";
 import {
   SURVEY_ANSWER_HINTS,
@@ -32,7 +32,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const storageKey = SURVEY_ANSWERS_STORAGE_KEY(id);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>(
-    () => readLocalStorage<Record<string, string[]>>(storageKey) ?? {},
+    () => readSurveyStorage<Record<string, string[]>>(storageKey) ?? {},
   );
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isSubmittedSuccess, setIsSubmittedSuccess] = useState(false);
@@ -40,7 +40,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
   useEffect(() => {
     if (isSubmittedSuccess) return;
     if (Object.keys(selectedAnswers).length === 0) return;
-    writeLocalStorage(storageKey, selectedAnswers);
+    writeSurveyStorage(storageKey, selectedAnswers);
   }, [isSubmittedSuccess, selectedAnswers, storageKey]);
 
   const handleAnswerChange = (questionId: string, optionIds: string[]) => {
@@ -78,7 +78,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
         .map(([questionId, optionIds]) => ({ questionId, optionIds }));
 
       await surveysService.submitAnswers(id, { answers });
-      removeLocalStorage(storageKey);
+      removeSurveyStorage(storageKey);
       setIsSubmittedSuccess(true);
       toast.success(SURVEY_ANSWER_TEXT.submitSuccess);
       setTimeout(() => router.push(SURVEY_NOTIFICATIONS_PATH), SURVEY_ANSWER_REDIRECT_DELAY_MS);

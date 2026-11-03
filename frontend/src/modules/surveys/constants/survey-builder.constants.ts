@@ -1,3 +1,4 @@
+import { SESSION_DRAFT_STORAGE_PREFIX } from "@/modules/auth";
 import { CircleDot, SquareCheck, SquareChevronDown } from "lucide-react";
 import type { QuestionTypeOption } from "../types/question-type-option.types";
 import type { QuestionType, SurveyDisplayStatus, SurveyTargetAudience } from "../types/survey.types";
@@ -114,4 +115,6 @@ export const SURVEY_ARIA = {
   editQuestion: (position: number) => `Editar pregunta ${position}`,
 } as const;
 
-export const SURVEY_CREATE_DRAFT_STORAGE_KEY = "umssy:survey-create-draft";
+export const SURVEY_CREATE_DRAFT_STORAGE_KEY = `${SESSION_DRAFT_STORAGE_PREFIX}survey-create`;
+
+export const SURVEY_EDIT_DRAFT_STORAGE_KEY = (surveyId: string) => `${SESSION_DRAFT_STORAGE_PREFIX}survey-edit:${surveyId}`;
