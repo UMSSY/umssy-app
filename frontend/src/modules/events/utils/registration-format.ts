@@ -31,3 +31,23 @@ export function formatRegistrationTime(time: string | null | undefined) {
     timeZone: 'UTC',
   }).format(value);
 }
+
+export function getEffectiveRegistrationStatus(status: string, isPast: boolean) {
+  if (isPast && (status === "CONFIRMED" || status === "APPROVED" || status === "Confirmada")) {
+    return { label: "Finalizado", isPast: true, code: "FINALIZED" };
+  }
+
+  const statusLabels: Record<string, string> = {
+    CONFIRMED: "Confirmada",
+    APPROVED: "Confirmada",
+    PENDING: "Pendiente",
+    CANCELLED: "Cancelada",
+    FINALIZED: "Finalizado",
+  };
+
+  return {
+    label: statusLabels[status] ?? status,
+    isPast,
+    code: status,
+  };
+}

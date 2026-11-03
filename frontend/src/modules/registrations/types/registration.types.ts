@@ -1,5 +1,6 @@
 export interface Registration {
   id: string;
+  eventId?: string;
   eventName: string;
   date: string;
   startTime: string;

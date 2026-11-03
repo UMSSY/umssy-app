@@ -35,8 +35,11 @@ export function registrationFixture() {
   };
   const tx = {
     $queryRaw: vi.fn().mockResolvedValue([{ id: EVENT_ID }]),
+    event: { findFirst: vi.fn().mockResolvedValue(null) },
     eventRegistration: {
       findUnique: vi.fn().mockResolvedValue(null),
+      findFirst: vi.fn().mockResolvedValue(null),
+      findMany: vi.fn().mockResolvedValue([]),
       count: vi.fn().mockResolvedValue(0),
       create: vi.fn().mockImplementation(({ data }) => Promise.resolve(registrationRecord({ qrToken: data.qrToken }))),
       update: vi.fn().mockImplementation(({ data }) => Promise.resolve(registrationRecord({
@@ -51,7 +54,7 @@ export function registrationFixture() {
     $transaction: vi.fn().mockImplementation((operation) => operation(tx)),
   };
   const eventService = new EventsService(new EventsRepository(prisma as never));
-  const events = { findForRegistration: vi.fn().mockResolvedValue(event), lockEventRow: eventService.lockEventRow.bind(eventService) };
+  const events = { findForRegistration: vi.fn().mockResolvedValue(event), lockEventRow: eventService.lockEventRow.bind(eventService), hasScheduleConflict: eventService.hasScheduleConflict.bind(eventService) };
   const service = new EventRegistrationsService(new EventRegistrationsRepository(prisma as unknown as PrismaService), events as unknown as EventsService);
   return { event, tx, prisma, events, service };
 }
