@@ -132,7 +132,7 @@ export function ProposalForm() {
           </div>
           
           <ProposalField id="proposal-location" label={values.modality === 'virtual' ? 'Enlace de la reunión' : 'Ubicación'} error={errors.location}>
-            <Input id="proposal-location" name="location" type={values.modality === 'virtual' ? 'url' : 'text'} required value={values.location} onChange={(event) => change('location', event.target.value)} placeholder={values.modality === 'virtual' ? 'https://…' : 'Ej. Laboratorio de Informática 3, piso 2'} className="h-11" {...feedback('location')} />
+            <Input id="proposal-location" name="location" type={values.modality === 'virtual' ? 'url' : 'text'} required value={values.location} onChange={(event) => change('location', event.target.value)} placeholder={values.modality === 'virtual' ? 'https://…' : 'Ej. Facultad de Tecnología, Aula 101'} className="h-11" {...feedback('location')} />
           </ProposalField>
         </fieldset>
         

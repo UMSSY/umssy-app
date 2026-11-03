@@ -7,9 +7,15 @@ beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new 
 afterEach(() => vi.useRealTimers());
 
 const cover = new File(['image'], 'cover.png', { type: 'image/png' });
-const values = { ...EMPTY_PROPOSAL, title: 'Python', description: 'Taller práctico', categoryId: 'cat', eventDate: '2026-11-12', startTime: '09:00', endTime: '12:00', capacity: '30', location: 'Aula 1' };
+const values = { ...EMPTY_PROPOSAL, title: 'Python', description: 'Taller práctico', categoryId: 'cat', eventDate: '2026-11-12', startTime: '09:00', endTime: '12:00', capacity: '30', location: 'Facultad de Tecnología, Aula 1' };
 
 describe('Proposal validation', () => {
+  it.each(['Facultad', 'Facultad, Aula, Piso', ', Aula', 'Facultad, '])('rejects an invalid place/classroom pair: %s', location => {
+    expect(validateProposal({ ...values, location }, cover, ['cat'])).toHaveProperty('location');
+  });
+  it('keeps valid cover files between two and five MB accepted', () => {
+    expect(validateProposalCover(new File([new Uint8Array(5 * 1024 * 1024)], 'cover.png', { type: 'image/png' }))).toBeNull();
+  });
   it('requires all input, including a cover and the approved capacity range', () => {
     expect(validateProposal(values, cover, ['cat'])).toEqual({});
     expect(validateProposal({ ...values, capacity: '1' }, cover, ['cat'])).toHaveProperty('capacity');

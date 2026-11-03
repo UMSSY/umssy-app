@@ -1,3 +1,4 @@
+import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
 import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
 import type { EventSupportContext } from '../types/event-support-context.types.js';
 import { mapSupportContext } from '../mappers/support-context.mapper.js';
@@ -98,7 +99,7 @@ export class EventsRepository {
       this.prisma.event.findMany({
         select: buildSelect(userId),
         where,
-        orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }],
+        orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
         skip,
         take,
       }),
@@ -128,6 +129,17 @@ export class EventsRepository {
     return event as unknown as
       | (EventWithRelations & { modality: { id: string; title: string } })
       | null;
+  }
+
+  findScheduleConflict(tx: Prisma.TransactionClient, event: RegistrationScheduleEvent, registeredEventIds: string[]) {
+    return tx.event.findFirst({
+      where: {
+        id: { in: registeredEventIds, not: event.id },
+        status: { title: PUBLISHED_STATUS_TITLE }, eventDate: event.eventDate,
+        startTime: { lt: event.endTime }, endTime: { gt: event.startTime },
+      },
+      select: { id: true },
+    });
   }
 
   async findForRegistration(id: string, tx: Prisma.TransactionClient = this.prisma) {

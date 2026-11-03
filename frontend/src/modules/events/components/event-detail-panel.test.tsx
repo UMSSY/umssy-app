@@ -1,5 +1,7 @@
+import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
+import { registrationsService } from "@/modules/registrations";
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EventDetailPanel } from "./event-detail-panel";
 import type { EventDetail } from "../types/event-detail.types";
@@ -29,6 +31,32 @@ const event: EventDetail = {
   modality: { id: "m1", title: "Presencial" },
 };
 describe("EventDetailPanel", () => {
+  it('does not carry a registration rejection into another workshop detail', async () => {
+    saveAccessToken('session');
+    vi.spyOn(registrationsService, 'getOwn').mockResolvedValue(null);
+    vi.spyOn(registrationsService, 'create').mockRejectedValue({ isAxiosError: true, response: {
+      status: 409, data: { ok: false, statusCode: 409, code: 'EVENT_FULL', data: null, detail: 'Full' },
+    } });
+    try {
+      const { rerender } = render(<EventDetailPanel event={event} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Inscribirme' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Confirmar' }));
+      await screen.findByRole('button', { name: 'Taller lleno' });
+      rerender(<EventDetailPanel event={{ ...event, id: 'other-event', title: 'Another workshop' }} />);
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Inscribirme' })).toBeEnabled());
+    } finally { clearAccessToken(); }
+  });
+  it('scales the workshop cover to the detail panel width', () => {
+    const { container } = render(<EventDetailPanel event={event} />);
+    const image = container.querySelector('img');
+
+    expect(image).toHaveAttribute(
+      'sizes',
+      '(min-width: 1280px) 24rem, (min-width: 640px) 50vw, 100vw',
+    );
+    expect(image?.parentElement).toHaveClass('w-full', 'aspect-workshop-cover');
+  });
+
   it('omits the redundant institution from a complete venue', () => {
     render(<EventDetailPanel event={{ ...event, location: 'Laboratorio 1, Facultad de Ciencias y Tecnología, UMSS' }} />);
     expect(screen.getByText('Laboratorio 1, Facultad de Ciencias y Tecnología')).toBeInTheDocument();
@@ -81,6 +109,8 @@ describe("EventDetailPanel", () => {
     const button = screen.getByRole("button", { name: "Inscribirme" });
     expect(button).toBeEnabled();
     expect(screen.getByText("20 cupos disponibles")).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toHaveClass('bg-availability-border');
+    expect(screen.getByRole('progressbar').firstElementChild).toHaveClass('bg-success');
   });
   it("places the registration action before the descriptive content", () => {
     render(<EventDetailPanel event={event} />);
@@ -98,6 +128,7 @@ describe("EventDetailPanel", () => {
     expect(
       screen.getByText("Lleno · Sin cupos disponibles"),
     ).toBeInTheDocument();
+    expect(screen.getByRole('progressbar').firstElementChild).toHaveClass('bg-danger');
   });
   it("handles missing optional values and unlimited capacity", () => {
     render(
