@@ -48,7 +48,7 @@ describe('GET /companies/:companyId/job-offers', () => {
     await request(app.getHttpServer()).get(URL).expect(200).expect([]);
 
     expect(service.listByCompany).toHaveBeenCalledWith(COMPANY_ID, {
-      sortBy: 'createdAt',
+      sortBy: 'publishedAt',
       order: 'desc',
     });
   });
@@ -84,7 +84,7 @@ describe('GET /companies/:companyId/job-offers', () => {
       .expect(200);
 
     expect(service.listByCompany).toHaveBeenCalledWith(COMPANY_ID, {
-      sortBy: 'createdAt',
+      sortBy: 'publishedAt',
       order: 'desc',
     });
   });
