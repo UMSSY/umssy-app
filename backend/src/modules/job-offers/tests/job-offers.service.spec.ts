@@ -1,12 +1,14 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   CompanyNotFoundException,
   JobOfferCatalogNotFoundException,
   JobOfferNotFoundException,
+  JobOfferNotReopenableException,
 } from '../exceptions/index.js';
 import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
 import type { JobOffersRepository } from '../repositories/job-offers.repository.js';
 import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
+import type { UpdateJobOfferRequest } from '../requests/update-job-offer.request.js';
 import type { JobOfferSkillsService } from '../services/job-offer-skills.service.js';
 import { JobOffersService } from '../services/job-offers.service.js';
 import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
@@ -41,6 +43,7 @@ const RECORD: JobOfferRecord = {
   languages: 'Español',
   locationUrl: 'https://maps.google.com/?q=x',
   expiresAt: null,
+  publishedAt: CREATED_AT,
   createdAt: CREATED_AT,
   company: { id: 'company-1', title: 'TechBolivia S.R.L.' },
   modality: { title: 'Híbrido' },
@@ -67,6 +70,9 @@ function createRepository() {
     findByCompanyAndId: vi.fn().mockResolvedValue(RECORD),
     findHistoryByCompanyAndId: vi.fn().mockResolvedValue(RECORD),
     update: vi.fn().mockResolvedValue(RECORD),
+    findStatusId: vi.fn().mockResolvedValue('status-deleted'),
+    updateStatus: vi.fn().mockResolvedValue(RECORD),
+    reopen: vi.fn().mockResolvedValue(RECORD),
   };
 }
 
@@ -175,7 +181,7 @@ describe('JobOffersService', () => {
     const result = await service.listByCompany('company-1');
 
     expect(repository.findByCompany).toHaveBeenCalledWith('company-1', {
-      sortBy: 'createdAt',
+      sortBy: 'publishedAt',
       order: 'desc',
     });
     expect(result).toHaveLength(1);
@@ -186,7 +192,7 @@ describe('JobOffersService', () => {
     const filters = {
       modality: JobOfferModality.REMOTE,
       dateFrom: '2026-10-01',
-      sortBy: 'createdAt' as const,
+      sortBy: 'publishedAt' as const,
       order: 'asc' as const,
     };
 
@@ -201,7 +207,7 @@ describe('JobOffersService', () => {
     expect(
       await service.listByCompany('company-1', {
         contractType: JobOfferContractType.INTERNSHIP,
-        sortBy: 'createdAt',
+        sortBy: 'publishedAt',
         order: 'desc',
       }),
     ).toEqual([]);
@@ -278,6 +284,23 @@ describe('JobOffersService', () => {
       expect(response.id).toBe('offer-1');
     });
 
+    it('conserva los requisitos guardados cuando la edición no los envía', async () => {
+      const request: UpdateJobOfferRequest = {
+        ...REQUEST,
+        requiredCareers: undefined,
+        minExperienceYears: undefined,
+        otherRequirements: undefined,
+      };
+
+      await service.update('company-1', 'offer-1', request);
+
+      const data = repository.update.mock.calls[0][1] as Record<string, unknown>;
+      expect(data).not.toHaveProperty('requiredCareers');
+      expect(data).not.toHaveProperty('minExperienceYears');
+      expect(data).not.toHaveProperty('otherRequirements');
+      expect(data.title).toBe('DevOps Senior');
+    });
+
     it('rechaza una empresa inexistente sin tocar la vacante', async () => {
       repository.companyExists.mockResolvedValue(false);
 
@@ -335,5 +358,96 @@ describe('JobOffersService', () => {
       expect(repository.update).not.toHaveBeenCalled();
     });
 
+  });
+  describe('softDelete', () => {
+    it('marca la vacante como Eliminada sin borrarla', async () => {
+      await service.softDelete('company-1', 'offer-1');
+
+      expect(repository.findByCompanyAndId).toHaveBeenCalledWith('company-1', 'offer-1');
+      expect(repository.findStatusId).toHaveBeenCalledWith('Eliminada');
+      expect(repository.updateStatus).toHaveBeenCalledWith('offer-1', 'status-deleted');
+    });
+
+    it('rechaza una vacante inexistente, ya eliminada o de otra empresa', async () => {
+      repository.findByCompanyAndId.mockResolvedValue(null);
+
+      await expect(service.softDelete('company-1', 'offer-1')).rejects.toBeInstanceOf(
+        JobOfferNotFoundException,
+      );
+      expect(repository.updateStatus).not.toHaveBeenCalled();
+    });
+
+    it('falla si el estado Eliminada no está en el catálogo', async () => {
+      repository.findStatusId.mockResolvedValue(null);
+
+      await expect(service.softDelete('company-1', 'offer-1')).rejects.toBeInstanceOf(
+        JobOfferCatalogNotFoundException,
+      );
+      expect(repository.updateStatus).not.toHaveBeenCalled();
+    });
+  });
+  describe('reopen', () => {
+    const CLOSED_RECORD: JobOfferRecord = { ...RECORD, status: { title: 'Cerrada' } };
+
+    beforeEach(() => {
+      repository.findByCompanyAndId.mockResolvedValue(CLOSED_RECORD);
+      repository.findStatusId.mockResolvedValue('status-published');
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('la publica de nuevo con la fecha de hoy sin tocar sus datos', async () => {
+      const today = new Date('2026-10-28T14:00:00.000Z');
+      vi.useFakeTimers({ now: today });
+
+      const result = await service.reopen('company-1', 'offer-1');
+
+      expect(repository.findByCompanyAndId).toHaveBeenCalledWith('company-1', 'offer-1');
+      expect(repository.findStatusId).toHaveBeenCalledWith('Publicada');
+      expect(repository.reopen).toHaveBeenCalledWith('offer-1', 'status-published', today);
+      expect(repository.update).not.toHaveBeenCalled();
+      expect(result.status).toBe('Publicada');
+    });
+
+    it.each(['Publicada', 'Eliminada', 'Borrador'])(
+      'rechaza reabrir una vacante en estado %s',
+      async (status) => {
+        repository.findByCompanyAndId.mockResolvedValue({ ...RECORD, status: { title: status } });
+
+        await expect(service.reopen('company-1', 'offer-1')).rejects.toBeInstanceOf(
+          JobOfferNotReopenableException,
+        );
+        expect(repository.reopen).not.toHaveBeenCalled();
+      },
+    );
+
+    it('rechaza una vacante inexistente o de otra empresa', async () => {
+      repository.findByCompanyAndId.mockResolvedValue(null);
+
+      await expect(service.reopen('company-1', 'offer-1')).rejects.toBeInstanceOf(
+        JobOfferNotFoundException,
+      );
+      expect(repository.reopen).not.toHaveBeenCalled();
+    });
+
+    it('rechaza una empresa inexistente sin buscar la vacante', async () => {
+      repository.companyExists.mockResolvedValue(false);
+
+      await expect(service.reopen('company-1', 'offer-1')).rejects.toBeInstanceOf(
+        CompanyNotFoundException,
+      );
+      expect(repository.findByCompanyAndId).not.toHaveBeenCalled();
+    });
+
+    it('falla si el estado Publicada no está en el catálogo', async () => {
+      repository.findStatusId.mockResolvedValue(null);
+
+      await expect(service.reopen('company-1', 'offer-1')).rejects.toBeInstanceOf(
+        JobOfferCatalogNotFoundException,
+      );
+      expect(repository.reopen).not.toHaveBeenCalled();
+    });
   });
 });
