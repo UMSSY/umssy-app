@@ -57,6 +57,21 @@ describe('createJobOfferSchema', () => {
     expect(firstMessage({ languages: 'a'.repeat(101) })).toMatch(/100/);
   });
 
+  it('limita la categoría a 100 caracteres', () => {
+    expect(parse({ category: 'a'.repeat(100) }).success).toBe(true);
+    expect(firstMessage({ category: 'a'.repeat(101) })).toBe(
+      'La categoría no debe exceder los 100 caracteres',
+    );
+  });
+
+  it('limita el enlace de Google Maps a 2048 caracteres', () => {
+    const base = 'https://maps.app.goo.gl/';
+    expect(parse({ locationUrl: `${base}${'a'.repeat(2048 - base.length)}` }).success).toBe(true);
+    expect(firstMessage({ locationUrl: `${base}${'a'.repeat(2049 - base.length)}` })).toBe(
+      'El enlace no debe exceder los 2048 caracteres',
+    );
+  });
+
   it('solo acepta las modalidades y tipos de contrato del catálogo', () => {
     expect(firstMessage({ modality: 'Hibrido' })).toBe('Modalidad inválida');
     expect(firstMessage({ contractType: 'Pasantia' })).toBe('Tipo de contrato inválido');

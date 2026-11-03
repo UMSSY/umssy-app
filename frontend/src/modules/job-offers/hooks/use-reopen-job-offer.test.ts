@@ -1,4 +1,5 @@
 import { AxiosError, type AxiosResponse } from "axios";
+import { onlineManager } from "@tanstack/react-query";
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { toast } from "sonner";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -30,6 +31,23 @@ describe("useReopenJobOffer", () => {
     expect(jobOffersService.reopen).toHaveBeenCalledWith(COMPANY_ID, "closed");
     expect(toast.success).toHaveBeenCalledWith(REOPEN_JOB_OFFER_TEXT.success, TOAST_OPTIONS);
     expect(invalidate).toHaveBeenCalledWith({ queryKey: JOB_OFFERS_QUERY_KEYS.company(COMPANY_ID) });
+  });
+
+  it("sin conexión deja de cargar, avisa del error y no muestra éxito", async () => {
+    onlineManager.setOnline(false);
+    try {
+      vi.mocked(jobOffersService.reopen).mockRejectedValue(new AxiosError("Network Error", "ERR_NETWORK"));
+      const { result } = renderHookWithQuery(() => useReopenJobOffer());
+
+      act(() => result.current.mutate(VARIABLES));
+
+      await waitFor(() => expect(result.current.isError).toBe(true));
+      expect(result.current.isPending).toBe(false);
+      expect(toast.error).toHaveBeenCalledWith(REOPEN_JOB_OFFER_TEXT.error, TOAST_OPTIONS);
+      expect(toast.success).not.toHaveBeenCalled();
+    } finally {
+      onlineManager.setOnline(true);
+    }
   });
 
   it("si la vacante cambió de estado avisa sin mostrar éxito", async () => {

@@ -11,7 +11,9 @@ import {
   EDITING_KEYS,
   FIELD_FOCUS_CLASS,
   INTERNSHIP_CONTRACT_TYPE,
+  MAX_CATEGORY_CHARS,
   MAX_LANGUAGES_CHARS,
+  MAX_MAPS_LINK_CHARS,
   MAX_TITLE_CHARS,
   MAX_VACANCIES,
   MAX_VACANCY_DIGITS,
@@ -162,7 +164,8 @@ export function InformationStep({
             placeholder="https://maps.app.goo.gl/..."
             className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
             value={conditions.mapsLink} 
-            onChange={(event) => updateField("mapsLink" , event.target.value)}
+            onChange={(event) => updateField("mapsLink", event.target.value.slice(0, MAX_MAPS_LINK_CHARS))}
+            maxLength={MAX_MAPS_LINK_CHARS}
             aria-invalid={Boolean(mapsLinkMessage)}
             aria-describedby={mapsLinkMessage ? "mapsLink-error" : undefined}
           />
@@ -198,7 +201,8 @@ export function InformationStep({
             placeholder="Tecnología" 
             className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
             value={conditions.category} 
-            onChange={(event) => updateField("category", event.target.value)} 
+            onChange={(event) => updateField("category", event.target.value.slice(0, MAX_CATEGORY_CHARS))}
+            maxLength={MAX_CATEGORY_CHARS}
             aria-invalid={Boolean(errors.category)}
             aria-describedby={errors.category ? "category-error" : undefined}
           />

@@ -45,7 +45,13 @@ export function JobOfferDetailsDialog({
   }, [status, errorMessage, onClose]);
 
   return (
-    <Dialog open={status !== "error"} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+    <Dialog
+      open={status !== "error"}
+      disablePointerDismissal
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose();
+      }}
+    >
       <DialogContent
         showCloseButton={false}
         onKeyDown={trapTabFocus}
@@ -75,7 +81,7 @@ export function JobOfferDetailsDialog({
                   {offer.title}
                 </h3>
                 <DialogDescription>{offer.company.name}</DialogDescription>
-                <p className="mt-1 text-sm font-bold text-ink-soft">
+                <p className="mt-1 text-sm font-bold break-words text-ink-soft">
                   {offer.category || NOT_SPECIFIED_TEXT}
                 </p>
               </div>
@@ -93,7 +99,9 @@ export function JobOfferDetailsDialog({
 
               <section className="border-t border-border pt-4">
                 <h4 className={SECTION_TITLE_CLASSES}>Idiomas</h4>
-                <p className="text-sm text-text-secondary">{offer.languages || NOT_SPECIFIED_TEXT}</p>
+                <p className="text-sm break-words text-text-secondary">
+                  {offer.languages || NOT_SPECIFIED_TEXT}
+                </p>
               </section>
 
               <section className="border-t border-border pt-4">

@@ -1,7 +1,9 @@
 import { z } from 'zod';
 import {
+  JOB_OFFER_CATEGORY_MAX_LENGTH,
   JOB_OFFER_DESCRIPTION_MAX_LENGTH,
   JOB_OFFER_LANGUAGES_MAX_LENGTH,
+  JOB_OFFER_LOCATION_URL_MAX_LENGTH,
   JOB_OFFER_MAX_EXPERIENCE_YEARS,
   JOB_OFFER_MAX_POSITIONS,
   JOB_OFFER_MAX_REQUIREMENTS,
@@ -37,7 +39,11 @@ export const jobOfferFieldsSchema = z.object({
     .max(JOB_OFFER_DESCRIPTION_MAX_LENGTH, MESSAGES.DESCRIPTION_TOO_LONG),
   modality: z.enum(JobOfferModality, { message: MESSAGES.INVALID_MODALITY }),
   contractType: z.enum(JobOfferContractType, { message: MESSAGES.INVALID_CONTRACT_TYPE }),
-  category: z.string().trim().min(1, MESSAGES.REQUIRED_FIELD),
+  category: z
+    .string()
+    .trim()
+    .min(1, MESSAGES.REQUIRED_FIELD)
+    .max(JOB_OFFER_CATEGORY_MAX_LENGTH, MESSAGES.CATEGORY_TOO_LONG),
   positionsAvailable: z
     .number()
     .int(MESSAGES.POSITIONS_NOT_INTEGER)
@@ -54,6 +60,7 @@ export const jobOfferFieldsSchema = z.object({
     .string()
     .trim()
     .min(1, MESSAGES.REQUIRED_FIELD)
+    .max(JOB_OFFER_LOCATION_URL_MAX_LENGTH, MESSAGES.LOCATION_URL_TOO_LONG)
     .regex(
       /^https:\/\/(?:maps\.app\.goo\.gl\/[\w-]+|goo\.gl\/maps\/[\w-]+|(?:www\.)?google\.com(?:\.[a-z]{2})?\/maps\/place\/[^/\s?#]+\/@-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?,\d+(?:\.\d+)?[zm])(?:[/?#]\S*)?$/,
       MESSAGES.INVALID_LOCATION_URL,

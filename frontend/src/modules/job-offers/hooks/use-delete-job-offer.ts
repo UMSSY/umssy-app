@@ -13,6 +13,7 @@ export function useDeleteJobOffer() {
   return useMutation({
     mutationFn: ({ companyId, jobOfferId }: JobOfferActionVariables) =>
       jobOffersService.remove(companyId, jobOfferId),
+    networkMode: "always",
     onSuccess: () => toast.success(DELETE_JOB_OFFER_TEXT.success, TOAST_OPTIONS),
     onError: () => toast.error(DELETE_JOB_OFFER_TEXT.error, TOAST_OPTIONS),
     // Se refresca la lista también tras un error por si la vacante cambió en el servidor.

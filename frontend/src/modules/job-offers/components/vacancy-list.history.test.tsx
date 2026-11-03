@@ -145,8 +145,8 @@ describe("VacancyList en modo historial", () => {
 
     expect(await screen.findByText("Aún no tienes vacantes en tu historial")).toBeInTheDocument();
     const links = screen.getAllByRole("link", { name: "Crear nueva vacante" });
-    expect(links).toHaveLength(2);
-    links.forEach((link) => expect(link).toHaveAttribute("href", "/recruiters/job-offers/new"));
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAttribute("href", "/recruiters/job-offers/new");
   });
 
   it("incluye el botón de crear vacante junto a la búsqueda cuando hay vacantes", async () => {

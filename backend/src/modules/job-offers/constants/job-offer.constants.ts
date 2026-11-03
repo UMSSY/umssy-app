@@ -1,6 +1,8 @@
 export const JOB_OFFER_TITLE_MAX_LENGTH = 60;
 export const JOB_OFFER_DESCRIPTION_MAX_LENGTH = 3000;
 export const JOB_OFFER_LANGUAGES_MAX_LENGTH = 100;
+export const JOB_OFFER_CATEGORY_MAX_LENGTH = 100;
+export const JOB_OFFER_LOCATION_URL_MAX_LENGTH = 2048;
 export const JOB_OFFER_MAX_POSITIONS = 500;
 export const JOB_OFFER_MAX_SKILLS = 10;
 export const JOB_OFFER_MAX_REQUIREMENTS = 10;
@@ -24,6 +26,8 @@ export const JOB_OFFER_VALIDATION_MESSAGES = {
   SALARY_RANGE_INVALID: 'El salario mínimo no puede ser mayor al salario máximo',
   LANGUAGES_TOO_LONG: `Los idiomas no deben exceder los ${JOB_OFFER_LANGUAGES_MAX_LENGTH} caracteres`,
   INVALID_LOCATION_URL: 'Ingresa un enlace válido de Google Maps',
+  LOCATION_URL_TOO_LONG: `El enlace no debe exceder los ${JOB_OFFER_LOCATION_URL_MAX_LENGTH} caracteres`,
+  CATEGORY_TOO_LONG: `La categoría no debe exceder los ${JOB_OFFER_CATEGORY_MAX_LENGTH} caracteres`,
   SKILLS_REQUIRED: 'Debes seleccionar al menos una habilidad requerida',
   SKILLS_TOO_MANY: `No se pueden seleccionar más de ${JOB_OFFER_MAX_SKILLS} habilidades`,
   INVALID_SKILL_ID: 'El identificador de la habilidad no es válido',

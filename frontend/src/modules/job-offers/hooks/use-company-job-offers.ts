@@ -24,6 +24,7 @@ export function useCompanyJobOffers(
     queryFn: () => jobOffersService.getByCompany(companyId as string, params),
     enabled: companyId !== null,
     placeholderData: keepPreviousData,
+    networkMode: "always",
     select: (offers) => selectVisibleOffers(offers, scope, filters),
   });
 

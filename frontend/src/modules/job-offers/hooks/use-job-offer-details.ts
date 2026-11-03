@@ -16,6 +16,7 @@ export function useJobOfferDetails(companyId: string | null, jobOfferId: string 
     },
     enabled: companyId !== null && jobOfferId !== null,
     retry: false,
+    networkMode: "always",
   });
 
   return {

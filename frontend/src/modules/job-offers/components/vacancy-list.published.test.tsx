@@ -40,8 +40,8 @@ describe("VacancyList en el portal de empresa", () => {
 
     expect(await screen.findByText("Aún no tienes vacantes publicadas")).toBeInTheDocument();
     const links = screen.getAllByRole("link", { name: "Crear nueva vacante" });
-    expect(links).toHaveLength(2);
-    links.forEach((link) => expect(link).toHaveAttribute("href", "/recruiters/job-offers/new"));
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAttribute("href", "/recruiters/job-offers/new");
   });
 
   it("muestra esqueletos de carga mientras consulta las vacantes", () => {
