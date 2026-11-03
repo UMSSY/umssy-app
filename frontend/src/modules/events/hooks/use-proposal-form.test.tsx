@@ -16,7 +16,7 @@ afterEach(() => { cleanup(); clearAccessToken(); vi.useRealTimers(); });
 async function setup() {
   const hook = renderHook(useProposalForm, { wrapper: createQueryWrapper().wrapper });
   await waitFor(() => expect(hook.result.current.tutor).toBe('Ana López'));
-  const fields: ProposalValues = { title: 'Python', description: 'Taller práctico', categoryId: 'cat', eventDate: '2026-11-12', startTime: '09:00', endTime: '12:00', capacity: '30', modality: 'presencial', location: 'Aula 1' };
+  const fields: ProposalValues = { title: 'Python', description: 'Taller práctico', categoryId: 'cat', eventDate: '2026-11-12', startTime: '09:00', endTime: '12:00', capacity: '30', modality: 'presencial', location: 'Facultad de Tecnología, Aula 1' };
   act(() => {
     for (const key of Object.keys(fields) as (keyof ProposalValues)[]) hook.result.current.change(key, fields[key]);
     hook.result.current.changeCover({ file: new File(['image'], 'cover.png', { type: 'image/png' }), previewUrl: 'blob:cover' });
