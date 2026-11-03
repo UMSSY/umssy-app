@@ -39,8 +39,8 @@ export function ReportHistoryTable({
   emptyMessage = REPORT_HISTORY_EMPTY_MESSAGE,
   searchTerm = "",
 }: ReportHistoryTableProps) {
-  const headClasses = `${HEAD_CLASSES} px-2 whitespace-normal md:px-6 md:whitespace-nowrap`;
-  const cellClasses = `${CELL_CLASSES} px-2 py-3 whitespace-normal md:px-6 md:py-4`;
+  const headClasses = `${HEAD_CLASSES} px-2 whitespace-normal md:px-4`;
+  const cellClasses = `${CELL_CLASSES} px-2 py-3 whitespace-normal md:px-4 md:py-4`;
 
   const renderBody = () => {
     if (isLoading) {
@@ -68,14 +68,14 @@ export function ReportHistoryTable({
           </span>
         </TableCell>
         <TableCell className={`${cellClasses} md:whitespace-nowrap`}>{REPORT_TYPE_LABELS[report.reportType]}</TableCell>
-        <TableCell className={`${cellClasses} md:whitespace-nowrap`}>{renderDateTime(report.generatedAt)}</TableCell>
+        <TableCell className={cellClasses}>{renderDateTime(report.generatedAt)}</TableCell>
       </TableRow>
     ));
   };
 
   return (
     <div className={`${CONTAINER_CLASSES} ${MIN_HEIGHT_CLASSES}`}>
-      <Table className="text-left text-xs sm:text-sm md:min-w-160 md:text-base">
+      <Table className="text-left text-xs sm:text-sm md:min-w-140 md:text-base">
         <TableHeader className="bg-surface-soft">
           <TableRow className="border-border hover:bg-transparent">
             <TableHead scope="col" className={headClasses}>

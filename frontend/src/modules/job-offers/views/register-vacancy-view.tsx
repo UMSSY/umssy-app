@@ -50,7 +50,6 @@ export function RegisterVacancyView({ jobOfferId }: RegisterVacancyViewProps) {
     reset,
   } = useJobOfferForm(jobOfferId);
 
-  // Al guardar una edición se avisa con una notificación y se vuelve al listado de vacantes.
   const publication = usePublishJobOffer(jobOfferId, {
     onSuccess: isEditMode
       ? () => {

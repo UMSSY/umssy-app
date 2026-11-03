@@ -14,6 +14,7 @@ import {
   MAX_LANGUAGES_CHARS,
   MAX_TITLE_CHARS,
   MAX_VACANCIES,
+  MAX_VACANCY_DIGITS,
   MODALITIES,
   SALARY_TO_BE_AGREED,
   TITLE_ALLOWED_REGEX,
@@ -70,7 +71,7 @@ export function InformationStep({
   };
 
   const handleVacancyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateField("vacancyCount", e.target.value.replace(/\D/g, ""));
+    updateField("vacancyCount", e.target.value.replace(/\D/g, "").slice(0, MAX_VACANCY_DIGITS));
   };
 
   const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,7 +91,7 @@ export function InformationStep({
   const vacancyCountMessage =
     errors.vacancyCount ??
     (Number(conditions.vacancyCount) > MAX_VACANCIES ? VACANCY_MESSAGES.maxVacancies : undefined);
-  // El enlace se valida mientras se escribe para avisar en tiempo real (HU4-13).
+  // El enlace se valida mientras se escribe para avisar en tiempo real.
   const mapsLinkMessage =
     errors.mapsLink ?? (conditions.mapsLink.trim() ? getMapsLinkError(conditions.mapsLink) : undefined);
 
@@ -216,6 +217,7 @@ export function InformationStep({
             onChange={handleVacancyChange}
             onKeyDown={handleNumberKeyDown}
             inputMode="numeric"
+            maxLength={MAX_VACANCY_DIGITS}
             aria-invalid={Boolean(vacancyCountMessage)}
             aria-describedby={vacancyCountMessage ? "vacancyCount-error" : undefined}
           />

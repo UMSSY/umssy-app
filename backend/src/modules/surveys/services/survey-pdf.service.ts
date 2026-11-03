@@ -3,7 +3,10 @@ import {
   SURVEY_PDF_COLORS as COLORS,
   SURVEY_PDF_LAYOUT,
 } from '../constants/survey-pdf.constants.js';
-import { SURVEY_DISPLAY_STATUS_LABELS } from '../constants/survey.constants.js';
+import {
+  SURVEY_DISPLAY_STATUS_LABELS,
+  SURVEY_QUESTION_TYPE_LABELS,
+} from '../constants/survey.constants.js';
 import type { SurveyStatisticsResponse } from '../responses/survey-statistics.response.js';
 import { SimplePdfDocument } from '../utils/simple-pdf-document.js';
 
@@ -153,8 +156,7 @@ export class SurveyPdfService {
         stmtY += 11;
       }
 
-      const isSingleChoice = q.type?.toLowerCase() === 'single_choice';
-      const typeLabel = isSingleChoice ? 'Opción única' : 'Opción múltiple';
+      const typeLabel = SURVEY_QUESTION_TYPE_LABELS[q.type?.toLowerCase() ?? ''] ?? SURVEY_QUESTION_TYPE_LABELS.single_choice;
       doc.text(`[${typeLabel}] · ${q.answeredCount} respuestas`, leftX + stmtWidth + 10, cardY + 7, {
         fontSize: 6.5,
         font: 'Helvetica',

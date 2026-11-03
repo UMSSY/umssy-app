@@ -1,5 +1,5 @@
 import type { SurveyBuilderState } from "../types/survey-builder.types";
-import type { CreateSurveyPayload, SurveyStatus } from "../types/survey.types";
+import type { CreateSurveyPayload, SurveyStatus, SurveyTargetAudience } from "../types/survey.types";
 import { toClosesAtIso, toCompleteDateValue, toOpensAtIso } from "./survey-dates";
 
 export function toCreateSurveyPayload(survey: SurveyBuilderState, status: SurveyStatus): CreateSurveyPayload {
@@ -10,6 +10,7 @@ export function toCreateSurveyPayload(survey: SurveyBuilderState, status: Survey
     description: description || undefined,
     careerId: survey.careerId || undefined,
     academicPeriod: survey.academicPeriod || undefined,
+    targetAudience: (survey.targetAudience || undefined) as SurveyTargetAudience | undefined,
     opensAt: toCompleteDateValue(survey.opensAt) ? toOpensAtIso(survey.opensAt) : undefined,
     closesAt: toCompleteDateValue(survey.closesAt) ? toClosesAtIso(survey.closesAt) : undefined,
     status,

@@ -8,6 +8,7 @@ import { useAccessRequestForm } from "../../contexts/access-request-context";
 import { SIS_CODE_LENGTH } from "../../constants/personal-data-rules.constants";
 import { usePersonalDataBind } from "../../hooks/use-personal-data-bind";
 import type { PersonalDataFieldName } from "../../types/access-request.types";
+import { getLatestBirthDate } from "../../utils/get-latest-birth-date";
 import { CareerSelect } from "./career-select";
 import { IdCardField } from "./id-card-field";
 import { PersonalDataField } from "./personal-data-field";
@@ -126,6 +127,7 @@ export function PersonalDataForm() {
           label="Fecha de nacimiento"
           isRequired
           type="date"
+          max={getLatestBirthDate()}
           autoComplete="bday"
         />
 

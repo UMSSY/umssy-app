@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { Prisma } from '../../../prisma/client.js';
 import { JOB_OFFER_CREATED_SELECT, JOB_OFFER_SELECT } from '../constants/job-offer.constants.js';
+import { JobOfferNotFoundException } from '../exceptions/index.js';
 import { JobOffersRepository } from '../repositories/job-offers.repository.js';
 import { JobOfferContractType, JobOfferModality, JobOfferStatus } from '../types/job-offer.enum.js';
 
@@ -59,6 +61,28 @@ describe('JobOffersRepository', () => {
       data: { statusId: 'status-published', createdAt: publishedAt },
       select: JOB_OFFER_SELECT,
     });
+  });
+
+  it('responde vacante no encontrada si se borró antes de escribir', async () => {
+    const recordNotFound = new Prisma.PrismaClientKnownRequestError('Record not found', {
+      code: 'P2025',
+      clientVersion: 'test',
+    });
+    prisma.jobOffer.update.mockRejectedValue(recordNotFound);
+
+    await expect(repository.updateStatus('offer-1', 'status-deleted')).rejects.toBeInstanceOf(
+      JobOfferNotFoundException,
+    );
+    await expect(
+      repository.reopen('offer-1', 'status-published', new Date()),
+    ).rejects.toBeInstanceOf(JobOfferNotFoundException);
+  });
+
+  it('no oculta otros errores de la base de datos al escribir', async () => {
+    const failure = new Error('connection lost');
+    prisma.jobOffer.update.mockRejectedValue(failure);
+
+    await expect(repository.updateStatus('offer-1', 'status-deleted')).rejects.toBe(failure);
   });
 
   it('busca el id de un estado por su título', async () => {

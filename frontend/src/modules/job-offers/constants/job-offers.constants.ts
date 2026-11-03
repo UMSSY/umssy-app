@@ -9,6 +9,8 @@ export const MAX_TITLE_CHARS = 60;
 export const MAX_LANGUAGES_CHARS = 100;
 export const MAX_DESCRIPTION_CHARS = 3000;
 export const MAX_VACANCIES = 500;
+// Un dígito más que el máximo: así 1000 no se recorta a 100 y se muestra el error del límite.
+export const MAX_VACANCY_DIGITS = String(MAX_VACANCIES).length + 1;
 export const MAX_SALARY_DIGITS = 9;
 export const MAX_SKILLS = 10;
 export const DESCRIPTION_PREVIEW_CHARS = 125;

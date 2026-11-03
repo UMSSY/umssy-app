@@ -128,12 +128,12 @@ describe("VacancyList en el portal de empresa", () => {
       await screen.findByRole("button", { name: "Eliminar vacante Ingeniero Backend" }),
     );
 
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("alertdialog");
     expect(within(dialog).getByText(DELETE_JOB_OFFER_TEXT.title)).toBeInTheDocument();
     expect(within(dialog).getByText("Ingeniero Backend")).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(remove).not.toHaveBeenCalled();
   });
 
@@ -147,10 +147,10 @@ describe("VacancyList en el portal de empresa", () => {
     await user.click(
       await screen.findByRole("button", { name: "Eliminar vacante Ingeniero Backend" }),
     );
-    await user.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Eliminar" }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Eliminar" }));
 
     expect(remove).toHaveBeenCalledWith(COMPANY_ID, "backend");
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(toast.success).toHaveBeenCalledWith(DELETE_JOB_OFFER_TEXT.success, TOAST_OPTIONS);
     await waitFor(() =>
       expect(screen.queryByRole("button", { name: "Ingeniero Backend" })).not.toBeInTheDocument(),
@@ -166,13 +166,13 @@ describe("VacancyList en el portal de empresa", () => {
     await user.click(
       await screen.findByRole("button", { name: "Eliminar vacante Ingeniero Backend" }),
     );
-    await user.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Eliminar" }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Eliminar" }));
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith(DELETE_JOB_OFFER_TEXT.error, TOAST_OPTIONS),
     );
     expect(toast.success).not.toHaveBeenCalled();
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Ingeniero Backend", hidden: true }),
     ).toBeInTheDocument();

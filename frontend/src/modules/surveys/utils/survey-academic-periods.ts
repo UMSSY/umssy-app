@@ -21,6 +21,6 @@ export function toSurveyAcademicPeriod(value: string | null | undefined): string
 }
 
 export function matchesSurveyYear(period: string | null | undefined, year: string): boolean {
-  if (!period) return false;
-  return period === ALL_ACADEMIC_PERIODS_VALUE || toSurveyAcademicPeriod(period) === year;
+  if (!period || period === ALL_ACADEMIC_PERIODS_VALUE) return false;
+  return toSurveyAcademicPeriod(period) === year;
 }

@@ -3,7 +3,11 @@ import { SURVEY_ERROR_MESSAGES } from '../constants/survey.constants.js';
 import {
   CareerNotFoundException,
   InvalidSurveyScheduleException,
+  SurveyHasResponsesException,
+  SurveyNotAvailableException,
   SurveyNotFoundException,
+  SurveyNotOpenException,
+  SurveyNotPublishedException,
   SurveyTitleAlreadyExistsException,
 } from '../exceptions/index.js';
 import { SurveyMapper } from '../mappers/survey.mapper.js';
@@ -20,6 +24,7 @@ const PUBLISHED_REQUEST: CreateSurveyRequest = {
   description: 'Situación laboral',
   careerId: CAREER_ID,
   academicPeriod: 'II-2026',
+  targetAudience: 'graduates',
   opensAt: '2026-11-03T04:00:00.000Z',
   closesAt: '2026-12-16T03:59:59.999Z',
   status: 'published',
@@ -48,6 +53,8 @@ function createRepositories() {
       findNotificationsForUser: vi.fn().mockResolvedValue([]),
       findByIdWithQuestions: vi.fn(),
       submitResponse: vi.fn(),
+      findPublicationState: vi.fn(),
+      unpublish: vi.fn().mockResolvedValue(true),
     },
     careers: { exists: vi.fn().mockResolvedValue(true), findAll: vi.fn() },
   };
@@ -87,6 +94,8 @@ describe('SurveysService', () => {
       title: PUBLISHED_REQUEST.title,
       careerId: CAREER_ID,
       academicPeriod: 'II-2026',
+      excludedId: undefined,
+      now: NOW,
     });
     expect(repositories.surveys.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -121,6 +130,8 @@ describe('SurveysService', () => {
       title: 'Borrador',
       careerId: null,
       academicPeriod: null,
+      excludedId: undefined,
+      now: NOW,
     });
     expect(repositories.surveys.create).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'draft', careerId: null, opensAt: null, closesAt: null }),
@@ -224,6 +235,7 @@ describe('SurveysService', () => {
         title: 'Encuesta',
         status: { title: 'published' },
         academicPeriod: 'II-2026',
+        targetAudience: { title: 'graduates' },
         opensAt: NOW,
         closesAt: NOW,
         createdAt: NOW,
@@ -243,6 +255,7 @@ describe('SurveysService', () => {
         career: { id: CAREER_ID, title: 'Ingeniería de Sistemas' },
         createdBy: { fullName: 'Admin Uno', email: 'admin.1@umssy.test' },
         academicPeriod: 'II-2026',
+        targetAudience: 'graduates',
         opensAt: NOW.toISOString(),
         closesAt: NOW.toISOString(),
         questionCount: 4,
@@ -288,10 +301,77 @@ describe('SurveysService', () => {
     ];
     const spy = repositories.surveys.findNotificationsForUser.mockResolvedValue(mockNotifications);
 
-    const result = await service.getNotificationsForUser('user-1');
+    const result = await service.getNotificationsForUser('user-1', ['titulado']);
 
-    expect(spy).toHaveBeenCalledWith('user-1', { careerId: CAREER_ID, graduationYear: 2026 });
+    expect(spy).toHaveBeenCalledWith('user-1', { careerId: CAREER_ID, graduationYear: 2026 }, ['all', 'graduates']);
     expect(result).toBe(mockNotifications);
+  });
+
+  it('no consulta notificaciones si la sesión no tiene un rol destinatario', async () => {
+    await expect(service.getNotificationsForUser('admin-1', ['administrativo'])).resolves.toEqual([]);
+    expect(repositories.surveys.findNotificationsForUser).not.toHaveBeenCalled();
+  });
+
+  it('rechaza responder una encuesta dirigida a otro tipo de usuario', async () => {
+    repositories.surveys.findByIdWithQuestions.mockResolvedValue({
+      id: 's1',
+      title: 'Test',
+      status: 'published',
+      targetAudience: 'mentors',
+      questions: [],
+    });
+
+    await expect(service.getSurveyForAnswering('s1', 'user-1', ['titulado'])).rejects.toBeInstanceOf(
+      SurveyNotAvailableException,
+    );
+    await expect(service.getSurveyForAnswering('s1', 'user-1', ['mentor'])).resolves.toBeDefined();
+  });
+
+  it('no permite responder una encuesta antes de su fecha de apertura', async () => {
+    const survey = {
+      id: 's1',
+      title: 'Test',
+      status: 'published',
+      targetAudience: 'graduates',
+      opensAt: '2999-01-01T04:00:00.000Z',
+      isExpired: false,
+      hasAnswered: false,
+      questions: [],
+    };
+    repositories.surveys.findByIdWithQuestions.mockResolvedValue(survey);
+
+    await expect(service.getSurveyForAnswering('s1', 'user-1', ['titulado'])).rejects.toBeInstanceOf(
+      SurveyNotOpenException,
+    );
+    await expect(service.submitResponse('s1', 'user-1', { answers: [] }, ['titulado'])).rejects.toBeInstanceOf(
+      SurveyNotOpenException,
+    );
+    expect(repositories.surveys.submitResponse).not.toHaveBeenCalled();
+  });
+
+  it('devuelve a borrador una encuesta publicada sin respuestas', async () => {
+    repositories.surveys.findPublicationState.mockResolvedValue({ status: 'published', responseCount: 0 });
+
+    await expect(service.unpublish('s1')).resolves.toBeUndefined();
+    expect(repositories.surveys.unpublish).toHaveBeenCalledWith('s1');
+  });
+
+  it.each([
+    ['no existe', null, SurveyNotFoundException],
+    ['es un borrador', { status: 'draft', responseCount: 0 }, SurveyNotPublishedException],
+    ['ya tiene respuestas', { status: 'published', responseCount: 3 }, SurveyHasResponsesException],
+  ])('no inhabilita una encuesta que %s', async (_case, state, exception) => {
+    repositories.surveys.findPublicationState.mockResolvedValue(state);
+
+    await expect(service.unpublish('s1')).rejects.toBeInstanceOf(exception);
+    expect(repositories.surveys.unpublish).not.toHaveBeenCalled();
+  });
+
+  it('no inhabilita la encuesta si recibe una respuesta antes de actualizarla', async () => {
+    repositories.surveys.findPublicationState.mockResolvedValue({ status: 'published', responseCount: 0 });
+    repositories.surveys.unpublish.mockResolvedValue(false);
+
+    await expect(service.unpublish('s1')).rejects.toBeInstanceOf(SurveyHasResponsesException);
   });
 
   it('obtiene encuesta para responderla o lanza SurveyNotFoundException si no existe', async () => {
@@ -300,9 +380,9 @@ describe('SurveysService', () => {
       SurveyNotFoundException,
     );
 
-    const mockDetail = { id: 's1', title: 'Test', status: 'published', questions: [] };
+    const mockDetail = { id: 's1', title: 'Test', status: 'published', targetAudience: 'graduates', questions: [] };
     repositories.surveys.findByIdWithQuestions.mockResolvedValue(mockDetail);
-    await expect(service.getSurveyForAnswering('s1', 'user-1')).resolves.toBe(mockDetail);
+    await expect(service.getSurveyForAnswering('s1', 'user-1', ['titulado'])).resolves.toBe(mockDetail);
   });
 
   it('permite guardar respuestas válidas para una encuesta publicada', async () => {
@@ -310,6 +390,7 @@ describe('SurveysService', () => {
       id: 's1',
       title: 'Test',
       status: 'published',
+      targetAudience: 'all',
       isExpired: false,
       hasAnswered: false,
       questions: [
@@ -330,7 +411,7 @@ describe('SurveysService', () => {
       answers: [{ questionId: 'q1', optionIds: ['opt1'] }],
     };
 
-    const res = await service.submitResponse('s1', 'user-1', payload);
+    const res = await service.submitResponse('s1', 'user-1', payload, ['estudiante']);
     expect(res.success).toBe(true);
     expect(repositories.surveys.submitResponse).toHaveBeenCalledWith(
       's1',

@@ -5,6 +5,7 @@ vi.mock("@/shared/services/api-client", async (importOriginal) => ({
     get: vi.fn(),
     post: vi.fn(),
     patch: vi.fn(),
+    delete: vi.fn(),
     
   },
 }));
@@ -16,6 +17,8 @@ import {
   getOrCreateConversation,
   sendMessage,
   markConversationAsRead,
+  blockUser,
+  unblockUser,
 } from '../services/chat-api';
 import { apiClient } from '@/shared/services/api-client';
 import {
@@ -644,7 +647,7 @@ describe('chat-api — getOrCreateConversation ', () => {
       contact: {
         id: 'user-1',
         fullName: 'Maria Peredo',
-        avatarUrl: 'https\://example.com/a.jpg',
+        avatarUrl: 'https://example.com/a.jpg',
         isOnline: true,
       },
       lastMessage: {
@@ -661,6 +664,34 @@ describe('chat-api — getOrCreateConversation ', () => {
     vi.spyOn(apiClient, 'post').mockResolvedValue({ data: conversation });
 
     const result = await getOrCreateConversation('user-1');
+
+    expect(result).toEqual(conversation);
+
+  });
+
+  it('debe desempaquetar la conversacion si el backend envia el sobre estandarizado con status 201', async () => {
+    const conversation = {
+      id: 'conv-wrapped-1',
+      contact: {
+        id: 'user-2',
+        fullName: 'Juan Perez',
+        avatarUrl: null,
+        isOnline: true,
+      },
+      lastMessage: null,
+      unreadCount: 0,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    };
+    vi.spyOn(apiClient, 'post').mockResolvedValue({
+      data: {
+        statusCode: 201,
+        ok: true,
+        detail: 'Conversación creada exitosamente',
+        data: conversation,
+      },
+    });
+
+    const result = await getOrCreateConversation('user-2');
 
     expect(result).toEqual(conversation);
 
@@ -1155,3 +1186,60 @@ describe('chat-api — estado leído con datos de la BD (HU-1)', () => {
   });
 });
 
+describe('chat-api · bloqueo de usuarios', () => {
+  const CONTACT_ID = '22222222-2222-4222-8222-222222222222';
+
+  it('getConversations mapea isBlockedByMe y usa false si el backend no lo envía', async () => {
+    apiClientMock.get.mockResolvedValueOnce({
+      data: {
+        data: [
+          { id: 'conv-1', contact: { id: 'u1', fullName: 'Uno', isOnline: false }, unreadCount: 0, updatedAt: '2026-10-12T10:00:00.000Z', isBlockedByMe: true },
+          { id: 'conv-2', contact: { id: 'u2', fullName: 'Dos', isOnline: false }, unreadCount: 0, updatedAt: '2026-10-11T10:00:00.000Z' },
+        ],
+      },
+    } as never);
+
+    const conversations = await getConversations();
+
+    expect(conversations.find((c) => c.id === 'conv-1')?.isBlockedByMe).toBe(true);
+    expect(conversations.find((c) => c.id === 'conv-2')?.isBlockedByMe).toBe(false);
+  });
+
+  it('getOrCreateConversation incluye isBlockedByMe', async () => {
+    apiClientMock.post.mockResolvedValueOnce({
+      data: { data: { id: 'conv-9', contact: { id: CONTACT_ID, fullName: 'Ana', isOnline: true }, unreadCount: 0, updatedAt: '2026-10-12T10:00:00.000Z', isBlockedByMe: true } },
+    } as never);
+
+    const conversation = await getOrCreateConversation(CONTACT_ID);
+
+    expect(conversation.isBlockedByMe).toBe(true);
+  });
+
+  it('blockUser llama a POST /chat/blocks con { userId }', async () => {
+    apiClientMock.post.mockResolvedValueOnce({ data: { data: { blockedUserId: CONTACT_ID } } } as never);
+
+    await expect(blockUser(CONTACT_ID)).resolves.toBeUndefined();
+
+    expect(apiClientMock.post).toHaveBeenCalledWith('/chat/blocks', { userId: CONTACT_ID });
+  });
+
+  it('blockUser propaga el error de red (sin catch silencioso)', async () => {
+    apiClientMock.post.mockRejectedValueOnce(new Error('Network Error'));
+
+    await expect(blockUser(CONTACT_ID)).rejects.toThrow('Network Error');
+  });
+
+  it('unblockUser llama a DELETE /chat/blocks/:userId', async () => {
+    apiClientMock.delete.mockResolvedValueOnce({ data: '' } as never);
+
+    await expect(unblockUser(CONTACT_ID)).resolves.toBeUndefined();
+
+    expect(apiClientMock.delete).toHaveBeenCalledWith(`/chat/blocks/${CONTACT_ID}`);
+  });
+
+  it('unblockUser propaga el error de red', async () => {
+    apiClientMock.delete.mockRejectedValueOnce(new Error('Network Error'));
+
+    await expect(unblockUser(CONTACT_ID)).rejects.toThrow('Network Error');
+  });
+});

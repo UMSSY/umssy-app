@@ -1,16 +1,18 @@
 "use client";
 
 import { LoaderCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { ConfirmDialogProps } from "../types/confirm-dialog-props.types";
+import { trapTabFocus } from "../utils/trap-tab-focus";
 
 export function ConfirmDialog({
   isOpen,
@@ -24,31 +26,25 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  // Mientras la acción está en curso el diálogo no se puede cerrar con Esc ni con clic fuera.
+  // Mientras la acción está en curso el diálogo no se puede cerrar con Esc ni con Cancelar.
   const handleOpenChange = (open: boolean) => {
     if (!open && !isBusy) onCancel?.();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent showCloseButton={false}>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
+    <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
+      <AlertDialogContent onKeyDown={trapTabFocus}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
           {cancelLabel ? (
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isBusy}
-              onClick={onCancel}
-              className="max-md:min-h-11"
-            >
+            <AlertDialogCancel disabled={isBusy} className="max-md:min-h-11">
               {cancelLabel}
-            </Button>
+            </AlertDialogCancel>
           ) : null}
-          <Button
+          <AlertDialogAction
             type="button"
             variant={confirmVariant}
             disabled={isBusy}
@@ -58,9 +54,9 @@ export function ConfirmDialog({
           >
             {isBusy ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null}
             {isBusy && busyLabel ? busyLabel : confirmLabel}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
