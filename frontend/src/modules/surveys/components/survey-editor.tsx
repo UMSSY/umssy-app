@@ -52,14 +52,14 @@ export function SurveyEditor({ title, initialState, autosaveKey, isSaving, pendi
   useEffect(() => {
     if (!autosaveKey) return;
     if (state.isDirty) {
-      writeSurveyStorage(autosaveKey, { ...state, pendingFocus: null });
+      void writeSurveyStorage(autosaveKey, { ...state, pendingFocus: null });
       return;
     }
-    removeSurveyStorage(autosaveKey);
+    void removeSurveyStorage(autosaveKey);
   }, [autosaveKey, state]);
 
   const clearAutosave = () => {
-    if (autosaveKey) removeSurveyStorage(autosaveKey);
+    if (autosaveKey) void removeSurveyStorage(autosaveKey);
   };
 
   const minDate = toCalendarDate(today) ?? new Date();

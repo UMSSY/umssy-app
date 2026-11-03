@@ -10,16 +10,18 @@ import { SURVEY_EDIT_DRAFT_STORAGE_KEY, SURVEY_TEXT } from "../constants/survey-
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import { SURVEYS_PATH } from "../constants/survey-routes.constants";
 import { useSurveyDetail } from "../hooks/use-survey-detail";
+import { useSurveyDraft } from "../hooks/use-survey-draft";
 import { useUpdateSurvey } from "../hooks/use-update-survey";
 import type { SurveyDetailViewProps } from "../types/survey-component-props.types";
-import { readSurveyDraft } from "../utils/read-survey-draft";
 import { toSurveyBuilderState } from "../utils/to-survey-builder-state";
 
 export function SurveyDetailView({ id }: SurveyDetailViewProps) {
   const { survey, isLoading, hasError } = useSurveyDetail(id);
   const { updateSurvey, isSaving, pendingStatus } = useUpdateSurvey(id);
+  const autosaveKey = SURVEY_EDIT_DRAFT_STORAGE_KEY(id);
+  const { draft, isRestored } = useSurveyDraft(autosaveKey);
 
-  if (isLoading) {
+  if (isLoading || !isRestored) {
     return (
       <div aria-busy="true" className="mx-auto flex w-full max-w-3xl flex-col gap-3">
         <Skeleton className="h-32 w-full rounded-lg" />
@@ -46,13 +48,11 @@ export function SurveyDetailView({ id }: SurveyDetailViewProps) {
     return <SurveyReadOnlyView survey={survey} />;
   }
 
-  const autosaveKey = SURVEY_EDIT_DRAFT_STORAGE_KEY(survey.id);
-
   return (
     <SurveyEditor
       key={survey.id}
       title={SURVEY_TEXT.editPageTitle}
-      initialState={readSurveyDraft(autosaveKey) ?? toSurveyBuilderState(survey)}
+      initialState={draft ?? toSurveyBuilderState(survey)}
       autosaveKey={autosaveKey}
       isSaving={isSaving}
       pendingStatus={pendingStatus}

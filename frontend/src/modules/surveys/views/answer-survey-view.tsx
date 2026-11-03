@@ -31,17 +31,28 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
   const { survey, isLoading, errorMessage } = useSurveyDetail(id);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const storageKey = SURVEY_ANSWERS_STORAGE_KEY(id);
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>(
-    () => readSurveyStorage<Record<string, string[]>>(storageKey) ?? {},
-  );
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>({});
+  const [isDraftRestored, setIsDraftRestored] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isSubmittedSuccess, setIsSubmittedSuccess] = useState(false);
 
   useEffect(() => {
-    if (isSubmittedSuccess) return;
+    let isActive = true;
+    void readSurveyStorage<Record<string, string[]>>(storageKey).then((storedAnswers) => {
+      if (!isActive) return;
+      if (storedAnswers) setSelectedAnswers(storedAnswers);
+      setIsDraftRestored(true);
+    });
+    return () => {
+      isActive = false;
+    };
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (!isDraftRestored || isSubmittedSuccess) return;
     if (Object.keys(selectedAnswers).length === 0) return;
-    writeSurveyStorage(storageKey, selectedAnswers);
-  }, [isSubmittedSuccess, selectedAnswers, storageKey]);
+    void writeSurveyStorage(storageKey, selectedAnswers);
+  }, [isDraftRestored, isSubmittedSuccess, selectedAnswers, storageKey]);
 
   const handleAnswerChange = (questionId: string, optionIds: string[]) => {
     setSelectedAnswers((previous) => ({ ...previous, [questionId]: optionIds }));
@@ -78,7 +89,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
         .map(([questionId, optionIds]) => ({ questionId, optionIds }));
 
       await surveysService.submitAnswers(id, { answers });
-      removeSurveyStorage(storageKey);
+      void removeSurveyStorage(storageKey);
       setIsSubmittedSuccess(true);
       toast.success(SURVEY_ANSWER_TEXT.submitSuccess);
       setTimeout(() => router.push(SURVEY_NOTIFICATIONS_PATH), SURVEY_ANSWER_REDIRECT_DELAY_MS);
@@ -89,7 +100,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !isDraftRestored) {
     return (
       <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
         <Skeleton className="h-6 w-36" />
