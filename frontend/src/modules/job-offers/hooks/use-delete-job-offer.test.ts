@@ -1,4 +1,6 @@
+import { onlineManager } from "@tanstack/react-query";
 import { act, cleanup, waitFor } from "@testing-library/react";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderHookWithQuery } from "@/shared/testing/render-hook-with-query";
@@ -17,6 +19,22 @@ describe("useDeleteJobOffer", () => {
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
+  });
+
+  it("sin conexión deja de cargar y avisa del error", async () => {
+    onlineManager.setOnline(false);
+    try {
+      vi.mocked(jobOffersService.remove).mockRejectedValue(new AxiosError("Network Error", "ERR_NETWORK"));
+      const { result } = renderHookWithQuery(() => useDeleteJobOffer());
+
+      act(() => result.current.mutate(VARIABLES));
+
+      await waitFor(() => expect(result.current.isError).toBe(true));
+      expect(result.current.isPending).toBe(false);
+      expect(toast.error).toHaveBeenCalledWith(DELETE_JOB_OFFER_TEXT.error, TOAST_OPTIONS);
+    } finally {
+      onlineManager.setOnline(true);
+    }
   });
 
   it("elimina, avisa con una notificación arriba y refresca las vacantes de la empresa", async () => {

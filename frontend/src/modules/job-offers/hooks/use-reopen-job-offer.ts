@@ -14,6 +14,7 @@ export function useReopenJobOffer() {
   return useMutation({
     mutationFn: ({ companyId, jobOfferId }: JobOfferActionVariables) =>
       jobOffersService.reopen(companyId, jobOfferId),
+    networkMode: "always",
     onSuccess: () => toast.success(REOPEN_JOB_OFFER_TEXT.success, TOAST_OPTIONS),
     onError: (error) => toast.error(toReopenErrorMessage(error), TOAST_OPTIONS),
     // Se refresca siempre: tras un éxito cambia la etiqueta y tras un 409 se muestra el estado real.

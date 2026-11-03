@@ -1,5 +1,7 @@
 import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { onlineManager } from "@tanstack/react-query";
 import userEvent from "@testing-library/user-event";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
@@ -102,6 +104,46 @@ describe("VacancyList details", () => {
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
     );
+  });
+
+  it("no cierra el detalle al hacer clic fuera de él", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(jobOffersService, "getByCompanyAndId").mockResolvedValue(OFFERS[1]);
+
+    renderWithQuery(<VacancyList />);
+    await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
+    await screen.findByText("TypeScript");
+
+    fireEvent.pointerDown(document.body);
+    fireEvent.mouseDown(document.body);
+    fireEvent.pointerUp(document.body);
+    fireEvent.mouseUp(document.body);
+    fireEvent.click(document.body);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("sin conexión avisa y no deja el detalle cargando", async () => {
+    const user = userEvent.setup();
+    onlineManager.setOnline(false);
+    try {
+      vi.spyOn(jobOffersService, "getByCompanyAndId").mockRejectedValue(
+        new AxiosError("Network Error", "ERR_NETWORK"),
+      );
+
+      renderWithQuery(<VacancyList />);
+      await user.click(screen.getByRole("button", { name: "Ingeniero Backend" }));
+
+      await waitFor(() =>
+        expect(toast.error).toHaveBeenCalledWith("No se pudo cargar la información de la vacante.", {
+          position: "top-center",
+          duration: 5000,
+        }),
+      );
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    } finally {
+      onlineManager.setOnline(true);
+    }
   });
 
   it("cierra el detalle con el botón Cerrar del pie", async () => {

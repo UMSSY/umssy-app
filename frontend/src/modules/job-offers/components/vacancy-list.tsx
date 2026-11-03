@@ -136,6 +136,7 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
     );
   }
 
+  const isEmptyWithoutFilters = offers.length === 0 && !hasFilters;
   const emptyMessage = !hasFilters
     ? text.empty
     : hasSearch && !hasOtherFilters
@@ -159,19 +160,27 @@ export function VacancyList({ scope = "published" }: VacancyListProps) {
           onReset={reset}
           showStatusFilter={isHistory}
         />
-        <Link
-          href={NEW_JOB_OFFER_ROUTE}
-          className={cn(buttonVariants({ variant: "outline" }), CREATE_LINK_CLASSES)}
-        >
-          <Plus aria-hidden="true" />
-          Crear nueva vacante
-        </Link>
+        {isEmptyWithoutFilters ? null : (
+          <Link
+            href={NEW_JOB_OFFER_ROUTE}
+            className={cn(buttonVariants({ variant: "outline" }), CREATE_LINK_CLASSES)}
+          >
+            <Plus aria-hidden="true" />
+            Crear nueva vacante
+          </Link>
+        )}
       </div>
 
       {offers.length === 0 ? (
-        <div className="space-y-3">
+        <div
+          className={cn(
+            "space-y-3",
+            isEmptyWithoutFilters &&
+              "flex flex-col items-center rounded-lg border border-dashed border-border-strong bg-surface px-6 py-10 text-center",
+          )}
+        >
           <p className="text-sm text-text-secondary">{emptyMessage}</p>
-          {!hasFilters ? (
+          {isEmptyWithoutFilters ? (
             <Link href={NEW_JOB_OFFER_ROUTE} className={cn(buttonVariants(), CREATE_LINK_CLASSES)}>
               <Plus aria-hidden="true" />
               Crear nueva vacante
