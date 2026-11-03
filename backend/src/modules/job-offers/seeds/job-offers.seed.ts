@@ -97,6 +97,7 @@ async function seedDemoJobOffers(
         salaryRange: formatSalaryRange(offer.salaryMin, offer.salaryMax),
         languages: offer.languages,
         locationUrl: SEED_JOB_OFFER_LOCATION_URL,
+        publishedAt: new Date(now.getTime() - offer.daysAgo * DAY_MS),
         createdAt: new Date(now.getTime() - offer.daysAgo * DAY_MS),
         skills: {
           create: offer.skills.map((name) => ({ skillId: requireId(skillIds, name, 'tecnologías') })),
