@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   StreamableFile,
   UseGuards,
 } from '@nestjs/common';
@@ -40,6 +41,10 @@ import {
   type SubmitSurveyResponseRequest,
 } from '../requests/submit-survey-response.schema.js';
 import { surveyIdSchema } from '../requests/survey-id.schema.js';
+import {
+  surveyStatisticsQuerySchema,
+  type SurveyStatisticsQuery,
+} from '../requests/survey-statistics-query.schema.js';
 
 import type { SurveyCreatedResponse } from '../responses/survey-created.response.js';
 import type { SurveyDetailResponse } from '../responses/survey-detail.response.js';
@@ -56,11 +61,14 @@ export class SurveysController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Crea una encuesta de empleabilidad en borrador o publicada' })
+  @ApiOperation({
+    summary: 'Crea una encuesta de empleabilidad en borrador o publicada',
+  })
   @ApiBody(toApiBody(createSurveySchema))
   @ApiCreatedResponse({ description: 'Encuesta creada' })
   create(
-    @Body(new ZodValidationPipe(createSurveySchema)) request: CreateSurveyRequest,
+    @Body(new ZodValidationPipe(createSurveySchema))
+    request: CreateSurveyRequest,
     @CurrentUserId() userId: string,
   ): Promise<SurveyCreatedResponse> {
     return this.surveysService.create(userId, request);
@@ -68,15 +76,21 @@ export class SurveysController {
 
   @Get()
   @ApiOperation({ summary: 'Lista las encuestas de empleabilidad creadas' })
-  @ApiOkResponse({ description: 'Encuestas, de la más reciente a la más antigua' })
+  @ApiOkResponse({
+    description: 'Encuestas, de la más reciente a la más antigua',
+  })
   list(): Promise<SurveySummaryResponse[]> {
     return this.surveysService.listSurveys();
   }
 
   @Get(':id')
   @Roles(...SURVEY_RESPONDENT_ROLES, SURVEYS_ROLE)
-  @ApiOperation({ summary: 'Obtiene una encuesta con sus preguntas y opciones' })
-  @ApiOkResponse({ description: 'Detalle de la encuesta para ser respondida o editada' })
+  @ApiOperation({
+    summary: 'Obtiene una encuesta con sus preguntas y opciones',
+  })
+  @ApiOkResponse({
+    description: 'Detalle de la encuesta para ser respondida o editada',
+  })
   getById(
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
     @CurrentUserId() userId: string,
@@ -90,60 +104,87 @@ export class SurveysController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Actualiza una encuesta en borrador y permite publicarla' })
+  @ApiOperation({
+    summary: 'Actualiza una encuesta en borrador y permite publicarla',
+  })
   @ApiBody(toApiBody(createSurveySchema))
   @ApiOkResponse({ description: 'Encuesta actualizada' })
   update(
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
-    @Body(new ZodValidationPipe(createSurveySchema)) request: CreateSurveyRequest,
+    @Body(new ZodValidationPipe(createSurveySchema))
+    request: CreateSurveyRequest,
   ): Promise<SurveyCreatedResponse> {
     return this.surveysService.update(id, request);
   }
 
   @Patch(':id/unpublish')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Inhabilita una encuesta publicada sin respuestas y la devuelve a borrador' })
-  @ApiNoContentResponse({ description: 'Encuesta devuelta a borrador para su corrección' })
-  unpublish(@Param('id', new ZodValidationPipe(surveyIdSchema)) id: string): Promise<void> {
+  @ApiOperation({
+    summary:
+      'Inhabilita una encuesta publicada sin respuestas y la devuelve a borrador',
+  })
+  @ApiNoContentResponse({
+    description: 'Encuesta devuelta a borrador para su corrección',
+  })
+  unpublish(
+    @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+  ): Promise<void> {
     return this.surveysService.unpublish(id);
   }
 
   @Post(':id/responses')
   @Roles(...SURVEY_RESPONDENT_ROLES, SURVEYS_ROLE)
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Registra las respuestas del usuario a una encuesta' })
+  @ApiOperation({
+    summary: 'Registra las respuestas del usuario a una encuesta',
+  })
   @ApiBody(toApiBody(submitSurveyResponseSchema))
   @ApiCreatedResponse({ description: 'Respuestas guardadas' })
   submitResponse(
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
     @CurrentUserId() userId: string,
-    @Body(new ZodValidationPipe(submitSurveyResponseSchema)) request: SubmitSurveyResponseRequest,
+    @Body(new ZodValidationPipe(submitSurveyResponseSchema))
+    request: SubmitSurveyResponseRequest,
     @CurrentUser() user?: AuthenticatedUser,
   ): Promise<{ success: boolean; message: string }> {
     return this.surveysService.submitResponse(id, userId, request, user?.roles);
   }
 
   @Get(':id/statistics')
-  @ApiOperation({ summary: 'Obtiene las estadísticas y resultados de una encuesta' })
-  @ApiOkResponse({ description: 'Estadísticas de la encuesta con desglose de respuestas por opción' })
+  @ApiOperation({
+    summary: 'Obtiene las estadísticas y resultados de una encuesta',
+  })
+  @ApiOkResponse({
+    description:
+      'Estadísticas de la encuesta con desglose de respuestas por opción',
+  })
   statistics(
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+    @Query(new ZodValidationPipe(surveyStatisticsQuerySchema))
+    { period }: SurveyStatisticsQuery,
   ): Promise<SurveyStatisticsResponse> {
-    return this.surveysService.getStatistics(id);
+    return this.surveysService.getStatistics(id, period);
   }
 
   @Get(':id/export-pdf')
-  @ApiOperation({ summary: 'Exporta el informe estadístico de una encuesta en formato PDF' })
+  @ApiOperation({
+    summary: 'Exporta el informe estadístico de una encuesta en formato PDF',
+  })
   @ApiProduces('application/pdf')
   async exportPdf(
     @Param('id', new ZodValidationPipe(surveyIdSchema)) id: string,
+    @Query(new ZodValidationPipe(surveyStatisticsQuerySchema))
+    { period }: SurveyStatisticsQuery,
     @CurrentUserId() userId: string,
   ): Promise<StreamableFile> {
-    const { fileName, buffer } = await this.surveysService.exportSurveyPdf(id, userId);
+    const { fileName, buffer } = await this.surveysService.exportSurveyPdf(
+      id,
+      userId,
+      period,
+    );
     return new StreamableFile(buffer, {
       type: 'application/pdf',
       disposition: `attachment; filename="${fileName}"`,
     });
   }
 }
-
