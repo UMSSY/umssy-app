@@ -55,6 +55,12 @@ export class EventsService {
     return this.repository.findById(id, userId);
   }
 
+  async findUnfinishedEventIds(eventIds: string[], now: Date): Promise<string[]> {
+    if (!eventIds.length) return [];
+    const events = await this.repository.findUnfinishedEventIds(eventIds, now);
+    return events.map(event => event.id);
+  }
+
   async hasScheduleConflict(tx: Prisma.TransactionClient, event: RegistrationScheduleEvent, registeredEventIds: string[]): Promise<boolean> {
     if (!registeredEventIds.length) return false;
     return Boolean(await this.repository.findScheduleConflict(tx, event, registeredEventIds));

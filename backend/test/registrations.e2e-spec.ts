@@ -90,6 +90,30 @@ describe.skipIf(!DATABASE)('registration persistence and concurrent HTTP request
     return () => { clearTimeout(timer); release(); expect(arrived).toBe(2); };
   }
 
+  it.each([
+    ['2026-12-01', '12:00', '2026-12-01T15:59:59.999Z', '2026-12-01T16:00:00.000Z'],
+    ['2026-12-01', '23:30', '2026-12-02T03:29:59.999Z', '2026-12-02T03:30:00.000Z'],
+  ])('hides a finished pass without deleting its registration or token: %s %s', async (date, end, before, finished) => {
+    const event = await fixture.createEvent(30);
+    const registration = (await create(event.id).expect(201)).body.data;
+    await fixture.client.event.update({ where: { id: event.id }, data: {
+      eventDate: new Date(`${date}T00:00:00Z`), endTime: new Date(`1970-01-01T${end}:00Z`),
+    } });
+    const list = () => request(app.getHttpServer()).get('/api/event-registrations/me')
+      .set('Authorization', `Bearer ${tokens[0]}`).expect(200);
+    vi.useFakeTimers({ toFake: ['Date'], now: new Date(before) });
+    try {
+      expect((await list()).body.data).toEqual(expect.arrayContaining([expect.objectContaining({ id: registration.id })]));
+      vi.setSystemTime(new Date(finished));
+      expect((await list()).body.data.some((pass: { id: string }) => pass.id === registration.id)).toBe(false);
+      expect((await list()).body.data.some((pass: { id: string }) => pass.id === registration.id)).toBe(false);
+      const stored = await fixture.client.eventRegistration.findUniqueOrThrow({ where: { id: registration.id }, include: { status: true } });
+      expect(stored.qrToken).toBe(registration.qrToken);
+      expect(stored.status.title).toBe('Confirmada');
+      expect(stored.cancelledAt).toBeNull();
+    } finally { vi.useRealTimers(); }
+  });
+
   it('rejects identical and partial overlaps but allows adjacent intervals and different dates', async () => {
     const first = await fixture.createEvent(30);
     expect((await create(first.id)).status).toBe(201);

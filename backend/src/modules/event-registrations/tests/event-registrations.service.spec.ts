@@ -6,11 +6,13 @@ describe('EventRegistrationsService', () => {
   let service: EventRegistrationsService;
   const create = vi.fn();
   const findByUserId = vi.fn();
+  const findUnfinishedEventIds = vi.fn();
 
   beforeEach(() => {
     create.mockReset();
     findByUserId.mockReset();
-    service = new EventRegistrationsService(new EventRegistrationsRepository({ eventRegistration: { create } } as never), {} as never);
+    findUnfinishedEventIds.mockReset().mockResolvedValue(["event-1"]);
+    service = new EventRegistrationsService(new EventRegistrationsRepository({ eventRegistration: { create } } as never), { findUnfinishedEventIds } as never);
     vi.spyOn(service, 'findByUserId').mockImplementation(findByUserId);
   });
 
@@ -51,6 +53,7 @@ describe('EventRegistrationsService', () => {
     findByUserId.mockResolvedValue([
       {
         id: 'reg-1',
+        eventId: 'event-1',
         registeredAt: new Date('2026-10-18T10:00:00.000Z'),
         cancelledAt: null,
         status: { title: 'Confirmada' },
@@ -68,6 +71,7 @@ describe('EventRegistrationsService', () => {
     expect(result).toEqual([
       {
         id: 'reg-1',
+        eventId: 'event-1',
         eventName: 'Taller de NestJS',
         date: new Date('2026-10-20T00:00:00.000Z'),
         location: 'Aula 101',

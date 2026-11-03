@@ -115,7 +115,9 @@ export class EventRegistrationsService {
   }
 
   async findMine(userId: string): Promise<MyRegistrationResponse[]> {
-    return EventRegistrationsMapper.toMyRegistrationList(await this.findByUserId(userId));
+    const registrations = await this.findByUserId(userId);
+    const activeEventIds = new Set(await this.eventsService.findUnfinishedEventIds(registrations.map(registration => registration.eventId), new Date()));
+    return EventRegistrationsMapper.toMyRegistrationList(registrations.filter(registration => activeEventIds.has(registration.eventId)));
   }
 
   findByUserId(userId: string) {

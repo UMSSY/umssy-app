@@ -1,3 +1,4 @@
+import { BOLIVIA_OFFSET_MS } from '../../../common/constants/date-time.constants.js';
 import type { RegistrationScheduleEvent } from '../types/registration-schedule-event.types.js';
 import { REGISTRATION_STATUS_TITLES } from '../../../common/constants/registration-status.constants.js';
 import type { EventSupportContext } from '../types/event-support-context.types.js';
@@ -129,6 +130,19 @@ export class EventsRepository {
     return event as unknown as
       | (EventWithRelations & { modality: { id: string; title: string } })
       | null;
+  }
+
+  findUnfinishedEventIds(eventIds: string[], now: Date) {
+    const local = new Date(now.getTime() + BOLIVIA_OFFSET_MS);
+    const date = new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate()));
+    const time = new Date(Date.UTC(1970, 0, 1, local.getUTCHours(), local.getUTCMinutes(), local.getUTCSeconds(), local.getUTCMilliseconds()));
+    return this.prisma.event.findMany({
+      where: {
+        id: { in: eventIds }, status: { title: PUBLISHED_STATUS_TITLE },
+        OR: [{ eventDate: { gt: date } }, { eventDate: date, endTime: { gt: time } }],
+      },
+      select: { id: true },
+    });
   }
 
   findScheduleConflict(tx: Prisma.TransactionClient, event: RegistrationScheduleEvent, registeredEventIds: string[]) {
