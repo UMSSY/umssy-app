@@ -250,7 +250,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-01482'),
       userId: context.getId('record-02893'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería Informática',
+      degree: 'Ingeniería de Sistemas',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -262,7 +262,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-03264'),
       userId: context.getId('record-02931'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería de Sistemas',
+      degree: 'Ingeniería Informática',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -274,7 +274,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-01573'),
       userId: context.getId('record-00602'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería Informática',
+      degree: 'Ingeniería de Sistemas',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -286,7 +286,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-01966'),
       userId: context.getId('record-02703'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería de Sistemas',
+      degree: 'Ingeniería Informática',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -298,7 +298,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-02183'),
       userId: context.getId('record-00295'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería Informática',
+      degree: 'Ingeniería de Sistemas',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -310,7 +310,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-00757'),
       userId: context.getId('record-00508'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería de Sistemas',
+      degree: 'Ingeniería Informática',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -322,7 +322,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-03465'),
       userId: context.getId('record-02953'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería Informática',
+      degree: 'Ingeniería de Sistemas',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -334,7 +334,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-03117'),
       userId: context.getId('record-03323'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería de Sistemas',
+      degree: 'Ingeniería Informática',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -346,7 +346,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-00214'),
       userId: context.getId('record-02750'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería Informática',
+      degree: 'Ingeniería de Sistemas',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -358,7 +358,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-02815'),
       userId: context.getId('record-00191'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería de Sistemas',
+      degree: 'Ingeniería Informática',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -370,7 +370,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-02008'),
       userId: context.getId('record-03502'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería Informática',
+      degree: 'Ingeniería de Sistemas',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -382,7 +382,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-02622'),
       userId: context.getId('record-01962'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería de Sistemas',
+      degree: 'Ingeniería Informática',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -394,7 +394,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-01594'),
       userId: context.getId('record-01403'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería Informática',
+      degree: 'Ingeniería de Sistemas',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -406,7 +406,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-01881'),
       userId: context.getId('record-00241'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería de Sistemas',
+      degree: 'Ingeniería Informática',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -418,7 +418,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-00247'),
       userId: context.getId('record-00283'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería Informática',
+      degree: 'Ingeniería de Sistemas',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -430,7 +430,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-00034'),
       userId: context.getId('record-00412'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería de Sistemas',
+      degree: 'Ingeniería Informática',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -442,7 +442,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-02382'),
       userId: context.getId('record-00122'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería Informática',
+      degree: 'Ingeniería de Sistemas',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -454,7 +454,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-02063'),
       userId: context.getId('record-02093'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería de Sistemas',
+      degree: 'Ingeniería Informática',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -466,7 +466,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-00954'),
       userId: context.getId('record-01983'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería Informática',
+      degree: 'Ingeniería de Sistemas',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -478,7 +478,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-02674'),
       userId: context.getId('record-02511'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería de Sistemas',
+      degree: 'Ingeniería Informática',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -490,7 +490,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-00275'),
       userId: context.getId('record-00524'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería Informática',
+      degree: 'Ingeniería de Sistemas',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
@@ -502,7 +502,7 @@ export async function seedEducationsFixtures(
       id: context.getId('record-00117'),
       userId: context.getId('record-00404'),
       institution: 'Universidad Mayor de San Simón (UMSS)',
-      degree: 'Ingeniería de Sistemas',
+      degree: 'Ingeniería Informática',
       startDate: new Date('2015-02-01T00:00:00.000Z'),
       endDate: new Date('2020-11-30T00:00:00.000Z'),
       description:
