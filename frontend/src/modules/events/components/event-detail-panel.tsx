@@ -47,7 +47,7 @@ export function EventDetailPanel({
       aria-label={`Detalle de ${event.title}`}
       className="w-full min-w-0 self-start rounded-lg border border-border bg-surface "
     >
-      <WorkshopCover eventId={event.id} coverUrl={event.coverUrl} className="h-32 rounded-t-lg" />
+      <WorkshopCover eventId={event.id} coverUrl={event.coverUrl} className="w-full rounded-t-lg" />
       <Card className="gap-0 space-y-5 rounded-none border-0 bg-transparent px-6 py-7 shadow-none lg:px-7">
         <header className="space-y-3">
           {onClose && (
@@ -193,11 +193,11 @@ export function EventDetailPanel({
               aria-valuemax={100}
               aria-valuemin={0}
               aria-valuenow={progressPercentage}
-              className="h-1.5 overflow-hidden rounded-full bg-muted"
+              className="h-1.5 overflow-hidden rounded-full bg-availability-border"
               role="progressbar"
             >
               <div
-                className="h-full rounded-full bg-progress transition-[width] duration-300 ease-out"
+                className={`h-full rounded-full transition-[width] duration-300 ease-out ${isFull ? 'bg-danger' : 'bg-success'}`}
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>

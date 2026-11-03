@@ -102,6 +102,8 @@ describe('EventCard y utilidades de formato', () => {
       'aria-valuenow',
       '80',
     );
+    expect(screen.getByRole('progressbar')).toHaveClass('bg-availability-border');
+    expect(screen.getByTestId('event-capacity-bar')).toHaveClass('bg-success');
   });
 
   it('aplica estilo por defecto para categorias no mapeadas y estado seleccionado', () => {
@@ -174,6 +176,7 @@ describe('EventCard y utilidades de formato', () => {
     expect(screen.getByTestId('event-capacity-bar')).toHaveStyle({
       width: '100%',
     });
+    expect(screen.getByTestId('event-capacity-bar')).toHaveClass('bg-danger');
   });
 
   it('muestra apoyos y plazo en una propuesta en votación sin confundirlos con cupos', () => {
