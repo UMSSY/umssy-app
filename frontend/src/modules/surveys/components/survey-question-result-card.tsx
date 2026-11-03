@@ -2,22 +2,27 @@ import { Badge } from "@/components/ui/badge";
 import { QUESTION_TYPE_LABELS } from "../constants/survey-builder.constants";
 import type { SurveyQuestionResultCardProps } from "../types/survey-component-props.types";
 import { SurveyHorizontalBars } from "./survey-horizontal-bars";
+import { SurveyQuestionTrend } from "./survey-question-trend";
 
 export function SurveyQuestionResultCard({ question }: SurveyQuestionResultCardProps) {
   const maxVotes = Math.max(...question.options.map((o) => o.count), 0);
   const highestOption = maxVotes > 0 ? question.options.find((o) => o.count === maxVotes) : undefined;
+  // En opción múltiple una persona puede elegir varias opciones: se cuentan selecciones y no personas.
+  const isMultipleChoice = question.type === "multiple_choice";
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-xs">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5">
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-surface-soft text-xs font-semibold text-text-secondary">
-            {question.position}
+          <span className="flex h-6 min-w-8 shrink-0 items-center justify-center rounded-md bg-ink px-1.5 text-xs font-bold text-surface">
+            P{question.position}
           </span>
           <div>
             <h3 className="leading-snug font-medium text-ink">{question.statement}</h3>
             <p className="mt-1 text-xs text-text-secondary">
-              {question.answeredCount} respuestas registradas
+              {isMultipleChoice
+                ? `${question.totalSelections} selecciones registradas`
+                : `${question.answeredCount} respuestas registradas`}
             </p>
           </div>
         </div>
@@ -29,6 +34,8 @@ export function SurveyQuestionResultCard({ question }: SurveyQuestionResultCardP
       <div className="pt-2">
         <SurveyHorizontalBars options={question.options} highlightedId={highestOption?.id} />
       </div>
+
+      <SurveyQuestionTrend trend={question.trend} />
     </div>
   );
 }
