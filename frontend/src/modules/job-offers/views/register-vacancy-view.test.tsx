@@ -1,10 +1,17 @@
 import { Button as TestButton } from "@/components/ui/button";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_CONDITIONS, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
 import { RegisterVacancyView } from "./register-vacancy-view";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+const { push, publishOptions } = vi.hoisted(() => ({
+  push: vi.fn(),
+  publishOptions: { current: undefined as { onSuccess?: () => void } | undefined },
+}));
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const { form, publication, leaveGuard } = vi.hoisted(() => ({
   form: {
@@ -41,7 +48,12 @@ const useLeaveGuard = vi.fn((isActive: boolean) => {
 });
 
 vi.mock("../hooks/use-job-offer-form", () => ({ useJobOfferForm: () => form }));
-vi.mock("../hooks/use-publish-job-offer", () => ({ usePublishJobOffer: () => publication }));
+vi.mock("../hooks/use-publish-job-offer", () => ({
+  usePublishJobOffer: (_jobOfferId?: string, options?: { onSuccess?: () => void }) => {
+    publishOptions.current = options;
+    return publication;
+  },
+}));
 vi.mock("../hooks/use-leave-guard", () => ({ useLeaveGuard: (isActive: boolean) => useLeaveGuard(isActive) }));
 vi.mock("../components/vacancy-stepper", () => ({
   VacancyStepper: ({ currentStep }: { currentStep: number }) => <div data-testid="stepper">Paso {currentStep}</div>,
@@ -66,18 +78,14 @@ vi.mock("../components/preview-step", () => ({
   PreviewStep: (props: {
     onPrevious: () => void;
     onConfirm: () => void;
-    onFinish: () => void;
     isSubmitting: boolean;
-    isPublished: boolean;
     company: { name: string };
   }) => (
     <div data-testid="preview-step">
       <span>{props.isSubmitting ? "enviando" : "libre"}</span>
-      <span>{props.isPublished ? "publicada" : "pendiente"}</span>
       <span>{props.company.name}</span>
       <TestButton onClick={props.onPrevious}>Anterior</TestButton>
       <TestButton onClick={props.onConfirm}>Confirmar</TestButton>
-      <TestButton onClick={props.onFinish}>Aceptar</TestButton>
     </div>
   ),
 }));
@@ -213,5 +221,47 @@ describe("RegisterVacancyView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Anterior" }));
 
     expect(form.goBack).toHaveBeenCalledOnce();
+  });
+  it("al publicar una vacante nueva no redirige ni notifica desde la vista", () => {
+    setStep(3, VALID_CONDITIONS, true);
+    render(<RegisterVacancyView />);
+
+    expect(publishOptions.current?.onSuccess).toBeUndefined();
+  });
+
+  it("al guardar una edición avisa con una notificación y vuelve al listado", () => {
+    setStep(3, VALID_CONDITIONS, true);
+    render(<RegisterVacancyView jobOfferId="offer-1" />);
+
+    publishOptions.current?.onSuccess?.();
+
+    expect(toast.success).toHaveBeenCalledWith("Vacante actualizada correctamente", {
+      position: "top-center",
+      duration: 5000,
+    });
+    expect(push).toHaveBeenCalledWith("/recruiters");
+  });
+
+  it("en la edición los diálogos hablan de cambios no guardados", () => {
+    setStep(1, VALID_CONDITIONS, true);
+    leaveGuard.isLeaveDialogOpen = true;
+    render(<RegisterVacancyView jobOfferId="offer-1" />);
+
+    expect(screen.getByText("¿Salir sin guardar?")).toBeInTheDocument();
+    expect(screen.getByText("Los cambios no guardados se perderán si abandonas la pantalla.")).toBeInTheDocument();
+  });
+
+  it("al descartar una edición vuelve al listado", () => {
+    setStep(1, VALID_CONDITIONS, true);
+    render(<RegisterVacancyView jobOfferId="offer-1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(
+      screen.getByText("Los cambios no guardados se perderán y la vacante conservará sus datos originales."),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Descartar" }));
+
+    expect(form.reset).toHaveBeenCalledOnce();
+    expect(push).toHaveBeenCalledWith("/recruiters");
   });
 });
