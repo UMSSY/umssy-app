@@ -8,6 +8,21 @@ afterEach(() => vi.useRealTimers());
 const conflict = (code: string) => new Prisma.PrismaClientKnownRequestError('Database conflict', { code, clientVersion: 'test' });
 
 describe('registration creation', () => {
+  it('retries serialization failures exposed directly by the PostgreSQL adapter', async () => {
+    const { service, prisma } = registrationFixture();
+    const error = Object.assign(new Error('TransactionWriteConflict'), { name: 'DriverAdapterError', cause: { kind: 'TransactionWriteConflict' } });
+    prisma.$transaction.mockRejectedValueOnce(error);
+    await expect(service.create(EVENT_ID, USER_ID)).resolves.toMatchObject({ status: 'confirmed' });
+    expect(prisma.$transaction).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry unrelated driver errors', async () => {
+    const { service, prisma } = registrationFixture();
+    const error = Object.assign(new Error('ForeignKeyConstraintViolation'), { name: 'DriverAdapterError', cause: { kind: 'ForeignKeyConstraintViolation' } });
+    prisma.$transaction.mockRejectedValue(error);
+    await expect(service.create(EVENT_ID, USER_ID)).rejects.toBe(error);
+    expect(prisma.$transaction).toHaveBeenCalledOnce();
+  });
   it('rejects schedule conflicts without creating a registration or consuming seats', async () => {
     const { service, tx } = registrationFixture();
     tx.eventRegistration.findMany.mockResolvedValue([{ eventId: 'other-event' }]);
