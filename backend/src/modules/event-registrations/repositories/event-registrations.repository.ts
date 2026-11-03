@@ -25,6 +25,14 @@ export class EventRegistrationsRepository {
     return tx.eventRegistration.findUnique({ where: { id }, select: REGISTRATION_SELECT });
   }
 
+  async findConfirmedEventIds(tx: Prisma.TransactionClient, userId: string): Promise<string[]> {
+    const registrations = await tx.eventRegistration.findMany({
+      where: { userId, cancelledAt: null, status: { title: REGISTRATION_STATUS_TITLES.confirmed } },
+      select: { eventId: true },
+    });
+    return registrations.map(registration => registration.eventId);
+  }
+
   countConfirmed(tx: Prisma.TransactionClient, eventId: string) {
     return tx.eventRegistration.count({ where: { eventId, cancelledAt: null, status: { title: REGISTRATION_STATUS_TITLES.confirmed } } });
   }
@@ -99,6 +107,7 @@ export class EventRegistrationsRepository {
       },
       select: {
         id: true,
+        eventId: true,
         registeredAt: true,
         cancelledAt: true,
         status: { select: { title: true } },

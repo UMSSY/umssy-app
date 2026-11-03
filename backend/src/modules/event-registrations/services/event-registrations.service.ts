@@ -1,3 +1,4 @@
+import { RegistrationScheduleConflictException } from '../exceptions/registration-schedule-conflict.exception.js';
 import { PassNotFoundException } from '../exceptions/pass-not-found.exception.js';
 import type { SupportTransactionResult } from '../types/support-transaction-result.types.js';
 import { COMMUNITY_ORIGIN_TITLE, EXPIRED_STATUS_TITLE, VOTING_STATUS_TITLES } from '../../events/index.js';
@@ -57,6 +58,10 @@ export class EventRegistrationsService {
       }
       if (event.status.title !== PUBLISHED_STATUS_TITLE) throw new EventNotOpenException();
       assertRegistrationOpen(event);
+      const registeredEventIds = await this.repository.findConfirmedEventIds(tx, userId);
+      if (await this.eventsService.hasScheduleConflict(tx, event, registeredEventIds)) {
+        throw new RegistrationScheduleConflictException();
+      }
       if (event.capacity !== null) {
         const count = await this.repository.countConfirmed(tx, eventId);
         if (count >= event.capacity) throw new EventFullException();

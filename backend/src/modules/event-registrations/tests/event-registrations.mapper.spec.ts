@@ -3,6 +3,7 @@ import { EventRegistrationsMapper } from '../mappers/event-registrations.mapper.
 
 const entity = {
   id: 'reg-1',
+  eventId: 'event-1',
   status: { title: 'Confirmada' },
   registeredAt: new Date('2026-10-18T10:00:00.000Z'),
   cancelledAt: null,
@@ -19,6 +20,7 @@ describe('EventRegistrationsMapper', () => {
   it('mapea una inscripción a la respuesta de "Mis pases"', () => {
     expect(EventRegistrationsMapper.toMyRegistration(entity as never)).toEqual({
       id: 'reg-1',
+  eventId: 'event-1',
       eventName: 'Taller de NestJS',
       date: new Date('2026-10-20T00:00:00.000Z'),
       startTime: new Date('1970-01-01T09:00:00Z'),

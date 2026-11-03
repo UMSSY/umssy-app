@@ -38,7 +38,7 @@ export async function createRegistrationDatabaseFixture() {
     async createEvent(capacity: number | null = 1) {
       const event = await client.event.create({ data: {
         title: `Registration fixture ${suffix}`,
-        eventDate: new Date(Date.now() + 3 * 86_400_000),
+        eventDate: new Date(Date.now() + (3 + eventIds.length) * 86_400_000),
         startTime: new Date('1970-01-01T09:00:00Z'), endTime: new Date('1970-01-01T12:00:00Z'),
         capacity, categoryId: category.id, modalityId: modality.id, originId: origin.id,
         statusId: status.id, createdById: users[0].id,
@@ -54,7 +54,7 @@ export async function createRegistrationDatabaseFixture() {
       ]);
       const event = await client.event.create({ data: {
         title: `Voting fixture ${suffix}`,
-        eventDate: new Date(Date.now() + 3 * 86_400_000),
+        eventDate: new Date(Date.now() + (3 + eventIds.length) * 86_400_000),
         startTime: new Date('1970-01-01T09:00:00Z'), endTime: new Date('1970-01-01T12:00:00Z'),
         capacity: 40, supportThreshold: 8, votingDeadline: new Date(Date.now() + 86_400_000),
         categoryId: category.id, modalityId: modality.id, originId: community.id,
