@@ -47,7 +47,7 @@ export function SurveyNotificationItem({ notification }: SurveyNotificationItemP
         <p className="text-sm [overflow-wrap:anywhere] text-text-secondary">{SURVEY_STATUS_MESSAGES[status]}</p>
         {isPending ? <Badge className={tone}>{SURVEY_STATUS_LABELS.pending}</Badge> : null}
       </div>
-      <time dateTime={publishedAt} className="shrink-0 text-sm text-text-secondary md:w-24 md:text-right">
+      <time dateTime={publishedAt} className="shrink-0 text-sm text-text-secondary md:mr-4 md:w-24 md:text-right">
         {formatSurveyDate(publishedAt)}
       </time>
       <div className="w-full shrink-0 md:w-52">{renderAction()}</div>
