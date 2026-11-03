@@ -1,12 +1,8 @@
 import { isApiError as isAxiosError } from "@/shared/services/api-client";
 import { EDIT_MESSAGES, PUBLISH_MESSAGES } from "../constants/job-offers.constants";
 import type { PublishError } from "../types/publish-error.types";
+import type { PublishErrorBody } from "../types/publish-error-body.types";
 import type { PublishMode } from "../types/publish-mode.types";
-
-interface ErrorBody {
-  data?: unknown;
-  detail?: unknown;
-}
 
 function readValidationMessages(data: unknown): string[] {
   if (!Array.isArray(data)) return [];
@@ -15,7 +11,7 @@ function readValidationMessages(data: unknown): string[] {
     .filter((message): message is string => typeof message === "string" && message.length > 0);
 }
 
-function readDetails(body: ErrorBody | undefined): string[] {
+function readDetails(body: PublishErrorBody | undefined): string[] {
   const messages = readValidationMessages(body?.data);
   if (messages.length > 0) return messages;
   return typeof body?.detail === "string" && body.detail.length > 0 ? [body.detail] : [];
@@ -35,7 +31,7 @@ export function toPublishError(error: unknown, mode: PublishMode = "publish"): P
 
   const { status, data } = error.response;
   if (status === 400 || status === 422) {
-    return { kind: "validation", message: PUBLISH_MESSAGES.validation, details: readDetails(data as ErrorBody) };
+    return { kind: "validation", message: PUBLISH_MESSAGES.validation, details: readDetails(data as PublishErrorBody) };
   }
   if (status === 404) {
     return { kind: "company", message: PUBLISH_MESSAGES.company, details: [] };

@@ -5,8 +5,8 @@ import { useState } from "react";
 import { PUBLISH_MESSAGES } from "../constants/job-offers.constants";
 import { JOB_OFFERS_QUERY_KEYS } from "../constants/job-offers-query-keys.constants";
 import { jobOffersService } from "../services/job-offers.service";
-import type { CreateJobOfferPayload } from "../types/create-job-offer-payload.types";
 import type { PublishError } from "../types/publish-error.types";
+import type { PublishVariables } from "../types/publish-variables.types";
 import type { VacancyConditions } from "../types/vacancy-conditions.types";
 import { getCurrentCompany } from "../utils/get-current-company";
 import { toJobOfferPayload } from "../utils/to-job-offer-payload";
@@ -14,11 +14,6 @@ import { toPublishError } from "../utils/to-publish-error";
 import { validateInformation, validateRequirements } from "../utils/validate-vacancy";
 import type { PublishStatus } from "../types/publish-status.types";
 import type { UsePublishJobOfferOptions } from "../types/use-publish-job-offer-options.types";
-
-interface PublishVariables {
-  companyId: string;
-  payload: CreateJobOfferPayload;
-}
 
 function hasErrors(conditions: VacancyConditions): boolean {
   const found = { ...validateInformation(conditions), ...validateRequirements(conditions) };

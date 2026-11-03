@@ -227,6 +227,7 @@ describe("VacancyList details", () => {
     await user.keyboard("{Enter}");
 
     expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 
   it("no abre la confirmación de eliminar mientras el detalle está abierto", async () => {
@@ -242,6 +243,7 @@ describe("VacancyList details", () => {
     );
 
     expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     expect(screen.queryByText("¿Estás seguro de eliminar esta vacante?")).not.toBeInTheDocument();
   });
 });

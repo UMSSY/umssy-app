@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { mapRecordNotFound } from '../../../common/utils/map-record-not-found.js';
+import type { Prisma } from '../../../prisma/client.js';
 import {
   JOB_OFFER_CREATED_SELECT,
   JOB_OFFER_SELECT,
 } from '../constants/job-offer.constants.js';
+import { JobOfferNotFoundException } from '../exceptions/index.js';
 import type { ListCompanyJobOffersRequest } from '../requests/list-company-job-offers.request.js';
 import type { CreateJobOfferData } from '../types/create-job-offer-data.type.js';
 import type { JobOfferCatalogIds } from '../types/job-offer-catalog-ids.type.js';
@@ -153,35 +156,38 @@ export class JobOffersRepository {
     data: UpdateJobOfferData,
   ): Promise<JobOfferRecord> {
     const { skillIds, ...jobOffer } = data;
-    return this.prisma.jobOffer.update({
-      where: { id: jobOfferId },
-      data: {
-        ...jobOffer,
-        ...(skillIds && {
-          skills: {
-            deleteMany: {},
-            create: skillIds.map((skillId) => ({ skillId })),
-          },
-        }),
-      },
-      select: JOB_OFFER_SELECT,
+    return this.updateExisting(jobOfferId, {
+      ...jobOffer,
+      ...(skillIds && {
+        skills: {
+          deleteMany: {},
+          create: skillIds.map((skillId) => ({ skillId })),
+        },
+      }),
     });
   }
 
   // La fecha de publicación que se muestra es createdAt, por eso al reabrir se renueva.
   reopen(jobOfferId: string, statusId: string, publishedAt: Date): Promise<JobOfferRecord> {
-    return this.prisma.jobOffer.update({
-      where: { id: jobOfferId },
-      data: { statusId, createdAt: publishedAt },
-      select: JOB_OFFER_SELECT,
-    });
+    return this.updateExisting(jobOfferId, { statusId, createdAt: publishedAt });
   }
 
   updateStatus(jobOfferId: string, statusId: string): Promise<JobOfferRecord> {
-    return this.prisma.jobOffer.update({
-      where: { id: jobOfferId },
-      data: { statusId },
-      select: JOB_OFFER_SELECT,
-    });
+    return this.updateExisting(jobOfferId, { statusId });
+  }
+
+  // Si la vacante se borró entre la verificación y la escritura, Prisma lanza P2025: se responde 404.
+  private updateExisting(
+    jobOfferId: string,
+    data: Prisma.JobOfferUncheckedUpdateInput,
+  ): Promise<JobOfferRecord> {
+    return mapRecordNotFound(
+      this.prisma.jobOffer.update({
+        where: { id: jobOfferId },
+        data,
+        select: JOB_OFFER_SELECT,
+      }),
+      () => new JobOfferNotFoundException(),
+    );
   }
 }

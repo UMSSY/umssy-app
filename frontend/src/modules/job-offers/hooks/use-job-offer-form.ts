@@ -74,7 +74,6 @@ export function useJobOfferForm(jobOfferId?: string) {
     const [conditions, setConditions] = useState<VacancyConditions>(INITIAL_CONDITIONS);
     const [errors, setErrors] = useState<VacancyErrors>({});
 
-    // Modo edición: se reutiliza el hook de detalles (misma clave de caché y mismo endpoint).
     const details = useJobOfferDetails(jobOfferId ? getCurrentCompany().id : null, jobOfferId ?? null);
     const baseline = details.offer ? toConditions(details.offer) : null;
     // Los datos se copian al formulario una sola vez por vacante, también cuando ya estaban en caché

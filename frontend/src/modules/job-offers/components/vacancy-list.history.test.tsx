@@ -193,12 +193,12 @@ describe("VacancyList en modo historial", () => {
     renderWithQuery(<VacancyList scope="history" />);
 
     await user.click(await screen.findByRole("button", { name: "Reabrir" }));
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("alertdialog");
     expect(within(dialog).getByText(REOPEN_JOB_OFFER_TEXT.title)).toBeInTheDocument();
     expect(within(dialog).getByText("Analista de Sistemas")).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(reopen).not.toHaveBeenCalled();
   });
 
@@ -209,10 +209,10 @@ describe("VacancyList en modo historial", () => {
     renderWithQuery(<VacancyList scope="history" />);
 
     await user.click(await screen.findByRole("button", { name: "Reabrir" }));
-    await screen.findByRole("dialog");
+    await screen.findByRole("alertdialog");
     await user.keyboard("{Escape}");
 
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(reopen).not.toHaveBeenCalled();
   });
 
@@ -226,10 +226,10 @@ describe("VacancyList en modo historial", () => {
     renderWithQuery(<VacancyList scope="history" />);
 
     await user.click(await screen.findByRole("button", { name: "Reabrir" }));
-    await user.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Reabrir" }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Reabrir" }));
 
     expect(reopen).toHaveBeenCalledWith(COMPANY_ID, "closed");
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(toast.success).toHaveBeenCalledWith(REOPEN_JOB_OFFER_TEXT.success, TOAST_OPTIONS);
     await waitFor(() => expect(screen.queryByRole("button", { name: "Reabrir" })).not.toBeInTheDocument());
     expect(screen.getAllByText("Activa")).toHaveLength(2);
@@ -252,7 +252,7 @@ describe("VacancyList en modo historial", () => {
     await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(1));
 
     await user.click(screen.getByRole("button", { name: "Reabrir" }));
-    await user.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Reabrir" }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Reabrir" }));
 
     await waitFor(() => expect(screen.queryByRole("listitem")).not.toBeInTheDocument());
     expect(screen.getByText("Ninguna vacante coincide con los filtros.")).toBeInTheDocument();
@@ -267,13 +267,13 @@ describe("VacancyList en modo historial", () => {
     renderWithQuery(<VacancyList scope="history" />);
 
     await user.click(await screen.findByRole("button", { name: "Reabrir" }));
-    await user.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Reabrir" }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Reabrir" }));
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith(REOPEN_JOB_OFFER_TEXT.error, TOAST_OPTIONS),
     );
     expect(toast.success).not.toHaveBeenCalled();
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText("Cerrada", { ignore: "[role=dialog] *" })).toBeInTheDocument();
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect(screen.getByText("Cerrada", { ignore: "[role=alertdialog] *" })).toBeInTheDocument();
   });
 });

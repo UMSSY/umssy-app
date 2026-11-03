@@ -91,7 +91,7 @@ export function InformationStep({
   const vacancyCountMessage =
     errors.vacancyCount ??
     (Number(conditions.vacancyCount) > MAX_VACANCIES ? VACANCY_MESSAGES.maxVacancies : undefined);
-  // El enlace se valida mientras se escribe para avisar en tiempo real (HU4-13).
+  // El enlace se valida mientras se escribe para avisar en tiempo real.
   const mapsLinkMessage =
     errors.mapsLink ?? (conditions.mapsLink.trim() ? getMapsLinkError(conditions.mapsLink) : undefined);
 
