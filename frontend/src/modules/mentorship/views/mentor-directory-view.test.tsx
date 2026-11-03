@@ -373,7 +373,7 @@ describe("MentorDirectoryView", () => {
     await user.keyboard(" ");
 
     expect(navigationMocks.replace).toHaveBeenCalledWith(
-      "/mentorship/mentors?page=1&available=true",
+      "/mentorship/mentors?page=1&available=false",
       { scroll: false },
     );
 
@@ -449,7 +449,7 @@ describe("MentorDirectoryView", () => {
     );
 
     expect(screen.getByText("Disponible para mentoría")).toBeInTheDocument();
-    expect(screen.getByText("No disponible")).toBeInTheDocument();
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
     expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
 
     expect(getProfile).toHaveBeenCalledTimes(1);
@@ -474,14 +474,14 @@ describe("MentorDirectoryView", () => {
     expect(getProfile).not.toHaveBeenCalled();
   });
 
-  it("muestra todos los mentores por defecto y Limpiar restablece los filtros", async () => {
+  it("aplica Solo disponibles por defecto y Limpiar restablece los filtros", async () => {
     mockDirectoryWithParams();
 
     const { rerender } = render(<MentorDirectoryView />);
 
     expect(
       screen.getByRole("checkbox", { name: "Solo disponibles" }),
-    ).not.toBeChecked();
+    ).toBeChecked();
 
     expect(
       await screen.findByRole("link", {
@@ -493,7 +493,7 @@ describe("MentorDirectoryView", () => {
       screen.queryByRole("link", {
         name: /Ver perfil de Carlos/,
       }),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: "Limpiar" }),
@@ -507,8 +507,15 @@ describe("MentorDirectoryView", () => {
 
     applyNavigation(rerender);
 
-    await waitFor(() => expect(screen.queryByRole("link", { name: /Ver perfil de Carlos/ })).not.toBeInTheDocument());
-    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", {
+        name: /Ver perfil de Carlos/,
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("No disponible"),
+    ).not.toBeInTheDocument();
 
     const searchCallsBeforeMaria =
       navigationMocks.replace.mock.calls.length;
@@ -561,7 +568,7 @@ describe("MentorDirectoryView", () => {
 
     expect(
       screen.getByRole("checkbox", { name: "Solo disponibles" }),
-    ).not.toBeChecked();
+    ).toBeChecked();
 
     expect(
       await screen.findByRole("link", {
@@ -573,7 +580,7 @@ describe("MentorDirectoryView", () => {
       screen.queryByRole("link", {
         name: /Ver perfil de Carlos/,
       }),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
   });
 
   it("restaura búsqueda, área, orientación y disponibilidad al volver desde el perfil", async () => {

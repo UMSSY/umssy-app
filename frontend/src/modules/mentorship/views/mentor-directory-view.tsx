@@ -26,6 +26,7 @@ import type {
   MentorSort,
 } from "../types/mentor-directory.types";
 import {
+  MENTOR_DIRECTORY_DEFAULTS,
   normalizeMentorDirectoryParams,
   parseMentorDirectoryState,
   updateMentorDirectoryParams,
@@ -93,7 +94,12 @@ export function MentorDirectoryView({
 
   const affinityStatus =
     directory?.affinityStatus ?? directoryState?.affinityStatus;
-  const hasFilters = Boolean(search.trim() || area || orientation || isAvailableOnly);
+  const hasFilters = Boolean(
+    search.trim() ||
+      area ||
+      orientation ||
+      isAvailableOnly !== MENTOR_DIRECTORY_DEFAULTS.available
+  );
 
   useEffect(() => {
     if (!directory && directoryState?.totalPages === undefined) {
@@ -160,7 +166,7 @@ export function MentorDirectoryView({
       search: "",
       area: "",
       orientation: "",
-      available: false,
+      available: true,
     });
   }
 
@@ -185,7 +191,6 @@ export function MentorDirectoryView({
           className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-surface p-4"
         >
           <MentorSearchBar
-            key={search}
             value={search}
             onSearchChange={(nextSearch) =>
               navigateWithUpdates({
@@ -207,7 +212,9 @@ export function MentorDirectoryView({
             }
           />
 
-          <Label className="flex items-center gap-2">
+          <Label
+            className={`flex items-center gap-2 ${isAvailableOnly ? "text-primary" : ""}`}
+          >
             <Checkbox
               checked={isAvailableOnly}
               onCheckedChange={(checked) =>
@@ -310,6 +317,7 @@ export function MentorDirectoryView({
               returnTo={returnTo}
               showAffinityBadge={effectiveSort === "affinity"}
               selectedArea={area}
+              highlightAvailability={isAvailableOnly}
             />
 
             <MentorDirectoryPagination
