@@ -58,6 +58,8 @@
   --grid-template-columns-event-browser-open: minmax(0, 1fr) 24rem;
   --grid-template-columns-event-cards: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
   --color-brand-coral: #FF806B;
+  --color-voting-progress: var(--color-orange-500);
+  --color-voting-progress-foreground: var(--color-orange-700);
   --color-progress: var(--progress, var(--primary));
   --color-critical-action: var(--critical-action, #0B1F2E);
   --color-critical-action-hover: var(--critical-action-hover, #33465A);
@@ -118,7 +120,7 @@
   --muted: #F6F7F9;
   --muted-foreground: #5B6470;
   --accent: #EEF3F8;
-  --accent-foreground: #0B1F2E;
+  --accent-foreground: var(--color-surface);
   --destructive: #B4050F;
   --border: #E3E7EC;
   --input: #C9CFD8;
