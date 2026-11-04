@@ -14,7 +14,7 @@ import {
   useParticipation,
 } from "@/modules/mentors";
 import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import {
   getAccessToken,
   subscribeAccessToken,

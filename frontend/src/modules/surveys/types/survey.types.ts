@@ -69,6 +69,13 @@ export interface SurveyOptionStatistic {
   percentage: number;
 }
 
+export type SurveyTrendDirection = "up" | "down" | "neutral";
+
+export interface SurveyQuestionTrend {
+  text: string;
+  direction: SurveyTrendDirection;
+}
+
 export interface SurveyQuestionStatistic {
   id: string;
   position: number;
@@ -78,6 +85,7 @@ export interface SurveyQuestionStatistic {
   answeredCount: number;
   totalSelections: number;
   options: SurveyOptionStatistic[];
+  trend: SurveyQuestionTrend;
 }
 
 export interface SurveyStatistics {
@@ -90,6 +98,9 @@ export interface SurveyStatistics {
   opensAt: string | null;
   closesAt: string | null;
   totalResponses: number;
+  hasData: boolean;
+  period: string | null;
+  availablePeriods: string[];
   questions: SurveyQuestionStatistic[];
 }
 

@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { CircleCheck, Eye, FileText, X } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "cn";
 import type { DocumentPreviewContentProps } from "../../types/document-preview-content-props.types";
 import { formatFileSize } from "../../utils/format-file-size";
