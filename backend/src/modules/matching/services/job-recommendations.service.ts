@@ -7,13 +7,8 @@ import type {
   JobRecommendation,
   JobRecommendations,
 } from '../types/job-recommendation.types.js';
-import type { RequirementState } from '../types/requirement-state.types.js';
 import { VacancyRankingService } from './vacancy-ranking.service.js';
 import { VacancyScoringService } from './vacancy-scoring.service.js';
-
-function allFulfilled(requirements: readonly RequirementState[]): boolean {
-  return requirements.every(({ status }) => status === 'Cumple');
-}
 
 @Injectable()
 export class JobRecommendationsService {
@@ -48,7 +43,8 @@ export class JobRecommendationsService {
       vacancies.map((vacancy) => this.evaluate(vacancy, candidate)),
     );
 
-    const ranked = this.ranking.rank(evaluated);
+    const listed = evaluated.filter(({ item }) => item.score > 0);
+    const ranked = this.ranking.rank(listed);
     return { isProfileComplete: true, items: ranked.map(({ item }) => item) };
   }
 
@@ -72,11 +68,9 @@ export class JobRecommendationsService {
     };
     return {
       item,
+      id: vacancy.id,
       compatibility: score,
-      matchedSkills,
-      careerMatch: allFulfilled(requirements.academicRequirements),
-      experienceMatch: allFulfilled(requirements.experienceRequirements),
-      allRequiredSkillsMatch: allFulfilled(requirements.skills),
+      publishedAt: vacancy.createdAt,
     };
   }
 }
