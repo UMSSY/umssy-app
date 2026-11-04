@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { Prisma } from '../../../prisma/client.js';
+import { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
 import {
@@ -14,6 +14,11 @@ import {
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
 import { MentorIntakeRepository } from './mentor-intake.repository.js';
+
+import {
+  directoryPredicate,
+  directoryOrder,
+} from './mentor-directory.queries.js';
 
 const directorySelect = {
   id: true,
@@ -44,36 +49,6 @@ interface DirectoryFilters {
 }
 
 type MentorDirectorySort = 'default' | 'name_asc' | 'name_desc';
-
-const SEARCH_CHARACTER_VARIANTS: Readonly<Record<string, readonly string[]>> = {
-  a: ['a', 'á'],
-  e: ['e', 'é'],
-  i: ['i', 'í'],
-  o: ['o', 'ó'],
-  u: ['u', 'ú', 'ü'],
-  n: ['n', 'ñ'],
-};
-
-function removeDiacritics(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
-}
-
-function buildAccentInsensitiveVariants(value: string): string[] {
-  const normalized = removeDiacritics(value);
-  let variants = [''];
-
-  for (const character of normalized) {
-    const options = SEARCH_CHARACTER_VARIANTS[character] ?? [character];
-    variants = variants.flatMap((prefix) =>
-      options.map((option) => `${prefix}${option}`),
-    );
-  }
-
-  return [...new Set(variants)];
-}
 
 @Injectable()
 export class MentorsRepository extends MentorIntakeRepository {
@@ -153,7 +128,14 @@ export class MentorsRepository extends MentorIntakeRepository {
     return this.withPhotoVersions(mentors);
   }
 
-  countDirectoryMentors(filters: DirectoryFilters, now: Date) {
+  async countDirectoryMentors(filters: DirectoryFilters, now: Date) {
+    if (filters.search.trim()) {
+      const [result] = await this.prisma.$queryRaw<
+        { total: bigint }[]
+      >(Prisma.sql`
+        SELECT count(*) AS total FROM users u WHERE ${directoryPredicate(filters, now)}`);
+      return Number(result.total);
+    }
     return this.prisma.user.count({
       where: this.directoryWhere(filters, now),
     });
@@ -167,6 +149,21 @@ export class MentorsRepository extends MentorIntakeRepository {
   }
 
   findDirectoryCandidates(filters: DirectoryFilters, now: Date) {
+    if (filters.search.trim()) {
+      return this.prisma.$queryRaw<
+        {
+          id: string;
+          firstName: string;
+          lastName: string;
+          createdAt: Date;
+          mentorTechnicalAreas: { technicalAreaId: string }[];
+        }[]
+      >(Prisma.sql`
+        SELECT u.id, u.first_name AS "firstName", u.last_name AS "lastName", u.created_at AS "createdAt",
+          COALESCE((SELECT jsonb_agg(jsonb_build_object('technicalAreaId', mta.technical_area_id))
+            FROM mentor_technical_areas mta WHERE mta.mentor_id = u.id), '[]'::jsonb) AS "mentorTechnicalAreas"
+        FROM users u WHERE ${directoryPredicate(filters, now)} ORDER BY ${directoryOrder('default')}`);
+    }
     return this.prisma.user.findMany({
       where: this.directoryWhere(filters, now),
       select: {
@@ -185,6 +182,12 @@ export class MentorsRepository extends MentorIntakeRepository {
     filters: DirectoryFilters,
     now: Date,
   ) {
+    if (filters.search.trim()) {
+      const matches = await this.prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
+        SELECT u.id FROM users u WHERE ${directoryPredicate(filters, now)}
+          AND u.id = ANY(${ids}::uuid[])`);
+      ids = matches.map(({ id }) => id);
+    }
     const mentors = await this.prisma.user.findMany({
       where: { ...this.directoryWhere(filters, now), id: { in: ids } },
       select: directorySelect,
@@ -200,6 +203,26 @@ export class MentorsRepository extends MentorIntakeRepository {
     pageSize: number,
     sort: MentorDirectorySort = 'default',
   ) {
+    if (filters.search.trim()) {
+      const ids = await this.prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
+        SELECT u.id FROM users u WHERE ${directoryPredicate(filters, now)}
+        ORDER BY ${directoryOrder(sort)} LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}`);
+      if (!ids.length) return [];
+      const mentors = await this.prisma.user.findMany({
+        where: {
+          ...this.directoryWhere(filters, now),
+          id: { in: ids.map(({ id }) => id) },
+        },
+        select: directorySelect,
+      });
+      const byId = new Map(mentors.map((mentor) => [mentor.id, mentor]));
+      return this.withPhotoVersions(
+        ids.flatMap(({ id }) => {
+          const mentor = byId.get(id);
+          return mentor ? [mentor] : [];
+        }),
+      );
+    }
     const direction = sort === 'name_desc' ? 'desc' : 'asc';
 
     const mentors = await this.prisma.user.findMany({
@@ -254,15 +277,6 @@ export class MentorsRepository extends MentorIntakeRepository {
           },
         },
       };
-    }
-
-    if (filters.search) {
-      where.AND = filters.search.split(/\s+/).map((word) => ({
-        OR: buildAccentInsensitiveVariants(word).flatMap((variant) => [
-          { firstName: { contains: variant, mode: 'insensitive' as const } },
-          { lastName: { contains: variant, mode: 'insensitive' as const } },
-        ]),
-      }));
     }
 
     return where;

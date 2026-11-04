@@ -208,7 +208,7 @@ export function OrientationConfigView() {
                               handleCheckboxChange(option.id)
                             }
                             aria-labelledby={`orientation-label-${option.id}`}
-                            className={`size-5 border-0 bg-border text-transparent data-checked:text-white [&_[data-slot=checkbox-indicator]>svg]:size-4 ${
+                            className={`size-5 border-0 bg-border text-transparent data-checked:text-accent-foreground [&_[data-slot=checkbox-indicator]>svg]:size-4 ${
                               !isSelected
                                 ? ""
                                 : isSaved
@@ -274,7 +274,7 @@ export function OrientationConfigView() {
               type="button"
               onClick={() => void handleSave()}
               disabled={isSaving}
-              className="h-10 bg-accent px-6 text-sm font-semibold text-white hover:bg-brand-hover"
+              className="h-10 bg-accent px-6 text-sm font-semibold text-accent-foreground hover:bg-brand-hover"
             >
               {isSaving ? "Guardando..." : "Sí, guardar cambios"}
             </AlertDialogAction>
