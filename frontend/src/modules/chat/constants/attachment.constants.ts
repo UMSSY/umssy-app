@@ -20,8 +20,8 @@ export const ACCEPTED_ATTACHMENT_TYPES = [
 ].join(',');
 
 export const ATTACHMENT_ERROR_MESSAGES = {
-  IMAGE_TOO_LARGE: 'La imagen supera el tamaño maximo permitido de 5 MB.',
-  PDF_TOO_LARGE: 'El documento supera el tamaño maximo permitido 10 MB.',
+  IMAGE_TOO_LARGE: 'La imagen supera el tamaño máximo permitido de 5 MB.',
+  PDF_TOO_LARGE: 'El documento supera el tamaño máximo permitido 10 MB.',
   INVALID_FORMAT:
-    'Formato no permitido, Solo puedes adjuntar imágenes (JPG, PNG) o documentos PDF.',
+    'Formato no permitido, Solo puedes adjuntar imágenes JPG, PNG o documentos PDF',
 } as const;
