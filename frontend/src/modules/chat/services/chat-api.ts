@@ -86,14 +86,6 @@ export async function getConversations(): Promise<Conversation[]> {
   });
 }
 
-
-
-/**
- * HU-2: búsqueda de contactos.
- * Llama a GET /chat/users/search?q=... en el backend.
- * El backend excluye al usuario de la sesión, filtra inactivos
- * y no expone email/teléfono.
- */
 export async function searchUsers(rawQuery: string): Promise<User[]> {
   const query = rawQuery.trim();
 
@@ -459,7 +451,7 @@ export async function markConversationAsRead(
   try {
     await apiClient.patch(`/chat/messages/${conversationId}/read`);
   } catch {
-    // Graceful fallback
+    
   }
 }
 

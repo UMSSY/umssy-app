@@ -58,7 +58,6 @@ export function MessageInputBar({
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Soporte de estado controlado o no controlado para el adjunto
   const [internalAttachment, setInternalAttachment] = useState<File | null>(null);
   const currentAttachment =
     attachment !== undefined ? attachment : internalAttachment;
@@ -73,7 +72,6 @@ export function MessageInputBar({
     }
   };
 
-  // Limpieza de URL en desmontaje
   useEffect(() => {
     return () => {
       if (imagePreviewUrl) {
@@ -82,7 +80,6 @@ export function MessageInputBar({
     };
   }, [imagePreviewUrl]);
 
-  // Ajusta la altura del textarea hasta un máximo de 120px.
   useEffect(() => {
     const textarea = textareaRef.current;
 
@@ -180,7 +177,9 @@ export function MessageInputBar({
         onSubmit={handleSubmit}
         className="flex w-full min-w-0 flex-col gap-2"
       >
-        {/* Píldora / tarjeta de archivo adjunto seleccionado */}
+        {
+          
+        }
         {currentAttachment && (
           <div
             data-testid="attachment-preview"
