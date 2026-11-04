@@ -1,4 +1,3 @@
--- Índices completos con la clave foránea como primera columna.
 CREATE INDEX "access_requests_document_type_id_idx" ON "access_requests"("document_type_id");
 CREATE INDEX "access_requests_opened_by_id_idx" ON "access_requests"("opened_by_id");
 CREATE INDEX "access_requests_reviewed_by_id_idx" ON "access_requests"("reviewed_by_id");
