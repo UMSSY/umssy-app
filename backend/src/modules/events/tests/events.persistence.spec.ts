@@ -188,7 +188,7 @@ describe('EventsService', () => {
 
     expect(prismaMock.event.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }],
+        orderBy: [{ eventDate: 'asc' }, { startTime: 'asc' }, { id: 'asc' }],
       }),
     );
   });

@@ -78,4 +78,21 @@ describe("HU-02A T2.4 - JobRecommendationCard", () => {
       container.querySelector(".sm\\:flex-row"),
     ).toHaveClass("flex-col", "sm:flex-row");
   });
+  it("shows required skills instead of a match label when affinity is zero", () => {
+    render(
+      <JobRecommendationCard
+        job={{
+          ...job,
+          score: 0,
+          matchedSkills: [],
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Habilidades requeridas")).toBeInTheDocument();
+    expect(screen.queryByText("Coincide contigo")).not.toBeInTheDocument();
+    expect(screen.getByText("React")).toBeInTheDocument();
+    expect(screen.getByText("TypeScript")).toBeInTheDocument();
+    expect(screen.getByText("0% de afinidad")).toBeInTheDocument();
+});
 });

@@ -13,6 +13,9 @@ export const CreateProposalSchema = z.object({
   location: z.string().trim().min(1).max(2000),
 }).strict().superRefine((value, context) => {
   if (value.endTime <= value.startTime) context.addIssue({ code: 'custom', path: ['endTime'], message: 'La finalización debe ser posterior al inicio.' });
+  if (value.modality === 'presencial' && (!/^[^,]+,[^,]+$/.test(value.location) || value.location.split(',').some(part => !part.trim()))) {
+    context.addIssue({ code: 'custom', path: ['location'], message: 'Indica un lugar y un aula separados por una sola coma.' });
+  }
   if (value.modality === 'virtual') {
     try {
       const url = new URL(value.location);

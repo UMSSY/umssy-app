@@ -31,7 +31,9 @@ export function JobRecommendationCard({ job }: JobRecommendationCardProps) {
       </div>
       <div className="flex flex-col gap-2">
         <p className="text-xs font-semibold tracking-wide text-text-secondary uppercase">
-          {JOB_MATCHING_MESSAGES.matchedLabel}
+            {job.matchedSkills.length > 0
+            ? JOB_MATCHING_MESSAGES.matchedLabel
+            : "Habilidades requeridas"}
         </p>
         <ul className="flex flex-wrap gap-2">
           {job.matchedSkills.map((skill) => (
