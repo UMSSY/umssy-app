@@ -81,7 +81,6 @@ export function parseMessageWithLinks(text: string): TextSegment[] {
     const matchIndex = match.index ?? 0;
     const rawMatch = match[0];
 
-    // Texto previo al enlace
     if (matchIndex > lastIndex) {
       segments.push({
         type: "text",
@@ -107,7 +106,7 @@ export function parseMessageWithLinks(text: string): TextSegment[] {
         });
       }
     } else {
-      // Si la URL no es segura o válida, se mantiene como texto plano
+
       segments.push({
         type: "text",
         content: rawMatch,
@@ -117,7 +116,6 @@ export function parseMessageWithLinks(text: string): TextSegment[] {
     lastIndex = matchIndex + rawMatch.length;
   }
 
-  // Texto restante tras la última coincidencia
   if (lastIndex < text.length) {
     segments.push({
       type: "text",
@@ -125,7 +123,6 @@ export function parseMessageWithLinks(text: string): TextSegment[] {
     });
   }
 
-  // Combinar segmentos de texto consecutivos para mantener un DOM limpio
   const combinedSegments: TextSegment[] = [];
   for (const segment of segments) {
     const previous = combinedSegments[combinedSegments.length - 1];
