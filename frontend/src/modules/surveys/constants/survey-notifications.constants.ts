@@ -35,7 +35,7 @@ export const SURVEY_STATUS_MESSAGES: Record<SurveyNotificationStatus, string> = 
 
 export const SURVEY_STATUS_TONES: Record<SurveyNotificationStatus, string> = {
   pending: "bg-danger/10 text-danger",
-  expired: "bg-danger/10 text-danger",
+  expired: "bg-accent/10 text-accent",
   answered: "bg-availability text-availability-foreground",
 };
 
