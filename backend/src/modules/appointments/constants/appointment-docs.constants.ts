@@ -6,6 +6,7 @@ export const APPOINTMENT_MESSAGES = {
   invalidBlockId: 'El bloque de disponibilidad no es válido',
   missingTopic: 'Selecciona el tema de la sesión',
   invalidTopic: 'El tema de la sesión no es válido',
+  missingMessage: 'Escribe un mensaje para el mentor',
   messageTooLong: `El mensaje no puede superar los ${APPOINTMENT_MESSAGE_MAX_LENGTH} caracteres`,
   unauthorizedSession: 'La sesión es requerida o no es válida',
   forbiddenAccess: 'El usuario no tiene acceso a las citas solicitadas',
