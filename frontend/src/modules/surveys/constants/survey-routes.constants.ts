@@ -7,9 +7,10 @@ export const SURVEYS_PAGE_TITLE = "Historial de Encuestas";
 export const SURVEYS_PAGE_DESCRIPTION = "Administra las encuestas de empleabilidad y consulta las estadísticas de cada una.";
 export const CREATE_SURVEY_ACTION_LABEL = "Crear encuesta";
 export const REFRESH_SURVEYS_LABEL = "Actualizar";
-export const CREATOR_SEARCH_LABEL = "Buscar por correo electrónico de administradores";
+export const CREATOR_SEARCH_LABEL = "Buscar por correo electrónico de los administradores";
 export const ACADEMIC_PERIOD_FILTER_LABEL = "Gestión académica";
 export const ACADEMIC_PERIOD_FILTER_PLACEHOLDER = "Selecciona una gestión";
+export const CLEAR_SURVEY_FILTERS_LABEL = "Limpiar filtros";
 export const SURVEYS_FILTERED_EMPTY = "No hay encuestas que coincidan con los filtros.";
 
 export const SURVEY_ROW_ACTION_LABELS = {
