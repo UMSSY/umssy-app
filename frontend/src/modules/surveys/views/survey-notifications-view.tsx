@@ -51,7 +51,7 @@ export function SurveyNotificationsView() {
   };
 
   return (
-    <main className="-mx-8 -my-4 w-auto min-w-0 space-y-6 sm:-mx-6 sm:-my-2 lg:mx-auto lg:my-0 lg:w-full lg:max-w-7xl">
+    <main className="-mx-8 -my-4 w-auto min-w-0 space-y-6 sm:-mx-6 sm:-my-2 lg:mx-auto lg:my-0 lg:w-full lg:max-w-[1440px]">
       <PageHeading
         title={SURVEY_NOTIFICATIONS_LABEL}
         description={SURVEY_NOTIFICATIONS_DESCRIPTION}
