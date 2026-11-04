@@ -37,7 +37,7 @@ export function RequirementAnalysisResult({ analysis }: RequirementAnalysisResul
   }
 
   return (
-    <Card className="gap-5 px-4 py-4">
+    <Card className="p-4">
       <h2 className="font-tight text-xl font-bold text-ink">
         {REQUIREMENT_ANALYSIS_MESSAGES.resultTitle}
       </h2>
