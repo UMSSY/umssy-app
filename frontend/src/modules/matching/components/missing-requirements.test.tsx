@@ -4,7 +4,7 @@ import { JOB_MATCHING_MESSAGES } from "../constants/job-matching.constants";
 import type { CategorizedJobRequirement } from "../types/requirement-category.types";
 import { MissingRequirements } from "./missing-requirements";
 
-const NO_PENDING = "No tienes habilidades ni requisitos visibles pendientes para esta oportunidad";
+const NO_PENDING = "Para esta oportunidad no tienes habilidades pendientes";
 
 const MIXED: CategorizedJobRequirement[] = [
   { name: "Docker", status: "Cumple", category: "skill" },

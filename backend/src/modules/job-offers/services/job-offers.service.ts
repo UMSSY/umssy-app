@@ -17,6 +17,7 @@ import type { JobOfferCreatedResponse } from '../responses/job-offer-created.res
 import type {
   JobOfferResponse,
   JobOfferSkillResponse,
+  PublishedJobOfferResponse,
 } from '../responses/job-offer.response.js';
 import { JobOfferStatus } from '../types/job-offer.enum.js';
 import type { UpdateJobOfferData } from '../types/update-job-offer-data.type.js';
@@ -60,9 +61,9 @@ export class JobOffersService {
     return this.jobOfferMapper.toCreatedResponse(record);
   }
 
-  async listPublished(): Promise<JobOfferResponse[]> {
+  async listPublished(): Promise<PublishedJobOfferResponse[]> {
     const records = await this.jobOffersRepository.findPublished(new Date());
-    return records.map((record) => this.jobOfferMapper.toResponse(record));
+    return records.map((record) => this.jobOfferMapper.toPublishedResponse(record));
   }
   async listByCompany(
     companyId: string,
@@ -73,7 +74,13 @@ export class JobOffersService {
       companyId,
       filters,
     );
-    return records.map((record) => this.jobOfferMapper.toResponse(record));
+    const responses = records.map((record) => this.jobOfferMapper.toResponse(record));
+    if (filters.sortBy !== 'applicants') return responses;
+
+    const direction = filters.order === 'asc' ? 1 : -1;
+    return responses.sort(
+      (a, b) => (a.applicantsCount - b.applicantsCount) * direction,
+    );
   }
 
   async getByCompanyAndId(
