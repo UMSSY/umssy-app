@@ -5,6 +5,8 @@ import { SURVEY_NOTIFICATIONS_LABEL, SURVEY_NOTIFICATIONS_PATH } from "./survey-
 
 export const SURVEY_ANSWER_REDIRECT_DELAY_MS = 1500;
 
+export const SURVEY_ANSWER_QUESTION_ID_PREFIX = "question";
+
 export const SURVEY_ANSWERS_STORAGE_KEY = (surveyId: string) => `${SESSION_DRAFT_STORAGE_PREFIX}survey-answers:${surveyId}`;
 
 export const SURVEY_ANSWER_BREADCRUMB: BreadcrumbEntry[] = [

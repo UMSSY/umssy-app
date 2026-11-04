@@ -1,6 +1,6 @@
 import { UserRoundPen } from "lucide-react";
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
 
 interface ProfileCompletionBannerProps {

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle2, ChevronRight, Clock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageBreadcrumb } from "@/shared/components/layout/page-breadcrumb";
@@ -16,6 +17,7 @@ import { SurveyQuestionField } from "../components/survey-question-field";
 import {
   SURVEY_ANSWER_BREADCRUMB,
   SURVEY_ANSWER_HINTS,
+  SURVEY_ANSWER_QUESTION_ID_PREFIX,
   SURVEY_ANSWER_REDIRECT_DELAY_MS,
   SURVEY_ANSWER_TEXT,
   SURVEY_ANSWERS_STORAGE_KEY,
@@ -24,8 +26,6 @@ import { SURVEY_NOTIFICATIONS_PATH } from "../constants/survey-notifications.con
 import { useSurveyDetail } from "../hooks/use-survey-detail";
 import { surveysService } from "../services/surveys.service";
 import type { AnswerSurveyViewProps } from "../types/survey-component-props.types";
-
-const QUESTION_ID_PREFIX = "question";
 
 export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
   const router = useRouter();
@@ -80,7 +80,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
       setValidationErrors(errors);
       toast.error(SURVEY_ANSWER_TEXT.missingAnswers);
       const [firstInvalidId] = Object.keys(errors);
-      document.getElementById(`${QUESTION_ID_PREFIX}-${firstInvalidId}-card`)?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+      document.getElementById(`${SURVEY_ANSWER_QUESTION_ID_PREFIX}-${firstInvalidId}-card`)?.scrollIntoView?.({ behavior: "smooth", block: "center" });
       return;
     }
 
@@ -187,7 +187,7 @@ export function AnswerSurveyView({ id }: AnswerSurveyViewProps) {
               <SurveyQuestionField
                 key={question.id}
                 variant="plain"
-                idPrefix={QUESTION_ID_PREFIX}
+                idPrefix={SURVEY_ANSWER_QUESTION_ID_PREFIX}
                 question={question}
                 index={index}
                 hint={question.type === "multiple_choice" ? SURVEY_ANSWER_HINTS.multiple_choice : undefined}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { SurveyDetailSkeleton } from "../components/survey-detail-skeleton";
 import { SurveyEditor } from "../components/survey-editor";
 import { SurveyReadOnlyView } from "../components/survey-read-only-view";

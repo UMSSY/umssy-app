@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArrowRight, CircleCheck, Clock, FileCheck, FileClock } from "lucide-react";
 import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import {
   ANSWER_SURVEY_LABEL,
   SURVEY_STATUS_LABELS,
