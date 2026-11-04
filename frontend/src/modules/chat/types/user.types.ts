@@ -1,5 +1,3 @@
-// modules/chat/types/user.types.ts
-
 export type UserRole =
   | 'STUDENT'
   | 'GRADUATE'
