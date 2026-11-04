@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Search, SquarePlus, UserRound } from "lucide-react";
 import { PageHeading } from "@/shared/components/layout/page-heading";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { VacancyList } from "@/modules/job-offers";
 import { RECRUITERS_ROUTES } from "../constants/navigation";
 
