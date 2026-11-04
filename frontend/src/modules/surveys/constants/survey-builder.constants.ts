@@ -118,3 +118,6 @@ export const SURVEY_ARIA = {
 export const SURVEY_CREATE_DRAFT_STORAGE_KEY = `${SESSION_DRAFT_STORAGE_PREFIX}survey-create`;
 
 export const SURVEY_EDIT_DRAFT_STORAGE_KEY = (surveyId: string) => `${SESSION_DRAFT_STORAGE_PREFIX}survey-edit:${surveyId}`;
+
+export const SURVEY_EDIT_DRAFT_BASE_STORAGE_KEY = (surveyId: string) =>
+  `${SESSION_DRAFT_STORAGE_PREFIX}survey-edit-base:${surveyId}`;
