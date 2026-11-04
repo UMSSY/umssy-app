@@ -212,7 +212,7 @@ export function PendingParticipation({
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-bold text-ink">Estado de participación</h2>
                 <span className="inline-flex items-center gap-1.5 rounded-md bg-notice px-2 py-1 text-xs font-semibold text-notice-foreground">
-                  <span aria-hidden="true" className="size-2 rounded-full bg-amber-500" /> PENDIENTE
+                  <span aria-hidden="true" className="size-2 rounded-full bg-notice-foreground" /> PENDIENTE
                 </span>
               </div>
               <p className="text-sm text-text-secondary">Tu solicitud está registrada en la lista de espera.</p>
@@ -407,11 +407,11 @@ export function PendingParticipation({
       <Dialog open={cancelOpen} onOpenChange={(value) => { if (!cancelMutation.isPending) setCancelOpen(value); }}>
         <DialogContent showCloseButton={!cancelMutation.isPending} aria-busy={cancelMutation.isPending} className="max-h-[calc(100dvh-2rem)] grid-cols-1 gap-0 overflow-y-auto p-0 sm:max-w-lg">
           <header className="flex items-center gap-4 border-b border-border p-5 pr-12 sm:px-6 sm:pr-12">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-brand-soft text-danger">
               <TriangleAlert aria-hidden="true" size={28} />
             </div>
             <div>
-              <span className="rounded-md bg-red-100 px-2 py-1 text-xs font-bold text-red-700 uppercase">Confirmar acción</span>
+              <span className="rounded-md bg-brand-soft px-2 py-1 text-xs font-bold text-danger uppercase">Confirmar acción</span>
               <DialogTitle className="mt-2 text-xl leading-tight font-bold text-ink">¿Cancelar solicitud de cupo?</DialogTitle>
             </div>
           </header>

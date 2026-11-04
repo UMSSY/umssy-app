@@ -1,11 +1,12 @@
 
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import {
   NativeSelect,
   NativeSelectOption,
@@ -137,29 +138,26 @@ export function MentorDirectoryView({
             ? "El orden por afinidad no se aplicó. Se muestran los mentores por defecto."
             : "La afinidad todavía no está disponible. Se muestran los mentores por defecto.";
 
-  const navigateWithUpdates = useCallback(
-    (updates: {
-      search?: string;
-      area?: string;
-      orientation?: string;
-      available?: boolean;
-      sort?: MentorSort;
-      page?: number;
-    }) => {
-      const next = updateMentorDirectoryParams(
-        new URLSearchParams(queryString),
-        updates,
-      );
+  function navigateWithUpdates(updates: {
+    search?: string;
+    area?: string;
+    orientation?: string;
+    available?: boolean;
+    sort?: MentorSort;
+    page?: number;
+  }) {
+    const next = updateMentorDirectoryParams(
+      new URLSearchParams(queryString),
+      updates,
+    );
 
-      const query = next.toString();
+    const query = next.toString();
 
-      router.replace(
-        query ? `${pathname}?${query}` : pathname,
-        { scroll: false },
-      );
-    },
-    [pathname, queryString, router],
-  );
+    router.replace(
+      query ? `${pathname}?${query}` : pathname,
+      { scroll: false },
+    );
+  }
 
   function handleClearFilters() {
     navigateWithUpdates({
@@ -171,10 +169,7 @@ export function MentorDirectoryView({
     });
   }
 
-  const returnTo = useMemo(
-    () => (queryString ? `${pathname}?${queryString}` : pathname),
-    [pathname, queryString],
-  );
+  const returnTo = queryString ? `${pathname}?${queryString}` : pathname;
 
   return (
     <main className="min-h-full bg-background">
@@ -214,7 +209,7 @@ export function MentorDirectoryView({
           />
 
           <Label
-            className={`flex items-center gap-2 ${isAvailableOnly ? "text-primary" : ""}`}
+            className={cn("flex items-center gap-2", isAvailableOnly && "text-primary")}
           >
             <Checkbox
               checked={isAvailableOnly}

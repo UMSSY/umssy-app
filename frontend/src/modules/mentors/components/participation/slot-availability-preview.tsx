@@ -16,20 +16,20 @@ export function SlotUnavailableDialog({ open, onOpenChange, isSubmitting, isRegi
     <DialogContent showCloseButton={!isSubmitting && !isRegistered} aria-busy={isSubmitting} className="max-h-[calc(100dvh-2rem)] grid-cols-1 gap-0 overflow-y-auto p-0 sm:max-w-xl">
       {isRegistered ? <>
         <div className="space-y-3 p-5 sm:p-6">
-          <div className="flex items-start gap-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-800">
+          <div className="flex items-start gap-4 rounded-xl border border-availability bg-interaction p-4 text-availability-foreground">
             <CircleCheck aria-hidden="true" className="mt-0.5 shrink-0" size={28} />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <DialogTitle className="text-base leading-normal font-bold">Solicitud registrada correctamente</DialogTitle>
-                <span className="rounded-md bg-emerald-100 px-2 py-1 text-xs font-bold">Estado: Pendiente</span>
+                <span className="rounded-md bg-availability px-2 py-1 text-xs font-bold text-availability-foreground">Estado: Pendiente</span>
               </div>
               <DialogDescription className="mt-1 text-sm leading-relaxed text-text-secondary">
                 Tu postulación ha sido guardada en el sistema. Puedes consultar el estado de tu solicitud y las ofertas disponibles en Mi participación.
               </DialogDescription>
             </div>
           </div>
-          <div className="flex items-start gap-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <Info aria-hidden="true" className="mt-0.5 shrink-0 text-amber-600" size={28} />
+          <div className="flex items-start gap-4 rounded-xl border border-availability bg-interaction p-4">
+            <Info aria-hidden="true" className="mt-0.5 shrink-0 text-availability-foreground" size={28} />
             <div>
               <h3 className="font-bold text-ink">Ya tienes una solicitud pendiente</h3>
               <p className="mt-1 text-sm leading-relaxed text-text-secondary">No necesitas solicitar nuevamente. El envío redundante de postulaciones no acelera el proceso de asignación de vacantes.</p>

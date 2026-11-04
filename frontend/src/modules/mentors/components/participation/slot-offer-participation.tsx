@@ -26,7 +26,7 @@ export function SlotOfferParticipation({ request, onConfirmed, showHeading = tru
   const confirmation = useMutation({
     mutationFn: () => mentorParticipationService.confirm(offer.id),
     onSuccess: async () => {
-      // Reconcile the participation view even if refreshing session roles fails.
+      // Sincroniza la vista de participación aunque falle la actualización de roles.
       await Promise.allSettled([
         refreshRoles(),
         client.invalidateQueries({ queryKey: ["mentors", "participation"] }),
@@ -51,7 +51,7 @@ export function SlotOfferParticipation({ request, onConfirmed, showHeading = tru
   async function confirm() {
     if (inFlight.current || countdown.expired || Date.now() >= new Date(offer.expiresAt).getTime()) return;
     inFlight.current = true;
-    try { await confirmation.mutateAsync(); } catch { /* Render mutation error below. */ }
+    try { await confirmation.mutateAsync(); } catch {}
     finally { inFlight.current = false; }
   }
 
@@ -67,13 +67,13 @@ export function SlotOfferParticipation({ request, onConfirmed, showHeading = tru
     <Dialog open={open} onOpenChange={(value) => { if (!inFlight.current) setOpen(value); }}>
       <DialogContent showCloseButton={!confirmation.isPending} aria-busy={confirmation.isPending} className="max-h-[calc(100dvh-2rem)] grid-cols-1 gap-0 overflow-y-auto p-0 sm:max-w-xl">
         <header className="flex items-center gap-4 border-b border-border p-5 pr-12 sm:px-7 sm:pr-12">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-notice text-notice-foreground">
             <Bell aria-hidden="true" size={28} />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-xs font-bold text-text-secondary uppercase">Notificación prioritaria</p>
-              <span className="rounded-md bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">Cupo ofrecido</span>
+              <span className="rounded-md bg-notice px-2 py-1 text-xs font-semibold text-notice-foreground">Cupo ofrecido</span>
             </div>
             <DialogTitle className="mt-1 text-xl leading-tight font-bold text-ink sm:text-2xl">¡Tienes un cupo disponible!</DialogTitle>
           </div>
@@ -82,17 +82,17 @@ export function SlotOfferParticipation({ request, onConfirmed, showHeading = tru
           <DialogDescription className="text-base leading-relaxed text-text-secondary">Se ha liberado un cupo para ti. Tienes 24 horas desde su asignación para confirmar tu participación en el programa de mentores.</DialogDescription>
           <div className="space-y-3 rounded-lg border border-border bg-surface-soft p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="flex items-center gap-3 font-bold text-ink"><Clock aria-hidden="true" className="size-5 text-red-600" />Plazo de confirmación (24 horas)</h3>
-              <p role="timer" aria-label="Tiempo restante para confirmar" className="rounded-md bg-red-100 px-2 py-1 text-sm font-semibold text-red-700">{countdown.label}</p>
+              <h3 className="flex items-center gap-3 font-bold text-ink"><Clock aria-hidden="true" className="size-5 text-notice-foreground" />Plazo de confirmación (24 horas)</h3>
+              <p role="timer" aria-label="Tiempo restante para confirmar" className="rounded-md bg-notice px-2 py-1 text-sm font-semibold text-notice-foreground">{countdown.label}</p>
             </div>
             <div className="flex flex-wrap justify-between gap-2 border-t border-border pt-3 text-sm">
               <span className="text-text-secondary">Fecha y hora límite:</span>
               <span className="font-bold text-ink">{deadline} BOT (UTC-4)</span>
             </div>
           </div>
-          <div className="flex items-start gap-4 rounded-lg border border-emerald-100 bg-emerald-50 p-4">
-            <Bell aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-emerald-700" />
-            <div><h3 className="font-bold text-emerald-800">Continuidad del proceso:</h3><p className="mt-1 text-sm leading-relaxed text-text-secondary">Al pulsar Confirmar participación se validará tu plazo y se aplicará la activación como mentor con la configuración ya revisada.</p></div>
+          <div className="flex items-start gap-4 rounded-lg border border-availability bg-interaction p-4">
+            <Bell aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-availability-foreground" />
+            <div><h3 className="font-bold text-ink">Continuidad del proceso:</h3><p className="mt-1 text-sm leading-relaxed text-text-secondary">Al pulsar Confirmar participación se validará tu plazo y se aplicará la activación como mentor con la configuración ya revisada.</p></div>
           </div>
           <div className="flex items-start gap-4 rounded-lg border border-availability bg-interaction p-4">
             <Clock aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-availability-foreground" />

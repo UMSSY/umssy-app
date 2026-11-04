@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { CircleX, FileText, Pencil, UsersRound } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
+import { cn } from "@/lib/utils";
 import { PageHeading } from "@/shared/components/layout";
 
 type ParticipationOverviewProps = {
@@ -52,14 +54,14 @@ export function ParticipationOverview({ isActive, areas, orientations, onAction,
         <div className="space-y-5 rounded-lg border border-border bg-surface p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex min-w-0 flex-1 items-start gap-3">
-              <div className={`flex size-12 shrink-0 items-center justify-center rounded-full ${isActive ? "bg-emerald-100 text-emerald-700" : "bg-surface-soft text-text-secondary"}`}>
+              <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-full", isActive ? "bg-interaction text-availability-foreground" : "bg-surface-soft text-text-secondary")}>
                 <UsersRound aria-hidden="true" className="size-6" />
               </div>
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-bold text-ink">Estado de participación</h2>
-                  <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold ${isActive ? "bg-emerald-100 text-emerald-800" : "bg-surface-soft text-text-secondary"}`}>
-                    <span aria-hidden="true" className={`size-2 rounded-full ${isActive ? "bg-emerald-600" : "bg-text-secondary"}`} />
+                  <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold", isActive ? "bg-interaction text-availability-foreground" : "bg-surface-soft text-text-secondary")}>
+                    <span aria-hidden="true" className={cn("size-2 rounded-full", isActive ? "bg-availability-foreground" : "bg-text-secondary")} />
                     {isActive ? "Activo" : "Desactivado"}
                   </span>
                 </div>
