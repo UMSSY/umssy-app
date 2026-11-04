@@ -6,8 +6,11 @@ import type { FileContent } from '../../files/types/file.types.js';
 import { OCR_LANGUAGE, OCR_TESSERACT_MODEL, PDF_MIME_TYPE, PDF_RENDER_SCALE } from '../constants/document-reading.constants.js';
 import type { DocumentText, DocumentTextRegion } from '../types/document-text.types.js';
 
-/** Tesseract informa la confianza de 0 a 100; el resto del flujo trabaja de 0 a 1. */
-const toUnitConfidence = (value: number) => (Number.isFinite(value) ? Math.min(1, Math.max(0, value / 100)) : 0);
+const TESSERACT_CONFIDENCE_MAX = 100;
+const PAGE_SEGMENTATION_KEEPING_HEADINGS = PSM.AUTO;
+
+const toUnitConfidence = (percent: number) =>
+  Number.isFinite(percent) ? Math.min(1, Math.max(0, percent / TESSERACT_CONFIDENCE_MAX)) : 0;
 
 @Injectable()
 export class DocumentTextExtractorService implements OnModuleDestroy {
@@ -54,9 +57,7 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
   private async createWorker(): Promise<Worker> {
     const worker = await createTesseractWorker(OCR_TESSERACT_MODEL, [OCR_LANGUAGE]);
     try {
-      // Con el modo por defecto (un solo bloque) Tesseract descarta los encabezados grandes del diploma,
-      // y el validador necesita leer "Título profesional" o "Diploma académico".
-      await worker.setParameters({ tessedit_pageseg_mode: PSM.AUTO });
+      await worker.setParameters({ tessedit_pageseg_mode: PAGE_SEGMENTATION_KEEPING_HEADINGS });
     } catch (error) {
       await worker.terminate().catch(() => undefined);
       throw error;
@@ -87,7 +88,6 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
     const document = mupdf.Document.openDocument(content, PDF_MIME_TYPE);
     const pages: DocumentText[] = [];
     try {
-      // Render every page, including mixed PDFs: embedded headers must not hide scanned names.
       for (let index = 0; index < document.countPages(); index += 1) {
         const page = document.loadPage(index);
         try {
@@ -117,7 +117,6 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
   }
 
   private async recognizePixmap(worker: Worker, pixmap: mupdf.Pixmap, page: number): Promise<DocumentText> {
-    // Tesseract no lee píxeles crudos: se le entrega la página renderizada como PNG.
     const png = Buffer.from(pixmap.asPNG());
     const { data } = await worker.recognize(png, {}, { text: true, blocks: true });
     const regions: DocumentTextRegion[] = (data.blocks ?? [])
