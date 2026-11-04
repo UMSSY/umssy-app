@@ -17,15 +17,22 @@ import { CareersRepository } from '../repositories/careers.repository.js';
 import { SurveysRepository } from '../repositories/surveys.repository.js';
 import { ReportHistoryService } from '../../reports/services/report-history.service.js';
 import { createSurveySchema } from '../requests/create-survey.schema.js';
+import { surveyStatisticsQuerySchema } from '../requests/survey-statistics-query.schema.js';
 import { CareersService } from '../services/careers.service.js';
 import { SurveyPdfService } from '../services/survey-pdf.service.js';
 import { SurveysService } from '../services/surveys.service.js';
 
-function contextFor(roles: string[], handler: () => unknown, controller: object): ExecutionContext {
+function contextFor(
+  roles: string[],
+  handler: () => unknown,
+  controller: object,
+): ExecutionContext {
   return {
     getHandler: () => handler,
     getClass: () => controller,
-    switchToHttp: () => ({ getRequest: () => ({ user: { id: 'user-1', roles } }) }),
+    switchToHttp: () => ({
+      getRequest: () => ({ user: { id: 'user-1', roles } }),
+    }),
   } as unknown as ExecutionContext;
 }
 
@@ -51,7 +58,10 @@ describe('SurveysController', () => {
         CareersRepository,
         SurveyMapper,
         { provide: SurveyPdfService, useValue: { generatePdf: vi.fn() } },
-        { provide: ReportHistoryService, useValue: { registerGeneratedReport: vi.fn() } },
+        {
+          provide: ReportHistoryService,
+          useValue: { registerGeneratedReport: vi.fn() },
+        },
         { provide: PrismaService, useValue: {} },
       ],
     })
@@ -70,14 +80,23 @@ describe('SurveysController', () => {
   it.each([SurveysController, CareersController])(
     'exige sesión con rol administrativo en %o',
     (controller) => {
-      expect(Reflect.getMetadata(GUARDS_METADATA, controller)).toEqual([JwtAuthGuard, RolesGuard]);
-      expect(Reflect.getMetadata(ROLES_KEY, controller)).toEqual(['administrativo']);
+      expect(Reflect.getMetadata(GUARDS_METADATA, controller)).toEqual([
+        JwtAuthGuard,
+        RolesGuard,
+      ]);
+      expect(Reflect.getMetadata(ROLES_KEY, controller)).toEqual([
+        'administrativo',
+      ]);
     },
   );
 
   it('responde 403 a un titulado que intenta crear una encuesta', () => {
     const guard = new RolesGuard(new Reflector());
-    const context = contextFor(['titulado'], () => undefined, SurveysController);
+    const context = contextFor(
+      ['titulado'],
+      () => undefined,
+      SurveysController,
+    );
 
     expect(() => guard.canActivate(context)).toThrow(ForbiddenRoleException);
     expect(new ForbiddenRoleException().statusCode).toBe(403);
@@ -85,24 +104,41 @@ describe('SurveysController', () => {
 
   it('permite el acceso a un administrativo', () => {
     const guard = new RolesGuard(new Reflector());
-    const context = contextFor(['administrativo'], () => undefined, SurveysController);
+    const context = contextFor(
+      ['administrativo'],
+      () => undefined,
+      SurveysController,
+    );
 
     expect(guard.canActivate(context)).toBe(true);
   });
 
   it('delega la creación al service con el usuario autenticado', async () => {
-    const request = { title: 'Borrador', status: 'draft' as const, questions: [] };
-    const created = { id: 'survey-1', title: 'Borrador', status: 'draft' as const, createdAt: '' };
+    const request = {
+      title: 'Borrador',
+      status: 'draft' as const,
+      questions: [],
+    };
+    const created = {
+      id: 'survey-1',
+      title: 'Borrador',
+      status: 'draft' as const,
+      createdAt: '',
+    };
     const spy = vi.spyOn(surveysService, 'create').mockResolvedValue(created);
 
-    await expect(surveysController.create(request, 'admin-1')).resolves.toBe(created);
+    await expect(surveysController.create(request, 'admin-1')).resolves.toBe(
+      created,
+    );
     expect(spy).toHaveBeenCalledWith('admin-1', request);
   });
 
   it('valida el cuerpo con el esquema de creación', () => {
     const pipe = new ZodValidationPipe(createSurveySchema);
 
-    expect(() => pipe.transform({ title: 'abc', status: 'draft' })).toThrow(RequestValidationException);
+    expect(() => pipe.transform({ title: 'abc', status: 'draft' })).toThrow(
+      RequestValidationException,
+    );
   });
 
   it('delega el listado de encuestas al service', async () => {
@@ -121,12 +157,69 @@ describe('SurveysController', () => {
 
   it('delega la exportación del PDF al service con el id y usuario autenticado', async () => {
     const fileData = { fileName: 'reporte.pdf', buffer: Buffer.from('pdf') };
-    const spy = vi.spyOn(surveysService, 'exportSurveyPdf').mockResolvedValue(fileData);
+    const spy = vi
+      .spyOn(surveysService, 'exportSurveyPdf')
+      .mockResolvedValue(fileData);
 
-    const streamable = await surveysController.exportPdf('survey-1', 'admin-1');
+    const streamable = await surveysController.exportPdf(
+      'survey-1',
+      {},
+      'admin-1',
+    );
 
-    expect(spy).toHaveBeenCalledWith('survey-1', 'admin-1');
-    expect(streamable.getHeaders().disposition).toBe('attachment; filename="reporte.pdf"');
+    expect(spy).toHaveBeenCalledWith('survey-1', 'admin-1', undefined);
+    expect(streamable.getHeaders().disposition).toBe(
+      'attachment; filename="reporte.pdf"',
+    );
+  });
+
+  it('delega las estadísticas al service con el semestre consultado', async () => {
+    const statistics = { id: 'survey-1' } as Awaited<
+      ReturnType<SurveysService['getStatistics']>
+    >;
+    const spy = vi
+      .spyOn(surveysService, 'getStatistics')
+      .mockResolvedValue(statistics);
+
+    await expect(
+      surveysController.statistics('survey-1', { period: 'II-2026' }),
+    ).resolves.toBe(statistics);
+    await surveysController.statistics('survey-1', {});
+
+    expect(spy).toHaveBeenNthCalledWith(1, 'survey-1', 'II-2026');
+    expect(spy).toHaveBeenNthCalledWith(2, 'survey-1', undefined);
+  });
+
+  it('exporta el PDF del semestre consultado', async () => {
+    const spy = vi
+      .spyOn(surveysService, 'exportSurveyPdf')
+      .mockResolvedValue({
+        fileName: 'reporte.pdf',
+        buffer: Buffer.from('pdf'),
+      });
+
+    await surveysController.exportPdf(
+      'survey-1',
+      { period: 'I-2026' },
+      'admin-1',
+    );
+
+    expect(spy).toHaveBeenCalledWith('survey-1', 'admin-1', 'I-2026');
+  });
+
+  it('valida el semestre de las estadísticas', () => {
+    const pipe = new ZodValidationPipe(surveyStatisticsQuerySchema);
+
+    expect(pipe.transform({})).toEqual({});
+    expect(pipe.transform({ period: ' II-2026 ' })).toEqual({
+      period: 'II-2026',
+    });
+    expect(() => pipe.transform({ period: '2026' })).toThrow(
+      RequestValidationException,
+    );
+    expect(() => pipe.transform({ period: 'III-2026' })).toThrow(
+      RequestValidationException,
+    );
   });
 
   it('permite a un titulado obtener el detalle de una encuesta para responderla', async () => {
@@ -143,8 +236,12 @@ describe('SurveysController', () => {
       isExpired: false,
       questions: [],
     };
-    const spy = vi.spyOn(surveysService, 'getSurveyForAnswering').mockResolvedValue(detail);
-    await expect(surveysController.getById('survey-1', 'titulado-1', TITULADO_SESSION)).resolves.toBe(detail);
+    const spy = vi
+      .spyOn(surveysService, 'getSurveyForAnswering')
+      .mockResolvedValue(detail);
+    await expect(
+      surveysController.getById('survey-1', 'titulado-1', TITULADO_SESSION),
+    ).resolves.toBe(detail);
     expect(spy).toHaveBeenCalledWith('survey-1', 'titulado-1', ['titulado']);
   });
 
@@ -158,12 +255,20 @@ describe('SurveysController', () => {
       ],
     };
     const result = { success: true, message: 'Respuestas guardadas con éxito' };
-    const spy = vi.spyOn(surveysService, 'submitResponse').mockResolvedValue(result);
+    const spy = vi
+      .spyOn(surveysService, 'submitResponse')
+      .mockResolvedValue(result);
 
     await expect(
-      surveysController.submitResponse('survey-1', 'titulado-1', payload, TITULADO_SESSION),
+      surveysController.submitResponse(
+        'survey-1',
+        'titulado-1',
+        payload,
+        TITULADO_SESSION,
+      ),
     ).resolves.toBe(result);
-    expect(spy).toHaveBeenCalledWith('survey-1', 'titulado-1', payload, ['titulado']);
+    expect(spy).toHaveBeenCalledWith('survey-1', 'titulado-1', payload, [
+      'titulado',
+    ]);
   });
 });
-

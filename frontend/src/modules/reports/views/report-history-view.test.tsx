@@ -144,7 +144,7 @@ describe("ReportHistoryView", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Aún no se generaron reportes.")).toBeDefined();
-      expect(screen.getByText("Mostrando 0-0 de 0 reportes")).toBeDefined();
+      expect(screen.queryByText(/^Mostrando/)).toBeNull();
     });
   });
 
@@ -200,7 +200,7 @@ describe("ReportHistoryView", () => {
       });
       fireEvent.change(getSearchInput(), { target: { value: "inexistente" } });
 
-      expect(await screen.findByText("No se encontró ningún reporte con el nombre")).toBeDefined();
+      expect(await screen.findByText("No se encontraron reportes que coincidan con la búsqueda")).toBeDefined();
     });
 
     it("limpia la búsqueda con el botón de la x", async () => {

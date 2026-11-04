@@ -16,7 +16,6 @@ interface ChatOptionsMenuProps {
   onUnblockSelect: () => void;
 }
 
-/** Menú (⋯) de la cabecera de la sala de chat. */
 export function ChatOptionsMenu({
   isBlocked,
   disabled = false,

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { CircleX, FileText, Pencil, UsersRound } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
 import { PageHeading } from "@/shared/components/layout";
 

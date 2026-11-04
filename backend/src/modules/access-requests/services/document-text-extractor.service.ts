@@ -1,34 +1,34 @@
 import { Injectable, type OnModuleDestroy } from '@nestjs/common';
 import * as mupdf from 'mupdf';
-import type { PaddleOcrService } from 'paddleocr';
-import { createPaddleWorker, recognizeWithPaddle } from '../../../common/ocr/paddle-ocr.js';
+import { PSM, type Worker } from 'tesseract.js';
+import { createTesseractWorker } from '../../../common/ocr/tesseract-ocr.js';
 import type { FileContent } from '../../files/types/file.types.js';
-import {
-  PADDLE_DETECTION_MODEL, PADDLE_DICTIONARY, PADDLE_PRESET,
-  PADDLE_RECOGNITION_MODEL, PDF_MIME_TYPE, PDF_RENDER_SCALE,
-} from '../constants/document-reading.constants.js';
-import type { DocumentText } from '../types/document-text.types.js';
+import { OCR_LANGUAGE, OCR_TESSERACT_MODEL, PDF_MIME_TYPE, PDF_RENDER_SCALE } from '../constants/document-reading.constants.js';
+import type { DocumentText, DocumentTextRegion } from '../types/document-text.types.js';
+
+const TESSERACT_CONFIDENCE_MAX = 100;
+const PAGE_SEGMENTATION_KEEPING_HEADINGS = PSM.AUTO;
+
+const toUnitConfidence = (percent: number) =>
+  Number.isFinite(percent) ? Math.min(1, Math.max(0, percent / TESSERACT_CONFIDENCE_MAX)) : 0;
 
 @Injectable()
 export class DocumentTextExtractorService implements OnModuleDestroy {
-  private paddleWorker: Promise<PaddleOcrService> | null = null;
+  private tesseractWorker: Promise<Worker> | null = null;
   private queue: Promise<unknown> = Promise.resolve();
   private closing = false;
 
   extract(file: FileContent): Promise<DocumentText> {
     if (this.closing) return Promise.reject(new Error('OCR service is shutting down'));
     const job = this.queue.then(async () => {
-      if (process.env.OCR_ENGINE && process.env.OCR_ENGINE !== 'paddle') {
-        throw new Error('This document flow requires OCR_ENGINE=paddle');
-      }
-      const worker = await this.getPaddleWorker();
+      const worker = await this.getTesseractWorker();
       try {
         return file.mimeType === PDF_MIME_TYPE
           ? await this.recognizePdf(worker, file.content)
           : await this.recognizeImage(worker, file.content);
       } catch (error) {
-        this.paddleWorker = null;
-        await worker.destroy().catch(() => undefined);
+        this.tesseractWorker = null;
+        await worker.terminate().catch(() => undefined);
         throw error;
       }
     });
@@ -39,27 +39,33 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
   async onModuleDestroy() {
     this.closing = true;
     await this.queue;
-    const pending = this.paddleWorker;
-    this.paddleWorker = null;
-    if (pending) await (await pending).destroy();
+    const pending = this.tesseractWorker;
+    this.tesseractWorker = null;
+    if (pending) await (await pending).terminate();
   }
 
-  private async getPaddleWorker(): Promise<PaddleOcrService> {
-    this.paddleWorker ??= createPaddleWorker({
-      detection: PADDLE_DETECTION_MODEL,
-      recognition: PADDLE_RECOGNITION_MODEL,
-      dictionary: PADDLE_DICTIONARY,
-      preset: PADDLE_PRESET,
-    });
+  private async getTesseractWorker(): Promise<Worker> {
+    this.tesseractWorker ??= this.createWorker();
     try {
-      return await this.paddleWorker;
+      return await this.tesseractWorker;
     } catch (cause) {
-      this.paddleWorker = null;
-      throw new Error('PaddleOCR initialization failed: check models and ONNX Runtime', { cause });
+      this.tesseractWorker = null;
+      throw new Error('Tesseract initialization failed: check the OCR models (pnpm ocr:models) and OCR_MODEL_DIR', { cause });
     }
   }
 
-  private async recognizeImage(worker: PaddleOcrService, content: Buffer): Promise<DocumentText> {
+  private async createWorker(): Promise<Worker> {
+    const worker = await createTesseractWorker(OCR_TESSERACT_MODEL, [OCR_LANGUAGE]);
+    try {
+      await worker.setParameters({ tessedit_pageseg_mode: PAGE_SEGMENTATION_KEEPING_HEADINGS });
+    } catch (error) {
+      await worker.terminate().catch(() => undefined);
+      throw error;
+    }
+    return worker;
+  }
+
+  private async recognizeImage(worker: Worker, content: Buffer): Promise<DocumentText> {
     const image = new mupdf.Image(content);
     try {
       const source = image.toPixmap();
@@ -78,11 +84,10 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
     }
   }
 
-  private async recognizePdf(worker: PaddleOcrService, content: Buffer): Promise<DocumentText> {
+  private async recognizePdf(worker: Worker, content: Buffer): Promise<DocumentText> {
     const document = mupdf.Document.openDocument(content, PDF_MIME_TYPE);
     const pages: DocumentText[] = [];
     try {
-      // Render every page, including mixed PDFs: embedded headers must not hide scanned names.
       for (let index = 0; index < document.countPages(); index += 1) {
         const page = document.loadPage(index);
         try {
@@ -104,18 +109,26 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
     }
     const nonempty = pages.filter((page) => page.text.trim());
     return {
-      engine: 'paddle',
+      engine: 'tesseract',
       text: pages.map((page) => page.text).join('\n'),
       confidence: nonempty.length ? Math.min(...nonempty.map((page) => page.confidence)) : 0,
       regions: pages.flatMap((page) => page.regions ?? []),
     };
   }
 
-  private async recognizePixmap(worker: PaddleOcrService, pixmap: mupdf.Pixmap, page: number): Promise<DocumentText> {
-    const result = await recognizeWithPaddle(worker, {
-      width: pixmap.getWidth(), height: pixmap.getHeight(),
-      data: Uint8Array.from(pixmap.getPixels()),
-    });
-    return { ...result, engine: 'paddle', regions: result.regions.map((region) => ({ ...region, page })) };
+  private async recognizePixmap(worker: Worker, pixmap: mupdf.Pixmap, page: number): Promise<DocumentText> {
+    const png = Buffer.from(pixmap.asPNG());
+    const { data } = await worker.recognize(png, {}, { text: true, blocks: true });
+    const regions: DocumentTextRegion[] = (data.blocks ?? [])
+      .flatMap((block) => block.paragraphs ?? [])
+      .flatMap((paragraph) => paragraph.lines ?? [])
+      .filter((line) => line.text.trim())
+      .map((line) => ({
+        text: line.text.trim(),
+        confidence: toUnitConfidence(line.confidence),
+        page,
+        box: { x: line.bbox.x0, y: line.bbox.y0, width: line.bbox.x1 - line.bbox.x0, height: line.bbox.y1 - line.bbox.y0 },
+      }));
+    return { engine: 'tesseract', text: data.text, confidence: toUnitConfidence(data.confidence), regions };
   }
 }
