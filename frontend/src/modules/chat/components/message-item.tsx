@@ -45,7 +45,6 @@ export function MessageItem({
       return message.attachments[0];
     }
 
-    // Compatibilidad con adjuntos sintéticos o históricos
     if (message.isAttachment) {
       const isImage = message.attachmentType === "image";
       const cleanedName = message.content.replace(/^\[Archivo\]\s*/i, "");
@@ -83,7 +82,6 @@ export function MessageItem({
     );
   }, [resolvedAttachment, message.attachmentType]);
 
-  // Si hay un adjunto y el contenido es igual al nombre del archivo o es el prefijo [Archivo], no duplicar como texto
   const shouldShowTextContent = useMemo(() => {
     if (!message.content) return false;
     const trimmed = message.content.trim();

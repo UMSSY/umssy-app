@@ -62,18 +62,15 @@ describe("Detección de Enlaces y Vista Previa Web (HU-11 Task 5)", () => {
 
     render(<MessageItem message={message} isOwn={false} />);
 
-    // Ambas URLs deben ser clicables
     const links = screen.getAllByRole("link");
     expect(links.some((l) => l.getAttribute("href") === "https://primero.com")).toBe(true);
     expect(links.some((l) => l.getAttribute("href") === "https://segundo.com/info")).toBe(true);
 
-    // Se solicita al backend UNICAMENTE para la primera URL
     await waitFor(() => {
       expect(spyGetLinkPreview).toHaveBeenCalledTimes(1);
       expect(spyGetLinkPreview).toHaveBeenCalledWith("https://primero.com");
     });
 
-    // Se renderiza la tarjeta de vista previa solo para la primera
     await waitFor(() => {
       expect(screen.getByTestId("chat-link-preview-card")).toBeInTheDocument();
       expect(screen.getByTestId("link-preview-title")).toHaveTextContent("Sitio Primero Oficial");
@@ -115,11 +112,9 @@ describe("Detección de Enlaces y Vista Previa Web (HU-11 Task 5)", () => {
 
     render(<MessageItem message={message} isOwn={false} />);
 
-    // El enlace sigue presente y clicable
     const link = screen.getByRole("link", { name: "https://pagina-desconocida.xyz/404" });
     expect(link).toBeInTheDocument();
 
-    // No se renderiza tarjeta ni mensaje de error
     await waitFor(() => {
       expect(screen.queryByTestId("chat-link-preview-card")).not.toBeInTheDocument();
     });
