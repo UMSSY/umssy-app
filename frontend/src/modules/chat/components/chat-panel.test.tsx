@@ -45,8 +45,8 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-vi.mock("./chat-socket", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./chat-socket")>();
+vi.mock("../services/chat-socket", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../services/chat-socket")>();
 
   return {
     ...actual,

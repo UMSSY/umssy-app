@@ -9,11 +9,11 @@ import { ConversationSkeleton } from "../components/conversation-skeleton";
 import { ConversationItem } from "../components/conversation-item";
 import { ConversationList } from "../components/conversation-list";
 import { ChatView } from "../views/chat-view";
-import { getChatSocket } from "../components/chat-socket";
+import { getChatSocket } from "../services/chat-socket";
 import * as chatApi from "../services/chat-api";
 import type { Conversation, Message } from "../types/conversation.types";
 
-vi.mock("../components/chat-socket", () => ({
+vi.mock("../services/chat-socket", () => ({
   getChatSocket: vi.fn(),
 }));
 
