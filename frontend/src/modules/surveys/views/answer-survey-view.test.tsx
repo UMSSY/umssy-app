@@ -95,7 +95,7 @@ describe("AnswerSurveyView", () => {
 
     renderWithQuery(<AnswerSurveyView id="survey-123" />);
     await user.click(await screen.findByText("Sí, a tiempo completo"));
-    await user.click(screen.getByRole("button", { name: /enviar respuestas/i }));
+    await user.click(screen.getByRole("button", { name: /finalizar y enviar/i }));
 
     expect(await screen.findByRole("heading", { name: "¡Encuesta completada!" })).toBeInTheDocument();
     await waitFor(() => expect(records.has(SURVEY_ANSWERS_STORAGE_KEY("survey-123"))).toBe(false));
@@ -171,11 +171,11 @@ describe("AnswerSurveyView", () => {
 
     renderWithQuery(<AnswerSurveyView id="survey-123" />);
 
-    const submitBtn = await screen.findByRole("button", { name: /enviar respuestas/i });
+    const submitBtn = await screen.findByRole("button", { name: /finalizar y enviar/i });
     await user.click(submitBtn);
 
     expect(
-      await screen.findByText("Esta pregunta es obligatoria. Por favor selecciona una opción."),
+      await screen.findByText("Esta pregunta es obligatoria."),
     ).toBeInTheDocument();
   });
 
@@ -196,7 +196,7 @@ describe("AnswerSurveyView", () => {
     const checkboxOption = screen.getByText("Gestión de proyectos");
     await user.click(checkboxOption);
 
-    const submitBtn = screen.getByRole("button", { name: /enviar respuestas/i });
+    const submitBtn = screen.getByRole("button", { name: /finalizar y enviar/i });
     await user.click(submitBtn);
 
     expect(submitSpy).toHaveBeenCalledWith("survey-123", {

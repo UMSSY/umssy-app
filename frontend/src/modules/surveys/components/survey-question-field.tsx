@@ -9,6 +9,8 @@ import { SURVEY_ANSWER_TEXT } from "../constants/survey-answer.constants";
 import type { SurveyQuestionFieldProps } from "../types/survey-component-props.types";
 import { RequiredMark } from "./required-mark";
 
+type SurveyQuestionFieldVariant = "card" | "plain";
+
 export function SurveyQuestionField({
   question,
   index,
@@ -18,18 +20,23 @@ export function SurveyQuestionField({
   isReadOnly = false,
   hint,
   error,
-}: SurveyQuestionFieldProps) {
+  variant = "card",
+}: SurveyQuestionFieldProps & { variant?: SurveyQuestionFieldVariant }) {
   const baseId = `${idPrefix}-${question.id}`;
   const isControlled = selectedOptionIds !== undefined;
   const selected = selectedOptionIds ?? [];
   const options = question.options ?? [];
+  const isPlain = variant === "plain";
+  const isInvalid = Boolean(error) || undefined;
 
   const optionClasses = (isActive: boolean) =>
-    cn(
-      "flex items-center gap-3 rounded-lg border p-3.5 transition-colors",
-      isActive ? "border-primary bg-primary/5 text-ink" : "border-border bg-surface text-ink",
-      !isReadOnly && !isActive && "hover:bg-muted",
-    );
+    isPlain
+      ? "flex items-center gap-3 text-ink"
+      : cn(
+          "flex items-center gap-3 rounded-lg border p-3.5 transition-colors",
+          isActive ? "border-primary bg-primary/5 text-ink" : "border-border bg-surface text-ink",
+          !isReadOnly && !isActive && "hover:bg-muted",
+        );
 
   const toggleOption = (optionId: string, isChecked: boolean) =>
     onChange?.(isChecked ? [...selected, optionId] : selected.filter((id) => id !== optionId));
@@ -37,13 +44,20 @@ export function SurveyQuestionField({
   return (
     <fieldset
       id={`${baseId}-card`}
-      className={cn(
-        "rounded-xl border bg-surface p-6 shadow-xs transition-colors",
-        error ? "border-danger ring-1 ring-danger/30" : "border-border",
-      )}
+      className={
+        isPlain
+          ? "py-5 first:pt-0 last:pb-0"
+          : cn(
+              "rounded-xl border bg-surface p-6 shadow-xs transition-colors",
+              error ? "border-danger ring-1 ring-danger/30" : "border-border",
+            )
+      }
     >
-      <legend id={`${baseId}-legend`} className="float-left mb-3 w-full text-base font-semibold text-ink">
-        <span className="text-primary">{index + 1}.</span> {question.statement}
+      <legend
+        id={`${baseId}-legend`}
+        className={cn("float-left mb-3 w-full font-semibold text-ink", isPlain ? "text-sm" : "text-base")}
+      >
+        <span className={isPlain ? undefined : "text-primary"}>{index + 1}.</span> {question.statement}
         {question.isRequired && <RequiredMark className="ml-1" />}
       </legend>
 
@@ -57,7 +71,12 @@ export function SurveyQuestionField({
             {...(isControlled && { value: selected[0] ?? null })}
             onValueChange={(value) => onChange?.(typeof value === "string" ? [value] : [])}
           >
-            <SelectTrigger id={`${baseId}-select`} aria-labelledby={`${baseId}-legend`} className="w-full">
+            <SelectTrigger
+              id={`${baseId}-select`}
+              aria-labelledby={`${baseId}-legend`}
+              aria-invalid={isInvalid}
+              className={cn("w-full", isPlain && "sm:max-w-md", error && "border-danger")}
+            >
               <SelectValue placeholder={SURVEY_ANSWER_TEXT.dropdownPlaceholder} />
             </SelectTrigger>
             <SelectContent>
@@ -79,7 +98,12 @@ export function SurveyQuestionField({
         >
           {options.map((option) => (
             <div key={option.id} className={optionClasses(selected[0] === option.id)}>
-              <RadioGroupItem id={`${baseId}-${option.id}`} value={option.id} />
+              <RadioGroupItem
+                id={`${baseId}-${option.id}`}
+                value={option.id}
+                aria-invalid={isInvalid}
+                className={cn(error && "border-danger")}
+              />
               <Label htmlFor={`${baseId}-${option.id}`} className="flex-1 cursor-pointer text-sm font-medium">
                 {option.label}
               </Label>
@@ -95,6 +119,8 @@ export function SurveyQuestionField({
                 <Checkbox
                   id={`${baseId}-${option.id}`}
                   disabled={isReadOnly}
+                  aria-invalid={isInvalid}
+                  className={cn(error && "border-danger")}
                   {...(isControlled && { checked: isChecked })}
                   onCheckedChange={(checked) => toggleOption(option.id, Boolean(checked))}
                 />
