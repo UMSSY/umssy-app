@@ -21,7 +21,6 @@ export function useChatConnection(conversationId: string | null) {
   }>({ conversationId: null, status: "reconnecting" });
 
   useEffect(() => {
-    if (!conversationId) return;
     let disposed = false;
     let socket: ReturnType<typeof getChatSocket> | undefined;
     let attempt: AbortController | undefined;
@@ -51,14 +50,21 @@ export function useChatConnection(conversationId: string | null) {
       try {
         do {
           dirty = false;
-          await synchronizeMessages(client, conversationId, current.signal);
+          if (conversationId) {
+            await synchronizeMessages(client, conversationId, current.signal);
+          } else {
+            await client.invalidateQueries(
+              { queryKey: ["chat", "conversations"] },
+              { throwOnError: true },
+            );
+          }
           current.signal.throwIfAborted();
           if (!navigator.onLine || !socket?.connected)
             throw new Error("Canal desconectado");
         } while (dirty);
         failures = 0;
         update("connected");
-        void client.invalidateQueries({ queryKey: ["chat", "conversations"] });
+        if (conversationId) void client.invalidateQueries({ queryKey: ["chat", "conversations"] });
       } catch {
         if (disposed || current.signal.aborted) return;
         joined = false;
@@ -78,7 +84,7 @@ export function useChatConnection(conversationId: string | null) {
       attempt = current;
       update("reconnecting");
       try {
-        await joinChatConversation(socket!, conversationId, current.signal);
+        if (conversationId) await joinChatConversation(socket!, conversationId, current.signal);
         current.signal.throwIfAborted();
         joined = true;
         await drain(current);
