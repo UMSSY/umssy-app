@@ -333,6 +333,9 @@ function createRepositories(store: Store) {
           name: ORIENTATION_NAMES[appointment.orientationTypeId],
         },
         status: { title: AppointmentStatusTitle.CONFIRMED },
+        message: appointment.message,
+        requestedAt: NOW,
+        document: null,
       };
     },
     createAppointmentHistory: async (
