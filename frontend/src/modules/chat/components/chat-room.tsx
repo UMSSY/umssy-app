@@ -15,6 +15,7 @@ import { EventRoomEmptyState } from "./event-room-empty-state";
 import { EventRoomInfoPanel } from "./event-room-info-panel";
 import { ChatErrorState } from "./chat-error-state";
 import { getInitials } from "../utils/date-formatter";
+import { getEventRoomSenderName } from "../utils/get-event-room-sender-name";
 import { isContentValidForSend } from "../utils/unicode-counter";
 import { useMessagingUi } from "../contexts/messaging-ui-context";
 import { ChatOptionsMenu } from "./chat-options-menu";
@@ -714,12 +715,20 @@ function ChatRoomContent({
                 index,
                 hasMoreMessages,
               );
+              const senderName =
+                !isOwn && eventConversation
+                  ? getEventRoomSenderName(
+                      message.senderId,
+                      eventConversation.participants ?? [],
+                    )
+                  : undefined;
 
               return (
                 <div key={message.id} data-message-id={message.id}>
                   <MessageItem
                     message={message}
                     isOwn={isOwn}
+                    senderName={senderName}
                     showDateSeparator={showDateSeparator}
                     onDownloadAttachment={handleDownloadAttachment}
                   />

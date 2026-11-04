@@ -169,6 +169,45 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
     expect(screen.getByText('Carlos Rojas')).toBeInTheDocument();
   });
 
+  it('muestra el nombre y las iniciales del remitente en los mensajes ajenos del grupo', () => {
+    const now = new Date().toISOString();
+    const eventMessages: Message[] = [
+      {
+        id: 'event-msg-1',
+        conversationId: 'event-conversation-1',
+        senderId: 'user-2',
+        content: 'Hola a todos',
+        timestamp: now,
+        status: 'sent',
+        createdAt: now,
+      },
+      {
+        id: 'event-msg-2',
+        conversationId: 'event-conversation-1',
+        senderId: 'user-1',
+        content: 'Hola Carlos',
+        timestamp: now,
+        status: 'sent',
+        createdAt: now,
+      },
+    ];
+
+    render(
+      <ChatRoom
+        conversation={mockEventConversation}
+        messages={eventMessages}
+        currentUserId="user-1"
+        onBack={vi.fn()}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('Hola a todos')).toBeInTheDocument();
+    expect(screen.getByText('Carlos Rojas')).toBeInTheDocument();
+    expect(screen.getByTestId('message-sender-avatar')).toHaveTextContent('CR');
+    expect(screen.getAllByTestId('message-sender-name')).toHaveLength(1);
+  });
+
   it('usa el singular cuando el grupo tiene un solo participante', () => {
     render(
       <ChatRoom

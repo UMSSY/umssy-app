@@ -4,11 +4,12 @@ import { useMemo } from "react";
 import type { MessageItemProps } from "../types/message-item-props.types";
 import type { MessageAttachment } from "../types/attachment.types";
 import type { LinkPreviewData } from "../types/link-preview.types";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ChatImageThumbnail } from "./chat-image-thumbnail";
 import { ChatPdfCard } from "./chat-pdf-card";
 import { ChatMessageText } from "./chat-message-text";
 import { ChatLinkPreviewCard } from "./chat-link-preview-card";
-import { formatMessageDateSeparator } from "../utils/date-formatter";
+import { formatMessageDateSeparator, getInitials } from "../utils/date-formatter";
 import { extractFirstValidUrl, extractDomainFromUrl } from "../utils/link-parser";
 import { useLinkPreview } from "../hooks/use-link-preview";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ function formatMessageTime(value?: string | null): string {
 export function MessageItem({
   message,
   isOwn,
+  senderName,
   showDateSeparator = false,
   onDownloadAttachment,
   onImageClick,
@@ -137,10 +139,30 @@ export function MessageItem({
       <div
         data-testid={`message-item-${message.id}`}
         className={cn(
-          "flex w-full min-w-0",
+          "flex w-full min-w-0 gap-2",
           isOwn ? "justify-end" : "justify-start"
         )}
       >
+        {!isOwn && senderName && (
+          <div data-testid="message-sender" className="shrink-0">
+            <Avatar
+              size="default"
+              data-testid="message-sender-avatar"
+              className="border border-border bg-surface"
+            >
+              <AvatarFallback className="text-xs font-bold text-ink">
+                {getInitials(senderName)}
+              </AvatarFallback>
+            </Avatar>
+            <p
+              data-testid="message-sender-name"
+              className="mt-0.5 text-xs font-medium text-text-secondary"
+            >
+              {senderName}
+            </p>
+          </div>
+        )}
+
         <div
           className={cn(
             "min-w-0 rounded-2xl px-3.5 py-2.5 text-sm [overflow-wrap:anywhere] break-words shadow-xs md:max-w-[70%]",
