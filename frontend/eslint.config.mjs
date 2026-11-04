@@ -114,7 +114,7 @@ const eslintConfig = defineConfig([
         },
       ],
       "react/forbid-elements": [
-        "warn",
+        "error",
         {
           forbid: [
             {
@@ -125,7 +125,7 @@ const eslintConfig = defineConfig([
             {
               element: "input",
               message:
-                "UI Standard: Use the <Input> component from Shadcn/Base UI instead of the native HTML <input> tag. For a justified file/hidden input, use a local eslint-disable comment with the reason.",
+                "UI Standard: Use the <Input> component from Shadcn/Base UI instead of the native HTML <input> tag.",
             },
             {
               element: "select",
