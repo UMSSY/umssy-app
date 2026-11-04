@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Card } from "@/components/ui/card";
-import { getSafeMapsUrl } from "@/modules/job-offers/utils/get-safe-maps-url";
+import { getSafeMapsUrl } from "@/modules/job-offers";
 import { ModalityIcon } from "@/shared/components/modality-icon";
 import {
   HIGH_AFFINITY_THRESHOLD,

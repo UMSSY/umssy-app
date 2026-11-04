@@ -87,13 +87,7 @@ export class ProfileSkillsAnalysisService {
       });
     } catch (error) {
       await this.markError(userId, revision);
-      this.write('error', NLP_LOG_EVENTS.failed, {
-        correlationId,
-        userId,
-        revision,
-        durationMs: Math.round(performance.now() - startedAt),
-        code: toErrorCode(error),
-      });
+      this.write('error', NLP_LOG_EVENTS.markErrorFailed, { userId, revision, code: toErrorCode(error) });
     }
     return outcome;
   }
