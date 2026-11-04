@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { RefreshButton, ReportFilterSelect, ReportSearchInput } from "@/modules/reports";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
@@ -11,7 +10,6 @@ import { SurveysTable } from "../components/surveys-table";
 import {
   ACADEMIC_PERIOD_FILTER_LABEL,
   ACADEMIC_PERIOD_FILTER_PLACEHOLDER,
-  CLEAR_SURVEY_FILTERS_LABEL,
   CREATE_SURVEY_ACTION_LABEL,
   CREATE_SURVEY_PATH,
   CREATOR_SEARCH_LABEL,
@@ -31,11 +29,6 @@ export function SurveysView() {
   const [periodOptions] = useState(() => getSurveyYears().map((year) => ({ value: year, label: year })));
   const hasFilters = Boolean(creatorSearch.trim() || academicPeriod);
   const visibleSurveys = filterSurveys(surveys, creatorSearch, academicPeriod);
-
-  const handleClearFilters = () => {
-    setCreatorSearch("");
-    setAcademicPeriod(undefined);
-  };
 
   return (
     <WorkspacePage
@@ -60,12 +53,6 @@ export function SurveysView() {
           value={academicPeriod}
           onChange={setAcademicPeriod}
         />
-        {hasFilters && (
-          <Button type="button" variant="ghost" onClick={handleClearFilters} className="self-start sm:self-center">
-            <X aria-hidden="true" />
-            {CLEAR_SURVEY_FILTERS_LABEL}
-          </Button>
-        )}
       </div>
       <SurveysTable
         surveys={visibleSurveys}

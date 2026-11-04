@@ -43,19 +43,14 @@ describe("SurveysView", () => {
     expect(screen.queryByRole("option", { name: "Todas" })).not.toBeInTheDocument();
   });
 
-  it("CA14: al elegir una gestión muestra solo las encuestas de ese año y permite limpiar el filtro", async () => {
+  it("CA14: al elegir una gestión muestra solo las encuestas de ese año", async () => {
     const user = userEvent.setup();
     renderWithQuery(<SurveysView />);
     expect(await screen.findByText("Borrador sin carrera")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Limpiar filtros" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("combobox", { name: "Gestión académica" }));
     await user.click(await screen.findByRole("option", { name: "2026" }));
     expect(screen.queryByText("Borrador sin carrera")).not.toBeInTheDocument();
-    expect(screen.getByText("Encuesta de Empleabilidad")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Limpiar filtros" }));
-    expect(await screen.findByText("Borrador sin carrera")).toBeInTheDocument();
     expect(screen.getByText("Encuesta de Empleabilidad")).toBeInTheDocument();
   });
 
