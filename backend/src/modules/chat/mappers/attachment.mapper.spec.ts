@@ -1,3 +1,4 @@
+
 import { describe, it, expect } from 'vitest';
 import { AttachmentMapper } from './attachment.mapper.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
@@ -10,9 +11,7 @@ describe('AttachmentMapper', () => {
     it('maps MulterFile to UploadedFile structure', () => {
       const buffer = Buffer.from('test');
       const multerFile: MulterFile = {
-        fieldname: 'file',
         originalname: 'test.png',
-        encoding: '7bit',
         mimetype: 'image/png',
         size: 4,
         buffer,

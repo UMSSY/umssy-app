@@ -23,6 +23,7 @@ import { ConversationParticipantRepository } from '../repositories/conversation-
 import { MessageRepository } from '../repositories/message.repository.js';
 import { MessageStatusService } from './message-status.service.js';
 import { BlockService } from './block.service.js';
+import { ChatRolePolicyService } from './chat-role-policy.service.js';
 import type { SendAttachmentMessageDto } from '../requests/send-attachment-message.schema.js';
 import type { AttachmentFileDownload } from '../types/attachment.types.js';
 import type { AttachmentResponse } from '../responses/attachment.response.js';
@@ -38,6 +39,7 @@ export class AttachmentService {
     private readonly messageStatusService: MessageStatusService,
     private readonly fileValidationService: FileValidationService,
     private readonly blockService: BlockService,
+    private readonly chatRolePolicyService: ChatRolePolicyService,
   ) {}
 
   async uploadAndSend(
@@ -73,7 +75,6 @@ export class AttachmentService {
       );
     }
 
-    // Validación profunda de integridad estructural y seguridad contra políglotas
     const uploadedFile = this.attachmentMapper.toUploadedFile(file);
     const validatedFile = this.fileValidationService.validate(uploadedFile, {
       allowedTypes: isImage ? ['jpg', 'png'] : ['pdf'],
@@ -96,12 +97,22 @@ export class AttachmentService {
       throw new NotConversationParticipantException();
     }
 
-        const otherParticipantId = this.getOtherParticipantId(conversation, userId);
+    const otherParticipantId = this.getOtherParticipantId(
+      conversation,
+      userId,
+    );
     if (
       otherParticipantId &&
       (await this.blockService.isBlockedBetween(userId, otherParticipantId))
     ) {
       throw new UserBlockedException();
+    }
+
+    if (otherParticipantId) {
+      await this.chatRolePolicyService.assertCanCommunicate(
+        userId,
+        otherParticipantId,
+      );
     }
 
     const typeTitle = isImage ? 'IMAGE' : 'PDF';
@@ -158,7 +169,9 @@ export class AttachmentService {
     userId: string,
     attachmentId: string,
   ): Promise<AttachmentFileDownload> {
-    const record = await this.attachmentRepository.findDownloadById(attachmentId);
+    const record = await this.attachmentRepository.findDownloadById(
+      attachmentId,
+    );
     if (!record || !record.fileData) {
       throw new AttachmentNotFoundException();
     }
