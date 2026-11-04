@@ -278,6 +278,7 @@ export type AppointmentWhereInput = {
   cancelledBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   proposals?: Prisma.TimeProposalListRelationFilter
   history?: Prisma.AppointmentHistoryListRelationFilter
+  document?: Prisma.XOR<Prisma.AppointmentDocumentNullableScalarRelationFilter, Prisma.AppointmentDocumentWhereInput> | null
 }
 
 export type AppointmentOrderByWithRelationInput = {
@@ -305,6 +306,7 @@ export type AppointmentOrderByWithRelationInput = {
   cancelledBy?: Prisma.UserOrderByWithRelationInput
   proposals?: Prisma.TimeProposalOrderByRelationAggregateInput
   history?: Prisma.AppointmentHistoryOrderByRelationAggregateInput
+  document?: Prisma.AppointmentDocumentOrderByWithRelationInput
 }
 
 export type AppointmentWhereUniqueInput = Prisma.AtLeast<{
@@ -335,6 +337,7 @@ export type AppointmentWhereUniqueInput = Prisma.AtLeast<{
   cancelledBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   proposals?: Prisma.TimeProposalListRelationFilter
   history?: Prisma.AppointmentHistoryListRelationFilter
+  document?: Prisma.XOR<Prisma.AppointmentDocumentNullableScalarRelationFilter, Prisma.AppointmentDocumentWhereInput> | null
 }, "id">
 
 export type AppointmentOrderByWithAggregationInput = {
@@ -400,6 +403,7 @@ export type AppointmentCreateInput = {
   cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledAppointmentsInput
   proposals?: Prisma.TimeProposalCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentUncheckedCreateInput = {
@@ -421,6 +425,7 @@ export type AppointmentUncheckedCreateInput = {
   updatedAt?: Date | string
   proposals?: Prisma.TimeProposalUncheckedCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentUncheckedCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentUpdateInput = {
@@ -442,6 +447,7 @@ export type AppointmentUpdateInput = {
   cancelledBy?: Prisma.UserUpdateOneWithoutCancelledAppointmentsNestedInput
   proposals?: Prisma.TimeProposalUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateInput = {
@@ -463,6 +469,7 @@ export type AppointmentUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proposals?: Prisma.TimeProposalUncheckedUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUncheckedUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentCreateManyInput = {
@@ -840,6 +847,20 @@ export type AppointmentUncheckedUpdateManyWithoutBlockNestedInput = {
   deleteMany?: Prisma.AppointmentScalarWhereInput | Prisma.AppointmentScalarWhereInput[]
 }
 
+export type AppointmentCreateNestedOneWithoutDocumentInput = {
+  create?: Prisma.XOR<Prisma.AppointmentCreateWithoutDocumentInput, Prisma.AppointmentUncheckedCreateWithoutDocumentInput>
+  connectOrCreate?: Prisma.AppointmentCreateOrConnectWithoutDocumentInput
+  connect?: Prisma.AppointmentWhereUniqueInput
+}
+
+export type AppointmentUpdateOneRequiredWithoutDocumentNestedInput = {
+  create?: Prisma.XOR<Prisma.AppointmentCreateWithoutDocumentInput, Prisma.AppointmentUncheckedCreateWithoutDocumentInput>
+  connectOrCreate?: Prisma.AppointmentCreateOrConnectWithoutDocumentInput
+  upsert?: Prisma.AppointmentUpsertWithoutDocumentInput
+  connect?: Prisma.AppointmentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AppointmentUpdateToOneWithWhereWithoutDocumentInput, Prisma.AppointmentUpdateWithoutDocumentInput>, Prisma.AppointmentUncheckedUpdateWithoutDocumentInput>
+}
+
 export type AppointmentCreateNestedOneWithoutProposalsInput = {
   create?: Prisma.XOR<Prisma.AppointmentCreateWithoutProposalsInput, Prisma.AppointmentUncheckedCreateWithoutProposalsInput>
   connectOrCreate?: Prisma.AppointmentCreateOrConnectWithoutProposalsInput
@@ -886,6 +907,7 @@ export type AppointmentCreateWithoutStatusInput = {
   cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledAppointmentsInput
   proposals?: Prisma.TimeProposalCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentUncheckedCreateWithoutStatusInput = {
@@ -906,6 +928,7 @@ export type AppointmentUncheckedCreateWithoutStatusInput = {
   updatedAt?: Date | string
   proposals?: Prisma.TimeProposalUncheckedCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentUncheckedCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentCreateOrConnectWithoutStatusInput = {
@@ -974,6 +997,7 @@ export type AppointmentCreateWithoutMentorInput = {
   cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledAppointmentsInput
   proposals?: Prisma.TimeProposalCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentUncheckedCreateWithoutMentorInput = {
@@ -994,6 +1018,7 @@ export type AppointmentUncheckedCreateWithoutMentorInput = {
   updatedAt?: Date | string
   proposals?: Prisma.TimeProposalUncheckedCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentUncheckedCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentCreateOrConnectWithoutMentorInput = {
@@ -1024,6 +1049,7 @@ export type AppointmentCreateWithoutStudentInput = {
   cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledAppointmentsInput
   proposals?: Prisma.TimeProposalCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentUncheckedCreateWithoutStudentInput = {
@@ -1044,6 +1070,7 @@ export type AppointmentUncheckedCreateWithoutStudentInput = {
   updatedAt?: Date | string
   proposals?: Prisma.TimeProposalUncheckedCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentUncheckedCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentCreateOrConnectWithoutStudentInput = {
@@ -1074,6 +1101,7 @@ export type AppointmentCreateWithoutCancelledByInput = {
   orientationType?: Prisma.OrientationTypeCreateNestedOneWithoutAppointmentsInput
   proposals?: Prisma.TimeProposalCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentUncheckedCreateWithoutCancelledByInput = {
@@ -1094,6 +1122,7 @@ export type AppointmentUncheckedCreateWithoutCancelledByInput = {
   updatedAt?: Date | string
   proposals?: Prisma.TimeProposalUncheckedCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentUncheckedCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentCreateOrConnectWithoutCancelledByInput = {
@@ -1172,6 +1201,7 @@ export type AppointmentCreateWithoutOrientationTypeInput = {
   cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledAppointmentsInput
   proposals?: Prisma.TimeProposalCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentUncheckedCreateWithoutOrientationTypeInput = {
@@ -1192,6 +1222,7 @@ export type AppointmentUncheckedCreateWithoutOrientationTypeInput = {
   updatedAt?: Date | string
   proposals?: Prisma.TimeProposalUncheckedCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentUncheckedCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentCreateOrConnectWithoutOrientationTypeInput = {
@@ -1238,6 +1269,7 @@ export type AppointmentCreateWithoutBlockInput = {
   cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledAppointmentsInput
   proposals?: Prisma.TimeProposalCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentUncheckedCreateWithoutBlockInput = {
@@ -1258,6 +1290,7 @@ export type AppointmentUncheckedCreateWithoutBlockInput = {
   updatedAt?: Date | string
   proposals?: Prisma.TimeProposalUncheckedCreateNestedManyWithoutAppointmentInput
   history?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentUncheckedCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentCreateOrConnectWithoutBlockInput = {
@@ -1286,6 +1319,106 @@ export type AppointmentUpdateManyWithWhereWithoutBlockInput = {
   data: Prisma.XOR<Prisma.AppointmentUpdateManyMutationInput, Prisma.AppointmentUncheckedUpdateManyWithoutBlockInput>
 }
 
+export type AppointmentCreateWithoutDocumentInput = {
+  id?: string
+  startAt: Date | string
+  endAt: Date | string
+  message?: string | null
+  rejectionReason?: string | null
+  meetingUrl?: string | null
+  requestedAt?: Date | string
+  respondedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  block?: Prisma.AvailabilityBlockCreateNestedOneWithoutAppointmentsInput
+  mentor: Prisma.UserCreateNestedOneWithoutMentorAppointmentsInput
+  student: Prisma.UserCreateNestedOneWithoutStudentAppointmentsInput
+  status: Prisma.AppointmentStatusCreateNestedOneWithoutAppointmentsInput
+  orientationType?: Prisma.OrientationTypeCreateNestedOneWithoutAppointmentsInput
+  cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledAppointmentsInput
+  proposals?: Prisma.TimeProposalCreateNestedManyWithoutAppointmentInput
+  history?: Prisma.AppointmentHistoryCreateNestedManyWithoutAppointmentInput
+}
+
+export type AppointmentUncheckedCreateWithoutDocumentInput = {
+  id?: string
+  blockId?: string | null
+  mentorId: string
+  studentId: string
+  startAt: Date | string
+  endAt: Date | string
+  statusId: string
+  orientationTypeId?: string | null
+  message?: string | null
+  rejectionReason?: string | null
+  meetingUrl?: string | null
+  cancelledById?: string | null
+  requestedAt?: Date | string
+  respondedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  proposals?: Prisma.TimeProposalUncheckedCreateNestedManyWithoutAppointmentInput
+  history?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutAppointmentInput
+}
+
+export type AppointmentCreateOrConnectWithoutDocumentInput = {
+  where: Prisma.AppointmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.AppointmentCreateWithoutDocumentInput, Prisma.AppointmentUncheckedCreateWithoutDocumentInput>
+}
+
+export type AppointmentUpsertWithoutDocumentInput = {
+  update: Prisma.XOR<Prisma.AppointmentUpdateWithoutDocumentInput, Prisma.AppointmentUncheckedUpdateWithoutDocumentInput>
+  create: Prisma.XOR<Prisma.AppointmentCreateWithoutDocumentInput, Prisma.AppointmentUncheckedCreateWithoutDocumentInput>
+  where?: Prisma.AppointmentWhereInput
+}
+
+export type AppointmentUpdateToOneWithWhereWithoutDocumentInput = {
+  where?: Prisma.AppointmentWhereInput
+  data: Prisma.XOR<Prisma.AppointmentUpdateWithoutDocumentInput, Prisma.AppointmentUncheckedUpdateWithoutDocumentInput>
+}
+
+export type AppointmentUpdateWithoutDocumentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meetingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requestedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  block?: Prisma.AvailabilityBlockUpdateOneWithoutAppointmentsNestedInput
+  mentor?: Prisma.UserUpdateOneRequiredWithoutMentorAppointmentsNestedInput
+  student?: Prisma.UserUpdateOneRequiredWithoutStudentAppointmentsNestedInput
+  status?: Prisma.AppointmentStatusUpdateOneRequiredWithoutAppointmentsNestedInput
+  orientationType?: Prisma.OrientationTypeUpdateOneWithoutAppointmentsNestedInput
+  cancelledBy?: Prisma.UserUpdateOneWithoutCancelledAppointmentsNestedInput
+  proposals?: Prisma.TimeProposalUpdateManyWithoutAppointmentNestedInput
+  history?: Prisma.AppointmentHistoryUpdateManyWithoutAppointmentNestedInput
+}
+
+export type AppointmentUncheckedUpdateWithoutDocumentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  blockId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mentorId?: Prisma.StringFieldUpdateOperationsInput | string
+  studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  statusId?: Prisma.StringFieldUpdateOperationsInput | string
+  orientationTypeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  meetingUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cancelledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requestedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  respondedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  proposals?: Prisma.TimeProposalUncheckedUpdateManyWithoutAppointmentNestedInput
+  history?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutAppointmentNestedInput
+}
+
 export type AppointmentCreateWithoutProposalsInput = {
   id?: string
   startAt: Date | string
@@ -1304,6 +1437,7 @@ export type AppointmentCreateWithoutProposalsInput = {
   orientationType?: Prisma.OrientationTypeCreateNestedOneWithoutAppointmentsInput
   cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledAppointmentsInput
   history?: Prisma.AppointmentHistoryCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentUncheckedCreateWithoutProposalsInput = {
@@ -1324,6 +1458,7 @@ export type AppointmentUncheckedCreateWithoutProposalsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   history?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentUncheckedCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentCreateOrConnectWithoutProposalsInput = {
@@ -1360,6 +1495,7 @@ export type AppointmentUpdateWithoutProposalsInput = {
   orientationType?: Prisma.OrientationTypeUpdateOneWithoutAppointmentsNestedInput
   cancelledBy?: Prisma.UserUpdateOneWithoutCancelledAppointmentsNestedInput
   history?: Prisma.AppointmentHistoryUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateWithoutProposalsInput = {
@@ -1380,6 +1516,7 @@ export type AppointmentUncheckedUpdateWithoutProposalsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   history?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUncheckedUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentCreateWithoutHistoryInput = {
@@ -1400,6 +1537,7 @@ export type AppointmentCreateWithoutHistoryInput = {
   orientationType?: Prisma.OrientationTypeCreateNestedOneWithoutAppointmentsInput
   cancelledBy?: Prisma.UserCreateNestedOneWithoutCancelledAppointmentsInput
   proposals?: Prisma.TimeProposalCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentUncheckedCreateWithoutHistoryInput = {
@@ -1420,6 +1558,7 @@ export type AppointmentUncheckedCreateWithoutHistoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   proposals?: Prisma.TimeProposalUncheckedCreateNestedManyWithoutAppointmentInput
+  document?: Prisma.AppointmentDocumentUncheckedCreateNestedOneWithoutAppointmentInput
 }
 
 export type AppointmentCreateOrConnectWithoutHistoryInput = {
@@ -1456,6 +1595,7 @@ export type AppointmentUpdateWithoutHistoryInput = {
   orientationType?: Prisma.OrientationTypeUpdateOneWithoutAppointmentsNestedInput
   cancelledBy?: Prisma.UserUpdateOneWithoutCancelledAppointmentsNestedInput
   proposals?: Prisma.TimeProposalUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateWithoutHistoryInput = {
@@ -1476,6 +1616,7 @@ export type AppointmentUncheckedUpdateWithoutHistoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proposals?: Prisma.TimeProposalUncheckedUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUncheckedUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentCreateManyStatusInput = {
@@ -1514,6 +1655,7 @@ export type AppointmentUpdateWithoutStatusInput = {
   cancelledBy?: Prisma.UserUpdateOneWithoutCancelledAppointmentsNestedInput
   proposals?: Prisma.TimeProposalUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateWithoutStatusInput = {
@@ -1534,6 +1676,7 @@ export type AppointmentUncheckedUpdateWithoutStatusInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proposals?: Prisma.TimeProposalUncheckedUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUncheckedUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateManyWithoutStatusInput = {
@@ -1626,6 +1769,7 @@ export type AppointmentUpdateWithoutMentorInput = {
   cancelledBy?: Prisma.UserUpdateOneWithoutCancelledAppointmentsNestedInput
   proposals?: Prisma.TimeProposalUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateWithoutMentorInput = {
@@ -1646,6 +1790,7 @@ export type AppointmentUncheckedUpdateWithoutMentorInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proposals?: Prisma.TimeProposalUncheckedUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUncheckedUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateManyWithoutMentorInput = {
@@ -1684,6 +1829,7 @@ export type AppointmentUpdateWithoutStudentInput = {
   cancelledBy?: Prisma.UserUpdateOneWithoutCancelledAppointmentsNestedInput
   proposals?: Prisma.TimeProposalUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateWithoutStudentInput = {
@@ -1704,6 +1850,7 @@ export type AppointmentUncheckedUpdateWithoutStudentInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proposals?: Prisma.TimeProposalUncheckedUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUncheckedUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateManyWithoutStudentInput = {
@@ -1742,6 +1889,7 @@ export type AppointmentUpdateWithoutCancelledByInput = {
   orientationType?: Prisma.OrientationTypeUpdateOneWithoutAppointmentsNestedInput
   proposals?: Prisma.TimeProposalUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateWithoutCancelledByInput = {
@@ -1762,6 +1910,7 @@ export type AppointmentUncheckedUpdateWithoutCancelledByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proposals?: Prisma.TimeProposalUncheckedUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUncheckedUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateManyWithoutCancelledByInput = {
@@ -1818,6 +1967,7 @@ export type AppointmentUpdateWithoutOrientationTypeInput = {
   cancelledBy?: Prisma.UserUpdateOneWithoutCancelledAppointmentsNestedInput
   proposals?: Prisma.TimeProposalUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateWithoutOrientationTypeInput = {
@@ -1838,6 +1988,7 @@ export type AppointmentUncheckedUpdateWithoutOrientationTypeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proposals?: Prisma.TimeProposalUncheckedUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUncheckedUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateManyWithoutOrientationTypeInput = {
@@ -1894,6 +2045,7 @@ export type AppointmentUpdateWithoutBlockInput = {
   cancelledBy?: Prisma.UserUpdateOneWithoutCancelledAppointmentsNestedInput
   proposals?: Prisma.TimeProposalUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateWithoutBlockInput = {
@@ -1914,6 +2066,7 @@ export type AppointmentUncheckedUpdateWithoutBlockInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   proposals?: Prisma.TimeProposalUncheckedUpdateManyWithoutAppointmentNestedInput
   history?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutAppointmentNestedInput
+  document?: Prisma.AppointmentDocumentUncheckedUpdateOneWithoutAppointmentNestedInput
 }
 
 export type AppointmentUncheckedUpdateManyWithoutBlockInput = {
@@ -1999,6 +2152,7 @@ export type AppointmentSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   cancelledBy?: boolean | Prisma.Appointment$cancelledByArgs<ExtArgs>
   proposals?: boolean | Prisma.Appointment$proposalsArgs<ExtArgs>
   history?: boolean | Prisma.Appointment$historyArgs<ExtArgs>
+  document?: boolean | Prisma.Appointment$documentArgs<ExtArgs>
   _count?: boolean | Prisma.AppointmentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["appointment"]>
 
@@ -2081,6 +2235,7 @@ export type AppointmentInclude<ExtArgs extends runtime.Types.Extensions.Internal
   cancelledBy?: boolean | Prisma.Appointment$cancelledByArgs<ExtArgs>
   proposals?: boolean | Prisma.Appointment$proposalsArgs<ExtArgs>
   history?: boolean | Prisma.Appointment$historyArgs<ExtArgs>
+  document?: boolean | Prisma.Appointment$documentArgs<ExtArgs>
   _count?: boolean | Prisma.AppointmentCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AppointmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2111,6 +2266,7 @@ export type $AppointmentPayload<ExtArgs extends runtime.Types.Extensions.Interna
     cancelledBy: Prisma.$UserPayload<ExtArgs> | null
     proposals: Prisma.$TimeProposalPayload<ExtArgs>[]
     history: Prisma.$AppointmentHistoryPayload<ExtArgs>[]
+    document: Prisma.$AppointmentDocumentPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2531,6 +2687,7 @@ export interface Prisma__AppointmentClient<T, Null = never, ExtArgs extends runt
   cancelledBy<T extends Prisma.Appointment$cancelledByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Appointment$cancelledByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   proposals<T extends Prisma.Appointment$proposalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Appointment$proposalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TimeProposalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   history<T extends Prisma.Appointment$historyArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Appointment$historyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppointmentHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  document<T extends Prisma.Appointment$documentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Appointment$documentArgs<ExtArgs>>): Prisma.Prisma__AppointmentDocumentClient<runtime.Types.Result.GetResult<Prisma.$AppointmentDocumentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3079,6 +3236,25 @@ export type Appointment$historyArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.AppointmentHistoryScalarFieldEnum | Prisma.AppointmentHistoryScalarFieldEnum[]
+}
+
+/**
+ * Appointment.document
+ */
+export type Appointment$documentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AppointmentDocument
+   */
+  select?: Prisma.AppointmentDocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AppointmentDocument
+   */
+  omit?: Prisma.AppointmentDocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AppointmentDocumentInclude<ExtArgs> | null
+  where?: Prisma.AppointmentDocumentWhereInput
 }
 
 /**
