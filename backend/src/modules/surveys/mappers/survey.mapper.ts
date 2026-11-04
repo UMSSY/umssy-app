@@ -19,10 +19,11 @@ import type {
   SurveyStatisticsRecord,
   SurveySummaryRecord,
 } from '../types/survey-record.type.js';
-import {
-  buildQuestionTrend,
-  type TrendComparison,
-} from '../utils/build-question-trend.js';
+import type {
+  StatisticsContext,
+  TrendComparison,
+} from '../types/survey-statistics.type.js';
+import { buildQuestionTrend } from '../utils/build-question-trend.js';
 import { distributePercentages } from '../utils/distribute-percentages.js';
 import { listSemesters } from '../utils/academic-semester.js';
 import { resolveSurveyStatus } from '../utils/resolve-survey-status.js';
@@ -32,11 +33,6 @@ import {
   toSurveyStatusValue,
   toSurveyTargetAudienceValue,
 } from '../utils/survey-catalog-values.js';
-
-export interface StatisticsContext {
-  period?: string | null;
-  previous?: { period: string; record: SurveyStatisticsRecord };
-}
 
 @Injectable()
 export class SurveyMapper {
@@ -137,8 +133,6 @@ export class SurveyMapper {
     };
   }
 
-  // period: semestre consultado (null = todas las respuestas). previous: el mismo cálculo del semestre anterior,
-  // que solo sirve para decir si la opción principal de cada pregunta sube o baja.
   toStatisticsResponse(
     record: SurveyStatisticsRecord,
     now: Date = new Date(),
@@ -168,7 +162,6 @@ export class SurveyMapper {
     };
   }
 
-  // Semestres consultables: desde la apertura (o creación) hasta hoy o el cierre, lo que ocurra primero.
   private getAvailablePeriods(
     record: SurveyStatisticsRecord,
     now: Date,
@@ -211,8 +204,6 @@ export class SurveyMapper {
   ): SurveyQuestionStatisticResponse {
     const counts = question.options.map((option) => option._count.answers);
     const totalSelections = counts.reduce((total, count) => total + count, 0);
-    // El porcentaje se calcula sobre las selecciones de la pregunta, así los de un card siempre suman 100%
-    // (en opción múltiple cada persona puede elegir varias opciones).
     const percentages = distributePercentages(counts);
     const options = question.options.map((option, index) => ({
       id: option.id,

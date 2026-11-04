@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import {
-  buildQuestionTrend,
-  NO_RESPONSES_TREND_TEXT,
-  type TrendComparison,
-} from '../utils/build-question-trend.js';
+import { NO_RESPONSES_TREND_TEXT } from '../constants/survey-statistics.constants.js';
+import type { TrendComparison } from '../types/survey-statistics.type.js';
+import { buildQuestionTrend } from '../utils/build-question-trend.js';
 
 const OPTIONS = [
   { id: 'a', label: 'Empleado', count: 3, percentage: 60 },

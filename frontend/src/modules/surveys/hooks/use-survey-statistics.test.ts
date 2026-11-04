@@ -39,7 +39,6 @@ describe("useSurveyStatistics", () => {
 
     rerender({ period: "I-2026" });
 
-    // Mientras carga el semestre nuevo no se reutilizan los valores del anterior, pero el selector conserva sus opciones.
     expect(result.current.isLoading).toBe(true);
     expect(result.current.statistics).toBeUndefined();
     expect(result.current.availablePeriods).toEqual(["II-2026", "I-2026"]);

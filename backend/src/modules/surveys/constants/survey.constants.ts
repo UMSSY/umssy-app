@@ -121,8 +121,6 @@ const buildAnswersCount = (range?: SemesterRange) =>
       }
     : true;
 
-// Con un semestre, los conteos solo incluyen las respuestas enviadas dentro de ese rango.
-// La forma del resultado no cambia, por eso se puede tipar igual que SURVEY_STATISTICS_INCLUDE.
 export const buildSurveyStatisticsInclude = (
   range?: SemesterRange,
 ): typeof SURVEY_STATISTICS_INCLUDE =>

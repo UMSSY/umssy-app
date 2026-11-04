@@ -1,29 +1,14 @@
+import {
+  NO_RESPONSES_TREND_TEXT,
+  TREND_MIN_CHANGE_POINTS,
+} from '../constants/survey-statistics.constants.js';
 import type { SurveyQuestionTrendResponse } from '../responses/survey-statistics.response.js';
-
-// Variación mínima, en puntos porcentuales, para decir que una opción sube o baja frente al semestre anterior.
-export const TREND_MIN_CHANGE_POINTS = 1;
-export const NO_RESPONSES_TREND_TEXT =
-  'Sin respuestas registradas en este periodo.';
-
-export interface TrendOption {
-  id: string;
-  label: string;
-  count: number;
-  percentage: number;
-}
-
-export interface TrendComparison {
-  period: string;
-  // Porcentaje de cada opción en el semestre anterior; vacío si ese semestre no tuvo respuestas.
-  percentageByOption: ReadonlyMap<string, number>;
-}
-
-export interface TrendInput {
-  options: readonly TrendOption[];
-  totalSelections: number;
-  isMultipleChoice: boolean;
-  comparison?: TrendComparison;
-}
+import type {
+  TrendChange,
+  TrendComparison,
+  TrendInput,
+  TrendOption,
+} from '../types/survey-statistics.type.js';
 
 function formatPercentage(value: number): string {
   return `${Number(value.toFixed(1))}%`;
@@ -38,7 +23,7 @@ function joinLabels(labels: readonly string[]): string {
 function describeChange(
   top: TrendOption,
   comparison: TrendComparison | undefined,
-): Pick<SurveyQuestionTrendResponse, 'direction'> & { sentence: string } {
+): TrendChange {
   if (!comparison || comparison.percentageByOption.size === 0) {
     return { direction: 'neutral', sentence: '' };
   }
@@ -66,8 +51,6 @@ function describeChange(
   };
 }
 
-// Tendencia principal de una pregunta: la opción más elegida y, si hay semestre anterior con respuestas,
-// si esa opción sube, baja o se mantiene. Sirve para cualquier pregunta porque se arma solo con los datos.
 export function buildQuestionTrend({
   options,
   totalSelections,

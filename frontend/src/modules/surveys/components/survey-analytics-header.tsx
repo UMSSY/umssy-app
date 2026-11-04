@@ -1,7 +1,5 @@
 import type { SurveyAnalyticsHeaderProps } from "../types/survey-component-props.types";
 
-// Header con el título de la encuesta, fijo en la zona superior al hacer scroll vertical.
-// Ocupa todo el ancho del contenido (-mx-12 -mt-10 anulan el padding del shell), igual que la barra del formulario.
 export function SurveyAnalyticsHeader({ title, description, actions }: SurveyAnalyticsHeaderProps) {
   return (
     <header className="sticky top-app-header z-20 -mx-12 -mt-10 border-b border-border bg-surface-soft px-12 py-3">

@@ -188,7 +188,6 @@ export class SurveysRepository {
     });
   }
 
-  // Con range, los conteos solo incluyen las respuestas enviadas dentro de ese semestre.
   findStatistics(
     surveyId: string,
     range?: SemesterRange,

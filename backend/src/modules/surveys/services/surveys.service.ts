@@ -28,6 +28,7 @@ import {
 import type { SurveySummaryResponse } from '../responses/survey-summary.response.js';
 import { SURVEYS_ROLE } from '../constants/surveys-access.constants.js';
 import type { UpdateSurveyData } from '../types/create-survey-data.type.js';
+import type { PreviousStatistics } from '../types/survey-statistics.type.js';
 import { SurveyQuestionType, SurveyStatus } from '../types/survey.enum.js';
 import {
   getSurveyAudiencesForRoles,
@@ -104,7 +105,6 @@ export class SurveysService {
     );
   }
 
-  // period (I-2026 / II-2026) limita los resultados a las respuestas enviadas en ese semestre; sin él, todas.
   async getStatistics(
     id: string,
     period?: string,
@@ -124,8 +124,10 @@ export class SurveysService {
     });
   }
 
-  // Resultados del semestre anterior, solo para decir si la opción principal sube o baja.
-  private async findPreviousStatistics(id: string, period: string) {
+  private async findPreviousStatistics(
+    id: string,
+    period: string,
+  ): Promise<PreviousStatistics | undefined> {
     const previousPeriod = getPreviousSemester(period);
     const range = previousPeriod ? getSemesterRange(previousPeriod) : undefined;
     if (!previousPeriod || !range) return undefined;

@@ -3,19 +3,19 @@ import {
   ACADEMIC_PERIOD_PATTERN,
   getAcademicPeriod,
 } from '../../reports/utils/academic-period.js';
+import { MAX_LISTED_SEMESTERS } from '../constants/survey-statistics.constants.js';
 import type { SemesterRange } from '../types/semester-range.type.js';
+import type {
+  AcademicSemester,
+  ParsedSemester,
+} from '../types/survey-statistics.type.js';
 
-const MAX_LISTED_SEMESTERS = 40;
-
-function parsePeriod(
-  period: string,
-): { semester: 'I' | 'II'; year: number } | undefined {
+function parsePeriod(period: string): ParsedSemester | undefined {
   if (!ACADEMIC_PERIOD_PATTERN.test(period)) return undefined;
   const [semester, year] = period.split('-');
-  return { semester: semester as 'I' | 'II', year: Number(year) };
+  return { semester: semester as AcademicSemester, year: Number(year) };
 }
 
-// Rango [inicio, fin) de un semestre en hora de Bolivia: I = enero a junio, II = julio a diciembre.
 export function getSemesterRange(period: string): SemesterRange | undefined {
   const parsed = parsePeriod(period);
   if (!parsed) return undefined;
@@ -39,7 +39,6 @@ export function getPreviousSemester(period: string): string | undefined {
     : `II-${parsed.year - 1}`;
 }
 
-// Semestres entre dos fechas, del más reciente al más antiguo. Son los que el administrador puede elegir.
 export function listSemesters(from: Date, to: Date): string[] {
   if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return [];
 

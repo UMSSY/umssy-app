@@ -141,7 +141,6 @@ describe("SurveyAnalyticsView", () => {
       expect(await screen.findByRole("status", { name: "Cargando analíticas" })).toBeInTheDocument();
       expect(screen.queryByText("¿Cuál es tu situación laboral actual?")).not.toBeInTheDocument();
       expect(screen.queryByText("5 respuestas registradas")).not.toBeInTheDocument();
-      // El selector no desaparece mientras carga.
       expect(screen.getByRole("combobox", { name: "Gestión académica" })).toHaveTextContent("II-2026");
 
       release();
@@ -171,7 +170,6 @@ describe("SurveyAnalyticsView", () => {
 
       expect(await screen.findByText("No hay respuestas registradas en la gestión I-2026")).toBeInTheDocument();
       expect(screen.getByRole("status")).toHaveTextContent("Las preguntas y sus opciones se muestran en cero");
-      // Los contenedores siguen ahí: resumen, cards por pregunta y todas sus opciones.
       expect(screen.getByText("Respuestas Recibidas")).toBeInTheDocument();
       expect(screen.getByText("¿Cuál es tu situación laboral actual?")).toBeInTheDocument();
       expect(screen.getByText("Buscando empleo")).toBeInTheDocument();

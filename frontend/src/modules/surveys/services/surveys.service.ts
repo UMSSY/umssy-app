@@ -46,7 +46,6 @@ export const surveysService = {
     await apiClient.patch(`/surveys/${id}/unpublish`, undefined, { timeout: SURVEY_SAVE_TIMEOUT_MS });
   },
 
-  // period (I-2026 / II-2026) limita los resultados a las respuestas de ese semestre; sin él, todas.
   getSurveyStatistics: async (id: string, period?: string): Promise<ApiResponse<SurveyStatistics>> => {
     const { data } = await apiClient.get<ApiResponse<SurveyStatistics>>(`/surveys/${id}/statistics`, {
       params: { period },

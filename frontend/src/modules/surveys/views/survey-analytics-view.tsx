@@ -35,7 +35,6 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
     if (isGeneratingPdf) return;
     setIsGeneratingPdf(true);
     try {
-      // El PDF respeta el semestre elegido: lo que se exporta es lo que se ve.
       const { file, fileName } = await surveysService.exportSurveyPdf(id, period);
       downloadFile(file, fileName);
       setSuccessMessage("PDF generado correctamente");
@@ -56,7 +55,6 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
   const description = statistics
     ? `${questionCount === 1 ? "Resultados de 1 pregunta" : `Resultados de las ${questionCount} preguntas`}: ${careerName}`
     : SURVEY_STATISTICS_TEXT.loadingDescription;
-  // Sin respuestas no hay nada que exportar.
   const canExportPdf = Boolean(statistics?.hasData) && !isGeneratingPdf;
 
   const renderResults = () => {
@@ -103,7 +101,6 @@ export function SurveyAnalyticsView({ id }: SurveyAnalyticsViewProps) {
             </div>
           )}
 
-          {/* Los cards se mantienen aunque no haya respuestas: preguntas y opciones quedan visibles en cero. */}
           <div className="grid grid-cols-1 gap-5">
             {statistics.questions.map((question) => (
               <SurveyQuestionResultCard key={question.id} question={question} />

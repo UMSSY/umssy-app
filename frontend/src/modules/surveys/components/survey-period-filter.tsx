@@ -8,7 +8,6 @@ import {
 } from "../constants/survey-statistics.constants";
 import type { SurveyPeriodFilterProps } from "../types/survey-component-props.types";
 
-// Selector de semestre de las analíticas. Es el mismo componente del historial y los reportes, para que se sienta igual.
 export function SurveyPeriodFilter({ periods, value, onChange }: SurveyPeriodFilterProps) {
   return (
     <div className="flex w-full flex-col gap-1 sm:w-72 sm:shrink-0">

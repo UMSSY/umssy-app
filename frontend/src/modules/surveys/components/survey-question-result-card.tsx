@@ -7,7 +7,6 @@ import { SurveyQuestionTrend } from "./survey-question-trend";
 export function SurveyQuestionResultCard({ question }: SurveyQuestionResultCardProps) {
   const maxVotes = Math.max(...question.options.map((o) => o.count), 0);
   const highestOption = maxVotes > 0 ? question.options.find((o) => o.count === maxVotes) : undefined;
-  // En opción múltiple una persona puede elegir varias opciones: se cuentan selecciones y no personas.
   const isMultipleChoice = question.type === "multiple_choice";
 
   return (

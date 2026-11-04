@@ -4,7 +4,6 @@ import {
   SURVEY_STATISTICS_SUMMARY_SKELETONS,
 } from "../constants/survey-statistics.constants";
 
-// Estado de carga de las analíticas: aparece al abrir la pantalla y cada vez que se cambia de gestión.
 export function SurveyStatisticsSkeleton() {
   return (
     <div className="flex flex-col gap-6" role="status" aria-label="Cargando analíticas">

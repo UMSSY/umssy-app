@@ -98,11 +98,8 @@ export interface SurveyStatistics {
   opensAt: string | null;
   closesAt: string | null;
   totalResponses: number;
-  // false cuando el periodo consultado no tiene respuestas; las preguntas y opciones se conservan en cero.
   hasData: boolean;
-  // Semestre consultado (I-2026 / II-2026) o null si se consultan todas las respuestas.
   period: string | null;
-  // Semestres que se pueden consultar, del más reciente al más antiguo.
   availablePeriods: string[];
   questions: SurveyQuestionStatistic[];
 }

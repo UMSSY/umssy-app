@@ -1,8 +1,5 @@
 const PERCENTAGE_SCALE = 1000;
 
-// Reparte el 100% entre las opciones con un decimal y garantiza que la suma sea exactamente 100.0.
-// Usa el método del mayor resto: cada opción recibe la parte entera de su porcentaje en décimas y las décimas
-// que sobran se entregan a las opciones con mayor fracción (ante un empate, a la primera).
 export function distributePercentages(counts: readonly number[]): number[] {
   const total = counts.reduce((sum, count) => sum + count, 0);
   if (total <= 0) return counts.map(() => 0);

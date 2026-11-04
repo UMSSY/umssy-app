@@ -60,7 +60,6 @@ export function buildStatistics(overrides: Partial<SurveyStatistics> = {}): Surv
   };
 }
 
-// Mismo cuestionario sin respuestas: se conservan las preguntas y las opciones, todo en cero.
 export function buildEmptyStatistics(period: string): SurveyStatistics {
   const zero = (question: SurveyQuestionStatistic): SurveyQuestionStatistic => ({
     ...question,
