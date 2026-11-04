@@ -88,6 +88,7 @@ describe('AppointmentsService', () => {
       availabilityService as never,
       blockedDatesService as never,
       mentorsService as never,
+      {} as never,
     );
   });
 
