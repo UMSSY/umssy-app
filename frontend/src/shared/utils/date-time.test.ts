@@ -184,7 +184,7 @@ describe("formatBoliviaWeekdayShort, formatBoliviaDay y formatBoliviaMonthShort"
 
     expect(formatBoliviaWeekdayShort(startAt)).toBe("LUN");
     expect(formatBoliviaDay(startAt)).toBe("26");
-    expect(formatBoliviaMonthShort(startAt)).toBe("OCT");
+    expect(formatBoliviaMonthShort(startAt)).toBe("oct");
   });
 
   it("mantiene la fecha de Bolivia en la última hora del día", () => {
@@ -192,7 +192,7 @@ describe("formatBoliviaWeekdayShort, formatBoliviaDay y formatBoliviaMonthShort"
 
     expect(formatBoliviaWeekdayShort(startAt)).toBe("LUN");
     expect(formatBoliviaDay(startAt)).toBe("26");
-    expect(formatBoliviaMonthShort(startAt)).toBe("OCT");
+    expect(formatBoliviaMonthShort(startAt)).toBe("oct");
   });
 
   it("cruza el mes con la fecha de Bolivia y no con la de UTC", () => {
@@ -200,6 +200,6 @@ describe("formatBoliviaWeekdayShort, formatBoliviaDay y formatBoliviaMonthShort"
 
     expect(formatBoliviaWeekdayShort(startAt)).toBe("SÁB");
     expect(formatBoliviaDay(startAt)).toBe("31");
-    expect(formatBoliviaMonthShort(startAt)).toBe("OCT");
+    expect(formatBoliviaMonthShort(startAt)).toBe("oct");
   });
 });

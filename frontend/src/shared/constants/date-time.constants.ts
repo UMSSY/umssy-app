@@ -21,16 +21,16 @@ export const BOLIVIA_WEEKDAY_SHORT_LABELS = [
 ] as const;
 
 export const BOLIVIA_MONTH_SHORT_LABELS = [
-  "ENE",
-  "FEB",
-  "MAR",
-  "ABR",
-  "MAY",
-  "JUN",
-  "JUL",
-  "AGO",
-  "SEP",
-  "OCT",
-  "NOV",
-  "DIC",
+  "ene",
+  "feb",
+  "mar",
+  "abr",
+  "may",
+  "jun",
+  "jul",
+  "ago",
+  "sep",
+  "oct",
+  "nov",
+  "dic",
 ] as const;

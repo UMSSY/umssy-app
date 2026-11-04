@@ -195,7 +195,7 @@ describe("AppointmentsView", () => {
     expect(await screen.findByText("Ana Pérez")).toBeInTheDocument();
     expect(screen.getByText("LUN")).toBeInTheDocument();
     expect(screen.getByText("26")).toBeInTheDocument();
-    expect(screen.getByText("OCT")).toBeInTheDocument();
+    expect(screen.getByText("oct")).toBeInTheDocument();
     expect(
       screen.getByText("Mentor · Desarrollo profesional"),
     ).toBeInTheDocument();

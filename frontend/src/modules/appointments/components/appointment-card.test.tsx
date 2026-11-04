@@ -25,7 +25,7 @@ describe("AppointmentCard", () => {
 
     expect(screen.getByText("LUN")).toBeInTheDocument();
     expect(screen.getByText("26")).toBeInTheDocument();
-    expect(screen.getByText("OCT")).toBeInTheDocument();
+    expect(screen.getByText("oct")).toBeInTheDocument();
     expect(screen.getByText("26").parentElement).toHaveClass("bg-accent");
   });
 
