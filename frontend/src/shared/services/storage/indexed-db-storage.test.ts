@@ -148,4 +148,21 @@ describe("shared IndexedDB storage", () => {
     expect(put).not.toHaveBeenCalled();
     expect(close).toHaveBeenCalledTimes(1);
   });
+
+  it("elimina solo las claves con el prefijo indicado en una misma transacción", async () => {
+    const getAllKeys = vi
+      .fn()
+      .mockResolvedValue(["session:a", "session:b", "other", 7]);
+    transaction.mockReturnValue({
+      store: { getAllKeys, delete: remove },
+      done: Promise.resolve(),
+    });
+    await storage.removeByPrefix("session:");
+    expect(transaction).toHaveBeenCalledTimes(1);
+    expect(transaction).toHaveBeenCalledWith("values", "readwrite");
+    expect(remove).toHaveBeenCalledTimes(2);
+    expect(remove).toHaveBeenCalledWith("session:a");
+    expect(remove).toHaveBeenCalledWith("session:b");
+    expect(close).toHaveBeenCalledTimes(1);
+  });
 });

@@ -32,7 +32,7 @@ export class MessageService {
     senderId: string;
     content: string;
   }): Promise<MessageResponse> {
-    // Verificar que la conversación exista
+
     const conversation = await this.conversationRepository.findById(
       params.conversationId,
     );
@@ -41,7 +41,6 @@ export class MessageService {
       throw new ConversationNotFoundException();
     }
 
-    // Verificar que el usuario participe en la conversación
     const participant =
       await this.participantRepository.findByConversationAndUser(
         params.conversationId,
@@ -52,13 +51,11 @@ export class MessageService {
       throw new NotConversationParticipantException();
     }
 
-    // Obtener el otro participante de la conversación
     const otherParticipantId = this.getOtherParticipantId(
       conversation,
       params.senderId,
     );
 
-    // HU-13: impedir mensajes entre usuarios bloqueados
     if (
       otherParticipantId &&
       (await this.blockService.isBlockedBetween(
@@ -69,8 +66,6 @@ export class MessageService {
       throw new UserBlockedException();
     }
 
-    // HU-08: verificar los roles actuales de ambos usuarios
-    // antes de permitir el envío del mensaje
     if (otherParticipantId) {
       await this.chatRolePolicyService.assertCanCommunicate(
         params.senderId,
@@ -78,29 +73,24 @@ export class MessageService {
       );
     }
 
-    // Sanitizar el contenido del mensaje
     const content = this.sanitize(params.content);
     const characterCount = countCharacters(content);
 
-    // Verificar contenido vacío
     if (characterCount === 0) {
       throw new InvalidMessageContentException(
         'El contenido del mensaje no puede estar vacío',
       );
     }
 
-    // Verificar longitud máxima
     if (characterCount > MAX_MESSAGE_LENGTH) {
       throw new InvalidMessageContentException(
         `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
       );
     }
 
-    // Obtener estado inicial del mensaje
     const sentStatusId = await this.messageStatusService.getSentId();
     const now = new Date();
 
-    // Crear mensaje en la base de datos
     const created = await this.messageRepository.create({
       conversationId: params.conversationId,
       senderId: params.senderId,
@@ -109,21 +99,18 @@ export class MessageService {
       sentAt: now,
     });
 
-    // Actualizar último mensaje de la conversación
     await this.conversationRepository.touchLastMessage(
       params.conversationId,
       created.id,
       now,
     );
 
-    // Marcar el mensaje como leído para el remitente
     await this.participantRepository.markRead(
       params.conversationId,
       params.senderId,
       now,
     );
 
-    // Retornar respuesta del mensaje
     return {
       id: created.id,
       conversationId: created.conversationId,
@@ -143,7 +130,7 @@ export class MessageService {
     cursor: string | null;
     limit: number;
   }) {
-    // Verificar que el usuario participe en la conversación
+
     const participant =
       await this.participantRepository.findByConversationAndUser(
         params.conversationId,
@@ -154,7 +141,6 @@ export class MessageService {
       throw new NotConversationParticipantException();
     }
 
-    // Obtener mensajes paginados
     const page = await this.messageRepository.findPage({
       conversationId: params.conversationId,
       cursor: params.cursor,
@@ -182,7 +168,6 @@ export class MessageService {
 
         const firstAttachment = rawAttachments?.[0];
 
-        // Detectar si el mensaje contiene archivos adjuntos
         const isAttachment = Boolean(
           firstAttachment || rawContent.startsWith('[Archivo] '),
         );
@@ -191,7 +176,6 @@ export class MessageService {
           ? rawContent.slice(10)
           : rawContent;
 
-        // Determinar tipo de adjunto
         const attachmentType = firstAttachment
           ? firstAttachment.type?.title?.toLowerCase() === 'image'
             ? ('image' as const)
@@ -200,7 +184,6 @@ export class MessageService {
             ? ('file' as const)
             : null;
 
-        // Determinar estado del mensaje
         const statusTitle = (
           m as { status?: { title?: string } }
         ).status?.title?.toLowerCase();
@@ -210,7 +193,6 @@ export class MessageService {
             ? ('read' as const)
             : ('sent' as const);
 
-        // Mapear los archivos adjuntos
         const mappedAttachments = rawAttachments?.map((att) => ({
           id: att.id,
           messageId: att.messageId,
@@ -251,7 +233,7 @@ export class MessageService {
     conversationId: string,
     userId: string,
   ): Promise<void> {
-    // Verificar participación del usuario
+
     const participant =
       await this.participantRepository.findByConversationAndUser(
         conversationId,
@@ -262,7 +244,6 @@ export class MessageService {
       throw new NotConversationParticipantException();
     }
 
-    // Actualizar fecha de lectura
     await this.participantRepository.markRead(
       conversationId,
       userId,
@@ -279,7 +260,6 @@ export class MessageService {
   ): string | null {
     const { userAId, userBId } = conversation;
 
-    // Conversaciones de eventos sin participantes privados
     if (!userAId || !userBId) {
       return null;
     }
@@ -292,7 +272,7 @@ export class MessageService {
   }
 
   private sanitize(raw: string): string {
-    // Eliminar caracteres de control no permitidos
+
     const cleaned = raw
       .split('')
       .filter((char) => {

@@ -1,5 +1,5 @@
-export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
-export const MAX_PDF_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; 
+export const MAX_PDF_SIZE_BYTES = 10 * 1024 * 1024; 
 
 export const ALLOWED_IMAGE_MIME_TYPES = [
   'image/jpeg',
@@ -20,8 +20,8 @@ export const ACCEPTED_ATTACHMENT_TYPES = [
 ].join(',');
 
 export const ATTACHMENT_ERROR_MESSAGES = {
-  IMAGE_TOO_LARGE: 'La imagen supera el tamaño maximo permitido de 5 MB.',
-  PDF_TOO_LARGE: 'El documento supera el tamaño maximo permitido 10 MB.',
+  IMAGE_TOO_LARGE: 'La imagen supera el tamaño máximo permitido de 5 MB.',
+  PDF_TOO_LARGE: 'El documento supera el tamaño máximo permitido 10 MB.',
   INVALID_FORMAT:
-    'Formato no permitido, Solo puedes adjuntar imágenes (JPG, PNG) o documentos PDF.',
+    'Formato no permitido, Solo puedes adjuntar imágenes JPG, PNG o documentos PDF',
 } as const;

@@ -7,7 +7,6 @@ import type { ChatImageThumbnailProps } from "../types/chat-image-thumbnail-prop
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/shared/services/api-client";
 
-// In-memory cache for loaded blob URLs to avoid re-fetching on chat re-renders
 const blobCache = new Map<string, string>();
 
 export function ChatImageThumbnail({
@@ -19,7 +18,6 @@ export function ChatImageThumbnail({
   const rawUrl = attachment.url || attachment.thumbnailUrl || "";
   const altText = attachment.fileName || caption || "Imagen adjunta";
 
-  // Determine if it requires an authenticated backend fetch
   const isBlobOrData = rawUrl.startsWith("blob:") || rawUrl.startsWith("data:");
   const isInternalDownload =
     Boolean(rawUrl) &&
@@ -52,7 +50,7 @@ export function ChatImageThumbnail({
         const parsed = new URL(endpoint);
         endpoint = parsed.pathname;
       } catch {
-        // use endpoint as is
+    
       }
     }
     if (endpoint.startsWith("/api/")) {

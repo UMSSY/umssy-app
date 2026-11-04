@@ -29,7 +29,7 @@ vi.mocked(io).mockImplementation((_url, options) => {
   return socket as unknown as ReturnType<typeof io>;
 });
     vi.mocked(getAccessToken).mockReturnValue("first-token");
-    const { getChatSocket } = await import("../components/chat-socket");
+    const { getChatSocket } = await import("../services/chat-socket");
     expect(getChatSocket()).toBe(socket);
     expect(io).toHaveBeenCalledWith(
       "http://localhost:8080/chat",
@@ -50,7 +50,7 @@ vi.mocked(io).mockImplementation((_url, options) => {
   });
   it("no abre el socket sin sesión", async () => {
     vi.mocked(getAccessToken).mockReturnValue(null);
-    const { getChatSocket } = await import("../components/chat-socket");
+    const { getChatSocket } = await import("../services/chat-socket");
     expect(() => getChatSocket()).toThrow("No hay una sesión iniciada");
     expect(io).not.toHaveBeenCalled();
   });

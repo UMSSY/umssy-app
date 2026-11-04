@@ -1,3 +1,4 @@
+import { SESSION_DRAFT_STORAGE_PREFIX } from "@/modules/auth";
 import { CircleDot, SquareCheck, SquareChevronDown } from "lucide-react";
 import type { QuestionTypeOption } from "../types/question-type-option.types";
 import type { QuestionType, SurveyDisplayStatus, SurveyTargetAudience } from "../types/survey.types";
@@ -53,8 +54,8 @@ export const SURVEY_STATUS_LABELS: Readonly<Record<SurveyDisplayStatus, string>>
 
 export const SURVEY_STATUS_BADGE_CLASSES: Readonly<Record<SurveyDisplayStatus, string>> = {
   draft: "border-gold/50 bg-gold/15 text-ink",
-  published: "border-accent/30 bg-interaction text-accent",
-  closed: "border-border bg-surface-soft text-text-secondary",
+  published: "border-success/30 bg-success/10 text-success",
+  closed: "border-danger/30 bg-danger/10 text-danger",
 };
 
 export const SURVEY_TEXT = {
@@ -113,3 +114,10 @@ export const SURVEY_ARIA = {
   toolbar: "Acciones de la pregunta",
   editQuestion: (position: number) => `Editar pregunta ${position}`,
 } as const;
+
+export const SURVEY_CREATE_DRAFT_STORAGE_KEY = `${SESSION_DRAFT_STORAGE_PREFIX}survey-create`;
+
+export const SURVEY_EDIT_DRAFT_STORAGE_KEY = (surveyId: string) => `${SESSION_DRAFT_STORAGE_PREFIX}survey-edit:${surveyId}`;
+
+export const SURVEY_EDIT_DRAFT_BASE_STORAGE_KEY = (surveyId: string) =>
+  `${SESSION_DRAFT_STORAGE_PREFIX}survey-edit-base:${surveyId}`;
