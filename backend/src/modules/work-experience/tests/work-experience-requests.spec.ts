@@ -39,6 +39,31 @@ describe('createWorkExperienceSchema', () => {
     ).toBe(true);
   });
 
+  it('rejects a missing description', () => {
+    const { description: _description, ...body } = validBody;
+    const result = createWorkExperienceSchema.safeParse(body);
+
+    expect(result.error?.issues[0]).toMatchObject({
+      path: ['description'],
+      message: 'Este campo es obligatorio.',
+    });
+  });
+
+  it.each([null, '', '   '])(
+    'rejects the description %j as required',
+    (description) => {
+      const result = createWorkExperienceSchema.safeParse({
+        ...validBody,
+        description,
+      });
+
+      expect(result.error?.issues[0]).toMatchObject({
+        path: ['description'],
+        message: 'Este campo es obligatorio.',
+      });
+    },
+  );
+
   it.each([
     { ...validBody, companyName: ' ' },
     { ...validBody, companyName: 'a'.repeat(101) },
@@ -94,6 +119,27 @@ describe('updateWorkExperienceSchema', () => {
   it('rejects an empty update', () => {
     expect(updateWorkExperienceSchema.safeParse({}).success).toBe(false);
   });
+
+  it('accepts an update without description', () => {
+    expect(
+      updateWorkExperienceSchema.safeParse({ position: 'Lead' }).success,
+    ).toBe(true);
+  });
+
+  it('trims a sent description', () => {
+    expect(
+      updateWorkExperienceSchema.parse({ description: ' APIs con Node.js ' }),
+    ).toEqual({ description: 'APIs con Node.js' });
+  });
+
+  it.each([null, '', '   '])(
+    'rejects the description %j when it is sent',
+    (description) => {
+      expect(
+        updateWorkExperienceSchema.safeParse({ description }).success,
+      ).toBe(false);
+    },
+  );
 });
 
 describe('workExperienceIdSchema', () => {
