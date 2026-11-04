@@ -4,6 +4,7 @@ import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { FileValidationService } from '../../common/services/file-validation.service.js';
 import { EventRegistrationsModule } from '../event-registrations/event-registrations.module.js';
+import { UsersModule } from '../users/users.module.js';
 import { ChatRolePolicyService } from './services/chat-role-policy.service.js';
 
 import { UserSearchController } from './controllers/user-search.controller.js';
@@ -46,14 +47,17 @@ import { EducationsModule } from '../educations/educations.module.js';
 import { SkillsModule } from '../skills/skills.module.js';
 
 @Module({
+@Module({
   imports: [
-  PrismaModule,
-  JwtAuthModule,
-  AuthModule,
-  EventRegistrationsModule,
-  EducationsModule,
-  SkillsModule,
-],
+    PrismaModule,
+    JwtAuthModule,
+    AuthModule,
+    EventRegistrationsModule,
+    EducationsModule,
+    SkillsModule,
+    UsersModule,
+  ],
+  controllers: [
   controllers: [
     UserSearchController,
     ConversationController,

@@ -7,7 +7,10 @@ import { ConversationService } from '../services/conversation.service.js';
 import { MessageService } from '../services/message.service.js';
 import { AttachmentService } from '../services/attachment.service.js';
 import { ChatGateway } from '../gateways/chat.gateway.js';
-import { UserBlockedException } from '../exceptions/index.js';
+import {
+  ChatRoleNotAllowedException,
+  UserBlockedException,
+} from '../exceptions/index.js';
 import { ConversationMapper } from '../mappers/conversation.mapper.js';
 
 const USER_A = '00000000-0000-4000-8000-000000000001';
@@ -30,14 +33,14 @@ function setup(rolesA: string[], rolesB: string[]) {
     },
   ];
 
-  const prisma = {
-    user: {
-      findMany: vi.fn().mockResolvedValue(users),
-    },
+  const usersService = {
+    findManyWithActiveRoles: vi.fn().mockResolvedValue(users),
   };
 
   const policy = new ChatRolePolicyService(
-    prisma as unknown as ConstructorParameters<typeof ChatRolePolicyService>[0],
+    usersService as unknown as ConstructorParameters<
+      typeof ChatRolePolicyService
+    >[0],
   );
 
   const conversation = {
@@ -205,7 +208,7 @@ function setup(rolesA: string[], rolesB: string[]) {
 
   return {
     users,
-    prisma,
+    usersService,
     policy,
     conversation,
     conversations,
@@ -252,21 +255,15 @@ describe('HU8 tarea 3: roles permitidos', () => {
     ).resolves.toMatchObject({ isAttachment: true });
   });
 
-  it('consulta los roles vigentes desde la base de datos', async () => {
+  it('consulta los roles vigentes a traves de UsersService', async () => {
     const context = setup(['estudiante'], ['titulado']);
 
     await context.policy.assertCanCommunicate(USER_A, USER_B);
 
-    expect(context.prisma.user.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: { in: [USER_A, USER_B] } },
-        select: expect.objectContaining({
-          roles: expect.objectContaining({
-            where: { deletedAt: null },
-          }),
-        }),
-      }),
-    );
+    expect(context.usersService.findManyWithActiveRoles).toHaveBeenCalledWith([
+      USER_A,
+      USER_B,
+    ]);
   });
 
   const forbiddenCases: Array<[string, string[], string[]]> = [
@@ -286,7 +283,7 @@ describe('HU8 tarea 3: roles permitidos', () => {
 
       await expect(
         context.conversationService.getOrCreate(USER_A, USER_B),
-      ).rejects.toBeInstanceOf(ForbiddenException);
+      ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
 
       expect(
         context.conversations.createWithParticipants,
@@ -298,13 +295,13 @@ describe('HU8 tarea 3: roles permitidos', () => {
           senderId: USER_A,
           content: 'Hola',
         }),
-      ).rejects.toBeInstanceOf(ForbiddenException);
+      ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
 
       await expect(
         context.attachmentService.uploadAndSend(USER_A, context.file, {
           conversationId: CONVERSATION_ID,
         }),
-      ).rejects.toBeInstanceOf(ForbiddenException);
+      ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
 
       expect(context.messages.create).not.toHaveBeenCalled();
       expect(context.attachments.create).not.toHaveBeenCalled();
@@ -321,7 +318,7 @@ describe('HU8 tarea 3: roles permitidos', () => {
 
     await expect(
       context.conversationService.getOrCreate(USER_A, USER_B),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
 
     expect(
       context.conversations.createWithParticipants,
@@ -341,7 +338,7 @@ describe('HU8 tarea 3: roles permitidos', () => {
         senderId: USER_A,
         content: 'Hola',
       }),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
 
     expect(context.messages.create).not.toHaveBeenCalled();
   });
