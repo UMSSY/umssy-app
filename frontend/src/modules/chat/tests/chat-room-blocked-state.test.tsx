@@ -168,14 +168,25 @@ describe("ChatRoom · conversación bloqueada", () => {
     expect(onSendMessage).toHaveBeenCalledTimes(1);
   });
 
-  it("otros errores de envío siguen mostrando el mensaje genérico", async () => {
+  it("muestra el mensaje de restricción cuando falla el envío", async () => {
     const user = userEvent.setup();
-    const onSendMessage = vi.fn().mockRejectedValue(new Error("Network Error"));
-    renderRoom({ ...conversation, isBlockedByMe: false }, { onSendMessage });
+
+    const onSendMessage = vi
+      .fn()
+      .mockRejectedValue(new Error("Network Error"));
+
+    renderRoom(
+      { ...conversation, isBlockedByMe: false },
+      { onSendMessage },
+    );
 
     await user.type(screen.getByRole("textbox"), "Hola{Enter}");
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo enviar el mensaje");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No es posible enviar mensajes en esta conversación. La comunicación con esta persona está restringida",
+    );
+
+    expect(onSendMessage).toHaveBeenCalledTimes(1);
     expect(screen.queryByTestId("blocked-send-error")).not.toBeInTheDocument();
   });
 });
