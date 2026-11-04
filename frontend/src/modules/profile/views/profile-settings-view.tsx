@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { PersonalInfoSettings } from "../components/personal-info-settings";
 import { PresentationSettings } from "../components/presentation-settings";
