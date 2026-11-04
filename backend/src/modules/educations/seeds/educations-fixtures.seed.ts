@@ -608,8 +608,6 @@ export async function seedEducationsFixtures(
     },
   ];
   await tx.education.createMany({ data, skipDuplicates: true });
-  // skipDuplicates conserva las carreras antiguas; se reparan solo las filas
-  // de los usuarios de prueba 21–42 que aún contienen el valor intercambiado.
   for (const row of data.slice(20, 42)) {
     const previousDegree = row.degree === 'Ingeniería Informática'
       ? 'Ingeniería de Sistemas'
