@@ -100,6 +100,15 @@ export class ConversationRepository {
     });
   }
 
+  async findParticipantsByConversationId(conversationId: string) {
+    return this.prisma.conversationParticipant.findMany({
+      where: { conversationId },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+  }
+
   async touchLastMessage(
     conversationId: string,
     lastMessageId: string,
@@ -114,15 +123,19 @@ export class ConversationRepository {
   async findUserConversations(userId: string) {
     return this.prisma.conversation.findMany({
       where: {
-        AND: [
+        OR: [
           {
+            eventId: null,
             OR: [
               { userAId: userId },
               { userBId: userId },
             ],
           },
           {
-            eventId: null,
+            eventId: { not: null },
+            participants: {
+              some: { userId },
+            },
           },
         ],
       },
@@ -130,6 +143,11 @@ export class ConversationRepository {
         userA: CONTACT_USER_SELECT,
         userB: CONTACT_USER_SELECT,
         event: { select: { id: true, title: true } },
+        participants: {
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true } },
+          },
+        },
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,

@@ -17,10 +17,12 @@ import { UserPresenceService } from '../services/user-presence.service.js';
 import { MessageService } from '../services/message.service.js';
 import { EventRoomService } from '../services/event-room.service.js';
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
+import { eventRoomJoinSchema } from '../requests/event-room-join.request.js';
 import type {
   SocketMessagePayload,
   EventRoomJoinPayload,
 } from '../types/chat-gateway.types.js';
+import type { MessageResponse } from '../responses/message.response.js';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -168,21 +170,31 @@ export class ChatGateway
     @MessageBody() payload: EventRoomJoinPayload,
   ) {
     const user = client.data.user;
-    if (!user || typeof payload?.eventId !== 'string') {
+    const parsedPayload = eventRoomJoinSchema.safeParse(payload);
+
+    if (!user) {
       return {
         ok: false,
-        error: 'Identificador de evento inválido',
+        error: 'Sesión no válida',
+      };
+    }
+
+    if (!parsedPayload.success) {
+      client.emit('event_room:error', { code: 'generic_error' });
+      return {
+        ok: false,
+        error: 'Identificador de inscripción inválido',
       };
     }
 
     try {
-      const conversationId = await this.eventRoomService.joinEventRoom(
+      const room = await this.eventRoomService.joinEventRoom(
         user.id,
-        payload.eventId,
+        parsedPayload.data.registrationId,
       );
-      await client.join(conversationId);
-      client.emit('event_room:joined', { conversationId });
-      return { ok: true, conversationId };
+      await client.join(room.conversationId);
+      client.emit('event_room:joined', room);
+      return { ok: true, conversationId: room.conversationId };
     } catch (error) {
       if (error instanceof NotRegisteredForEventException) {
         client.emit('event_room:error', { code: 'not_registered' });
@@ -195,6 +207,10 @@ export class ChatGateway
           error instanceof Error ? error.message : 'Error al unirse a la sala',
       };
     }
+  }
+
+  broadcastMessage(message: MessageResponse): void {
+    this.server.to(message.conversationId).emit('message:new', message);
   }
 
   @SubscribeMessage('message:send')
@@ -222,7 +238,7 @@ export class ChatGateway
         content: body.content,
       });
 
-      this.server.to(body.conversationId).emit('message:new', message);
+      this.broadcastMessage(message);
 
       return {
         ok: true,
