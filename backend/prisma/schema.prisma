@@ -491,6 +491,8 @@ model Appointment {
   @@index([studentId, startAt])
   @@index([statusId])
   @@index([blockId])
+  @@index([cancelledById])
+  @@index([orientationTypeId])
   @@map("appointments")
 }
 
@@ -533,6 +535,7 @@ model AppointmentHistory {
   @@index([appointmentId, changedAt])
   @@index([previousStatusId])
   @@index([newStatusId])
+  @@index([changedById])
   @@map("appointment_histories")
 }
 
@@ -590,6 +593,7 @@ model Event {
   @@index([originId])
   @@index([statusId])
   @@index([eventDate])
+  @@index([moderatedById])
   @@map("events")
 }
 
@@ -628,6 +632,7 @@ model EventAttendance {
   registration EventRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
   checkedInBy  User?             @relation(fields: [checkedInById], references: [id], onDelete: SetNull)
 
+  @@index([checkedInById])
   @@map("event_attendances")
 }
 
@@ -810,6 +815,9 @@ model AccessRequest {
   @@index([sisCode])
   @@index([idCardNumber])
   @@index([email])
+  @@index([documentTypeId])
+  @@index([openedById])
+  @@index([reviewedById])
   @@map("access_requests")
 }
 
@@ -827,6 +835,7 @@ model MentorParticipationRequest {
   offer MentorSlotOffer?
 
   @@index([status, queuedAt, id])
+  @@index([userId])
   @@map("mentor_participation_requests")
 }
 
@@ -843,6 +852,7 @@ model MentorSlotOffer {
   request MentorParticipationRequest? @relation(fields: [requestId], references: [id], onDelete: Restrict)
 
   @@index([status, expiresAt])
+  @@index([userId])
   @@map("mentor_slot_offers")
 }
 
@@ -934,6 +944,7 @@ model ConversationParticipant {
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([conversationId, userId])
+  @@index([userId])
   @@map("conversation_participants")
 }
 
@@ -1012,6 +1023,7 @@ model ConnectionRequest {
   @@index([senderId])
   @@index([receiverId])
   @@index([receiverId, statusId])
+  @@index([statusId])
   @@map("connection_requests")
 }
 
