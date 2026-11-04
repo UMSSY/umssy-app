@@ -29,3 +29,8 @@ export function updateIndexedDb<T>(
     return Promise.reject(new Error("IndexedDB no está disponible"));
   return storage.update(key, update);
 }
+
+export async function removeIndexedDbByPrefix(prefix: string): Promise<void> {
+  if (typeof indexedDB === "undefined") return;
+  await storage.removeByPrefix(prefix);
+}

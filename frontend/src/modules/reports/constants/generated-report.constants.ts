@@ -28,4 +28,4 @@ export const REPORT_TYPE_SELECT_OPTIONS = REPORT_TYPE_FILTER_OPTIONS.map((report
 
 export const REPORT_HISTORY_EMPTY_MESSAGE = "Aún no se generaron reportes.";
 export const REPORT_HISTORY_EMPTY_TYPE_MESSAGE = "No hay reportes generados de este tipo.";
-export const FILE_NAME_SEARCH_NO_RESULTS_MESSAGE = "No se encontró ningún reporte con el nombre";
+export const FILE_NAME_SEARCH_NO_RESULTS_MESSAGE = "No se encontraron reportes que coincidan con la búsqueda";

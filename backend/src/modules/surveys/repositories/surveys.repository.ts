@@ -8,7 +8,7 @@ import {
   SURVEY_ALL_ACADEMIC_PERIODS,
   SURVEY_CREATED_SELECT,
   SURVEY_DETAIL_INCLUDE,
-  SURVEY_STATISTICS_INCLUDE,
+  buildSurveyStatisticsInclude,
   SURVEY_SUMMARY_SELECT,
 } from '../constants/survey.constants.js';
 import { SurveysStorageUnavailableException } from '../exceptions/surveys-storage-unavailable.exception.js';
@@ -26,7 +26,11 @@ import type {
   SurveyTitleScope,
 } from '../types/survey-record.type.js';
 import type { GraduateProfile } from '../types/graduate-profile.type.js';
-import { SurveyStatus, type SurveyTargetAudienceValue } from '../types/survey.enum.js';
+import type { SemesterRange } from '../types/semester-range.type.js';
+import {
+  SurveyStatus,
+  type SurveyTargetAudienceValue,
+} from '../types/survey.enum.js';
 import {
   toSurveyQuestionTypeValue,
   toSurveyStatusValue,
@@ -49,7 +53,11 @@ export class SurveysRepository {
         title: { equals: title, mode: 'insensitive' },
         careerId,
         academicPeriod,
-        OR: [{ status: { title: SurveyStatus.DRAFT } }, { closesAt: null }, { closesAt: { gte: now } }],
+        OR: [
+          { status: { title: SurveyStatus.DRAFT } },
+          { closesAt: null },
+          { closesAt: { gte: now } },
+        ],
         ...(excludedId ? { id: { not: excludedId } } : {}),
       },
       select: { id: true },
@@ -62,12 +70,17 @@ export class SurveysRepository {
 
     return this.prisma.$transaction(async (tx) => {
       const catalogs = await this.findCatalogIds(tx);
-      const { questionRows, optionRows } = this.toQuestionRows(questions, catalogs.typeIds);
+      const { questionRows, optionRows } = this.toQuestionRows(
+        questions,
+        catalogs.typeIds,
+      );
       const created = await tx.survey.create({
         data: {
           ...survey,
           statusId: this.requireCatalogId(catalogs.statusIds, status),
-          targetAudienceId: targetAudience ? this.requireCatalogId(catalogs.audienceIds, targetAudience) : null,
+          targetAudienceId: targetAudience
+            ? this.requireCatalogId(catalogs.audienceIds, targetAudience)
+            : null,
         },
         select: SURVEY_CREATED_SELECT,
       });
@@ -113,25 +126,40 @@ export class SurveysRepository {
   ): Promise<{ status: string; responseCount: number } | null> {
     const survey = await this.prisma.survey.findUnique({
       where: { id: surveyId },
-      select: { status: CATALOG_TITLE_SELECT, _count: { select: { responses: true } } },
+      select: {
+        status: CATALOG_TITLE_SELECT,
+        _count: { select: { responses: true } },
+      },
     });
-    return survey ? { status: survey.status.title, responseCount: survey._count.responses } : null;
+    return survey
+      ? { status: survey.status.title, responseCount: survey._count.responses }
+      : null;
   }
 
   async unpublish(surveyId: string): Promise<boolean> {
     const { count } = await this.prisma.survey.updateMany({
-      where: { id: surveyId, status: { title: SurveyStatus.PUBLISHED }, responses: { none: {} } },
+      where: {
+        id: surveyId,
+        status: { title: SurveyStatus.PUBLISHED },
+        responses: { none: {} },
+      },
       data: { statusId: await this.findStatusId(SurveyStatus.DRAFT) },
     });
     return count > 0;
   }
 
-  update(surveyId: string, data: UpdateSurveyData): Promise<SurveyCreatedRecord> {
+  update(
+    surveyId: string,
+    data: UpdateSurveyData,
+  ): Promise<SurveyCreatedRecord> {
     const { questions, status, targetAudience, ...survey } = data;
 
     return this.prisma.$transaction(async (tx) => {
       const catalogs = await this.findCatalogIds(tx);
-      const { questionRows, optionRows } = this.toQuestionRows(questions, catalogs.typeIds);
+      const { questionRows, optionRows } = this.toQuestionRows(
+        questions,
+        catalogs.typeIds,
+      );
       await tx.surveyQuestion.deleteMany({ where: { surveyId } });
 
       const updated = await tx.survey.update({
@@ -139,7 +167,9 @@ export class SurveysRepository {
         data: {
           ...survey,
           statusId: this.requireCatalogId(catalogs.statusIds, status),
-          targetAudienceId: targetAudience ? this.requireCatalogId(catalogs.audienceIds, targetAudience) : null,
+          targetAudienceId: targetAudience
+            ? this.requireCatalogId(catalogs.audienceIds, targetAudience)
+            : null,
         },
         select: SURVEY_CREATED_SELECT,
       });
@@ -158,10 +188,13 @@ export class SurveysRepository {
     });
   }
 
-  findStatistics(surveyId: string): Promise<SurveyStatisticsRecord | null> {
+  findStatistics(
+    surveyId: string,
+    range?: SemesterRange,
+  ): Promise<SurveyStatisticsRecord | null> {
     return this.prisma.survey.findUnique({
       where: { id: surveyId },
-      include: SURVEY_STATISTICS_INCLUDE,
+      include: buildSurveyStatisticsInclude(range),
     });
   }
 
@@ -194,13 +227,24 @@ export class SurveysRepository {
         targetAudience: { title: { in: audiences } },
         AND: [
           { OR: [{ opensAt: null }, { opensAt: { lte: now } }] },
-          { OR: [{ careerId: null }, ...(graduate ? [{ careerId: graduate.careerId }] : [])] },
+          {
+            OR: [
+              { careerId: null },
+              ...(graduate ? [{ careerId: graduate.careerId }] : []),
+            ],
+          },
           {
             OR: [
               { academicPeriod: null },
               { academicPeriod: SURVEY_ALL_ACADEMIC_PERIODS },
               ...(graduate
-                ? [{ academicPeriod: { endsWith: String(graduate.graduationYear) } }]
+                ? [
+                    {
+                      academicPeriod: {
+                        endsWith: String(graduate.graduationYear),
+                      },
+                    },
+                  ]
                 : []),
             ],
           },
@@ -238,7 +282,10 @@ export class SurveysRepository {
     });
   }
 
-  async findByIdWithQuestions(id: string, userId: string): Promise<SurveyDetailResponse | null> {
+  async findByIdWithQuestions(
+    id: string,
+    userId: string,
+  ): Promise<SurveyDetailResponse | null> {
     const survey = await this.prisma.survey.findUnique({
       where: { id },
       include: {
@@ -265,14 +312,18 @@ export class SurveysRepository {
     if (!survey) return null;
 
     const hasAnswered = survey.responses.length > 0;
-    const isExpired = survey.closesAt ? new Date(survey.closesAt) < new Date() : false;
+    const isExpired = survey.closesAt
+      ? new Date(survey.closesAt) < new Date()
+      : false;
 
     return {
       id: survey.id,
       title: survey.title,
       description: survey.description,
       status: toSurveyStatusValue(survey.status.title),
-      career: survey.career ? { id: survey.career.id, title: survey.career.title } : null,
+      career: survey.career
+        ? { id: survey.career.id, title: survey.career.title }
+        : null,
       targetsAllCareers: survey.targetsAllCareers,
       academicPeriod: survey.academicPeriod,
       targetAudience: toSurveyTargetAudienceValue(survey.targetAudience),
@@ -339,12 +390,18 @@ export class SurveysRepository {
   }
 
   private async findStatusId(title: string): Promise<string> {
-    const status = await this.prisma.surveyStatus.findUnique({ where: { title }, select: { id: true } });
+    const status = await this.prisma.surveyStatus.findUnique({
+      where: { title },
+      select: { id: true },
+    });
     if (!status) throw new SurveysStorageUnavailableException();
     return status.id;
   }
 
-  private requireCatalogId(ids: ReadonlyMap<string, string>, title: string): string {
+  private requireCatalogId(
+    ids: ReadonlyMap<string, string>,
+    title: string,
+  ): string {
     const id = ids.get(title);
     if (!id) throw new SurveysStorageUnavailableException();
     return id;
@@ -371,5 +428,3 @@ export class SurveysRepository {
     return { questionRows, optionRows };
   }
 }
-
-

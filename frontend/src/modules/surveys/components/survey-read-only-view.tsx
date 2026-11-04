@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import {
   ALL_CAREERS_LABEL,

@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { RefreshButton, ReportFilterSelect, ReportSearchInput } from "@/modules/reports";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { SurveysTable } from "../components/surveys-table";
+import { ALL_ACADEMIC_PERIODS_OPTION_LABEL } from "../constants/survey-builder.constants";
 import {
   ACADEMIC_PERIOD_FILTER_LABEL,
   ACADEMIC_PERIOD_FILTER_PLACEHOLDER,
@@ -48,6 +49,7 @@ export function SurveysView() {
         <ReportSearchInput value={creatorSearch} onChange={setCreatorSearch} label={CREATOR_SEARCH_LABEL} />
         <ReportFilterSelect
           label={ACADEMIC_PERIOD_FILTER_LABEL}
+          allLabel={ALL_ACADEMIC_PERIODS_OPTION_LABEL}
           placeholder={ACADEMIC_PERIOD_FILTER_PLACEHOLDER}
           options={periodOptions}
           value={academicPeriod}
