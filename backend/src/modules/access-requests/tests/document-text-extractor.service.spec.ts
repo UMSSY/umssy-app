@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => {
   const document = { countPages: vi.fn(() => 2), loadPage: vi.fn(() => page), destroy: vi.fn() };
   const source = { convertToColorSpace: vi.fn(() => pixmap), destroy: vi.fn() };
   const image = { toPixmap: vi.fn(() => source), destroy: vi.fn() };
-  const worker = { recognize: vi.fn(), terminate: vi.fn(async () => undefined) };
+  const worker = { recognize: vi.fn(), setParameters: vi.fn(async () => undefined), terminate: vi.fn(async () => undefined) };
   return { pixmap, page, document, source, image, worker };
 });
 
@@ -116,6 +116,20 @@ describe('DocumentTextExtractorService: Tesseract', () => {
     await service.extract(IMAGE);
     expect(createTesseractWorker).toHaveBeenCalledOnce();
     expect(createTesseractWorker).toHaveBeenCalledWith('4.0.0_best', ['spa']);
+  });
+
+  it('configura la segmentación automática para no perder los encabezados grandes', async () => {
+    await service.extract(IMAGE);
+    expect(mocks.worker.setParameters).toHaveBeenCalledWith({ tessedit_pageseg_mode: '3' });
+    expect(mocks.worker.setParameters.mock.invocationCallOrder[0]).toBeLessThan(mocks.worker.recognize.mock.invocationCallOrder[0]);
+  });
+
+  it('termina el worker y propaga el error si no puede configurarlo', async () => {
+    mocks.worker.setParameters.mockRejectedValueOnce(new Error('bad params'));
+    await expect(service.extract(IMAGE)).rejects.toThrow('Tesseract initialization failed');
+    expect(mocks.worker.terminate).toHaveBeenCalledOnce();
+    expect(mocks.worker.recognize).not.toHaveBeenCalled();
+    await expect(service.extract(IMAGE)).resolves.toHaveProperty('engine', 'tesseract');
   });
 
   it('propaga un fallo de modelos y reintenta inicializar en la siguiente solicitud', async () => {
