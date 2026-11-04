@@ -86,14 +86,6 @@ export async function getConversations(): Promise<Conversation[]> {
   });
 }
 
-
-
-/**
- * HU-2: búsqueda de contactos.
- * Llama a GET /chat/users/search?q=... en el backend.
- * El backend excluye al usuario de la sesión, filtra inactivos
- * y no expone email/teléfono.
- */
 export async function searchUsers(rawQuery: string): Promise<User[]> {
   const query = rawQuery.trim();
 
@@ -141,6 +133,8 @@ export async function getPaginatedMessages({
   conversationId,
   cursor = null,
   limit = DEFAULT_MESSAGE_PAGE_SIZE,
+  signal,
+  requireServer = false,
 }: GetPaginatedMessagesParams): Promise<PaginatedMessagesResponse> {
   if (!conversationId) {
     throw new Error(
@@ -159,6 +153,8 @@ export async function getPaginatedMessages({
       | StandardApiResponse<PaginatedMessagesResponse>
       | PaginatedMessagesResponse
     >(`/conversations/${conversationId}/messages`, {
+      ...(signal ? { signal } : {}),
+      ...(requireServer ? { timeout: 15000 } : {}),
       params: {
         cursor: cursor ?? undefined,
         limit,
@@ -177,6 +173,10 @@ export async function getPaginatedMessages({
         Array.isArray((body.data as { data?: unknown[] }).data)
           ? (body.data as PaginatedMessagesResponse)
           : (body as PaginatedMessagesResponse);
+
+      if (requireServer && (!Array.isArray(payload.data) || typeof payload.hasMore !== 'boolean' || !(payload.nextCursor === null || typeof payload.nextCursor === 'string'))) {
+        throw new Error('Respuesta de sincronización inválida');
+      }
 
       const rawMessages = (
         Array.isArray(payload.data) ? payload.data : []
@@ -253,6 +253,8 @@ export async function getPaginatedMessages({
   } catch (error){
     throw error;
   }
+
+  if (requireServer) throw new Error('Respuesta de sincronización inválida');
 
   const messages = getMessagesByConversation(conversationId);
 
@@ -449,7 +451,7 @@ export async function markConversationAsRead(
   try {
     await apiClient.patch(`/chat/messages/${conversationId}/read`);
   } catch {
-    // Graceful fallback
+    
   }
 }
 
