@@ -1,3 +1,9 @@
+import { ApplicationStatus } from '../../applications/types/applications.types.js';
+
+export const ACTIVE_JOB_APPLICATION_WHERE = {
+  status: { title: { not: ApplicationStatus.WITHDRAWN } },
+} as const;
+
 export const JOB_APPLICATION_STATUS = {
   IN_REVIEW: 'En revisión',
   INTERVIEW: 'Entrevista',
