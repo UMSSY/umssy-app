@@ -29,6 +29,9 @@ export class AppointmentMapper {
         appointment.status.title === AppointmentStatusTitle.LEGACY_CONFIRMED
           ? AppointmentStatusTitle.CONFIRMED
           : appointment.status.title,
+      message: appointment.message,
+      requestedAt: appointment.requestedAt.toISOString(),
+      document: appointment.document,
     };
   }
 
