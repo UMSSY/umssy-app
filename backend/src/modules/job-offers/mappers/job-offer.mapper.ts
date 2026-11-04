@@ -26,6 +26,7 @@ export class JobOfferMapper {
       languages: record.languages,
       locationUrl: record.locationUrl,
       expiresAt: record.expiresAt?.toISOString() ?? null,
+      publishedAt: record.publishedAt.toISOString(),
       createdAt: record.createdAt.toISOString(),
       company: { id: record.company.id, name: record.company.title },
       skills: record.skills.map(({ skill }) => ({ id: skill.id, name: skill.name })),
