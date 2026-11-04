@@ -1,9 +1,16 @@
+
 import { describe, expect, it, vi } from 'vitest';
 import { ConversationService } from '../services/conversation.service.js';
 import type { ConversationRepository } from '../repositories/conversation.repository.js';
 import type { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import type { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import type { UserPresenceService } from '../services/user-presence.service.js';
+import type { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
+import type { BlockService } from '../services/block.service.js';
+import type { ConversationMapper } from '../mappers/conversation.mapper.js';
+import type { ChatRolePolicyService } from '../services/chat-role-policy.service.js';
+import type { EducationsService } from '../../educations/services/educations.service.js';
+import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 import {
   InactiveUserException,
   UserNotFoundException,
@@ -15,6 +22,26 @@ describe('HU8: validación del destinatario', () => {
     const findByOrderedPair = vi.fn();
     const createWithParticipants = vi.fn();
 
+    const connectionRequestRepository = {} as ConnectionRequestRepository;
+
+    const blockService = {
+      isBlockedBetween: vi.fn().mockResolvedValue(false),
+    } as unknown as BlockService;
+
+    const conversationMapper = {} as ConversationMapper;
+
+    const chatRolePolicyService = {
+      assertCanCommunicate: vi.fn(),
+    } as unknown as ChatRolePolicyService;
+
+    const educationsService = {
+      findAll: vi.fn().mockResolvedValue([]),
+    } as unknown as EducationsService;
+
+    const userSkillService = {
+      getUserSkills: vi.fn().mockResolvedValue([]),
+    } as unknown as UserSkillService;
+
     const service = new ConversationService(
       {
         findByOrderedPair,
@@ -23,6 +50,12 @@ describe('HU8: validación del destinatario', () => {
       {} as ConversationParticipantRepository,
       { findById } as unknown as UserLookupRepository,
       {} as UserPresenceService,
+      connectionRequestRepository,
+      blockService,
+      conversationMapper,
+      chatRolePolicyService,
+      educationsService,
+      userSkillService,
     );
 
     return {

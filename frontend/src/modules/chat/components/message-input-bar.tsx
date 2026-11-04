@@ -1,5 +1,4 @@
 "use client";
-
 import { useRef, useEffect, useState } from "react";
 import type {
   ChangeEvent,
@@ -7,12 +6,11 @@ import type {
   KeyboardEvent,
 } from "react";
 import { Paperclip, FileText, X, Loader2 } from "lucide-react";
+import Image from "next/image";
 import { toast } from "sonner";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
 import {
   countCharacters,
   truncateToMaxCharacters,
@@ -25,7 +23,6 @@ import {
   isAllowedImage,
 } from "../utils/attachment-validator";
 import { ACCEPTED_ATTACHMENT_TYPES } from "../constants/attachment.constants";
-
 export interface MessageInputBarProps {
   value: string;
   onChange: (value: string) => void;
@@ -40,7 +37,6 @@ export interface MessageInputBarProps {
   onAttachmentChange?: (file: File | null) => void;
   isUploading?: boolean;
 }
-
 export function MessageInputBar({
   value,
   onChange,
@@ -57,14 +53,10 @@ export function MessageInputBar({
 }: MessageInputBarProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Soporte de estado controlado o no controlado para el adjunto
   const [internalAttachment, setInternalAttachment] = useState<File | null>(null);
   const currentAttachment =
     attachment !== undefined ? attachment : internalAttachment;
-
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
-
   const setAttachment = (file: File | null) => {
     if (onAttachmentChange) {
       onAttachmentChange(file);
@@ -72,8 +64,6 @@ export function MessageInputBar({
       setInternalAttachment(file);
     }
   };
-
-  // Limpieza de URL en desmontaje
   useEffect(() => {
     return () => {
       if (imagePreviewUrl) {
@@ -81,25 +71,17 @@ export function MessageInputBar({
       }
     };
   }, [imagePreviewUrl]);
-
-  // Ajusta la altura del textarea hasta un máximo de 120px.
   useEffect(() => {
     const textarea = textareaRef.current;
-
     if (!textarea) return;
-
     textarea.style.height = "auto";
-
     const newHeight = Math.min(textarea.scrollHeight, 120);
-
     textarea.style.height = `${Math.max(newHeight, 40)}px`;
   }, [value]);
-
   const characterCount = countCharacters(value);
   const hasText = !isWhitespaceOnly(value);
   const hasAttachment = Boolean(currentAttachment);
   const canSend = hasText || hasAttachment;
-
   const isSendDisabled =
     disabled ||
     sendDisabled ||
@@ -107,45 +89,36 @@ export function MessageInputBar({
     isUploading ||
     !canSend ||
     characterCount > maxLength;
-
   const handleChange = (
     event: ChangeEvent<HTMLTextAreaElement>
   ) => {
     const rawValue = event.target.value;
-
     const truncatedValue = truncateToMaxCharacters(
       rawValue,
       maxLength
     );
-
     onChange(truncatedValue);
   };
-
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     const result = validateAttachmentFile(file);
     if (!result.valid) {
       toast.error(result.error);
       event.target.value = "";
       return;
     }
-
     if (imagePreviewUrl) {
       URL.revokeObjectURL(imagePreviewUrl);
     }
-
     if (isAllowedImage(file)) {
       setImagePreviewUrl(URL.createObjectURL(file));
     } else {
       setImagePreviewUrl(null);
     }
-
     setAttachment(file);
     event.target.value = "";
   };
-
   const handleRemoveAttachment = () => {
     if (imagePreviewUrl) {
       URL.revokeObjectURL(imagePreviewUrl);
@@ -156,21 +129,17 @@ export function MessageInputBar({
     }
     setAttachment(null);
   };
-
   const handleSubmit = (
     event: FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
-
     if (!isSendDisabled) {
       onSend();
     }
   };
-
   const isImageAttachment = currentAttachment
     ? isAllowedImage(currentAttachment)
     : false;
-
   return (
     <div
       data-testid="message-input-bar"
@@ -180,7 +149,6 @@ export function MessageInputBar({
         onSubmit={handleSubmit}
         className="flex w-full min-w-0 flex-col gap-2"
       >
-        {/* Píldora / tarjeta de archivo adjunto seleccionado */}
         {currentAttachment && (
           <div
             data-testid="attachment-preview"
@@ -188,9 +156,11 @@ export function MessageInputBar({
           >
             {isImageAttachment && imagePreviewUrl ? (
               <div className="relative size-10 shrink-0 overflow-hidden rounded-md border border-border bg-surface">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={imagePreviewUrl}
+                  unoptimized
+                  width={40}
+                  height={40}
                   alt={currentAttachment.name}
                   className="size-full object-cover"
                 />
@@ -200,7 +170,6 @@ export function MessageInputBar({
                 <FileText className="size-5" />
               </div>
             )}
-
             <div className="flex min-w-0 flex-1 flex-col">
               <span
                 data-testid="attachment-name"
@@ -216,7 +185,6 @@ export function MessageInputBar({
                 {isImageAttachment ? "Imagen" : "PDF"} · {formatFileSize(currentAttachment.size)}
               </span>
             </div>
-
             <Button
               type="button"
               variant="ghost"
@@ -231,8 +199,6 @@ export function MessageInputBar({
             </Button>
           </div>
         )}
-
-        {/* Input file de Shadcn/Base UI (oculto visualmente) */}
         <Input
           ref={fileInputRef}
           type="file"
@@ -242,7 +208,6 @@ export function MessageInputBar({
           onChange={handleFileSelect}
           disabled={disabled || isSending || isUploading}
         />
-
         <div className="flex w-full min-w-0 items-end gap-2.5 rounded-xl border border-border bg-surface-soft p-2 transition-all focus-within:border-ink focus-within:bg-surface">
           <Textarea
             ref={textareaRef}
@@ -256,7 +221,6 @@ export function MessageInputBar({
             className="max-h-[120px] min-h-[40px] w-full min-w-0 flex-1 resize-none overflow-y-auto border-0 bg-transparent p-1 text-sm leading-relaxed [overflow-wrap:anywhere] break-words text-ink placeholder:text-text-secondary focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Campo de redacción de mensaje"
           />
-
           <div className="flex shrink-0 items-center gap-2 pb-1">
             <span
               data-testid="character-counter"
@@ -268,8 +232,6 @@ export function MessageInputBar({
             >
               {characterCount}/{maxLength}
             </span>
-
-            {/* Botón clip para adjuntar archivo ubicado a la derecha según mockups HU-11 */}
             <Button
               type="button"
               variant="ghost"
@@ -282,7 +244,6 @@ export function MessageInputBar({
             >
               <Paperclip className="size-4" />
             </Button>
-
             <Button
               type="submit"
               variant="default"

@@ -1,12 +1,12 @@
 
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../common/prisma/prisma.service.js';
-
-const ALLOWED_ROLES = new Set(['estudiante', 'titulado']);
+import { Injectable } from '@nestjs/common';
+import { UsersService } from '../../users/services/users.service.js';
+import { hasOnlyChatAllowedRoles } from '../constants/chat-role-policy.constants.js';
+import { ChatRoleNotAllowedException } from '../exceptions/index.js';
 
 @Injectable()
 export class ChatRolePolicyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly usersService: UsersService) {}
 
   async assertCanCommunicate(
     userId: string,
@@ -17,21 +17,7 @@ export class ChatRolePolicyService {
       contactId.trim().toLowerCase(),
     ];
 
-    const users = await this.prisma.user.findMany({
-      where: { id: { in: ids } },
-      select: {
-        id: true,
-        isActive: true,
-        roles: {
-          where: { deletedAt: null },
-          select: {
-            role: {
-              select: { name: true },
-            },
-          },
-        },
-      },
-    });
+    const users = await this.usersService.findManyWithActiveRoles(ids);
 
     const allowed =
       users.length === 2 &&
@@ -40,17 +26,14 @@ export class ChatRolePolicyService {
           (user) =>
             user.id.toLowerCase() === id &&
             user.isActive &&
-            user.roles.length > 0 &&
-            user.roles.every(({ role }) =>
-              ALLOWED_ROLES.has(role.name.trim().toLowerCase()),
+            hasOnlyChatAllowedRoles(
+              user.roles.map(({ role }) => role.name),
             ),
         ),
       );
 
     if (!allowed) {
-      throw new ForbiddenException(
-        'El chat privado solo está permitido entre estudiantes y titulados.',
-      );
+      throw new ChatRoleNotAllowedException();
     }
   }
 }

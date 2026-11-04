@@ -59,7 +59,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-// Datos ficticios utilizados únicamente en las pruebas.
 const testConversations: Conversation[] = [
   {
     id: "test-conversation-1",

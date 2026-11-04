@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApplicationsTable } from "../components/applications-table";
 import { APPLICATION_MESSAGES, VACANCIES_ROUTE } from "../constants/application.constants";

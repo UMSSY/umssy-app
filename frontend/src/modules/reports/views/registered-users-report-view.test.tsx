@@ -309,7 +309,7 @@ describe("RegisteredUsersReportView", () => {
     await selectPeriod(user, "II-2026");
 
     expect(await screen.findByText("No hay usuarios registrados para este filtro.")).toBeDefined();
-    expect(screen.getByText("Mostrando 0-0 de 0 usuarios")).toBeDefined();
+    expect(screen.queryByText(/^Mostrando/)).toBeNull();
 
     await selectPeriod(user, "Todas");
     expect(await screen.findByText("Mostrando 1-10 de 24 usuarios")).toBeDefined();
@@ -341,7 +341,7 @@ describe("RegisteredUsersReportView", () => {
     await waitFor(() => {
       expect(screen.getByText("No hay usuarios registrados para este filtro.")).toBeDefined();
     });
-    expect(screen.getByText("Mostrando 0-0 de 0 usuarios")).toBeDefined();
+    expect(screen.queryByText(/^Mostrando/)).toBeNull();
   });
 
   it("muestra un mensaje de error si falla la carga", async () => {
