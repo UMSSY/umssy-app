@@ -9,8 +9,6 @@ import { SURVEY_ANSWER_TEXT } from "../constants/survey-answer.constants";
 import type { SurveyQuestionFieldProps } from "../types/survey-component-props.types";
 import { RequiredMark } from "./required-mark";
 
-type SurveyQuestionFieldVariant = "card" | "plain";
-
 export function SurveyQuestionField({
   question,
   index,
@@ -21,7 +19,7 @@ export function SurveyQuestionField({
   hint,
   error,
   variant = "card",
-}: SurveyQuestionFieldProps & { variant?: SurveyQuestionFieldVariant }) {
+}: SurveyQuestionFieldProps) {
   const baseId = `${idPrefix}-${question.id}`;
   const isControlled = selectedOptionIds !== undefined;
   const selected = selectedOptionIds ?? [];

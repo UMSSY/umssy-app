@@ -240,6 +240,8 @@ export interface SurveyQuestionFieldQuestion {
   options: SurveyQuestionFieldOption[];
 }
 
+export type SurveyQuestionFieldVariant = "card" | "plain";
+
 export interface SurveyQuestionFieldProps {
   question: SurveyQuestionFieldQuestion;
   index: number;
@@ -249,6 +251,7 @@ export interface SurveyQuestionFieldProps {
   isReadOnly?: boolean;
   hint?: string;
   error?: string;
+  variant?: SurveyQuestionFieldVariant;
 }
 
 export interface AnswerSurveyViewProps {

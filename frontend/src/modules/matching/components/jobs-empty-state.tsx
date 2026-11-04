@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Briefcase } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { JOB_MATCHING_MESSAGES, PROFILE_SKILLS_ROUTE } from "../constants/job-matching.constants";
 
 interface JobsEmptyStateProps {

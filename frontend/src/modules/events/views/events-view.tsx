@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Ticket } from "lucide-react";
 import { toast } from "sonner";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Button } from '@/components/ui/button';
 import { buildLoginUrl } from '@/modules/auth/utils/safe-next-path';
 import { useRegistrationSession } from '@/modules/registrations';
