@@ -1,5 +1,5 @@
-import { RequirementAnalysisView } from "@/modules/matching";
+import { RecommendedJobsView } from "@/modules/matching";
 
 export default function RequirementAnalysisPage() {
-  return <RequirementAnalysisView />;
+  return <RecommendedJobsView />;
 }

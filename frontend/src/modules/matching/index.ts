@@ -1,5 +1,6 @@
 export { MatchingView } from "./views/matching-view";
 export { useMatching } from "./hooks/use-matching";
+export * from "./views/requirement-analysis-view";
 export type {
   AffinityAxis,
   AffinityAxisId,
