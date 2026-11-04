@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { BrandLogo } from "@/shared/components/layout/brand-logo";
 import { cn } from "cn";
 import type { RequestAccessHeaderProps } from "../../types/request-access-header-props.types";

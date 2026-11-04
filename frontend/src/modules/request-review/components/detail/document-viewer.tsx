@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Download, FileText, RotateCw, ZoomIn, ZoomOut } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "cn";
 import type { DocumentViewerProps } from "../../types/document-viewer-props.types";
 
