@@ -99,3 +99,11 @@ export const FIND_APPOINTMENT_DOCS = {
   notFoundDescription: 'La cita no existe',
   responseDescription: 'Detalle de una cita del participante autenticado',
 } as const;
+
+export const FIND_COUNTERPART_PHOTO_DOCS = {
+  summary: 'Descarga la foto de perfil de la otra persona de la cita',
+  description:
+    'Solo el mentor o el titulado de la cita pueden consultarla; devuelve la imagen PNG o JPEG',
+  responseDescription: 'Foto de perfil de la contraparte',
+  notFoundDescription: 'La cita no existe o la contraparte no tiene foto',
+} as const;
