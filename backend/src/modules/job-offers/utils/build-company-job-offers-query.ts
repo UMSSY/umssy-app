@@ -34,8 +34,7 @@ export function buildCompanyJobOffersQuery(
     }),
   };
 
-  const orderBy: Prisma.JobOfferOrderByWithRelationInput[] = [
-    ...(filters.sortBy === 'applicants' ? [{ applications: { _count: filters.order } }] : []),
+    const orderBy: Prisma.JobOfferOrderByWithRelationInput[] = [
     { publishedAt: filters.order },
     { id: filters.order },
   ];

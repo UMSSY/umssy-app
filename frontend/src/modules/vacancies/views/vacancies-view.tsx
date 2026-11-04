@@ -4,10 +4,13 @@ import Link from "next/link";
 import { useState, type MouseEvent } from "react";
 import { VacancyDetailDialog } from "../components/vacancy-detail-dialog";
 import type { VacanciesViewProps } from "../types/vacancies-view-props.types";
-import { ArrowRight, BriefcaseBusiness, MapPin, Search, SearchX } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, ExternalLink, Search, SearchX } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Input } from "@/components/ui/input";
+import { getSafeMapsUrl } from "@/modules/job-offers/utils/get-safe-maps-url";
+import { ModalityIcon } from "@/shared/components/modality-icon";
 import { PageHeading } from "@/shared/components/layout";
 import { getInitials } from "@/shared/utils/get-initials";
 import { useVacancies } from "../hooks/use-vacancies";
@@ -79,9 +82,11 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
                 <p className="mt-2 line-clamp-2 max-w-prose text-sm leading-relaxed text-text-secondary">{vacancy.description}</p>
                 <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
                   <div><dt className="sr-only">Salario</dt><dd className="rounded-md bg-interaction px-2.5 py-1 font-semibold text-accent tabular-nums">{vacancy.salary}</dd></div>
-                  <div><dt className="sr-only">Modalidad</dt><dd className="flex items-center gap-1.5 text-ink-soft"><MapPin aria-hidden="true" className="size-4" />{vacancy.modality}</dd></div>
+                  <div><dt className="sr-only">Modalidad</dt><dd className="flex items-center gap-1.5 text-ink-soft"><ModalityIcon modality={vacancy.modality} className="size-4" />{vacancy.modality}</dd></div>
                   <div><dt className="sr-only">Contrato</dt><dd className="flex items-center gap-1.5 text-ink-soft"><BriefcaseBusiness aria-hidden="true" className="size-4" />{vacancy.contractType}</dd></div>
+                  {getSafeMapsUrl(vacancy.locationUrl) ? <div><dt className="sr-only">Ubicación</dt><dd><a href={getSafeMapsUrl(vacancy.locationUrl) ?? undefined} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent underline-offset-4 hover:underline">Ver ubicación<span className="sr-only"> de {vacancy.title}</span><ExternalLink className="size-3.5" aria-hidden="true" /></a></dd></div> : null}
                 </dl>
+                {vacancy.requirements.length > 0 ? <ul aria-label="Habilidades requeridas" className="mt-3 flex flex-wrap gap-2">{vacancy.requirements.map((requirement) => <li key={requirement}><Badge variant="outline">{requirement}</Badge></li>)}</ul> : null}
               </div>
               <Link href={`/vacancies/${vacancy.id}`} onClick={(event) => openVacancy(event, vacancy.id)} className={buttonVariants({ variant: "ghost", className: "self-center text-accent hover:text-accent" })} aria-label={`Ver detalles de ${vacancy.title}`}>Ver detalles<ArrowRight aria-hidden="true" className="transition-transform duration-150 group-hover:translate-x-0.5" /></Link>
             </article>

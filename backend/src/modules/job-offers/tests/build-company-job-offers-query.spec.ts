@@ -102,9 +102,8 @@ describe('buildCompanyJobOffersQuery', () => {
     ]);
   });
 
-  it('ordena por cantidad de postulantes y desempata por fecha', () => {
-    expect(build({ sortBy: 'applicants', order: 'asc' }).orderBy).toEqual([
-      { applications: { _count: 'asc' } },
+  it('deja a la fecha como orden base al ordenar por cantidad de postulantes', () => {
+        expect(build({ sortBy: 'applicants', order: 'asc' }).orderBy).toEqual([
       { publishedAt: 'asc' },
       { id: 'asc' },
     ]);
