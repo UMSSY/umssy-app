@@ -17,18 +17,6 @@ const CONTACT_USER_SELECT = {
         },
       },
     },
-    educations: {
-      orderBy: { startDate: 'desc' as const },
-      take: 1,
-      select: { degree: true, institution: true },
-    },
-    userSkills: {
-      select: {
-        skill: {
-          select: { name: true },
-        },
-      },
-    },
   },
 };
 

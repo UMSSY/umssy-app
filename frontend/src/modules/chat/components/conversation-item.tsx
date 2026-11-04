@@ -1,6 +1,4 @@
-
 "use client";
-/* eslint-disable @next/next/no-img-element */
 
 import { Lock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -79,6 +77,7 @@ export function ConversationItem({
     >
       <div className="relative shrink-0">
         {contact.avatarUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={contact.avatarUrl}
             alt={contact.fullName}

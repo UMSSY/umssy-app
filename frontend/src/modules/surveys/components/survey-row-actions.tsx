@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BarChart3, Eye, Pencil } from "lucide-react";
 import { cn } from "cn";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Separator } from "@/components/ui/separator";
 import { SURVEY_ROW_ACTION_LABELS, getSurveyDetailPath, getSurveyStatisticsPath } from "../constants/survey-routes.constants";
 import type { SurveyRowActionsProps } from "../types/survey-component-props.types";

@@ -6,7 +6,6 @@ import type { Message } from "../types/conversation.types";
 
 import { mergeMessages } from "../utils/merge-messages";
 
-/** Walk backward to the known history, including gaps larger than one page. */
 export async function synchronizeMessages(
   client: QueryClient,
   conversationId: string,
@@ -38,7 +37,6 @@ export async function synchronizeMessages(
     };
     const chronological = mergeMessages(conversationId, page.data);
     const knownIndex = chronological.findLastIndex((message) => known.has(message.id));
-    // The boundary page may contain older, unloaded history. Only append the gap.
     recovered.push(...chronological.slice(knownIndex + 1));
     if (!cached || knownIndex >= 0 || !page.hasMore) break;
     if (!page.nextCursor || visited.has(page.nextCursor))
@@ -47,7 +45,6 @@ export async function synchronizeMessages(
     cursor = page.nextCursor;
   } while (cursor);
   signal.throwIfAborted();
-  // Cancel concurrent pagination/refetch before committing, retaining its cached pages.
   await client.cancelQueries({ queryKey: key });
   signal.throwIfAborted();
   client.setQueryData<InfiniteData<MessagesPage>>(key, (current) => {

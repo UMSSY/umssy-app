@@ -1,3 +1,4 @@
+
 import { UserNotFoundException } from '../exceptions/index.js';
 import { Injectable } from '@nestjs/common';
 import type {
@@ -58,19 +59,21 @@ export class ConversationMapper {
     isOnline: boolean;
     unreadCount: number;
     isBlockedByMe: boolean;
+    academicTitle: string | null;
+    skills: string[];
   }): ConversationResponse {
-    const { conversation, contact, isOnline, unreadCount, isBlockedByMe } =
-      params;
+    const {
+      conversation,
+      contact,
+      isOnline,
+      unreadCount,
+      isBlockedByMe,
+      academicTitle,
+      skills,
+    } = params;
+
     const avatarUrl = this.toAvatarUrl(contact.photoUrl);
     const roleName = contact.roles?.[0]?.role?.name ?? null;
-    const academicTitle = contact.educations?.[0]
-      ? `${contact.educations[0].degree} / ${contact.educations[0].institution}`
-      : (contact.headline ?? null);
-    const skills = contact.userSkills
-      ? contact.userSkills
-          .map((us) => us.skill?.name)
-          .filter((name): name is string => Boolean(name))
-      : [];
 
     return {
       id: conversation.id,

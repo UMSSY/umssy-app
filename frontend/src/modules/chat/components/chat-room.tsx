@@ -1,11 +1,12 @@
 "use client";
-
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import Image from "next/image";
 import { ArrowLeft, Lock, MessageCircle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import type { Conversation, Message } from "../types/conversation.types";
 import type { MessageAttachment } from "../types/attachment.types";
 import { MessageInputBar } from "./message-input-bar";
@@ -26,10 +27,8 @@ import {
   getChatActionErrorMessage,
   getChatHttpStatus,
 } from "../utils/chat-action-error";
-
 import { ChatConnectionBanner } from './chat-connection-banner';
 import type { ChatConnectionStatus } from '../types/chat-connection-status.types';
-
 interface ChatRoomProps {
   connectionStatus?: ChatConnectionStatus;
   conversation: Conversation;
@@ -49,7 +48,6 @@ interface ChatRoomProps {
   onBlockUser?: () => Promise<void>;
   onUnblockUser?: () => Promise<void>;
 }
-
 interface ScrollAnchor {
   messageId: string;
   offsetTop: number;
@@ -57,34 +55,27 @@ interface ScrollAnchor {
   scrollHeight: number;
   firstMessageId: string | null;
 }
-
 const TOP_THRESHOLD = 80;
 const BOTTOM_THRESHOLD = 120;
-
 function getMessageDate(message: Message): string {
   return message.timestamp || message.createdAt || "";
 }
-
 function isSameDay(
   firstDate?: string | null,
   secondDate?: string | null,
 ): boolean {
   if (!firstDate || !secondDate) return false;
-
   const first = new Date(firstDate);
   const second = new Date(secondDate);
-
   if (Number.isNaN(first.getTime()) || Number.isNaN(second.getTime())) {
     return false;
   }
-
   return (
     first.getFullYear() === second.getFullYear() &&
     first.getMonth() === second.getMonth() &&
     first.getDate() === second.getDate()
   );
 }
-
 function shouldShowDateSeparator(
   messages: Message[],
   index: number,
@@ -92,13 +83,11 @@ function shouldShowDateSeparator(
 ): boolean {
   if (!messages[index]) return false;
   if (index === 0) return !hasMoreMessages;
-
   return !isSameDay(
     getMessageDate(messages[index - 1]),
     getMessageDate(messages[index]),
   );
 }
-
 function scrollToBottom(
   container: HTMLDivElement,
   behavior: ScrollBehavior = "smooth",
@@ -112,11 +101,9 @@ function scrollToBottom(
     container.scrollTop = container.scrollHeight;
   }
 }
-
 export function ChatRoom(props: ChatRoomProps) {
   return <ChatRoomContent key={props.conversation.id} {...props} />;
 }
-
 function ChatRoomContent({
   conversation,
   messages,
@@ -147,7 +134,6 @@ function ChatRoomContent({
       ? "1 participante"
       : `${eventParticipantCount} participantes`;
   const ui = useMessagingUi();
-
   const [localInputText, setLocalInputText] = useState("");
   const [selectedAttachment, setSelectedAttachment] = useState<File | null>(
     null,
@@ -160,12 +146,9 @@ function ChatRoomContent({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
   const [isUnblocking, setIsUnblocking] = useState(false);
-  const [unblockError, setUnblockError] = useState(false);
-
   const inputText = ui
     ? (ui.drafts[conversation.id] ?? "")
     : localInputText;
-
   const setInputText = (content: string) => {
     if (ui) {
       ui.setDraft(conversation.id, content);
@@ -173,9 +156,7 @@ function ChatRoomContent({
       setLocalInputText(content);
     }
   };
-
   const isBlockedByMe = Boolean(conversation.isBlockedByMe);
-
   const containerRef = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<ScrollAnchor | null>(null);
   const loadingOlderRef = useRef(false);
@@ -185,14 +166,11 @@ function ChatRoomContent({
   const scrollAfterSendRef = useRef(false);
   const previousFirstIdRef = useRef<string | null>(null);
   const previousLastIdRef = useRef<string | null>(null);
-
   const showInitialLoading = isLoadingMessages && messages.length === 0;
-
   const getMessageElement = useCallback(
     (messageId: string): HTMLElement | null => {
       const container = containerRef.current;
       if (!container) return null;
-
       for (const element of container.querySelectorAll<HTMLElement>(
         "[data-message-id]",
       )) {
@@ -200,27 +178,21 @@ function ChatRoomContent({
           return element;
         }
       }
-
       return null;
     },
     [],
   );
-
   const captureAnchor = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
-
     const containerRect = container.getBoundingClientRect();
-
     for (const element of container.querySelectorAll<HTMLElement>(
       "[data-message-id]",
     )) {
       const rect = element.getBoundingClientRect();
-
       if (rect.bottom > containerRect.top) {
         const messageId = element.dataset.messageId;
         if (!messageId) continue;
-
         anchorRef.current = {
           messageId,
           offsetTop: rect.top - containerRect.top,
@@ -228,11 +200,9 @@ function ChatRoomContent({
           scrollHeight: container.scrollHeight,
           firstMessageId: previousFirstIdRef.current,
         };
-
         return;
       }
     }
-
     anchorRef.current = {
       messageId: "",
       offsetTop: 0,
@@ -241,7 +211,6 @@ function ChatRoomContent({
       firstMessageId: previousFirstIdRef.current,
     };
   }, []);
-
   const loadOlderMessages = useCallback(async () => {
     if (
       !onLoadMoreMessages ||
@@ -251,13 +220,9 @@ function ChatRoomContent({
     ) {
       return;
     }
-
     captureAnchor();
-
     if (!anchorRef.current) return;
-
     loadingOlderRef.current = true;
-
     try {
       await onLoadMoreMessages();
     } catch {
@@ -270,18 +235,13 @@ function ChatRoomContent({
     isLoadingMoreMessages,
     captureAnchor,
   ]);
-
   const handleScroll = () => {
     const container = containerRef.current;
     if (!container) return;
-
     const distanceToBottom =
       container.scrollHeight - container.scrollTop - container.clientHeight;
-
     nearBottomRef.current = distanceToBottom <= BOTTOM_THRESHOLD;
-
     if (loadingOlderRef.current) return;
-
     if (
       container.scrollTop <= TOP_THRESHOLD &&
       !showInitialLoading &&
@@ -291,37 +251,30 @@ function ChatRoomContent({
       void loadOlderMessages();
     }
   };
-
   useLayoutEffect(() => {
     const container = containerRef.current;
     if (!container || showInitialLoading) return;
-
     const firstId = messages[0]?.id ?? null;
     const lastId = messages[messages.length - 1]?.id ?? null;
     const previousLastId = previousLastIdRef.current;
     const anchor = anchorRef.current;
-
     if (loadingOlderRef.current && anchor) {
       const olderMessagesAdded =
         firstId !== null && firstId !== anchor.firstMessageId;
-
       if (olderMessagesAdded) {
         const anchorElement = anchor.messageId
           ? getMessageElement(anchor.messageId)
           : null;
-
         if (anchorElement) {
           const currentOffset =
             anchorElement.getBoundingClientRect().top -
             container.getBoundingClientRect().top;
-
           container.scrollTop += currentOffset - anchor.offsetTop;
         } else {
           container.scrollTop =
             anchor.scrollTop +
             (container.scrollHeight - anchor.scrollHeight);
         }
-
         loadingOlderRef.current = false;
         anchorRef.current = null;
       } else if (!isLoadingMoreMessages && !hasMoreMessages) {
@@ -342,7 +295,6 @@ function ChatRoomContent({
         scrollAfterSendRef.current = false;
       }
     }
-
     previousFirstIdRef.current = firstId;
     previousLastIdRef.current = lastId;
   }, [
@@ -352,14 +304,11 @@ function ChatRoomContent({
     hasMoreMessages,
     getMessageElement,
   ]);
-
   const handleSend = async () => {
     if (connectionStatus !== "connected") return;
     if (isBlockedByMe) return;
-
     const hasText = isContentValidForSend(inputText);
     const hasAttachment = Boolean(selectedAttachment);
-
     if (
       (!hasText && !hasAttachment) ||
       isSending ||
@@ -371,33 +320,25 @@ function ChatRoomContent({
     ) {
       return;
     }
-
     const content = inputText.trim();
-
     sendPendingRef.current = true;
     scrollAfterSendRef.current = true;
-
     setIsSubmitting(true);
     setSendError(null);
     setBlockedSendError(false);
-
     if (selectedAttachment) {
       setIsUploading(true);
     }
-
     try {
       if (selectedAttachment) {
         await onSendMessage(content, selectedAttachment);
       } else {
         await onSendMessage(content);
       }
-
-      // Limpiar el borrador únicamente cuando el envío se confirma.
       if (ui) {
         ui.clearSubmittedDraft(conversation.id, inputText);
       }
       setLocalInputText("");
-
       setSelectedAttachment(null);
     } catch (error) {
       if (getChatHttpStatus(error) === 403) {
@@ -406,11 +347,10 @@ function ChatRoomContent({
         setSendError(
           getChatActionErrorMessage(
             error,
-            "No se pudo enviar el mensaje. Conservamos tu texto y el adjunto; vuelve a pulsar Enviar para reintentar.",
+            "No es posible enviar mensajes en esta conversación. La comunicación con esta persona está restringida",
           ),
         );
       }
-
       scrollAfterSendRef.current = false;
       return;
     } finally {
@@ -418,29 +358,22 @@ function ChatRoomContent({
       setIsSubmitting(false);
       setIsUploading(false);
     }
-
     setSendError(null);
-
     if (containerRef.current) {
       scrollToBottom(containerRef.current, "smooth");
     }
   };
-
   const handleUnblock = async () => {
     if (!onUnblockUser || isUnblocking) return;
-
     setIsUnblocking(true);
-    setUnblockError(false);
-
     try {
       await onUnblockUser();
     } catch {
-      setUnblockError(true);
+      toast.error("No se pudo desbloquear. Intenta de nuevo.");
     } finally {
       setIsUnblocking(false);
     }
   };
-
   const handleInputKeyDown = (
     event: KeyboardEvent<HTMLTextAreaElement>,
   ) => {
@@ -449,18 +382,15 @@ function ChatRoomContent({
       void handleSend();
     }
   };
-
   const handleDownloadAttachment = useCallback(
     async (attachment: MessageAttachment) => {
       try {
         await downloadAttachment(attachment.id, attachment.fileName);
       } catch {
-        // El servicio muestra el aviso de error de descarga.
       }
     },
     [],
   );
-
   return (
     <div
       data-testid="chat-room"
@@ -478,13 +408,13 @@ function ChatRoomContent({
             data-testid="chat-back-button"
             onClick={onBack}
             aria-label="Volver a la lista de chats"
-            className={`-ml-1 rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-soft hover:text-ink ${
-              isCompact ? "" : "md:hidden"
-            }`}
+            className={cn(
+              "-ml-1 rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-soft hover:text-ink",
+              !isCompact && "md:hidden",
+            )}
           >
             <ArrowLeft className="size-5" aria-hidden="true" />
           </Button>
-
           <Button
             type="button"
             variant="ghost"
@@ -544,7 +474,6 @@ function ChatRoomContent({
                 />
               )}
             </div>
-
             <div className="text-left">
               <h3
                 data-testid="chat-contact-name"
@@ -552,7 +481,6 @@ function ChatRoomContent({
               >
                 {conversationName}
               </h3>
-
               {isBlockedByMe ? (
                 <span
                   data-testid="chat-blocked-status"
@@ -589,14 +517,12 @@ function ChatRoomContent({
           />
         )}
             </header>
-
       {connectionStatus !== "connected" && (
         <ChatConnectionBanner
           key={connectionStatus}
           status={connectionStatus}
         />
       )}
-
       {!isEventConversation && onBlockUser && (
         <BlockUserDialog
           open={isBlockDialogOpen}
@@ -605,18 +531,6 @@ function ChatRoomContent({
           onConfirm={onBlockUser}
         />
       )}
-
-      {unblockError && (
-        <div
-          role="alert"
-          className="mx-4 mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-center"
-        >
-          <p className="text-sm text-red-800">
-            No se pudo desbloquear. Intenta de nuevo.
-          </p>
-        </div>
-      )}
-
       <div
         ref={containerRef}
         data-testid="messages-container"
@@ -641,7 +555,6 @@ function ChatRoomContent({
             }
           />
         )}
-
         {isLoadingMoreMessages && (
           <div
             role="status"
@@ -653,7 +566,6 @@ function ChatRoomContent({
             </span>
           </div>
         )}
-
         {hasMoreMessages &&
           !isLoadingMoreMessages &&
           !isMessagesError && (
@@ -668,7 +580,6 @@ function ChatRoomContent({
               </Button>
             </div>
           )}
-
         {!hasMoreMessages &&
           messages.length > 0 &&
           !showInitialLoading && (
@@ -681,7 +592,6 @@ function ChatRoomContent({
               </span>
             </div>
           )}
-
         {showInitialLoading ? (
           <div
             role="status"
@@ -715,14 +625,13 @@ function ChatRoomContent({
                 index,
                 hasMoreMessages,
               );
-              const senderName =
+         const senderName =
                 !isOwn && eventConversation
                   ? getEventRoomSenderName(
                       message.senderId,
                       eventConversation.participants ?? [],
                     )
                   : undefined;
-
               return (
                 <div key={message.id} data-message-id={message.id}>
                   <MessageItem
@@ -737,10 +646,8 @@ function ChatRoomContent({
             })}
           </div>
         )}
-
         <div data-testid="messages-scroll-anchor" />
       </div>
-
       {isBlockedByMe ? (
         <BlockedConversationNotice
           contactName={conversationName}
@@ -757,7 +664,6 @@ function ChatRoomContent({
               <p className="text-sm text-destructive">{sendError}</p>
             </div>
           )}
-
           {blockedSendError && (
             <div
               role="alert"
@@ -770,7 +676,6 @@ function ChatRoomContent({
               </p>
             </div>
           )}
-
           <MessageInputBar
             value={inputText}
             onChange={setInputText}
