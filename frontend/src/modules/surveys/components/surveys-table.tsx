@@ -53,7 +53,7 @@ export function SurveysTable({ surveys, isLoading, hasError, emptyMessage }: Sur
                 <TableCell className="text-ink-soft">{survey.academicPeriod ?? "-"}</TableCell>
                 <TableCell className="text-ink-soft tabular-nums">{formatIsoDateTime(survey.createdAt) || "-"}</TableCell>
                 <TableCell className="text-center">
-                  <Badge className={cn("min-w-24", SURVEY_STATUS_BADGE_CLASSES[survey.status])}>{SURVEY_STATUS_LABELS[survey.status]}</Badge>
+                  <Badge className={cn("h-7 rounded-full px-3 text-sm", SURVEY_STATUS_BADGE_CLASSES[survey.status])}>{SURVEY_STATUS_LABELS[survey.status]}</Badge>
                 </TableCell>
                 <TableCell>
                   <SurveyRowActions survey={survey} />
