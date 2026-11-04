@@ -26,6 +26,7 @@ import { EmptyChatState } from "./empty-chat-state";
 import { ContactSearchModal } from "./contact-search-modal";
 import { ChatRoom } from "./chat-room";
 import { ChatConnectionDialog } from "./chat-connection-dialog";
+import { ChatConnectionBanner } from "./chat-connection-banner";
 import { ChatErrorState } from "./chat-error-state";
 import { SendConnectionRequestDialog } from "./send-connection-request-dialog";
 
@@ -495,6 +496,10 @@ export function ChatWorkspace({
   };
 
   return (
+    <>
+      {(!selectedConversation || selectedRequest) && connectionStatus !== "connected" && (
+        <ChatConnectionBanner key={connectionStatus} status={connectionStatus} />
+      )}
     <div className="relative flex size-full min-h-0 max-w-full flex-1 overflow-hidden bg-surface-soft font-sans">
       <aside
         className={cn(
@@ -662,5 +667,6 @@ export function ChatWorkspace({
         </div>
       )}
     </div>
+    </>
   );
 }
