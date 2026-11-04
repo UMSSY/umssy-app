@@ -26,9 +26,8 @@ describe('createWorkExperienceSchema', () => {
     });
   });
 
-  it('accepts a current job without end date or description', () => {
-    const { endDate: _endDate, description: _description, ...body } =
-      validBody;
+  it('accepts a current job without end date', () => {
+    const { endDate: _endDate, ...body } = validBody;
 
     expect(
       createWorkExperienceSchema.safeParse({ ...body, isCurrent: true })
