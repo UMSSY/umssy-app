@@ -84,7 +84,6 @@ describe('bounded directory SQL', () => {
   });
 });
 
-// Opt-in only: never fall back to the application's database credentials.
 const isolatedUrl = process.env.MENTOR_DIRECTORY_TEST_DATABASE_URL;
 describe.skipIf(!isolatedUrl)(
   'PostgreSQL directory semantics (isolated, read-only)',

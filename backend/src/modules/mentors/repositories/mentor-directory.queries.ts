@@ -7,8 +7,6 @@ type DirectoryFilters = Pick<
   'search' | 'area' | 'orientation' | 'available'
 >;
 
-// PostgreSQL 18 / UTF8: native normalization needs no extension or schema change.
-// Keep the mark range identical for stored names and search terms.
 function normalized(value: Prisma.Sql): Prisma.Sql {
   return Prisma.sql`lower(regexp_replace(normalize(${value}, NFD), ${'[\u0300-\u036f]'}, '', 'g'))`;
 }
@@ -37,7 +35,6 @@ export function directoryPredicate(
     WHERE mot.mentor_id = u.id AND ot.is_active = true AND ot.name = ${filters.orientation}
   )`);
   for (const term of filters.search.trim().split(/\s+/).filter(Boolean)) {
-    // strpos treats %, _, backslashes and regex metacharacters as literal input.
     conditions.push(Prisma.sql`(
       strpos(${normalized(Prisma.sql`u.first_name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
       OR strpos(${normalized(Prisma.sql`u.last_name`)}, ${normalized(Prisma.sql`${term}::text`)}) > 0
