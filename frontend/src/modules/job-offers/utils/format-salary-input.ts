@@ -1,4 +1,4 @@
-import { MAX_SALARY_DIGITS } from "../constants/vacancies.constants";
+import { MAX_SALARY_DIGITS } from "../constants/job-offers.constants";
 
 const CURRENCY_PREFIX = "Bs ";
 const RANGE_SEPARATOR = " - ";

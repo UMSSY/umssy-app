@@ -648,6 +648,7 @@ model JobOffer {
   minExperienceYears Int?      @map("min_experience_years")
   otherRequirements  String[]  @default([]) @map("other_requirements")
   expiresAt          DateTime? @map("expires_at") @db.Timestamptz(6)
+  publishedAt        DateTime  @default(now()) @map("published_at") @db.Timestamptz(6)
   createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 

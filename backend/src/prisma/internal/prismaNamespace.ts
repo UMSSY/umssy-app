@@ -6838,6 +6838,7 @@ export const JobOfferScalarFieldEnum = {
   minExperienceYears: 'minExperienceYears',
   otherRequirements: 'otherRequirements',
   expiresAt: 'expiresAt',
+  publishedAt: 'publishedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
