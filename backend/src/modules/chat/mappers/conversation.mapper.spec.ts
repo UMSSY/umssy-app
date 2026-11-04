@@ -52,4 +52,47 @@ describe('ConversationMapper', () => {
     );
     expect(result.contact?.skills).toEqual(['TypeScript', 'NestJS']);
   });
+
+  it('maps event conversation metadata and participants', () => {
+    const rawConversation: RawConversationRecord = {
+      id: 'conv-event-1',
+      userAId: null,
+      userBId: null,
+      createdAt: new Date('2026-11-01T10:00:00Z'),
+      updatedAt: new Date('2026-11-02T12:00:00Z'),
+      messages: [],
+      event: {
+        id: 'event-1',
+        title: 'Taller de React',
+      },
+      participants: [
+        {
+          userId: 'user-1',
+          user: {
+            id: 'user-1',
+            firstName: 'Maria',
+            lastName: 'Fernandez',
+          },
+        },
+        {
+          userId: 'user-2',
+          user: {
+            id: 'user-2',
+            firstName: 'Carlos',
+            lastName: 'Rojas',
+          },
+        },
+      ],
+    };
+
+    const result = mapper.toEventConversationResponse(rawConversation);
+
+    expect(result.eventId).toBe('event-1');
+    expect(result.eventTitle).toBe('Taller de React');
+    expect(result.createdAt).toBe('2026-11-01T10:00:00.000Z');
+    expect(result.participants).toEqual([
+      { id: 'user-1', fullName: 'Maria Fernandez' },
+      { id: 'user-2', fullName: 'Carlos Rojas' },
+    ]);
+  });
 });

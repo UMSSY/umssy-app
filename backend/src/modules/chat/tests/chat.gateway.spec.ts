@@ -8,12 +8,16 @@ import { UserPresenceService } from '../services/user-presence.service.js';
 import { MessageService } from '../services/message.service.js';
 import type { Socket, Server } from 'socket.io';
 import { EventRoomService } from '../services/event-room.service.js';
+import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
+
+const REGISTRATION_ID = '11111111-1111-4111-8111-111111111111';
 
 describe('ChatGateway (HU-5 Handshake)', () => {
   let gateway: ChatGateway;
   let jwtService: JwtService;
   let sessionService: SessionService;
   let messageService: MessageService;
+  let eventRoomService: EventRoomService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -50,6 +54,7 @@ describe('ChatGateway (HU-5 Handshake)', () => {
     messageService = module.get<MessageService>(MessageService);
     jwtService = module.get<JwtService>(JwtService);
     sessionService = module.get<SessionService>(SessionService);
+    eventRoomService = module.get<EventRoomService>(EventRoomService);
   });
 
   it('debe rechazar la conexión si no se envía un token JWT', async () => {
@@ -117,5 +122,87 @@ describe('ChatGateway (HU-5 Handshake)', () => {
     const client = { data: { user: { id: 'user-1' } } } as unknown as Socket;
     vi.mocked(messageService.send).mockRejectedValue(new Error('Usuario bloqueado'));
     expect(await gateway.sendMessage(client, { conversationId: 'conversation-1', content: 'Hola' })).toEqual({ ok: false, error: 'Usuario bloqueado' });
+  });
+
+  it('rechaza event_room:join cuando no hay una sesión autenticada', async () => {
+    const client = {
+      data: {},
+      join: vi.fn(),
+      emit: vi.fn(),
+    } as unknown as Socket;
+
+    const result = await gateway.handleEventRoomJoin(client, {
+      registrationId: REGISTRATION_ID,
+    });
+
+    expect(eventRoomService.joinEventRoom).not.toHaveBeenCalled();
+    expect(client.emit).not.toHaveBeenCalled();
+    expect(result).toEqual({ ok: false, error: 'Sesión no válida' });
+  });
+
+  it('atiende event_room:join con registrationId y emite la sala', async () => {
+    const client = {
+      data: { user: { id: 'user-1' } },
+      join: vi.fn().mockResolvedValue(undefined),
+      emit: vi.fn(),
+    } as unknown as Socket;
+    const room = {
+      conversationId: 'conversation-1',
+      eventId: 'event-1',
+      name: 'Taller de React',
+      createdAt: '2026-11-01T10:00:00.000Z',
+      participants: [{ id: 'user-1', fullName: 'Usuario Uno' }],
+    };
+    vi.mocked(eventRoomService.joinEventRoom).mockResolvedValue(room);
+
+    const result = await gateway.handleEventRoomJoin(client, {
+      registrationId: REGISTRATION_ID,
+    });
+
+    expect(eventRoomService.joinEventRoom).toHaveBeenCalledWith(
+      'user-1',
+      REGISTRATION_ID,
+    );
+    expect(client.join).toHaveBeenCalledWith('conversation-1');
+    expect(client.emit).toHaveBeenCalledWith('event_room:joined', room);
+    expect(result).toEqual({ ok: true, conversationId: 'conversation-1' });
+  });
+
+  it('emite not_registered cuando la inscripción no es válida', async () => {
+    const client = {
+      data: { user: { id: 'user-1' } },
+      join: vi.fn(),
+      emit: vi.fn(),
+    } as unknown as Socket;
+    vi.mocked(eventRoomService.joinEventRoom).mockRejectedValue(
+      new NotRegisteredForEventException(),
+    );
+
+    const result = await gateway.handleEventRoomJoin(client, {
+      registrationId: REGISTRATION_ID,
+    });
+
+    expect(client.emit).toHaveBeenCalledWith('event_room:error', {
+      code: 'not_registered',
+    });
+    expect(result.ok).toBe(false);
+  });
+
+  it('rechaza un registrationId que no es uuid', async () => {
+    const client = {
+      data: { user: { id: 'user-1' } },
+      join: vi.fn(),
+      emit: vi.fn(),
+    } as unknown as Socket;
+
+    const result = await gateway.handleEventRoomJoin(client, {
+      registrationId: 'not-a-uuid',
+    });
+
+    expect(eventRoomService.joinEventRoom).not.toHaveBeenCalled();
+    expect(client.emit).toHaveBeenCalledWith('event_room:error', {
+      code: 'generic_error',
+    });
+    expect(result.ok).toBe(false);
   });
 });
