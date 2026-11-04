@@ -1,6 +1,7 @@
+
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../../users/services/users.service.js';
-import { CHAT_ALLOWED_ROLES } from '../constants/chat-role-policy.constants.js';
+import { hasOnlyChatAllowedRoles } from '../constants/chat-role-policy.constants.js';
 import { ChatRoleNotAllowedException } from '../exceptions/index.js';
 
 @Injectable()

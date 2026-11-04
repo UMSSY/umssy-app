@@ -1,10 +1,14 @@
+
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { FileValidationService } from '../../common/services/file-validation.service.js';
 import { EventRegistrationsModule } from '../event-registrations/event-registrations.module.js';
+import { EducationsModule } from '../educations/educations.module.js';
+import { SkillsModule } from '../skills/skills.module.js';
 import { UsersModule } from '../users/users.module.js';
+
 import { ChatRolePolicyService } from './services/chat-role-policy.service.js';
 
 import { UserSearchController } from './controllers/user-search.controller.js';
@@ -43,10 +47,7 @@ import { ConnectionRequestRepository } from './repositories/connection-request.r
 import { ChatUserBlockRepository } from './repositories/chat-user-block.repository.js';
 
 import { ChatGateway } from './gateways/chat.gateway.js';
-import { EducationsModule } from '../educations/educations.module.js';
-import { SkillsModule } from '../skills/skills.module.js';
 
-@Module({
 @Module({
   imports: [
     PrismaModule,
@@ -57,7 +58,6 @@ import { SkillsModule } from '../skills/skills.module.js';
     SkillsModule,
     UsersModule,
   ],
-  controllers: [
   controllers: [
     UserSearchController,
     ConversationController,
@@ -84,10 +84,8 @@ import { SkillsModule } from '../skills/skills.module.js';
     AttachmentUploadInterceptor,
     FileValidationService,
     EventRoomService,
-
     ConnectionRequestService,
     BlockService,
-
     ConversationRepository,
     ConversationParticipantRepository,
     MessageRepository,
