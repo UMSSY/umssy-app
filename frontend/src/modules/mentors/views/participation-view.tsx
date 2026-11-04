@@ -77,7 +77,6 @@ export function ParticipationView({
     navigationFeedbackHandled.current = true;
 
     const url = new URL(window.location.href);
-    // Read the current URL too: a restored route can retain old server props.
     const hasActivationFeedback =
       activated && url.searchParams.get("activated") === "1";
     const hasRegistrationFeedback =

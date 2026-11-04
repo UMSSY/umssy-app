@@ -151,7 +151,7 @@ export function MentorshipView() {
     selectedOrientationTypeIds.includes(orientation.id),
   );
 
-  // Always read the backend before either intake action, bypassing cached data.
+  // Consulta siempre el backend antes de cada acción, sin usar datos en caché.
   const verifyBeforeSubmit = async () => {
     try {
       const [state, currentRequest] = await Promise.all([
