@@ -43,7 +43,7 @@ describe('attachment-validator (HU-11 Task 3)', () => {
       expect(result.valid).toBe(false);
       if (!result.valid) {
         expect(result.error).toBe(ATTACHMENT_ERROR_MESSAGES.IMAGE_TOO_LARGE);
-        expect(result.error).toBe('La imagen supera el tamaño maximo permitido de 5 MB.');
+        expect(result.error).toBe('La imagen supera el tamaño máximo permitido de 5 MB.');
       }
     });
   });
@@ -64,7 +64,7 @@ describe('attachment-validator (HU-11 Task 3)', () => {
       expect(result.valid).toBe(false);
       if (!result.valid) {
         expect(result.error).toBe(ATTACHMENT_ERROR_MESSAGES.PDF_TOO_LARGE);
-        expect(result.error).toBe('El documento supera el tamaño maximo permitido 10 MB.');
+        expect(result.error).toBe('El documento supera el tamaño máximo permitido 10 MB.');
       }
     });
   });
@@ -77,7 +77,7 @@ describe('attachment-validator (HU-11 Task 3)', () => {
       if (!result.valid) {
         expect(result.error).toBe(ATTACHMENT_ERROR_MESSAGES.INVALID_FORMAT);
         expect(result.error).toBe(
-          'Formato no permitido, Solo puedes adjuntar imágenes (JPG, PNG) o documentos PDF.',
+          'Formato no permitido, Solo puedes adjuntar imágenes JPG, PNG o documentos PDF',
         );
       }
     });

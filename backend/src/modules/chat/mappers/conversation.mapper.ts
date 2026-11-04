@@ -1,6 +1,10 @@
+
 import { UserNotFoundException } from '../exceptions/index.js';
 import { Injectable } from '@nestjs/common';
-import type { ConversationResponse } from '../responses/conversation.response.js';
+import type {
+  ConversationResponse,
+  EventConversationResponse,
+} from '../responses/conversation.response.js';
 
 import type { RawConversationMessage } from '../types/raw-conversation-message.types.js';
 import type { RawConversationUser } from '../types/raw-conversation-user.types.js';
@@ -31,12 +35,17 @@ export class ConversationMapper {
 
   toEventConversationResponse(
     conversation: RawConversationRecord,
-  ): ConversationResponse {
+  ): EventConversationResponse {
     if (!conversation.event) throw new UserNotFoundException();
     return {
       id: conversation.id,
       eventId: conversation.event.id,
       eventTitle: conversation.event.title,
+      createdAt: (conversation.createdAt ?? conversation.updatedAt).toISOString(),
+      participants: (conversation.participants ?? []).map((participant) => ({
+        id: participant.userId,
+        fullName: `${participant.user.firstName} ${participant.user.lastName}`.trim(),
+      })),
       lastMessage: this.toLastMessage(conversation.messages[0]),
       unreadCount: 0,
       isBlockedByMe: false,
@@ -50,19 +59,21 @@ export class ConversationMapper {
     isOnline: boolean;
     unreadCount: number;
     isBlockedByMe: boolean;
+    academicTitle: string | null;
+    skills: string[];
   }): ConversationResponse {
-    const { conversation, contact, isOnline, unreadCount, isBlockedByMe } =
-      params;
+    const {
+      conversation,
+      contact,
+      isOnline,
+      unreadCount,
+      isBlockedByMe,
+      academicTitle,
+      skills,
+    } = params;
+
     const avatarUrl = this.toAvatarUrl(contact.photoUrl);
     const roleName = contact.roles?.[0]?.role?.name ?? null;
-    const academicTitle = contact.educations?.[0]
-      ? `${contact.educations[0].degree} / ${contact.educations[0].institution}`
-      : (contact.headline ?? null);
-    const skills = contact.userSkills
-      ? contact.userSkills
-          .map((us) => us.skill?.name)
-          .filter((name): name is string => Boolean(name))
-      : [];
 
     return {
       id: conversation.id,

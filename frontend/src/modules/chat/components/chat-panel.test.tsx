@@ -45,8 +45,8 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-vi.mock("./chat-socket", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./chat-socket")>();
+vi.mock("../services/chat-socket", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../services/chat-socket")>();
 
   return {
     ...actual,
@@ -367,7 +367,7 @@ describe("ChatPanel", () => {
     },
   );
 });
-// These suites exercise panel/UI behavior; transport recovery has its own tests.
+
 vi.mock('../hooks/use-chat-connection', () => ({
   useChatConnection: () => ({ status: 'connected', refreshMessages: vi.fn() }),
 }));

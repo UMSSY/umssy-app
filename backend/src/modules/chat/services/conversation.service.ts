@@ -5,6 +5,9 @@ import { ConversationParticipantRepository } from '../repositories/conversation-
 import { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
 
+import { EducationsService } from '../../educations/services/educations.service.js';
+import { UserSkillService } from '../../skills/services/user-skill.service.js';
+
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
 import { ChatRolePolicyService } from './chat-role-policy.service.js';
@@ -31,6 +34,8 @@ export class ConversationService {
     private readonly blockService: BlockService,
     private readonly conversationMapper: ConversationMapper,
     private readonly chatRolePolicyService: ChatRolePolicyService,
+    private readonly educationsService: EducationsService,
+    private readonly userSkillService: UserSkillService,
   ) {}
 
   async getOrCreate(
@@ -80,7 +85,6 @@ export class ConversationService {
       normalizedCurrentUserId,
     );
 
-    // HU-13: impedir conversaciones con usuarios bloqueados.
     if (
       await this.blockService.isBlockedBetween(
         normalizedCurrentUserId,
@@ -90,7 +94,6 @@ export class ConversationService {
       throw new UserBlockedException();
     }
 
-    // HU-08: validar los roles y la postulación cuando corresponde.
     const authorization =
       await this.chatRolePolicyService.assertCanCommunicate(
         normalizedCurrentUserId,
@@ -121,8 +124,6 @@ export class ConversationService {
         userBId,
       );
 
-    // La postulación habilita el chat con la empresa.
-    // Los demás contactos requieren una conexión aceptada.
     if (!acceptedRequest && authorization !== 'application') {
       throw new ForbiddenException(
         'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
@@ -148,7 +149,6 @@ export class ConversationService {
         isCreated: true,
       };
     } catch (error: unknown) {
-      // Recuperación ante creación concurrente.
       const err = error as {
         code?: string;
         message?: string;
@@ -216,7 +216,6 @@ export class ConversationService {
     currentUserId: string,
     blockedIds: ReadonlySet<string>,
   ): Promise<ConversationResponse> {
-    // Las salas de eventos se convierten por separado.
     if (
       conversation.event?.id ||
       (!conversation.userAId && !conversation.userBId)
@@ -235,12 +234,14 @@ export class ConversationService {
       throw new UserNotFoundException();
     }
 
-    const [onlineMap, participant] = await Promise.all([
+    const [onlineMap, participant, educations, userSkills] = await Promise.all([
       this.userPresenceService.mapOnlineStatus([contact.id]),
       this.participantRepository.findByConversationAndUser(
         conversation.id,
         currentUserId,
       ),
+      this.educationsService.findAll(contact.id),
+      this.userSkillService.getUserSkills(contact.id),
     ]);
 
     const unreadCount = participant
@@ -251,12 +252,25 @@ export class ConversationService {
         )
       : 0;
 
+    const latestEducation = [...educations].sort(
+      (a, b) =>
+        new Date(b.startDate).getTime() - new Date(a.startDate).getTime(),
+    )[0];
+
+    const academicTitle = latestEducation
+      ? `${latestEducation.degree} / ${latestEducation.institution}`
+      : contact.headline ?? null;
+
+    const skills = userSkills.map((skill) => skill.name);
+
     return this.conversationMapper.toDirectConversationResponse({
       conversation,
       contact,
       isOnline: onlineMap.get(contact.id) ?? false,
       unreadCount,
       isBlockedByMe: blockedIds.has(contact.id.toLowerCase()),
+      academicTitle,
+      skills,
     });
   }
 }

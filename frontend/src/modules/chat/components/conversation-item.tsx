@@ -1,8 +1,6 @@
-
 "use client";
-/* eslint-disable @next/next/no-img-element */
 
-import { Lock } from "lucide-react";
+import { Lock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import type { Conversation } from "../types/conversation.types";
@@ -79,6 +77,7 @@ export function ConversationItem({
     >
       <div className="relative shrink-0">
         {contact.avatarUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={contact.avatarUrl}
             alt={contact.fullName}
@@ -88,6 +87,16 @@ export function ConversationItem({
           <div className="flex size-12 items-center justify-center rounded-full border border-border-strong bg-border text-sm font-bold text-ink-soft">
             {getInitials(contact.fullName)}
           </div>
+        )}
+
+        {conversation.eventId && (
+          <span
+            data-testid="conversation-group-icon"
+            aria-hidden="true"
+            className="absolute -right-1 -bottom-1 flex size-5 items-center justify-center rounded-full border-2 border-surface bg-accent text-surface"
+          >
+            <Users className="size-2.5" />
+          </span>
         )}
 
         {contact.isOnline && !conversation.isBlockedByMe && (

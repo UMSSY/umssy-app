@@ -59,3 +59,8 @@ export type SurveyBuilderAction =
   | { type: "updateOption"; questionId: string; optionId: string; label: string }
   | { type: "clearPendingFocus" }
   | { type: "markSaved" };
+
+export interface RestoredSurveyDraft {
+  surveyId: string;
+  draft?: SurveyBuilderState;
+}

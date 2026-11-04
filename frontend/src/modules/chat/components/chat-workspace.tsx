@@ -36,7 +36,7 @@ import {
   unblockUser,
   sendMessage,
 } from '../services/chat-api';
-import { getChatSocket } from './chat-socket';
+import { getChatSocket } from '../services/chat-socket';
 import { useChatConnection } from '../hooks/use-chat-connection';
 
 interface SocketMessage {

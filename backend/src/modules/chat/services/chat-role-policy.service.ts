@@ -64,12 +64,10 @@ export class ChatRolePolicyService {
         names.every((name) => name === 'empresa'),
     );
 
-    // Entre estudiantes y titulados se conserva el flujo existente.
     if (students[0] && students[1]) {
       return;
     }
 
-    // Identificar al postulante y al reclutador en ambos sentidos.
     const studentIndex =
       students[0] && companies[1]
         ? 0
@@ -88,7 +86,6 @@ export class ChatRolePolicyService {
       return this.deny();
     }
 
-    // La postulación debe corresponder a la empresa del reclutador.
     const application = await this.prisma.jobApplication.findFirst({
       where: {
         userId: student.id,

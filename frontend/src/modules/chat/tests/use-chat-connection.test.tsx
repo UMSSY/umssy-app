@@ -4,12 +4,12 @@ import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useChatConnection } from "../hooks/use-chat-connection";
 import { synchronizeMessages } from "../services/synchronize-messages";
-import { getChatSocket } from "../components/chat-socket";
+import { getChatSocket } from "../services/chat-socket";
 
 vi.mock("../services/synchronize-messages", () => ({
   synchronizeMessages: vi.fn(),
 }));
-vi.mock("../components/chat-socket", () => ({ getChatSocket: vi.fn() }));
+vi.mock("../services/chat-socket", () => ({ getChatSocket: vi.fn() }));
 const listeners = new Map<string, (...args: unknown[]) => void>();
 let joinResult = true;
 let joinCallback: ((result: { ok: boolean }) => void) | undefined;

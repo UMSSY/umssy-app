@@ -11,6 +11,19 @@ export { ChatPdfCard } from "./components/chat-pdf-card";
 export { ChatLinkPreviewCard } from "./components/chat-link-preview-card";
 export { ChatMessageText } from "./components/chat-message-text";
 export { MessageItem } from "./components/message-item";
+export { EventChatRoomView } from "./views/event-chat-room-view";
+export { useEventRoom } from "./hooks/use-event-room";
+export { getEventRoomPath } from "./utils/event-room-path";
+export { useSendEventRoomMessage } from "./hooks/use-event-room-message";
+export type {
+  EventChatRoomViewProps,
+  EventRoomParticipant,
+  EventRoomSummary,
+  EventRoomHeaderProps,
+  EventRoomMessagesProps,
+  EventRoomInfoPanelProps,
+  EventRoomEmptyStateProps,
+} from "./types";
 export { useLinkPreview } from "./hooks/use-link-preview";
 export {
   parseMessageWithLinks,
