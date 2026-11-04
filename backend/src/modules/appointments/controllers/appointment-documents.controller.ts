@@ -25,6 +25,7 @@ import {
   ApiProduces,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiUnsupportedMediaTypeResponse,
 } from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
@@ -115,6 +116,10 @@ export class AppointmentDocumentsController {
   })
   @ApiPayloadTooLargeResponse({
     description: UPLOAD_APPOINTMENT_DOCUMENT_DOCS.payloadTooLargeDescription,
+  })
+  @ApiUnsupportedMediaTypeResponse({
+    description:
+      UPLOAD_APPOINTMENT_DOCUMENT_DOCS.unsupportedMediaTypeDescription,
   })
   upload(
     @CurrentUserId() userId: string,

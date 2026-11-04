@@ -102,11 +102,12 @@ export const UPLOAD_APPOINTMENT_DOCUMENT_DOCS = {
   fileDescription: 'Documento PDF, PNG o JPG de hasta 5 MB',
   createdDescription: 'Documento guardado y asociado a la cita',
   badRequestDescription:
-    'El archivo está vacío, supera los 5 MB, no es PDF, PNG o JPG, o está dañado',
+    'Falta el archivo, está vacío o está dañado, o el id de la cita no es válido',
   forbiddenDescription: 'El usuario no reservó la cita o no participa en ella',
   notFoundDescription: 'La cita no existe',
   conflictDescription: 'La cita no está confirmada o ya terminó',
-  payloadTooLargeDescription: 'El archivo supera el límite de carga de 10 MB',
+  payloadTooLargeDescription: 'El archivo supera los 5 MB',
+  unsupportedMediaTypeDescription: 'El archivo no es PDF, PNG ni JPG',
 } as const;
 
 export const DOWNLOAD_APPOINTMENT_DOCUMENT_DOCS = {
