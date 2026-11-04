@@ -23,7 +23,6 @@ const mockConversation: Conversation = {
 };
 
 const multimediaMessages: Message[] = [
-  // 1. Mensaje con imagen recibido
   {
     id: "msg-media-img-in",
     conversationId: "conv-hu11-test",
@@ -43,7 +42,7 @@ const multimediaMessages: Message[] = [
       type: "IMAGE",
     },
   },
-  // 2. Mensaje con imagen enviado
+
   {
     id: "msg-media-img-out",
     conversationId: "conv-hu11-test",
@@ -63,7 +62,7 @@ const multimediaMessages: Message[] = [
       type: "IMAGE",
     },
   },
-  // 3. Mensaje con PDF recibido
+
   {
     id: "msg-media-pdf-in",
     conversationId: "conv-hu11-test",
@@ -83,7 +82,7 @@ const multimediaMessages: Message[] = [
       type: "PDF",
     },
   },
-  // 4. Mensaje con PDF enviado con nombre largo
+
   {
     id: "msg-media-pdf-out",
     conversationId: "conv-hu11-test",
@@ -117,7 +116,6 @@ describe("Renderizado de Miniaturas y Tarjetas PDF en el Chat (HU-11 Task 4)", (
       />
     );
 
-    // Verificamos imagen recibida y enviada
     const receivedImg = screen.getByRole("img", { name: "campus.jpg" });
     expect(receivedImg).toBeDefined();
     expect(screen.getByText("Foto del campus central")).toBeDefined();
@@ -148,12 +146,10 @@ describe("Renderizado de Miniaturas y Tarjetas PDF en el Chat (HU-11 Task 4)", (
     expect(screen.getByText("Temario_Taller.pdf")).toBeDefined();
     expect(screen.getByText("PDF · 512 KB")).toBeDefined();
 
-    // Nombre largo con truncate
     const longName = screen.getByText("Oferta_desarrollo_software_fullstack_2026_valida_para_postulacion.pdf");
     expect(longName.className).toContain("truncate");
     expect(screen.getByText("PDF · 245 KB")).toBeDefined();
 
-    // Botones de descarga
     const downloadButtons = screen.getAllByTestId("pdf-download-button");
     expect(downloadButtons.length).toBe(2);
   });
@@ -224,7 +220,6 @@ describe("Renderizado de Miniaturas y Tarjetas PDF en el Chat (HU-11 Task 4)", (
 
     fireEvent.change(fileInput, { target: { files: [file] } });
 
-    // Se muestra la preview del adjunto
     expect(screen.getByTestId("attachment-preview")).toBeDefined();
     expect(screen.getByTestId("attachment-name").textContent).toBe("nueva_foto.png");
 
@@ -234,7 +229,6 @@ describe("Renderizado de Miniaturas y Tarjetas PDF en el Chat (HU-11 Task 4)", (
     expect(onSendMessage).toHaveBeenCalledWith("", file);
     expect(screen.getByText("Subiendo...")).toBeDefined();
 
-    // Terminamos la subida
     resolveSend();
     await waitFor(() => {
       expect(screen.queryByText("Subiendo...")).toBeNull();
@@ -268,7 +262,6 @@ describe("Renderizado de Miniaturas y Tarjetas PDF en el Chat (HU-11 Task 4)", (
       expect(screen.getByRole("alert")).toBeDefined();
     });
 
-    // Se conserva el adjunto y el texto para reintentar
     expect(screen.getByTestId("attachment-preview")).toBeDefined();
     expect(screen.getByTestId("attachment-name").textContent).toBe("propuesta.pdf");
     expect((screen.getByTestId("message-textarea") as HTMLTextAreaElement).value).toBe("Comentario adicional");

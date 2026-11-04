@@ -1,3 +1,4 @@
+
 import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { ConversationRepository } from '../repositories/conversation.repository.js';
@@ -5,8 +6,12 @@ import { ConversationParticipantRepository } from '../repositories/conversation-
 import { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
 
+import { EducationsService } from '../../educations/services/educations.service.js';
+import { UserSkillService } from '../../skills/services/user-skill.service.js';
+
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
+import { ChatRolePolicyService } from './chat-role-policy.service.js';
 import { ConversationMapper } from '../mappers/conversation.mapper.js';
 import type { RawConversationRecord } from '../types/raw-conversation-record.types.js';
 
@@ -14,6 +19,7 @@ import {
   InactiveUserException,
   SelfConversationException,
   UserNotFoundException,
+  UserBlockedException,
 } from '../exceptions/index.js';
 
 import type { ConversationResponse } from '../responses/conversation.response.js';
@@ -28,6 +34,9 @@ export class ConversationService {
     private readonly connectionRequestRepository: ConnectionRequestRepository,
     private readonly blockService: BlockService,
     private readonly conversationMapper: ConversationMapper,
+    private readonly chatRolePolicyService: ChatRolePolicyService,
+    private readonly educationsService: EducationsService,
+    private readonly userSkillService: UserSkillService,
   ) {}
 
   async getOrCreate(
@@ -77,11 +86,24 @@ export class ConversationService {
       normalizedCurrentUserId,
     );
 
-    const existing =
-      await this.conversationRepository.findByOrderedPair(
-        userAId,
-        userBId,
-      );
+    if (
+      await this.blockService.isBlockedBetween(
+        normalizedCurrentUserId,
+        normalizedContactId,
+      )
+    ) {
+      throw new UserBlockedException();
+    }
+
+    await this.chatRolePolicyService.assertCanCommunicate(
+      normalizedCurrentUserId,
+      normalizedContactId,
+    );
+
+    const existing = await this.conversationRepository.findByOrderedPair(
+      userAId,
+      userBId,
+    );
 
     if (existing) {
       const conversation = await this.toResponse(
@@ -109,12 +131,11 @@ export class ConversationService {
     }
 
     try {
-      const created =
-        await this.conversationRepository.createWithParticipants(
-          userAId,
-          userBId,
-          new Date(),
-        );
+      const created = await this.conversationRepository.createWithParticipants(
+        userAId,
+        userBId,
+        new Date(),
+      );
 
       const conversation = await this.toResponse(
         created,
@@ -194,24 +215,30 @@ export class ConversationService {
     currentUserId: string,
     blockedIds: ReadonlySet<string>,
   ): Promise<ConversationResponse> {
-    if (conversation.event?.id || (!conversation.userAId && !conversation.userBId)) {
+    if (
+      conversation.event?.id ||
+      (!conversation.userAId && !conversation.userBId)
+    ) {
       return this.conversationMapper.toEventConversationResponse(conversation);
     }
 
-    const contact = conversation.userAId === currentUserId
-      ? conversation.userB
-      : conversation.userA;
+    const contact =
+      conversation.userAId === currentUserId
+        ? conversation.userB
+        : conversation.userA;
 
     if (!contact) {
       throw new UserNotFoundException();
     }
 
-    const [onlineMap, participant] = await Promise.all([
+    const [onlineMap, participant, educations, userSkills] = await Promise.all([
       this.userPresenceService.mapOnlineStatus([contact.id]),
       this.participantRepository.findByConversationAndUser(
         conversation.id,
         currentUserId,
       ),
+      this.educationsService.findAll(contact.id),
+      this.userSkillService.getUserSkills(contact.id),
     ]);
 
     const unreadCount = participant
@@ -222,12 +249,25 @@ export class ConversationService {
         )
       : 0;
 
+    const latestEducation = [...educations].sort(
+      (a, b) =>
+        new Date(b.startDate).getTime() - new Date(a.startDate).getTime(),
+    )[0];
+
+    const academicTitle = latestEducation
+      ? `${latestEducation.degree} / ${latestEducation.institution}`
+      : contact.headline ?? null;
+
+    const skills = userSkills.map((skill) => skill.name);
+
     return this.conversationMapper.toDirectConversationResponse({
       conversation,
       contact,
       isOnline: onlineMap.get(contact.id) ?? false,
       unreadCount,
       isBlockedByMe: blockedIds.has(contact.id.toLowerCase()),
+      academicTitle,
+      skills,
     });
   }
 }

@@ -15,16 +15,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { normalizeSearchText } from "@/shared/utils/normalize-search-text";
-import { FIELD_FOCUS_CLASS, SKILL_SEARCH_TEXT } from "../constants/vacancies.constants";
-import type { SkillOption } from "../types/vacancy-conditions.types";
-
-interface SkillSearchDialogProps {
-  catalog: SkillOption[];
-  selected: SkillOption[];
-  isDisabled: boolean;
-  onAdd: (skill: SkillOption) => void;
-}
+import { FIELD_FOCUS_CLASS, SKILL_SEARCH_TEXT } from "../constants/job-offers.constants";
+import type { SkillOption } from "../types/skill-option.types";
+import type { SkillSearchDialogProps } from "../types/skill-search-dialog-props.types";
 
 export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: SkillSearchDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -82,14 +77,14 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
         </DialogHeader>
 
         <div>
-          <Label htmlFor="skill-search" className="text-[12.5px] font-semibold">
+          <Label htmlFor="skill-search" className="text-xs font-semibold">
             {SKILL_SEARCH_TEXT.label} <span className="text-ink-soft">*</span>
           </Label>
           <Input
             id="skill-search"
             autoComplete="off"
             placeholder={SKILL_SEARCH_TEXT.placeholder}
-            className={`mt-1.5 ${FIELD_FOCUS_CLASS}`}
+            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
             value={search}
             onChange={(event) => handleSearchChange(event.target.value)}
           />

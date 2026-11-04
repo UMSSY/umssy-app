@@ -1,4 +1,4 @@
-import { GOOGLE_MAPS_LINK_REGEX } from "../constants/vacancies.constants";
+import { GOOGLE_MAPS_LINK_REGEX } from "../constants/job-offers.constants";
 
 export function getSafeMapsUrl(value: string | null | undefined): string | null {
   const url = (value ?? "").trim();

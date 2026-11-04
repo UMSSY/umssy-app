@@ -608,5 +608,14 @@ export async function seedEducationsFixtures(
     },
   ];
   await tx.education.createMany({ data, skipDuplicates: true });
+  for (const row of data.slice(20, 42)) {
+    const previousDegree = row.degree === 'Ingeniería Informática'
+      ? 'Ingeniería de Sistemas'
+      : 'Ingeniería Informática';
+    await tx.education.updateMany({
+      where: { id: row.id, userId: row.userId, degree: previousDegree },
+      data: { degree: row.degree },
+    });
+  }
   return data.length;
 }

@@ -74,5 +74,18 @@ export function createIndexedDbStorage({
         }
       });
     },
+    removeByPrefix(prefix: string): Promise<void> {
+      return withDatabase(async (database) => {
+        const transaction = database.transaction(storeName, "readwrite");
+        const keys = await transaction.store.getAllKeys();
+        const matchingKeys = keys.filter(
+          (key) => typeof key === "string" && key.startsWith(prefix),
+        );
+        await Promise.all([
+          ...matchingKeys.map((key) => transaction.store.delete(key)),
+          transaction.done,
+        ]);
+      });
+    },
   };
 }

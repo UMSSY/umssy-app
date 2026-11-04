@@ -66,16 +66,33 @@ export class SurveyPdfService {
     curY += 15;
 
     const careerLabel = statistics.career?.title ?? 'Todas las carreras';
-    const periodLabel = statistics.academicPeriod ?? 'General';
+    const periodLabel = [
+      statistics.academicPeriod ?? 'General',
+      statistics.period ? `respuestas ${statistics.period}` : undefined,
+    ]
+      .filter(Boolean)
+      .join(' · ');
     const statusLabel = SURVEY_DISPLAY_STATUS_LABELS[statistics.status];
-    const opensStr = statistics.opensAt ? new Date(statistics.opensAt).toLocaleDateString('es-BO') : 'N/D';
-    const closesStr = statistics.closesAt ? new Date(statistics.closesAt).toLocaleDateString('es-BO') : 'N/D';
+    const opensStr = statistics.opensAt
+      ? new Date(statistics.opensAt).toLocaleDateString('es-BO')
+      : 'N/D';
+    const closesStr = statistics.closesAt
+      ? new Date(statistics.closesAt).toLocaleDateString('es-BO')
+      : 'N/D';
 
     const titleLines = doc.wrapText(statistics.title, printWidth - 20, 9, true);
     const titleHeight = titleLines.length * 11;
     const fichaH = Math.max(50, titleHeight + 36);
 
-    doc.rect(leftX, curY, printWidth, fichaH, COLORS.cardBackground, COLORS.border, 0.5);
+    doc.rect(
+      leftX,
+      curY,
+      printWidth,
+      fichaH,
+      COLORS.cardBackground,
+      COLORS.border,
+      0.5,
+    );
 
     let tY = curY + 7;
     for (const tLine of titleLines) {
@@ -123,7 +140,12 @@ export class SurveyPdfService {
     statistics.questions.forEach((q, idx) => {
       const maxCount = Math.max(...q.options.map((o) => o.count), 0);
       const stmtWidth = 370;
-      const stmtLines = doc.wrapText(`${idx + 1}. ${q.statement}`, stmtWidth, 8, true);
+      const stmtLines = doc.wrapText(
+        `${idx + 1}. ${q.statement}`,
+        stmtWidth,
+        8,
+        true,
+      );
       const stmtHeight = stmtLines.length * 11;
       const headerH = Math.max(22, stmtHeight + 8);
 
@@ -141,10 +163,25 @@ export class SurveyPdfService {
       }
 
       const cardY = curY;
-      doc.rect(leftX, cardY, printWidth, cardTotalH, COLORS.cardSurface, COLORS.border, 0.5);
+      doc.rect(
+        leftX,
+        cardY,
+        printWidth,
+        cardTotalH,
+        COLORS.cardSurface,
+        COLORS.border,
+        0.5,
+      );
 
       doc.rect(leftX, cardY, printWidth, headerH, COLORS.cardBackground);
-      doc.rect(leftX, cardY + headerH, printWidth, 0.5, undefined, COLORS.border);
+      doc.rect(
+        leftX,
+        cardY + headerH,
+        printWidth,
+        0.5,
+        undefined,
+        COLORS.border,
+      );
 
       let stmtY = cardY + 6;
       for (const line of stmtLines) {
@@ -156,14 +193,21 @@ export class SurveyPdfService {
         stmtY += 11;
       }
 
-      const typeLabel = SURVEY_QUESTION_TYPE_LABELS[q.type?.toLowerCase() ?? ''] ?? SURVEY_QUESTION_TYPE_LABELS.single_choice;
-      doc.text(`[${typeLabel}] · ${q.answeredCount} respuestas`, leftX + stmtWidth + 10, cardY + 7, {
-        fontSize: 6.5,
-        font: 'Helvetica',
-        color: COLORS.inkMuted,
-        align: 'right',
-        width: printWidth - stmtWidth - 20,
-      });
+      const typeLabel =
+        SURVEY_QUESTION_TYPE_LABELS[q.type?.toLowerCase() ?? ''] ??
+        SURVEY_QUESTION_TYPE_LABELS.single_choice;
+      doc.text(
+        `[${typeLabel}] · ${q.answeredCount} respuestas`,
+        leftX + stmtWidth + 10,
+        cardY + 7,
+        {
+          fontSize: 6.5,
+          font: 'Helvetica',
+          color: COLORS.inkMuted,
+          align: 'right',
+          width: printWidth - stmtWidth - 20,
+        },
+      );
 
       let optY = cardY + headerH + 5;
       q.options.forEach((opt, optIndex) => {
@@ -173,7 +217,13 @@ export class SurveyPdfService {
         const barWidth = Math.max(2, (opt.percentage / 100) * barMaxWidth);
 
         if (isTop) {
-          doc.rect(leftX + 4, optY - 1, printWidth - 8, rowH, COLORS.leadBackground);
+          doc.rect(
+            leftX + 4,
+            optY - 1,
+            printWidth - 8,
+            rowH,
+            COLORS.leadBackground,
+          );
         }
 
         const lines = doc.wrapText(opt.label, optLabelWidth, 7.5, isTop);
@@ -203,7 +253,13 @@ export class SurveyPdfService {
 
         doc.rect(barX, barY, barMaxWidth, barH, COLORS.track);
         if (barWidth > 0 && opt.count > 0) {
-          doc.rect(barX, barY, barWidth, barH, isTop ? COLORS.leadBar : COLORS.comparisonBar);
+          doc.rect(
+            barX,
+            barY,
+            barWidth,
+            barH,
+            isTop ? COLORS.leadBar : COLORS.comparisonBar,
+          );
         }
 
         const statsY = optY + (rowH - 8) / 2;
@@ -240,13 +296,18 @@ export class SurveyPdfService {
           font: 'Helvetica',
           color: COLORS.inkMuted,
         });
-        doc.text(`INFORME ESTADÍSTICO · ${refCode}`, leftX + printWidth * 0.5, 11, {
-          fontSize: 6,
-          font: 'Helvetica-Bold',
-          color: COLORS.navy,
-          align: 'right',
-          width: printWidth * 0.5,
-        });
+        doc.text(
+          `INFORME ESTADÍSTICO · ${refCode}`,
+          leftX + printWidth * 0.5,
+          11,
+          {
+            fontSize: 6,
+            font: 'Helvetica-Bold',
+            color: COLORS.navy,
+            align: 'right',
+            width: printWidth * 0.5,
+          },
+        );
       }
 
       doc.rect(leftX, 808, printWidth, 0.5, undefined, COLORS.border);
