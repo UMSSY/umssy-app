@@ -3,6 +3,10 @@ import type { PrismaService } from '../../common/prisma/prisma.service.js';
 import { ProfileSkillsEvents } from '../../common/profile-skills/profile-skills-events.service.js';
 import type { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-analysis.service.js';
 import { RadarIntegrationService } from './radar-integration.service.js';
+import { RadarPublicationService } from './radar-publication.service.js';
+import { RadarPublicationRepository } from './repositories/radar-publication.repository.js';
+import type { RadarCvService } from './radar-cv.service.js';
+import type { RadarReviewService } from './radar-review.service.js';
 import { emptyScores, scoreVerifiedSkills } from './radar-scoring.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
@@ -46,7 +50,7 @@ function setup() {
   db.$transaction.mockImplementation(async operation => operation(db));
   const nlp = { analyzeNow: vi.fn().mockResolvedValue({ status: 'ready' }) };
   const events = new ProfileSkillsEvents();
-  const service = new RadarIntegrationService(db as unknown as PrismaService, nlp as unknown as ProfileSkillsAnalysisService, events);
+  const service = new RadarIntegrationService(nlp as unknown as ProfileSkillsAnalysisService, events, new RadarPublicationService(new RadarPublicationRepository(db as unknown as PrismaService)), {} as RadarCvService, {} as RadarReviewService);
   return { service, db, state, rows, insertions, nlp, events };
 }
 

@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import { radarIntegrationApi } from '../sprint2-integration/radar-integration-api';
-import { mapEpic2Radar } from './radar-mapper';
+import { mapPublishedRadar } from '../mappers/radar-published.mapper';
 import type { RadarBridgeView } from './types';
 
 export function useLiveRadar() {
@@ -43,14 +43,7 @@ export function useLiveRadar() {
       if (stored.version < currentVersion.current) return;
       currentVersion.current = stored.version;
       // Skills, evidence and scores come from the same server publication.
-      const published = mapEpic2Radar({
-        userId: stored.userId,
-        status: 'ready',
-        version: stored.version,
-        updatedAt: stored.updatedAt,
-        dictionaryVersion: stored.dictionaryVersion ?? null,
-        skills: stored.skills.map(skill => ({ ...skill, text: skill.name, source: 'nlp' as const, verificationStatus: 'approved' as const })),
-      });
+      const published = mapPublishedRadar(stored);
       const status = stored.processingStatus === 'error'
         ? 'error'
         : stored.processingStatus === 'pending' || stored.hasPending ? 'pending' : 'ready';
@@ -61,9 +54,6 @@ export function useLiveRadar() {
         rubric: stored.rubricVersion,
         version: stored.version,
         updatedAt: stored.updatedAt,
-        areas: published.areas.map(area => ({ ...area, score: stored.scores[area.id] ?? 0 })),
-        average: stored.average,
-        pendingCount: stored.pending,
       });
       setVariation(stored.variation);
       setError(status === 'error' ? 'No se pudo publicar la actualización. Se conserva el último radar válido.' : null);

@@ -184,7 +184,6 @@ export type CompanyWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Company"> | Date | string
   workExperiences?: Prisma.WorkExperienceListRelationFilter
   jobOffers?: Prisma.JobOfferListRelationFilter
-  radarCompanyAccess?: Prisma.RadarCompanyAccessListRelationFilter
 }
 
 export type CompanyOrderByWithRelationInput = {
@@ -195,7 +194,6 @@ export type CompanyOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   workExperiences?: Prisma.WorkExperienceOrderByRelationAggregateInput
   jobOffers?: Prisma.JobOfferOrderByRelationAggregateInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessOrderByRelationAggregateInput
 }
 
 export type CompanyWhereUniqueInput = Prisma.AtLeast<{
@@ -209,7 +207,6 @@ export type CompanyWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Company"> | Date | string
   workExperiences?: Prisma.WorkExperienceListRelationFilter
   jobOffers?: Prisma.JobOfferListRelationFilter
-  radarCompanyAccess?: Prisma.RadarCompanyAccessListRelationFilter
 }, "id" | "title">
 
 export type CompanyOrderByWithAggregationInput = {
@@ -242,7 +239,6 @@ export type CompanyCreateInput = {
   updatedAt?: Date | string
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutCompanyInput
   jobOffers?: Prisma.JobOfferCreateNestedManyWithoutCompanyInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateInput = {
@@ -253,7 +249,6 @@ export type CompanyUncheckedCreateInput = {
   updatedAt?: Date | string
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutCompanyInput
   jobOffers?: Prisma.JobOfferUncheckedCreateNestedManyWithoutCompanyInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUpdateInput = {
@@ -264,7 +259,6 @@ export type CompanyUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutCompanyNestedInput
   jobOffers?: Prisma.JobOfferUpdateManyWithoutCompanyNestedInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateInput = {
@@ -275,7 +269,6 @@ export type CompanyUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutCompanyNestedInput
   jobOffers?: Prisma.JobOfferUncheckedUpdateManyWithoutCompanyNestedInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyCreateManyInput = {
@@ -359,20 +352,6 @@ export type CompanyUpdateOneRequiredWithoutJobOffersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CompanyUpdateToOneWithWhereWithoutJobOffersInput, Prisma.CompanyUpdateWithoutJobOffersInput>, Prisma.CompanyUncheckedUpdateWithoutJobOffersInput>
 }
 
-export type CompanyCreateNestedOneWithoutRadarCompanyAccessInput = {
-  create?: Prisma.XOR<Prisma.CompanyCreateWithoutRadarCompanyAccessInput, Prisma.CompanyUncheckedCreateWithoutRadarCompanyAccessInput>
-  connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutRadarCompanyAccessInput
-  connect?: Prisma.CompanyWhereUniqueInput
-}
-
-export type CompanyUpdateOneRequiredWithoutRadarCompanyAccessNestedInput = {
-  create?: Prisma.XOR<Prisma.CompanyCreateWithoutRadarCompanyAccessInput, Prisma.CompanyUncheckedCreateWithoutRadarCompanyAccessInput>
-  connectOrCreate?: Prisma.CompanyCreateOrConnectWithoutRadarCompanyAccessInput
-  upsert?: Prisma.CompanyUpsertWithoutRadarCompanyAccessInput
-  connect?: Prisma.CompanyWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.CompanyUpdateToOneWithWhereWithoutRadarCompanyAccessInput, Prisma.CompanyUpdateWithoutRadarCompanyAccessInput>, Prisma.CompanyUncheckedUpdateWithoutRadarCompanyAccessInput>
-}
-
 export type CompanyCreateWithoutWorkExperiencesInput = {
   id?: string
   title: string
@@ -380,7 +359,6 @@ export type CompanyCreateWithoutWorkExperiencesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   jobOffers?: Prisma.JobOfferCreateNestedManyWithoutCompanyInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateWithoutWorkExperiencesInput = {
@@ -390,7 +368,6 @@ export type CompanyUncheckedCreateWithoutWorkExperiencesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   jobOffers?: Prisma.JobOfferUncheckedCreateNestedManyWithoutCompanyInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyCreateOrConnectWithoutWorkExperiencesInput = {
@@ -416,7 +393,6 @@ export type CompanyUpdateWithoutWorkExperiencesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   jobOffers?: Prisma.JobOfferUpdateManyWithoutCompanyNestedInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateWithoutWorkExperiencesInput = {
@@ -426,7 +402,6 @@ export type CompanyUncheckedUpdateWithoutWorkExperiencesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   jobOffers?: Prisma.JobOfferUncheckedUpdateManyWithoutCompanyNestedInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyCreateWithoutJobOffersInput = {
@@ -436,7 +411,6 @@ export type CompanyCreateWithoutJobOffersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutCompanyInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyUncheckedCreateWithoutJobOffersInput = {
@@ -446,7 +420,6 @@ export type CompanyUncheckedCreateWithoutJobOffersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutCompanyInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessUncheckedCreateNestedManyWithoutCompanyInput
 }
 
 export type CompanyCreateOrConnectWithoutJobOffersInput = {
@@ -472,7 +445,6 @@ export type CompanyUpdateWithoutJobOffersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutCompanyNestedInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessUpdateManyWithoutCompanyNestedInput
 }
 
 export type CompanyUncheckedUpdateWithoutJobOffersInput = {
@@ -482,63 +454,6 @@ export type CompanyUncheckedUpdateWithoutJobOffersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutCompanyNestedInput
-  radarCompanyAccess?: Prisma.RadarCompanyAccessUncheckedUpdateManyWithoutCompanyNestedInput
-}
-
-export type CompanyCreateWithoutRadarCompanyAccessInput = {
-  id?: string
-  title: string
-  description?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutCompanyInput
-  jobOffers?: Prisma.JobOfferCreateNestedManyWithoutCompanyInput
-}
-
-export type CompanyUncheckedCreateWithoutRadarCompanyAccessInput = {
-  id?: string
-  title: string
-  description?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutCompanyInput
-  jobOffers?: Prisma.JobOfferUncheckedCreateNestedManyWithoutCompanyInput
-}
-
-export type CompanyCreateOrConnectWithoutRadarCompanyAccessInput = {
-  where: Prisma.CompanyWhereUniqueInput
-  create: Prisma.XOR<Prisma.CompanyCreateWithoutRadarCompanyAccessInput, Prisma.CompanyUncheckedCreateWithoutRadarCompanyAccessInput>
-}
-
-export type CompanyUpsertWithoutRadarCompanyAccessInput = {
-  update: Prisma.XOR<Prisma.CompanyUpdateWithoutRadarCompanyAccessInput, Prisma.CompanyUncheckedUpdateWithoutRadarCompanyAccessInput>
-  create: Prisma.XOR<Prisma.CompanyCreateWithoutRadarCompanyAccessInput, Prisma.CompanyUncheckedCreateWithoutRadarCompanyAccessInput>
-  where?: Prisma.CompanyWhereInput
-}
-
-export type CompanyUpdateToOneWithWhereWithoutRadarCompanyAccessInput = {
-  where?: Prisma.CompanyWhereInput
-  data: Prisma.XOR<Prisma.CompanyUpdateWithoutRadarCompanyAccessInput, Prisma.CompanyUncheckedUpdateWithoutRadarCompanyAccessInput>
-}
-
-export type CompanyUpdateWithoutRadarCompanyAccessInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutCompanyNestedInput
-  jobOffers?: Prisma.JobOfferUpdateManyWithoutCompanyNestedInput
-}
-
-export type CompanyUncheckedUpdateWithoutRadarCompanyAccessInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutCompanyNestedInput
-  jobOffers?: Prisma.JobOfferUncheckedUpdateManyWithoutCompanyNestedInput
 }
 
 
@@ -549,13 +464,11 @@ export type CompanyUncheckedUpdateWithoutRadarCompanyAccessInput = {
 export type CompanyCountOutputType = {
   workExperiences: number
   jobOffers: number
-  radarCompanyAccess: number
 }
 
 export type CompanyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workExperiences?: boolean | CompanyCountOutputTypeCountWorkExperiencesArgs
   jobOffers?: boolean | CompanyCountOutputTypeCountJobOffersArgs
-  radarCompanyAccess?: boolean | CompanyCountOutputTypeCountRadarCompanyAccessArgs
 }
 
 /**
@@ -582,13 +495,6 @@ export type CompanyCountOutputTypeCountJobOffersArgs<ExtArgs extends runtime.Typ
   where?: Prisma.JobOfferWhereInput
 }
 
-/**
- * CompanyCountOutputType without action
- */
-export type CompanyCountOutputTypeCountRadarCompanyAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.RadarCompanyAccessWhereInput
-}
-
 
 export type CompanySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -598,7 +504,6 @@ export type CompanySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   updatedAt?: boolean
   workExperiences?: boolean | Prisma.Company$workExperiencesArgs<ExtArgs>
   jobOffers?: boolean | Prisma.Company$jobOffersArgs<ExtArgs>
-  radarCompanyAccess?: boolean | Prisma.Company$radarCompanyAccessArgs<ExtArgs>
   _count?: boolean | Prisma.CompanyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["company"]>
 
@@ -630,7 +535,6 @@ export type CompanyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type CompanyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workExperiences?: boolean | Prisma.Company$workExperiencesArgs<ExtArgs>
   jobOffers?: boolean | Prisma.Company$jobOffersArgs<ExtArgs>
-  radarCompanyAccess?: boolean | Prisma.Company$radarCompanyAccessArgs<ExtArgs>
   _count?: boolean | Prisma.CompanyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CompanyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -641,7 +545,6 @@ export type $CompanyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   objects: {
     workExperiences: Prisma.$WorkExperiencePayload<ExtArgs>[]
     jobOffers: Prisma.$JobOfferPayload<ExtArgs>[]
-    radarCompanyAccess: Prisma.$RadarCompanyAccessPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1045,7 +948,6 @@ export interface Prisma__CompanyClient<T, Null = never, ExtArgs extends runtime.
   readonly [Symbol.toStringTag]: "PrismaPromise"
   workExperiences<T extends Prisma.Company$workExperiencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$workExperiencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkExperiencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   jobOffers<T extends Prisma.Company$jobOffersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$jobOffersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobOfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  radarCompanyAccess<T extends Prisma.Company$radarCompanyAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Company$radarCompanyAccessArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarCompanyAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1518,30 +1420,6 @@ export type Company$jobOffersArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.JobOfferScalarFieldEnum | Prisma.JobOfferScalarFieldEnum[]
-}
-
-/**
- * Company.radarCompanyAccess
- */
-export type Company$radarCompanyAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the RadarCompanyAccess
-   */
-  select?: Prisma.RadarCompanyAccessSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the RadarCompanyAccess
-   */
-  omit?: Prisma.RadarCompanyAccessOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.RadarCompanyAccessInclude<ExtArgs> | null
-  where?: Prisma.RadarCompanyAccessWhereInput
-  orderBy?: Prisma.RadarCompanyAccessOrderByWithRelationInput | Prisma.RadarCompanyAccessOrderByWithRelationInput[]
-  cursor?: Prisma.RadarCompanyAccessWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.RadarCompanyAccessScalarFieldEnum | Prisma.RadarCompanyAccessScalarFieldEnum[]
 }
 
 /**

@@ -102,7 +102,7 @@ model Company {
 
   workExperiences WorkExperience[]
   jobOffers       JobOffer[]
-  radarCompanyAccess RadarCompanyAccess[]
+  radarCompanyAccess RadarCompanyAccess[] @ignore
 
 
   @@map("companies")
@@ -180,9 +180,9 @@ model User {
   radarSnapshots     RadarScoreSnapshot[]
   radarAuditSubjects RadarAuditEvent[]     @relation("RadarAuditSubject")
   radarAuditActors   RadarAuditEvent[]     @relation("RadarAuditActor")
-  radarCompanyAccess RadarCompanyAccess[]
-  radarApplications  RadarJobApplication[] @relation("RadarApplicant")
-  radarDecisions     RadarJobApplication[] @relation("RadarDecision")
+  radarCompanyAccess RadarCompanyAccess[] @ignore
+  radarApplications  RadarJobApplication[] @relation("RadarApplicant") @ignore
+  radarDecisions     RadarJobApplication[] @relation("RadarDecision") @ignore
 
 
 
@@ -657,7 +657,7 @@ model JobOffer {
   status       JobOfferStatus       @relation(fields: [statusId], references: [id], onDelete: Restrict)
   skills       JobOfferSkill[]
   applications JobApplication[]
-  radarApplications RadarJobApplication[]
+  radarApplications RadarJobApplication[] @ignore
 
 
   @@index([companyId])
@@ -1389,6 +1389,8 @@ model RadarCompanyAccess {
 
   @@id([companyId, userId])
   @@map("radar_company_access")
+  // Modelo historico de HU4: conservado para compatibilidad de migraciones.
+  @@ignore
 }
 
 model RadarJobApplication {
@@ -1410,4 +1412,6 @@ model RadarJobApplication {
   @@unique([jobOfferId, userId])
   @@index([jobOfferId, appliedAt(sort: Desc)], map: "radar_job_applications_vacancy_idx")
   @@map("radar_job_applications")
+  // Modelo historico de HU4: conservado para compatibilidad de migraciones.
+  @@ignore
 }
