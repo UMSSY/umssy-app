@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useSyncExternalS
 import type { Socket } from 'socket.io-client';
 import { toast } from 'sonner';
 import { getAccessToken, subscribeAccessToken } from '@/shared/services/storage/access-token-storage';
-import { getChatSocket, resetChatSocket } from '../components/chat-socket';
+import { getChatSocket, resetChatSocket } from '../services/chat-socket';
 
 interface SocketContextType {
   socket: Socket | null;

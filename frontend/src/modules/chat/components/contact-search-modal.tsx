@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { UserRoundPlus } from "lucide-react";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 import { useContactSearch } from "../hooks/use-contact-search";
 import { useSendConnectionRequest } from "../hooks/use-send-connection-request";
@@ -356,16 +358,19 @@ export function ContactSearchModal({
               return (
                 <div
                   key={user.id}
-                  className={`flex min-w-0 items-center gap-3 border-b border-border px-2 py-3 ${
-                    isSelected ? "bg-surface-soft" : ""
-                  }`}
+                  className={cn(
+                    "flex min-w-0 items-center gap-3 border-b border-border px-2 py-3",
+                    isSelected && "bg-surface-soft",
+                  )}
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
                   {user.avatarUrl ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
+                    <Image
                       src={user.avatarUrl}
                       alt={user.fullName}
+                      width={40}
+                      height={40}
+                      unoptimized
                       className="size-10 shrink-0 rounded object-cover"
                     />
                   ) : (
@@ -395,9 +400,10 @@ export function ContactSearchModal({
                     variant={status === "NONE" ? "default" : "secondary"}
                     disabled={isDisabled}
                     onClick={() => void handleUserAction(user)}
-                    className={`shrink-0 gap-2 text-xs ${
-                      status === "PENDING" ? "bg-gray-400 text-white" : ""
-                    }`}
+                    className={cn(
+                      "shrink-0 gap-2 text-xs",
+                      status === "PENDING" && "bg-muted text-muted-foreground",
+                    )}
                   >
                     <UserRoundPlus className="size-4" aria-hidden="true" />
                     {buttonText}

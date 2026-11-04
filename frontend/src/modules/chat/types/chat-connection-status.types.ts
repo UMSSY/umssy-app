@@ -7,3 +7,7 @@ export interface ChatConnectionState {
   conversationId: string | null;
   status: ChatConnectionStatus;
 }
+
+export interface ChatMessageEvent {
+  conversationId?: string;
+}

@@ -3,12 +3,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { getChatSocket } from "../components/chat-socket";
+import { getChatSocket } from "../services/chat-socket";
 import { joinChatConversation } from "../services/join-chat-conversation";
 import { synchronizeMessages } from "../services/synchronize-messages";
 import type {
   ChatConnectionState,
   ChatConnectionStatus,
+  ChatMessageEvent,
 } from "../types/chat-connection-status.types";
 
 export function useChatConnection(conversationId: string | null) {
@@ -157,7 +158,7 @@ export function useChatConnection(conversationId: string | null) {
       void recover();
     };
 
-    const onMessage = (message: { conversationId?: string }) => {
+    const onMessage = (message: ChatMessageEvent) => {
       if (!message?.conversationId) return;
 
       void client.invalidateQueries({

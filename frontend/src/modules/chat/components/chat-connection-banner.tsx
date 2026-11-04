@@ -24,7 +24,7 @@ export function ChatConnectionBanner({
       className={cn(
         "mx-4 mt-3 flex shrink-0 items-center gap-3 rounded-lg border p-3 text-sm md:mx-6",
         offline
-          ? "border-brand-red bg-brand-soft text-danger"
+          ? "border-destructive/20 bg-destructive/10 text-destructive"
           : "border-notice-border bg-notice text-notice-foreground",
       )}
     >
