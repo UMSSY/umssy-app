@@ -1,4 +1,5 @@
 import { FixtureContext } from '../../../common/database/fixture-context.js';
+import { seedEventRegistrationsFixtures } from '../../event-registrations/seeds/event-registrations-fixtures.seed.js';
 import { seedEventsFixtures } from '../seeds/events-fixtures.seed.js';
 import { describe, expect, it, vi } from 'vitest';
 import type { Prisma } from '../../../prisma/client.js';
@@ -62,5 +63,50 @@ describe('Development event fixtures', () => {
       expect(data.some((event: { categoryId: string }) => event.categoryId === `event_categories:${category}`)).toBe(true);
     }
     expect(createMany).toHaveBeenCalledWith({ data, skipDuplicates: true });
+  });
+
+  it('keeps full and one-spot workshop capacities when fixture events already exist', async () => {
+    const context = new FixtureContext(new Date('2026-10-25T12:00:00Z'), 'admin');
+    vi.spyOn(context, 'getReference').mockImplementation((table, value) => `${table}:${value}`);
+    const eventCreateMany = vi.fn().mockResolvedValue({ count: 0 });
+    const registrationCreateMany = vi.fn().mockResolvedValue({ count: 0 });
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const tx = {
+      event: { createMany: eventCreateMany, updateMany },
+      eventRegistration: {
+        createMany: registrationCreateMany,
+        findMany: vi.fn().mockResolvedValue([]),
+      },
+    };
+
+    await seedEventsFixtures(tx as unknown as Prisma.TransactionClient, context);
+    await seedEventRegistrationsFixtures(tx as unknown as Prisma.TransactionClient, context);
+
+    const events = eventCreateMany.mock.calls[0][0].data as Prisma.EventCreateManyInput[];
+    const registrations = registrationCreateMany.mock.calls[0][0].data as Prisma.EventRegistrationCreateManyInput[];
+    const scenarios = [
+      { key: 'record-01700', capacity: 13, availableSpots: 0 },
+      { key: 'record-00376', capacity: 14, availableSpots: 1 },
+    ];
+
+    for (const scenario of scenarios) {
+      const id = context.getId(scenario.key);
+      const event = events.find((item) => item.id === id);
+      const confirmedCount = registrations.filter(
+        (registration) =>
+          registration.eventId === id &&
+          registration.statusId === 'registration_statuses:Confirmada' &&
+          registration.cancelledAt === null,
+      ).length;
+
+      expect(event?.statusId).toBe('event_statuses:Publicado');
+      expect(event?.capacity).toBe(scenario.capacity);
+      expect(scenario.capacity - confirmedCount).toBe(scenario.availableSpots);
+      expect(updateMany).toHaveBeenCalledWith({
+        where: { id },
+        data: { capacity: scenario.capacity },
+      });
+    }
+    expect(updateMany).toHaveBeenCalledTimes(scenarios.length);
   });
 });
