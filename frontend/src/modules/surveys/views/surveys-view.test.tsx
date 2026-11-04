@@ -25,10 +25,10 @@ describe("SurveysView", () => {
     expect(await screen.findByText("Encuesta de Empleabilidad")).toBeInTheDocument();
   });
 
-  it("CA2: muestra el buscador con el texto de los administradores", async () => {
+  it("CA2: muestra el buscador con el texto Buscar por correo electrónico", async () => {
     renderWithQuery(<SurveysView />);
 
-    expect(await screen.findByPlaceholderText("Buscar por correo electrónico de los administradores")).toBeInTheDocument();
+    expect(await screen.findByPlaceholderText("Buscar por correo electrónico")).toBeInTheDocument();
   });
 
   it("CA3: el dropdown de gestión académica lista solo años, sin la opción Todas", async () => {
@@ -64,7 +64,7 @@ describe("SurveysView", () => {
     renderWithQuery(<SurveysView />);
     await screen.findByText("Encuesta de Empleabilidad");
 
-    await user.type(screen.getByPlaceholderText("Buscar por correo electrónico de los administradores"), "carla.arce");
+    await user.type(screen.getByPlaceholderText("Buscar por correo electrónico"), "carla.arce");
     expect(screen.getByText("Borrador sin carrera")).toBeInTheDocument();
     expect(screen.queryByText("Encuesta de Empleabilidad")).not.toBeInTheDocument();
   });
