@@ -384,7 +384,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     await user.click(within(dialog).getByRole("button", { name: "Publicar" }));
 
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith("Error 503/504: Sin conexión con el servidor", expect.anything()),
+      expect(toast.error).toHaveBeenCalledWith("Sin conexión con el servidor. Vuelve a intentarlo en unos minutos", expect.anything()),
     );
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(screen.getByRole("button", { name: /Publicar encuesta/ })).toBeEnabled();
