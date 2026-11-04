@@ -7,8 +7,11 @@ export const APPOINTMENT_SELECT = {
   studentId: true,
   startAt: true,
   endAt: true,
+  message: true,
+  requestedAt: true,
   mentor: { select: { id: true, firstName: true, lastName: true } },
   student: { select: { id: true, firstName: true, lastName: true } },
   orientationType: { select: { id: true, name: true } },
   status: { select: { title: true } },
+  document: { select: { fileName: true, sizeBytes: true, mimeType: true } },
 } satisfies Prisma.AppointmentSelect;
