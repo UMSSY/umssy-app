@@ -75,7 +75,6 @@ export class AttachmentService {
       );
     }
 
-    // Validación profunda de integridad estructural y seguridad contra políglotas.
     const uploadedFile = this.attachmentMapper.toUploadedFile(file);
     const validatedFile = this.fileValidationService.validate(uploadedFile, {
       allowedTypes: isImage ? ['jpg', 'png'] : ['pdf'],
@@ -98,7 +97,6 @@ export class AttachmentService {
       throw new NotConversationParticipantException();
     }
 
-    // HU-13: impedir adjuntos entre usuarios bloqueados.
     const otherParticipantId = this.getOtherParticipantId(
       conversation,
       userId,
@@ -110,8 +108,6 @@ export class AttachmentService {
       throw new UserBlockedException();
     }
 
-    // HU-08: verificar roles actuales antes de crear mensajes o adjuntos.
-    // No aplica a las conversaciones de eventos sin pareja de usuarios.
     if (otherParticipantId) {
       await this.chatRolePolicyService.assertCanCommunicate(
         userId,
@@ -141,7 +137,6 @@ export class AttachmentService {
       sentAt: now,
     });
 
-    // Guardar el archivo binario en PostgreSQL.
     const attachmentRecord = await this.attachmentRepository.create({
       messageId: message.id,
       typeId: attachmentType.id,
@@ -163,7 +158,6 @@ export class AttachmentService {
       now,
     );
 
-    // Mantener el mapper incorporado por la rama del equipo.
     return this.attachmentMapper.toMessageResponse({
       message,
       attachmentRecord,

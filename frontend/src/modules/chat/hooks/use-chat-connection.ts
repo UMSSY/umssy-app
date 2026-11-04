@@ -11,7 +11,6 @@ import type {
   ChatConnectionStatus,
 } from "../types/chat-connection-status.types";
 
-/** Reuse the epic's socket; recovery completes only after join + HTTP catch-up. */
 export function useChatConnection(conversationId: string | null) {
   const client = useQueryClient();
 
