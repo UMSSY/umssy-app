@@ -5,6 +5,8 @@ import { BlockNotFoundException } from '../../availability/exceptions/index.js';
 import { AvailabilityService } from '../../availability/services/availability.service.js';
 import { BlockedDatesService } from '../../availability/services/blocked-dates.service.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
+import { ProfilePhotoService } from '../../profile/services/profile-photo.service.js';
+import type { PhotoFileDownload } from '../../profile/types/photo-file-download.type.js';
 import {
   BlockAlreadyBookedException,
   BlockInPastException,
@@ -29,6 +31,7 @@ export class AppointmentsService {
     private readonly availabilityService: AvailabilityService,
     private readonly blockedDatesService: BlockedDatesService,
     private readonly mentorsService: MentorsService,
+    private readonly profilePhotoService: ProfilePhotoService,
   ) {}
 
   async create(
@@ -133,6 +136,18 @@ export class AppointmentsService {
   async findOne(userId: string, id: string): Promise<MyAppointmentResponse> {
     const appointment = await this.findParticipatedAppointment(userId, id);
     return this.appointmentMapper.toResponse(appointment, userId);
+  }
+
+  async getCounterpartPhoto(
+    userId: string,
+    id: string,
+  ): Promise<PhotoFileDownload> {
+    const appointment = await this.findParticipatedAppointment(userId, id);
+    const counterpartId =
+      appointment.mentorId === userId
+        ? appointment.studentId
+        : appointment.mentorId;
+    return this.profilePhotoService.getPhoto(counterpartId);
   }
 
   private async findParticipatedAppointment(
