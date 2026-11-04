@@ -2,5 +2,6 @@ import type { SkillEvidenceRefPayload } from './skill-evidence-ref-payload.type.
 
 export interface DetectedSkillPayload {
   id: string;
+  name: string;
   evidenceRefs: readonly SkillEvidenceRefPayload[];
 }

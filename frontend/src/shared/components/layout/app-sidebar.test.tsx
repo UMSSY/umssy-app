@@ -56,6 +56,24 @@ describe("AppSidebar", () => {
     sessionRoles.current = [role]; renderSidebar();
     expect(screen.queryByRole("link", { name: "Mis citas" })).toBeNull();
   });
+  it.each([["titulado"], ["estudiante"]] as const)("shows the three vacancy links to %s", (role) => {
+    sessionRoles.current = [role]; renderSidebar();
+    fireEvent.click(screen.getByRole("button", { name: "Vacantes" }));
+    expect(screen.getByRole("link", { name: "Todas las vacantes" })).toHaveAttribute("href", "/vacancies");
+    expect(screen.getByRole("link", { name: "Vacantes para ti" })).toHaveAttribute("href", "/vacancies/recommended");
+    expect(screen.getByRole("link", { name: "Mis postulaciones" })).toHaveAttribute("href", "/vacancies/my-applications");
+  });
+  it("shows only all vacancies to the mentor", () => {
+    sessionRoles.current = ["mentor"]; renderSidebar();
+    fireEvent.click(screen.getByRole("button", { name: "Vacantes" }));
+    expect(screen.getByRole("link", { name: "Todas las vacantes" })).toHaveAttribute("href", "/vacancies");
+    expect(screen.queryByRole("link", { name: "Vacantes para ti" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Mis postulaciones" })).toBeNull();
+  });
+  it.each([["empresa"], ["administrativo"]] as const)("hides the vacancies group from %s", (role) => {
+    sessionRoles.current = [role]; renderSidebar();
+    expect(screen.queryByRole("button", { name: "Vacantes" })).toBeNull();
+  });
   it("keeps the group open for detail routes without selecting an unrelated destination", () => {
     route.pathname = "/mentors/example-id/availability"; renderSidebar();
     expect(screen.getByRole("button", { name: "Mentorías" })).toHaveAttribute("aria-expanded", "true");
