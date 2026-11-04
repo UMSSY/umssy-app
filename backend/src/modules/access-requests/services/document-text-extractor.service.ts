@@ -1,6 +1,6 @@
 import { Injectable, type OnModuleDestroy } from '@nestjs/common';
 import * as mupdf from 'mupdf';
-import type { Worker } from 'tesseract.js';
+import { PSM, type Worker } from 'tesseract.js';
 import { createTesseractWorker } from '../../../common/ocr/tesseract-ocr.js';
 import type { FileContent } from '../../files/types/file.types.js';
 import { OCR_LANGUAGE, OCR_TESSERACT_MODEL, PDF_MIME_TYPE, PDF_RENDER_SCALE } from '../constants/document-reading.constants.js';
@@ -42,13 +42,26 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
   }
 
   private async getTesseractWorker(): Promise<Worker> {
-    this.tesseractWorker ??= createTesseractWorker(OCR_TESSERACT_MODEL, [OCR_LANGUAGE]);
+    this.tesseractWorker ??= this.createWorker();
     try {
       return await this.tesseractWorker;
     } catch (cause) {
       this.tesseractWorker = null;
       throw new Error('Tesseract initialization failed: check the OCR models (pnpm ocr:models) and OCR_MODEL_DIR', { cause });
     }
+  }
+
+  private async createWorker(): Promise<Worker> {
+    const worker = await createTesseractWorker(OCR_TESSERACT_MODEL, [OCR_LANGUAGE]);
+    try {
+      // Con el modo por defecto (un solo bloque) Tesseract descarta los encabezados grandes del diploma,
+      // y el validador necesita leer "Título profesional" o "Diploma académico".
+      await worker.setParameters({ tessedit_pageseg_mode: PSM.AUTO });
+    } catch (error) {
+      await worker.terminate().catch(() => undefined);
+      throw error;
+    }
+    return worker;
   }
 
   private async recognizeImage(worker: Worker, content: Buffer): Promise<DocumentText> {
