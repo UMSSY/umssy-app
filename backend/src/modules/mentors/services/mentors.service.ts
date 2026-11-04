@@ -1,5 +1,6 @@
 import { withMentorIntake } from './mentor-intake.service.js';
 import { Injectable } from '@nestjs/common';
+import { UserSkillService } from '../../skills/services/user-skill.service.js';
 import { MentorParticipationException } from '../exceptions/mentor-participation.exception.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 import {
@@ -38,6 +39,7 @@ export class MentorsService {
   constructor(
     private readonly mentorsRepository: MentorsRepository,
     private readonly mentorMapper: MentorMapper,
+    private readonly userSkillService: UserSkillService,
     private readonly mentorAffinityService?: MentorAffinityService,
   ) {}
 
@@ -160,7 +162,8 @@ export class MentorsService {
       throw new MentorNotFoundException();
     }
 
-    return this.mentorMapper.toProfileResponse(mentor);
+    const skills = await this.userSkillService.getProfessionalSkills(userId);
+    return this.mentorMapper.toProfileResponse(mentor, skills);
   }
 
   async findMyTechnicalAreas(userId: string) {

@@ -159,13 +159,6 @@ export class MentorsRepository extends MentorIntakeRepository {
     });
   }
 
-  findUserSkills(userId: string) {
-    return this.prisma.userSkill.findMany({
-      where: { userId },
-      select: { skill: { select: { name: true, isCustom: true } } },
-    });
-  }
-
   findTechnicalAreasByNames(names: string[]) {
     return this.prisma.technicalArea.findMany({
       where: { name: { in: names } },
@@ -429,22 +422,6 @@ export class MentorsRepository extends MentorIntakeRepository {
             },
           },
           orderBy: [{ isCurrent: 'desc' }, { startDate: 'desc' }],
-        },
-        userSkills: {
-          select: {
-            skill: {
-              select: {
-                id: true,
-                name: true,
-                isCustom: true,
-              },
-            },
-          },
-          orderBy: {
-            skill: {
-              name: 'asc',
-            },
-          },
         },
         certifications: {
           select: {
