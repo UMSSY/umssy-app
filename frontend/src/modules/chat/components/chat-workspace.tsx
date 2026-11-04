@@ -197,7 +197,7 @@ export function ChatWorkspace({
     setIsSearchModalOpen(true);
   };
 
-  const handleStartChatWithContact = async (
+    const handleStartChatWithContact = async (
     contactUser: User,
   ): Promise<void> => {
     if (startingConversationRef.current) {
@@ -212,6 +212,7 @@ export function ChatWorkspace({
     }
 
     setIsSearchModalOpen(false);
+    setSelectedContactForRequest(null);
     setRequestError(null);
     setRequestSuccess(null);
     setContactSelectionError(null);
@@ -222,6 +223,15 @@ export function ChatWorkspace({
 
       if (existingConversation) {
         handleSelectChat(existingConversation);
+        return;
+      }
+
+      // La postulación permite abrir el chat directamente.
+      // El backend vuelve a comprobar este permiso.
+      if (contactUser.canChatByApplication === true) {
+        await startConversationWithContact(contactUser);
+        setSelectedRequestId(null);
+        setResponseError(null);
         return;
       }
 

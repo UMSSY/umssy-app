@@ -134,11 +134,22 @@ export function ContactSearchModal({
     onClose();
   };
 
-  const getRequestStatus = (userId: string) => {
+    const getRequestStatus = (userId: string) => {
+    const authorizedByApplication = results.some(
+      (user) =>
+        user.id === userId &&
+        user.canChatByApplication === true,
+    );
+
+    if (authorizedByApplication) {
+      return "ACCEPTED";
+    }
+
     const accepted = acceptedRequests.some(
       (request: ConnectionRequest) =>
         request.status?.title === "ACCEPTED" &&
-        (request.senderId === userId || request.receiverId === userId),
+        (request.senderId === userId ||
+          request.receiverId === userId),
     );
 
     if (accepted) return "ACCEPTED";
@@ -161,7 +172,8 @@ export function ContactSearchModal({
 
     const rejected = [...sentRequests, ...receivedRequests].some(
       (request: ConnectionRequest) =>
-        (request.senderId === userId || request.receiverId === userId) &&
+        (request.senderId === userId ||
+          request.receiverId === userId) &&
         request.status?.title === "REJECTED",
     );
 
@@ -170,20 +182,22 @@ export function ContactSearchModal({
     return "NONE";
   };
 
-  const handleUserAction = async (user: User) => {
+    const handleUserAction = async (user: User) => {
     if (
       actionPendingRef.current ||
       isSearching ||
       isSearchError ||
-      hasStatusError ||
-      isLoadingStatuses
+      (!user.canChatByApplication && hasStatusError) ||
+      (!user.canChatByApplication && isLoadingStatuses)
     ) {
       return;
     }
 
     const status = getRequestStatus(user.id);
 
-    if (status !== "ACCEPTED" && status !== "NONE") return;
+    if (status !== "ACCEPTED" && status !== "NONE") {
+      return;
+    }
 
     actionPendingRef.current = true;
     setSendingUserId(user.id);
@@ -340,21 +354,21 @@ export function ContactSearchModal({
               const isSendingThisUser = sendingUserId === user.id;
               const isSelected = selectedIndex === index;
 
-              const isDisabled =
-                isLoadingStatuses ||
-                hasStatusError ||
+                const isDisabled =
+                (!user.canChatByApplication && isLoadingStatuses) ||
+                (!user.canChatByApplication && hasStatusError) ||
                 Boolean(sendingUserId) ||
                 status === "PENDING" ||
                 status === "RECEIVED" ||
                 status === "REJECTED";
 
-              const buttonText = isSendingThisUser
+                const buttonText = isSendingThisUser
                 ? status === "ACCEPTED"
                   ? "Abriendo..."
                   : "Enviando..."
-                : isLoadingStatuses
+                : !user.canChatByApplication && isLoadingStatuses
                   ? "Consultando..."
-                  : hasStatusError
+                  : !user.canChatByApplication && hasStatusError
                     ? "No disponible"
                     : status === "PENDING"
                       ? "Solicitud enviada"
@@ -365,7 +379,6 @@ export function ContactSearchModal({
                           : status === "REJECTED"
                             ? "Solicitud rechazada"
                             : "Enviar Solicitud";
-
               return (
                 <div
                   key={user.id}

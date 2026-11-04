@@ -80,7 +80,7 @@ export class ConversationService {
       normalizedCurrentUserId,
     );
 
-    // HU-13: impedir abrir o crear conversaciones con usuarios bloqueados.
+    // HU-13: impedir conversaciones con usuarios bloqueados.
     if (
       await this.blockService.isBlockedBetween(
         normalizedCurrentUserId,
@@ -90,11 +90,12 @@ export class ConversationService {
       throw new UserBlockedException();
     }
 
-    // HU-08: consultar los roles vigentes antes de abrir o crear una conversación.
-    await this.chatRolePolicyService.assertCanCommunicate(
-      normalizedCurrentUserId,
-      normalizedContactId,
-    );
+    // HU-08: validar los roles y la postulación cuando corresponde.
+    const authorization =
+      await this.chatRolePolicyService.assertCanCommunicate(
+        normalizedCurrentUserId,
+        normalizedContactId,
+      );
 
     const existing = await this.conversationRepository.findByOrderedPair(
       userAId,
@@ -114,25 +115,27 @@ export class ConversationService {
       };
     }
 
-    // HU-09: exigir una conexión aceptada antes de crear una conversación.
     const acceptedRequest =
       await this.connectionRequestRepository.findAcceptedRequest(
         userAId,
         userBId,
       );
 
-    if (!acceptedRequest) {
+    // La postulación habilita el chat con la empresa.
+    // Los demás contactos requieren una conexión aceptada.
+    if (!acceptedRequest && authorization !== 'application') {
       throw new ForbiddenException(
         'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
       );
     }
 
     try {
-      const created = await this.conversationRepository.createWithParticipants(
-        userAId,
-        userBId,
-        new Date(),
-      );
+      const created =
+        await this.conversationRepository.createWithParticipants(
+          userAId,
+          userBId,
+          new Date(),
+        );
 
       const conversation = await this.toResponse(
         created,
@@ -213,12 +216,14 @@ export class ConversationService {
     currentUserId: string,
     blockedIds: ReadonlySet<string>,
   ): Promise<ConversationResponse> {
-    // Las salas de eventos no se convierten como conversaciones privadas.
+    // Las salas de eventos se convierten por separado.
     if (
       conversation.event?.id ||
       (!conversation.userAId && !conversation.userBId)
     ) {
-      return this.conversationMapper.toEventConversationResponse(conversation);
+      return this.conversationMapper.toEventConversationResponse(
+        conversation,
+      );
     }
 
     const contact =
