@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile/hooks/use-profile-skills-radar";
+import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
 import type { Feedback } from "@/modules/profile";

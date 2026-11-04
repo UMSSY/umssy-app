@@ -1,16 +1,14 @@
-import { USER_SKILL_SOURCES } from '../constants/user-skill.constants.js';
+import {
+  USER_SKILL_SOURCES,
+  USER_SKILL_VERIFICATION_STATUSES,
+} from '../constants/user-skill.constants.js';
 import type { DetectedSkillPayload } from '../types/detected-skill-payload.type.js';
+import type { ResolvedDetection } from '../types/resolved-detection.type.js';
 import type { SkillEvidenceRefPayload } from '../types/skill-evidence-ref-payload.type.js';
 import type { SkillReconciliationPayload } from '../types/skill-reconciliation-payload.type.js';
 import type { ProfileSkillRowResponse } from '../responses/profile-skill-row.response.js';
 import { parseEvidenceRefs } from './parse-evidence-refs.js';
 import { sortEvidenceRefs } from './sort-evidence-refs.js';
-
-type ResolvedDetection = {
-  skillId: string;
-  nameKey: string;
-  evidenceRefs: SkillEvidenceRefPayload[];
-};
 
 const sameEvidence = (
   first: readonly SkillEvidenceRefPayload[],
@@ -25,22 +23,9 @@ export function planSkillReconciliation(
   const detectedByName = new Map<string, ResolvedDetection>();
 
   for (const skill of detected) {
-    const rawSkill = skill as DetectedSkillPayload & {
-      skillId?: string;
-      id?: string;
-      name?: string;
-    };
-
-    const resolvedId = rawSkill.skillId ?? rawSkill.id;
-
-    if (!resolvedId) {
-      continue;
-    }
-
-    const skillId = String(resolvedId);
-    const nameKey = (rawSkill.name ?? '').toLowerCase().trim();
+    const skillId = skill.id;
+    const nameKey = (skill.name ?? '').toLowerCase().trim();
     const evidenceRefs = sortEvidenceRefs(skill.evidenceRefs);
-
     const existing = detectedById.get(skillId);
 
     const detection: ResolvedDetection = {
@@ -81,47 +66,15 @@ export function planSkillReconciliation(
     }
 
     const isManualRow = row.source === USER_SKILL_SOURCES.manual;
-    const isApproved = row.verificationStatus === 'approved';
+    const isApproved =
+      row.verificationStatus === USER_SKILL_VERIFICATION_STATUSES.approved;
 
-    if (isManualRow) {
-      const nextEvidence = detection?.evidenceRefs ?? [];
-      const nextIsHighRelevance = nextEvidence.length > 0;
-      const currentEvidence = parseEvidenceRefs(row.evidenceRefs);
-
-      if (
-        !sameEvidence(currentEvidence, nextEvidence) ||
-        row.isHighRelevance !== nextIsHighRelevance
-      ) {
-        plan.updates.push({
-          id: row.id,
-          evidenceRefs: nextEvidence,
-          isHighRelevance: nextIsHighRelevance,
-        });
-      }
-
+    if (!detection && !isManualRow && !isApproved) {
+      plan.deleteIds.push(row.id);
       continue;
     }
 
-    if (!detection) {
-      if (!isApproved) {
-        plan.deleteIds.push(row.id);
-        continue;
-      }
-
-      const currentEvidence = parseEvidenceRefs(row.evidenceRefs);
-
-      if (currentEvidence.length > 0 || row.isHighRelevance) {
-        plan.updates.push({
-          id: row.id,
-          evidenceRefs: [],
-          isHighRelevance: false,
-        });
-      }
-
-      continue;
-    }
-
-    const nextEvidence = detection.evidenceRefs;
+    const nextEvidence = detection?.evidenceRefs ?? [];
     const nextIsHighRelevance = nextEvidence.length > 0;
     const currentEvidence = parseEvidenceRefs(row.evidenceRefs);
 
