@@ -4,7 +4,6 @@ const NAME_LABEL = /^(?:(?:se\s+)?(?:confiere|otorga|concede)(?:\s+el\s+presente
 const NAME_WORDS = /^[\p{L}][\p{L}\s.'’-]+$/u;
 const STOP_NAME = /\b(?:universidad|facultad|rector|decano|grado|titulo|diploma|ingenier\w*|licenciad\w*|licenciatura|carrera|certificado|curso|resolucion|fecha|cochabamba|por haber|ha cumplido|en cumplimiento)\b/;
 
-/** Only explicit recipient contexts; never borrow the applicant's declared name. */
 export function readRecipient(lines: string[]): string | null {
   const candidates = new Set<string>();
   for (let index = 0; index < lines.length; index += 1) {
@@ -28,7 +27,6 @@ export function readRecipient(lines: string[]): string | null {
 
 const CAREER_PATTERN = /(?:(?:licenciatura|licenciad[oa])\s+(?:en\s+)?)?(?:ingenier[ií]a|ingenier[oa]|ing\.)\s+(?:(?:de|en)\s+)?(?:sistemas|inform[aá]tica)\b/giu;
 
-/** Controlled aliases: Systems and Informatics are never merged. */
 export function canonicalCareer(value: string): string {
   return foldAccents(value).replace(/^(?:licenciatura|licenciad[oa])\s+(?:en\s+)?/, '')
     .replace(/^(?:ingenier[oa]|ing\.)\s+/, 'ingenieria ')
