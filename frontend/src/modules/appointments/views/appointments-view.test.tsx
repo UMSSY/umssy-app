@@ -49,7 +49,7 @@ afterEach(() => {
 
 describe("AppointmentsView", () => {
   it.each(["upcoming", "past"] as const)(
-    "en %s enlaza al mentor y conserva al egresado como texto para usuarios con ambos roles",
+    "en %s muestra a la otra persona con su rol para usuarios con ambos roles",
     async (scope) => {
       vi.mocked(useAuth).mockReturnValue({
         roles: ["mentor", "titulado"],
@@ -68,9 +68,18 @@ describe("AppointmentsView", () => {
       if (scope === "past") {
         await user.click(screen.getByRole("tab", { name: "Pasadas" }));
       }
-      expect(await screen.findByRole("link", { name: "Ana Pérez" })).toHaveAttribute("href", "/mentors/mentor-1");
-      expect(screen.getByText("Luis Flores")).toBeInTheDocument();
-      expect(screen.queryByRole("link", { name: "Luis Flores" })).not.toBeInTheDocument();
+      expect(
+        await screen.findByRole("button", { name: /Ana Pérez/ }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /Luis Flores/ }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Mentor · Desarrollo profesional"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Titulado · Desarrollo profesional"),
+      ).toBeInTheDocument();
       expect(appointmentsApi.getMyAppointments).toHaveBeenCalledWith(scope);
     },
   );
@@ -176,7 +185,7 @@ describe("AppointmentsView", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("muestra nombre, tema, estado y fecha y horario de Bolivia", async () => {
+  it("muestra día, nombre, tema, estado y horario de Bolivia", async () => {
     vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue([
       makeAppointment(),
     ]);
@@ -184,15 +193,14 @@ describe("AppointmentsView", () => {
     renderWithQuery(<AppointmentsView />);
 
     expect(await screen.findByText("Ana Pérez")).toBeInTheDocument();
+    expect(screen.getByText("LUN")).toBeInTheDocument();
+    expect(screen.getByText("26")).toBeInTheDocument();
+    expect(screen.getByText("oct")).toBeInTheDocument();
     expect(
-      screen.getByText("Tema: Desarrollo profesional"),
+      screen.getByText("Mentor · Desarrollo profesional"),
     ).toBeInTheDocument();
+    expect(screen.getByText("20:00 - 21:00 · Hora de Bolivia (GMT-4)")).toBeInTheDocument();
     expect(screen.getByText("Confirmada")).toBeInTheDocument();
-    expect(screen.getByText("26 de octubre de 2026")).toBeInTheDocument();
-    expect(screen.getByText("20:00 - 21:00")).toBeInTheDocument();
-    expect(
-      screen.getByText("Hora de Bolivia (GMT-4)"),
-    ).toBeInTheDocument();
   });
 
   it("muestra una alternativa cuando la cita no tiene tema", async () => {
@@ -203,7 +211,7 @@ describe("AppointmentsView", () => {
     renderWithQuery(<AppointmentsView />);
 
     expect(
-      await screen.findByText("Tema: Tema no especificado"),
+      await screen.findByText("Mentor · Tema no especificado"),
     ).toBeInTheDocument();
   });
 

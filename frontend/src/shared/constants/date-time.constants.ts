@@ -9,3 +9,28 @@ export const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 export const TIME_PATTERN = /^(\d{2}):(\d{2})$/;
 
 export const BOLIVIA_TIME_LABEL = "Hora de Bolivia (GMT-4)";
+
+export const BOLIVIA_WEEKDAY_SHORT_LABELS = [
+  "LUN",
+  "MAR",
+  "MIÉ",
+  "JUE",
+  "VIE",
+  "SÁB",
+  "DOM",
+] as const;
+
+export const BOLIVIA_MONTH_SHORT_LABELS = [
+  "ene",
+  "feb",
+  "mar",
+  "abr",
+  "may",
+  "jun",
+  "jul",
+  "ago",
+  "sep",
+  "oct",
+  "nov",
+  "dic",
+] as const;
