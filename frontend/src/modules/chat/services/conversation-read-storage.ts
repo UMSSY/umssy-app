@@ -1,7 +1,5 @@
 import { readLocalStorage, writeLocalStorage } from "@/shared/services/storage/browser-local-storage";
-/**
- * HU-1: recuerda cuándo el usuario leyó cada conversación.
- */
+
 import type { Conversation } from '../types/conversation.types';
 
 export const CHAT_READ_AT_STORAGE_KEY = 'umssy_chat_read_at_v1';
@@ -30,7 +28,6 @@ export function saveConversationReadAt(
     map[conversationId] = readAt;
     writeLocalStorage(CHAT_READ_AT_STORAGE_KEY, JSON.stringify(map));
   } catch {
-    // Sin almacenamiento disponible: se usa el contador del backend.
   }
 }
 
