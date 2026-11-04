@@ -14,7 +14,7 @@ describe("parseMentorDirectoryState", () => {
       area: "",
       orientation: "",
       available: true,
-      sort: "name_asc",
+      sort: "default",
     });
   });
 
@@ -42,7 +42,7 @@ describe("parseMentorDirectoryState", () => {
   it("normaliza parámetros propios sin alterar los ajenos", () => {
     const params = new URLSearchParams("page=02&sort=unknown&available=yes&module=chat");
     expect(normalizeMentorDirectoryParams(params).toString())
-      .toBe("page=1&sort=name_asc&available=true&module=chat");
+      .toBe("page=1&available=true&module=chat");
   });
 
   it("ajusta la página fuera de rango cuando se conoce totalPages", () => {
@@ -60,6 +60,30 @@ describe("updateMentorDirectoryParams", () => {
     const next = updateMentorDirectoryParams(current, { page: 3 });
 
     expect(next.get("page")).toBe("3");
+    expect(next.get("module")).toBe("chat");
+  });
+
+  it("conserva filtros y orden al cambiar de página", () => {
+    const current = new URLSearchParams(
+      "page=1&area=Backend&sort=name_desc&module=chat",
+    );
+
+    const next = updateMentorDirectoryParams(current, { page: 2 });
+
+    expect(next.toString()).toBe(
+      "page=2&area=Backend&sort=name_desc&module=chat",
+    );
+  });
+
+  it("representa Por defecto sin sort y reinicia la página", () => {
+    const current = new URLSearchParams(
+      "page=3&sort=affinity&module=chat",
+    );
+
+    const next = updateMentorDirectoryParams(current, { sort: "default" });
+
+    expect(next.get("page")).toBe("1");
+    expect(next.has("sort")).toBe(false);
     expect(next.get("module")).toBe("chat");
   });
 

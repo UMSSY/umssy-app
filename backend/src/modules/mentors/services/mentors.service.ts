@@ -133,7 +133,7 @@ export class MentorsService {
           now,
           page,
           DIRECTORY_PAGE_SIZE,
-          query.sort === 'affinity' ? 'name_asc' : query.sort,
+          query.sort === 'affinity' ? 'default' : query.sort,
         )
       : [];
 
@@ -144,7 +144,7 @@ export class MentorsService {
       totalItems,
       totalPages,
       effectiveSort:
-        query.sort === 'affinity' ? ('name_asc' as const) : query.sort,
+        query.sort === 'affinity' ? ('default' as const) : query.sort,
       ...(affinityStatus ? { affinityStatus } : {}),
     };
   }

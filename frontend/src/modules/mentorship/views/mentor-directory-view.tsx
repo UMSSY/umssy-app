@@ -90,7 +90,7 @@ export function MentorDirectoryView({
       ? sortBy
       : directory?.effectiveSort ??
         directoryState?.effectiveSort ??
-        "name_asc";
+        "default";
 
   const affinityStatus =
     directory?.affinityStatus ?? directoryState?.affinityStatus;
@@ -130,12 +130,12 @@ export function MentorDirectoryView({
     sortBy !== "affinity" || effectiveSort === "affinity"
       ? null
       : affinityStatus === "no_skills"
-        ? "Agrega habilidades profesionales a tu perfil para encontrar mentores con mayor afinidad. Se muestran los mentores por nombre."
+        ? "Agrega habilidades profesionales a tu perfil para encontrar mentores con mayor afinidad. Se muestran los mentores por defecto."
         : affinityStatus === "unmapped_skills"
-          ? "Tus habilidades profesionales aún no tienen correspondencia con las áreas técnicas. Se muestran los mentores por nombre."
+          ? "Tus habilidades profesionales aún no tienen correspondencia con las áreas técnicas. Se muestran los mentores por defecto."
           : affinityStatus === "ready"
-            ? "El orden por afinidad no se aplicó. Se muestran los mentores por nombre."
-            : "La afinidad todavía no está disponible. Se muestran los mentores por nombre.";
+            ? "El orden por afinidad no se aplicó. Se muestran los mentores por defecto."
+            : "La afinidad todavía no está disponible. Se muestran los mentores por defecto.";
 
   const navigateWithUpdates = useCallback(
     (updates: {
@@ -167,6 +167,7 @@ export function MentorDirectoryView({
       area: "",
       orientation: "",
       available: true,
+      sort: "default",
     });
   }
 
@@ -244,6 +245,10 @@ export function MentorDirectoryView({
                 })
               }
             >
+              <NativeSelectOption value="default">
+                Por defecto
+              </NativeSelectOption>
+
               <NativeSelectOption value="name_asc">
                 Nombre (A–Z)
               </NativeSelectOption>

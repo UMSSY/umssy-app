@@ -49,7 +49,7 @@ export function ParticipationView({
 }) {
   const router = useRouter();
   const client = useQueryClient();
-  const { refreshRoles } = useAuth();
+  const { currentUserId, refreshRoles } = useAuth();
   const token = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
@@ -257,9 +257,10 @@ export function ParticipationView({
               return;
             }
             try {
-              const draft = await loadMentorshipWizardDraft();
+              if (!currentUserId) throw new Error("Identidad no disponible");
+              const draft = await loadMentorshipWizardDraft(currentUserId);
               if (!draft)
-                await saveMentorshipWizardDraft({
+                await saveMentorshipWizardDraft(currentUserId, {
                   currentStep: 1,
                   wantsToParticipate: true,
                   selectedTechnicalAreaIds: (state?.areas ?? []).map(

@@ -6,7 +6,7 @@ export const MENTOR_DIRECTORY_DEFAULTS = {
   area: "",
   orientation: "",
   available: true,
-  sort: "name_asc",
+  sort: "default",
 } as const;
 
 export interface MentorDirectoryNavigationState {
@@ -19,6 +19,7 @@ export interface MentorDirectoryNavigationState {
 }
 
 const VALID_SORTS: readonly MentorSort[] = [
+  "default",
   "name_asc",
   "name_desc",
   "affinity",
@@ -62,7 +63,11 @@ export function normalizeMentorDirectoryParams(
     next.set("page", String(page));
   }
   if (current.has("sort")) {
-    next.set("sort", state.sort);
+    if (state.sort === MENTOR_DIRECTORY_DEFAULTS.sort) {
+      next.delete("sort");
+    } else {
+      next.set("sort", state.sort);
+    }
   }
   if (current.has("available")) {
     next.set("available", String(state.available));

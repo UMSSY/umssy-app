@@ -77,7 +77,7 @@ describe('MentorsRepository directory page', () => {
     );
 
     expect(findMany.mock.calls[0]?.[0]).toMatchObject({
-      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
       skip: 18,
       take: 6,
     });
@@ -189,6 +189,50 @@ describe('MentorsRepository directory page', () => {
         orderBy: [{ firstName: 'desc' }, { lastName: 'desc' }, { id: 'asc' }],
         skip: 6,
         take: 6,
+      }),
+    );
+  });
+
+  it('ordena A-Z antes de paginar y conserva el desempate por ID', async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+
+    const repository = new MentorsRepository({
+      user: { findMany },
+    } as unknown as PrismaService);
+
+    await repository.findDirectoryPage(
+      { search: '', available: false },
+      now,
+      1,
+      6,
+      'name_asc',
+    );
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
+        skip: 0,
+        take: 6,
+      }),
+    );
+  });
+
+  it('ordena los candidatos de afinidad por el orden general estable', async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+
+    const repository = new MentorsRepository({
+      user: { findMany },
+    } as unknown as PrismaService);
+
+    await repository.findDirectoryCandidates(
+      { search: '', available: false },
+      now,
+    );
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        select: expect.objectContaining({ createdAt: true }),
       }),
     );
   });

@@ -49,25 +49,33 @@ export class MentorAffinityService {
     mentors: Awaited<ReturnType<MentorsRepository['findDirectoryCandidates']>>,
     userAreaIds: ReadonlySet<string>,
   ) {
-    return mentors
-      .map((mentor) => {
-        const mentorAreaIds = new Set(
-          mentor.mentorTechnicalAreas.map(
-            ({ technicalAreaId }) => technicalAreaId,
-          ),
-        );
-        const sharedInterestsCount = [...mentorAreaIds].filter((id) =>
-          userAreaIds.has(id),
-        ).length;
-
-        return { ...mentor, sharedInterestsCount };
-      })
-      .sort(
-        (a, b) =>
-          b.sharedInterestsCount - a.sharedInterestsCount ||
-          a.firstName.localeCompare(b.firstName) ||
-          a.lastName.localeCompare(b.lastName) ||
-          a.id.localeCompare(b.id),
+    const ranked = mentors.map((mentor) => {
+      const mentorAreaIds = new Set(
+        mentor.mentorTechnicalAreas.map(
+          ({ technicalAreaId }) => technicalAreaId,
+        ),
       );
+      const sharedInterestsCount = [...mentorAreaIds].filter((id) =>
+        userAreaIds.has(id),
+      ).length;
+
+      return { ...mentor, sharedInterestsCount };
+    });
+
+    const hasMatches = ranked.some(
+      ({ sharedInterestsCount }) => sharedInterestsCount > 0,
+    );
+
+    return ranked.sort(
+      hasMatches
+        ? (a, b) =>
+            b.sharedInterestsCount - a.sharedInterestsCount ||
+            a.firstName.localeCompare(b.firstName) ||
+            a.lastName.localeCompare(b.lastName) ||
+            a.id.localeCompare(b.id)
+        : (a, b) =>
+            a.createdAt.getTime() - b.createdAt.getTime() ||
+            a.id.localeCompare(b.id),
+    );
   }
 }

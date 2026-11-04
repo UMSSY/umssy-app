@@ -28,7 +28,16 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
 const drafts = vi.hoisted(() => new Map<string, unknown>());
+const USER_ID = "user-a";
 vi.mock("next/navigation", () => ({ useRouter: () => navigation }));
+vi.mock("@/shared/contexts/auth-context", () => ({
+  useAuth: () => ({
+    currentUserId: "user-a",
+    roles: [],
+    isLoading: false,
+    refreshRoles: vi.fn(),
+  }),
+}));
 vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
   readIndexedDb: vi.fn(async (key: string) => drafts.get(key) ?? null),
   writeIndexedDb: vi.fn(async (key: string, value: unknown) => {
@@ -196,7 +205,7 @@ describe("ParticipationView HU-MEN-06", () => {
     await waitFor(() =>
       expect(navigation.push).toHaveBeenCalledWith("/mentorship"),
     );
-    expect(await loadMentorshipWizardDraft()).toEqual({
+    expect(await loadMentorshipWizardDraft(USER_ID)).toEqual({
       currentStep: 1,
       wantsToParticipate: true,
       selectedTechnicalAreaIds: ["area-1"],
@@ -234,7 +243,7 @@ describe("ParticipationView HU-MEN-06", () => {
     vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(
       deactivated,
     );
-    await saveMentorshipWizardDraft({
+    await saveMentorshipWizardDraft(USER_ID, {
       currentStep: 3,
       wantsToParticipate: true,
       selectedTechnicalAreaIds: ["area-editada"],
@@ -251,7 +260,7 @@ describe("ParticipationView HU-MEN-06", () => {
       expect(navigation.push).toHaveBeenCalledWith("/mentorship"),
     );
     expect(
-      (await loadMentorshipWizardDraft())?.selectedTechnicalAreaIds,
+      (await loadMentorshipWizardDraft(USER_ID))?.selectedTechnicalAreaIds,
     ).toEqual(["area-editada"]);
   });
 
