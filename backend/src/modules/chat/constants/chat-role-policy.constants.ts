@@ -1,0 +1,1 @@
+export const CHAT_ALLOWED_ROLES = new Set(['estudiante', 'titulado']);
