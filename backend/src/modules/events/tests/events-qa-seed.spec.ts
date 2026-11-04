@@ -52,7 +52,8 @@ describe('Development event fixtures', () => {
     const context = new FixtureContext(new Date('2026-10-25T12:00:00Z'), 'admin');
     vi.spyOn(context, 'getReference').mockImplementation((table, value) => `${table}:${value}`);
     const createMany = vi.fn().mockResolvedValue({ count: 20 });
-    const tx = { event: { createMany } };
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const tx = { event: { createMany, updateMany } };
     const count = await seedEventsFixtures(tx as unknown as Prisma.TransactionClient, context);
     const data = createMany.mock.calls[0][0].data;
     expect(count).toBe(data.length);
