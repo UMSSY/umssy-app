@@ -381,7 +381,6 @@ function ChatRoomContent({
         await onSendMessage(content);
       }
 
-      // Limpiar el borrador únicamente cuando el envío se confirma.
       if (ui) {
         ui.clearSubmittedDraft(conversation.id, inputText);
       }
@@ -395,7 +394,7 @@ function ChatRoomContent({
         setSendError(
           getChatActionErrorMessage(
             error,
-            "No se pudo enviar el mensaje. Conservamos tu texto y el adjunto; vuelve a pulsar Enviar para reintentar.",
+            "No es posible enviar mensajes en esta conversación. La comunicación con esta persona está restringida",
           ),
         );
       }
@@ -444,7 +443,7 @@ function ChatRoomContent({
       try {
         await downloadAttachment(attachment.id, attachment.fileName);
       } catch {
-        // El servicio muestra el aviso de error de descarga.
+        
       }
     },
     [],

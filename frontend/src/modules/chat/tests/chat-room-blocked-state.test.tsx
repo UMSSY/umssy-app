@@ -157,7 +157,7 @@ describe("ChatRoom · conversación bloqueada", () => {
   it("si el envío responde 403 muestra 'No es posible enviar mensajes en esta conversación'", async () => {
     const user = userEvent.setup();
     const onSendMessage = vi.fn().mockRejectedValue(forbiddenError());
-    // Lado del usuario bloqueado: para él isBlockedByMe es false y ve el campo.
+  
     renderRoom({ ...conversation, isBlockedByMe: false }, { onSendMessage });
 
     await user.type(screen.getByRole("textbox"), "Hola{Enter}");

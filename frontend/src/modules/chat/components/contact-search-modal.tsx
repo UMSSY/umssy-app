@@ -1,13 +1,6 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
-
-import {
-  useState,
-  useRef,
-  useEffect,
-  type KeyboardEvent,
-} from "react";
+import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { UserRoundPlus } from "lucide-react";
 
@@ -96,14 +89,10 @@ export function ContactSearchModal({
   const acceptedRequests = acceptedQuery.data ?? [];
 
   const isLoadingStatuses =
-    sentQuery.isPending ||
-    receivedQuery.isPending ||
-    acceptedQuery.isPending;
+    sentQuery.isPending || receivedQuery.isPending || acceptedQuery.isPending;
 
   const hasStatusError =
-    sentQuery.isError ||
-    receivedQuery.isError ||
-    acceptedQuery.isError;
+    sentQuery.isError || receivedQuery.isError || acceptedQuery.isError;
 
   const statusErrors = [
     sentQuery.error,
@@ -145,16 +134,14 @@ export function ContactSearchModal({
 
     const received = receivedRequests.some(
       (request: ConnectionRequest) =>
-        request.senderId === userId &&
-        request.status?.title === "PENDING",
+        request.senderId === userId && request.status?.title === "PENDING",
     );
 
     if (received) return "RECEIVED";
 
     const sent = sentRequests.some(
       (request: ConnectionRequest) =>
-        request.receiverId === userId &&
-        request.status?.title === "PENDING",
+        request.receiverId === userId && request.status?.title === "PENDING",
     );
 
     if (sent) return "PENDING";
@@ -375,13 +362,14 @@ export function ContactSearchModal({
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
                   {user.avatarUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={user.avatarUrl}
                       alt={user.fullName}
                       className="size-10 shrink-0 rounded object-cover"
                     />
                   ) : (
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded bg-border text-sm font-bold text-ink-soft">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded bg-border text-sm">
                       {getInitials(user.fullName)}
                     </div>
                   )}

@@ -1,6 +1,5 @@
 import type { Socket } from "socket.io-client";
 
-/** Wait for the server's authorization/join acknowledgement before synchronizing. */
 export function joinChatConversation(
   socket: Socket,
   conversationId: string,

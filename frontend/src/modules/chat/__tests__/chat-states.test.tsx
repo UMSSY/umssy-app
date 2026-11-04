@@ -335,7 +335,6 @@ describe("Chat Components", () => {
   });
 });
 
-// These suites exercise panel/UI behavior; transport recovery has its own tests.
 vi.mock('../hooks/use-chat-connection', () => ({
   useChatConnection: () => ({ status: 'connected', refreshMessages: vi.fn() }),
 }));
