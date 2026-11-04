@@ -8,7 +8,9 @@ import type { ChatUserResponse } from '../responses/chat-user.response.js';
 
 @Injectable()
 export class UserSearchService {
-  constructor(private readonly userLookupRepository: UserLookupRepository) {}
+  constructor(
+    private readonly userLookupRepository: UserLookupRepository,
+  ) {}
 
   async search(
     rawQuery: string,
@@ -27,8 +29,12 @@ export class UserSearchService {
     );
 
     const seenIds = new Set<string>();
+
     const uniqueRows = rows.filter((row) => {
-      if (seenIds.has(row.id)) return false;
+      if (seenIds.has(row.id)) {
+        return false;
+      }
+
       seenIds.add(row.id);
       return true;
     });
@@ -37,11 +43,14 @@ export class UserSearchService {
       id: row.id,
       fullName: `${row.first_name} ${row.last_name}`.trim(),
       avatarUrl: row.photo_url
-        ? `data:image/jpeg;base64,${Buffer.from(row.photo_url).toString('base64')}`
+        ? `data:image/jpeg;base64,${Buffer.from(
+            row.photo_url,
+          ).toString('base64')}`
         : null,
       headline: row.headline,
       role: row.role_name ?? 'GRADUATE',
       isOnline: row.is_online ?? false,
+      canChatByApplication: row.can_chat_by_application === true,
     }));
   }
 

@@ -1,4 +1,3 @@
-
 import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { ConversationRepository } from '../repositories/conversation.repository.js';
@@ -95,10 +94,11 @@ export class ConversationService {
       throw new UserBlockedException();
     }
 
-    await this.chatRolePolicyService.assertCanCommunicate(
-      normalizedCurrentUserId,
-      normalizedContactId,
-    );
+    const authorization =
+      await this.chatRolePolicyService.assertCanCommunicate(
+        normalizedCurrentUserId,
+        normalizedContactId,
+      );
 
     const existing = await this.conversationRepository.findByOrderedPair(
       userAId,
@@ -124,18 +124,19 @@ export class ConversationService {
         userBId,
       );
 
-    if (!acceptedRequest) {
+    if (!acceptedRequest && authorization !== 'application') {
       throw new ForbiddenException(
         'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
       );
     }
 
     try {
-      const created = await this.conversationRepository.createWithParticipants(
-        userAId,
-        userBId,
-        new Date(),
-      );
+      const created =
+        await this.conversationRepository.createWithParticipants(
+          userAId,
+          userBId,
+          new Date(),
+        );
 
       const conversation = await this.toResponse(
         created,
@@ -219,7 +220,9 @@ export class ConversationService {
       conversation.event?.id ||
       (!conversation.userAId && !conversation.userBId)
     ) {
-      return this.conversationMapper.toEventConversationResponse(conversation);
+      return this.conversationMapper.toEventConversationResponse(
+        conversation,
+      );
     }
 
     const contact =
