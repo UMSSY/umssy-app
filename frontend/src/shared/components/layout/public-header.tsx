@@ -4,7 +4,7 @@ import { BrandLogo } from "./brand-logo";
 import { InstitutionalSeal } from "./institutional-seal";
 import type { PublicHeaderProps } from "@/shared/types/public-header-props.types";
 import { PublicMobileMenu } from "./public-mobile-menu";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { PUBLIC_NAV_LABELS, PUBLIC_NAV_LINK_CLASS, PUBLIC_NAV_LINKS, PUBLIC_SLANT_BUTTON_CLASS } from "@/shared/constants/public-navigation.constants";
 
 export function PublicHeader({ showInstitutionalSeal = false }: PublicHeaderProps) {

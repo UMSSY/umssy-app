@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tabs,
