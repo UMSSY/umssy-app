@@ -15,7 +15,7 @@ export function AcademicPeriodFilter({ periods, value, onChange }: AcademicPerio
     <div className="relative w-full sm:w-72 sm:shrink-0">
       <ReportFilterSelect
         label={ACADEMIC_PERIOD_FILTER_LABEL}
-        placeholder={ACADEMIC_PERIOD_FILTER_PLACEHOLDER}
+        allLabel={ACADEMIC_PERIOD_FILTER_PLACEHOLDER}
         options={periods.map((period) => ({ value: period, label: period }))}
         value={value}
         onChange={onChange}

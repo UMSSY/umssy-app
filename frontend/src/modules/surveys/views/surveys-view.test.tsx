@@ -71,6 +71,22 @@ describe("SurveysView", () => {
     expect(screen.queryByRole("button", { name: "Quitar filtro de gestión académica" })).not.toBeInTheDocument();
   });
 
+  it("BUG-UI-07: la opción Selecciona una gestión del menú quita el filtro y restablece la tabla", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<SurveysView />);
+    expect(await screen.findByText("Borrador sin carrera")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("combobox", { name: "Gestión académica" }));
+    await user.click(await screen.findByRole("option", { name: "2026" }));
+    expect(screen.queryByText("Borrador sin carrera")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("combobox", { name: "Gestión académica" }));
+    await user.click(await screen.findByRole("option", { name: "Selecciona una gestión" }));
+    expect(await screen.findByText("Borrador sin carrera")).toBeInTheDocument();
+    expect(screen.getByText("Encuesta de Empleabilidad")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Gestión académica" })).toHaveTextContent("Selecciona una gestión");
+  });
+
   it("CA13: filtra las filas por el correo electrónico del autor", async () => {
     const user = userEvent.setup();
     renderWithQuery(<SurveysView />);
