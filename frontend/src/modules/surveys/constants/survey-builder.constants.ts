@@ -54,8 +54,8 @@ export const SURVEY_STATUS_LABELS: Readonly<Record<SurveyDisplayStatus, string>>
 
 export const SURVEY_STATUS_BADGE_CLASSES: Readonly<Record<SurveyDisplayStatus, string>> = {
   draft: "border-gold/50 bg-gold/15 text-ink",
-  published: "border-accent/30 bg-interaction text-accent",
-  closed: "border-border bg-surface-soft text-text-secondary",
+  published: "border-success/30 bg-success/10 text-success",
+  closed: "border-danger/30 bg-danger/10 text-danger",
 };
 
 export const SURVEY_TEXT = {
