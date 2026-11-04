@@ -87,6 +87,7 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
         'offer-1',
         'offer-2',
       ]);
+
       expect(result).toEqual([
         {
           id: 'app-1',
@@ -107,12 +108,12 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
           appliedDate: '2026-10-29T12:00:00.000Z',
         },
       ]);
+
       const sorted = await service.findMyApplications('user-1', {
         sortBy: 'affinity',
         sortOrder: 'asc',
       });
       expect(sorted.map(({ id }) => id)).toEqual(['app-2', 'app-1']);
-    });
   });
 
   describe('withdrawApplication (AC-05.4)', () => {
@@ -180,4 +181,4 @@ describe('ApplicationsService (T5.1 & T5.2)', () => {
       ).rejects.toThrow(ApplicationNotWithdrawableException);
     });
   });
-});
+})})

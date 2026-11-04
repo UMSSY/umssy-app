@@ -21,36 +21,40 @@ export class ApplicationsService {
   ) {}
 
   async findMyApplications(
-    userId: string,
-    query: FindApplicationsQueryDto,
-  ): Promise<ApplicationItemResponse[]> {
-    const records = await this.repository.findByUserId(userId, query);
-    if (!records.length) return [];
+  userId: string,
+  query: FindApplicationsQueryDto,
+): Promise<ApplicationItemResponse[]> {
+  const records = await this.repository.findByUserId(userId, query);
+  if (!records || !records.length) return [];
 
-    // Obtenemos la afinidad usando el método existente getJobFit
-    const responses: ApplicationItemResponse[] = await Promise.all(
-      records.map(async (record: ApplicationRecord) => {
-        let score = 0;
-        try {
-          const fit = await (this.matching as any).getJobFit(userId, record.jobOfferId);
-          score = fit.score;
-        } catch {
-          score = 0;
-        }
-        return this.mapper.toResponse(record, score);
-      }),
-    );
+  // Extraer los IDs de las vacantes de forma segura independientemente de la estructura del tipo
+  const offerIds = records.map(
+    (record: any) => record.jobOfferId ?? record.jobOffer?.id,
+  );
 
-    if (query.sortBy === 'affinity') {
-      responses.sort(
-        (a: ApplicationItemResponse, b: ApplicationItemResponse) =>
-          (a.affinityPercentage - b.affinityPercentage) *
-          (query.sortOrder === 'asc' ? 1 : -1),
-      );
-    }
-
-    return responses;
+  let scoresMap = new Map<string, number>();
+  try {
+    scoresMap = await this.matching.scoresForOffers(userId, offerIds);
+  } catch {
+    scoresMap = new Map();
   }
+
+  const responses: ApplicationItemResponse[] = records.map((record: any) => {
+    const offerId = record.jobOfferId ?? record.jobOffer?.id;
+    const score = scoresMap.get(offerId) ?? 0;
+    return this.mapper.toResponse(record, score);
+  });
+
+  if (query.sortBy === 'affinity') {
+    responses.sort(
+      (a: ApplicationItemResponse, b: ApplicationItemResponse) =>
+        (a.affinityPercentage - b.affinityPercentage) *
+        (query.sortOrder === 'asc' ? 1 : -1),
+    );
+  }
+
+  return responses;
+}
 
   async withdrawApplication(id: string, userId: string): Promise<void> {
     const application = await this.repository.findById(id);
