@@ -28,7 +28,35 @@ describe('AppointmentMapper', () => {
       orientationType: record.orientationType,
       counterpart: { id: STUDENT_ID, fullName: 'Luis Flores', role: 'student' },
       status: 'CONFIRMED',
+      message: null,
+      requestedAt: '2026-10-22T13:00:00.000Z',
+      document: null,
     });
+  });
+
+  it('returns the message, request date and document metadata of the appointment', () => {
+    const document = {
+      fileName: 'cv-luis-flores.pdf',
+      sizeBytes: 245760,
+      mimeType: 'application/pdf',
+    };
+    const record = createAppointmentRecord({
+      message: 'Quiero revisar mi CV',
+      requestedAt: new Date('2026-10-22T09:15:00-04:00'),
+      document,
+    });
+
+    expect(mapper.toResponse(record, MENTOR_ID)).toMatchObject({
+      message: 'Quiero revisar mi CV',
+      requestedAt: '2026-10-22T13:15:00.000Z',
+      document,
+    });
+  });
+
+  it('returns null message and document when the appointment has none', () => {
+    expect(
+      mapper.toResponse(createAppointmentRecord(), STUDENT_ID),
+    ).toMatchObject({ message: null, document: null });
   });
 
   it('returns the same appointment data for both participants, changing only the counterpart', () => {
