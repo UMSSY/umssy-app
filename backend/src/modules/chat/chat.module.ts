@@ -42,9 +42,18 @@ import { ConnectionRequestRepository } from './repositories/connection-request.r
 import { ChatUserBlockRepository } from './repositories/chat-user-block.repository.js';
 
 import { ChatGateway } from './gateways/chat.gateway.js';
+import { EducationsModule } from '../educations/educations.module.js';
+import { SkillsModule } from '../skills/skills.module.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule, AuthModule, EventRegistrationsModule],
+  imports: [
+  PrismaModule,
+  JwtAuthModule,
+  AuthModule,
+  EventRegistrationsModule,
+  EducationsModule,
+  SkillsModule,
+],
   controllers: [
     UserSearchController,
     ConversationController,
