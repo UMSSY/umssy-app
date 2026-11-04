@@ -9,7 +9,7 @@ const VALID_VALUES: WorkExperienceFormValues = {
   startDate: "2024-07-01",
   endDate: "2024-12-31",
   isCurrent: false,
-  description: "",
+  description: "Desarrollo de interfaces con React",
 };
 
 describe("validateWorkExperience", () => {
