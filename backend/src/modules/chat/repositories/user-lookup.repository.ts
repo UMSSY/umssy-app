@@ -1,9 +1,7 @@
-
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { hasOnlyChatAllowedRoles } from '../constants/chat-role-policy.constants.js';
 
-type SearchUserRow = {
+export type SearchUserRow = {
   id: string;
   first_name: string;
   last_name: string;
@@ -11,10 +9,7 @@ type SearchUserRow = {
   photo_url: Uint8Array | null;
   is_online: boolean | null;
   role_name: string | null;
-};
-
-type SearchUserWithRolesRow = SearchUserRow & {
-  role_names: string[];
+  can_chat_by_application: boolean;
 };
 
 @Injectable()
@@ -23,7 +18,10 @@ export class UserLookupRepository {
 
   async findActiveById(userId: string) {
     return this.prisma.user.findFirst({
-      where: { id: userId, isActive: true },
+      where: {
+        id: userId,
+        isActive: true,
+      },
       select: {
         id: true,
         firstName: true,
@@ -35,7 +33,9 @@ export class UserLookupRepository {
 
   async findById(userId: string) {
     return this.prisma.user.findUnique({
-      where: { id: userId },
+      where: {
+        id: userId,
+      },
       select: {
         id: true,
         firstName: true,
@@ -55,45 +55,113 @@ export class UserLookupRepository {
     const escaped = normalizedQuery.replace(/[%_\\]/g, '\\$&');
     const pattern = `%${escaped}%`;
 
-    const rows = await this.prisma.$queryRaw<SearchUserWithRolesRow[]>`
+    return this.prisma.$queryRaw<SearchUserRow[]>`
+      WITH eligible_users AS (
+        SELECT
+          u.*,
+          EXISTS (
+            SELECT 1
+            FROM user_roles ur
+            JOIN roles r ON r.id = ur.role_id
+            WHERE ur.user_id = u.id
+              AND ur.deleted_at IS NULL
+              AND lower(trim(r.name)) IN ('estudiante', 'titulado')
+          )
+          AND NOT EXISTS (
+            SELECT 1
+            FROM user_roles ur
+            JOIN roles r ON r.id = ur.role_id
+            WHERE ur.user_id = u.id
+              AND ur.deleted_at IS NULL
+              AND lower(trim(r.name)) NOT IN ('estudiante', 'titulado')
+          ) AS is_student,
+          EXISTS (
+            SELECT 1
+            FROM user_roles ur
+            JOIN roles r ON r.id = ur.role_id
+            WHERE ur.user_id = u.id
+              AND ur.deleted_at IS NULL
+              AND lower(trim(r.name)) = 'empresa'
+          )
+          AND NOT EXISTS (
+            SELECT 1
+            FROM user_roles ur
+            JOIN roles r ON r.id = ur.role_id
+            WHERE ur.user_id = u.id
+              AND ur.deleted_at IS NULL
+              AND lower(trim(r.name)) <> 'empresa'
+          ) AS is_company
+        FROM users u
+        WHERE u.is_active = true
+      ),
+      contacts AS (
+        SELECT
+          u.*,
+          up.is_online,
+          (
+            (
+              me.is_student
+              AND u.is_company
+              AND EXISTS (
+                SELECT 1
+                FROM job_applications ja
+                JOIN job_offers jo ON jo.id = ja.job_offer_id
+                WHERE ja.user_id = me.id
+                  AND jo.company_id = u.company_id
+              )
+            )
+            OR
+            (
+              me.is_company
+              AND u.is_student
+              AND EXISTS (
+                SELECT 1
+                FROM job_applications ja
+                JOIN job_offers jo ON jo.id = ja.job_offer_id
+                WHERE ja.user_id = u.id
+                  AND jo.company_id = me.company_id
+              )
+            )
+          ) AS can_chat_by_application,
+          (
+            me.is_student AND u.is_student
+          ) AS can_chat_as_student
+        FROM eligible_users u
+        JOIN eligible_users me
+          ON me.id = ${excludeUserId}::uuid
+        LEFT JOIN user_presences up
+          ON up.user_id = u.id
+        WHERE u.id <> me.id
+          AND lower(
+            u.first_name || ' ' || u.last_name || ' ' || u.email
+          ) LIKE lower(${pattern}) ESCAPE '\\'
+      )
       SELECT
-        u.id,
-        u.first_name,
-        u.last_name,
-        u.headline,
-        u.photo_url,
-        up.is_online,
+        id,
+        first_name,
+        last_name,
+        headline,
+        photo_url,
+        is_online,
         (
-          SELECT r.name
+          SELECT CASE lower(trim(r.name))
+            WHEN 'estudiante' THEN 'STUDENT'
+            WHEN 'titulado' THEN 'GRADUATE'
+            WHEN 'empresa' THEN 'RECRUITER'
+          END
           FROM user_roles ur
           JOIN roles r ON r.id = ur.role_id
-          WHERE ur.user_id = u.id
+          WHERE ur.user_id = contacts.id
             AND ur.deleted_at IS NULL
           ORDER BY ur.created_at ASC, r.name ASC
           LIMIT 1
         ) AS role_name,
-        ARRAY(
-          SELECT r.name
-          FROM user_roles ur
-          JOIN roles r ON r.id = ur.role_id
-          WHERE ur.user_id = u.id
-            AND ur.deleted_at IS NULL
-        ) AS role_names
-      FROM users u
-      LEFT JOIN user_presences up ON up.user_id = u.id
-      WHERE u.id <> ${excludeUserId}::uuid
-        AND u.is_active = true
-        AND lower(u.first_name || ' ' || u.last_name)
-            LIKE lower(${pattern}) ESCAPE '\'
-      ORDER BY u.first_name ASC, u.last_name ASC, u.id ASC;
+        can_chat_by_application
+      FROM contacts
+      WHERE can_chat_as_student
+         OR can_chat_by_application
+      ORDER BY first_name ASC, last_name ASC, id ASC
+      LIMIT ${limit};
     `;
-
-    return rows
-      .filter((row) => hasOnlyChatAllowedRoles(row.role_names))
-      .slice(0, limit)
-      .map(({ role_names, ...row }) => {
-        void role_names;
-        return row;
-      });
   }
 }

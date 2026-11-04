@@ -2,8 +2,9 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import Image from "next/image";
-import { ArrowLeft, Lock, MessageCircle } from "lucide-react";
+import { ArrowLeft, Lock, MessageCircle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Conversation, Message } from "../types/conversation.types";
@@ -11,8 +12,11 @@ import type { MessageAttachment } from "../types/attachment.types";
 import { MessageInputBar } from "./message-input-bar";
 import { MessageItem } from "./message-item";
 import { ContactProfileModal } from "./contact-profile-modal";
+import { EventRoomEmptyState } from "./event-room-empty-state";
+import { EventRoomInfoPanel } from "./event-room-info-panel";
 import { ChatErrorState } from "./chat-error-state";
 import { getInitials } from "../utils/date-formatter";
+import { getEventRoomSenderName } from "../utils/get-event-room-sender-name";
 import { isContentValidForSend } from "../utils/unicode-counter";
 import { useMessagingUi } from "../contexts/messaging-ui-context";
 import { ChatOptionsMenu } from "./chat-options-menu";
@@ -119,10 +123,16 @@ function ChatRoomContent({
   onUnblockUser,
   connectionStatus = "connected",
 }: ChatRoomProps) {
-  const isEventConversation = Boolean(conversation.eventId);
-  const conversationName = conversation.eventId
-    ? conversation.eventTitle ?? 'Chat del evento'
+  const eventConversation = conversation.eventId ? conversation : null;
+  const isEventConversation = Boolean(eventConversation);
+  const conversationName = eventConversation
+    ? eventConversation.eventTitle ?? 'Chat del evento'
     : conversation.contact?.fullName ?? '';
+  const eventParticipantCount = eventConversation?.participants?.length ?? 0;
+  const eventParticipantLabel =
+    eventParticipantCount === 1
+      ? "1 participante"
+      : `${eventParticipantCount} participantes`;
   const ui = useMessagingUi();
   const [localInputText, setLocalInputText] = useState("");
   const [selectedAttachment, setSelectedAttachment] = useState<File | null>(
@@ -130,6 +140,7 @@ function ChatRoomContent({
   );
   const [isUploading, setIsUploading] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [blockedSendError, setBlockedSendError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -409,10 +420,26 @@ function ChatRoomContent({
             variant="ghost"
             size="default"
             data-testid="chat-contact-profile-trigger"
-            title="Ver perfil de usuario"
-            aria-label="Ver perfil de usuario"
-            disabled={isEventConversation}
-            onClick={() => setIsProfileModalOpen(true)}
+            title={
+              isEventConversation
+                ? "Ver información del grupo"
+                : "Ver perfil de usuario"
+            }
+            aria-label={
+              isEventConversation
+                ? "Ver información del grupo"
+                : "Ver perfil de usuario"
+            }
+            aria-haspopup={isEventConversation ? "dialog" : undefined}
+            aria-expanded={isEventConversation ? isGroupInfoOpen : undefined}
+            onClick={() => {
+              if (isEventConversation) {
+                setIsGroupInfoOpen(true);
+                return;
+              }
+
+              setIsProfileModalOpen(true);
+            }}
             className="flex h-auto items-center gap-3 p-1 transition-colors hover:bg-surface-soft"
           >
             <div className="relative shrink-0">
@@ -429,6 +456,15 @@ function ChatRoomContent({
                 <div className="flex size-10 items-center justify-center rounded-full border border-border bg-border text-xs font-bold text-ink">
                   {getInitials(conversationName)}
                 </div>
+              )}
+              {eventConversation && (
+                <span
+                  data-testid="chat-room-group-icon"
+                  aria-hidden="true"
+                  className="absolute -right-1 -bottom-1 flex size-5 items-center justify-center rounded-full border-2 border-surface bg-accent text-surface"
+                >
+                  <Users className="size-2.5" />
+                </span>
               )}
               {conversation.contact?.isOnline && !isBlockedByMe && (
                 <span
@@ -454,10 +490,19 @@ function ChatRoomContent({
                   Bloqueado
                 </span>
               ) : (
-                <span className="text-xs font-medium text-ink-soft">
-                  {isEventConversation ? "Chat del evento" : conversation.contact?.isOnline
-                    ? "En línea"
-                    : "Desconectado"}
+                <span
+                  data-testid={
+                    isEventConversation
+                      ? "chat-event-participant-count"
+                      : undefined
+                  }
+                  className="text-xs font-medium text-ink-soft"
+                >
+                  {isEventConversation
+                    ? eventParticipantLabel
+                    : conversation.contact?.isOnline
+                      ? "En línea"
+                      : "Desconectado"}
                 </span>
               )}
             </div>
@@ -558,13 +603,19 @@ function ChatRoomContent({
             </span>
           </div>
         ) : messages.length === 0 && !isMessagesError ? (
-          <div className="flex h-full flex-col items-center justify-center p-6 text-center text-text-secondary">
-            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-surface text-ink">
-              <MessageCircle className="size-6" aria-hidden="true" />
+          isEventConversation ? (
+            <div className="flex h-full flex-col items-center justify-center p-6 text-center">
+              <EventRoomEmptyState description="Aún no hay mensajes. Envía el primero para comenzar la conversación." />
             </div>
-            <p className="text-sm font-medium">Sala de chat con {conversationName}</p>
-            <p className="mt-1 text-xs">Aún no hay mensajes. Envía el primero para comenzar la conversación.</p>
-          </div>
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center p-6 text-center text-text-secondary">
+              <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-surface text-ink">
+                <MessageCircle className="size-6" aria-hidden="true" />
+              </div>
+              <p className="text-sm font-medium">Sala de chat con {conversationName}</p>
+              <p className="mt-1 text-xs">Aún no hay mensajes. Envía el primero para comenzar la conversación.</p>
+            </div>
+          )
         ) : (
           <div className="space-y-3">
             {messages.map((message, index) => {
@@ -574,11 +625,19 @@ function ChatRoomContent({
                 index,
                 hasMoreMessages,
               );
+         const senderName =
+                !isOwn && eventConversation
+                  ? getEventRoomSenderName(
+                      message.senderId,
+                      eventConversation.participants ?? [],
+                    )
+                  : undefined;
               return (
                 <div key={message.id} data-message-id={message.id}>
                   <MessageItem
                     message={message}
                     isOwn={isOwn}
+                    senderName={senderName}
                     showDateSeparator={showDateSeparator}
                     onDownloadAttachment={handleDownloadAttachment}
                   />
@@ -622,6 +681,11 @@ function ChatRoomContent({
             onChange={setInputText}
             onSend={() => void handleSend()}
             onKeyDown={handleInputKeyDown}
+            placeholder={
+              isEventConversation
+                ? "Escribe un mensaje al grupo..."
+                : undefined
+            }
             isSending={isSending || isSubmitting}
             isUploading={isUploading}
             sendDisabled={connectionStatus !== "connected"}
@@ -634,6 +698,27 @@ function ChatRoomContent({
           />
         </>
       )}
+
+      {eventConversation && (
+        <Sheet open={isGroupInfoOpen} onOpenChange={setIsGroupInfoOpen}>
+          <SheetContent side="right" className="overflow-y-auto p-0">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Información del grupo</SheetTitle>
+            </SheetHeader>
+            <div className="p-4">
+              <EventRoomInfoPanel
+                groupName={conversationName}
+                createdAt={
+                  eventConversation.createdAt ?? eventConversation.updatedAt
+                }
+                participants={eventConversation.participants ?? []}
+                currentUserId={currentUserId}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
+      )}
+
       <ContactProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}

@@ -1,39 +1,113 @@
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
-import { Injectable } from '@nestjs/common';
-import { UsersService } from '../../users/services/users.service.js';
-import { hasOnlyChatAllowedRoles } from '../constants/chat-role-policy.constants.js';
-import { ChatRoleNotAllowedException } from '../exceptions/index.js';
+const STUDENT_ROLES = new Set(['estudiante', 'titulado']);
 
 @Injectable()
 export class ChatRolePolicyService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async assertCanCommunicate(
     userId: string,
     contactId: string,
-  ): Promise<void> {
+  ): Promise<'application' | void> {
     const ids = [
       userId.trim().toLowerCase(),
       contactId.trim().toLowerCase(),
     ];
 
-    const users = await this.usersService.findManyWithActiveRoles(ids);
-
-    const allowed =
-      users.length === 2 &&
-      ids.every((id) =>
-        users.some(
-          (user) =>
-            user.id.toLowerCase() === id &&
-            user.isActive &&
-            hasOnlyChatAllowedRoles(
-              user.roles.map(({ role }) => role.name),
-            ),
-        ),
-      );
-
-    if (!allowed) {
-      throw new ChatRoleNotAllowedException();
+    if (ids[0] === ids[1]) {
+      return this.deny();
     }
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: { in: ids },
+      },
+      select: {
+        id: true,
+        isActive: true,
+        companyId: true,
+        roles: {
+          where: { deletedAt: null },
+          select: {
+            role: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (
+      users.length !== 2 ||
+      users.some((user) => !user.isActive)
+    ) {
+      return this.deny();
+    }
+
+    const roles = users.map((user) =>
+      user.roles.map(({ role }) =>
+        role.name.trim().toLowerCase(),
+      ),
+    );
+
+    const students = roles.map(
+      (names) =>
+        names.length > 0 &&
+        names.every((name) => STUDENT_ROLES.has(name)),
+    );
+
+    const companies = roles.map(
+      (names) =>
+        names.length > 0 &&
+        names.every((name) => name === 'empresa'),
+    );
+
+    if (students[0] && students[1]) {
+      return;
+    }
+
+    const studentIndex =
+      students[0] && companies[1]
+        ? 0
+        : students[1] && companies[0]
+          ? 1
+          : -1;
+
+    if (studentIndex < 0) {
+      return this.deny();
+    }
+
+    const student = users[studentIndex];
+    const recruiter = users[1 - studentIndex];
+
+    if (!recruiter.companyId) {
+      return this.deny();
+    }
+
+    const application = await this.prisma.jobApplication.findFirst({
+      where: {
+        userId: student.id,
+        jobOffer: {
+          companyId: recruiter.companyId,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!application) {
+      return this.deny();
+    }
+
+    return 'application';
+  }
+
+  private deny(): never {
+    throw new ForbiddenException(
+      'El chat requiere roles permitidos o una postulación previa a una vacante de la empresa del reclutador.',
+    );
   }
 }
