@@ -33,8 +33,9 @@ export const JOB_MATCHING_MESSAGES = {
   pageDescription: "Encuentra ofertas según las habilidades de tu perfil.",
   scoreInfoTitle: "¿Qué es la afinidad?",
   scoreInfoText:
-    "Comparamos tu perfil con los requisitos de cada vacante para calcular su afinidad; es una guía para priorizar, no una garantía de contratación.",
+    "Comparamos tus habilidades con las que pide cada vacante para calcular su afinidad; es una guía para priorizar, no una garantía de contratación.",
   matchedLabel: "Coincide contigo",
+  highAffinityLabel: "Alta afinidad",
   viewJob: "Ver vacante",
   viewLocation: "Ver ubicación",
   back: "Volver",

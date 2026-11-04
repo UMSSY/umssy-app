@@ -1,15 +1,18 @@
 "use client";
 
-import { BriefcaseBusiness, ExternalLink, MapPin, X } from "lucide-react";
+import { BriefcaseBusiness, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { getSafeMapsUrl } from "@/modules/job-offers/utils/get-safe-maps-url";
 import { JobApplicationAction } from "@/modules/matching";
+import { ModalityIcon } from "@/shared/components/modality-icon";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import type { VacancyDetailDialogProps } from "../types/vacancy-detail-dialog-props.types";
 import { canApplyToVacancies } from "../utils/can-apply-to-vacancies";
 
 export function VacancyDetailDialog({ vacancy, onClose }: VacancyDetailDialogProps) {
   const canApply = canApplyToVacancies(getAccessToken());
+  const locationUrl = getSafeMapsUrl(vacancy?.locationUrl);
 
   return <Dialog open onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
     <DialogContent showCloseButton={false} className="max-h-editor-dialog overflow-y-auto p-7 sm:max-w-3xl">
@@ -18,11 +21,11 @@ export function VacancyDetailDialog({ vacancy, onClose }: VacancyDetailDialogPro
       {vacancy ? <>
         <dl aria-label="Condiciones de la vacante" className="grid grid-cols-2 gap-5 rounded-lg bg-interaction p-5 text-sm">
           <div><dt className="text-xs text-availability-foreground">Salario</dt><dd className="mt-1 font-semibold text-accent">{vacancy.salary}</dd></div>
-          <div><dt className="flex items-center gap-1 text-xs text-availability-foreground"><MapPin className="size-3.5" aria-hidden="true" />Modalidad</dt><dd className="mt-1 text-ink">{vacancy.modality}</dd></div>
+          <div><dt className="flex items-center gap-1 text-xs text-availability-foreground"><ModalityIcon modality={vacancy.modality} className="size-3.5" />Modalidad</dt><dd className="mt-1 text-ink">{vacancy.modality}</dd></div>
           <div><dt className="flex items-center gap-1 text-xs text-availability-foreground"><BriefcaseBusiness className="size-3.5" aria-hidden="true" />Tipo de contrato</dt><dd className="mt-1 text-ink">{vacancy.contractType}</dd></div>
           <div><dt className="text-xs text-availability-foreground">Puestos disponibles</dt><dd className="mt-1 text-ink tabular-nums">{vacancy.positionsAvailable}</dd></div>
           <div><dt className="text-xs text-availability-foreground">Idiomas</dt><dd className="mt-1 text-ink">{vacancy.languages}</dd></div>
-          {vacancy.locationUrl ? <div><dt className="text-xs text-availability-foreground">Ubicación</dt><dd className="mt-1"><a href={vacancy.locationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent underline-offset-4 hover:underline">Ver en el mapa<ExternalLink className="size-3.5" aria-hidden="true" /></a></dd></div> : null}
+          {locationUrl ? <div><dt className="text-xs text-availability-foreground">Ubicación</dt><dd className="mt-1"><a href={locationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-accent underline-offset-4 hover:underline">Ver en el mapa<ExternalLink className="size-3.5" aria-hidden="true" /></a></dd></div> : null}
         </dl>
         <section aria-labelledby="vacancy-description"><h2 id="vacancy-description" className="mb-3 text-lg font-semibold">Descripción</h2><p className="max-w-prose text-sm leading-relaxed wrap-anywhere whitespace-pre-line text-ink-soft">{vacancy.description}</p></section>
         {vacancy.requirements.length > 0 ? <section aria-labelledby="vacancy-requirements" className="border-t border-border pt-5"><h2 id="vacancy-requirements" className="mb-3 text-lg font-semibold">Tecnologías requeridas</h2><ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-ink-soft">{vacancy.requirements.map((requirement) => <li key={requirement}>{requirement}</li>)}</ul></section> : null}
