@@ -77,7 +77,7 @@ export function AppointmentsView() {
                 <Skeleton
                   key={index}
                   aria-hidden="true"
-                  className="h-40 w-full rounded-lg"
+                  className="h-28 w-full rounded-lg"
                 />
               ))}
               <span className="sr-only">
