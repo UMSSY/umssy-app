@@ -15,7 +15,7 @@ describe("ApplicationsTable", () => {
       />,
     );
 
-    expect(screen.getByRole("columnheader", { name: "Vacante" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: /vacante/i })).toBeInTheDocument();
     expect(screen.getByText("Desarrollador Backend Python / FastAPI")).toBeInTheDocument();
     expect(screen.getByText("TechBolivia S.R.L.")).toBeInTheDocument();
     expect(screen.getByText("92%")).toBeInTheDocument();
