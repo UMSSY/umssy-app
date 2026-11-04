@@ -21,7 +21,7 @@ export const APPOINTMENT_ROLE_LABELS: Record<
   string
 > = {
   mentor: "Mentor",
-  student: "Estudiante",
+  student: "Titulado",
 };
 
 export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {

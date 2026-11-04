@@ -39,7 +39,7 @@ describe("AppointmentCard", () => {
     expect(screen.getByText("20:00 - 21:00 (GMT-4)")).toBeInTheDocument();
   });
 
-  it("identifica a la otra persona como estudiante cuando la cita es del mentor", () => {
+  it("identifica a la otra persona como titulado cuando la cita es del mentor", () => {
     render(
       <AppointmentCard
         appointment={makeAppointment({
@@ -53,7 +53,7 @@ describe("AppointmentCard", () => {
     );
 
     expect(
-      screen.getByText("Estudiante · Desarrollo profesional"),
+      screen.getByText("Titulado · Desarrollo profesional"),
     ).toBeInTheDocument();
   });
 

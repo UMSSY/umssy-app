@@ -78,7 +78,7 @@ describe("AppointmentsView", () => {
         screen.getByText("Mentor · Desarrollo profesional"),
       ).toBeInTheDocument();
       expect(
-        screen.getByText("Estudiante · Desarrollo profesional"),
+        screen.getByText("Titulado · Desarrollo profesional"),
       ).toBeInTheDocument();
       expect(appointmentsApi.getMyAppointments).toHaveBeenCalledWith(scope);
     },
