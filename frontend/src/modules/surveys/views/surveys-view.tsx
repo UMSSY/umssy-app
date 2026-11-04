@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { Plus, X } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { RefreshButton, ReportFilterSelect, ReportSearchInput } from "@/modules/reports";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { SurveysTable } from "../components/surveys-table";
-import { ALL_ACADEMIC_PERIODS_OPTION_LABEL } from "../constants/survey-builder.constants";
 import {
   ACADEMIC_PERIOD_FILTER_LABEL,
   ACADEMIC_PERIOD_FILTER_PLACEHOLDER,
+  CLEAR_SURVEY_FILTERS_LABEL,
   CREATE_SURVEY_ACTION_LABEL,
   CREATE_SURVEY_PATH,
   CREATOR_SEARCH_LABEL,
@@ -31,6 +31,11 @@ export function SurveysView() {
   const hasFilters = Boolean(creatorSearch.trim() || academicPeriod);
   const visibleSurveys = filterSurveys(surveys, creatorSearch, academicPeriod);
 
+  const handleClearFilters = () => {
+    setCreatorSearch("");
+    setAcademicPeriod(undefined);
+  };
+
   return (
     <WorkspacePage
       title={SURVEYS_PAGE_TITLE}
@@ -49,12 +54,17 @@ export function SurveysView() {
         <ReportSearchInput value={creatorSearch} onChange={setCreatorSearch} label={CREATOR_SEARCH_LABEL} />
         <ReportFilterSelect
           label={ACADEMIC_PERIOD_FILTER_LABEL}
-          allLabel={ALL_ACADEMIC_PERIODS_OPTION_LABEL}
           placeholder={ACADEMIC_PERIOD_FILTER_PLACEHOLDER}
           options={periodOptions}
           value={academicPeriod}
           onChange={setAcademicPeriod}
         />
+        {hasFilters && (
+          <Button type="button" variant="ghost" onClick={handleClearFilters} className="self-start sm:self-center">
+            <X aria-hidden="true" />
+            {CLEAR_SURVEY_FILTERS_LABEL}
+          </Button>
+        )}
       </div>
       <SurveysTable
         surveys={visibleSurveys}
