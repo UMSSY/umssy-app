@@ -101,7 +101,9 @@ export class ProfileSkillsAnalysisService {
   private async markError(userId: string, revision: number): Promise<void> {
     try {
       await this.results.markError(userId, revision, new Date());
-    } catch {}
+    } catch (error) {
+      this.write('error', NLP_LOG_EVENTS.markErrorFailed, { userId, revision, code: toErrorCode(error) });
+    }
   }
 
   private async readSnapshot(userId: string): Promise<ProfileSkillsRadarResponse> {

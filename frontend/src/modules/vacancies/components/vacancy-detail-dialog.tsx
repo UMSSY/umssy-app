@@ -3,7 +3,7 @@
 import { BriefcaseBusiness, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getSafeMapsUrl } from "@/modules/job-offers/utils/get-safe-maps-url";
+import { getSafeMapsUrl } from "@/modules/job-offers";
 import { JobApplicationAction } from "@/modules/matching";
 import { ModalityIcon } from "@/shared/components/modality-icon";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
