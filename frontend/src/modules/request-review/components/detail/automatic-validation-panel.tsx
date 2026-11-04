@@ -11,7 +11,6 @@ const RESULT_ICONS = { match: CircleCheck, mismatch: CircleAlert, not_compared: 
 const RESULT_CLASS = { match: "text-ink", mismatch: "text-danger", not_compared: "text-text-secondary" } as const;
 const HEAD_CLASS = "whitespace-normal";
 
-// Si la lectura no dejó datos, la tabla igual lista los campos declarados para que se vea qué quedó sin comparar
 function buildNotComparedFields(detail: ReviewDetail): ValidationFieldOutcome[] {
   const declared: Record<ValidationField, string> = {
     fullName: `${detail.firstName} ${detail.lastName}`.trim(),

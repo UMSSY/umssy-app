@@ -1,6 +1,5 @@
 import { KNOWN_EMAIL_DOMAINS, KNOWN_EMAIL_TLDS } from "../constants/personal-data-rules.constants";
 
-// Distancia de edición que cuenta el intercambio de dos letras seguidas como un solo error, para reconocer «gmial» como errata de «gmail»
 function editDistance(source: string, target: string): number {
   const distances: number[][] = Array.from({ length: source.length + 1 }, (_, row) =>
     Array.from({ length: target.length + 1 }, (_, column) => (row === 0 ? column : column === 0 ? row : 0)),
@@ -27,23 +26,17 @@ const splitDomain = (domain: string) => {
   return { name: domain.slice(0, lastDot), tld: domain.slice(lastDot + 1) };
 };
 
-/**
- * Devuelve el dominio corregido cuando el escrito es una errata evidente de uno conocido, y null cuando no lo es.
- * Un dominio desconocido que no se parezca a ninguno se acepta, para no bloquear correos legítimos.
- */
 export function detectEmailTypo(email: string): string | null {
   const domain = email.slice(email.lastIndexOf("@") + 1);
   if (domain.length === 0 || (KNOWN_EMAIL_DOMAINS as readonly string[]).includes(domain)) return null;
 
   const { name, tld } = splitDomain(domain);
 
-  // Un dominio de primer nivel inventado solo se rechaza si se parece a uno real, como «.con» de «.com»
   if (!(KNOWN_EMAIL_TLDS as readonly string[]).includes(tld)) {
     const closestTld = closest(tld, KNOWN_EMAIL_TLDS);
     return closestTld ? `${name}.${closestTld}` : null;
   }
 
-  // Con el dominio de primer nivel correcto, se compara el nombre contra los proveedores que usan ese mismo
   const sameTld = KNOWN_EMAIL_DOMAINS.filter((known) => splitDomain(known).tld === tld).map((known) => splitDomain(known).name);
   const closestName = closest(name, sameTld);
   return closestName ? `${closestName}.${tld}` : null;

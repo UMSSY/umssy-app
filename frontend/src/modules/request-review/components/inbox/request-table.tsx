@@ -18,7 +18,6 @@ const CELL_CLASS =
   "px-5 lg:px-4 text-sm text-ink max-md:block max-md:p-0 max-md:before:mb-0.5 max-md:before:block max-md:before:text-xs max-md:before:font-semibold max-md:before:text-text-secondary max-md:before:content-[attr(data-label)]";
 const WRAP_CLASS = "whitespace-normal break-words";
 const TABLE_COLUMN_COUNT = 8;
-// Estado, Enviada y Coincidencia se desbordaban sobre la columna vecina con sus textos más largos
 const COLUMN_WIDTHS = ["w-[19%]", "w-[9%]", "w-[13%]", "w-[11%]", "w-[10%]", "w-[16%]", "w-[13%]", "w-[9%]"] as const;
 
 export function RequestTable({ items = [], isLoading = false }: RequestTableProps) {

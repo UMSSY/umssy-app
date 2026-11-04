@@ -1,7 +1,6 @@
 import { PHONE_MAX_DIGITS } from "../constants/profile-validation.constants";
 
 const DIGIT_PATTERN = /\d/;
-// The hint offers digits plus +, spaces and hyphens, so anything else is dropped while typing
 const ALLOWED_PATTERN = /[\d +-]/;
 
 export function sanitizePhoneInput(value: string): string {

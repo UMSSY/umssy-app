@@ -7,7 +7,6 @@ import type { AuditFiltersProps } from "../../types/audit-log-extras-props.types
 import { AuditFilterFields } from "./audit-filter-fields";
 import { AuditSearchInput } from "./audit-search-input";
 
-// Escritorio: barra con todos los filtros. Móvil: búsqueda visible y botón Filtros con un panel
 export function AuditFilters({ values, responsibles, activeCount, periodError, onSearchChange, onClear, ...handlers }: AuditFiltersProps) {
   const fieldProps = { values, responsibles, periodError, ...handlers };
 
@@ -21,7 +20,6 @@ export function AuditFilters({ values, responsibles, activeCount, periodError, o
           <AuditFilterFields idPrefix="audit-desktop" {...fieldProps} />
         </div>
         {activeCount > 0 ? (
-          // Secundario: cuando la búsqueda no trae resultados, el botón destacado es el del aviso central
           <Button type="button" variant="outline" onClick={onClear} className="border-border bg-surface text-ink">
             Limpiar filtros
           </Button>

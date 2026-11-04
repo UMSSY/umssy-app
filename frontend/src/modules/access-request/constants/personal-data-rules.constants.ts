@@ -3,7 +3,6 @@ export const ID_CARD_MIN_LENGTH = 6;
 export const ID_CARD_MAX_LENGTH = 10;
 export const DIGIT_ONLY_FIELDS = ["idCardNumber", "sisCode"] as const;
 
-// Dominios reales que se aceptan tal cual y sirven de referencia para detectar erratas como «gbail.com»
 export const KNOWN_EMAIL_DOMAINS = [
   "gmail.com",
   "hotmail.com",
@@ -24,7 +23,6 @@ export const KNOWN_EMAIL_DOMAINS = [
   "est.umss.edu.bo",
 ] as const;
 
-// Dominios de primer nivel reales. Uno que no esté aquí solo se rechaza si es una errata evidente de alguno, como «.con» de «.com»
 export const KNOWN_EMAIL_TLDS = [
   "com",
   "net",

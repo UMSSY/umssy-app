@@ -13,7 +13,6 @@ import {
 import { useLogout } from "../hooks/use-logout";
 import type { LogoutConfirmDialogProps } from "../types/logout-confirm-dialog-props.types";
 
-// El contenido solo se monta con el diálogo abierto, así quien muestra el botón de salir no necesita el cliente de consultas
 function LogoutConfirmAction() {
   const handleLogout = useLogout();
   return (
