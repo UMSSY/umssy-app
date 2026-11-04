@@ -12,6 +12,7 @@ export function parseRegistration(value: unknown): Registration {
     location: readString(registration.location),
     status: readString(registration.status),
   };
+  if (typeof registration.eventId === "string") parsed.eventId = registration.eventId;
   if (typeof registration.registeredAt === "string") {
     parsed.registeredAt = registration.registeredAt;
   }

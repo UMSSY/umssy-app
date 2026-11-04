@@ -64,6 +64,10 @@ export function validateProposal(values: ProposalValues, cover: File | null, cat
 
   if (!values.location.trim()) {
     errors.location = values.modality === 'virtual' ? 'Ingresa el enlace de la reunión.' : 'Ingresa la ubicación del taller.';
+  } else if (values.modality === 'presencial' && !/^[^,]+,[^,]+$/.test(values.location.trim())) {
+    errors.location = 'Indica un lugar y un aula separados por una sola coma.';
+  } else if (values.modality === 'presencial' && values.location.split(',').some(part => !part.trim())) {
+    errors.location = 'Completa el lugar y el aula.';
   } else if (values.modality === 'virtual') {
     try {
       const url = new URL(values.location.trim());

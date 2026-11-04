@@ -1,3 +1,4 @@
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
@@ -31,7 +32,7 @@ describe("SessionGate", () => {
   });
 
   it("con token muestra el contenido, no redirige y mantiene la cookie", () => {
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    saveAccessToken("token-de-prueba");
     renderGate();
 
     expect(screen.getByText("contenido privado")).toBeInTheDocument();
@@ -59,7 +60,7 @@ describe("SessionGate", () => {
   });
 
   it("un 401 del backend cierra la sesión y lleva al login", async () => {
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    saveAccessToken("token-de-prueba");
     renderGate();
 
     await expect(
@@ -74,7 +75,7 @@ describe("SessionGate", () => {
   });
 
   it("otros errores no cierran la sesión", async () => {
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    saveAccessToken("token-de-prueba");
     renderGate();
 
     await expect(
@@ -88,7 +89,7 @@ describe("SessionGate", () => {
   });
 
   it("el interceptor central sigue invalidando la sesión después de desmontar el guard", async () => {
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    saveAccessToken("token-de-prueba");
     const { unmount } = renderGate();
     unmount();
 

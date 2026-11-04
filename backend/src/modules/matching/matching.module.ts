@@ -22,6 +22,7 @@ import { ExperienceSkillsRepository } from './repositories/experience-skills.rep
 import { JobMatchController } from './controllers/job-match.controller.js';
 import { JobMatchRepository } from './repositories/job-match.repository.js';
 import { JobMatchService } from './services/job-match.service.js';
+import { VacancyScoringService } from './services/vacancy-scoring.service.js';
 import { CandidateProfileService } from './services/candidate-profile.service.js';
 import { JobApplicationMapper } from './mappers/job-application.mapper.js';
 import { JobRecommendationsController } from './controllers/job-recommendations.controller.js';
@@ -59,6 +60,7 @@ import { RequirementsController } from './controllers/requirements.controller.js
     WeightedScoreService,
     ExperienceSkillsRepository,
     JobMatchRepository,
+    VacancyScoringService,
     JobMatchService,
     CandidateProfileService,
     JobRecommendationsService,
