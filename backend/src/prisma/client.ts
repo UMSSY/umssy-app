@@ -426,13 +426,3 @@ export type RadarScoreSnapshot = Prisma.RadarScoreSnapshotModel
  * 
  */
 export type RadarAuditEvent = Prisma.RadarAuditEventModel
-/**
- * Model RadarCompanyAccess
- * 
- */
-export type RadarCompanyAccess = Prisma.RadarCompanyAccessModel
-/**
- * Model RadarJobApplication
- * 
- */
-export type RadarJobApplication = Prisma.RadarJobApplicationModel

@@ -62,7 +62,7 @@ export function RadarProfileView() {
           {selectedArea ? (
             <RadarEvidencePanel key={`${data.userId}:${selectedArea}`} selected={selectedArea} radar={data} onClose={() => setSelectedArea(null)} />
           ) : null}
-          <p className="text-xs text-text-secondary">Cálculo provisional para integración: 1 punto por habilidad aprobada y 0,5 adicional por alta relevancia, máximo 10 por área. Pendiente de aprobación del Product Owner.</p>
+          <p className="text-xs text-text-secondary">Las puntuaciones y comparaciones del radar se calculan y publican en el servidor conforme a la rúbrica vigente.</p>
         </>
       ) : (!loading && !error ? <p className="text-text-secondary">Sin respuesta del servicio de afinidad.</p> : null)}
     </main>

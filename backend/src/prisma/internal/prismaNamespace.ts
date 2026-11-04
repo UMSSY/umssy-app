@@ -473,9 +473,7 @@ export const ModelName = {
   MentorIntakeOperation: 'MentorIntakeOperation',
   RadarCvEvidence: 'RadarCvEvidence',
   RadarScoreSnapshot: 'RadarScoreSnapshot',
-  RadarAuditEvent: 'RadarAuditEvent',
-  RadarCompanyAccess: 'RadarCompanyAccess',
-  RadarJobApplication: 'RadarJobApplication'
+  RadarAuditEvent: 'RadarAuditEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -491,7 +489,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent" | "radarCompanyAccess" | "radarJobApplication"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "radarArea" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "profileSkillProcessingState" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "mentorParticipationRequest" | "mentorSlotOffer" | "activationOtp" | "messageStatus" | "connectionRequestStatus" | "attachmentType" | "conversation" | "conversationParticipant" | "message" | "messageAttachment" | "chatUserBlock" | "connectionRequest" | "userPresence" | "passwordResetOtp" | "mentorParticipationAttemptLimit" | "jobApplicationStatus" | "jobApplication" | "surveyStatus" | "surveyQuestionType" | "surveyTargetAudience" | "survey" | "surveyQuestion" | "surveyQuestionOption" | "surveyResponse" | "surveyAnswer" | "auditAction" | "auditEvent" | "documentValidation" | "mentorIntakeAttempt" | "mentorParticipationSanction" | "mentorIntakeOperation" | "radarCvEvidence" | "radarScoreSnapshot" | "radarAuditEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -6193,154 +6191,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    RadarCompanyAccess: {
-      payload: Prisma.$RadarCompanyAccessPayload<ExtArgs>
-      fields: Prisma.RadarCompanyAccessFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.RadarCompanyAccessFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.RadarCompanyAccessFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
-        }
-        findFirst: {
-          args: Prisma.RadarCompanyAccessFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.RadarCompanyAccessFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
-        }
-        findMany: {
-          args: Prisma.RadarCompanyAccessFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>[]
-        }
-        create: {
-          args: Prisma.RadarCompanyAccessCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
-        }
-        createMany: {
-          args: Prisma.RadarCompanyAccessCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.RadarCompanyAccessCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>[]
-        }
-        delete: {
-          args: Prisma.RadarCompanyAccessDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
-        }
-        update: {
-          args: Prisma.RadarCompanyAccessUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
-        }
-        deleteMany: {
-          args: Prisma.RadarCompanyAccessDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.RadarCompanyAccessUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.RadarCompanyAccessUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>[]
-        }
-        upsert: {
-          args: Prisma.RadarCompanyAccessUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarCompanyAccessPayload>
-        }
-        aggregate: {
-          args: Prisma.RadarCompanyAccessAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateRadarCompanyAccess>
-        }
-        groupBy: {
-          args: Prisma.RadarCompanyAccessGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.RadarCompanyAccessGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.RadarCompanyAccessCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.RadarCompanyAccessCountAggregateOutputType> | number
-        }
-      }
-    }
-    RadarJobApplication: {
-      payload: Prisma.$RadarJobApplicationPayload<ExtArgs>
-      fields: Prisma.RadarJobApplicationFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.RadarJobApplicationFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.RadarJobApplicationFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
-        }
-        findFirst: {
-          args: Prisma.RadarJobApplicationFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.RadarJobApplicationFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
-        }
-        findMany: {
-          args: Prisma.RadarJobApplicationFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>[]
-        }
-        create: {
-          args: Prisma.RadarJobApplicationCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
-        }
-        createMany: {
-          args: Prisma.RadarJobApplicationCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.RadarJobApplicationCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>[]
-        }
-        delete: {
-          args: Prisma.RadarJobApplicationDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
-        }
-        update: {
-          args: Prisma.RadarJobApplicationUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
-        }
-        deleteMany: {
-          args: Prisma.RadarJobApplicationDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.RadarJobApplicationUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.RadarJobApplicationUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>[]
-        }
-        upsert: {
-          args: Prisma.RadarJobApplicationUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$RadarJobApplicationPayload>
-        }
-        aggregate: {
-          args: Prisma.RadarJobApplicationAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateRadarJobApplication>
-        }
-        groupBy: {
-          args: Prisma.RadarJobApplicationGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.RadarJobApplicationGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.RadarJobApplicationCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.RadarJobApplicationCountAggregateOutputType> | number
-        }
-      }
-    }
   }
 } & {
   other: {
@@ -7409,30 +7259,6 @@ export const RadarAuditEventScalarFieldEnum = {
 export type RadarAuditEventScalarFieldEnum = (typeof RadarAuditEventScalarFieldEnum)[keyof typeof RadarAuditEventScalarFieldEnum]
 
 
-export const RadarCompanyAccessScalarFieldEnum = {
-  companyId: 'companyId',
-  userId: 'userId'
-} as const
-
-export type RadarCompanyAccessScalarFieldEnum = (typeof RadarCompanyAccessScalarFieldEnum)[keyof typeof RadarCompanyAccessScalarFieldEnum]
-
-
-export const RadarJobApplicationScalarFieldEnum = {
-  id: 'id',
-  jobOfferId: 'jobOfferId',
-  userId: 'userId',
-  consentToRecruiter: 'consentToRecruiter',
-  consentToCv: 'consentToCv',
-  consentToContact: 'consentToContact',
-  state: 'state',
-  appliedAt: 'appliedAt',
-  decidedAt: 'decidedAt',
-  decidedBy: 'decidedBy'
-} as const
-
-export type RadarJobApplicationScalarFieldEnum = (typeof RadarJobApplicationScalarFieldEnum)[keyof typeof RadarJobApplicationScalarFieldEnum]
-
-
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -7819,8 +7645,6 @@ export type GlobalOmitConfig = {
   radarCvEvidence?: Prisma.RadarCvEvidenceOmit
   radarScoreSnapshot?: Prisma.RadarScoreSnapshotOmit
   radarAuditEvent?: Prisma.RadarAuditEventOmit
-  radarCompanyAccess?: Prisma.RadarCompanyAccessOmit
-  radarJobApplication?: Prisma.RadarJobApplicationOmit
 }
 
 /* Types for Logging */

@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AppLayout from "@/app/(app)/layout";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
-import { mapEpic2Radar } from "../sprint2/radar-mapper";
+import { mapPublishedRadar } from "../mappers/radar-published.mapper";
 import { useLiveRadar } from "../sprint2/use-live-radar";
 import { RadarProfileView } from "./radar-profile-view";
 
@@ -33,7 +33,11 @@ const source = {
 const mockHook = vi.mocked(useLiveRadar);
 function setRadar(override: Partial<ReturnType<typeof useLiveRadar>> = {}) {
   mockHook.mockReturnValue({
-    data: mapEpic2Radar(source), loading: false, error: null, variation: null,
+    data: mapPublishedRadar({userId:source.userId,status:'published',version:source.version,
+      updatedAt:source.updatedAt,dictionaryVersion:source.dictionaryVersion,
+      rubricVersion:'servidor-v1',scores:{desarrollo:0,'cloud-devops':0,'data-ai':0,qa:0,ciberseguridad:0,'gobernanza-ti':0},
+      average:0,variation:null,pending:0,hasPending:false,evidence:{},sourceRevision:1,inputRevision:1,
+      processingStatus:'ready',skills:[]}), loading: false, error: null, variation: null,
     refresh: vi.fn().mockResolvedValue(undefined), retry: vi.fn().mockResolvedValue(undefined), retrying: false, ...override,
   });
 }

@@ -330,7 +330,6 @@ export type JobOfferWhereInput = {
   status?: Prisma.XOR<Prisma.JobOfferStatusScalarRelationFilter, Prisma.JobOfferStatusWhereInput>
   skills?: Prisma.JobOfferSkillListRelationFilter
   applications?: Prisma.JobApplicationListRelationFilter
-  radarApplications?: Prisma.RadarJobApplicationListRelationFilter
 }
 
 export type JobOfferOrderByWithRelationInput = {
@@ -359,7 +358,6 @@ export type JobOfferOrderByWithRelationInput = {
   status?: Prisma.JobOfferStatusOrderByWithRelationInput
   skills?: Prisma.JobOfferSkillOrderByRelationAggregateInput
   applications?: Prisma.JobApplicationOrderByRelationAggregateInput
-  radarApplications?: Prisma.RadarJobApplicationOrderByRelationAggregateInput
 }
 
 export type JobOfferWhereUniqueInput = Prisma.AtLeast<{
@@ -391,7 +389,6 @@ export type JobOfferWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.XOR<Prisma.JobOfferStatusScalarRelationFilter, Prisma.JobOfferStatusWhereInput>
   skills?: Prisma.JobOfferSkillListRelationFilter
   applications?: Prisma.JobApplicationListRelationFilter
-  radarApplications?: Prisma.RadarJobApplicationListRelationFilter
 }, "id">
 
 export type JobOfferOrderByWithAggregationInput = {
@@ -468,7 +465,6 @@ export type JobOfferCreateInput = {
   status: Prisma.JobOfferStatusCreateNestedOneWithoutJobOffersInput
   skills?: Prisma.JobOfferSkillCreateNestedManyWithoutJobOfferInput
   applications?: Prisma.JobApplicationCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferUncheckedCreateInput = {
@@ -493,7 +489,6 @@ export type JobOfferUncheckedCreateInput = {
   updatedAt?: Date | string
   skills?: Prisma.JobOfferSkillUncheckedCreateNestedManyWithoutJobOfferInput
   applications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferUpdateInput = {
@@ -518,7 +513,6 @@ export type JobOfferUpdateInput = {
   status?: Prisma.JobOfferStatusUpdateOneRequiredWithoutJobOffersNestedInput
   skills?: Prisma.JobOfferSkillUpdateManyWithoutJobOfferNestedInput
   applications?: Prisma.JobApplicationUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferUncheckedUpdateInput = {
@@ -543,7 +537,6 @@ export type JobOfferUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skills?: Prisma.JobOfferSkillUncheckedUpdateManyWithoutJobOfferNestedInput
   applications?: Prisma.JobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferCreateManyInput = {
@@ -917,20 +910,6 @@ export type JobOfferUpdateOneRequiredWithoutApplicationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.JobOfferUpdateToOneWithWhereWithoutApplicationsInput, Prisma.JobOfferUpdateWithoutApplicationsInput>, Prisma.JobOfferUncheckedUpdateWithoutApplicationsInput>
 }
 
-export type JobOfferCreateNestedOneWithoutRadarApplicationsInput = {
-  create?: Prisma.XOR<Prisma.JobOfferCreateWithoutRadarApplicationsInput, Prisma.JobOfferUncheckedCreateWithoutRadarApplicationsInput>
-  connectOrCreate?: Prisma.JobOfferCreateOrConnectWithoutRadarApplicationsInput
-  connect?: Prisma.JobOfferWhereUniqueInput
-}
-
-export type JobOfferUpdateOneRequiredWithoutRadarApplicationsNestedInput = {
-  create?: Prisma.XOR<Prisma.JobOfferCreateWithoutRadarApplicationsInput, Prisma.JobOfferUncheckedCreateWithoutRadarApplicationsInput>
-  connectOrCreate?: Prisma.JobOfferCreateOrConnectWithoutRadarApplicationsInput
-  upsert?: Prisma.JobOfferUpsertWithoutRadarApplicationsInput
-  connect?: Prisma.JobOfferWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.JobOfferUpdateToOneWithWhereWithoutRadarApplicationsInput, Prisma.JobOfferUpdateWithoutRadarApplicationsInput>, Prisma.JobOfferUncheckedUpdateWithoutRadarApplicationsInput>
-}
-
 export type JobOfferCreateWithoutCompanyInput = {
   id?: string
   title: string
@@ -952,7 +931,6 @@ export type JobOfferCreateWithoutCompanyInput = {
   status: Prisma.JobOfferStatusCreateNestedOneWithoutJobOffersInput
   skills?: Prisma.JobOfferSkillCreateNestedManyWithoutJobOfferInput
   applications?: Prisma.JobApplicationCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferUncheckedCreateWithoutCompanyInput = {
@@ -976,7 +954,6 @@ export type JobOfferUncheckedCreateWithoutCompanyInput = {
   updatedAt?: Date | string
   skills?: Prisma.JobOfferSkillUncheckedCreateNestedManyWithoutJobOfferInput
   applications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferCreateOrConnectWithoutCompanyInput = {
@@ -1051,7 +1028,6 @@ export type JobOfferCreateWithoutSkillsInput = {
   contractType: Prisma.JobOfferContractTypeCreateNestedOneWithoutJobOffersInput
   status: Prisma.JobOfferStatusCreateNestedOneWithoutJobOffersInput
   applications?: Prisma.JobApplicationCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferUncheckedCreateWithoutSkillsInput = {
@@ -1075,7 +1051,6 @@ export type JobOfferUncheckedCreateWithoutSkillsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   applications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferCreateOrConnectWithoutSkillsInput = {
@@ -1115,7 +1090,6 @@ export type JobOfferUpdateWithoutSkillsInput = {
   contractType?: Prisma.JobOfferContractTypeUpdateOneRequiredWithoutJobOffersNestedInput
   status?: Prisma.JobOfferStatusUpdateOneRequiredWithoutJobOffersNestedInput
   applications?: Prisma.JobApplicationUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferUncheckedUpdateWithoutSkillsInput = {
@@ -1139,7 +1113,6 @@ export type JobOfferUncheckedUpdateWithoutSkillsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   applications?: Prisma.JobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferCreateWithoutModalityInput = {
@@ -1163,7 +1136,6 @@ export type JobOfferCreateWithoutModalityInput = {
   status: Prisma.JobOfferStatusCreateNestedOneWithoutJobOffersInput
   skills?: Prisma.JobOfferSkillCreateNestedManyWithoutJobOfferInput
   applications?: Prisma.JobApplicationCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferUncheckedCreateWithoutModalityInput = {
@@ -1187,7 +1159,6 @@ export type JobOfferUncheckedCreateWithoutModalityInput = {
   updatedAt?: Date | string
   skills?: Prisma.JobOfferSkillUncheckedCreateNestedManyWithoutJobOfferInput
   applications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferCreateOrConnectWithoutModalityInput = {
@@ -1237,7 +1208,6 @@ export type JobOfferCreateWithoutContractTypeInput = {
   status: Prisma.JobOfferStatusCreateNestedOneWithoutJobOffersInput
   skills?: Prisma.JobOfferSkillCreateNestedManyWithoutJobOfferInput
   applications?: Prisma.JobApplicationCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferUncheckedCreateWithoutContractTypeInput = {
@@ -1261,7 +1231,6 @@ export type JobOfferUncheckedCreateWithoutContractTypeInput = {
   updatedAt?: Date | string
   skills?: Prisma.JobOfferSkillUncheckedCreateNestedManyWithoutJobOfferInput
   applications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferCreateOrConnectWithoutContractTypeInput = {
@@ -1311,7 +1280,6 @@ export type JobOfferCreateWithoutStatusInput = {
   contractType: Prisma.JobOfferContractTypeCreateNestedOneWithoutJobOffersInput
   skills?: Prisma.JobOfferSkillCreateNestedManyWithoutJobOfferInput
   applications?: Prisma.JobApplicationCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferUncheckedCreateWithoutStatusInput = {
@@ -1335,7 +1303,6 @@ export type JobOfferUncheckedCreateWithoutStatusInput = {
   updatedAt?: Date | string
   skills?: Prisma.JobOfferSkillUncheckedCreateNestedManyWithoutJobOfferInput
   applications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferCreateOrConnectWithoutStatusInput = {
@@ -1385,7 +1352,6 @@ export type JobOfferCreateWithoutApplicationsInput = {
   contractType: Prisma.JobOfferContractTypeCreateNestedOneWithoutJobOffersInput
   status: Prisma.JobOfferStatusCreateNestedOneWithoutJobOffersInput
   skills?: Prisma.JobOfferSkillCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferUncheckedCreateWithoutApplicationsInput = {
@@ -1409,7 +1375,6 @@ export type JobOfferUncheckedCreateWithoutApplicationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   skills?: Prisma.JobOfferSkillUncheckedCreateNestedManyWithoutJobOfferInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
 }
 
 export type JobOfferCreateOrConnectWithoutApplicationsInput = {
@@ -1449,7 +1414,6 @@ export type JobOfferUpdateWithoutApplicationsInput = {
   contractType?: Prisma.JobOfferContractTypeUpdateOneRequiredWithoutJobOffersNestedInput
   status?: Prisma.JobOfferStatusUpdateOneRequiredWithoutJobOffersNestedInput
   skills?: Prisma.JobOfferSkillUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferUncheckedUpdateWithoutApplicationsInput = {
@@ -1473,119 +1437,6 @@ export type JobOfferUncheckedUpdateWithoutApplicationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skills?: Prisma.JobOfferSkillUncheckedUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
-}
-
-export type JobOfferCreateWithoutRadarApplicationsInput = {
-  id?: string
-  title: string
-  description: string
-  category: string
-  positionsAvailable?: number
-  salaryRange: string
-  languages: string
-  locationUrl: string
-  requiredCareers?: Prisma.JobOfferCreaterequiredCareersInput | string[]
-  minExperienceYears?: number | null
-  otherRequirements?: Prisma.JobOfferCreateotherRequirementsInput | string[]
-  expiresAt?: Date | string | null
-  publishedAt?: Date | string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  company: Prisma.CompanyCreateNestedOneWithoutJobOffersInput
-  modality: Prisma.JobOfferModalityCreateNestedOneWithoutJobOffersInput
-  contractType: Prisma.JobOfferContractTypeCreateNestedOneWithoutJobOffersInput
-  status: Prisma.JobOfferStatusCreateNestedOneWithoutJobOffersInput
-  skills?: Prisma.JobOfferSkillCreateNestedManyWithoutJobOfferInput
-  applications?: Prisma.JobApplicationCreateNestedManyWithoutJobOfferInput
-}
-
-export type JobOfferUncheckedCreateWithoutRadarApplicationsInput = {
-  id?: string
-  title: string
-  description: string
-  companyId: string
-  modalityId: string
-  contractTypeId: string
-  statusId: string
-  category: string
-  positionsAvailable?: number
-  salaryRange: string
-  languages: string
-  locationUrl: string
-  requiredCareers?: Prisma.JobOfferCreaterequiredCareersInput | string[]
-  minExperienceYears?: number | null
-  otherRequirements?: Prisma.JobOfferCreateotherRequirementsInput | string[]
-  expiresAt?: Date | string | null
-  publishedAt?: Date | string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  skills?: Prisma.JobOfferSkillUncheckedCreateNestedManyWithoutJobOfferInput
-  applications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutJobOfferInput
-}
-
-export type JobOfferCreateOrConnectWithoutRadarApplicationsInput = {
-  where: Prisma.JobOfferWhereUniqueInput
-  create: Prisma.XOR<Prisma.JobOfferCreateWithoutRadarApplicationsInput, Prisma.JobOfferUncheckedCreateWithoutRadarApplicationsInput>
-}
-
-export type JobOfferUpsertWithoutRadarApplicationsInput = {
-  update: Prisma.XOR<Prisma.JobOfferUpdateWithoutRadarApplicationsInput, Prisma.JobOfferUncheckedUpdateWithoutRadarApplicationsInput>
-  create: Prisma.XOR<Prisma.JobOfferCreateWithoutRadarApplicationsInput, Prisma.JobOfferUncheckedCreateWithoutRadarApplicationsInput>
-  where?: Prisma.JobOfferWhereInput
-}
-
-export type JobOfferUpdateToOneWithWhereWithoutRadarApplicationsInput = {
-  where?: Prisma.JobOfferWhereInput
-  data: Prisma.XOR<Prisma.JobOfferUpdateWithoutRadarApplicationsInput, Prisma.JobOfferUncheckedUpdateWithoutRadarApplicationsInput>
-}
-
-export type JobOfferUpdateWithoutRadarApplicationsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
-  positionsAvailable?: Prisma.IntFieldUpdateOperationsInput | number
-  salaryRange?: Prisma.StringFieldUpdateOperationsInput | string
-  languages?: Prisma.StringFieldUpdateOperationsInput | string
-  locationUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  requiredCareers?: Prisma.JobOfferUpdaterequiredCareersInput | string[]
-  minExperienceYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherRequirements?: Prisma.JobOfferUpdateotherRequirementsInput | string[]
-  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  publishedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  company?: Prisma.CompanyUpdateOneRequiredWithoutJobOffersNestedInput
-  modality?: Prisma.JobOfferModalityUpdateOneRequiredWithoutJobOffersNestedInput
-  contractType?: Prisma.JobOfferContractTypeUpdateOneRequiredWithoutJobOffersNestedInput
-  status?: Prisma.JobOfferStatusUpdateOneRequiredWithoutJobOffersNestedInput
-  skills?: Prisma.JobOfferSkillUpdateManyWithoutJobOfferNestedInput
-  applications?: Prisma.JobApplicationUpdateManyWithoutJobOfferNestedInput
-}
-
-export type JobOfferUncheckedUpdateWithoutRadarApplicationsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.StringFieldUpdateOperationsInput | string
-  companyId?: Prisma.StringFieldUpdateOperationsInput | string
-  modalityId?: Prisma.StringFieldUpdateOperationsInput | string
-  contractTypeId?: Prisma.StringFieldUpdateOperationsInput | string
-  statusId?: Prisma.StringFieldUpdateOperationsInput | string
-  category?: Prisma.StringFieldUpdateOperationsInput | string
-  positionsAvailable?: Prisma.IntFieldUpdateOperationsInput | number
-  salaryRange?: Prisma.StringFieldUpdateOperationsInput | string
-  languages?: Prisma.StringFieldUpdateOperationsInput | string
-  locationUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  requiredCareers?: Prisma.JobOfferUpdaterequiredCareersInput | string[]
-  minExperienceYears?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  otherRequirements?: Prisma.JobOfferUpdateotherRequirementsInput | string[]
-  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  publishedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  skills?: Prisma.JobOfferSkillUncheckedUpdateManyWithoutJobOfferNestedInput
-  applications?: Prisma.JobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferCreateManyCompanyInput = {
@@ -1630,7 +1481,6 @@ export type JobOfferUpdateWithoutCompanyInput = {
   status?: Prisma.JobOfferStatusUpdateOneRequiredWithoutJobOffersNestedInput
   skills?: Prisma.JobOfferSkillUpdateManyWithoutJobOfferNestedInput
   applications?: Prisma.JobApplicationUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferUncheckedUpdateWithoutCompanyInput = {
@@ -1654,7 +1504,6 @@ export type JobOfferUncheckedUpdateWithoutCompanyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skills?: Prisma.JobOfferSkillUncheckedUpdateManyWithoutJobOfferNestedInput
   applications?: Prisma.JobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferUncheckedUpdateManyWithoutCompanyInput = {
@@ -1720,7 +1569,6 @@ export type JobOfferUpdateWithoutModalityInput = {
   status?: Prisma.JobOfferStatusUpdateOneRequiredWithoutJobOffersNestedInput
   skills?: Prisma.JobOfferSkillUpdateManyWithoutJobOfferNestedInput
   applications?: Prisma.JobApplicationUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferUncheckedUpdateWithoutModalityInput = {
@@ -1744,7 +1592,6 @@ export type JobOfferUncheckedUpdateWithoutModalityInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skills?: Prisma.JobOfferSkillUncheckedUpdateManyWithoutJobOfferNestedInput
   applications?: Prisma.JobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferUncheckedUpdateManyWithoutModalityInput = {
@@ -1810,7 +1657,6 @@ export type JobOfferUpdateWithoutContractTypeInput = {
   status?: Prisma.JobOfferStatusUpdateOneRequiredWithoutJobOffersNestedInput
   skills?: Prisma.JobOfferSkillUpdateManyWithoutJobOfferNestedInput
   applications?: Prisma.JobApplicationUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferUncheckedUpdateWithoutContractTypeInput = {
@@ -1834,7 +1680,6 @@ export type JobOfferUncheckedUpdateWithoutContractTypeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skills?: Prisma.JobOfferSkillUncheckedUpdateManyWithoutJobOfferNestedInput
   applications?: Prisma.JobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferUncheckedUpdateManyWithoutContractTypeInput = {
@@ -1900,7 +1745,6 @@ export type JobOfferUpdateWithoutStatusInput = {
   contractType?: Prisma.JobOfferContractTypeUpdateOneRequiredWithoutJobOffersNestedInput
   skills?: Prisma.JobOfferSkillUpdateManyWithoutJobOfferNestedInput
   applications?: Prisma.JobApplicationUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferUncheckedUpdateWithoutStatusInput = {
@@ -1924,7 +1768,6 @@ export type JobOfferUncheckedUpdateWithoutStatusInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skills?: Prisma.JobOfferSkillUncheckedUpdateManyWithoutJobOfferNestedInput
   applications?: Prisma.JobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
-  radarApplications?: Prisma.RadarJobApplicationUncheckedUpdateManyWithoutJobOfferNestedInput
 }
 
 export type JobOfferUncheckedUpdateManyWithoutStatusInput = {
@@ -1956,13 +1799,11 @@ export type JobOfferUncheckedUpdateManyWithoutStatusInput = {
 export type JobOfferCountOutputType = {
   skills: number
   applications: number
-  radarApplications: number
 }
 
 export type JobOfferCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   skills?: boolean | JobOfferCountOutputTypeCountSkillsArgs
   applications?: boolean | JobOfferCountOutputTypeCountApplicationsArgs
-  radarApplications?: boolean | JobOfferCountOutputTypeCountRadarApplicationsArgs
 }
 
 /**
@@ -1987,13 +1828,6 @@ export type JobOfferCountOutputTypeCountSkillsArgs<ExtArgs extends runtime.Types
  */
 export type JobOfferCountOutputTypeCountApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.JobApplicationWhereInput
-}
-
-/**
- * JobOfferCountOutputType without action
- */
-export type JobOfferCountOutputTypeCountRadarApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.RadarJobApplicationWhereInput
 }
 
 
@@ -2023,7 +1857,6 @@ export type JobOfferSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   status?: boolean | Prisma.JobOfferStatusDefaultArgs<ExtArgs>
   skills?: boolean | Prisma.JobOffer$skillsArgs<ExtArgs>
   applications?: boolean | Prisma.JobOffer$applicationsArgs<ExtArgs>
-  radarApplications?: boolean | Prisma.JobOffer$radarApplicationsArgs<ExtArgs>
   _count?: boolean | Prisma.JobOfferCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["jobOffer"]>
 
@@ -2109,7 +1942,6 @@ export type JobOfferInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   status?: boolean | Prisma.JobOfferStatusDefaultArgs<ExtArgs>
   skills?: boolean | Prisma.JobOffer$skillsArgs<ExtArgs>
   applications?: boolean | Prisma.JobOffer$applicationsArgs<ExtArgs>
-  radarApplications?: boolean | Prisma.JobOffer$radarApplicationsArgs<ExtArgs>
   _count?: boolean | Prisma.JobOfferCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type JobOfferIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2134,7 +1966,6 @@ export type $JobOfferPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     status: Prisma.$JobOfferStatusPayload<ExtArgs>
     skills: Prisma.$JobOfferSkillPayload<ExtArgs>[]
     applications: Prisma.$JobApplicationPayload<ExtArgs>[]
-    radarApplications: Prisma.$RadarJobApplicationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2556,7 +2387,6 @@ export interface Prisma__JobOfferClient<T, Null = never, ExtArgs extends runtime
   status<T extends Prisma.JobOfferStatusDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JobOfferStatusDefaultArgs<ExtArgs>>): Prisma.Prisma__JobOfferStatusClient<runtime.Types.Result.GetResult<Prisma.$JobOfferStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   skills<T extends Prisma.JobOffer$skillsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JobOffer$skillsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobOfferSkillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   applications<T extends Prisma.JobOffer$applicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JobOffer$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  radarApplications<T extends Prisma.JobOffer$radarApplicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JobOffer$radarApplicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarJobApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3051,30 +2881,6 @@ export type JobOffer$applicationsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.JobApplicationScalarFieldEnum | Prisma.JobApplicationScalarFieldEnum[]
-}
-
-/**
- * JobOffer.radarApplications
- */
-export type JobOffer$radarApplicationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the RadarJobApplication
-   */
-  select?: Prisma.RadarJobApplicationSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the RadarJobApplication
-   */
-  omit?: Prisma.RadarJobApplicationOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.RadarJobApplicationInclude<ExtArgs> | null
-  where?: Prisma.RadarJobApplicationWhereInput
-  orderBy?: Prisma.RadarJobApplicationOrderByWithRelationInput | Prisma.RadarJobApplicationOrderByWithRelationInput[]
-  cursor?: Prisma.RadarJobApplicationWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.RadarJobApplicationScalarFieldEnum | Prisma.RadarJobApplicationScalarFieldEnum[]
 }
 
 /**

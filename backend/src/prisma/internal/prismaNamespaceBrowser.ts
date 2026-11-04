@@ -127,9 +127,7 @@ export const ModelName = {
   MentorIntakeOperation: 'MentorIntakeOperation',
   RadarCvEvidence: 'RadarCvEvidence',
   RadarScoreSnapshot: 'RadarScoreSnapshot',
-  RadarAuditEvent: 'RadarAuditEvent',
-  RadarCompanyAccess: 'RadarCompanyAccess',
-  RadarJobApplication: 'RadarJobApplication'
+  RadarAuditEvent: 'RadarAuditEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1175,30 +1173,6 @@ export const RadarAuditEventScalarFieldEnum = {
 } as const
 
 export type RadarAuditEventScalarFieldEnum = (typeof RadarAuditEventScalarFieldEnum)[keyof typeof RadarAuditEventScalarFieldEnum]
-
-
-export const RadarCompanyAccessScalarFieldEnum = {
-  companyId: 'companyId',
-  userId: 'userId'
-} as const
-
-export type RadarCompanyAccessScalarFieldEnum = (typeof RadarCompanyAccessScalarFieldEnum)[keyof typeof RadarCompanyAccessScalarFieldEnum]
-
-
-export const RadarJobApplicationScalarFieldEnum = {
-  id: 'id',
-  jobOfferId: 'jobOfferId',
-  userId: 'userId',
-  consentToRecruiter: 'consentToRecruiter',
-  consentToCv: 'consentToCv',
-  consentToContact: 'consentToContact',
-  state: 'state',
-  appliedAt: 'appliedAt',
-  decidedAt: 'decidedAt',
-  decidedBy: 'decidedBy'
-} as const
-
-export type RadarJobApplicationScalarFieldEnum = (typeof RadarJobApplicationScalarFieldEnum)[keyof typeof RadarJobApplicationScalarFieldEnum]
 
 
 export const SortOrder = {
