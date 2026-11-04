@@ -21,6 +21,9 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
     'orientationType',
     'counterpart',
     'status',
+    'message',
+    'requestedAt',
+    'document',
   ],
   properties: {
     id: { type: 'string' as const, format: 'uuid' },
@@ -46,6 +49,22 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
       },
     },
     status: { type: 'string' as const, example: 'CONFIRMED' },
+    message: {
+      type: 'string' as const,
+      nullable: true,
+      maxLength: APPOINTMENT_MESSAGE_MAX_LENGTH,
+    },
+    requestedAt: { type: 'string' as const, format: 'date-time' },
+    document: {
+      type: 'object' as const,
+      nullable: true,
+      required: ['fileName', 'sizeBytes', 'mimeType'],
+      properties: {
+        fileName: { type: 'string' as const, example: 'cv.pdf' },
+        sizeBytes: { type: 'integer' as const, example: 245760 },
+        mimeType: { type: 'string' as const, example: 'application/pdf' },
+      },
+    },
   },
 };
 
