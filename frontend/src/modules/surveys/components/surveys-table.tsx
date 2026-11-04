@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SURVEY_STATUS_BADGE_CLASSES, SURVEY_STATUS_LABELS } from "../constants/survey-builder.constants";
@@ -6,6 +7,8 @@ import { SURVEYS_TABLE_COLUMNS } from "../constants/survey-routes.constants";
 import type { SurveysTableProps } from "../types/survey-component-props.types";
 import { formatIsoDateTime } from "../utils/survey-dates";
 import { SurveyRowActions } from "./survey-row-actions";
+
+const STATUS_COLUMN: (typeof SURVEYS_TABLE_COLUMNS)[number] = "Estado";
 
 export function SurveysTable({ surveys, isLoading, hasError, emptyMessage }: SurveysTableProps) {
   const rows = surveys ?? [];
@@ -23,7 +26,10 @@ export function SurveysTable({ surveys, isLoading, hasError, emptyMessage }: Sur
         <TableHeader className="bg-surface-soft">
           <TableRow>
             {SURVEYS_TABLE_COLUMNS.map((column) => (
-              <TableHead key={column} className="text-xs font-semibold tracking-wide text-ink uppercase">
+              <TableHead
+                key={column}
+                className={cn("text-xs font-semibold tracking-wide text-ink uppercase", column === STATUS_COLUMN && "text-center")}
+              >
                 {column}
               </TableHead>
             ))}
@@ -46,8 +52,8 @@ export function SurveysTable({ surveys, isLoading, hasError, emptyMessage }: Sur
                 </TableCell>
                 <TableCell className="text-ink-soft">{survey.academicPeriod ?? "-"}</TableCell>
                 <TableCell className="text-ink-soft tabular-nums">{formatIsoDateTime(survey.createdAt) || "-"}</TableCell>
-                <TableCell>
-                  <Badge className={SURVEY_STATUS_BADGE_CLASSES[survey.status]}>{SURVEY_STATUS_LABELS[survey.status]}</Badge>
+                <TableCell className="text-center">
+                  <Badge className={cn("min-w-24", SURVEY_STATUS_BADGE_CLASSES[survey.status])}>{SURVEY_STATUS_LABELS[survey.status]}</Badge>
                 </TableCell>
                 <TableCell>
                   <SurveyRowActions survey={survey} />

@@ -19,6 +19,15 @@ describe("SurveysTable", () => {
     expect(draft).toHaveTextContent("Borrador sin carreraCarla Arcecarla.arce@umssy.edu-2026-10-22 11:00Borrador");
   });
 
+  it("centra la columna de estado con badges del mismo ancho", () => {
+    render(<SurveysTable surveys={SURVEY_SUMMARIES} isLoading={false} hasError={false} />);
+
+    expect(screen.getByRole("columnheader", { name: "Estado" })).toHaveClass("text-center");
+    expect(screen.getByText("Publicada")).toHaveClass("min-w-24");
+    expect(screen.getByText("Borrador")).toHaveClass("min-w-24");
+    expect(screen.getByText("Publicada").closest("td")).toHaveClass("text-center");
+  });
+
   it("ofrece inhabilitar solo las encuestas publicadas y lo bloquea si ya tienen respuestas", () => {
     const [published, draft] = SURVEY_SUMMARIES;
     render(
