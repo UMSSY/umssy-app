@@ -17,6 +17,7 @@ import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owne
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
+import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
 
@@ -130,6 +131,14 @@ export class AppointmentsService {
   }
 
   async findOne(userId: string, id: string): Promise<MyAppointmentResponse> {
+    const appointment = await this.findParticipatedAppointment(userId, id);
+    return this.appointmentMapper.toResponse(appointment, userId);
+  }
+
+  private async findParticipatedAppointment(
+    userId: string,
+    id: string,
+  ): Promise<AppointmentRecord> {
     const appointment = await this.appointmentsRepository.findById(id);
     if (!appointment) {
       throw new AppointmentNotFoundException();
@@ -137,6 +146,6 @@ export class AppointmentsService {
     if (appointment.mentorId !== userId && appointment.studentId !== userId) {
       throw new AppointmentNotOwnedException();
     }
-    return this.appointmentMapper.toResponse(appointment, userId);
+    return appointment;
   }
 }
