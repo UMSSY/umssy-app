@@ -1,8 +1,7 @@
 
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-
-const ALLOWED_ROLES = new Set(['estudiante', 'titulado']);
+import { hasOnlyChatAllowedRoles } from '../constants/chat-role-policy.constants.js';
 
 @Injectable()
 export class ChatRolePolicyService {
@@ -40,9 +39,8 @@ export class ChatRolePolicyService {
           (user) =>
             user.id.toLowerCase() === id &&
             user.isActive &&
-            user.roles.length > 0 &&
-            user.roles.every(({ role }) =>
-              ALLOWED_ROLES.has(role.name.trim().toLowerCase()),
+            hasOnlyChatAllowedRoles(
+              user.roles.map(({ role }) => role.name),
             ),
         ),
       );
