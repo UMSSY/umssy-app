@@ -193,6 +193,12 @@ export interface SurveyQuestionTrendProps {
   trend: SurveyQuestionTrend;
 }
 
+export interface AcademicPeriodFilterProps {
+  periods: string[];
+  value?: string;
+  onChange: (period?: string) => void;
+}
+
 export interface SurveyPeriodFilterProps {
   periods: string[];
   value?: string;

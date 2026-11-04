@@ -10,6 +10,7 @@ export const REFRESH_SURVEYS_LABEL = "Actualizar";
 export const CREATOR_SEARCH_LABEL = "Buscar por correo electrónico";
 export const ACADEMIC_PERIOD_FILTER_LABEL = "Gestión académica";
 export const ACADEMIC_PERIOD_FILTER_PLACEHOLDER = "Selecciona una gestión";
+export const CLEAR_ACADEMIC_PERIOD_LABEL = "Quitar filtro de gestión académica";
 export const SURVEYS_FILTERED_EMPTY = "No hay encuestas que coincidan con los filtros.";
 
 export const SURVEY_ROW_ACTION_LABELS = {

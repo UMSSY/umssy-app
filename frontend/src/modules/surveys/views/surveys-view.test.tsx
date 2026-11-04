@@ -54,6 +54,23 @@ describe("SurveysView", () => {
     expect(screen.getByText("Encuesta de Empleabilidad")).toBeInTheDocument();
   });
 
+  it("BUG-UI-07: el icono X quita el filtro de gestión y restablece la tabla sin recargar", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<SurveysView />);
+    expect(await screen.findByText("Borrador sin carrera")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Quitar filtro de gestión académica" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("combobox", { name: "Gestión académica" }));
+    await user.click(await screen.findByRole("option", { name: "2026" }));
+    expect(screen.queryByText("Borrador sin carrera")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Quitar filtro de gestión académica" }));
+    expect(await screen.findByText("Borrador sin carrera")).toBeInTheDocument();
+    expect(screen.getByText("Encuesta de Empleabilidad")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Gestión académica" })).toHaveTextContent("Selecciona una gestión");
+    expect(screen.queryByRole("button", { name: "Quitar filtro de gestión académica" })).not.toBeInTheDocument();
+  });
+
   it("CA13: filtra las filas por el correo electrónico del autor", async () => {
     const user = userEvent.setup();
     renderWithQuery(<SurveysView />);

@@ -4,12 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button-variants";
-import { RefreshButton, ReportFilterSelect, ReportSearchInput } from "@/modules/reports";
+import { RefreshButton, ReportSearchInput } from "@/modules/reports";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
+import { AcademicPeriodFilter } from "../components/academic-period-filter";
 import { SurveysTable } from "../components/surveys-table";
 import {
-  ACADEMIC_PERIOD_FILTER_LABEL,
-  ACADEMIC_PERIOD_FILTER_PLACEHOLDER,
   CREATE_SURVEY_ACTION_LABEL,
   CREATE_SURVEY_PATH,
   CREATOR_SEARCH_LABEL,
@@ -26,7 +25,7 @@ export function SurveysView() {
   const { surveys, isLoading, isRefreshing, hasError, refresh } = useSurveys();
   const [creatorSearch, setCreatorSearch] = useState("");
   const [academicPeriod, setAcademicPeriod] = useState<string | undefined>(undefined);
-  const [periodOptions] = useState(() => getSurveyYears().map((year) => ({ value: year, label: year })));
+  const [academicPeriods] = useState(() => getSurveyYears());
   const hasFilters = Boolean(creatorSearch.trim() || academicPeriod);
   const visibleSurveys = filterSurveys(surveys, creatorSearch, academicPeriod);
 
@@ -46,13 +45,7 @@ export function SurveysView() {
     >
       <div className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-center">
         <ReportSearchInput value={creatorSearch} onChange={setCreatorSearch} label={CREATOR_SEARCH_LABEL} />
-        <ReportFilterSelect
-          label={ACADEMIC_PERIOD_FILTER_LABEL}
-          placeholder={ACADEMIC_PERIOD_FILTER_PLACEHOLDER}
-          options={periodOptions}
-          value={academicPeriod}
-          onChange={setAcademicPeriod}
-        />
+        <AcademicPeriodFilter periods={academicPeriods} value={academicPeriod} onChange={setAcademicPeriod} />
       </div>
       <SurveysTable
         surveys={visibleSurveys}
