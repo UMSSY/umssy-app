@@ -36,7 +36,7 @@ describe("AppointmentCard", () => {
     expect(
       screen.getByText("Mentor · Desarrollo profesional"),
     ).toBeInTheDocument();
-    expect(screen.getByText("20:00 - 21:00 (GMT-4)")).toBeInTheDocument();
+    expect(screen.getByText("20:00 - 21:00 · Hora de Bolivia (GMT-4)")).toBeInTheDocument();
   });
 
   it("identifica a la otra persona como titulado cuando la cita es del mentor", () => {

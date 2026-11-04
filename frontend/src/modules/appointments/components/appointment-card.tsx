@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BOLIVIA_TIMEZONE_LABEL } from "@/shared/constants/date-time.constants";
+import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import {
   formatBlockRange,
   formatBoliviaDay,
@@ -60,7 +60,7 @@ export function AppointmentCard({ appointment, onSelect }: AppointmentCardProps)
 
           <span className="col-start-1 row-start-4 text-sm whitespace-nowrap text-text-secondary sm:row-start-3">
             {formatBlockRange(appointment.startAt, appointment.endAt)}
-            {` (${BOLIVIA_TIMEZONE_LABEL})`}
+            {` · ${BOLIVIA_TIME_LABEL}`}
           </span>
         </span>
       </Button>
