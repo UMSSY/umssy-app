@@ -85,9 +85,15 @@ export class ProfileSkillsAnalysisService {
         resultVersion: published?.state.resultVersion ?? null,
         changed: published?.changed ?? false,
       });
-    } catch (error) {
+      } catch (error) {
       await this.markError(userId, revision);
-      this.write('error', NLP_LOG_EVENTS.markErrorFailed, { userId, revision, code: toErrorCode(error) });
+      this.write('error', NLP_LOG_EVENTS.failed, {
+        correlationId,
+        userId,
+        revision,
+        durationMs: Math.round(performance.now() - startedAt),
+        code: toErrorCode(error),
+      });
     }
     return outcome;
   }
@@ -95,7 +101,9 @@ export class ProfileSkillsAnalysisService {
   private async markError(userId: string, revision: number): Promise<void> {
     try {
       await this.results.markError(userId, revision, new Date());
-    } catch {}
+    } catch (error) {
+      this.write('error', NLP_LOG_EVENTS.markErrorFailed, { userId, revision, code: toErrorCode(error) });
+    }
   }
 
   private async readSnapshot(userId: string): Promise<ProfileSkillsRadarResponse> {
