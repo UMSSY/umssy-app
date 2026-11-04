@@ -8,8 +8,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
-import { MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY } from "../constants/mentorship-wizard.constants";
-import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
+import { getMentorshipWizardDraftStorageKey } from "../services/mentorship-wizard-draft.service";
 import { mentorParticipationService } from "@/modules/mentors/services/mentor-participation.service";
 import {
   clearAccessToken,
@@ -24,6 +23,8 @@ const integrationMocks = vi.hoisted(() => ({
   retryOrientationTypes: vi.fn(),
   isTechnicalAreasError: false,
   isOrientationTypesError: false,
+  currentUserId: "user-a",
+  refreshRoles: vi.fn(),
 }));
 const drafts = vi.hoisted(() => new Map<string, unknown>());
 
@@ -39,6 +40,15 @@ vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: integrationMocks.push }),
+}));
+
+vi.mock("@/shared/contexts/auth-context", () => ({
+  useAuth: () => ({
+    currentUserId: integrationMocks.currentUserId,
+    roles: [],
+    isLoading: false,
+    refreshRoles: integrationMocks.refreshRoles,
+  }),
 }));
 
 vi.mock("../services/mentor-activation.service", () => ({
@@ -81,6 +91,7 @@ vi.mock("../hooks/use-mentorship-catalogs", () => ({
 }));
 
 beforeEach(() => {
+  drafts.clear();
   vi.restoreAllMocks();
   vi.clearAllMocks();
   vi.spyOn(mentorParticipationService, "capacity").mockResolvedValue({
@@ -93,6 +104,7 @@ beforeEach(() => {
   vi.spyOn(mentorParticipationService, "getCurrent").mockResolvedValue(null);
   integrationMocks.isTechnicalAreasError = false;
   integrationMocks.isOrientationTypesError = false;
+  integrationMocks.currentUserId = "user-a";
   integrationMocks.activateMentor.mockResolvedValue({
     id: "550e8400-e29b-41d4-a716-446655440005",
   });
@@ -100,10 +112,14 @@ beforeEach(() => {
 
 afterEach(async () => {
   cleanup();
-  await clearMentorshipWizardDraft();
+  drafts.clear();
   clearAccessToken();
   vi.unstubAllEnvs();
 });
+
+function draftKey(userId = integrationMocks.currentUserId) {
+  return getMentorshipWizardDraftStorageKey(userId);
+}
 
 function advanceToConfirmation() {
   fireEvent.click(screen.getByRole("checkbox"));
@@ -178,12 +194,19 @@ describe("MentorshipView", () => {
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(screen.getByText("Orientación profesional")).toBeInTheDocument();
     expect(
-      drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null,
+      drafts.get(draftKey()) ?? null,
     ).not.toBeNull();
     expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
   });
 
   it("registra una solicitud real solo al confirmar Solicitar cupo", async () => {
+    const draftB = {
+      currentStep: 4,
+      wantsToParticipate: true,
+      selectedTechnicalAreaIds: ["area-b"],
+      selectedOrientationTypeIds: ["orientation-b"],
+    };
+    drafts.set(draftKey("user-b"), draftB);
     vi.mocked(mentorParticipationService.capacity).mockResolvedValue({
       available: 0,
       capacity: 2,
@@ -221,6 +244,8 @@ describe("MentorshipView", () => {
       "/mentors/participation?registered=1",
     );
     expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
+    expect(drafts.get(draftKey()) ?? null).toBeNull();
+    expect(drafts.get(draftKey("user-b"))).toEqual(draftB);
   });
 
   it.each(["Cancelar", "Escape"])(
@@ -769,7 +794,14 @@ describe("MentorshipView", () => {
     expect(screen.getByText("Orientación profesional")).toBeInTheDocument();
   });
 
-  it("shows success only after one activation resolves and clears the draft", async () => {
+  it("shows success only after one activation resolves and clears only A's draft", async () => {
+    const draftB = {
+      currentStep: 3,
+      wantsToParticipate: true,
+      selectedTechnicalAreaIds: ["area-b"],
+      selectedOrientationTypeIds: ["orientation-b"],
+    };
+    drafts.set(draftKey("user-b"), draftB);
     let resolveActivation!: (value: { id: string }) => void;
     integrationMocks.activateMentor.mockReturnValue(
       new Promise((resolve) => {
@@ -782,7 +814,7 @@ describe("MentorshipView", () => {
 
     await waitFor(() => {
       expect(
-        drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null,
+        drafts.get(draftKey()) ?? null,
       ).not.toBeNull();
     });
 
@@ -807,7 +839,7 @@ describe("MentorshipView", () => {
       }),
     ).not.toBeInTheDocument();
     expect(
-      drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null,
+      drafts.get(draftKey()) ?? null,
     ).not.toBeNull();
 
     await act(async () => {
@@ -819,7 +851,8 @@ describe("MentorshipView", () => {
         name: "Tu participación como mentor está activa",
       }),
     ).toBeInTheDocument();
-    expect(drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null).toBeNull();
+    expect(drafts.get(draftKey()) ?? null).toBeNull();
+    expect(drafts.get(draftKey("user-b"))).toEqual(draftB);
   });
 
   it("keeps selections and the draft when activation returns a conflict", async () => {
@@ -833,7 +866,7 @@ describe("MentorshipView", () => {
 
     await waitFor(() => {
       expect(
-        drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null,
+        drafts.get(draftKey()) ?? null,
       ).not.toBeNull();
     });
 
@@ -852,7 +885,7 @@ describe("MentorshipView", () => {
       }),
     ).not.toBeInTheDocument();
     expect(
-      drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY) ?? null,
+      drafts.get(draftKey()) ?? null,
     ).not.toBeNull();
   });
 
@@ -887,7 +920,7 @@ describe("MentorshipView", () => {
           name: "Tu participación como mentor está activa",
         }),
       ).not.toBeInTheDocument();
-      expect(drafts.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).not.toBeNull();
+      expect(drafts.get(draftKey())).not.toBeNull();
     },
   );
 });

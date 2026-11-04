@@ -22,11 +22,13 @@ function mentor(
   firstName: string,
   lastName: string,
   areas: string[],
+  createdAt = new Date('2026-01-01T00:00:00.000Z'),
 ) {
   return {
     id,
     firstName,
     lastName,
+    createdAt,
     mentorTechnicalAreas: areas.map((name) => ({
       technicalAreaId: areaIds.get(name)!,
     })),
@@ -37,13 +39,11 @@ function makeContext(
   skills: Array<{ name: string; isCustom?: boolean }>,
   candidates: ReturnType<typeof mentor>[],
 ) {
-  const skillFindMany = vi
-    .fn()
-    .mockResolvedValue(
-      skills.map(({ name, isCustom = false }) => ({
-        skill: { name, isCustom },
-      })),
-    );
+  const skillFindMany = vi.fn().mockResolvedValue(
+    skills.map(({ name, isCustom = false }) => ({
+      skill: { name, isCustom },
+    })),
+  );
   const areaFindMany = vi
     .fn()
     .mockImplementation(async ({ where }) =>
@@ -187,30 +187,33 @@ describe('MentorAffinityService', () => {
   it.each([
     { skills: [], status: 'no_skills' },
     { skills: [{ name: 'Python' }], status: 'unmapped_skills' },
-  ])('mantiene A–Z sin contador para $status', async ({ skills, status }) => {
-    const context = makeContext(skills, []);
-    context.userCount.mockResolvedValue(0);
-    const result = await context.service.findDirectory(filters, 'user-1');
-    expect(result).toMatchObject({
-      effectiveSort: 'name_asc',
-      affinityStatus: status,
-      items: [],
-    });
-    expect(context.userFindMany).not.toHaveBeenCalled();
-  });
+  ])(
+    'mantiene el orden general sin contador para $status',
+    async ({ skills, status }) => {
+      const context = makeContext(skills, []);
+      context.userCount.mockResolvedValue(0);
+      const result = await context.service.findDirectory(filters, 'user-1');
+      expect(result).toMatchObject({
+        effectiveSort: 'default',
+        affinityStatus: status,
+        items: [],
+      });
+      expect(context.userFindMany).not.toHaveBeenCalled();
+    },
+  );
 
-  it('mantiene ready y ceros reales cuando nadie coincide, con desempate por nombre e ID', async () => {
+  it('mantiene ready y ceros reales cuando nadie coincide, con orden general e ID', async () => {
     const context = makeContext(
       [{ name: 'NestJS' }],
       [
-        mentor('z', 'Ana', 'Rojas', ['Cloud']),
-        mentor('a', 'Ana', 'Rojas', ['Datos']),
-        mentor('b', 'Ana', 'Paz', []),
-        mentor('c', 'Beto', 'Paz', []),
+        mentor('z', 'Ana', 'Rojas', ['Cloud'], new Date('2024-01-01')),
+        mentor('a', 'Ana', 'Rojas', ['Datos'], new Date('2025-01-01')),
+        mentor('b', 'Ana', 'Paz', [], new Date('2023-01-01')),
+        mentor('c', 'Beto', 'Paz', [], new Date('2025-01-01')),
       ],
     );
     const result = await context.service.findDirectory(filters, 'user-1');
-    expect(result.items.map(({ id }) => id)).toEqual(['b', 'a', 'z', 'c']);
+    expect(result.items.map(({ id }) => id)).toEqual(['b', 'z', 'a', 'c']);
     expect(
       result.items.every(
         ({ sharedInterestsCount }) => sharedInterestsCount === 0,

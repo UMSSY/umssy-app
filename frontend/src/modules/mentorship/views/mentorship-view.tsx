@@ -60,7 +60,7 @@ function extractErrorMessage(error: unknown): string | null {
 export function MentorshipView() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { refreshRoles } = useAuth();
+  const { currentUserId, refreshRoles } = useAuth();
   const token = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
@@ -105,7 +105,7 @@ export function MentorshipView() {
     canGoNext,
     hasDraftStorageError,
     setState,
-  } = useMentorshipWizard();
+  } = useMentorshipWizard(currentUserId);
 
   const {
     technicalAreas,
@@ -227,7 +227,9 @@ export function MentorshipView() {
         }),
         queryClient.invalidateQueries({ queryKey: ["mentorship", "profile"] }),
       ]);
-      await clearMentorshipWizardDraft().catch(() => {});
+      if (currentUserId) {
+        await clearMentorshipWizardDraft(currentUserId).catch(() => {});
+      }
       setIsActivated(true);
     } catch (error) {
       if (
@@ -300,7 +302,9 @@ export function MentorshipView() {
         technicalAreaIds: selectedTechnicalAreaIds,
         orientationTypeIds: selectedOrientationTypeIds,
       });
-      await clearMentorshipWizardDraft().catch(() => {});
+      if (currentUserId) {
+        await clearMentorshipWizardDraft(currentUserId).catch(() => {});
+      }
       await queryClient.invalidateQueries({
         queryKey: ["mentor-participation-requests"],
       });

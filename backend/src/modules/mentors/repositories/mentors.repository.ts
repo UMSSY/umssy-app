@@ -43,7 +43,7 @@ interface DirectoryFilters {
   available: boolean;
 }
 
-type MentorDirectorySort = 'name_asc' | 'name_desc';
+type MentorDirectorySort = 'default' | 'name_asc' | 'name_desc';
 
 const SEARCH_CHARACTER_VARIANTS: Readonly<Record<string, readonly string[]>> = {
   a: ['a', 'á'],
@@ -180,8 +180,10 @@ export class MentorsRepository extends MentorIntakeRepository {
         id: true,
         firstName: true,
         lastName: true,
+        createdAt: true,
         mentorTechnicalAreas: { select: { technicalAreaId: true } },
       },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     });
   }
 
@@ -203,18 +205,17 @@ export class MentorsRepository extends MentorIntakeRepository {
     now: Date,
     page: number,
     pageSize: number,
-    sort: MentorDirectorySort = 'name_asc',
+    sort: MentorDirectorySort = 'default',
   ) {
     const direction = sort === 'name_desc' ? 'desc' : 'asc';
 
     const mentors = await this.prisma.user.findMany({
       where: this.directoryWhere(filters, now),
       select: directorySelect,
-      orderBy: [
-        { firstName: direction },
-        { lastName: direction },
-        { id: 'asc' },
-      ],
+      orderBy:
+        sort === 'default'
+          ? [{ createdAt: 'asc' }, { id: 'asc' }]
+          : [{ firstName: direction }, { lastName: direction }, { id: 'asc' }],
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
