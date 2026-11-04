@@ -38,6 +38,12 @@ describe("validateWorkExperience", () => {
     });
   });
 
+  it.each(["", "   "])("requires a description when it is %j", (description) => {
+    expect(validateWorkExperience({ ...VALID_VALUES, description })).toEqual({
+      description: WORK_EXPERIENCE_VALIDATION_MESSAGES.required,
+    });
+  });
+
   it("rejects an end date earlier than the start date", () => {
     expect(validateWorkExperience({ ...VALID_VALUES, endDate: "2024-06-30" }).endDate).toBe(
       WORK_EXPERIENCE_VALIDATION_MESSAGES.endDateBeforeStartDate,

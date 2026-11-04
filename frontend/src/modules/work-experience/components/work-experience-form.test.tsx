@@ -46,6 +46,31 @@ describe("WorkExperienceForm", () => {
     expect(screen.getByLabelText(/Empresa/)).toHaveAttribute("aria-invalid", "true");
   });
 
+  it("marks the description as required", () => {
+    render(<WorkExperienceForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+
+    const label = screen.getByText("Descripción de funciones");
+    expect(label).toHaveTextContent("Descripción de funciones *");
+    expect(screen.queryByText(/\(opcional\)/)).not.toBeInTheDocument();
+  });
+
+  it("does not submit without a description and shows the required message", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<WorkExperienceForm onSubmit={onSubmit} onCancel={vi.fn()} />);
+
+    await user.type(screen.getByLabelText(/Empresa/), "Synapse Labs");
+    await user.type(screen.getByLabelText(/Cargo/), "Desarrolladora web");
+    fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2024-07-01" } });
+    fireEvent.change(screen.getByLabelText("Hasta"), { target: { value: "2024-12-31" } });
+    await user.type(screen.getByLabelText(/Descripción de funciones/), "   ");
+    await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByText(WORK_EXPERIENCE_VALIDATION_MESSAGES.required)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Descripción de funciones/)).toHaveAttribute("aria-invalid", "true");
+  });
+
   it("rejects an end date earlier than the start date", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();
