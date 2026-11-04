@@ -1,3 +1,4 @@
+
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -171,11 +172,11 @@ describe("WorkExperienceForm", () => {
     render(<WorkExperienceForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
 
     expect(screen.getByLabelText(/Cargo/)).toHaveAttribute("maxLength", "150");
-    expect(screen.getByLabelText(/Descripción de funciones/)).toHaveAttribute("maxLength", "2000");
+    expect(screen.getByLabelText(/Descripción de funciones/)).toHaveAttribute("maxLength", "5000");
     await user.type(screen.getByLabelText(/Cargo/), "Analista");
 
     expect(screen.getByText("8/150")).toBeInTheDocument();
-    expect(screen.getByText("0/2000")).toBeInTheDocument();
+    expect(screen.getByText("0/5000")).toBeInTheDocument();
   });
 
   it("asks to shorten a saved position that is longer than the limit", async () => {

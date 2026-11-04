@@ -117,3 +117,50 @@ describe("VacanciesView", () => {
     expect(getMine).not.toHaveBeenCalled();
   });
 });
+
+describe("VacanciesView - tarjeta de vacante", () => {
+  it("muestra la modalidad de la vacante", async () => {
+    listPublished.mockResolvedValue([buildVacancy({ modality: "Remoto" })]);
+    renderWithQuery(<VacanciesView />);
+
+    expect(await screen.findByText("Remoto")).toBeInTheDocument();
+  });
+
+  it("muestra las habilidades requeridas como chips", async () => {
+    listPublished.mockResolvedValue([buildVacancy({ requirements: ["Node.js", "React"] })]);
+    renderWithQuery(<VacanciesView />);
+
+    const skills = await screen.findByRole("list", { name: "Habilidades requeridas" });
+    expect(within(skills).getByText("Node.js")).toBeInTheDocument();
+    expect(within(skills).getByText("React")).toBeInTheDocument();
+  });
+
+  it("oculta la lista de habilidades cuando la vacante no tiene ninguna", async () => {
+    listPublished.mockResolvedValue([buildVacancy({ requirements: [] })]);
+    renderWithQuery(<VacanciesView />);
+
+    await screen.findByRole("link", { name: /^Ver detalles de / });
+    expect(screen.queryByRole("list", { name: "Habilidades requeridas" })).toBeNull();
+  });
+
+  it("abre la ubicación de Google Maps en una pestaña nueva", async () => {
+    listPublished.mockResolvedValue([buildVacancy({ locationUrl: "https://maps.app.goo.gl/abc123" })]);
+    renderWithQuery(<VacanciesView />);
+
+    const link = await screen.findByRole("link", { name: /Ver ubicación/ });
+    expect(link).toHaveAttribute("href", "https://maps.app.goo.gl/abc123");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", expect.stringContaining("noopener"));
+  });
+
+  it.each(["https://jobs.example.invalid/seed/1", "javascript:alert(1)", ""])(
+    "oculta la ubicación cuando el enlace %j no es de Google Maps",
+    async (locationUrl) => {
+      listPublished.mockResolvedValue([buildVacancy({ locationUrl })]);
+      renderWithQuery(<VacanciesView />);
+
+      await screen.findByRole("link", { name: /^Ver detalles de / });
+      expect(screen.queryByRole("link", { name: /Ver ubicación/ })).toBeNull();
+    },
+  );
+});
