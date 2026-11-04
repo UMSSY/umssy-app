@@ -1,3 +1,4 @@
+
 import { ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -121,18 +122,20 @@ function setup(rolesA: string[], rolesB: string[]) {
   const mapper = {
     toUploadedFile: vi.fn().mockReturnValue({}),
     toResponse: vi.fn().mockReturnValue({ id: 'attachment-1' }),
-    toMessageResponse: vi.fn().mockImplementation(({ message, attachmentRecord, isImage }) => ({
-      id: message.id,
-      conversationId: message.conversationId,
-      senderId: message.senderId,
-      content: message.content ?? '',
-      timestamp: message.sentAt.toISOString(),
-      createdAt: message.createdAt.toISOString(),
-      status: 'sent',
-      isAttachment: true,
-      attachmentType: isImage ? 'image' : 'file',
-      attachment: { id: attachmentRecord.id },
-    })),
+    toMessageResponse: vi.fn().mockImplementation(
+      ({ message, attachmentRecord, isImage }) => ({
+        id: message.id,
+        conversationId: message.conversationId,
+        senderId: message.senderId,
+        content: message.content ?? '',
+        timestamp: message.sentAt.toISOString(),
+        createdAt: message.createdAt.toISOString(),
+        status: 'sent',
+        isAttachment: true,
+        attachmentType: isImage ? 'image' : 'file',
+        attachment: { id: attachmentRecord.id },
+      }),
+    ),
   };
 
   const fileValidation = {
@@ -145,6 +148,14 @@ function setup(rolesA: string[], rolesB: string[]) {
     }),
   };
 
+  const educationsService = {
+    findAll: vi.fn().mockResolvedValue([]),
+  };
+
+  const userSkillService = {
+    getUserSkills: vi.fn().mockResolvedValue([]),
+  };
+
   const conversationService = new ConversationService(
     ...([
       conversations,
@@ -155,6 +166,8 @@ function setup(rolesA: string[], rolesB: string[]) {
       blocks,
       new ConversationMapper(),
       policy,
+      educationsService,
+      userSkillService,
     ] as unknown as ConstructorParameters<typeof ConversationService>),
   );
 
@@ -301,6 +314,7 @@ describe('HU8 tarea 3: roles permitidos', () => {
 
   it('rechaza abrir una conversacion existente con reclutador', async () => {
     const context = setup(['estudiante'], ['empresa']);
+
     context.conversations.findByOrderedPair.mockResolvedValue(
       context.conversation,
     );
@@ -309,7 +323,9 @@ describe('HU8 tarea 3: roles permitidos', () => {
       context.conversationService.getOrCreate(USER_A, USER_B),
     ).rejects.toBeInstanceOf(ForbiddenException);
 
-    expect(context.conversations.createWithParticipants).not.toHaveBeenCalled();
+    expect(
+      context.conversations.createWithParticipants,
+    ).not.toHaveBeenCalled();
   });
 
   it('vuelve a consultar roles si cambian durante la sesion', async () => {
@@ -332,22 +348,25 @@ describe('HU8 tarea 3: roles permitidos', () => {
 
   it('conserva la solicitud de conexion aceptada de HU9', async () => {
     const context = setup(['estudiante'], ['titulado']);
+
     context.connections.findAcceptedRequest.mockResolvedValue(null);
 
     await expect(
       context.conversationService.getOrCreate(USER_A, USER_B),
     ).rejects.toBeInstanceOf(ForbiddenException);
 
-    expect(context.connections.findAcceptedRequest).toHaveBeenCalledWith(
-      USER_A,
-      USER_B,
-    );
+    expect(
+      context.connections.findAcceptedRequest,
+    ).toHaveBeenCalledWith(USER_A, USER_B);
 
-    expect(context.conversations.createWithParticipants).not.toHaveBeenCalled();
+    expect(
+      context.conversations.createWithParticipants,
+    ).not.toHaveBeenCalled();
   });
 
   it('conserva el bloqueo de HU13 aunque los roles sean permitidos', async () => {
     const context = setup(['estudiante'], ['titulado']);
+
     context.blocks.isBlockedBetween.mockResolvedValue(true);
 
     await expect(
@@ -368,7 +387,10 @@ describe('HU8 tarea 3: roles permitidos', () => {
       }),
     ).rejects.toBeInstanceOf(UserBlockedException);
 
-    expect(context.conversations.createWithParticipants).not.toHaveBeenCalled();
+    expect(
+      context.conversations.createWithParticipants,
+    ).not.toHaveBeenCalled();
+
     expect(context.messages.create).not.toHaveBeenCalled();
     expect(context.attachments.create).not.toHaveBeenCalled();
   });

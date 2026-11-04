@@ -1,9 +1,13 @@
+
 import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import { UserLookupRepository } from '../repositories/user-lookup.repository.js';
 import { ConnectionRequestRepository } from '../repositories/connection-request.repository.js';
+
+import { EducationsService } from '../../educations/services/educations.service.js';
+import { UserSkillService } from '../../skills/services/user-skill.service.js';
 
 import { UserPresenceService } from './user-presence.service.js';
 import { BlockService } from './block.service.js';
@@ -31,6 +35,8 @@ export class ConversationService {
     private readonly blockService: BlockService,
     private readonly conversationMapper: ConversationMapper,
     private readonly chatRolePolicyService: ChatRolePolicyService,
+    private readonly educationsService: EducationsService,
+    private readonly userSkillService: UserSkillService,
   ) {}
 
   async getOrCreate(
@@ -80,7 +86,6 @@ export class ConversationService {
       normalizedCurrentUserId,
     );
 
-    // HU-13: impedir abrir o crear conversaciones con usuarios bloqueados.
     if (
       await this.blockService.isBlockedBetween(
         normalizedCurrentUserId,
@@ -90,7 +95,6 @@ export class ConversationService {
       throw new UserBlockedException();
     }
 
-    // HU-08: consultar los roles vigentes antes de abrir o crear una conversación.
     await this.chatRolePolicyService.assertCanCommunicate(
       normalizedCurrentUserId,
       normalizedContactId,
@@ -114,7 +118,6 @@ export class ConversationService {
       };
     }
 
-    // HU-09: exigir una conexión aceptada antes de crear una conversación.
     const acceptedRequest =
       await this.connectionRequestRepository.findAcceptedRequest(
         userAId,
@@ -145,7 +148,6 @@ export class ConversationService {
         isCreated: true,
       };
     } catch (error: unknown) {
-      // Recuperación ante creación concurrente.
       const err = error as {
         code?: string;
         message?: string;
@@ -213,7 +215,6 @@ export class ConversationService {
     currentUserId: string,
     blockedIds: ReadonlySet<string>,
   ): Promise<ConversationResponse> {
-    // Las salas de eventos no se convierten como conversaciones privadas.
     if (
       conversation.event?.id ||
       (!conversation.userAId && !conversation.userBId)
@@ -230,12 +231,14 @@ export class ConversationService {
       throw new UserNotFoundException();
     }
 
-    const [onlineMap, participant] = await Promise.all([
+    const [onlineMap, participant, educations, userSkills] = await Promise.all([
       this.userPresenceService.mapOnlineStatus([contact.id]),
       this.participantRepository.findByConversationAndUser(
         conversation.id,
         currentUserId,
       ),
+      this.educationsService.findAll(contact.id),
+      this.userSkillService.getUserSkills(contact.id),
     ]);
 
     const unreadCount = participant
@@ -246,12 +249,25 @@ export class ConversationService {
         )
       : 0;
 
+    const latestEducation = [...educations].sort(
+      (a, b) =>
+        new Date(b.startDate).getTime() - new Date(a.startDate).getTime(),
+    )[0];
+
+    const academicTitle = latestEducation
+      ? `${latestEducation.degree} / ${latestEducation.institution}`
+      : contact.headline ?? null;
+
+    const skills = userSkills.map((skill) => skill.name);
+
     return this.conversationMapper.toDirectConversationResponse({
       conversation,
       contact,
       isOnline: onlineMap.get(contact.id) ?? false,
       unreadCount,
       isBlockedByMe: blockedIds.has(contact.id.toLowerCase()),
+      academicTitle,
+      skills,
     });
   }
 }
