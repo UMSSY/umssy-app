@@ -8,6 +8,8 @@ import type {
   SurveyDetail,
   SurveyOptionStatistic,
   SurveyQuestionStatistic,
+  SurveyQuestionTrend,
+  SurveyStatistics,
   SurveyStatus,
   SurveySummary,
 } from "./survey.types";
@@ -187,9 +189,30 @@ export interface SurveyAnalyticsViewProps {
   id: string;
 }
 
+export interface SurveyQuestionTrendProps {
+  trend: SurveyQuestionTrend;
+}
+
+export interface SurveyPeriodFilterProps {
+  periods: string[];
+  value?: string;
+  onChange: (period?: string) => void;
+}
+
+export interface SurveyAnalyticsHeaderProps {
+  title: string;
+  description: string;
+  actions?: ReactNode;
+}
+
+export interface SurveyStatisticsSummaryProps {
+  statistics: SurveyStatistics;
+}
+
 export interface SurveyEditorProps {
   title: string;
   initialState?: SurveyBuilderState;
+  autosaveKey?: string;
   isSaving: boolean;
   pendingStatus?: SurveyStatus;
   draftSavedMessage: string;
@@ -217,6 +240,8 @@ export interface SurveyQuestionFieldQuestion {
   options: SurveyQuestionFieldOption[];
 }
 
+export type SurveyQuestionFieldVariant = "card" | "plain";
+
 export interface SurveyQuestionFieldProps {
   question: SurveyQuestionFieldQuestion;
   index: number;
@@ -226,6 +251,7 @@ export interface SurveyQuestionFieldProps {
   isReadOnly?: boolean;
   hint?: string;
   error?: string;
+  variant?: SurveyQuestionFieldVariant;
 }
 
 export interface AnswerSurveyViewProps {
