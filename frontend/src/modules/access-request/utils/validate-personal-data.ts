@@ -2,6 +2,7 @@ import { CAREERS } from "../constants/careers.constants";
 import { ID_CARD_ISSUED_IN } from "../constants/id-card-issued-in.constants";
 import { ID_CARD_MAX_LENGTH, ID_CARD_MIN_LENGTH, SIS_CODE_LENGTH } from "../constants/personal-data-rules.constants";
 import type { FieldErrors, PersonalDataValues } from "../types/access-request.types";
+import { detectEmailTypo } from "./detect-email-typo";
 
 export const MIN_AGE = 18;
 
@@ -53,6 +54,8 @@ function validateEmail(value: string): string | undefined {
   if (text.length === 0) return "El correo es obligatorio";
   if (text.length > 150) return "El correo no puede superar los 150 caracteres";
   if (!EMAIL_REGEX.test(text)) return "El correo no tiene un formato válido";
+  const suggestion = detectEmailTypo(text);
+  if (suggestion) return `Revisa el dominio del correo. ¿Quisiste decir @${suggestion}?`;
 }
 
 function validateBirthDate(value: string, now: Date): string | undefined {
