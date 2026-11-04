@@ -22,6 +22,8 @@ export const AUTOMATION_LABELS = {
 export const QUEUED_DESCRIPTION = "En cola de lectura OCR";
 export const NOT_VALIDATED_LABEL = "Sin validar";
 
+export const VALIDATION_FIELD_ORDER: readonly ValidationField[] = ["fullName", "career", "graduationYear", "idCardNumber", "sisCode"];
+
 export const VALIDATION_FIELD_LABELS: Record<ValidationField, string> = {
   fullName: "Nombre completo",
   career: "Carrera",
