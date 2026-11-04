@@ -1,6 +1,6 @@
 import { Pencil } from "lucide-react";
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
 import type { EditSectionLinkProps } from "../types/edit-section-link-props.types";
 
