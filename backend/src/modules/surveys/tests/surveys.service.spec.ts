@@ -49,7 +49,10 @@ function createRepositories() {
         createdAt: NOW,
       }),
       findAll: vi.fn(),
-      findGraduateProfile: vi.fn().mockResolvedValue({ careerId: CAREER_ID, graduationYear: 2026 }),
+      findStatistics: vi.fn(),
+      findGraduateProfile: vi
+        .fn()
+        .mockResolvedValue({ careerId: CAREER_ID, graduationYear: 2026 }),
       findNotificationsForUser: vi.fn().mockResolvedValue([]),
       findByIdWithQuestions: vi.fn(),
       submitResponse: vi.fn(),
@@ -60,17 +63,22 @@ function createRepositories() {
   };
 }
 
-
 describe('SurveysService', () => {
   let repositories: ReturnType<typeof createRepositories>;
   let pdfService: { generatePdf: ReturnType<typeof vi.fn> };
-  let reportHistoryService: { registerGeneratedReport: ReturnType<typeof vi.fn> };
+  let reportHistoryService: {
+    registerGeneratedReport: ReturnType<typeof vi.fn>;
+  };
   let service: SurveysService;
 
   beforeEach(() => {
     repositories = createRepositories();
-    pdfService = { generatePdf: vi.fn().mockResolvedValue(Buffer.from('mock-pdf')) };
-    reportHistoryService = { registerGeneratedReport: vi.fn().mockResolvedValue({}) };
+    pdfService = {
+      generatePdf: vi.fn().mockResolvedValue(Buffer.from('mock-pdf')),
+    };
+    reportHistoryService = {
+      registerGeneratedReport: vi.fn().mockResolvedValue({}),
+    };
     service = new SurveysService(
       repositories.surveys as unknown as SurveysRepository,
       repositories.careers as unknown as CareersRepository,
@@ -122,7 +130,11 @@ describe('SurveysService', () => {
       createdAt: NOW,
     });
 
-    const result = await service.create('admin-1', { title: 'Borrador', status: 'draft', questions: [] }, NOW);
+    const result = await service.create(
+      'admin-1',
+      { title: 'Borrador', status: 'draft', questions: [] },
+      NOW,
+    );
 
     expect(result.status).toBe('draft');
     expect(repositories.careers.exists).not.toHaveBeenCalled();
@@ -134,7 +146,12 @@ describe('SurveysService', () => {
       now: NOW,
     });
     expect(repositories.surveys.create).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'draft', careerId: null, opensAt: null, closesAt: null }),
+      expect.objectContaining({
+        status: 'draft',
+        careerId: null,
+        opensAt: null,
+        closesAt: null,
+      }),
     );
   });
 
@@ -142,7 +159,11 @@ describe('SurveysService', () => {
     await expect(
       service.create(
         'admin-1',
-        { ...PUBLISHED_REQUEST, status: 'draft', opensAt: '2026-01-01T04:00:00.000Z' },
+        {
+          ...PUBLISHED_REQUEST,
+          status: 'draft',
+          opensAt: '2026-01-01T04:00:00.000Z',
+        },
         NOW,
       ),
     ).resolves.toBeDefined();
@@ -151,19 +172,24 @@ describe('SurveysService', () => {
   it('rechaza una carrera inexistente con 404', async () => {
     repositories.careers.exists.mockResolvedValue(false);
 
-    await expect(service.create('admin-1', PUBLISHED_REQUEST, NOW)).rejects.toBeInstanceOf(
-      CareerNotFoundException,
-    );
+    await expect(
+      service.create('admin-1', PUBLISHED_REQUEST, NOW),
+    ).rejects.toBeInstanceOf(CareerNotFoundException);
     expect(repositories.surveys.create).not.toHaveBeenCalled();
   });
 
   it('rechaza un título duplicado para la misma carrera y gestión con 409', async () => {
     repositories.surveys.existsWithTitle.mockResolvedValue(true);
 
-    const error = await service.create('admin-1', PUBLISHED_REQUEST, NOW).catch((caught) => caught);
+    const error = await service
+      .create('admin-1', PUBLISHED_REQUEST, NOW)
+      .catch((caught) => caught);
 
     expect(error).toBeInstanceOf(SurveyTitleAlreadyExistsException);
-    expect(error).toMatchObject({ statusCode: 409, message: SURVEY_ERROR_MESSAGES.TITLE_ALREADY_EXISTS });
+    expect(error).toMatchObject({
+      statusCode: 409,
+      message: SURVEY_ERROR_MESSAGES.TITLE_ALREADY_EXISTS,
+    });
     expect(repositories.surveys.create).not.toHaveBeenCalled();
   });
 
@@ -190,7 +216,11 @@ describe('SurveysService', () => {
 
   it('rechaza una fecha de cierre igual a la de apertura', async () => {
     const error = await service
-      .create('admin-1', { ...PUBLISHED_REQUEST, closesAt: '2026-11-04T03:00:00.000Z' }, NOW)
+      .create(
+        'admin-1',
+        { ...PUBLISHED_REQUEST, closesAt: '2026-11-04T03:00:00.000Z' },
+        NOW,
+      )
       .catch((caught) => caught);
 
     expect(error).toBeInstanceOf(InvalidSurveyScheduleException);
@@ -203,7 +233,11 @@ describe('SurveysService', () => {
 
   it('rechaza una fecha de apertura anterior a hoy en Bolivia', async () => {
     const error = await service
-      .create('admin-1', { ...PUBLISHED_REQUEST, opensAt: '2026-10-21T04:00:00.000Z' }, NOW)
+      .create(
+        'admin-1',
+        { ...PUBLISHED_REQUEST, opensAt: '2026-10-21T04:00:00.000Z' },
+        NOW,
+      )
       .catch((caught) => caught);
 
     expect(error).toMatchObject({
@@ -215,7 +249,11 @@ describe('SurveysService', () => {
 
   it('acepta una apertura el mismo día de hoy en Bolivia', async () => {
     await expect(
-      service.create('admin-1', { ...PUBLISHED_REQUEST, opensAt: '2026-10-22T04:00:00.000Z' }, NOW),
+      service.create(
+        'admin-1',
+        { ...PUBLISHED_REQUEST, opensAt: '2026-10-22T04:00:00.000Z' },
+        NOW,
+      ),
     ).resolves.toBeDefined();
   });
 
@@ -223,7 +261,9 @@ describe('SurveysService', () => {
     vi.useFakeTimers();
     vi.setSystemTime(NOW);
 
-    await expect(service.create('admin-1', PUBLISHED_REQUEST)).resolves.toBeDefined();
+    await expect(
+      service.create('admin-1', PUBLISHED_REQUEST),
+    ).resolves.toBeDefined();
 
     vi.useRealTimers();
   });
@@ -240,7 +280,11 @@ describe('SurveysService', () => {
         closesAt: NOW,
         createdAt: NOW,
         career: { id: CAREER_ID, title: 'Ingeniería de Sistemas' },
-        createdBy: { firstName: 'Admin', lastName: 'Uno', email: 'admin.1@umssy.test' },
+        createdBy: {
+          firstName: 'Admin',
+          lastName: 'Uno',
+          email: 'admin.1@umssy.test',
+        },
         _count: { questions: 4, responses: 0 },
       },
     ]);
@@ -276,16 +320,24 @@ describe('SurveysService', () => {
       opensAt: NOW.toISOString(),
       closesAt: NOW.toISOString(),
       totalResponses: 10,
+      hasData: true,
+      period: null,
+      availablePeriods: ['II-2026'],
       questions: [],
     });
 
     const result = await service.exportSurveyPdf('survey-1', 'admin-1');
 
     expect(pdfService.generatePdf).toHaveBeenCalled();
-    expect(reportHistoryService.registerGeneratedReport).toHaveBeenCalledWith('admin-1', {
-      fileName: expect.stringMatching(/^reporte-encuesta-encuesta-ia-\d{4}-\d{2}-\d{2}\.pdf$/),
-      reportType: 'SURVEY_STATISTICS',
-    });
+    expect(reportHistoryService.registerGeneratedReport).toHaveBeenCalledWith(
+      'admin-1',
+      {
+        fileName: expect.stringMatching(
+          /^reporte-encuesta-encuesta-ia-\d{4}-\d{2}-\d{2}\.pdf$/,
+        ),
+        reportType: 'SURVEY_STATISTICS',
+      },
+    );
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.fileName).toContain('reporte-encuesta-encuesta-ia');
   });
@@ -299,17 +351,30 @@ describe('SurveysService', () => {
         status: 'pending' as const,
       },
     ];
-    const spy = repositories.surveys.findNotificationsForUser.mockResolvedValue(mockNotifications);
+    const spy =
+      repositories.surveys.findNotificationsForUser.mockResolvedValue(
+        mockNotifications,
+      );
 
-    const result = await service.getNotificationsForUser('user-1', ['titulado']);
+    const result = await service.getNotificationsForUser('user-1', [
+      'titulado',
+    ]);
 
-    expect(spy).toHaveBeenCalledWith('user-1', { careerId: CAREER_ID, graduationYear: 2026 }, ['all', 'graduates']);
+    expect(spy).toHaveBeenCalledWith(
+      'user-1',
+      { careerId: CAREER_ID, graduationYear: 2026 },
+      ['all', 'graduates'],
+    );
     expect(result).toBe(mockNotifications);
   });
 
   it('no consulta notificaciones si la sesión no tiene un rol destinatario', async () => {
-    await expect(service.getNotificationsForUser('admin-1', ['administrativo'])).resolves.toEqual([]);
-    expect(repositories.surveys.findNotificationsForUser).not.toHaveBeenCalled();
+    await expect(
+      service.getNotificationsForUser('admin-1', ['administrativo']),
+    ).resolves.toEqual([]);
+    expect(
+      repositories.surveys.findNotificationsForUser,
+    ).not.toHaveBeenCalled();
   });
 
   it('rechaza responder una encuesta dirigida a otro tipo de usuario', async () => {
@@ -321,10 +386,12 @@ describe('SurveysService', () => {
       questions: [],
     });
 
-    await expect(service.getSurveyForAnswering('s1', 'user-1', ['titulado'])).rejects.toBeInstanceOf(
-      SurveyNotAvailableException,
-    );
-    await expect(service.getSurveyForAnswering('s1', 'user-1', ['mentor'])).resolves.toBeDefined();
+    await expect(
+      service.getSurveyForAnswering('s1', 'user-1', ['titulado']),
+    ).rejects.toBeInstanceOf(SurveyNotAvailableException);
+    await expect(
+      service.getSurveyForAnswering('s1', 'user-1', ['mentor']),
+    ).resolves.toBeDefined();
   });
 
   it('no permite responder una encuesta antes de su fecha de apertura', async () => {
@@ -340,17 +407,20 @@ describe('SurveysService', () => {
     };
     repositories.surveys.findByIdWithQuestions.mockResolvedValue(survey);
 
-    await expect(service.getSurveyForAnswering('s1', 'user-1', ['titulado'])).rejects.toBeInstanceOf(
-      SurveyNotOpenException,
-    );
-    await expect(service.submitResponse('s1', 'user-1', { answers: [] }, ['titulado'])).rejects.toBeInstanceOf(
-      SurveyNotOpenException,
-    );
+    await expect(
+      service.getSurveyForAnswering('s1', 'user-1', ['titulado']),
+    ).rejects.toBeInstanceOf(SurveyNotOpenException);
+    await expect(
+      service.submitResponse('s1', 'user-1', { answers: [] }, ['titulado']),
+    ).rejects.toBeInstanceOf(SurveyNotOpenException);
     expect(repositories.surveys.submitResponse).not.toHaveBeenCalled();
   });
 
   it('devuelve a borrador una encuesta publicada sin respuestas', async () => {
-    repositories.surveys.findPublicationState.mockResolvedValue({ status: 'published', responseCount: 0 });
+    repositories.surveys.findPublicationState.mockResolvedValue({
+      status: 'published',
+      responseCount: 0,
+    });
 
     await expect(service.unpublish('s1')).resolves.toBeUndefined();
     expect(repositories.surveys.unpublish).toHaveBeenCalledWith('s1');
@@ -358,8 +428,16 @@ describe('SurveysService', () => {
 
   it.each([
     ['no existe', null, SurveyNotFoundException],
-    ['es un borrador', { status: 'draft', responseCount: 0 }, SurveyNotPublishedException],
-    ['ya tiene respuestas', { status: 'published', responseCount: 3 }, SurveyHasResponsesException],
+    [
+      'es un borrador',
+      { status: 'draft', responseCount: 0 },
+      SurveyNotPublishedException,
+    ],
+    [
+      'ya tiene respuestas',
+      { status: 'published', responseCount: 3 },
+      SurveyHasResponsesException,
+    ],
   ])('no inhabilita una encuesta que %s', async (_case, state, exception) => {
     repositories.surveys.findPublicationState.mockResolvedValue(state);
 
@@ -368,21 +446,34 @@ describe('SurveysService', () => {
   });
 
   it('no inhabilita la encuesta si recibe una respuesta antes de actualizarla', async () => {
-    repositories.surveys.findPublicationState.mockResolvedValue({ status: 'published', responseCount: 0 });
+    repositories.surveys.findPublicationState.mockResolvedValue({
+      status: 'published',
+      responseCount: 0,
+    });
     repositories.surveys.unpublish.mockResolvedValue(false);
 
-    await expect(service.unpublish('s1')).rejects.toBeInstanceOf(SurveyHasResponsesException);
+    await expect(service.unpublish('s1')).rejects.toBeInstanceOf(
+      SurveyHasResponsesException,
+    );
   });
 
   it('obtiene encuesta para responderla o lanza SurveyNotFoundException si no existe', async () => {
     repositories.surveys.findByIdWithQuestions.mockResolvedValue(null);
-    await expect(service.getSurveyForAnswering('unknown', 'user-1')).rejects.toThrow(
-      SurveyNotFoundException,
-    );
+    await expect(
+      service.getSurveyForAnswering('unknown', 'user-1'),
+    ).rejects.toThrow(SurveyNotFoundException);
 
-    const mockDetail = { id: 's1', title: 'Test', status: 'published', targetAudience: 'graduates', questions: [] };
+    const mockDetail = {
+      id: 's1',
+      title: 'Test',
+      status: 'published',
+      targetAudience: 'graduates',
+      questions: [],
+    };
     repositories.surveys.findByIdWithQuestions.mockResolvedValue(mockDetail);
-    await expect(service.getSurveyForAnswering('s1', 'user-1', ['titulado'])).resolves.toBe(mockDetail);
+    await expect(
+      service.getSurveyForAnswering('s1', 'user-1', ['titulado']),
+    ).resolves.toBe(mockDetail);
   });
 
   it('permite guardar respuestas válidas para una encuesta publicada', async () => {
@@ -411,7 +502,9 @@ describe('SurveysService', () => {
       answers: [{ questionId: 'q1', optionIds: ['opt1'] }],
     };
 
-    const res = await service.submitResponse('s1', 'user-1', payload, ['estudiante']);
+    const res = await service.submitResponse('s1', 'user-1', payload, [
+      'estudiante',
+    ]);
     expect(res.success).toBe(true);
     expect(repositories.surveys.submitResponse).toHaveBeenCalledWith(
       's1',
@@ -419,6 +512,138 @@ describe('SurveysService', () => {
       payload.answers,
     );
   });
+
+  describe('estadísticas por semestre', () => {
+    const statisticsRecord = (answers: number, responses: number) => ({
+      id: 'survey-1',
+      title: 'Encuesta de empleabilidad',
+      description: null,
+      academicPeriod: '2020',
+      opensAt: new Date('2026-01-10T12:00:00.000Z'),
+      closesAt: null,
+      createdAt: NOW,
+      status: { title: 'published' },
+      career: null,
+      questions: [
+        {
+          id: 'question-1',
+          position: 1,
+          statement: '¿Trabajas?',
+          isRequired: true,
+          type: { title: 'single_choice' },
+          options: [
+            { id: 'option-1', position: 1, label: 'Sí', _count: { answers } },
+            {
+              id: 'option-2',
+              position: 2,
+              label: 'No',
+              _count: { answers: 0 },
+            },
+          ],
+          _count: { answers },
+        },
+      ],
+      _count: { responses },
+    });
+
+    it('sin semestre consulta todas las respuestas y no busca el semestre anterior', async () => {
+      repositories.surveys.findStatistics.mockResolvedValue(
+        statisticsRecord(4, 4),
+      );
+
+      const result = await service.getStatistics('survey-1', undefined, NOW);
+
+      expect(repositories.surveys.findStatistics).toHaveBeenCalledTimes(1);
+      expect(repositories.surveys.findStatistics).toHaveBeenCalledWith(
+        'survey-1',
+        undefined,
+      );
+      expect(result).toMatchObject({
+        period: null,
+        hasData: true,
+        totalResponses: 4,
+      });
+    });
+
+    it('con un semestre consulta su rango de fechas y el del semestre anterior', async () => {
+      repositories.surveys.findStatistics
+        .mockResolvedValueOnce(statisticsRecord(5, 5))
+        .mockResolvedValueOnce(statisticsRecord(2, 4));
+
+      const result = await service.getStatistics('survey-1', 'II-2026', NOW);
+
+      const [current, previous] =
+        repositories.surveys.findStatistics.mock.calls;
+      expect(current[1].start.toISOString()).toBe('2026-07-01T04:00:00.000Z');
+      expect(current[1].end.toISOString()).toBe('2027-01-01T04:00:00.000Z');
+      expect(previous[1].start.toISOString()).toBe('2026-01-01T04:00:00.000Z');
+      expect(previous[1].end.toISOString()).toBe('2026-07-01T04:00:00.000Z');
+      expect(result.period).toBe('II-2026');
+      expect(result.questions[0].trend.text).toContain('frente a I-2026');
+    });
+
+    it('un semestre sin respuestas devuelve la estructura completa con hasData en falso', async () => {
+      repositories.surveys.findStatistics.mockResolvedValue(
+        statisticsRecord(0, 0),
+      );
+
+      const result = await service.getStatistics('survey-1', 'I-2025', NOW);
+
+      expect(result.hasData).toBe(false);
+      expect(result.questions[0].options.map((option) => option.label)).toEqual(
+        ['Sí', 'No'],
+      );
+    });
+
+    it('ignora un semestre con formato inválido y consulta todas las respuestas', async () => {
+      repositories.surveys.findStatistics.mockResolvedValue(
+        statisticsRecord(1, 1),
+      );
+
+      const result = await service.getStatistics('survey-1', '2026', NOW);
+
+      expect(repositories.surveys.findStatistics).toHaveBeenCalledWith(
+        'survey-1',
+        undefined,
+      );
+      expect(result.period).toBeNull();
+    });
+
+    it('sin datos del semestre anterior no hay comparación', async () => {
+      repositories.surveys.findStatistics
+        .mockResolvedValueOnce(statisticsRecord(5, 5))
+        .mockResolvedValueOnce(null);
+
+      const result = await service.getStatistics('survey-1', 'II-2026', NOW);
+
+      expect(result.questions[0].trend.text).not.toContain('frente a');
+    });
+
+    it('rechaza una encuesta que no existe', async () => {
+      repositories.surveys.findStatistics.mockResolvedValue(null);
+
+      await expect(
+        service.getStatistics('no-existe', 'II-2026', NOW),
+      ).rejects.toBeInstanceOf(SurveyNotFoundException);
+    });
+
+    it('el PDF exportado respeta el semestre elegido y lo indica en el nombre del archivo', async () => {
+      repositories.surveys.findStatistics.mockResolvedValue(
+        statisticsRecord(3, 3),
+      );
+
+      const { fileName } = await service.exportSurveyPdf(
+        'survey-1',
+        'admin-1',
+        'II-2026',
+      );
+
+      expect(pdfService.generatePdf).toHaveBeenCalledWith(
+        expect.objectContaining({ period: 'II-2026' }),
+      );
+      expect(fileName).toMatch(
+        /^reporte-encuesta-encuesta-de-empleabilidad-ii-2026-\d{4}-\d{2}-\d{2}\.pdf$/,
+      );
+    });
+  });
 });
-
-
