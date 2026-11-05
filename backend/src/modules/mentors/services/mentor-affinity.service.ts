@@ -1,20 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import { UserSkillService } from '../../skills/services/user-skill.service.js';
 import { SKILL_TO_TECHNICAL_AREA } from '../constants/skill-to-technical-area.catalog.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 
 @Injectable()
 export class MentorAffinityService {
-  constructor(private readonly mentorsRepository: MentorsRepository) {}
+  constructor(
+    private readonly mentorsRepository: MentorsRepository,
+    private readonly userSkillService: UserSkillService,
+  ) {}
 
   async findUserAreaIds(userId: string) {
-    const skills = await this.mentorsRepository.findUserSkills(userId);
+    const skills = await this.userSkillService.getProfessionalSkills(userId);
 
     if (skills.length === 0) {
       return { status: 'no_skills' as const, areaIds: new Set<string>() };
     }
 
     const names = new Set(
-      skills.flatMap(({ skill }) => {
+      skills.flatMap((skill) => {
         if (
           skill.isCustom ||
           !Object.hasOwn(SKILL_TO_TECHNICAL_AREA, skill.name)
@@ -49,25 +53,33 @@ export class MentorAffinityService {
     mentors: Awaited<ReturnType<MentorsRepository['findDirectoryCandidates']>>,
     userAreaIds: ReadonlySet<string>,
   ) {
-    return mentors
-      .map((mentor) => {
-        const mentorAreaIds = new Set(
-          mentor.mentorTechnicalAreas.map(
-            ({ technicalAreaId }) => technicalAreaId,
-          ),
-        );
-        const sharedInterestsCount = [...mentorAreaIds].filter((id) =>
-          userAreaIds.has(id),
-        ).length;
-
-        return { ...mentor, sharedInterestsCount };
-      })
-      .sort(
-        (a, b) =>
-          b.sharedInterestsCount - a.sharedInterestsCount ||
-          a.firstName.localeCompare(b.firstName) ||
-          a.lastName.localeCompare(b.lastName) ||
-          a.id.localeCompare(b.id),
+    const ranked = mentors.map((mentor) => {
+      const mentorAreaIds = new Set(
+        mentor.mentorTechnicalAreas.map(
+          ({ technicalAreaId }) => technicalAreaId,
+        ),
       );
+      const sharedInterestsCount = [...mentorAreaIds].filter((id) =>
+        userAreaIds.has(id),
+      ).length;
+
+      return { ...mentor, sharedInterestsCount };
+    });
+
+    const hasMatches = ranked.some(
+      ({ sharedInterestsCount }) => sharedInterestsCount > 0,
+    );
+
+    return ranked.sort(
+      hasMatches
+        ? (a, b) =>
+            b.sharedInterestsCount - a.sharedInterestsCount ||
+            a.firstName.localeCompare(b.firstName) ||
+            a.lastName.localeCompare(b.lastName) ||
+            a.id.localeCompare(b.id)
+        : (a, b) =>
+            a.createdAt.getTime() - b.createdAt.getTime() ||
+            a.id.localeCompare(b.id),
+    );
   }
 }

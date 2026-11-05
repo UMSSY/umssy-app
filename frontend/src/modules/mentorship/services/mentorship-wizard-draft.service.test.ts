@@ -1,16 +1,28 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY } from "../constants/mentorship-wizard.constants";
 import type { MentorshipWizardState } from "../types/mentorship-wizard-state.types";
-import { clearMentorshipWizardDraft, loadMentorshipWizardDraft, saveMentorshipWizardDraft } from "./mentorship-wizard-draft.service";
+import {
+  readIndexedDb,
+  removeIndexedDb,
+  writeIndexedDb,
+} from "@/shared/services/storage/browser-indexed-db";
+import {
+  clearMentorshipWizardDraft,
+  getMentorshipWizardDraftStorageKey,
+  loadMentorshipWizardDraft,
+  saveMentorshipWizardDraft,
+} from "./mentorship-wizard-draft.service";
 
 const records = vi.hoisted(() => new Map<string, unknown>());
 
 vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
-  readIndexedDb: vi.fn(async (key: string) => records.get(key) ?? null),
-  writeIndexedDb: vi.fn(async (key: string, value: unknown) => { records.set(key, value); }),
-  removeIndexedDb: vi.fn(async (key: string) => { records.delete(key); }),
+  readIndexedDb: vi.fn(),
+  writeIndexedDb: vi.fn(),
+  removeIndexedDb: vi.fn(),
 }));
 
+const USER_A = "user-a";
+const USER_B = "user-b";
 const validDraft: MentorshipWizardState = {
   currentStep: 3,
   wantsToParticipate: true,
@@ -18,46 +30,94 @@ const validDraft: MentorshipWizardState = {
   selectedOrientationTypeIds: ["orientation-id"],
 };
 
-afterEach(async () => {
-  await clearMentorshipWizardDraft();
+beforeEach(() => {
+  records.clear();
   localStorage.clear();
-  vi.unstubAllGlobals();
+  vi.mocked(readIndexedDb).mockReset().mockImplementation(
+    async (key: string) => records.get(key) ?? null,
+  );
+  vi.mocked(writeIndexedDb).mockReset().mockImplementation(
+    async (key: string, value: unknown) => {
+      records.set(key, value);
+    },
+  );
+  vi.mocked(removeIndexedDb).mockReset().mockImplementation(
+    async (key: string) => {
+      records.delete(key);
+    },
+  );
 });
 
 describe("mentorship wizard draft", () => {
-  it("returns null when no draft exists", async () => {
-    expect(await loadMentorshipWizardDraft()).toBeNull();
+  it("returns null when the user has no draft", async () => {
+    expect(await loadMentorshipWizardDraft(USER_A)).toBeNull();
   });
 
-  it.each(["{broken", "", "null", "[]", '"text"', "42", "{}", '{"currentStep":2}'])("removes corrupt legacy JSON: %s", async (stored) => {
-    localStorage.setItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY, stored);
-    expect(await loadMentorshipWizardDraft()).toBeNull();
-    expect(localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).toBeNull();
+  it.each([1, 2, 3, 4] as const)(
+    "preserves a valid user draft at step %i",
+    async (currentStep) => {
+      const draft = { ...validDraft, currentStep };
+      await saveMentorshipWizardDraft(USER_A, draft);
+      expect(await loadMentorshipWizardDraft(USER_A)).toEqual(draft);
+    },
+  );
+
+  it("keeps A and B drafts isolated while either account edits", async () => {
+    const draftA = { ...validDraft, currentStep: 4 as const };
+    const draftB = {
+      ...validDraft,
+      currentStep: 2 as const,
+      selectedTechnicalAreaIds: ["area-b"],
+      selectedOrientationTypeIds: [],
+    };
+    await Promise.all([
+      saveMentorshipWizardDraft(USER_A, draftA),
+      saveMentorshipWizardDraft(USER_B, draftB),
+    ]);
+
+    const changedB = {
+      ...draftB,
+      selectedTechnicalAreaIds: ["area-b-2"],
+    };
+    await saveMentorshipWizardDraft(USER_B, changedB);
+
+    expect(await loadMentorshipWizardDraft(USER_A)).toEqual(draftA);
+    expect(await loadMentorshipWizardDraft(USER_B)).toEqual(changedB);
   });
 
-  it.each([1, 2, 3, 4] as const)("preserves a valid draft at step %i", async (currentStep) => {
-    const draft = { ...validDraft, currentStep };
-    await saveMentorshipWizardDraft(draft);
-    expect(await loadMentorshipWizardDraft()).toEqual(draft);
-    expect(localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).toBeNull();
-  });
+  it("discards an unowned legacy draft instead of assigning it to a user", async () => {
+    records.set(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY, validDraft);
+    localStorage.setItem(
+      MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY,
+      JSON.stringify(validDraft),
+    );
 
-  it("migrates a valid legacy draft once", async () => {
-    localStorage.setItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY, JSON.stringify(validDraft));
-    expect(await loadMentorshipWizardDraft()).toEqual(validDraft);
-    expect(records.get(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).toEqual(validDraft);
-    expect(localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).toBeNull();
-  });
-
-  it("rejects an incompatible IndexedDB draft", async () => {
-    records.set(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY, { ...validDraft, currentStep: 5 });
-    expect(await loadMentorshipWizardDraft()).toBeNull();
+    expect(await loadMentorshipWizardDraft(USER_A)).toBeNull();
     expect(records.has(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).toBe(false);
+    expect(localStorage.getItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY)).toBeNull();
+    expect(
+      records.has(getMentorshipWizardDraftStorageKey(USER_A)),
+    ).toBe(false);
   });
 
-  it("clears a saved draft", async () => {
-    await saveMentorshipWizardDraft(validDraft);
-    await clearMentorshipWizardDraft();
-    expect(await loadMentorshipWizardDraft()).toBeNull();
+  it("removes an incompatible draft only for its owner", async () => {
+    const keyA = getMentorshipWizardDraftStorageKey(USER_A);
+    const keyB = getMentorshipWizardDraftStorageKey(USER_B);
+    records.set(keyA, { ...validDraft, currentStep: 5 });
+    records.set(keyB, validDraft);
+
+    expect(await loadMentorshipWizardDraft(USER_A)).toBeNull();
+    expect(records.has(keyA)).toBe(false);
+    expect(records.get(keyB)).toEqual(validDraft);
+  });
+
+  it("clears only the completing user's draft", async () => {
+    await saveMentorshipWizardDraft(USER_A, validDraft);
+    await saveMentorshipWizardDraft(USER_B, validDraft);
+
+    await clearMentorshipWizardDraft(USER_A);
+
+    expect(await loadMentorshipWizardDraft(USER_A)).toBeNull();
+    expect(await loadMentorshipWizardDraft(USER_B)).toEqual(validDraft);
   });
 });
