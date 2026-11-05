@@ -197,7 +197,7 @@ export function ChatWorkspace({
     setIsSearchModalOpen(true);
   };
 
-    const handleStartChatWithContact = async (
+  const handleStartChatWithContact = async (
     contactUser: User,
   ): Promise<void> => {
     if (startingConversationRef.current) {
@@ -269,7 +269,7 @@ export function ChatWorkspace({
       setContactSelectionError(
         error instanceof Error
           ? error.message
-          : "No se pudo iniciar la conversaci├│n.",
+          : "No se pudo iniciar la conversación.",
       );
     } finally {
       startingConversationRef.current = false;
@@ -296,13 +296,13 @@ export function ChatWorkspace({
       setSelectedContactForRequest(null);
 
       setRequestSuccess(
-        `Solicitud de conexi├│n enviada a ${contact.fullName}.`,
+        `Solicitud de conexión enviada a ${contact.fullName}.`,
       );
     } catch (error) {
       setRequestError(
         error instanceof Error
           ? error.message
-          : "No se pudo enviar la solicitud de conexi├│n.",
+          : "No se pudo enviar la solicitud de conexión.",
       );
     }
   };
@@ -342,14 +342,14 @@ export function ChatWorkspace({
 
       setRequestSuccess(
         action === "accept"
-          ? "Solicitud de conexi├│n aceptada correctamente."
-          : "Solicitud de conexi├│n rechazada correctamente.",
+          ? "Solicitud de conexión aceptada correctamente."
+          : "Solicitud de conexión rechazada correctamente.",
       );
     } catch (error) {
       setResponseError(
         error instanceof Error
           ? error.message
-          : "No se pudo responder a la solicitud de conexi├│n.",
+          : "No se pudo responder a la solicitud de conexión.",
       );
     }
   };
@@ -360,14 +360,14 @@ export function ChatWorkspace({
   ): Promise<void> => {
     if (!selectedId || selectedRequestId || isSending || connectionStatus !== "connected") {
       throw new Error(
-        "No hay una conversaci├│n seleccionada o ya se est├í enviando un mensaje."
+        "No hay una conversación seleccionada o ya se está enviando un mensaje."
       );
     }
 
     const trimmedContent = content.trim();
 
     if (!trimmedContent && !file) {
-      throw new Error('El mensaje no puede estar vac├¡o.');
+      throw new Error('El mensaje no puede estar vacío.');
     }
 
     setIsSending(true);
@@ -383,15 +383,14 @@ export function ChatWorkspace({
         );
       } else {
         const socket = getChatSocket();
-
         if (!socket.connected) {
-          throw new Error("No est├ís conectado al servidor de chat. Revisa tu conexi├│n a internet.");
+          throw new Error("No estás conectado al servidor de chat. Revisa tu conexión a internet.");
         }
 
         const response = await new Promise<SocketSendResponse>(
           (resolve, reject) => {
             const timeoutId = setTimeout(() => {
-              reject(new Error('El servidor tard├│ demasiado en responder. Intenta de nuevo.'));
+              reject(new Error('El servidor tardó demasiado en responder. Intenta de nuevo.'));
             }, 10000);
 
             socket.emit(
@@ -558,10 +557,10 @@ export function ChatWorkspace({
           <EmptyChatState
             description={
               isStartingConversation
-                ? "Comprobando conexi├│n e iniciando conversaci├│n..."
-                : "Selecciona una conversaci├│n existente en el panel izquierdo o inicia una nueva para comenzar a comunicarte."
+                ? "Comprobando conexión e iniciando conversación..."
+                : "Selecciona una conversación existente en el panel izquierdo o inicia una nueva para comenzar a comunicarte."
             }
-            actionLabel="Iniciar una nueva conversaci├│n"
+            actionLabel="Iniciar una nueva conversación"
             onAction={handleStartNewChat}
           />
         )}
