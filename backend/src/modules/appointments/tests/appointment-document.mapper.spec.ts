@@ -70,6 +70,20 @@ describe('AppointmentDocumentMapper', () => {
     expect(fileName).toHaveLength(APPOINTMENT_DOCUMENT_FILE_NAME_MAX_LENGTH);
   });
 
+  it('truncates by characters so an emoji at the limit is not split', () => {
+    const fileName = mapper.toSaveData(
+      validated(`${'a'.repeat(254)}😀.pdf`),
+    ).fileName;
+
+    expect(Array.from(fileName)).toHaveLength(
+      APPOINTMENT_DOCUMENT_FILE_NAME_MAX_LENGTH,
+    );
+    expect(fileName.endsWith('😀')).toBe(true);
+    expect(() =>
+      mapper.toDownload(createDocumentFileRecord({ fileName })),
+    ).not.toThrow();
+  });
+
   it('maps the stored metadata to the API response', () => {
     const { data: _data, ...metadata } = createDocumentFileRecord();
 

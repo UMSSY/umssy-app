@@ -64,10 +64,9 @@ export class AppointmentDocumentMapper {
       .replace(CONTROL_CHARACTERS, '')
       .trim();
 
-    return (name || APPOINTMENT_DOCUMENT_DEFAULT_FILE_NAME).slice(
-      0,
-      APPOINTMENT_DOCUMENT_FILE_NAME_MAX_LENGTH,
-    );
+    return Array.from(name || APPOINTMENT_DOCUMENT_DEFAULT_FILE_NAME)
+      .slice(0, APPOINTMENT_DOCUMENT_FILE_NAME_MAX_LENGTH)
+      .join('');
   }
 
   private toContentDisposition(fileName: string): string {
