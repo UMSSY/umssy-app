@@ -33,7 +33,7 @@ export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
 };
 
 export const APPOINTMENT_STATUS_CLASSES: Record<AppointmentStatus, string> = {
-  CONFIRMED: "border-success/30 bg-success/10 text-success",
+  CONFIRMED: "text-success",
   CANCELLED: "text-text-secondary",
   COMPLETED: "text-text-secondary",
 };
