@@ -1,16 +1,16 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { UsersService } from '../../users/services/users.service.js';
 
 const STUDENT_ROLES = new Set(['estudiante', 'titulado']);
 
 @Injectable()
 export class ChatRolePolicyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly usersService: UsersService) {}
 
   async assertCanCommunicate(
     userId: string,
     contactId: string,
-  ): Promise<'application' | void> {
+  ): Promise<void> {
     const ids = [
       userId.trim().toLowerCase(),
       contactId.trim().toLowerCase(),
@@ -20,24 +20,7 @@ export class ChatRolePolicyService {
       return this.deny();
     }
 
-    const users = await this.prisma.user.findMany({
-      where: {
-        id: { in: ids },
-      },
-      select: {
-        id: true,
-        isActive: true,
-        companyId: true,
-        roles: {
-          where: { deletedAt: null },
-          select: {
-            role: {
-              select: { name: true },
-            },
-          },
-        },
-      },
-    });
+    const users = await this.usersService.findManyWithActiveRoles(ids);
 
     if (
       users.length !== 2 ||
@@ -52,62 +35,22 @@ export class ChatRolePolicyService {
       ),
     );
 
-    const students = roles.map(
+    const areStudents = roles.map(
       (names) =>
         names.length > 0 &&
         names.every((name) => STUDENT_ROLES.has(name)),
     );
 
-    const companies = roles.map(
-      (names) =>
-        names.length > 0 &&
-        names.every((name) => name === 'empresa'),
-    );
-
-    if (students[0] && students[1]) {
+    if (areStudents[0] && areStudents[1]) {
       return;
     }
 
-    const studentIndex =
-      students[0] && companies[1]
-        ? 0
-        : students[1] && companies[0]
-          ? 1
-          : -1;
-
-    if (studentIndex < 0) {
-      return this.deny();
-    }
-
-    const student = users[studentIndex];
-    const recruiter = users[1 - studentIndex];
-
-    if (!recruiter.companyId) {
-      return this.deny();
-    }
-
-    const application = await this.prisma.jobApplication.findFirst({
-      where: {
-        userId: student.id,
-        jobOffer: {
-          companyId: recruiter.companyId,
-        },
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    if (!application) {
-      return this.deny();
-    }
-
-    return 'application';
+     return this.deny();
   }
 
   private deny(): never {
     throw new ForbiddenException(
-      'El chat requiere roles permitidos o una postulación previa a una vacante de la empresa del reclutador.',
+      'El chat libre solo está disponible entre estudiantes y titulados. Para contactar a un reclutador, debes postularte a una de sus vacantes.',
     );
   }
 }
