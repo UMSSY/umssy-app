@@ -1,3 +1,5 @@
+"use client";
+
 import { GraduationCap, UserPlus } from "lucide-react";
 import {
   Avatar,
