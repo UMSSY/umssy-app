@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "cn";
 import { BOLIVIA_TIME_LABEL } from "@/shared/constants/date-time.constants";
 import {
   formatBlockRange,
@@ -45,7 +46,10 @@ export function AppointmentCard({ appointment, onSelect }: AppointmentCardProps)
 
         <Badge
           variant="outline"
-          className={`col-start-1 row-start-2 h-6 w-fit justify-self-start px-2.5 text-sm sm:col-start-2 sm:row-span-3 sm:row-start-1 sm:justify-self-end ${APPOINTMENT_STATUS_CLASSES[appointment.status]}`}
+          className={cn(
+            "col-start-1 row-start-2 h-6 w-fit justify-self-start px-2.5 text-sm sm:col-start-2 sm:row-span-3 sm:row-start-1 sm:justify-self-end",
+            APPOINTMENT_STATUS_CLASSES[appointment.status],
+          )}
         >
           {APPOINTMENT_STATUS_LABELS[appointment.status]}
         </Badge>

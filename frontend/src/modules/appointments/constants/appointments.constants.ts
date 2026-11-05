@@ -33,7 +33,7 @@ export const APPOINTMENT_STATUS_LABELS: Record<AppointmentStatus, string> = {
 };
 
 export const APPOINTMENT_STATUS_CLASSES: Record<AppointmentStatus, string> = {
-  CONFIRMED: "border-success/30 bg-success/10 text-success",
+  CONFIRMED: "text-success",
   CANCELLED: "text-text-secondary",
   COMPLETED: "text-text-secondary",
 };
@@ -82,11 +82,3 @@ export const APPOINTMENT_MONTH_LABELS = [
   "noviembre",
   "diciembre",
 ] as const;
-
-export const APPOINTMENT_DOCUMENT_TYPE_LABELS: Record<string, string> = {
-  "application/pdf": "PDF",
-  "image/png": "PNG",
-  "image/jpeg": "JPG",
-};
-
-export const APPOINTMENT_DOCUMENT_FALLBACK_TYPE_LABEL = "DOC";

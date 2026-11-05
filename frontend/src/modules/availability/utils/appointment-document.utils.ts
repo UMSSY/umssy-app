@@ -7,7 +7,7 @@ import {
 import {
   APPOINTMENT_DOCUMENT_FALLBACK_TYPE_LABEL,
   APPOINTMENT_DOCUMENT_TYPE_LABELS,
-} from "../constants/appointment-document.constants";
+} from "@/modules/appointments";
 
 export const validateAppointmentDocument = (file: File): string | null =>
   validateFile(

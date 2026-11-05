@@ -2,14 +2,6 @@ import { CERTIFICATE_ALLOWED_EXTENSIONS } from "@/modules/profile";
 
 export const APPOINTMENT_DOCUMENT_ACCEPT = CERTIFICATE_ALLOWED_EXTENSIONS.join(",");
 
-export const APPOINTMENT_DOCUMENT_TYPE_LABELS: Record<string, string> = {
-  "application/pdf": "PDF",
-  "image/png": "PNG",
-  "image/jpeg": "JPG",
-};
-
-export const APPOINTMENT_DOCUMENT_FALLBACK_TYPE_LABEL = "DOC";
-
 export const APPOINTMENT_DOCUMENT_TEXT = {
   label: "Documento (opcional)",
   hint: "PDF, PNG o JPG de hasta 5 MB: tu CV, tu tesis, un diseño u otro trabajo.",
