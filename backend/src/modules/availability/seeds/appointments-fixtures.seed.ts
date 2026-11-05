@@ -1,4 +1,5 @@
 import { buildAvailabilityBlockFixtures } from './availability-blocks-fixtures.seed.js';
+import { seedAppointmentDocumentFixture } from './appointment-documents-fixtures.seed.js';
 import { FIXTURE_MENTORS } from '../../users/constants/seed-fixture-users.constants.js';
 import { FIXTURE_AVAILABILITY } from '../constants/seed-fixture-availability.constants.js';
 import {
@@ -14,6 +15,10 @@ export async function seedAppointmentsFixtures(
 ): Promise<number> {
   const data = buildAppointmentFixtures(context);
   await tx.appointment.createMany({ data, skipDuplicates: true });
+  await seedAppointmentDocumentFixture(
+    tx,
+    context.getId(FIXTURE_APPOINTMENTS[0].appointmentKeys[5]),
+  );
   return data.length;
 }
 

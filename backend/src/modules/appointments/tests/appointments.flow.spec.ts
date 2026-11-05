@@ -45,6 +45,7 @@ const PERFORMANCE_MENTOR = '33333333-3333-4333-8333-333333333333';
 const GRADUATE = '44444444-4444-4444-8444-444444444444';
 const STUDENT = '88888888-8888-4888-8888-888888888888';
 const TOPIC_ID = '66666666-6666-4666-8666-666666666666';
+const MESSAGE = 'Quiero reforzar mis bases';
 const OTHER_TOPIC_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const STATUS_ID = '77777777-7777-4777-8777-777777777777';
 
@@ -333,6 +334,9 @@ function createRepositories(store: Store) {
           name: ORIENTATION_NAMES[appointment.orientationTypeId],
         },
         status: { title: AppointmentStatusTitle.CONFIRMED },
+        message: appointment.message,
+        requestedAt: NOW,
+        document: null,
       };
     },
     createAppointmentHistory: async (
@@ -471,7 +475,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
     const response = await book(tokens.graduate, {
       blockId: plan.free.id,
       orientationTypeId: TOPIC_ID,
-      message: 'Quiero reforzar mis bases',
+      message: MESSAGE,
     }).expect(201);
 
     expect(response.body).toMatchObject({
@@ -480,7 +484,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
       data: {
         blockId: plan.free.id,
         status: AppointmentStatusTitle.CONFIRMED,
-        counterpart: { id: MENTOR_A, fullName: 'Ana Pérez' },
+        counterpart: { id: MENTOR_A, fullName: 'Ana Pérez', role: 'mentor' },
         orientationType: { id: TOPIC_ID },
       },
     });
@@ -490,7 +494,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
       mentorId: MENTOR_A,
       studentId: GRADUATE,
       orientationTypeId: TOPIC_ID,
-      message: 'Quiero reforzar mis bases',
+      message: MESSAGE,
     });
     expect(store.histories).toEqual([
       {
@@ -509,6 +513,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
     const response = await book(tokens.graduate, {
       blockId: plan.next.id,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     }).expect(409);
 
     expect(response.body.detail).toBe('Este horario ya fue reservado');
@@ -521,10 +526,12 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
       book(tokens.graduate, {
         blockId: plan.free.id,
         orientationTypeId: TOPIC_ID,
+        message: MESSAGE,
       }),
       book(tokens.student, {
         blockId: plan.free.id,
         orientationTypeId: TOPIC_ID,
+        message: MESSAGE,
       }),
     ]);
 
@@ -542,6 +549,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
     const response = await book(tokens.graduate, {
       blockId: plan.past.id,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     }).expect(400);
 
     expect(response.body.detail).toBe('El horario ya pasó');
@@ -552,6 +560,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
     const response = await book(tokens.graduate, {
       blockId: plan.blocked.id,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     }).expect(409);
 
     expect(response.body.detail).toBe('Ese día está bloqueado');
@@ -565,6 +574,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
     const response = await book(tokens.graduate, {
       blockId: plan.free.id,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     }).expect(403);
 
     expect(response.body.detail).toBe(
@@ -577,6 +587,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
     const response = await book(tokens.mentorA, {
       blockId: plan.free.id,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     }).expect(403);
 
     expect(response.body.detail).toBe('No puedes reservar tu propio horario');
@@ -587,11 +598,13 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
     await book(tokens.graduate, {
       blockId: plan.free.id,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     }).expect(201);
 
     const response = await book(tokens.graduate, {
       blockId: plan.free.id,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     }).expect(409);
 
     expect(response.body.detail).toBe('Este horario ya fue reservado');
@@ -617,6 +630,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
     const notOffered = await book(tokens.graduate, {
       blockId: plan.free.id,
       orientationTypeId: OTHER_TOPIC_ID,
+      message: MESSAGE,
     }).expect(400);
 
     expect(notOffered.body.detail).toBe('El tema de la sesión no es válido');
@@ -628,6 +642,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
     await book(tokens.graduate, {
       blockId: raceBlock.id,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     }).expect(201);
 
     const response = await blockDate(tokens.mentorA, {
@@ -650,6 +665,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
     const response = await book(tokens.graduate, {
       blockId: raceBlock.id,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     }).expect(409);
 
     expect(response.body.detail).toBe('Ese día está bloqueado');
@@ -663,6 +679,7 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
       book(tokens.graduate, {
         blockId: raceBlock.id,
         orientationTypeId: TOPIC_ID,
+        message: MESSAGE,
       }),
       blockDate(tokens.mentorA, { blockedOn: dayOf(raceBlock.start) }),
     ]);
@@ -678,5 +695,24 @@ describe('Reserva de citas (integración HTTP con el plan del seed B-08)', () =>
         dayBlocked && dayOf(appointment.startAt) === dayOf(raceBlock.start),
     );
     expect(appointmentInsideBlockedDay).toBe(false);
+  });
+
+  it('13. rechaza una reserva sin mensaje o con solo espacios y conserva el horario libre', async () => {
+    for (const message of [undefined, '   ']) {
+      const response = await book(tokens.graduate, {
+        blockId: plan.free.id,
+        orientationTypeId: TOPIC_ID,
+        message,
+      }).expect(400);
+
+      expect(response.body.errors).toEqual([
+        expect.objectContaining({
+          field: 'message',
+          message: 'Escribe un mensaje para el mentor',
+        }),
+      ]);
+    }
+    expect(store.appointments).toHaveLength(0);
+    expect(await freeBlockIds()).toContain(plan.free.id);
   });
 });

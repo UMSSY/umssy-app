@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  StreamableFile,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -9,6 +18,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiProduces,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -25,6 +35,7 @@ import {
   APPOINTMENT_RESPONSE_SCHEMA,
   CREATE_APPOINTMENT_DOCS,
   FIND_APPOINTMENT_DOCS,
+  FIND_COUNTERPART_PHOTO_DOCS,
   FIND_MY_APPOINTMENTS_DOCS,
 } from '../constants/appointment-docs.constants.js';
 import { CreateAppointmentDto } from '../requests/create-appointment.request.js';
@@ -134,5 +145,38 @@ export class AppointmentsController {
     @Param('id', new RequestValidationPipe(appointmentIdSchema)) id: string,
   ): Promise<MyAppointmentResponse> {
     return this.appointmentsService.findOne(userId, id);
+  }
+
+  @Get(':id/counterpart-photo')
+  @ApiOperation({
+    summary: FIND_COUNTERPART_PHOTO_DOCS.summary,
+    description: FIND_COUNTERPART_PHOTO_DOCS.description,
+  })
+  @ApiParam({
+    name: 'id',
+    format: 'uuid',
+    description: FIND_APPOINTMENT_DOCS.idDescription,
+  })
+  @ApiProduces('image/png', 'image/jpeg')
+  @ApiBadRequestResponse({
+    description: FIND_APPOINTMENT_DOCS.invalidIdDescription,
+  })
+  @ApiNotFoundResponse({
+    description: FIND_COUNTERPART_PHOTO_DOCS.notFoundDescription,
+  })
+  @ApiOkResponse({
+    description: FIND_COUNTERPART_PHOTO_DOCS.responseDescription,
+  })
+  async findCounterpartPhoto(
+    @CurrentUserId() userId: string,
+    @Param('id', new RequestValidationPipe(appointmentIdSchema)) id: string,
+  ): Promise<StreamableFile> {
+    const photo = await this.appointmentsService.getCounterpartPhoto(userId, id);
+
+    return new StreamableFile(photo.content, {
+      type: photo.mimeType,
+      disposition: 'inline',
+      length: photo.content.length,
+    });
   }
 }

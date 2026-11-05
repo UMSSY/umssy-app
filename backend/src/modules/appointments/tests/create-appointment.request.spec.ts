@@ -7,41 +7,49 @@ import { createAppointmentSchema } from '../requests/create-appointment.request.
 
 const BLOCK_ID = '55555555-5555-4555-8555-555555555555';
 const TOPIC_ID = '66666666-6666-4666-8666-666666666666';
+const MESSAGE = 'Quiero reforzar mis bases';
 
 const getMessages = (payload: unknown): string[] => {
   const result = createAppointmentSchema.safeParse(payload);
   return result.success ? [] : result.error.issues.map((issue) => issue.message);
 };
 
-const getMessage = (payload: unknown): string | null | undefined =>
+const getMessage = (payload: unknown): string =>
   createAppointmentSchema.parse(payload).message;
 
 describe('createAppointmentSchema', () => {
-  it('acepta un bloque y un tema válidos con mensaje opcional', () => {
+  it('acepta un bloque, un tema y un mensaje válidos', () => {
     expect(
       getMessages({ blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, message: 'Hola' }),
     ).toEqual([]);
   });
 
-  it('acepta el payload sin mensaje', () => {
-    expect(getMessages({ blockId: BLOCK_ID, orientationTypeId: TOPIC_ID })).toEqual([]);
+  it.each([
+    ['sin mensaje', {}],
+    ['con mensaje null', { message: null }],
+    ['con mensaje vacío', { message: '' }],
+    ['con mensaje en blanco', { message: '   ' }],
+  ])('rechaza el payload %s con el texto del HU', (_case, message) => {
+    expect(
+      getMessages({ blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, ...message }),
+    ).toEqual([APPOINTMENT_MESSAGES.missingMessage]);
   });
 
   it('rechaza el payload sin tema con el texto del HU', () => {
-    expect(getMessages({ blockId: BLOCK_ID })).toEqual([
+    expect(getMessages({ blockId: BLOCK_ID, message: MESSAGE })).toEqual([
       APPOINTMENT_MESSAGES.missingTopic,
     ]);
   });
 
   it('rechaza un tema que no es un uuid', () => {
     expect(
-      getMessages({ blockId: BLOCK_ID, orientationTypeId: 'tema-raro' }),
+      getMessages({ blockId: BLOCK_ID, orientationTypeId: 'tema-raro', message: MESSAGE }),
     ).toEqual([APPOINTMENT_MESSAGES.invalidTopic]);
   });
 
   it('rechaza un bloque que no es un uuid', () => {
     expect(
-      getMessages({ blockId: 'bloque-raro', orientationTypeId: TOPIC_ID }),
+      getMessages({ blockId: 'bloque-raro', orientationTypeId: TOPIC_ID, message: MESSAGE }),
     ).toEqual([APPOINTMENT_MESSAGES.invalidBlockId]);
   });
 
@@ -65,16 +73,14 @@ describe('createAppointmentSchema', () => {
     ).toEqual([]);
   });
 
-  it('convierte el mensaje vacío en null', () => {
+  it('mide el límite sobre el mensaje ya recortado', () => {
     expect(
-      getMessage({ blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, message: '' }),
-    ).toBeNull();
-  });
-
-  it('convierte el mensaje en blanco en null', () => {
-    expect(
-      getMessage({ blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, message: '   ' }),
-    ).toBeNull();
+      getMessage({
+        blockId: BLOCK_ID,
+        orientationTypeId: TOPIC_ID,
+        message: ` ${'x'.repeat(APPOINTMENT_MESSAGE_MAX_LENGTH)} `,
+      }),
+    ).toHaveLength(APPOINTMENT_MESSAGE_MAX_LENGTH);
   });
 
   it('recorta los espacios del mensaje', () => {
@@ -85,7 +91,12 @@ describe('createAppointmentSchema', () => {
 
   it('rechaza campos desconocidos', () => {
     expect(
-      getMessages({ blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, studentId: 'otro' }),
+      getMessages({
+        blockId: BLOCK_ID,
+        orientationTypeId: TOPIC_ID,
+        message: MESSAGE,
+        studentId: 'otro',
+      }),
     ).toHaveLength(1);
   });
 });
