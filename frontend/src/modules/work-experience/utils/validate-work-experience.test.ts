@@ -1,4 +1,3 @@
-
 import { describe, expect, it } from "vitest";
 import { WORK_EXPERIENCE_VALIDATION_MESSAGES } from "../constants/work-experience-validation.constants";
 import type { WorkExperienceFormValues } from "../types/work-experience-form-values.types";
@@ -10,7 +9,7 @@ const VALID_VALUES: WorkExperienceFormValues = {
   startDate: "2024-07-01",
   endDate: "2024-12-31",
   isCurrent: false,
-  description: "",
+  description: "Desarrollo de aplicaciones web",
 };
 
 describe("validateWorkExperience", () => {
@@ -19,7 +18,13 @@ describe("validateWorkExperience", () => {
   });
 
   it("accepts a current job without end date", () => {
-    expect(validateWorkExperience({ ...VALID_VALUES, endDate: "", isCurrent: true })).toEqual({});
+    expect(
+      validateWorkExperience({
+        ...VALID_VALUES,
+        endDate: "",
+        isCurrent: true,
+      }),
+    ).toEqual({});
   });
 
   it("marks the empty required fields", () => {
@@ -30,25 +35,51 @@ describe("validateWorkExperience", () => {
         position: "",
         startDate: "",
         endDate: "",
+        description: "   ",
       }),
     ).toEqual({
       companyName: WORK_EXPERIENCE_VALIDATION_MESSAGES.required,
       position: WORK_EXPERIENCE_VALIDATION_MESSAGES.required,
       startDate: WORK_EXPERIENCE_VALIDATION_MESSAGES.required,
       endDate: WORK_EXPERIENCE_VALIDATION_MESSAGES.endDateRequired,
+      description: WORK_EXPERIENCE_VALIDATION_MESSAGES.required,
     });
   });
 
+  it("rejects an empty description", () => {
+    expect(
+      validateWorkExperience({
+        ...VALID_VALUES,
+        description: "",
+      }).description,
+    ).toBe(WORK_EXPERIENCE_VALIDATION_MESSAGES.required);
+  });
+
+  it("rejects a description containing only spaces", () => {
+    expect(
+      validateWorkExperience({
+        ...VALID_VALUES,
+        description: "   ",
+      }).description,
+    ).toBe(WORK_EXPERIENCE_VALIDATION_MESSAGES.required);
+  });
+
   it("rejects an end date earlier than the start date", () => {
-    expect(validateWorkExperience({ ...VALID_VALUES, endDate: "2024-06-30" }).endDate).toBe(
-      WORK_EXPERIENCE_VALIDATION_MESSAGES.endDateBeforeStartDate,
-    );
+    expect(
+      validateWorkExperience({
+        ...VALID_VALUES,
+        endDate: "2024-06-30",
+      }).endDate,
+    ).toBe(WORK_EXPERIENCE_VALIDATION_MESSAGES.endDateBeforeStartDate);
   });
 
   it("rejects a company name longer than the limit", () => {
-    expect(validateWorkExperience({ ...VALID_VALUES, companyName: "a".repeat(101) }).companyName).toBe(
-      WORK_EXPERIENCE_VALIDATION_MESSAGES.companyNameTooLong,
-    );
+    expect(
+      validateWorkExperience({
+        ...VALID_VALUES,
+        companyName: "a".repeat(101),
+      }).companyName,
+    ).toBe(WORK_EXPERIENCE_VALIDATION_MESSAGES.companyNameTooLong);
   });
 
   it.each([
@@ -58,17 +89,30 @@ describe("validateWorkExperience", () => {
     ["2024-02-30", WORK_EXPERIENCE_VALIDATION_MESSAGES.invalidDate],
     ["2999-01-01", WORK_EXPERIENCE_VALIDATION_MESSAGES.futureDate],
   ])("rejects the start date %s", (startDate, message) => {
-    expect(validateWorkExperience({ ...VALID_VALUES, startDate }).startDate).toBe(message);
+    expect(
+      validateWorkExperience({
+        ...VALID_VALUES,
+        startDate,
+      }).startDate,
+    ).toBe(message);
   });
 
   it("accepts the minimum date", () => {
     expect(
-      validateWorkExperience({ ...VALID_VALUES, startDate: "1950-01-01" }),
+      validateWorkExperience({
+        ...VALID_VALUES,
+        startDate: "1950-01-01",
+      }),
     ).toEqual({});
   });
 
   it("rejects an end date out of range without comparing it with the start date", () => {
-    expect(validateWorkExperience({ ...VALID_VALUES, endDate: "0012-01-01" })).toEqual({
+    expect(
+      validateWorkExperience({
+        ...VALID_VALUES,
+        endDate: "0012-01-01",
+      }),
+    ).toEqual({
       endDate: WORK_EXPERIENCE_VALIDATION_MESSAGES.dateBeforeMinimum,
     });
   });

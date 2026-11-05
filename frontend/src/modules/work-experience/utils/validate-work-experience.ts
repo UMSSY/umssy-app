@@ -1,3 +1,4 @@
+
 import {
   WORK_EXPERIENCE_COMPANY_NAME_MAX_LENGTH,
   WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH,
@@ -14,17 +15,23 @@ function getDateError(value: string): string | undefined {
   if (!isValidIsoDate(value)) {
     return WORK_EXPERIENCE_VALIDATION_MESSAGES.invalidDate;
   }
+
   if (value < WORK_EXPERIENCE_MIN_DATE) {
     return WORK_EXPERIENCE_VALIDATION_MESSAGES.dateBeforeMinimum;
   }
+
   if (value > getTodayIsoDate()) {
     return WORK_EXPERIENCE_VALIDATION_MESSAGES.futureDate;
   }
+
   return undefined;
 }
 
-export function validateWorkExperience(values: WorkExperienceFormValues): WorkExperienceErrors {
+export function validateWorkExperience(
+  values: WorkExperienceFormValues,
+): WorkExperienceErrors {
   const errors: WorkExperienceErrors = {};
+
   const companyName = (values.companyName ?? "").trim();
   const position = (values.position ?? "").trim();
   const description = (values.description ?? "").trim();
@@ -34,7 +41,8 @@ export function validateWorkExperience(values: WorkExperienceFormValues): WorkEx
   if (!companyName) {
     errors.companyName = WORK_EXPERIENCE_VALIDATION_MESSAGES.required;
   } else if (companyName.length > WORK_EXPERIENCE_COMPANY_NAME_MAX_LENGTH) {
-    errors.companyName = WORK_EXPERIENCE_VALIDATION_MESSAGES.companyNameTooLong;
+    errors.companyName =
+      WORK_EXPERIENCE_VALIDATION_MESSAGES.companyNameTooLong;
   }
 
   if (!position) {
@@ -43,8 +51,11 @@ export function validateWorkExperience(values: WorkExperienceFormValues): WorkEx
     errors.position = WORK_EXPERIENCE_VALIDATION_MESSAGES.positionTooLong;
   }
 
-  if (description.length > WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH) {
-    errors.description = WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong;
+  if (!description) {
+    errors.description = WORK_EXPERIENCE_VALIDATION_MESSAGES.required;
+  } else if (description.length > WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH) {
+    errors.description =
+      WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong;
   }
 
   errors.startDate = startDate
@@ -53,11 +64,14 @@ export function validateWorkExperience(values: WorkExperienceFormValues): WorkEx
 
   if (!values.isCurrent) {
     if (!endDate) {
-      errors.endDate = WORK_EXPERIENCE_VALIDATION_MESSAGES.endDateRequired;
+      errors.endDate =
+        WORK_EXPERIENCE_VALIDATION_MESSAGES.endDateRequired;
     } else {
       errors.endDate = getDateError(endDate);
+
       if (!errors.endDate && !errors.startDate && endDate < startDate) {
-        errors.endDate = WORK_EXPERIENCE_VALIDATION_MESSAGES.endDateBeforeStartDate;
+        errors.endDate =
+          WORK_EXPERIENCE_VALIDATION_MESSAGES.endDateBeforeStartDate;
       }
     }
   }

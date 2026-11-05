@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +13,7 @@ import { workExperienceService } from "../services/work-experience.service";
 import type { Feedback } from "@/modules/profile";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
 import type { WorkExperiencePayload } from "../types/work-experience-payload.types";
+import { normalizeWorkExperienceDescription } from "../utils/normalize-work-experience-description";
 
 const SKILLS_PROFILE_QUERY_KEY = ["skills", "profile"] as const;
 
@@ -77,13 +77,18 @@ export function useSaveWorkExperience(onSaved: () => void) {
     setFeedback(null);
     setAnalysis(null);
 
+    const normalizedPayload: WorkExperiencePayload = {
+      ...payload,
+      description: normalizeWorkExperienceDescription(payload.description),
+    };
+
     try {
       const saved = id
         ? await mutation.mutateAsync(() =>
-            workExperienceService.updateWorkExperience(id, payload),
+            workExperienceService.updateWorkExperience(id, normalizedPayload),
           )
         : await mutation.mutateAsync(() =>
-            workExperienceService.createWorkExperience(payload),
+            workExperienceService.createWorkExperience(normalizedPayload),
           );
 
       setFeedback({
@@ -95,7 +100,6 @@ export function useSaveWorkExperience(onSaved: () => void) {
 
       onSaved();
 
-      // El análisis se ejecuta en segundo plano sin invalidar el guardado.
       void analyze(saved, payload);
     } catch {
       setFeedback({
