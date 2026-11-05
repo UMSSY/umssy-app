@@ -10,7 +10,7 @@ export interface MentorDirectoryItem {
   sharedInterestsCount?: number;
 }
 
-export type MentorSort = "name_asc" | "name_desc" | "affinity";
+export type MentorSort = "default" | "name_asc" | "name_desc" | "affinity";
 
 export type AffinityStatus = "ready" | "no_skills" | "unmapped_skills";
 

@@ -38,6 +38,7 @@ beforeEach(() => {
   vi.restoreAllMocks();
 
   vi.mocked(useAuth).mockReturnValue({
+    currentUserId: "user-a",
     roles: ["titulado"],
     isLoading: false,
     refreshRoles: vi.fn().mockResolvedValue(undefined),
@@ -55,6 +56,7 @@ describe("AppointmentsView", () => {
     "en %s muestra a la otra persona con su rol para usuarios con ambos roles",
     async (scope) => {
       vi.mocked(useAuth).mockReturnValue({
+        currentUserId: "user-a",
         roles: ["mentor", "titulado"],
         isLoading: false,
         refreshRoles: vi.fn().mockResolvedValue(undefined),
@@ -111,6 +113,7 @@ describe("AppointmentsView", () => {
     "no ofrece buscar mentores al rol %s",
     async (role) => {
       vi.mocked(useAuth).mockReturnValue({
+        currentUserId: "user-a",
         roles: [role],
         isLoading: false,
         refreshRoles: vi.fn().mockResolvedValue(undefined),

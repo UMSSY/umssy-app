@@ -38,7 +38,7 @@ describe('Mentorship Standard Response HTTP', () => {
       pageSize: 6,
       totalItems: 1,
       totalPages: 1,
-      effectiveSort: 'name_asc',
+      effectiveSort: 'default',
     }),
     findOne: vi.fn().mockResolvedValue(profile),
     activate: vi.fn().mockResolvedValue({ id: userId }),
@@ -48,7 +48,7 @@ describe('Mentorship Standard Response HTTP', () => {
     updateMyOrientationTypes: vi.fn().mockResolvedValue(orientationPayload),
   };
 
-  let app: INestApplication;
+  let app: INestApplication<Server>;
   let server: Server;
 
   beforeAll(async () => {
@@ -87,7 +87,7 @@ describe('Mentorship Standard Response HTTP', () => {
     app.setGlobalPrefix('api');
     app.useGlobalFilters(new DomainExceptionFilter());
     await app.init();
-    server = app.getHttpServer<Server>();
+    server = app.getHttpServer();
   });
 
   afterAll(async () => {
@@ -122,7 +122,7 @@ describe('Mentorship Standard Response HTTP', () => {
       pageSize: 6,
       totalItems: 1,
       totalPages: 1,
-      effectiveSort: 'name_asc',
+      effectiveSort: 'default',
     });
     expect(mentorsService.findDirectory).toHaveBeenCalledWith(
       {
@@ -130,7 +130,7 @@ describe('Mentorship Standard Response HTTP', () => {
         search: 'Ana',
         area: 'Backend',
         available: true,
-        sort: 'name_asc',
+        sort: 'default',
       },
       userId,
     );
@@ -143,7 +143,7 @@ describe('Mentorship Standard Response HTTP', () => {
         page: 1,
         search: '',
         available: false,
-        sort: 'name_asc',
+        sort: 'default',
       },
       userId,
     );
