@@ -56,6 +56,7 @@ describe("AppointmentsView", () => {
     "en %s muestra a la otra persona con su rol para usuarios con ambos roles",
     async (scope) => {
       vi.mocked(useAuth).mockReturnValue({
+        currentUserId: "user-a",
         roles: ["mentor", "titulado"],
         isLoading: false,
         refreshRoles: vi.fn().mockResolvedValue(undefined),
