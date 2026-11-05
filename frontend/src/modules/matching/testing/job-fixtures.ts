@@ -8,14 +8,17 @@ export function buildJob(overrides: Partial<RecommendedJob> = {}): RecommendedJo
     modality: "Remoto",
     score: 67,
     matchedSkills: ["Python", "Docker"],
-    matchedSkillIds: ["s1", "s2"],
-    missingSkills: ["React"],
-    missingSkillIds: ["s3"],
     skills: ["Python", "Docker", "React"],
     ...overrides,
   };
 }
 
 export function buildMatch(overrides: Partial<JobMatch> = {}): JobMatch {
-  return { ...buildJob(), description: "Desarrollo de servicios.\nTrabajo en equipo.", ...overrides };
+  return {
+    ...buildJob(),
+    description: "Desarrollo de servicios.\nTrabajo en equipo.",
+    requirements: [],
+    hasPendingRequirements: false,
+    ...overrides,
+  };
 }

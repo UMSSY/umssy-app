@@ -54,6 +54,12 @@ export const JOB_MATCHING_MESSAGES = {
   noMatchesText:
     "Cuando se publiquen ofertas que coincidan con tus habilidades, aparecerán aquí.",
   noMatchesAction: "Revisar mi perfil",
+  filtersLabel: "Filtros",
+  searchLabel: "Buscar",
+  searchPlaceholder: "Buscar por título o empresa...",
+  modalityLabel: "Modalidad",
+  allOptions: "Todas",
+  clearFilters: "Limpiar filtros",
 } as const;
 
 export const HIGH_AFFINITY_THRESHOLD = 70;

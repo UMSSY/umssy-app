@@ -57,11 +57,11 @@ describe("RecommendedJobsFilters", () => {
 
     await userEvent.click(screen.getByRole("checkbox", { name: "Solo alta afinidad" }));
 
-    expect(onChange).toHaveBeenCalledWith({ ...DEFAULT_FILTERS, highAffinityOnly: true });
+    expect(onChange).toHaveBeenCalledWith({ ...DEFAULT_FILTERS, onlyHighAffinity: true });
   });
 
   it("refleja los filtros recibidos", () => {
-    renderFilters({ filters: { search: "sql", modality: "Híbrido", highAffinityOnly: true } });
+    renderFilters({ filters: { search: "sql", modality: "Híbrido", onlyHighAffinity: true } });
 
     expect(screen.getByRole("searchbox", { name: "Buscar" })).toHaveValue("sql");
     expect(screen.getByLabelText("Modalidad:")).toHaveValue("Híbrido");

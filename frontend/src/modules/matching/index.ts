@@ -24,3 +24,6 @@ export type {
 } from "./types/job-matching.types";
 export { skillsAnalysisService } from "./services/skills-analysis.service";
 export type { DetectedSkill, SkillsAnalysisResult } from "./types/skills-analysis.types";
+export type JobDetailPageProps = {
+  params: Promise<{ id: string }>;
+};
