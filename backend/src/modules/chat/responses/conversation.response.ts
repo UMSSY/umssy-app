@@ -6,6 +6,11 @@ interface ConversationBaseResponse {
     fullName: string;
     avatarUrl: string | null;
     isOnline: boolean;
+    role?: string | null;
+    roleName?: string | null;
+    email?: string | null;
+    academicTitle?: string | null;
+    skills?: string[];
   };
   lastMessage: {
     id: string;

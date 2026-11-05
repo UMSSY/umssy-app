@@ -24,9 +24,10 @@ export function ContactProfileModal({
 }: ContactProfileModalProps) {
   if (!contact) return null;
 
-  const roleDisplay = contact.roleName
-    ? contact.roleName.charAt(0).toUpperCase() +
-      contact.roleName.slice(1).toLowerCase()
+  const resolvedRole = contact.roleName || contact.role || null;
+  const roleDisplay = resolvedRole
+    ? resolvedRole.charAt(0).toUpperCase() +
+      resolvedRole.slice(1).toLowerCase()
     : null;
 
   const showEmail = contact.isEmailVisible !== false && Boolean(contact.email);

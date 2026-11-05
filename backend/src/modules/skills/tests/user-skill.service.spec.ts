@@ -20,6 +20,7 @@ describe('UserSkillService', () => {
   let service: UserSkillService;
   let skillRepository: { findByIds: ReturnType<typeof vi.fn> };
   let userSkillRepository: {
+    findAllByUserId: ReturnType<typeof vi.fn>;
     findByUserId: ReturnType<typeof vi.fn>;
     replaceForUser: ReturnType<typeof vi.fn>;
   };
@@ -28,7 +29,7 @@ describe('UserSkillService', () => {
 
   beforeEach(() => {
     skillRepository = { findByIds: vi.fn() };
-    userSkillRepository = { findByUserId: vi.fn(), replaceForUser: vi.fn() };
+    userSkillRepository = { findAllByUserId: vi.fn(), findByUserId: vi.fn(), replaceForUser: vi.fn() };
     profileRepository = { findByUserId: vi.fn().mockResolvedValue({ id: userId }) };
     skillsAnalysis = { refreshAfterChange: vi.fn().mockResolvedValue(undefined) };
     service = new UserSkillService(
@@ -38,6 +39,31 @@ describe('UserSkillService', () => {
       new SkillMapper(),
       skillsAnalysis as unknown as ProfileSkillsAnalysisService,
     );
+  });
+
+  describe('getProfessionalSkills', () => {
+    it('returns public skill fields including catalog membership without profile or NLP queries', async () => {
+      const custom = { id: 'custom', name: 'Python', isCustom: true };
+      userSkillRepository.findAllByUserId.mockResolvedValue([
+        { skill: python, source: 'manual' },
+        { skill: sql, source: 'nlp' },
+        { skill: custom, source: 'manual' },
+      ]);
+
+      await expect(service.getProfessionalSkills(userId)).resolves.toEqual([python, sql, custom]);
+      expect(userSkillRepository.findAllByUserId).toHaveBeenCalledExactlyOnceWith(userId);
+      expect(userSkillRepository.findByUserId).not.toHaveBeenCalled();
+      expect(profileRepository.findByUserId).not.toHaveBeenCalled();
+      expect(skillsAnalysis.refreshAfterChange).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty list without requiring a profile', async () => {
+      profileRepository.findByUserId.mockResolvedValue(null);
+      userSkillRepository.findAllByUserId.mockResolvedValue([]);
+
+      await expect(service.getProfessionalSkills(userId)).resolves.toEqual([]);
+      expect(profileRepository.findByUserId).not.toHaveBeenCalled();
+    });
   });
 
   describe('getUserSkills', () => {

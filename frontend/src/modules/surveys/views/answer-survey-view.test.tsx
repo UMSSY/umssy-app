@@ -1,11 +1,21 @@
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
+import { SURVEY_ANSWERS_STORAGE_KEY } from "../constants/survey-answer.constants";
 import { surveysService } from "../services/surveys.service";
 import { apiResponse } from "../testing/survey-fixtures";
 import type { SurveyDetail } from "../types/survey.types";
+import { removeSurveyStorage } from "../utils/survey-draft-storage";
 import { AnswerSurveyView } from "./answer-survey-view";
+
+const records = vi.hoisted(() => new Map<string, unknown>());
+
+vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
+  readIndexedDb: vi.fn(async (key: string) => records.get(key) ?? null),
+  writeIndexedDb: vi.fn(async (key: string, value: unknown) => { records.set(key, value); }),
+  removeIndexedDb: vi.fn(async (key: string) => { records.delete(key); }),
+}));
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({
@@ -56,9 +66,39 @@ const MOCK_SURVEY: SurveyDetail = {
 };
 
 describe("AnswerSurveyView", () => {
-  afterEach(() => {
+  afterEach(async () => {
     cleanup();
+    await removeSurveyStorage(SURVEY_ANSWERS_STORAGE_KEY("survey-123"));
+    records.clear();
     vi.restoreAllMocks();
+  });
+
+  it("BUG-HU2-01: conserva las respuestas seleccionadas tras volver a montar la vista", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(surveysService, "getSurvey").mockResolvedValue(apiResponse(MOCK_SURVEY));
+
+    renderWithQuery(<AnswerSurveyView id="survey-123" />);
+    await user.click(await screen.findByText("Sí, a tiempo completo"));
+
+    await waitFor(() => expect(records.get(SURVEY_ANSWERS_STORAGE_KEY("survey-123"))).toEqual({ "q-1": ["opt-1a"] }));
+
+    cleanup();
+    renderWithQuery(<AnswerSurveyView id="survey-123" />);
+
+    expect(await screen.findByRole("radio", { name: "Sí, a tiempo completo" })).toBeChecked();
+  });
+
+  it("BUG-HU2-01: limpia las respuestas guardadas al enviarlas correctamente", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(surveysService, "getSurvey").mockResolvedValue(apiResponse(MOCK_SURVEY));
+    vi.spyOn(surveysService, "submitAnswers").mockResolvedValue(apiResponse({ success: true, message: "Guardado" }));
+
+    renderWithQuery(<AnswerSurveyView id="survey-123" />);
+    await user.click(await screen.findByText("Sí, a tiempo completo"));
+    await user.click(screen.getByRole("button", { name: /finalizar y enviar/i }));
+
+    expect(await screen.findByRole("heading", { name: "¡Encuesta completada!" })).toBeInTheDocument();
+    await waitFor(() => expect(records.has(SURVEY_ANSWERS_STORAGE_KEY("survey-123"))).toBe(false));
   });
 
   it("muestra el título, descripción y preguntas de la encuesta", async () => {
@@ -131,11 +171,11 @@ describe("AnswerSurveyView", () => {
 
     renderWithQuery(<AnswerSurveyView id="survey-123" />);
 
-    const submitBtn = await screen.findByRole("button", { name: /enviar respuestas/i });
+    const submitBtn = await screen.findByRole("button", { name: /finalizar y enviar/i });
     await user.click(submitBtn);
 
     expect(
-      await screen.findByText("Esta pregunta es obligatoria. Por favor selecciona una opción."),
+      await screen.findByText("Esta pregunta es obligatoria."),
     ).toBeInTheDocument();
   });
 
@@ -156,7 +196,7 @@ describe("AnswerSurveyView", () => {
     const checkboxOption = screen.getByText("Gestión de proyectos");
     await user.click(checkboxOption);
 
-    const submitBtn = screen.getByRole("button", { name: /enviar respuestas/i });
+    const submitBtn = screen.getByRole("button", { name: /finalizar y enviar/i });
     await user.click(submitBtn);
 
     expect(submitSpy).toHaveBeenCalledWith("survey-123", {

@@ -53,7 +53,7 @@ export class AvailabilityMapper {
     const { student } = appointment;
     return {
       id: appointment.id,
-      counterpart: { id: student.id, fullName: `${student.firstName} ${student.lastName}`.trim() },
+      counterpart: { id: student.id, fullName: `${student.firstName} ${student.lastName}`.trim(), role: 'student' },
       orientationType: appointment.orientationType,
     };
   }

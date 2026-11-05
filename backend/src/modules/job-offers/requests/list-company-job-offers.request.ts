@@ -30,7 +30,7 @@ export const listCompanyJobOffersSchema = z
     ),
     sortBy: z.preprocess(
       emptyToUndefined,
-      z.enum(JOB_OFFER_SORT_FIELDS, { message: MESSAGES.INVALID_SORT_BY }).default('createdAt'),
+      z.enum(JOB_OFFER_SORT_FIELDS, { message: MESSAGES.INVALID_SORT_BY }).default('publishedAt'),
     ),
     order: z.preprocess(
       emptyToUndefined,
@@ -45,6 +45,6 @@ export const listCompanyJobOffersSchema = z
 export type ListCompanyJobOffersRequest = z.infer<typeof listCompanyJobOffersSchema>;
 
 export const DEFAULT_COMPANY_JOB_OFFERS_FILTERS: ListCompanyJobOffersRequest = {
-  sortBy: 'createdAt',
+  sortBy: 'publishedAt',
   order: 'desc',
 };

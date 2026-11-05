@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { EventProposalsService } from '../services/event-proposals.service.js';
 import { CreateProposalSchema } from '../requests/create-proposal.request.js';
 
-const valid = { title: 'Python', description: 'Taller práctico', categoryId: '11111111-1111-4111-8111-111111111111', eventDate: '2026-12-12', startTime: '09:00', endTime: '12:00', capacity: '31', modality: 'presencial', location: 'Aula 1' };
+const valid = { title: 'Python', description: 'Taller práctico', categoryId: '11111111-1111-4111-8111-111111111111', eventDate: '2026-12-12', startTime: '09:00', endTime: '12:00', capacity: '31', modality: 'presencial', location: 'Facultad de Tecnología, Aula 1' };
 function setup() {
   const record = { id: randomUUID(), supportThreshold: 16, votingDeadline: new Date('2026-12-01T12:00:00Z'), proposalHash: '' };
   const tx = { user: { findFirst: vi.fn().mockResolvedValue({ firstName: 'Ana', lastName: 'López' }) }, eventCategory: { findUnique: vi.fn().mockResolvedValue({ id: valid.categoryId }) }, eventStatus: { upsert: vi.fn().mockResolvedValue({ id: 'status' }) }, eventOrigin: { upsert: vi.fn().mockResolvedValue({ id: 'origin' }) }, eventModality: { upsert: vi.fn().mockResolvedValue({ id: 'modality' }) }, event: { create: vi.fn().mockImplementation(({ data }) => { Object.assign(record, data); return record; }) } };
@@ -13,6 +13,9 @@ function setup() {
   return { tx, prisma, record, files, service: new EventProposalsService(new EventProposalsRepository(prisma as never), files as never) };
 }
 describe('Workshop proposal validation and persistence', () => {
+  it.each(['Facultad, Aula, Piso, Bloque, Campus', 'Facultad,, Aula', ', Aula', 'Facultad, '])('rejects an invalid physical location: %s', location => {
+    expect(CreateProposalSchema.safeParse({ ...valid, location }).success).toBe(false);
+  });
   it.each([{ title: '' }, { title: 'a'.repeat(81) }, { description: 'a'.repeat(301) }, { capacity: '1.5' }, { eventDate: '2026-02-30' }, { endTime: '08:59' }, { modality: 'virtual', location: 'javascript:alert(1)' }, { authorId: randomUUID() }])('rejects invalid or forged values: %j', (change) => {
     expect(CreateProposalSchema.safeParse({ ...valid, ...change }).success).toBe(false);
   });

@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Ticket } from "lucide-react";
 import { toast } from "sonner";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Button } from '@/components/ui/button';
 import { buildLoginUrl } from '@/modules/auth/utils/safe-next-path';
 import { useRegistrationSession } from '@/modules/registrations';
@@ -165,7 +165,7 @@ export function EventsView({ initialProposalId = null }: EventsViewProps) {
         )}
 
         <section aria-label="Listado de talleres">
-          <div className="grid grid-cols-(--grid-template-columns-event-cards) gap-5">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
             {visibleEvents.map((eventItem) => (
               <EventCard
                 key={eventItem.id}

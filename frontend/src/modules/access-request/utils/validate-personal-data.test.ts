@@ -80,8 +80,16 @@ describe("validatePersonalData", () => {
     },
   );
 
-  it.each(["code0156@gma.con", "ana@umss.edu.bo", "a.b+c@mail.co"])("acepta el correo %s", (email) => {
+  it.each(["ana@umss.edu.bo", "a.b+c@mail.co", "code0156@gmail.com", "ana@miempresa.com.bo"])("acepta el correo %s", (email) => {
     expect(errorsOf({ email }).email).toBeUndefined();
+  });
+
+  it.each([
+    ["code0156@gma.con", "@gma.com"],
+    ["code0156@gbail.com", "@gmail.com"],
+    ["ana@hotmial.com", "@hotmail.com"],
+  ])("rechaza el correo %s por una errata evidente del dominio", (email, suggestion) => {
+    expect(errorsOf({ email }).email).toBe(`Revisa el dominio del correo. ¿Quisiste decir ${suggestion}?`);
   });
 
   it("valida el departamento de expedición", () => {

@@ -1,3 +1,4 @@
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -33,7 +34,7 @@ describe("BackofficeShell", () => {
   });
 
   it("un administrativo ve el layout con la opción Solicitudes y su contenido", () => {
-    sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+    saveAccessToken(tokenFor("administrativo"));
     renderWithQuery(
       <BackofficeShell>
         <p>Contenido del backoffice</p>
@@ -58,7 +59,7 @@ describe("BackofficeShell", () => {
   });
 
   it.each(["titulado", "estudiante", "mentor", "empresa"])("el rol %s es redirigido al inicio", async (role) => {
-    sessionStorage.setItem("accessToken", tokenFor(role));
+    saveAccessToken(tokenFor(role));
     renderWithQuery(
       <BackofficeShell>
         <p>Contenido del backoffice</p>
@@ -70,7 +71,7 @@ describe("BackofficeShell", () => {
   });
 
   it("Cerrar sesión borra el token y va al login", () => {
-    sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+    saveAccessToken(tokenFor("administrativo"));
     renderWithQuery(
       <BackofficeShell>
         <p>Contenido</p>
@@ -88,7 +89,7 @@ describe("BackofficeShell", () => {
     beforeEach(() => listRequests.mockReset());
 
     it("muestra la insignia de pendientes con el total que devuelve el listado (limit=1)", async () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+      saveAccessToken(tokenFor("administrativo"));
       listRequests.mockResolvedValue({ ok: true, data: { items: [], total: 18, page: 1, offset: 0 } });
       renderWithQuery(
         <BackofficeShell>
@@ -101,7 +102,7 @@ describe("BackofficeShell", () => {
     });
 
     it("si el conteo falla no hay insignia ni error", async () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+      saveAccessToken(tokenFor("administrativo"));
       listRequests.mockResolvedValue({ ok: false, status: 0, message: "sin red" });
       renderWithQuery(
         <BackofficeShell>
@@ -124,7 +125,7 @@ describe("BackofficeShell", () => {
     });
 
     it("la barra tiene la marca de texto, el pie con iniciales y no menciona egresados ni el lema", async () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+      saveAccessToken(tokenFor("administrativo"));
       listRequests.mockResolvedValue({ ok: false, status: 0, message: "x" });
       renderWithQuery(
         <BackofficeShell>
@@ -149,7 +150,7 @@ describe("BackofficeShell", () => {
     beforeEach(() => listRequests.mockResolvedValue({ ok: false, status: 0, message: "x" }));
 
     it("usa un solo AppShell: una barra lateral de 264 px y el botón de menú accesible", () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+      saveAccessToken(tokenFor("administrativo"));
       const { container } = renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>
@@ -164,7 +165,7 @@ describe("BackofficeShell", () => {
     });
 
     it("la barra lateral no muestra un chevron junto a la marca y el ítem activo muestra un punto claro", () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+      saveAccessToken(tokenFor("administrativo"));
       renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>
