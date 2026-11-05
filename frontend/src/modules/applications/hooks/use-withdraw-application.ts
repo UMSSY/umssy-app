@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { JOB_APPLICATION_QUERY_KEYS } from "@/modules/matching/constants/job-application.constants";
 import { APPLICATION_QUERY_KEYS } from "../constants/application.constants";
 import { applicationService } from "../services/application.service";
 
@@ -9,7 +10,12 @@ export function useWithdrawApplication() {
 
   const mutation = useMutation({
     mutationFn: (applicationId: string) => applicationService.withdraw(applicationId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: APPLICATION_QUERY_KEYS.mine }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: APPLICATION_QUERY_KEYS.mine }),
+        queryClient.invalidateQueries({ queryKey: JOB_APPLICATION_QUERY_KEYS.minePrefix }),
+      ]);
+    },
   });
 
   return {
