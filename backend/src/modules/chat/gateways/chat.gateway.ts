@@ -18,10 +18,10 @@ import { MessageService } from '../services/message.service.js';
 import { EventRoomService } from '../services/event-room.service.js';
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
 import { eventRoomJoinSchema } from '../requests/event-room-join.request.js';
-import type {
-  SocketMessagePayload,
-  EventRoomJoinPayload,
-} from '../types/chat-gateway.types.js';
+import type { SocketMessagePayload } from '../types/socket-message-payload.types.js';
+import type { EventRoomJoinPayload } from '../types/event-room-join-payload.types.js';
+import type { EventRoomJoinedPayload } from '../types/event-room-joined-payload.types.js';
+import type { EventRoomErrorPayload } from '../types/event-room-error-payload.types.js';
 import type { MessageResponse } from '../responses/message.response.js';
 
 @WebSocketGateway({

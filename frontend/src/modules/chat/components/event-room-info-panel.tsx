@@ -8,13 +8,6 @@ import { cn } from "@/lib/utils";
 import { formatEventRoomCreatedAt, getInitials } from "../utils/date-formatter";
 import type { EventRoomInfoPanelProps } from "../types/event-room-info-panel-props.types";
 
-/**
- * Panel derecho "Info del grupo" (solo en pantallas grandes; oculto debajo de lg).
- * - Título "Info del grupo".
- * - Círculo grande con icono Users, nombre del grupo y "Creado el dd/mm/aa".
- * - "N participantes" y la lista: avatar con iniciales y nombre.
- *   El usuario actual aparece como "Tú".
- */
 export function EventRoomInfoPanel({
   groupName,
   createdAt,
@@ -33,7 +26,7 @@ export function EventRoomInfoPanel({
       <div className="flex flex-col items-center gap-2">
         <div
           className={cn(
-            "flex size-20 items-center justify-center rounded-full border border-accent bg-accent text-surface",
+            "flex size-20 items-center justify-center rounded-full border border-accent bg-accent text-accent-foreground",
           )}
           aria-hidden="true"
         >

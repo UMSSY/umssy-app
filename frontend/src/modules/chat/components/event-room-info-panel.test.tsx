@@ -1,14 +1,14 @@
-import { render, screen, cleanup } from '@testing-library/react';
-import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
-import { EventRoomInfoPanel } from './event-room-info-panel';
+import { render, screen, cleanup } from "@testing-library/react";
+import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
+import { EventRoomInfoPanel } from "./event-room-info-panel";
 
-const avatarRootContextError = 'AvatarRootContext is missing';
+const avatarRootContextError = "AvatarRootContext is missing";
 
-describe('EventRoomInfoPanel', () => {
+describe("EventRoomInfoPanel", () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -17,11 +17,11 @@ describe('EventRoomInfoPanel', () => {
   });
 
   const participants = [
-    { id: 'user-1', fullName: 'Maria Fernandez' },
-    { id: 'user-2', fullName: 'Carlos Rojas' },
+    { id: "user-1", fullName: "Maria Fernandez" },
+    { id: "user-2", fullName: "Carlos Rojas" },
   ];
 
-  it('muestra el título, el nombre del grupo y la fecha de creación', () => {
+  it("muestra el título, el nombre del grupo y la fecha de creación", () => {
     render(
       <EventRoomInfoPanel
         groupName="Taller de React 2026"
@@ -31,12 +31,12 @@ describe('EventRoomInfoPanel', () => {
       />,
     );
 
-    expect(screen.getByText('Info del grupo')).toBeInTheDocument();
-    expect(screen.getByText('Taller de React 2026')).toBeInTheDocument();
+    expect(screen.getByText("Info del grupo")).toBeInTheDocument();
+    expect(screen.getByText("Taller de React 2026")).toBeInTheDocument();
     expect(screen.getByText(/Creado el/)).toBeInTheDocument();
   });
 
-  it('muestra el conteo y la lista de participantes', () => {
+  it("muestra el conteo y la lista de participantes", () => {
     render(
       <EventRoomInfoPanel
         groupName="Grupo"
@@ -46,9 +46,9 @@ describe('EventRoomInfoPanel', () => {
       />,
     );
 
-    expect(screen.getByText('2 participantes')).toBeInTheDocument();
-    expect(screen.getByText('Maria Fernandez')).toBeInTheDocument();
-    expect(screen.getByText('Carlos Rojas')).toBeInTheDocument();
+    expect(screen.getByText("2 participantes")).toBeInTheDocument();
+    expect(screen.getByText("Maria Fernandez")).toBeInTheDocument();
+    expect(screen.getByText("Carlos Rojas")).toBeInTheDocument();
   });
 
   it('muestra al usuario actual como "Tú"', () => {
@@ -61,11 +61,11 @@ describe('EventRoomInfoPanel', () => {
       />,
     );
 
-    expect(screen.getByText('Tú')).toBeInTheDocument();
+    expect(screen.getByText("Tú")).toBeInTheDocument();
   });
 
-  it('renderiza con 1 participante sin error de AvatarRootContext', () => {
-    const unParticipante = [{ id: 'user-9', fullName: 'Ana Torres' }];
+  it("renderiza con 1 participante sin error de AvatarRootContext", () => {
+    const unParticipante = [{ id: "user-9", fullName: "Ana Torres" }];
 
     render(
       <EventRoomInfoPanel
@@ -76,14 +76,14 @@ describe('EventRoomInfoPanel', () => {
       />,
     );
 
-    expect(screen.getByText('1 participante')).toBeInTheDocument();
-    expect(screen.getByText('Ana Torres')).toBeInTheDocument();
+    expect(screen.getByText("1 participante")).toBeInTheDocument();
+    expect(screen.getByText("Ana Torres")).toBeInTheDocument();
     expect(consoleErrorSpy).not.toHaveBeenCalledWith(
       expect.stringContaining(avatarRootContextError),
     );
   });
 
-  it('no lanza error de AvatarRootContext al renderizar con varios participantes', () => {
+  it("no lanza error de AvatarRootContext al renderizar con varios participantes", () => {
     render(
       <EventRoomInfoPanel
         groupName="Grupo"
@@ -98,7 +98,7 @@ describe('EventRoomInfoPanel', () => {
     );
   });
 
-  it('usa el azul de acento solo en el icono del grupo', () => {
+  it("usa el azul de acento solo en el icono del grupo", () => {
     const { container } = render(
       <EventRoomInfoPanel
         groupName="Grupo"
@@ -108,13 +108,13 @@ describe('EventRoomInfoPanel', () => {
       />,
     );
 
-    expect(container.querySelector('svg')?.parentElement).toHaveClass(
-      'bg-accent',
-      'text-surface',
+    expect(container.querySelector("svg")?.parentElement).toHaveClass(
+      "bg-accent",
+      "text-accent-foreground",
     );
 
     container.querySelectorAll('[data-slot="avatar"]').forEach((avatar) => {
-      expect(avatar).not.toHaveClass('bg-accent');
+      expect(avatar).not.toHaveClass("bg-accent");
     });
   });
 });

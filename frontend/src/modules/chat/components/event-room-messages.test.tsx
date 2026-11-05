@@ -2,7 +2,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 import { EventRoomMessages } from './event-room-messages';
 import type { Message } from '../types/conversation.types';
-import type { EventRoomParticipant } from '../types/event-room.types';
+import type { EventRoomParticipant } from '../types/event-room-participant.types';
 
 const now = new Date().toISOString();
 
