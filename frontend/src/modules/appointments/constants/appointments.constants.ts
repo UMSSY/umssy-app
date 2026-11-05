@@ -56,3 +56,36 @@ export const APPOINTMENT_DETAIL_TEXT = {
   mentorProfile: "Ver perfil del mentor",
   photoAlt: "Foto de perfil de",
 } as const;
+
+export const APPOINTMENT_WEEKDAY_LABELS = [
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
+  "Domingo",
+] as const;
+
+export const APPOINTMENT_MONTH_LABELS = [
+  "enero",
+  "febrero",
+  "marzo",
+  "abril",
+  "mayo",
+  "junio",
+  "julio",
+  "agosto",
+  "septiembre",
+  "octubre",
+  "noviembre",
+  "diciembre",
+] as const;
+
+export const APPOINTMENT_DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  "application/pdf": "PDF",
+  "image/png": "PNG",
+  "image/jpeg": "JPG",
+};
+
+export const APPOINTMENT_DOCUMENT_FALLBACK_TYPE_LABEL = "DOC";
