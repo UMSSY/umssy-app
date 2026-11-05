@@ -5,6 +5,8 @@ import { BlockNotFoundException } from '../../availability/exceptions/index.js';
 import { AvailabilityService } from '../../availability/services/availability.service.js';
 import { BlockedDatesService } from '../../availability/services/blocked-dates.service.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
+import { ProfilePhotoService } from '../../profile/services/profile-photo.service.js';
+import type { PhotoFileDownload } from '../../profile/types/photo-file-download.type.js';
 import {
   BlockAlreadyBookedException,
   BlockInPastException,
@@ -17,6 +19,7 @@ import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owne
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
 import { AppointmentsRepository } from '../repositories/appointments.repository.js';
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
+import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
 import type { MyAppointmentsQuery } from '../types/my-appointments-query.types.js';
 
@@ -28,6 +31,7 @@ export class AppointmentsService {
     private readonly availabilityService: AvailabilityService,
     private readonly blockedDatesService: BlockedDatesService,
     private readonly mentorsService: MentorsService,
+    private readonly profilePhotoService: ProfilePhotoService,
   ) {}
 
   async create(
@@ -130,6 +134,26 @@ export class AppointmentsService {
   }
 
   async findOne(userId: string, id: string): Promise<MyAppointmentResponse> {
+    const appointment = await this.findParticipatedAppointment(userId, id);
+    return this.appointmentMapper.toResponse(appointment, userId);
+  }
+
+  async getCounterpartPhoto(
+    userId: string,
+    id: string,
+  ): Promise<PhotoFileDownload> {
+    const appointment = await this.findParticipatedAppointment(userId, id);
+    const counterpartId =
+      appointment.mentorId === userId
+        ? appointment.studentId
+        : appointment.mentorId;
+    return this.profilePhotoService.getPhoto(counterpartId);
+  }
+
+  private async findParticipatedAppointment(
+    userId: string,
+    id: string,
+  ): Promise<AppointmentRecord> {
     const appointment = await this.appointmentsRepository.findById(id);
     if (!appointment) {
       throw new AppointmentNotFoundException();
@@ -137,6 +161,6 @@ export class AppointmentsService {
     if (appointment.mentorId !== userId && appointment.studentId !== userId) {
       throw new AppointmentNotOwnedException();
     }
-    return this.appointmentMapper.toResponse(appointment, userId);
+    return appointment;
   }
 }

@@ -94,10 +94,13 @@ function toRecord(
     studentId: GRADUATE,
     startAt,
     endAt,
+    message: null,
+    requestedAt: NOW,
     mentor: person(mentorId),
     student: person(GRADUATE),
     orientationType: TOPIC,
     status: { title: AppointmentStatusTitle.CONFIRMED },
+    document: null,
   };
 }
 
@@ -357,6 +360,9 @@ describe('Mis citas (integración HTTP con el plan del seed B-08)', () => {
       endAt: plan.next.end.toISOString(),
       orientationType: TOPIC,
       status: 'CONFIRMED',
+      message: null,
+      requestedAt: NOW.toISOString(),
+      document: null,
     });
     expect(mentorCounterpart).toEqual({ id: GRADUATE, fullName: 'Titulado Uno', role: 'student' });
     expect(graduateCounterpart).toEqual({ id: MENTOR_A, fullName: 'Mentor Alfa', role: 'mentor' });

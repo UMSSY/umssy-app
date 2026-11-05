@@ -33,6 +33,7 @@ import {
 
 const BLOCK_ID = '55555555-5555-4555-8555-555555555555';
 const TOPIC_ID = '66666666-6666-4666-8666-666666666666';
+const MESSAGE = 'Quiero reforzar mis bases';
 const STATUS_ID = '77777777-7777-4777-8777-777777777777';
 const OTHER_TOPIC_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const OTHER_MENTOR_ID = '99999999-9999-4999-8999-999999999999';
@@ -160,7 +161,10 @@ describe('POST /appointments (integración HTTP)', () => {
   };
 
   it('responde 401 cuando no hay sesión', async () => {
-    const response = await post({ blockId: BLOCK_ID, orientationTypeId: TOPIC_ID }, '');
+    const response = await post(
+      { blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, message: MESSAGE },
+      '',
+    );
 
     expect(response.status).toBe(401);
     expect(response.body).toMatchObject({ statusCode: 401, ok: false });
@@ -169,7 +173,7 @@ describe('POST /appointments (integración HTTP)', () => {
 
   it('responde 403 cuando el rol no puede reservar citas', async () => {
     const response = await post(
-      { blockId: BLOCK_ID, orientationTypeId: TOPIC_ID },
+      { blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, message: MESSAGE },
       companyToken,
     );
 
@@ -180,7 +184,7 @@ describe('POST /appointments (integración HTTP)', () => {
 
   it('responde 201 cuando un mentor reserva el bloque de otro mentor', async () => {
     const response = await post(
-      { blockId: BLOCK_ID, orientationTypeId: TOPIC_ID },
+      { blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, message: MESSAGE },
       otherMentorToken,
     );
 
@@ -209,6 +213,26 @@ describe('POST /appointments (integración HTTP)', () => {
     expect(createAppointment).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['falta el mensaje', {}],
+    ['el mensaje solo tiene espacios', { message: '   ' }],
+  ])('responde 400 con el detalle cuando %s', async (_case, message) => {
+    const response = await post({
+      blockId: BLOCK_ID,
+      orientationTypeId: TOPIC_ID,
+      ...message,
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toEqual([
+      expect.objectContaining({
+        field: 'message',
+        message: APPOINTMENT_MESSAGES.missingMessage,
+      }),
+    ]);
+    expect(createAppointment).not.toHaveBeenCalled();
+  });
+
   it('responde 400 con el detalle cuando el mensaje supera el límite', async () => {
     const response = await post({
       blockId: BLOCK_ID,
@@ -229,7 +253,7 @@ describe('POST /appointments (integración HTTP)', () => {
     const response = await post({
       blockId: BLOCK_ID,
       orientationTypeId: TOPIC_ID,
-      message: 'Quiero reforzar mis bases',
+      message: MESSAGE,
     });
 
     expect(response.status).toBe(201);
@@ -252,6 +276,7 @@ describe('POST /appointments (integración HTTP)', () => {
         studentId: STUDENT_ID,
         statusId: STATUS_ID,
         orientationTypeId: TOPIC_ID,
+        message: MESSAGE,
       }),
       TX,
     );
@@ -272,6 +297,7 @@ describe('POST /appointments (integración HTTP)', () => {
     const response = await post({
       blockId: BLOCK_ID,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     });
 
     expect(response.status).toBe(404);
@@ -291,6 +317,7 @@ describe('POST /appointments (integración HTTP)', () => {
     const response = await post({
       blockId: BLOCK_ID,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     });
 
     expect(response.status).toBe(409);
@@ -300,7 +327,7 @@ describe('POST /appointments (integración HTTP)', () => {
 
   it('responde 403 cuando el mentor intenta reservar su propio bloque', async () => {
     const response = await post(
-      { blockId: BLOCK_ID, orientationTypeId: TOPIC_ID },
+      { blockId: BLOCK_ID, orientationTypeId: TOPIC_ID, message: MESSAGE },
       mentorToken,
     );
 
@@ -316,6 +343,7 @@ describe('POST /appointments (integración HTTP)', () => {
     const response = await post({
       blockId: BLOCK_ID,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     });
 
     expect(response.status).toBe(403);
@@ -337,6 +365,7 @@ describe('POST /appointments (integración HTTP)', () => {
     const response = await post({
       blockId: BLOCK_ID,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     });
 
     expect(response.status).toBe(400);
@@ -354,6 +383,7 @@ describe('POST /appointments (integración HTTP)', () => {
     const response = await post({
       blockId: BLOCK_ID,
       orientationTypeId: TOPIC_ID,
+      message: MESSAGE,
     });
 
     expect(response.status).toBe(400);

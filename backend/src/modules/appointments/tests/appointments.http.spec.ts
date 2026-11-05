@@ -92,6 +92,9 @@ describe('Appointments HTTP with shared authentication guards', () => {
           },
           counterpart: { id: STUDENT_ID, fullName: 'Luis Flores', role: 'student' },
           status: 'CONFIRMED',
+          message: null,
+          requestedAt: '2026-10-22T13:00:00.000Z',
+          document: null,
         },
       ],
     });

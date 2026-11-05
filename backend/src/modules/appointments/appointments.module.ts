@@ -3,6 +3,7 @@ import { FileValidationService } from '../../common/services/file-validation.ser
 import { AuthModule } from '../auth/auth.module.js';
 import { AvailabilityModule } from '../availability/availability.module.js';
 import { MentorsModule } from '../mentors/mentors.module.js';
+import { ProfileModule } from '../profile/profile.module.js';
 import { AppointmentDocumentsController } from './controllers/appointment-documents.controller.js';
 import { AppointmentsController } from './controllers/appointments.controller.js';
 import { AppointmentDocumentMapper } from './mappers/appointment-document.mapper.js';
@@ -13,7 +14,7 @@ import { AppointmentDocumentsService } from './services/appointment-documents.se
 import { AppointmentsService } from './services/appointments.service.js';
 
 @Module({
-  imports: [AuthModule, AvailabilityModule, MentorsModule],
+  imports: [AuthModule, AvailabilityModule, MentorsModule, ProfileModule],
   controllers: [AppointmentsController, AppointmentDocumentsController],
   providers: [
     AppointmentsService,
