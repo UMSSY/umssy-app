@@ -12,8 +12,7 @@ export function EventRoomEmptyState({
   return (
     <div className={cn("flex flex-col items-center justify-center gap-3 text-center")}>
       <div
-        className="flex size-12 items-center justify-center rounded-full border border-accent bg-accent text-surface"
-        aria-hidden="true"
+        className="flex size-12 items-center justify-center rounded-full border border-accent bg-accent text-accent-foreground"
       >
         <Users className="size-6" />
       </div>

@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { EventRegistrationsService } from '../../event-registrations/services/event-registrations.service.js';
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
-import { ConversationMapper } from '../mappers/conversation.mapper.js'; // <-- IMPORTAMOS EL MAPPER
-import type { EventRoomJoinedPayload } from '../types/chat-gateway.types.js';
+import { ConversationMapper } from '../mappers/conversation.mapper.js';
+import type { EventRoomJoinedPayload } from '../types/event-room-joined-payload.types.js';
 
 @Injectable()
 export class EventRoomService {

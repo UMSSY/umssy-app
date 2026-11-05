@@ -1,5 +1,5 @@
 import type { Message } from './conversation.types';
-import type { EventRoomParticipant } from './event-room.types';
+import type { EventRoomParticipant } from './event-room-participant.types';
 
 export interface EventRoomMessagesProps {
   messages: Message[];

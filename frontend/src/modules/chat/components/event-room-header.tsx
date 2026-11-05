@@ -6,12 +6,6 @@ import { cn } from "@/lib/utils";
 
 import type { EventRoomHeaderProps } from "../types/event-room-header-props.types";
 
-/**
- * Cabecera de la sala de evento.
- * - Círculo con icono Users (Lucide).
- * - Nombre del grupo en negrita.
- * - Bajo, "N participantes" (con 1: "1 participante").
- */
 export function EventRoomHeader({
   groupName,
   participantCount,
@@ -23,7 +17,7 @@ export function EventRoomHeader({
     <div className="flex items-center gap-3">
       <div
         className={cn(
-          "flex size-9 items-center justify-center rounded-full border border-accent bg-accent text-surface",
+          "flex size-9 items-center justify-center rounded-full border border-accent bg-accent text-accent-foreground",
         )}
         aria-hidden="true"
       >

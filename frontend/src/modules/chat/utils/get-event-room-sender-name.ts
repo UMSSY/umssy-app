@@ -1,4 +1,4 @@
-import type { EventRoomParticipant } from '../types/event-room.types';
+import type { EventRoomParticipant } from '../types/event-room-participant.types';
 
 export function getEventRoomSenderName(
   senderId: string,

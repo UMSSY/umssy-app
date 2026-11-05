@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useSocket } from '../contexts/socket-context';
-import type { EventRoomSummary } from '../types/event-room.types';
+import type { EventRoomSummary } from '../types/event-room-summary.types';
 
 interface UseEventRoomReturn {
   conversationId: string | null;

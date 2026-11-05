@@ -1,4 +1,3 @@
-
 import { describe, expect, it } from 'vitest';
 import { ConversationMapper } from './conversation.mapper.js';
 import type { RawConversationRecord } from '../types/raw-conversation-record.types.js';
@@ -54,8 +53,8 @@ describe('ConversationMapper', () => {
       id: 'conv-event-1',
       userAId: null,
       userBId: null,
-      userA: null, 
-      userB: null, 
+      userA: null,
+      userB: null,
       createdAt: new Date('2026-11-01T10:00:00Z'),
       updatedAt: new Date('2026-11-02T12:00:00Z'),
       messages: [],
@@ -118,9 +117,9 @@ describe('ConversationMapper', () => {
       conversationId: 'conv-event-room-1',
       eventId: 'event-1',
       name: 'Taller de React',
-      createdAt: '2026-11-01T10:00:00.000Z', // Formateado a ISO string
+      createdAt: '2026-11-01T10:00:00.000Z',
       participants: [
-        { id: 'user-1', fullName: 'Maria Fernandez' }, // Nombres concatenados
+        { id: 'user-1', fullName: 'Maria Fernandez' },
         { id: 'user-2', fullName: 'Carlos Rojas' },
       ],
     });
