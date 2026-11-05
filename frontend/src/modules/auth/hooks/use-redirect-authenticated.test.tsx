@@ -15,7 +15,7 @@ vi.mock("@/shared/contexts/auth-context", () => ({
 }));
 
 const authState = (roles: string[], isLoading = false) =>
-  ({ roles, isLoading, refreshRoles: async () => {} }) as AuthContextValue;
+  ({ currentUserId: null, roles, isLoading, refreshRoles: async () => {} }) as AuthContextValue;
 
 describe("useRedirectAuthenticated", () => {
   beforeEach(() => {

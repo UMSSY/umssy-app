@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { Prisma } from '../../../prisma/client.js';
+import { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
 import {
@@ -14,6 +14,11 @@ import {
 import { withMentorCapacityLock } from './mentor-capacity-lock.js';
 import { reconcileMentorOffers } from './mentor-offers.queries.js';
 import { MentorIntakeRepository } from './mentor-intake.repository.js';
+
+import {
+  directoryPredicate,
+  directoryOrder,
+} from './mentor-directory.queries.js';
 
 const directorySelect = {
   id: true,
@@ -43,7 +48,7 @@ interface DirectoryFilters {
   available: boolean;
 }
 
-type MentorDirectorySort = 'name_asc' | 'name_desc';
+type MentorDirectorySort = 'default' | 'name_asc' | 'name_desc';
 
 @Injectable()
 export class MentorsRepository extends MentorIntakeRepository {
@@ -123,16 +128,16 @@ export class MentorsRepository extends MentorIntakeRepository {
     return this.withPhotoVersions(mentors);
   }
 
-  countDirectoryMentors(filters: DirectoryFilters, now: Date) {
+  async countDirectoryMentors(filters: DirectoryFilters, now: Date) {
+    if (filters.search.trim()) {
+      const [result] = await this.prisma.$queryRaw<
+        { total: bigint }[]
+      >(Prisma.sql`
+        SELECT count(*) AS total FROM users u WHERE ${directoryPredicate(filters, now)}`);
+      return Number(result.total);
+    }
     return this.prisma.user.count({
       where: this.directoryWhere(filters, now),
-    });
-  }
-
-  findUserSkills(userId: string) {
-    return this.prisma.userSkill.findMany({
-      where: { userId },
-      select: { skill: { select: { name: true, isCustom: true } } },
     });
   }
 
@@ -144,14 +149,31 @@ export class MentorsRepository extends MentorIntakeRepository {
   }
 
   findDirectoryCandidates(filters: DirectoryFilters, now: Date) {
+    if (filters.search.trim()) {
+      return this.prisma.$queryRaw<
+        {
+          id: string;
+          firstName: string;
+          lastName: string;
+          createdAt: Date;
+          mentorTechnicalAreas: { technicalAreaId: string }[];
+        }[]
+      >(Prisma.sql`
+        SELECT u.id, u.first_name AS "firstName", u.last_name AS "lastName", u.created_at AS "createdAt",
+          COALESCE((SELECT jsonb_agg(jsonb_build_object('technicalAreaId', mta.technical_area_id))
+            FROM mentor_technical_areas mta WHERE mta.mentor_id = u.id), '[]'::jsonb) AS "mentorTechnicalAreas"
+        FROM users u WHERE ${directoryPredicate(filters, now)} ORDER BY ${directoryOrder('default')}`);
+    }
     return this.prisma.user.findMany({
       where: this.directoryWhere(filters, now),
       select: {
         id: true,
         firstName: true,
         lastName: true,
+        createdAt: true,
         mentorTechnicalAreas: { select: { technicalAreaId: true } },
       },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     });
   }
 
@@ -160,6 +182,12 @@ export class MentorsRepository extends MentorIntakeRepository {
     filters: DirectoryFilters,
     now: Date,
   ) {
+    if (filters.search.trim()) {
+      const matches = await this.prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
+        SELECT u.id FROM users u WHERE ${directoryPredicate(filters, now)}
+          AND u.id = ANY(${ids}::uuid[])`);
+      ids = matches.map(({ id }) => id);
+    }
     const mentors = await this.prisma.user.findMany({
       where: { ...this.directoryWhere(filters, now), id: { in: ids } },
       select: directorySelect,
@@ -173,18 +201,37 @@ export class MentorsRepository extends MentorIntakeRepository {
     now: Date,
     page: number,
     pageSize: number,
-    sort: MentorDirectorySort = 'name_asc',
+    sort: MentorDirectorySort = 'default',
   ) {
+    if (filters.search.trim()) {
+      const ids = await this.prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
+        SELECT u.id FROM users u WHERE ${directoryPredicate(filters, now)}
+        ORDER BY ${directoryOrder(sort)} LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}`);
+      if (!ids.length) return [];
+      const mentors = await this.prisma.user.findMany({
+        where: {
+          ...this.directoryWhere(filters, now),
+          id: { in: ids.map(({ id }) => id) },
+        },
+        select: directorySelect,
+      });
+      const byId = new Map(mentors.map((mentor) => [mentor.id, mentor]));
+      return this.withPhotoVersions(
+        ids.flatMap(({ id }) => {
+          const mentor = byId.get(id);
+          return mentor ? [mentor] : [];
+        }),
+      );
+    }
     const direction = sort === 'name_desc' ? 'desc' : 'asc';
 
     const mentors = await this.prisma.user.findMany({
       where: this.directoryWhere(filters, now),
       select: directorySelect,
-      orderBy: [
-        { firstName: direction },
-        { lastName: direction },
-        { id: 'asc' },
-      ],
+      orderBy:
+        sort === 'default'
+          ? [{ createdAt: 'asc' }, { id: 'asc' }]
+          : [{ firstName: direction }, { lastName: direction }, { id: 'asc' }],
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
@@ -230,15 +277,6 @@ export class MentorsRepository extends MentorIntakeRepository {
           },
         },
       };
-    }
-
-    if (filters.search) {
-      where.AND = filters.search.split(/\s+/).map((word) => ({
-        OR: [
-          { firstName: { contains: word, mode: 'insensitive' } },
-          { lastName: { contains: word, mode: 'insensitive' } },
-        ],
-      }));
     }
 
     return where;
@@ -398,22 +436,6 @@ export class MentorsRepository extends MentorIntakeRepository {
             },
           },
           orderBy: [{ isCurrent: 'desc' }, { startDate: 'desc' }],
-        },
-        userSkills: {
-          select: {
-            skill: {
-              select: {
-                id: true,
-                name: true,
-                isCustom: true,
-              },
-            },
-          },
-          orderBy: {
-            skill: {
-              name: 'asc',
-            },
-          },
         },
         certifications: {
           select: {
