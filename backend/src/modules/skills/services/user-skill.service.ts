@@ -20,7 +20,6 @@ export class UserSkillService {
     private readonly skillsAnalysis: ProfileSkillsAnalysisService,
   ) {}
 
-  // Incluye habilidades manuales y detectadas; una lista vacía no exige un perfil.
   async getProfessionalSkills(userId: string): Promise<SkillResponse[]> {
     const records = await this.userSkillRepository.findAllByUserId(userId);
     return records.map((record) => this.skillMapper.toUserSkillResponse(record));

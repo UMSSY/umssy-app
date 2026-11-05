@@ -41,7 +41,7 @@ export function SlotUnavailableDialog({ open, onOpenChange, isSubmitting, isRegi
         </footer>
       </> : <>
       <header className="flex items-center gap-4 border-b border-border p-5 pr-12 sm:px-7 sm:pr-12">
-        <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-notice/50 text-gold">
+        <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-notice/50 text-notice-foreground">
           <Hourglass aria-hidden="true" size={28} />
         </div>
         <div>

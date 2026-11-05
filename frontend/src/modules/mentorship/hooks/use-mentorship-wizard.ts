@@ -6,17 +6,9 @@ import {
   loadMentorshipWizardDraft,
   saveMentorshipWizardDraft,
 } from "../services/mentorship-wizard-draft.service";
+import type { OwnedWizardState } from "../types/owned-wizard-state.types";
 import type { MentorshipStep } from "../types/mentorship-step.types";
 import type { MentorshipWizardState } from "../types/mentorship-wizard-state.types";
-
-interface OwnedWizardState {
-  userId: string | null;
-  state: MentorshipWizardState;
-  isHydrated: boolean;
-  hasUserEdited: boolean;
-  hasDraftLoadFailed: boolean;
-  hasDraftStorageError: boolean;
-}
 
 function createOwnedWizardState(userId: string | null): OwnedWizardState {
   return {

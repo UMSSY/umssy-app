@@ -76,7 +76,9 @@ function makeContext(
     return [];
   });
   const userCount = vi.fn();
+  const queryRaw = vi.fn().mockResolvedValue(candidates);
   const repository = new MentorsRepository({
+    $queryRaw: queryRaw,
     technicalArea: { findMany: areaFindMany },
     user: { findMany: userFindMany, count: userCount },
   } as unknown as PrismaService);
@@ -95,6 +97,7 @@ function makeContext(
     areaFindMany,
     userFindMany,
     userCount,
+    queryRaw,
   };
 }
 
@@ -313,22 +316,21 @@ describe('MentorAffinityService', () => {
       'user-1',
     );
     expect(result.items).toHaveLength(1);
-    const candidateQuery = context.userFindMany.mock.calls[0][0];
-    const detailsQuery = context.userFindMany.mock.calls[1][0];
-    expect(candidateQuery.where).toMatchObject({
-      isActive: true,
-      isAvailableForMentoring: true,
+    const candidateQuery = context.queryRaw.mock.calls[0][0];
+    const detailsQuery = context.userFindMany.mock.calls[0][0];
+    expect(candidateQuery.sql).toContain('u.is_active = true');
+    expect(candidateQuery.sql).toContain('u.is_available_for_mentoring = true');
+    expect(candidateQuery.sql.match(/strpos\(/g)).toHaveLength(4);
+    expect(candidateQuery.values).toEqual(expect.arrayContaining(['Backend', 'Orientación técnica', 'Ana', 'Rojas']));
+    expect(context.queryRaw.mock.calls[1][0].values.at(-1)).toEqual(['a']);
+    expect(detailsQuery.where).toMatchObject({
+      isActive: true, isAvailableForMentoring: true, id: { in: ['a'] },
       mentorTechnicalAreas: { some: { technicalArea: { name: 'Backend' } } },
       mentorOrientationTypes: { some: { orientationType: { name: 'Orientación técnica', isActive: true } } },
     });
-    expect(candidateQuery.where.AND).toHaveLength(2);
-    expect(detailsQuery.where).toMatchObject({
-      ...candidateQuery.where,
-      id: { in: ['a'] },
-    });
-    expect(candidateQuery.select).not.toHaveProperty('educations');
-    expect(candidateQuery.select).not.toHaveProperty('photoUrl');
+    expect(candidateQuery.sql).not.toContain('educations');
+    expect(candidateQuery.sql).not.toContain('photo_url');
     expect(detailsQuery.select).not.toHaveProperty('photoUrl');
-    expect(context.userFindMany).toHaveBeenCalledTimes(3);
+    expect(context.userFindMany).toHaveBeenCalledTimes(2);
   });
 });
