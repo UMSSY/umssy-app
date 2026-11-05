@@ -3,6 +3,10 @@ import { LinkPreviewService } from './link-preview.service.js';
 import { InvalidLinkUrlException } from '../exceptions/invalid-link-url.exception.js';
 import { BlockedLinkUrlException } from '../exceptions/blocked-link-url.exception.js';
 
+vi.mock('node:dns/promises', () => ({
+  lookup: vi.fn().mockResolvedValue([{ address: '93.184.216.34', family: 4 }]),
+}));
+
 describe('LinkPreviewService', () => {
   let service: LinkPreviewService;
 
