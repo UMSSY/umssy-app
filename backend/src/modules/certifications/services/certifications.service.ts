@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { CertificationInvalidDocumentActionException } from '../exceptions/certification-invalid-document-action.exception.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { CertificationDocumentsService } from '../../certification-documents/services/certification-documents.service.js';
 import type { CertificationDocumentData } from '../../certification-documents/types/certification-document-data.type.js';
@@ -30,8 +31,8 @@ export class CertificationsService {
     file: MulterFile | undefined,
   ): Promise<CertificationResponse> {
     if (id) await this.getOwnedOrFail(userId, id);
-    if (!id && action !== 'replace') throw new BadRequestException('Adjunta el respaldo de la certificación.');
-    if (file && action !== 'replace') throw new BadRequestException('La acción no corresponde al archivo enviado.');
+    if (!id && action !== 'replace') throw new CertificationInvalidDocumentActionException('Adjunta el respaldo de la certificación.');
+    if (file && action !== 'replace') throw new CertificationInvalidDocumentActionException('La acción no corresponde al archivo enviado.');
     let document: CertificationDocumentData | undefined;
     if (action === 'replace') {
       const prepared = this.documents.prepare(file);
@@ -39,7 +40,6 @@ export class CertificationsService {
     } else if (action === 'remove') {
       document = { documentUrl: null, documentFileName: null, documentMimeType: null, documentSizeBytes: null, documentUploadedAt: null };
     }
-    // Certification fields, file bytes and the audit receipt commit in one transaction.
     const saved = id
       ? await this.certificationsRepository.update(id, request, document)
       : await this.certificationsRepository.create(userId, request, document);

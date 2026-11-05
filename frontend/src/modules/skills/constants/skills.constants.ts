@@ -4,9 +4,7 @@ export const CUSTOM_SKILL_ENDPOINT = "/skills/custom";
 
 export const MY_SKILLS_ENDPOINT = "/profile/me/skills";
 
-export const SKILLS_FOR_RADAR_ENDPOINT = "/profile/skills-for-radar";
 
-export const SKILLS_ANALYSIS_ENDPOINT = "/profile/me/skills/analysis";
 
 export const DETECTED_SKILLS_QUERY_KEY = ["skills", "detected"] as const;
 

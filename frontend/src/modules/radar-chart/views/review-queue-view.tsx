@@ -1,10 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { cn } from 'cn';
 import { Button } from '@/components/ui/button';
 import { PageHeading } from '@/shared/components/layout';
 import { ConfirmActionDialog } from '@/shared/components/confirm-action-dialog';
-import { radarIntegrationApi } from '../sprint2-integration/radar-integration-api';
+import { radarIntegrationApi } from '../services/radar-integration.service';
 import { useRadarReviews, useRadarReviewMutations } from '../hooks/use-radar-integration-queries';
 
 export function ReviewQueueView(){
@@ -51,7 +52,7 @@ export function ReviewQueueView(){
     <div className="grid min-h-[500px] gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
       <section className="max-h-[70vh] space-y-2 overflow-y-auto rounded-lg border border-border bg-surface p-3" aria-label="Elementos enviados">
         <p className="text-sm text-text-secondary">{shown.length} elemento(s)</p>
-        {shown.map(i=><Button key={i.id} variant="outline" className={`h-auto w-full flex-col items-start py-3 text-left whitespace-normal ${item?.id===i.id?'border-accent':''}`} onClick={()=>setSelected(i.id)}><span className="font-semibold">{i.userName}</span><span className="text-xs">{i.type==='cv'?'CV PDF':'Habilidad'} · {i.title}</span><span className="text-xs text-text-secondary">{i.status} · {new Date(i.date).toLocaleDateString('es-BO')}</span></Button>)}
+        {shown.map(i=><Button key={i.id} variant="outline" className={cn("h-auto w-full flex-col items-start py-3 text-left whitespace-normal", item?.id === i.id && "border-accent")} onClick={()=>setSelected(i.id)}><span className="font-semibold">{i.userName}</span><span className="text-xs">{i.type==='cv'?'CV PDF':'Habilidad'} · {i.title}</span><span className="text-xs text-text-secondary">{i.status} · {new Date(i.date).toLocaleDateString('es-BO')}</span></Button>)}
         {!shown.length&&<p className="p-4 text-sm text-text-secondary">No hay elementos en esta categoría.</p>}
       </section>
       <section className="min-w-0 space-y-4 rounded-lg border border-border bg-surface p-6">

@@ -30,12 +30,26 @@ export class SkillAnalysisRepository {
     });
   }
 
+  countPendingPublicationSkills(userId: string): Promise<number> {
+    return this.prisma.userSkill.count({ where: { userId, verificationStatus: 'pending' } });
+  }
+
   findProfileSkillRows(userId: string, context?: TransactionContext): Promise<ProfileSkillRowResponse[]> {
     const client = context?.client ?? this.prisma;
     return client.userSkill.findMany({
       where: { userId },
       orderBy: { skill: { name: 'asc' } },
       select: profileSkillRowSelect,
+    });
+  }
+
+  findApprovedPublicationSkills(userId: string, context: TransactionContext) {
+    return context.client.userSkill.findMany({
+      where: { userId, verificationStatus: 'approved' },
+      select: {
+        skillId: true, source: true, isHighRelevance: true, evidenceRefs: true,
+        skill: { select: { name: true, areaId: true } },
+      },
     });
   }
 

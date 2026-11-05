@@ -14,6 +14,14 @@ function toISOString(value: string): string {
 }
 
 export const availabilityApi = {
+  getFutureBlockedDates: async (from: string): Promise<BlockedDate[]> => {
+    const params = new URLSearchParams({ from });
+    const response = await apiClient.get<ApiResponse<BlockedDate[]>>(
+      `/blocked-dates?${params.toString()}`,
+    );
+    return response.data.data;
+  },
+
   getBlockedDates: async (range: WeekRange): Promise<BlockedDate[]> => {
     const params = new URLSearchParams({ from: range.startAt, to: range.endAt });
     const response = await apiClient.get<ApiResponse<BlockedDate[]>>(

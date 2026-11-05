@@ -1,11 +1,17 @@
 import { cloneElement, type ReactElement } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AppLayout from "@/app/(app)/layout";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import { mapPublishedRadar } from "../mappers/radar-published.mapper";
-import { useLiveRadar } from "../sprint2/use-live-radar";
+import { useLiveRadar } from "../hooks/use-live-radar";
 import { RadarProfileView } from "./radar-profile-view";
+
+function renderWithQuery(ui: ReactElement) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+}
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/profile/radar",
@@ -15,7 +21,7 @@ vi.mock("@/modules/auth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/modules/auth")>();
   return { ...actual, SessionUserCard: () => null };
 });
-vi.mock("../sprint2/use-live-radar", () => ({ useLiveRadar: vi.fn() }));
+vi.mock("../hooks/use-live-radar", () => ({ useLiveRadar: vi.fn() }));
 vi.mock("recharts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("recharts")>();
   return {
@@ -47,7 +53,7 @@ describe("Radar personal integrado con Épica 2", () => {
   afterEach(() => { cleanup(); vi.clearAllMocks(); sessionStorage.clear(); });
 
   it("muestra seis ejes en cero sin inventar datos ni mezclar perfiles", () => {
-    render(<RadarProfileView />);
+    renderWithQuery(<RadarProfileView />);
     expect(screen.getByText("Mi perfil profesional")).toBeInTheDocument();
     expect(screen.getByText(/Todavía no tienes habilidades aprobadas/)).toBeInTheDocument();
     expect(screen.getByTestId("radar-dot-qa")).toBeInTheDocument();
@@ -55,7 +61,7 @@ describe("Radar personal integrado con Épica 2", () => {
   });
 
   it("abre el detalle del eje seleccionado y permite cerrarlo", () => {
-    render(<RadarProfileView />);
+    renderWithQuery(<RadarProfileView />);
     fireEvent.click(screen.getByRole("button", { name: "Ver detalle de QA" }));
     expect(screen.getByRole("dialog", { name: "QA" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle del área" }));
@@ -64,7 +70,7 @@ describe("Radar personal integrado con Épica 2", () => {
 
   it("muestra error y reintento sin representar un fallo como cero competencias", () => {
     setRadar({ data: null, error: "Error de conexión" });
-    render(<RadarProfileView />);
+    renderWithQuery(<RadarProfileView />);
     expect(screen.getByRole("alert")).toHaveTextContent("Error de conexión");
     expect(screen.getByRole("button", { name: "Reintentar" })).toBeInTheDocument();
     expect(screen.queryByTestId("radar-dot-qa")).not.toBeInTheDocument();
@@ -72,7 +78,7 @@ describe("Radar personal integrado con Épica 2", () => {
 
   it("mantiene una sola navegación dentro del layout de la aplicación", () => {
     sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
-    render(<AppLayout><RadarProfileView /></AppLayout>);
+    renderWithQuery(<AppLayout><RadarProfileView /></AppLayout>);
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
   });
 });

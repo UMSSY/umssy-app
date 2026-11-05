@@ -2,89 +2,69 @@ import { describe, expect, it } from 'vitest';
 import { VacancyRankingService } from '../services/vacancy-ranking.service.js';
 import { compareVacancyRank } from '../utils/compare-vacancy-rank.js';
 
-describe('HU-02A T2.3 - Vacancy ranking', () => {
-  const common = {
-    careerMatch: true,
-    experienceMatch: true,
-    allRequiredSkillsMatch: true,
-    matchedSkills: ['TypeScript'],
-  };
+const day = (value: number) =>
+  new Date(`2026-10-${String(value).padStart(2, '0')}T12:00:00.000Z`);
 
+describe('HU-06 T2.3 - Vacancy ranking', () => {
   const service = new VacancyRankingService();
 
   it('sorts vacancies by compatibility percentage descending', () => {
     const vacancies = [
-      { ...common, id: 'low', compatibility: 60 },
-      { ...common, id: 'high', compatibility: 95, careerMatch: false },
-      { ...common, id: 'medium', compatibility: 80 },
+      { id: 'low', compatibility: 60, publishedAt: day(1) },
+      { id: 'high', compatibility: 95, publishedAt: day(1) },
+      { id: 'medium', compatibility: 80, publishedAt: day(1) },
     ];
 
-    const result = service.rank(vacancies);
-
-    expect(result.map(({ id }) => id)).toEqual([
+    expect(service.rank(vacancies).map(({ id }) => id)).toEqual([
       'high',
       'medium',
       'low',
     ]);
   });
 
-  it('prioritizes career match when compatibility is equal', () => {
+  it('AC-06.2: lists the most recently published first when the percentage is equal', () => {
     const vacancies = [
-      { ...common, id: 'other-career', careerMatch: false, compatibility: 85 },
-      { ...common, id: 'same-career', compatibility: 85 },
+      { id: 'older', compatibility: 85, publishedAt: day(1) },
+      { id: 'newest', compatibility: 85, publishedAt: day(20) },
+      { id: 'middle', compatibility: 85, publishedAt: day(10) },
     ];
 
     expect(service.rank(vacancies).map(({ id }) => id)).toEqual([
-      'same-career',
-      'other-career',
+      'newest',
+      'middle',
+      'older',
     ]);
   });
 
-  it('prioritizes experience when compatibility and career match are equal', () => {
+  it('keeps a higher percentage first even when it was published earlier', () => {
     const vacancies = [
-      { ...common, id: 'less-experience', experienceMatch: false, compatibility: 85 },
-      { ...common, id: 'enough-experience', compatibility: 85 },
+      { id: 'recent-lower', compatibility: 70, publishedAt: day(20) },
+      { id: 'older-higher', compatibility: 90, publishedAt: day(1) },
     ];
 
     expect(service.rank(vacancies).map(({ id }) => id)).toEqual([
-      'enough-experience',
-      'less-experience',
+      'older-higher',
+      'recent-lower',
     ]);
   });
 
-  it('prioritizes more matching skills when previous criteria are equal', () => {
+  it('uses the id as the last criterion so the order is always the same', () => {
     const vacancies = [
-      { ...common, id: 'one-skill', compatibility: 85 },
-      {
-        ...common,
-        id: 'two-skills',
-        compatibility: 85,
-        matchedSkills: ['TypeScript', 'PostgreSQL'],
-      },
+      { id: 'b', compatibility: 85, publishedAt: day(5) },
+      { id: 'a', compatibility: 85, publishedAt: day(5) },
     ];
 
-    expect(service.rank(vacancies).map(({ id }) => id)).toEqual([
-      'two-skills',
-      'one-skill',
-    ]);
-  });
-
-  it('preserves the original order on a complete tie', () => {
-    const vacancies = [
-      { ...common, id: 'first', compatibility: 85 },
-      { ...common, id: 'second', compatibility: 85 },
-    ];
-
-    expect(service.rank(vacancies).map(({ id }) => id)).toEqual([
-      'first',
-      'second',
+    expect(service.rank(vacancies).map(({ id }) => id)).toEqual(['a', 'b']);
+    expect(service.rank([...vacancies].reverse()).map(({ id }) => id)).toEqual([
+      'a',
+      'b',
     ]);
   });
 
   it('does not mutate the original vacancy list', () => {
     const vacancies = [
-      { ...common, id: 'low', compatibility: 60 },
-      { ...common, id: 'high', compatibility: 95 },
+      { id: 'low', compatibility: 60, publishedAt: day(1) },
+      { id: 'high', compatibility: 95, publishedAt: day(1) },
     ];
 
     service.rank(vacancies);
@@ -96,13 +76,8 @@ describe('HU-02A T2.3 - Vacancy ranking', () => {
     expect(service.rank([])).toEqual([]);
   });
 
-  it('returns zero from the comparator on a complete tie', () => {
-    const rank = {
-      compatibility: 85,
-      careerMatch: true,
-      experienceMatch: true,
-      matchingSkills: 2,
-    };
+  it('returns zero from the comparator for the same vacancy', () => {
+    const rank = { id: 'same', compatibility: 85, publishedAt: day(3) };
 
     expect(compareVacancyRank(rank, rank)).toBe(0);
   });

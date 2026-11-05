@@ -11,7 +11,6 @@ export type CvReview = {
   extracted_chars: number;
 };
 
-/** Storage and atomic review decisions; authorization remains in the service. */
 @Injectable()
 export class RadarReviewRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -37,8 +36,11 @@ export class RadarReviewRepository {
 
   changeCvDecision(adminId: string, cvId: string, action: string) {
     return this.prisma.$queryRaw<{ user_id: string; review_status: string }[]>`
-      UPDATE radar_cv_evidence SET review_status=${action},reviewer_id=${adminId}::uuid,decided_at=now()
-      WHERE cv_id=${cvId}::uuid AND review_status<>${action} RETURNING user_id,review_status`;
+      UPDATE radar_cv_evidence evidence
+      SET review_status=${action},review_status_id=status.id,reviewer_id=${adminId}::uuid,decided_at=now()
+      FROM radar_cv_review_statuses status
+      WHERE evidence.cv_id=${cvId}::uuid AND evidence.review_status<>${action} AND status.title=${action}
+      RETURNING evidence.user_id,evidence.review_status`;
   }
 
   cvOwner(cvId: string) {

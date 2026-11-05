@@ -90,8 +90,11 @@ describe('Appointments HTTP with shared authentication guards', () => {
             id: '66666666-6666-4666-8666-666666666666',
             name: 'Orientación profesional',
           },
-          counterpart: { id: STUDENT_ID, fullName: 'Luis Flores' },
+          counterpart: { id: STUDENT_ID, fullName: 'Luis Flores', role: 'student' },
           status: 'CONFIRMED',
+          message: null,
+          requestedAt: '2026-10-22T13:00:00.000Z',
+          document: null,
         },
       ],
     });
@@ -198,6 +201,7 @@ describe('Appointments HTTP with shared authentication guards', () => {
       expect(response.body.data[0].counterpart).toEqual({
         id: MENTOR_ID,
         fullName: 'Ana Pérez',
+        role: 'mentor',
       });
       expect(findMany).toHaveBeenCalledWith(
         expect.objectContaining({

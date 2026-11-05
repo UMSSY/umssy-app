@@ -34,6 +34,7 @@ export function OrientationConfigView() {
   const selectedIds = draftIds ?? savedIds;
   const [showToast, setShowToast] = useState(false);
   const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export function OrientationConfigView() {
         "No se pudieron guardar los cambios. Intente nuevamente.",
       );
     } finally {
-      setIsDiscardDialogOpen(false);
+      setIsConfirmDialogOpen(false);
     }
   };
 
@@ -207,7 +208,7 @@ export function OrientationConfigView() {
                               handleCheckboxChange(option.id)
                             }
                             aria-labelledby={`orientation-label-${option.id}`}
-                            className={`size-5 border-0 bg-border text-transparent data-checked:text-white [&_[data-slot=checkbox-indicator]>svg]:size-4 ${
+                            className={`size-5 border-0 bg-border text-transparent data-checked:text-accent-foreground [&_[data-slot=checkbox-indicator]>svg]:size-4 ${
                               !isSelected
                                 ? ""
                                 : isSaved
@@ -235,7 +236,7 @@ export function OrientationConfigView() {
               </Link>
               <Button
                 type="button"
-                onClick={() => void handleSave()}
+                onClick={() => setIsConfirmDialogOpen(true)}
                 disabled={!hasChanges || selectedIds.length === 0 || isSaving || hasLoadError}
                 className="h-10 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -245,6 +246,41 @@ export function OrientationConfigView() {
           </Card>
         </div>
       </div>
+
+      <AlertDialog
+        open={isConfirmDialogOpen}
+        onOpenChange={(open) => {
+          if (!isSaving) setIsConfirmDialogOpen(open);
+        }}
+      >
+        <AlertDialogContent className="max-w-md gap-0 rounded-lg border border-border bg-surface p-8 text-ink shadow-none ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
+          <AlertDialogHeader className="place-items-start text-left">
+            <AlertDialogTitle className="font-tight text-2xl font-bold text-ink">
+              ¿Guardar cambios?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-2 text-base text-text-secondary">
+              Se actualizarán los tipos de orientación que seleccionaste.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mx-0 mt-8 mb-0 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
+            <AlertDialogCancel
+              type="button"
+              disabled={isSaving}
+              className="h-10 border-border-strong bg-surface px-6 text-sm font-semibold text-ink hover:bg-surface-soft"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={isSaving}
+              className="h-10 bg-accent px-6 text-sm font-semibold text-accent-foreground hover:bg-brand-hover"
+            >
+              {isSaving ? "Guardando..." : "Sí, guardar cambios"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={isDiscardDialogOpen}

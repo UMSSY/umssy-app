@@ -13,6 +13,7 @@ import {
   MentorUnavailableException,
   OwnBlockException,
 } from '../exceptions/index.js';
+import { AppointmentDocumentMapper } from '../mappers/appointment-document.mapper.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
 import type { CreateAppointmentDto } from '../requests/create-appointment.request.js';
 import { AppointmentsService } from '../services/appointments.service.js';
@@ -84,10 +85,11 @@ describe('AppointmentsService', () => {
     );
     service = new AppointmentsService(
       appointmentsRepository as never,
-      new AppointmentMapper(),
+      new AppointmentMapper(new AppointmentDocumentMapper()),
       availabilityService as never,
       blockedDatesService as never,
       mentorsService as never,
+      {} as never,
     );
   });
 
@@ -125,7 +127,7 @@ describe('AppointmentsService', () => {
     expect(result).toMatchObject({
       id: APPOINTMENT_ID,
       status: AppointmentStatusTitle.CONFIRMED,
-      counterpart: { id: MENTOR_ID, fullName: 'Ana Pérez' },
+      counterpart: { id: MENTOR_ID, fullName: 'Ana Pérez', role: 'mentor' },
       orientationType: { id: TOPIC_ID, name: 'Orientación profesional' },
     });
   });

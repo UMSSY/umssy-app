@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EducationAnalysisSourceResponse } from '../responses/education-analysis-source.response.js';
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { EDUCATION_TRANSACTION_ATTEMPTS } from '../constants/education-conflict.constants.js';
 import { DuplicateEducationException } from '../exceptions/duplicate-education.exception.js';
 import { EducationWriteConflictException } from '../exceptions/education-write-conflict.exception.js';
@@ -29,6 +30,10 @@ export class EducationsRepository {
       orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
       select: { id: true, degree: true, description: true },
     });
+  }
+
+  findPublicationEvidenceIds(userId: string, context: TransactionContext) {
+    return context.client.education.findMany({ where: { userId }, select: { id: true } });
   }
 
   findManyByUserId(userId: string): Promise<EducationRecord[]> {

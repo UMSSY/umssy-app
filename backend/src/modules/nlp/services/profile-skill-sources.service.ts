@@ -4,8 +4,8 @@ import { EducationSourcesService } from '../../educations/services/education-sou
 import { WorkExperienceSourcesService } from '../../work-experience/services/work-experience-sources.service.js';
 import { ProfileService } from '../../profile/services/profile.service.js';
 import { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
-import { CertificationsRepository } from '../../certifications/repositories/certifications.repository.js';
-import { RadarEvidenceSourcesRepository } from '../../radar-integration/radar-evidence-sources.repository.js';
+import { CertificationSourcesService } from '../../certifications/services/certification-sources.service.js';
+import { RadarEvidenceSourcesService } from '../../radar-integration/services/radar-evidence-sources.service.js';
 import type { NlpTextSource } from '../types/nlp-text-source.type.js';
 import type { NlpCatalogSkill } from '../types/nlp-catalog-skill.type.js';
 
@@ -21,8 +21,8 @@ export class ProfileSkillSourcesService {
     private readonly workExperience: WorkExperienceSourcesService,
     private readonly profile: ProfileService,
     private readonly skills: SkillAnalysisService,
-    private readonly certifications: CertificationsRepository,
-    private readonly radarEvidence: RadarEvidenceSourcesRepository,
+    private readonly certifications: CertificationSourcesService,
+    private readonly radarEvidence: RadarEvidenceSourcesService,
   ) {}
 
   ensureProfileExists(userId: string): Promise<void> {

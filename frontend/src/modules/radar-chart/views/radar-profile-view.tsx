@@ -7,8 +7,8 @@ import { PageHeading } from "@/shared/components/layout";
 import { AffinityRadarChart } from "../components/affinity-radar-chart";
 import { AreaBreakdownPanel } from "../components/area-breakdown-panel";
 import type { AreaId } from "../types/area-detail.types";
-import { RadarEvidencePanel } from "../sprint2/radar-evidence-panel";
-import { useLiveRadar } from "../sprint2/use-live-radar";
+import { RadarEvidencePanel } from "../components/radar-evidence-panel";
+import { useLiveRadar } from "../hooks/use-live-radar";
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short" };
 

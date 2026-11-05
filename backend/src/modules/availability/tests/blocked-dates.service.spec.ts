@@ -189,6 +189,18 @@ describe('BlockedDatesService', () => {
   });
 
   describe('findBlockedDates', () => {
+    it('sin to consulta desde el día de Bolivia sin límite superior y conserva los motivos', async () => {
+      repository.findInRange.mockResolvedValue([
+        record({ blockedOn: new Date('2026-10-22T00:00:00Z') }),
+        record({ id: 'later', blockedOn: new Date('2027-03-01T00:00:00Z'), reason: 'Viaje' }),
+      ]);
+      const result = await service.findBlockedDates('mentor-1', { from: '2026-10-23T02:00:00Z' });
+      expect(repository.findInRange).toHaveBeenCalledWith('mentor-1', new Date('2026-10-22T00:00:00Z'));
+      expect(result.map(({ blockedOn, reason }) => ({ blockedOn, reason }))).toEqual([
+        { blockedOn: '2026-10-22', reason: null }, { blockedOn: '2027-03-01', reason: 'Viaje' },
+      ]);
+    });
+
     it('lista los días de Bolivia del rango semiabierto [from, to)', async () => {
       repository.findInRange.mockResolvedValue([record()]);
 

@@ -61,7 +61,7 @@ export class ProfileSkillsAnalysisService {
         this.sources.findCatalog(),
       ]);
       const sources = this.validation.validateSources(textSources);
-      const candidates = this.detection.detect({ userId, sources: sources.accepted });
+      const candidates = await this.detection.detect({ userId, sources: sources.accepted });
       const detection = this.validation.validateDetected(candidates, catalog);
       outcome.rejectedSources = sources.rejected;
       outcome.discarded = detection.discarded;
@@ -110,7 +110,8 @@ export class ProfileSkillsAnalysisService {
   private async markError(userId: string, revision: number): Promise<void> {
     try {
       await this.results.markError(userId, revision, new Date());
-    } catch {
+    } catch (error) {
+      this.write('error', NLP_LOG_EVENTS.markErrorFailed, { userId, revision, code: toErrorCode(error) });
     }
   }
 

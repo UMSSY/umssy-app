@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { EducationDeleteDialog } from "../components/education-delete-dialog";
-import { EducationForm } from "../components/education-form";
-import { EducationListCard } from "../components/education-list-card";
+import { EducationDeleteDialog } from "./education-delete-dialog";
+import { EducationForm } from "./education-form";
+import { EducationListCard } from "./education-list-card";
 import { FeedbackMessage } from "@/modules/profile";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
 import { useDeleteEducation } from "../hooks/use-delete-education";
