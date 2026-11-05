@@ -5,6 +5,8 @@ import { QUESTION_TYPE_ITEMS, QUESTION_TYPE_OPTIONS, SURVEY_ARIA } from "../cons
 import type { QuestionTypeSelectProps } from "../types/survey-component-props.types";
 import { isQuestionType } from "../utils/is-question-type";
 
+const SELECTABLE_QUESTION_TYPE_OPTIONS = QUESTION_TYPE_OPTIONS.filter((option) => option.value !== "dropdown");
+
 export function QuestionTypeSelect({ id, value, onChange }: QuestionTypeSelectProps) {
   const selected = QUESTION_TYPE_OPTIONS.find((option) => option.value === value) ?? QUESTION_TYPE_OPTIONS[0];
   const SelectedIcon = selected.icon;
@@ -26,11 +28,12 @@ export function QuestionTypeSelect({ id, value, onChange }: QuestionTypeSelectPr
         <SelectValue />
       </SelectTrigger>
       <SelectContent alignItemWithTrigger={false} className="bg-surface p-1">
-        {QUESTION_TYPE_OPTIONS.map(({ value: optionValue, label, icon: Icon }) => (
+        {SELECTABLE_QUESTION_TYPE_OPTIONS.map(({ value: optionValue, label, icon: Icon }) => (
           <SelectItem
             key={optionValue}
             value={optionValue}
-            className="gap-2.5 py-2 pl-2 data-selected:bg-interaction data-selected:font-semibold data-selected:text-accent"
+            variant="subtle"
+            className="gap-2.5 py-2 pl-2 font-medium text-ink data-highlighted:bg-surface-soft data-selected:bg-accent/10 data-selected:font-semibold data-selected:text-accent data-selected:focus:bg-accent/10 data-selected:focus:text-accent data-selected:data-highlighted:bg-accent/10 data-selected:data-highlighted:text-accent"
           >
             <Icon aria-hidden="true" className="text-accent" />
             {label}
