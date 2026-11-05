@@ -1,5 +1,6 @@
 import { cleanup, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { toast } from "sonner"
 import Link from "next/link"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { renderWithQuery } from "@/shared/testing/render-with-query"
@@ -17,7 +18,7 @@ import type { AvailabilityBlock } from "../../types/availability-block.types"
 const push = vi.fn()
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }))
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() } }))
 vi.mock("@/modules/mentorship", () => ({
   useMentorProfile: () => ({
     data: {
@@ -194,6 +195,40 @@ describe("BlockSelection", () => {
 
     await waitFor(() => expect(screen.getByText(BLOCK_SELECTION_TEXT.empty)).toBeInTheDocument())
     expect(uploadSpy).toHaveBeenCalledWith("a1", pdf)
+  })
+
+  it("si falla la subida del documento la cita queda confirmada y se avisa", async () => {
+    const user = userEvent.setup()
+    vi.mocked(toast.success).mockClear()
+    vi.mocked(toast.warning).mockClear()
+    vi.spyOn(appointmentsApi, "createAppointment").mockResolvedValue({ id: "a1" } as Appointment)
+    vi.spyOn(appointmentsApi, "uploadDocument").mockRejectedValue(new Error("network"))
+    renderSelection(vi.fn().mockResolvedValue([tuesdayBlock]))
+
+    await selectTuesday(user)
+    await fillRequest(user)
+    await user.upload(
+      screen.getByLabelText(APPOINTMENT_DOCUMENT_TEXT.label),
+      new File(["%PDF-1.4"], "Tesis.pdf", { type: "application/pdf" }),
+    )
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+
+    await waitFor(() => expect(screen.getByText(BLOCK_SELECTION_TEXT.empty)).toBeInTheDocument())
+    expect(toast.success).toHaveBeenCalledWith(REQUEST_APPOINTMENT_TEXT.confirmed, expect.any(Object))
+    expect(toast.warning).toHaveBeenCalledWith(APPOINTMENT_DOCUMENT_TEXT.uploadError)
+  })
+
+  it("sin mensaje no crea la cita y muestra el error junto al campo", async () => {
+    const user = userEvent.setup()
+    const createSpy = vi.spyOn(appointmentsApi, "createAppointment")
+    renderSelection(vi.fn().mockResolvedValue([tuesdayBlock]))
+
+    await selectTuesday(user)
+    await chooseTopic(user, "Revisión de CV")
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+
+    expect(screen.getByText(REQUEST_APPOINTMENT_TEXT.missingMessage)).toBeInTheDocument()
+    expect(createSpy).not.toHaveBeenCalled()
   })
 
   it("con 409 marca el bloque como no disponible y permite elegir otro", async () => {
