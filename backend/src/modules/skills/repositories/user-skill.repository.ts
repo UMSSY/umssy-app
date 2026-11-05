@@ -12,6 +12,10 @@ const sourceRowSelect = { id: true, skillId: true, source: true, evidenceRefs: t
 export class UserSkillRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  findAllByUserId(userId: string): Promise<UserSkillRecord[]> {
+    return this.findByUserId(userId);
+  }
+
   findByUserId(userId: string): Promise<UserSkillRecord[]> {
     return this.prisma.userSkill.findMany({
       where: { userId },
