@@ -17,7 +17,12 @@ export const validateAppointmentDocument = (file: File): string | null =>
     FILE_VALIDATION_MESSAGES.invalidCertificateType,
   );
 
+const getFileExtension = (fileName: string): string | null => {
+  const dotIndex = fileName.lastIndexOf(".");
+  return dotIndex > 0 && dotIndex < fileName.length - 1 ? fileName.slice(dotIndex + 1) : null;
+};
+
 export const getAppointmentDocumentTypeLabel = (file: File): string =>
   APPOINTMENT_DOCUMENT_TYPE_LABELS[file.type] ??
-  file.name.split(".").pop()?.toUpperCase() ??
+  getFileExtension(file.name)?.toUpperCase() ??
   APPOINTMENT_DOCUMENT_FALLBACK_TYPE_LABEL;

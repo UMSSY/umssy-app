@@ -58,4 +58,11 @@ describe("getAppointmentDocumentTypeLabel", () => {
   it("usa la extensión si el mime type no es conocido", () => {
     expect(getAppointmentDocumentTypeLabel(makeFile("plano.png", "", 1))).toBe("PNG")
   })
+
+  it.each(["documento", ".env", "tesis."])(
+    "usa una etiqueta genérica si %s no tiene extensión",
+    (name) => {
+      expect(getAppointmentDocumentTypeLabel(makeFile(name, "", 1))).toBe("DOC")
+    },
+  )
 })
