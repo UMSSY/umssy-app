@@ -504,3 +504,8 @@ export const FIXTURE_APPOINTMENTS = [
     ],
   },
 ];
+
+export const FIXTURE_APPOINTMENT_DOCUMENT = {
+  fileName: 'documento-ejemplo.pdf',
+  mimeType: 'application/pdf',
+} as const;
