@@ -55,7 +55,7 @@ describe("EditBlockPanel", () => {
           state: "confirmed",
           appointment: {
             id: "a1",
-            counterpart: { id: "s1", fullName: "Luis Flores" },
+            counterpart: { id: "s1", fullName: "Luis Flores", role: "student" },
             orientationType: { id: "o1", name: "Orientación profesional" },
           },
         }}

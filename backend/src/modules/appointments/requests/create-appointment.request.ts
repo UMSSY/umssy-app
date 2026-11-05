@@ -14,13 +14,12 @@ export const createAppointmentSchema = z.strictObject({
         : APPOINTMENT_MESSAGES.invalidTopic,
   }),
   message: z
-    .string()
+    .string({ error: APPOINTMENT_MESSAGES.missingMessage })
     .trim()
+    .min(1, { error: APPOINTMENT_MESSAGES.missingMessage })
     .max(APPOINTMENT_MESSAGE_MAX_LENGTH, {
       error: APPOINTMENT_MESSAGES.messageTooLong,
-    })
-    .nullish()
-    .transform((message) => message || null),
+    }),
 });
 
 export class CreateAppointmentDto extends createZodDto(createAppointmentSchema) {}

@@ -8,7 +8,7 @@ describe("QuestionTypeSelect", () => {
     cleanup();
   });
 
-  it("ofrece opción única, opción múltiple y lista desplegable", async () => {
+  it("ofrece solo opción única y opción múltiple", async () => {
     const user = userEvent.setup();
     render(<QuestionTypeSelect id="type" value="single_choice" onChange={vi.fn()} />);
 
@@ -17,7 +17,6 @@ describe("QuestionTypeSelect", () => {
     expect((await screen.findAllByRole("option")).map((option) => option.textContent)).toEqual([
       "Opción única",
       "Opción múltiple",
-      "Lista desplegable",
     ]);
   });
 
