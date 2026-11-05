@@ -82,7 +82,7 @@ describe('useLiveRadar', () => {
       isAxiosError: true,
       response: { status: 409, data: { detail: 'El cálculo de afinidad se encuentra en proceso. Se actualizará en breve.' } },
     });
-    const { result } = renderHook(useLiveRadar);
+    const { result } = renderRadarHook();
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.data?.version).toBe(2);
     expect(result.current.data?.status).toBe('pending');
@@ -90,8 +90,8 @@ describe('useLiveRadar', () => {
 
   it('resolves descriptive error messages for different failure kinds', async () => {
     vi.mocked(radarIntegrationApi.me).mockRejectedValueOnce(new Error('Syntax breakdown'));
-    const { result } = renderHook(useLiveRadar);
+    const { result } = renderRadarHook();
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.error).toBe('Error al procesar los datos del radar: Syntax breakdown');
+    expect(result.current.error).toBe('No se pudo actualizar el radar publicado. Comprueba la conexión y vuelve a intentarlo.');
   });
 });

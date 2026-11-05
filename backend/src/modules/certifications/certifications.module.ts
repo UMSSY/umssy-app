@@ -26,6 +26,6 @@ import { RadarAuditModule } from '../radar-integration/radar-audit.module.js';
     CertificationsRepository,
     CertificationMapper,
   ],
-  exports: [CertificationSourcesModule, CertificationMapper],
+  exports: [CertificationSourcesModule, CertificationMapper, CertificationsRepository],
 })
 export class CertificationsModule {}
