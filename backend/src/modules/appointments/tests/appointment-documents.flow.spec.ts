@@ -347,4 +347,87 @@ describe('Documento y detalle de la cita (integración HTTP con el seed de citas
       expect(Buffer.compare(file.body as Buffer, FIXTURE_PDF)).toBe(0);
     },
   );
+
+  it('5. el mentor no puede subir y otro usuario tampoco', async () => {
+    await upload(MENTOR, seeded.id, FIXTURE_PDF, 'cv.pdf').expect(403);
+    await upload(OUTSIDER, seeded.id, FIXTURE_PDF, 'cv.pdf').expect(403);
+
+    expect(store.documents.get(seeded.id)?.fileName).toBe(SEEDED_DOCUMENT_NAME);
+  });
+
+  it('6. una cita completada ya no acepta documentos', async () => {
+    await upload(STUDENT, completedOf(0), FIXTURE_PDF, 'cv.pdf').expect(409);
+
+    expect(store.documents.has(completedOf(0))).toBe(false);
+  });
+
+  it.each([
+    ['el mentor', () => MENTOR],
+    ['el titulado', () => STUDENT],
+  ])(
+    '7. %s descarga el documento con su nombre original',
+    async (_who, userOf) => {
+      const file = await download(userOf(), seeded.id).expect(200);
+
+      expect(file.headers['content-type']).toBe('application/pdf');
+      expect(file.headers['content-disposition']).toContain(
+        `attachment; filename="${SEEDED_DOCUMENT_NAME}"`,
+      );
+      expect(Buffer.compare(file.body as Buffer, FIXTURE_PDF)).toBe(0);
+    },
+  );
+
+  it('8. ningún usuario ajeno a la cita descarga, ve el detalle ni la foto', async () => {
+    store.photos.set(MENTOR, PNG_CONTENT);
+
+    await download(OUTSIDER, seeded.id).expect(403);
+    await detail(OUTSIDER, seeded.id).expect(403);
+    await http()
+      .get(`/api/appointments/${seeded.id}/counterpart-photo`)
+      .set('Authorization', tokenOf(OUTSIDER))
+      .expect(403);
+  });
+
+  it('9. una cita sin documento responde 404 al descargar y null en el detalle', async () => {
+    await download(other.studentId, other.id).expect(404);
+    const response = await detail(other.studentId, other.id).expect(200);
+
+    expect(response.body.data.document).toBeNull();
+  });
+
+  it('10. cada participante recibe la foto de la otra persona y sin foto responde 404', async () => {
+    store.photos.set(MENTOR, PNG_CONTENT);
+
+    const photo = await http()
+      .get(`/api/appointments/${seeded.id}/counterpart-photo`)
+      .set('Authorization', tokenOf(STUDENT))
+      .buffer(true)
+      .parse((res, done) => {
+        const chunks: Buffer[] = [];
+        res.on('data', (chunk: Buffer) => chunks.push(chunk));
+        res.on('end', () => done(null, Buffer.concat(chunks)));
+      })
+      .expect(200);
+    expect(photo.headers['content-type']).toBe('image/png');
+    expect(Buffer.compare(photo.body as Buffer, PNG_CONTENT)).toBe(0);
+
+    await http()
+      .get(`/api/appointments/${seeded.id}/counterpart-photo`)
+      .set('Authorization', tokenOf(MENTOR))
+      .expect(404);
+  });
+
+  it('11. Mis citas del mentor incluye el documento de la cita del seed', async () => {
+    const response = await http()
+      .get('/api/appointments/me')
+      .set('Authorization', tokenOf(MENTOR))
+      .expect(200);
+
+    const appointment = (
+      response.body.data as { id: string; document: unknown }[]
+    ).find((item) => item.id === seeded.id);
+    expect(appointment?.document).toMatchObject({
+      fileName: SEEDED_DOCUMENT_NAME,
+    });
+  });
 });
