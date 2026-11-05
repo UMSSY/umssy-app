@@ -12,9 +12,13 @@ const sourceRowSelect = { id: true, skillId: true, source: true, evidenceRefs: t
 export class UserSkillRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  findAllByUserId(userId: string): Promise<UserSkillRecord[]> {
+    return this.findByUserId(userId);
+  }
+
   findByUserId(userId: string): Promise<UserSkillRecord[]> {
     return this.prisma.userSkill.findMany({
-      where: { userId, source: USER_SKILL_SOURCES.manual },
+      where: { userId },
       orderBy: { skill: { name: 'asc' } },
       select: userSkillSelect,
     });
@@ -42,7 +46,11 @@ export class UserSkillRepository {
       }
       if (changes.createSkillIds.length > 0) {
         await tx.userSkill.createMany({
-          data: changes.createSkillIds.map((skillId) => ({ userId, skillId, source: USER_SKILL_SOURCES.manual })),
+          data: changes.createSkillIds.map((skillId) => ({
+            userId,
+            skillId,
+            source: USER_SKILL_SOURCES.manual,
+          })),
           skipDuplicates: true,
         });
       }

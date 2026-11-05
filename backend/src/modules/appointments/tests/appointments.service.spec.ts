@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AvailabilityService } from '../../availability/services/availability.service.js';
 import { BlockedDatesService } from '../../availability/services/blocked-dates.service.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
+import { PhotoNotFoundException } from '../../profile/exceptions/photo-not-found.exception.js';
+import { ProfilePhotoService } from '../../profile/services/profile-photo.service.js';
 import { AppointmentNotFoundException } from '../exceptions/appointment-not-found.exception.js';
 import { AppointmentNotOwnedException } from '../exceptions/appointment-not-owned.exception.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
@@ -20,6 +22,7 @@ import {
 describe('AppointmentsService', () => {
   const repository = { findMine: vi.fn(), findById: vi.fn() };
   const mapper = { toResponse: vi.fn(), toResponseList: vi.fn() };
+  const profilePhotoService = { getPhoto: vi.fn() };
   let moduleRef: TestingModule;
   let service: AppointmentsService;
 
@@ -35,6 +38,7 @@ describe('AppointmentsService', () => {
         { provide: AvailabilityService, useValue: {} },
         { provide: BlockedDatesService, useValue: {} },
         { provide: MentorsService, useValue: {} },
+        { provide: ProfilePhotoService, useValue: profilePhotoService },
       ],
     }).compile();
     service = moduleRef.get(AppointmentsService);
@@ -135,5 +139,50 @@ describe('AppointmentsService', () => {
       failure,
     );
     expect(mapper.toResponse).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [MENTOR_ID, STUDENT_ID],
+    [STUDENT_ID, MENTOR_ID],
+  ])(
+    'returns to participant %s the photo of the counterpart %s',
+    async (userId, counterpartId) => {
+      const photo = { content: Buffer.from('png'), mimeType: 'image/png' };
+      repository.findById.mockResolvedValue(createAppointmentRecord());
+      profilePhotoService.getPhoto.mockResolvedValue(photo);
+
+      await expect(
+        service.getCounterpartPhoto(userId, APPOINTMENT_ID),
+      ).resolves.toBe(photo);
+      expect(profilePhotoService.getPhoto).toHaveBeenCalledExactlyOnceWith(
+        counterpartId,
+      );
+    },
+  );
+
+  it('throws 403 before reading any photo for a user outside the appointment', async () => {
+    repository.findById.mockResolvedValue(createAppointmentRecord());
+    const result = service.getCounterpartPhoto(OTHER_USER_ID, APPOINTMENT_ID);
+
+    await expect(result).rejects.toBeInstanceOf(AppointmentNotOwnedException);
+    expect(profilePhotoService.getPhoto).not.toHaveBeenCalled();
+  });
+
+  it('throws 404 before reading any photo for an appointment that does not exist', async () => {
+    repository.findById.mockResolvedValue(null);
+
+    await expect(
+      service.getCounterpartPhoto(MENTOR_ID, APPOINTMENT_ID),
+    ).rejects.toBeInstanceOf(AppointmentNotFoundException);
+    expect(profilePhotoService.getPhoto).not.toHaveBeenCalled();
+  });
+
+  it('propagates 404 when the counterpart has no photo', async () => {
+    repository.findById.mockResolvedValue(createAppointmentRecord());
+    profilePhotoService.getPhoto.mockRejectedValue(new PhotoNotFoundException());
+
+    await expect(
+      service.getCounterpartPhoto(STUDENT_ID, APPOINTMENT_ID),
+    ).rejects.toMatchObject({ statusCode: 404 });
   });
 });

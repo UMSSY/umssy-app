@@ -177,6 +177,11 @@ export type BlockedDate = Prisma.BlockedDateModel
  */
 export type Appointment = Prisma.AppointmentModel
 /**
+ * Model AppointmentDocument
+ * 
+ */
+export type AppointmentDocument = Prisma.AppointmentDocumentModel
+/**
  * Model TimeProposal
  * 
  */
@@ -426,3 +431,13 @@ export type RadarScoreSnapshot = Prisma.RadarScoreSnapshotModel
  * 
  */
 export type RadarAuditEvent = Prisma.RadarAuditEventModel
+/**
+ * Model RadarCvExtractionStatus
+ * 
+ */
+export type RadarCvExtractionStatus = Prisma.RadarCvExtractionStatusModel
+/**
+ * Model RadarCvReviewStatus
+ * 
+ */
+export type RadarCvReviewStatus = Prisma.RadarCvReviewStatusModel

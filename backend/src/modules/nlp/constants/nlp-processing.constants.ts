@@ -10,4 +10,5 @@ export const NLP_LOG_EVENTS = {
   stale: 'nlp.analysis.stale',
   failed: 'nlp.analysis.failed',
   triggerFailed: 'nlp.analysis.trigger_failed',
+  markErrorFailed: 'nlp.analysis.mark_error_failed',
 } as const;

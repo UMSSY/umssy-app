@@ -2,6 +2,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   addWeeks,
   formatBlockRange,
+  formatBoliviaDay,
+  formatBoliviaMonthShort,
+  formatBoliviaWeekdayShort,
   getWeekRange,
   toBoliviaTime,
   toUtcIso,
@@ -173,4 +176,30 @@ describe("independencia de la zona horaria del navegador", () => {
       );
     },
   );
+});
+
+describe("formatBoliviaWeekdayShort, formatBoliviaDay y formatBoliviaMonthShort", () => {
+  it("etiqueta el día de Bolivia que en UTC todavía es el día siguiente", () => {
+    const startAt = "2026-10-27T00:00:00.000Z";
+
+    expect(formatBoliviaWeekdayShort(startAt)).toBe("LUN");
+    expect(formatBoliviaDay(startAt)).toBe("26");
+    expect(formatBoliviaMonthShort(startAt)).toBe("oct");
+  });
+
+  it("mantiene la fecha de Bolivia en la última hora del día", () => {
+    const startAt = "2026-10-27T03:00:00.000Z";
+
+    expect(formatBoliviaWeekdayShort(startAt)).toBe("LUN");
+    expect(formatBoliviaDay(startAt)).toBe("26");
+    expect(formatBoliviaMonthShort(startAt)).toBe("oct");
+  });
+
+  it("cruza el mes con la fecha de Bolivia y no con la de UTC", () => {
+    const startAt = "2026-11-01T02:00:00.000Z";
+
+    expect(formatBoliviaWeekdayShort(startAt)).toBe("SÁB");
+    expect(formatBoliviaDay(startAt)).toBe("31");
+    expect(formatBoliviaMonthShort(startAt)).toBe("oct");
+  });
 });

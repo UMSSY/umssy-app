@@ -199,6 +199,6 @@ describe("MentorDirectoryPagination", () => {
       ),
     ).toHaveClass("flex-col");
 
-    expect(container.querySelector(".flex-wrap")).toBeInTheDocument();
+    expect(container.querySelector(".flex-nowrap")).toBeInTheDocument();
   });
 });

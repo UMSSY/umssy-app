@@ -26,10 +26,23 @@ export class SkillAnalysisService {
     return this.repository.findApprovedPublicationSkills(userId, context);
   }
 
-  async reconcileDetected(userId: string, detected: readonly DetectedSkillPayload[], context: TransactionContext): Promise<boolean> {
+  async reconcileDetected(
+    userId: string,
+    detected: readonly DetectedSkillPayload[],
+    context: TransactionContext,
+  ): Promise<boolean> {
+
     const rows = await this.repository.findProfileSkillRows(userId, context);
+
     const plan = planSkillReconciliation(rows, detected);
+
     await this.repository.applyReconciliation(userId, plan, context);
-    return plan.creates.length + plan.updates.length + plan.deleteIds.length > 0;
+
+    return (
+      plan.creates.length +
+        plan.updates.length +
+        plan.deleteIds.length >
+      0
+    );
   }
 }

@@ -37,6 +37,7 @@ export type RadarScoreSnapshotSumAggregateOutputType = {
 }
 
 export type RadarScoreSnapshotMinAggregateOutputType = {
+  id: string | null
   userId: string | null
   version: number | null
   rubricVersion: string | null
@@ -46,6 +47,7 @@ export type RadarScoreSnapshotMinAggregateOutputType = {
 }
 
 export type RadarScoreSnapshotMaxAggregateOutputType = {
+  id: string | null
   userId: string | null
   version: number | null
   rubricVersion: string | null
@@ -55,6 +57,7 @@ export type RadarScoreSnapshotMaxAggregateOutputType = {
 }
 
 export type RadarScoreSnapshotCountAggregateOutputType = {
+  id: number
   userId: number
   version: number
   rubricVersion: number
@@ -78,6 +81,7 @@ export type RadarScoreSnapshotSumAggregateInputType = {
 }
 
 export type RadarScoreSnapshotMinAggregateInputType = {
+  id?: true
   userId?: true
   version?: true
   rubricVersion?: true
@@ -87,6 +91,7 @@ export type RadarScoreSnapshotMinAggregateInputType = {
 }
 
 export type RadarScoreSnapshotMaxAggregateInputType = {
+  id?: true
   userId?: true
   version?: true
   rubricVersion?: true
@@ -96,6 +101,7 @@ export type RadarScoreSnapshotMaxAggregateInputType = {
 }
 
 export type RadarScoreSnapshotCountAggregateInputType = {
+  id?: true
   userId?: true
   version?: true
   rubricVersion?: true
@@ -194,6 +200,7 @@ export type RadarScoreSnapshotGroupByArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 export type RadarScoreSnapshotGroupByOutputType = {
+  id: string
   userId: string
   version: number
   rubricVersion: string
@@ -228,6 +235,7 @@ export type RadarScoreSnapshotWhereInput = {
   AND?: Prisma.RadarScoreSnapshotWhereInput | Prisma.RadarScoreSnapshotWhereInput[]
   OR?: Prisma.RadarScoreSnapshotWhereInput[]
   NOT?: Prisma.RadarScoreSnapshotWhereInput | Prisma.RadarScoreSnapshotWhereInput[]
+  id?: Prisma.UuidFilter<"RadarScoreSnapshot"> | string
   userId?: Prisma.UuidFilter<"RadarScoreSnapshot"> | string
   version?: Prisma.IntFilter<"RadarScoreSnapshot"> | number
   rubricVersion?: Prisma.StringFilter<"RadarScoreSnapshot"> | string
@@ -240,6 +248,7 @@ export type RadarScoreSnapshotWhereInput = {
 }
 
 export type RadarScoreSnapshotOrderByWithRelationInput = {
+  id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   version?: Prisma.SortOrder
   rubricVersion?: Prisma.SortOrder
@@ -252,6 +261,7 @@ export type RadarScoreSnapshotOrderByWithRelationInput = {
 }
 
 export type RadarScoreSnapshotWhereUniqueInput = Prisma.AtLeast<{
+  id?: string
   userId_version?: Prisma.RadarScoreSnapshotUserIdVersionCompoundUniqueInput
   AND?: Prisma.RadarScoreSnapshotWhereInput | Prisma.RadarScoreSnapshotWhereInput[]
   OR?: Prisma.RadarScoreSnapshotWhereInput[]
@@ -265,9 +275,10 @@ export type RadarScoreSnapshotWhereUniqueInput = Prisma.AtLeast<{
   averageScore?: Prisma.DecimalFilter<"RadarScoreSnapshot"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"RadarScoreSnapshot"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "userId_version">
+}, "id" | "userId_version">
 
 export type RadarScoreSnapshotOrderByWithAggregationInput = {
+  id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   version?: Prisma.SortOrder
   rubricVersion?: Prisma.SortOrder
@@ -287,6 +298,7 @@ export type RadarScoreSnapshotScalarWhereWithAggregatesInput = {
   AND?: Prisma.RadarScoreSnapshotScalarWhereWithAggregatesInput | Prisma.RadarScoreSnapshotScalarWhereWithAggregatesInput[]
   OR?: Prisma.RadarScoreSnapshotScalarWhereWithAggregatesInput[]
   NOT?: Prisma.RadarScoreSnapshotScalarWhereWithAggregatesInput | Prisma.RadarScoreSnapshotScalarWhereWithAggregatesInput[]
+  id?: Prisma.UuidWithAggregatesFilter<"RadarScoreSnapshot"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"RadarScoreSnapshot"> | string
   version?: Prisma.IntWithAggregatesFilter<"RadarScoreSnapshot"> | number
   rubricVersion?: Prisma.StringWithAggregatesFilter<"RadarScoreSnapshot"> | string
@@ -298,6 +310,7 @@ export type RadarScoreSnapshotScalarWhereWithAggregatesInput = {
 }
 
 export type RadarScoreSnapshotCreateInput = {
+  id?: string
   version: number
   rubricVersion: string
   fingerprint: string
@@ -309,6 +322,7 @@ export type RadarScoreSnapshotCreateInput = {
 }
 
 export type RadarScoreSnapshotUncheckedCreateInput = {
+  id?: string
   userId: string
   version: number
   rubricVersion: string
@@ -320,6 +334,7 @@ export type RadarScoreSnapshotUncheckedCreateInput = {
 }
 
 export type RadarScoreSnapshotUpdateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   rubricVersion?: Prisma.StringFieldUpdateOperationsInput | string
   fingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -331,6 +346,7 @@ export type RadarScoreSnapshotUpdateInput = {
 }
 
 export type RadarScoreSnapshotUncheckedUpdateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   rubricVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -342,6 +358,7 @@ export type RadarScoreSnapshotUncheckedUpdateInput = {
 }
 
 export type RadarScoreSnapshotCreateManyInput = {
+  id?: string
   userId: string
   version: number
   rubricVersion: string
@@ -353,6 +370,7 @@ export type RadarScoreSnapshotCreateManyInput = {
 }
 
 export type RadarScoreSnapshotUpdateManyMutationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   rubricVersion?: Prisma.StringFieldUpdateOperationsInput | string
   fingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -363,6 +381,7 @@ export type RadarScoreSnapshotUpdateManyMutationInput = {
 }
 
 export type RadarScoreSnapshotUncheckedUpdateManyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   rubricVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -389,6 +408,7 @@ export type RadarScoreSnapshotUserIdVersionCompoundUniqueInput = {
 }
 
 export type RadarScoreSnapshotCountOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   version?: Prisma.SortOrder
   rubricVersion?: Prisma.SortOrder
@@ -405,6 +425,7 @@ export type RadarScoreSnapshotAvgOrderByAggregateInput = {
 }
 
 export type RadarScoreSnapshotMaxOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   version?: Prisma.SortOrder
   rubricVersion?: Prisma.SortOrder
@@ -414,6 +435,7 @@ export type RadarScoreSnapshotMaxOrderByAggregateInput = {
 }
 
 export type RadarScoreSnapshotMinOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   version?: Prisma.SortOrder
   rubricVersion?: Prisma.SortOrder
@@ -478,6 +500,7 @@ export type DecimalFieldUpdateOperationsInput = {
 }
 
 export type RadarScoreSnapshotCreateWithoutUserInput = {
+  id?: string
   version: number
   rubricVersion: string
   fingerprint: string
@@ -488,6 +511,7 @@ export type RadarScoreSnapshotCreateWithoutUserInput = {
 }
 
 export type RadarScoreSnapshotUncheckedCreateWithoutUserInput = {
+  id?: string
   version: number
   rubricVersion: string
   fingerprint: string
@@ -527,6 +551,7 @@ export type RadarScoreSnapshotScalarWhereInput = {
   AND?: Prisma.RadarScoreSnapshotScalarWhereInput | Prisma.RadarScoreSnapshotScalarWhereInput[]
   OR?: Prisma.RadarScoreSnapshotScalarWhereInput[]
   NOT?: Prisma.RadarScoreSnapshotScalarWhereInput | Prisma.RadarScoreSnapshotScalarWhereInput[]
+  id?: Prisma.UuidFilter<"RadarScoreSnapshot"> | string
   userId?: Prisma.UuidFilter<"RadarScoreSnapshot"> | string
   version?: Prisma.IntFilter<"RadarScoreSnapshot"> | number
   rubricVersion?: Prisma.StringFilter<"RadarScoreSnapshot"> | string
@@ -538,6 +563,7 @@ export type RadarScoreSnapshotScalarWhereInput = {
 }
 
 export type RadarScoreSnapshotCreateManyUserInput = {
+  id?: string
   version: number
   rubricVersion: string
   fingerprint: string
@@ -548,6 +574,7 @@ export type RadarScoreSnapshotCreateManyUserInput = {
 }
 
 export type RadarScoreSnapshotUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   rubricVersion?: Prisma.StringFieldUpdateOperationsInput | string
   fingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -558,6 +585,7 @@ export type RadarScoreSnapshotUpdateWithoutUserInput = {
 }
 
 export type RadarScoreSnapshotUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   rubricVersion?: Prisma.StringFieldUpdateOperationsInput | string
   fingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -568,6 +596,7 @@ export type RadarScoreSnapshotUncheckedUpdateWithoutUserInput = {
 }
 
 export type RadarScoreSnapshotUncheckedUpdateManyWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   rubricVersion?: Prisma.StringFieldUpdateOperationsInput | string
   fingerprint?: Prisma.StringFieldUpdateOperationsInput | string
@@ -580,6 +609,7 @@ export type RadarScoreSnapshotUncheckedUpdateManyWithoutUserInput = {
 
 
 export type RadarScoreSnapshotSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   userId?: boolean
   version?: boolean
   rubricVersion?: boolean
@@ -592,6 +622,7 @@ export type RadarScoreSnapshotSelect<ExtArgs extends runtime.Types.Extensions.In
 }, ExtArgs["result"]["radarScoreSnapshot"]>
 
 export type RadarScoreSnapshotSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   userId?: boolean
   version?: boolean
   rubricVersion?: boolean
@@ -604,6 +635,7 @@ export type RadarScoreSnapshotSelectCreateManyAndReturn<ExtArgs extends runtime.
 }, ExtArgs["result"]["radarScoreSnapshot"]>
 
 export type RadarScoreSnapshotSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   userId?: boolean
   version?: boolean
   rubricVersion?: boolean
@@ -616,6 +648,7 @@ export type RadarScoreSnapshotSelectUpdateManyAndReturn<ExtArgs extends runtime.
 }, ExtArgs["result"]["radarScoreSnapshot"]>
 
 export type RadarScoreSnapshotSelectScalar = {
+  id?: boolean
   userId?: boolean
   version?: boolean
   rubricVersion?: boolean
@@ -626,7 +659,7 @@ export type RadarScoreSnapshotSelectScalar = {
   createdAt?: boolean
 }
 
-export type RadarScoreSnapshotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "version" | "rubricVersion" | "fingerprint" | "scores" | "evidence" | "averageScore" | "createdAt", ExtArgs["result"]["radarScoreSnapshot"]>
+export type RadarScoreSnapshotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "version" | "rubricVersion" | "fingerprint" | "scores" | "evidence" | "averageScore" | "createdAt", ExtArgs["result"]["radarScoreSnapshot"]>
 export type RadarScoreSnapshotInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -643,6 +676,7 @@ export type $RadarScoreSnapshotPayload<ExtArgs extends runtime.Types.Extensions.
     user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    id: string
     userId: string
     version: number
     rubricVersion: string
@@ -734,8 +768,8 @@ export interface RadarScoreSnapshotDelegate<ExtArgs extends runtime.Types.Extens
    * // Get first 10 RadarScoreSnapshots
    * const radarScoreSnapshots = await prisma.radarScoreSnapshot.findMany({ take: 10 })
    * 
-   * // Only select the `userId`
-   * const radarScoreSnapshotWithUserIdOnly = await prisma.radarScoreSnapshot.findMany({ select: { userId: true } })
+   * // Only select the `id`
+   * const radarScoreSnapshotWithIdOnly = await prisma.radarScoreSnapshot.findMany({ select: { id: true } })
    * 
    */
   findMany<T extends RadarScoreSnapshotFindManyArgs>(args?: Prisma.SelectSubset<T, RadarScoreSnapshotFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarScoreSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -779,9 +813,9 @@ export interface RadarScoreSnapshotDelegate<ExtArgs extends runtime.Types.Extens
    *   ]
    * })
    * 
-   * // Create many RadarScoreSnapshots and only return the `userId`
-   * const radarScoreSnapshotWithUserIdOnly = await prisma.radarScoreSnapshot.createManyAndReturn({
-   *   select: { userId: true },
+   * // Create many RadarScoreSnapshots and only return the `id`
+   * const radarScoreSnapshotWithIdOnly = await prisma.radarScoreSnapshot.createManyAndReturn({
+   *   select: { id: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -870,9 +904,9 @@ export interface RadarScoreSnapshotDelegate<ExtArgs extends runtime.Types.Extens
    *   ]
    * })
    * 
-   * // Update zero or more RadarScoreSnapshots and only return the `userId`
-   * const radarScoreSnapshotWithUserIdOnly = await prisma.radarScoreSnapshot.updateManyAndReturn({
-   *   select: { userId: true },
+   * // Update zero or more RadarScoreSnapshots and only return the `id`
+   * const radarScoreSnapshotWithIdOnly = await prisma.radarScoreSnapshot.updateManyAndReturn({
+   *   select: { id: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1075,6 +1109,7 @@ export interface Prisma__RadarScoreSnapshotClient<T, Null = never, ExtArgs exten
  * Fields of the RadarScoreSnapshot model
  */
 export interface RadarScoreSnapshotFieldRefs {
+  readonly id: Prisma.FieldRef<"RadarScoreSnapshot", 'String'>
   readonly userId: Prisma.FieldRef<"RadarScoreSnapshot", 'String'>
   readonly version: Prisma.FieldRef<"RadarScoreSnapshot", 'Int'>
   readonly rubricVersion: Prisma.FieldRef<"RadarScoreSnapshot", 'String'>
