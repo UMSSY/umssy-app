@@ -430,4 +430,27 @@ describe('Documento y detalle de la cita (integración HTTP con el seed de citas
       fileName: SEEDED_DOCUMENT_NAME,
     });
   });
+
+  it.each([
+    ['sin mensaje', {}],
+    ['con mensaje null', { message: null }],
+    ['solo con espacios', { message: '   ' }],
+  ])(
+    '12. POST /appointments %s responde 400 con el texto del mensaje',
+    async (_case, body) => {
+      const response = await http()
+        .post('/api/appointments')
+        .set('Authorization', tokenOf(STUDENT))
+        .send({
+          blockId: seeded.blockId,
+          orientationTypeId: '66666666-6666-4666-8666-666666666666',
+          ...body,
+        })
+        .expect(400);
+
+      expect(JSON.stringify(response.body)).toContain(
+        'Escribe un mensaje para el mentor',
+      );
+    },
+  );
 });
