@@ -20,7 +20,7 @@ describe('buildCompanyJobOffersQuery', () => {
   it('sin filtros consulta todas las vacantes de la empresa en orden cronológico descendente', () => {
     expect(build()).toEqual({
       where: { companyId: COMPANY_ID },
-      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      orderBy: [{ publishedAt: 'desc' }, { id: 'desc' }],
     });
   });
 
@@ -46,27 +46,27 @@ describe('buildCompanyJobOffersQuery', () => {
   });
 
   it('convierte el rango de fechas a días completos en hora de Bolivia', () => {
-    expect(build({ dateFrom: '2026-10-01', dateTo: '2026-10-31' }).where.createdAt).toEqual({
+    expect(build({ dateFrom: '2026-10-01', dateTo: '2026-10-31' }).where.publishedAt).toEqual({
       gte: new Date('2026-10-01T04:00:00.000Z'),
       lt: new Date('2026-11-01T04:00:00.000Z'),
     });
   });
 
   it('incluye todo el día cuando ambas fechas son iguales', () => {
-    expect(build({ dateFrom: '2026-10-21', dateTo: '2026-10-21' }).where.createdAt).toEqual({
+    expect(build({ dateFrom: '2026-10-21', dateTo: '2026-10-21' }).where.publishedAt).toEqual({
       gte: new Date('2026-10-21T04:00:00.000Z'),
       lt: new Date('2026-10-22T04:00:00.000Z'),
     });
   });
 
   it('acepta solo la fecha inicial', () => {
-    expect(build({ dateFrom: '2026-10-01' }).where.createdAt).toEqual({
+    expect(build({ dateFrom: '2026-10-01' }).where.publishedAt).toEqual({
       gte: new Date('2026-10-01T04:00:00.000Z'),
     });
   });
 
   it('acepta solo la fecha final', () => {
-    expect(build({ dateTo: '2026-10-31' }).where.createdAt).toEqual({
+    expect(build({ dateTo: '2026-10-31' }).where.publishedAt).toEqual({
       lt: new Date('2026-11-01T04:00:00.000Z'),
     });
   });
@@ -90,21 +90,21 @@ describe('buildCompanyJobOffersQuery', () => {
       companyId: COMPANY_ID,
       modality: { title: 'Remoto' },
       contractType: { title: 'Tiempo completo' },
-      createdAt: { gte: new Date('2026-10-01T04:00:00.000Z') },
+      publishedAt: { gte: new Date('2026-10-01T04:00:00.000Z') },
       title: { contains: 'devops', mode: 'insensitive' },
     });
   });
 
   it('ordena de la más antigua a la más reciente cuando el orden es ascendente', () => {
     expect(build({ order: 'asc' }).orderBy).toEqual([
-      { createdAt: 'asc' },
+      { publishedAt: 'asc' },
       { id: 'asc' },
     ]);
   });
 
   it('deja a la fecha como orden base al ordenar por cantidad de postulantes', () => {
     expect(build({ sortBy: 'applicants', order: 'asc' }).orderBy).toEqual([
-      { createdAt: 'asc' },
+      { publishedAt: 'asc' },
       { id: 'asc' },
     ]);
   });

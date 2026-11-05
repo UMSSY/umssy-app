@@ -1,9 +1,12 @@
 export const SKILL_TO_TECHNICAL_AREA = {
+  Java: 'Backend',
   'Node.js': 'Backend',
   NestJS: 'Backend',
   'Spring Boot': 'Backend',
   Django: 'Backend',
   FastAPI: 'Backend',
+  JavaScript: 'Desarrollo Web',
+  TypeScript: 'Desarrollo Web',
   React: 'Desarrollo Web',
   'Vue.js': 'Desarrollo Web',
   Angular: 'Desarrollo Web',
@@ -15,6 +18,10 @@ export const SKILL_TO_TECHNICAL_AREA = {
   PostgreSQL: 'Bases de Datos',
   MongoDB: 'Bases de Datos',
   Redis: 'Bases de Datos',
+  Selenium: 'QA',
+  Python: 'Datos',
+  'Machine Learning': 'Datos',
+  AWS: 'Cloud',
   Docker: 'Cloud',
   Kubernetes: 'Cloud',
 } as const;

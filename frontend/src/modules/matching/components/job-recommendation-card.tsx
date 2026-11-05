@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Check, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Card } from "@/components/ui/card";
 import { getSafeMapsUrl } from "@/modules/job-offers";
 import { ModalityIcon } from "@/shared/components/modality-icon";

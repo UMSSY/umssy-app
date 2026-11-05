@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
+import { directoryPredicate } from '../repositories/mentor-directory.queries.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 
 describe('MentorsRepository directory page', () => {
@@ -13,177 +13,79 @@ describe('MentorsRepository directory page', () => {
     available: true,
   };
 
-  it('usa los mismos filtros en count y página, y pagina tras ordenar', async () => {
-    const count = vi.fn().mockResolvedValue(20);
-
+  it('comparte predicado entre conteo, página, afinidad y selección por IDs', async () => {
+    const raw = vi
+      .fn()
+      .mockResolvedValueOnce([{ total: 20n }])
+      .mockResolvedValueOnce([{ id: 'b' }, { id: 'a' }])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
     const findMany = vi
       .fn()
-      .mockResolvedValueOnce([{ id: 'mentor-19' }])
-      .mockResolvedValueOnce([]);
-
+      .mockResolvedValueOnce([{ id: 'a' }, { id: 'b' }])
+      .mockResolvedValue([]);
     const repository = new MentorsRepository({
-      user: { count, findMany },
+      $queryRaw: raw,
+      user: { findMany },
     } as unknown as PrismaService);
-
     expect(await repository.countDirectoryMentors(filters, now)).toBe(20);
-
-    expect(await repository.findDirectoryPage(filters, now, 4, 6)).toEqual([
-      { id: 'mentor-19', photoVersion: null },
+    expect(
+      await repository.findDirectoryPage(filters, now, 4, 6, 'name_desc'),
+    ).toEqual([
+      { id: 'b', photoVersion: null },
+      { id: 'a', photoVersion: null },
     ]);
-
-    const where = count.mock.calls[0]?.[0].where;
-
-    expect(findMany.mock.calls[0]?.[0].where).toEqual(where);
-
-    expect(where).toMatchObject({
+    await repository.findDirectoryCandidates(filters, now);
+    await repository.findDirectoryByIds(['b'], filters, now);
+    const predicate = directoryPredicate(filters, now);
+    for (const [query] of raw.mock.calls) {
+      expect(query.sql).toContain(predicate.sql);
+      expect(query.values.slice(0, predicate.values.length)).toEqual(
+        predicate.values,
+      );
+    }
+    expect(raw.mock.calls[1][0].sql).toContain(
+      'u.first_name DESC, u.last_name DESC, u.id ASC',
+    );
+    expect(raw.mock.calls[1][0].values.slice(-2)).toEqual([6, 18]);
+    expect(raw.mock.calls[3][0].sql).toContain('ANY(?::uuid[])');
+    expect(findMany.mock.calls[0][0].select).not.toHaveProperty('photoUrl');
+    expect(findMany.mock.calls[0][0].where).toMatchObject({
       isActive: true,
       isAvailableForMentoring: true,
-      roles: {
-        some: {
-          deletedAt: null,
-          startAt: { lte: now },
-          role: { name: MENTOR_ROLE_NAME },
-        },
-      },
-      mentorTechnicalAreas: {
-        some: {
-          technicalArea: { name: 'Backend' },
-        },
-      },
-      mentorOrientationTypes: {
-        some: {
-          orientationType: {
-            name: 'Orientación técnica',
-            isActive: true,
-          },
-        },
-      },
-    });
-
-    expect(where.AND).toHaveLength(2);
-
-    expect(where.AND[0].OR).toEqual([
-      {
-        firstName: { contains: 'Ana', mode: 'insensitive' },
-      },
-      {
-        lastName: { contains: 'Ana', mode: 'insensitive' },
-      },
-    ]);
-
-    expect(where.AND[1].OR).toEqual([
-      {
-        firstName: { contains: 'Rojas', mode: 'insensitive' },
-      },
-      {
-        lastName: { contains: 'Rojas', mode: 'insensitive' },
-      },
-    ]);
-
-    expect(findMany.mock.calls[0]?.[0]).toMatchObject({
-      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
-      skip: 18,
-      take: 6,
-    });
-
-    expect(findMany.mock.calls[0]?.[0].select).not.toHaveProperty('photoUrl');
-
-    expect(findMany.mock.calls[1]?.[0].select).toEqual({
-      id: true,
-      updatedAt: true,
     });
   });
 
-  it('busca varias palabras en cualquier orden solo entre nombre y apellido', async () => {
-    const count = vi.fn().mockResolvedValue(1);
-
+  it('no hidrata una página sin coincidencias', async () => {
+    const raw = vi.fn().mockResolvedValue([]);
+    const findMany = vi.fn();
     const repository = new MentorsRepository({
-      user: { count },
+      $queryRaw: raw,
+      user: { findMany },
     } as unknown as PrismaService);
-
-    await repository.countDirectoryMentors(
-      {
-        search: 'Rojas Ana',
-        available: false,
-      },
-      now,
-    );
-
-    const where = count.mock.calls[0]?.[0].where;
-
-    expect(where.AND).toEqual([
-      {
-        OR: [
-          {
-            firstName: {
-              contains: 'Rojas',
-              mode: 'insensitive',
-            },
-          },
-          {
-            lastName: {
-              contains: 'Rojas',
-              mode: 'insensitive',
-            },
-          },
-        ],
-      },
-      {
-        OR: [
-          {
-            firstName: {
-              contains: 'Ana',
-              mode: 'insensitive',
-            },
-          },
-          {
-            lastName: {
-              contains: 'Ana',
-              mode: 'insensitive',
-            },
-          },
-        ],
-      },
-    ]);
+    expect(await repository.findDirectoryPage(filters, now, 1, 6)).toEqual([]);
+    expect(findMany).not.toHaveBeenCalled();
   });
 
-  it('no incluye titular profesional ni áreas técnicas dentro de search', async () => {
-    const count = vi.fn().mockResolvedValue(0);
-
+  it('construye consultas independientes bajo concurrencia', async () => {
+    const raw = vi.fn().mockResolvedValue([{ total: 0n }]);
     const repository = new MentorsRepository({
-      user: { count },
+      $queryRaw: raw,
     } as unknown as PrismaService);
-
-    await repository.countDirectoryMentors(
-      {
-        search: 'Backend',
-        available: false,
-      },
-      now,
-    );
-
-    const searchConditions = count.mock.calls[0]?.[0].where.AND;
-
-    expect(searchConditions).toHaveLength(1);
-    expect(searchConditions[0].OR).toEqual([
-      {
-        firstName: {
-          contains: 'Backend',
-          mode: 'insensitive',
-        },
-      },
-      {
-        lastName: {
-          contains: 'Backend',
-          mode: 'insensitive',
-        },
-      },
-    ]);
-
-    expect(JSON.stringify(searchConditions)).not.toContain('headline');
-    expect(JSON.stringify(searchConditions)).not.toContain(
-      'mentorTechnicalAreas',
-    );
+    expect(
+      await Promise.all(
+        Array.from({ length: 32 }, (_, index) =>
+          repository.countDirectoryMentors(
+            { search: 'u'.repeat(index % 2 ? 20 : 100), available: false },
+            now,
+          ),
+        ),
+      ),
+    ).toEqual(Array(32).fill(0));
+    for (const [query] of raw.mock.calls) {
+      expect(query.sql.length).toBeLessThan(1500);
+      expect(query.values.length).toBe(8);
+    }
   });
 
   it('ordena Z-A antes de paginar y desempata por ID ascendente', async () => {
@@ -206,6 +108,50 @@ describe('MentorsRepository directory page', () => {
         orderBy: [{ firstName: 'desc' }, { lastName: 'desc' }, { id: 'asc' }],
         skip: 6,
         take: 6,
+      }),
+    );
+  });
+
+  it('ordena A-Z antes de paginar y conserva el desempate por ID', async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+
+    const repository = new MentorsRepository({
+      user: { findMany },
+    } as unknown as PrismaService);
+
+    await repository.findDirectoryPage(
+      { search: '', available: false },
+      now,
+      1,
+      6,
+      'name_asc',
+    );
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }, { id: 'asc' }],
+        skip: 0,
+        take: 6,
+      }),
+    );
+  });
+
+  it('ordena los candidatos de afinidad por el orden general estable', async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+
+    const repository = new MentorsRepository({
+      user: { findMany },
+    } as unknown as PrismaService);
+
+    await repository.findDirectoryCandidates(
+      { search: '', available: false },
+      now,
+    );
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        select: expect.objectContaining({ createdAt: true }),
       }),
     );
   });

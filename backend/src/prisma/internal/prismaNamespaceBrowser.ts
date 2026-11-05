@@ -78,6 +78,7 @@ export const ModelName = {
   AvailabilityBlock: 'AvailabilityBlock',
   BlockedDate: 'BlockedDate',
   Appointment: 'Appointment',
+  AppointmentDocument: 'AppointmentDocument',
   TimeProposal: 'TimeProposal',
   AppointmentHistory: 'AppointmentHistory',
   EventCategory: 'EventCategory',
@@ -486,6 +487,19 @@ export const AppointmentScalarFieldEnum = {
 export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
 
 
+export const AppointmentDocumentScalarFieldEnum = {
+  id: 'id',
+  appointmentId: 'appointmentId',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  data: 'data',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type AppointmentDocumentScalarFieldEnum = (typeof AppointmentDocumentScalarFieldEnum)[keyof typeof AppointmentDocumentScalarFieldEnum]
+
+
 export const TimeProposalScalarFieldEnum = {
   id: 'id',
   appointmentId: 'appointmentId',
@@ -601,6 +615,7 @@ export const JobOfferScalarFieldEnum = {
   minExperienceYears: 'minExperienceYears',
   otherRequirements: 'otherRequirements',
   expiresAt: 'expiresAt',
+  publishedAt: 'publishedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

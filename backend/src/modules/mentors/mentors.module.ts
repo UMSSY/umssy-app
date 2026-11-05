@@ -1,6 +1,7 @@
 
 import { Module } from '@nestjs/common';
 import { ProfileModule } from '../profile/profile.module.js';
+import { SkillsModule } from '../skills/skills.module.js';
 import { MentorPhotoController } from './controllers/mentor-photo.controller.js';
 import { MentorPhotoService } from './services/mentor-photo.service.js';
 import { AuthModule } from '../auth/auth.module.js';
@@ -21,7 +22,7 @@ import { MentorParticipationService } from './services/mentor-participation.serv
 import { MentorParticipationRepository } from './repositories/mentor-participation.repository.js';
 
 @Module({
-  imports: [AuthModule, ProfileModule],
+  imports: [AuthModule, ProfileModule, SkillsModule],
   controllers: [
     MentorsController,
     MentorPhotoController,

@@ -12,7 +12,7 @@ export const EMAIL_SEARCH_NO_RESULTS_MESSAGE = "No se encontró ningún usuario 
 
 export const SLOW_REQUEST_THRESHOLD_MS = 10_000;
 export const SLOW_REQUEST_MESSAGE = "Error 408: La solicitud está tardando demasiado";
-export const CONNECTION_ERROR_MESSAGE = "Error 503/504: Sin conexión con el servidor";
+export const CONNECTION_ERROR_MESSAGE = "Sin conexión con el servidor. Vuelve a intentarlo en unos minutos";
 export const RATE_LIMIT_MESSAGE = "Error 429: Demasiadas solicitudes, intenta nuevamente en unos segundos";
 export const INTERNAL_ERROR_MESSAGE = "Error 500: Ocurrió un error interno en el servidor";
 export const REPORT_ALERT_DURATION_MS = 7_000;

@@ -14,7 +14,7 @@ import {
 import { BlockedDateMapper } from '../mappers/blocked-date.mapper.js';
 import { BlockedDatesRepository } from '../repositories/blocked-dates.repository.js';
 import type { BlockDateDto } from '../requests/block-date.request.js';
-import type { WeekQueryDto } from '../requests/week-query.request.js';
+import type { BlockedDatesQueryDto } from '../requests/blocked-dates-query.request.js';
 import type { BlockedDateResponse } from '../types/blocked-date-response.types.js';
 import type { DeletedBlockedDateResponse } from '../types/deleted-blocked-date-response.types.js';
 import {
@@ -73,8 +73,13 @@ export class BlockedDatesService {
     return this.blockedDateMapper.toDeletedResponse(blockedDate);
   }
 
-  async findBlockedDates(mentorId: string, query: WeekQueryDto): Promise<BlockedDateResponse[]> {
-    const blockedDates = await this.findInRange(mentorId, new Date(query.from), new Date(query.to));
+  async findBlockedDates(mentorId: string, query: BlockedDatesQueryDto): Promise<BlockedDateResponse[]> {
+    const blockedDates = query.to
+      ? await this.findInRange(mentorId, new Date(query.from), new Date(query.to))
+      : await this.blockedDatesRepository.findInRange(
+          mentorId,
+          toCalendarDate(toBoliviaTime(query.from).date),
+        );
     return this.blockedDateMapper.toResponseList(blockedDates);
   }
 
