@@ -47,7 +47,7 @@ describe("getMentorDirectory", () => {
         pageSize: 10,
         totalItems: 2,
         totalPages: 1,
-        effectiveSort: "name_asc",
+        effectiveSort: "default",
         affinityStatus: "ready",
       };
 
@@ -69,7 +69,7 @@ describe("getMentorDirectory", () => {
           search: "",
           area: "",
           available: false,
-          sort: "name_asc",
+          sort: "default",
         });
 
         const normalizedBaseURL = baseURL.replace(/\/$/, "");
@@ -126,7 +126,7 @@ describe("getMentorDirectory", () => {
       pageSize: 10,
       totalItems: 2,
       totalPages: 1,
-      effectiveSort: "name_asc" as const,
+      effectiveSort: "default" as const,
       affinityStatus: "ready" as const,
     };
 
@@ -146,7 +146,7 @@ describe("getMentorDirectory", () => {
       search: "",
       area: "",
       available: false,
-      sort: "name_asc" as const,
+      sort: "default" as const,
     };
 
     const result = await getMentorDirectory(params, signal);
@@ -157,7 +157,7 @@ describe("getMentorDirectory", () => {
         search: undefined,
         area: undefined,
         available: "false",
-        sort: "name_asc",
+        sort: "default",
       },
       signal,
     });
@@ -175,7 +175,7 @@ describe("getMentorDirectory", () => {
       pageSize: 6,
       totalItems: 0,
       totalPages: 0,
-      effectiveSort: "name_asc" as const,
+      effectiveSort: "default" as const,
       affinityStatus: "no_skills" as const,
     };
 
