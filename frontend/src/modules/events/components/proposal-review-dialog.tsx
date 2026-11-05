@@ -53,8 +53,8 @@ export function ProposalReviewDialog({ open, values, cover, tutor, category, pen
           {unavailable && <p role="alert" className="text-sm text-danger">No se pudo verificar la sesión o los datos del formulario. Vuelve al formulario para revisarlos.</p>}
         </div>
         <div className="flex flex-wrap justify-end gap-3 border-t border-border pt-4">
-          <Button type="button" variant="outline" disabled={pending} onClick={onClose}>Cancelar/Modificar</Button>
-          <Button type="button" disabled={pending || unavailable} onClick={onConfirm}>{pending && <Loader2 className="animate-spin" aria-hidden="true" />}{pending ? 'Enviando…' : 'Confirmar y enviar'}</Button>
+          <Button type="button" variant="outline" disabled={pending} onClick={onClose}>Cancelar</Button>
+          <Button type="button" disabled={pending || unavailable} onClick={onConfirm}>{pending && <Loader2 className="animate-spin" aria-hidden="true" />}{pending ? 'Enviando…' : 'Confirmar'}</Button>
         </div>
       </DialogContent>
     </Dialog>
