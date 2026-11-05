@@ -87,6 +87,8 @@ export class ChatGateway
     }
 
     try {
+      await client.join(`user:${user.id}`);
+
       const conversationIds = await this.chatService.getActiveConversationIds(
         user.id,
       );
@@ -211,6 +213,20 @@ export class ChatGateway
 
   broadcastMessage(message: MessageResponse): void {
     this.server.to(message.conversationId).emit('message:new', message);
+  }
+
+  notifyUser(userId: string, event: string, payload: unknown): void {
+    const room = `user:${userId}`;
+
+    this.logger.log(`[Socket] Enviando ${event} al usuario ${userId}`);
+
+    this.server.to(room).emit(event, payload);
+  }
+
+  joinUsersToConversation(userIds: string[], conversationId: string): void {
+    for (const id of userIds) {
+      this.server.in(`user:${id}`).socketsJoin(conversationId);
+    }
   }
 
   @SubscribeMessage('message:send')

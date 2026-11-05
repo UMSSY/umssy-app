@@ -35,7 +35,6 @@ import {
   getCurrentSessionUserId,
   blockUser,
   unblockUser,
-  sendMessage,
 } from '../services/chat-api';
 import { getChatSocket } from '../services/chat-socket';
 import { useChatConnection } from '../hooks/use-chat-connection';
@@ -198,7 +197,7 @@ export function ChatWorkspace({
     setIsSearchModalOpen(true);
   };
 
-    const handleStartChatWithContact = async (
+  const handleStartChatWithContact = async (
     contactUser: User,
   ): Promise<void> => {
     if (startingConversationRef.current) {
@@ -383,82 +382,46 @@ export function ChatWorkspace({
           currentUserId,
         );
       } else {
-        let sentContent = trimmedContent;
-        let sentSenderId = currentUserId;
-
         const socket = getChatSocket();
-        if (socket.connected) {
-          let socketTimedOut = false;
-          try {
-            const response = await new Promise<SocketSendResponse>(
-              (resolve, reject) => {
-                const timeoutId = setTimeout(() => {
-                  socketTimedOut = true;
-                  reject(new Error('SOCKET_TIMEOUT'));
-                }, 4000);
+        if (!socket.connected) {
+          throw new Error("No estás conectado al servidor de chat. Revisa tu conexión a internet.");
+        }
 
-                socket.emit(
-                  'message:send',
-                  {
-                    conversationId: selectedId,
-                    content: trimmedContent,
-                  },
-                  (result: SocketSendResponse) => {
-                    clearTimeout(timeoutId);
-                    const acknowledgement = result?.data ?? result;
-                    if (acknowledgement?.ok && acknowledgement.message) {
-                      resolve(acknowledgement);
-                    } else {
-                      reject(
-                        new Error(
-                          acknowledgement?.error || 'No se pudo enviar el mensaje.',
-                        ),
-                      );
-                    }
-                  },
-                );
-              },
-            );
+        const response = await new Promise<SocketSendResponse>(
+          (resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+              reject(new Error('El servidor tardó demasiado en responder. Intenta de nuevo.'));
+            }, 10000);
 
-            sentContent = response.message?.content || trimmedContent;
-            sentSenderId = response.message?.senderId || currentUserId;
-          } catch (error) {
-            if (socketTimedOut) {
-              const httpResponse = await sendMessage({
+            socket.emit(
+              'message:send',
+              {
                 conversationId: selectedId,
                 content: trimmedContent,
-              });
-              if (httpResponse?.data) {
-                sentContent = httpResponse.data.content || trimmedContent;
-                sentSenderId = httpResponse.data.senderId || currentUserId;
-              }
-            } else {
-              throw error;
-            }
-          }
-        } else {
-          const httpResponse = await sendMessage({
-            conversationId: selectedId,
-            content: trimmedContent,
-          });
-          if (httpResponse?.data) {
-            sentContent = httpResponse.data.content || trimmedContent;
-            sentSenderId = httpResponse.data.senderId || currentUserId;
-          }
-        }
+              },
+              (result: SocketSendResponse) => {
+                clearTimeout(timeoutId);
+                const acknowledgement = result?.data ?? result;
+                if (acknowledgement?.ok && acknowledgement.message) {
+                  resolve(acknowledgement);
+                } else {
+                  reject(new Error(acknowledgement?.error || 'No se pudo enviar el mensaje.'));
+                }
+              },
+            );
+          },
+        );
 
         updateConversationLastMessage(
           selectedId,
-          sentContent,
-          sentSenderId,
+          response.message?.content || trimmedContent,
+          response.message?.senderId || currentUserId,
         );
       }
 
+      await queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
       refreshMessages(selectedId);
 
-      await queryClient.invalidateQueries({
-        queryKey: ['chat', 'conversations'],
-      });
     } finally {
       setIsSending(false);
     }
