@@ -18,7 +18,6 @@ export function useDetectedSkills(): UseDetectedSkillsResult {
     onSuccess: (summary) => queryClient.setQueryData<DetectedSkillsSummary>(DETECTED_SKILLS_QUERY_KEY, summary),
   });
 
-  // The backend analyzes the profile after every saved change, so the list is read again after each save.
   useEffect(
     () =>
       queryClient.getMutationCache().subscribe((event) => {

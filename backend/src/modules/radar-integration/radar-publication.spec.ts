@@ -4,6 +4,8 @@ import { ProfileSkillsEvents } from '../../common/profile-skills/profile-skills-
 import type { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-analysis.service.js';
 import { RadarIntegrationService } from './radar-integration.service.js';
 import { RadarPublicationService } from './radar-publication.service.js';
+import { RadarPublicationMapper } from './mappers/radar-publication.mapper.js';
+import type { RadarPublicationEvidenceService } from './services/radar-publication-evidence.service.js';
 import { RadarPublicationRepository } from './repositories/radar-publication.repository.js';
 import type { RadarCvService } from './radar-cv.service.js';
 import type { RadarReviewService } from './radar-review.service.js';
@@ -50,7 +52,19 @@ function setup() {
   db.$transaction.mockImplementation(async operation => operation(db));
   const nlp = { analyzeNow: vi.fn().mockResolvedValue({ status: 'ready' }) };
   const events = new ProfileSkillsEvents();
-  const service = new RadarIntegrationService(nlp as unknown as ProfileSkillsAnalysisService, events, new RadarPublicationService(new RadarPublicationRepository(db as unknown as PrismaService)), {} as RadarCvService, {} as RadarReviewService);
+  const evidence = {
+    countPendingPublicationSkills: () => db.userSkill.count(),
+    read: async () => Promise.all([
+      db.userSkill.findMany(),
+      db.$queryRaw`SELECT cv_id,review_status,extraction_status FROM radar_cv_evidence`,
+      db.workExperience.findMany(), db.education.findMany(), db.certification.findMany(),
+    ]),
+  };
+  const publication = new RadarPublicationService(
+    new RadarPublicationRepository(db as unknown as PrismaService),
+    new RadarPublicationMapper(), evidence as unknown as RadarPublicationEvidenceService,
+  );
+  const service = new RadarIntegrationService(nlp as unknown as ProfileSkillsAnalysisService, events, publication, {} as RadarCvService, {} as RadarReviewService);
   return { service, db, state, rows, insertions, nlp, events };
 }
 

@@ -431,3 +431,13 @@ export type RadarScoreSnapshot = Prisma.RadarScoreSnapshotModel
  * 
  */
 export type RadarAuditEvent = Prisma.RadarAuditEventModel
+/**
+ * Model RadarCvExtractionStatus
+ * 
+ */
+export type RadarCvExtractionStatus = Prisma.RadarCvExtractionStatusModel
+/**
+ * Model RadarCvReviewStatus
+ * 
+ */
+export type RadarCvReviewStatus = Prisma.RadarCvReviewStatusModel

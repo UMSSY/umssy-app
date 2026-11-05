@@ -1,11 +1,13 @@
+import { type ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
-import { radarIntegrationApi, type IntegrationRadar } from '../sprint2-integration/radar-integration-api';
+import { radarIntegrationApi, type IntegrationRadar } from '../services/radar-integration.service';
 import { useLiveRadar } from './use-live-radar';
 
 vi.mock('@/shared/services/storage/access-token-storage', () => ({ getAccessToken: vi.fn() }));
-vi.mock('../sprint2-integration/radar-integration-api', () => ({ radarIntegrationApi: { me: vi.fn(), recalculate: vi.fn() } }));
+vi.mock('../services/radar-integration.service', () => ({ radarIntegrationApi: { me: vi.fn(), recalculate: vi.fn() } }));
 
 const stored: IntegrationRadar = {
   userId: 'owner', status: 'published', version: 2, sourceRevision: 3, inputRevision: 4,
@@ -16,6 +18,14 @@ const stored: IntegrationRadar = {
   skills: [{ id: 'python', name: 'Python', areaId: 'data-ai', isHighRelevance: true, evidenceRefs: [{ type: 'work-experience', id: 'old-source' }] }],
 };
 
+function renderRadarHook() {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+  return renderHook(useLiveRadar, { wrapper });
+}
+
 beforeEach(() => {
   vi.mocked(getAccessToken).mockReturnValue('session-a');
   vi.mocked(radarIntegrationApi.me).mockResolvedValue(stored);
@@ -25,7 +35,7 @@ afterEach(() => { cleanup(); vi.resetAllMocks(); });
 
 describe('useLiveRadar', () => {
   it('keeps scores and evidence from the same published revision while NLP is newer', async () => {
-    const { result } = renderHook(useLiveRadar);
+    const { result } = renderRadarHook();
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.data).toMatchObject({ version: 2, status: 'pending', rubric: 'rubric-from-server', average: 0.25 });
     expect(result.current.data?.approved[0].evidenceRefs).toEqual([{ type: 'work-experience', id: 'old-source' }]);
@@ -34,18 +44,21 @@ describe('useLiveRadar', () => {
 
   it('keeps the last publication and actually processes a retry after a failure', async () => {
     vi.mocked(radarIntegrationApi.me).mockResolvedValue({ ...stored, processingStatus: 'error' });
-    const { result } = renderHook(useLiveRadar);
+    const { result } = renderRadarHook();
     await waitFor(() => expect(result.current.error).not.toBeNull());
     expect(result.current.data?.version).toBe(2);
     vi.mocked(radarIntegrationApi.me).mockResolvedValue({ ...stored, processingStatus: 'ready', hasPending: false });
     await act(async () => { await result.current.retry(); });
     expect(radarIntegrationApi.recalculate).toHaveBeenCalledOnce();
-    expect(result.current.error).toBeNull();
-    expect(result.current.data?.status).toBe('ready');
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+      expect(result.current.data?.status).toBe('ready');
+    });
+    expect(vi.mocked(radarIntegrationApi.me).mock.calls.length).toBeGreaterThanOrEqual(2);
   });
 
   it('does not replace a newer publication with a late older version', async () => {
-    const { result } = renderHook(useLiveRadar);
+    const { result } = renderRadarHook();
     await waitFor(() => expect(result.current.data?.version).toBe(2));
     vi.mocked(radarIntegrationApi.me).mockResolvedValue({ ...stored, version: 1, skills: [] });
     await act(async () => { await result.current.refresh(); });
@@ -56,7 +69,7 @@ describe('useLiveRadar', () => {
   it('discards a response received after the session has changed', async () => {
     let resolve!: (value: IntegrationRadar) => void;
     vi.mocked(radarIntegrationApi.me).mockReturnValueOnce(new Promise(done => { resolve = done; }));
-    const { result } = renderHook(useLiveRadar);
+    const { result } = renderRadarHook();
     await waitFor(() => expect(radarIntegrationApi.me).toHaveBeenCalledOnce());
     vi.mocked(getAccessToken).mockReturnValue('session-b');
     await act(async () => { resolve(stored); await Promise.resolve(); });

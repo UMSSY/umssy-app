@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { RadarCvService } from './radar-cv.service.js';
 import { RadarReviewService } from './radar-review.service.js';
+import { RadarReviewMapper } from './mappers/radar-review.mapper.js';
+import { RadarIntegrationController } from './radar-integration.controller.js';
+import { ROLES_KEY } from '../../common/constants/roles.constants.js';
 import type { RadarCvRepository } from './repositories/radar-cv.repository.js';
 import type { RadarReviewRepository } from './repositories/radar-review.repository.js';
 import type { RadarAccessRepository } from './repositories/radar-access.repository.js';
@@ -27,7 +30,7 @@ function setupReview() {
   const access = { hasRole: vi.fn().mockResolvedValue(true), recordAudit: vi.fn().mockResolvedValue(undefined) };
   const nlp = { refreshAfterChange: vi.fn().mockResolvedValue(undefined) };
   const publication = { recalculate: vi.fn().mockResolvedValue({}), myRadar: vi.fn().mockResolvedValue({ userId: owner }) };
-  const service = new RadarReviewService(repository as unknown as RadarReviewRepository, access as unknown as RadarAccessRepository, nlp as unknown as ProfileSkillsAnalysisService, publication as unknown as RadarPublicationService);
+  const service = new RadarReviewService(repository as unknown as RadarReviewRepository, access as unknown as RadarAccessRepository, nlp as unknown as ProfileSkillsAnalysisService, publication as unknown as RadarPublicationService, new RadarReviewMapper());
   return { repository, access, nlp, publication, service };
 }
 
@@ -47,17 +50,13 @@ describe('Separación de CV y revisión HU1-HU3', () => {
     await expect(service.ingestCv(owner, cvId, Buffer.from('pdf'))).rejects.toThrow('El CV no pertenece al titular');
     expect(access.recordAudit).not.toHaveBeenCalled();
   });
-  it('rechaza reprocesamiento administrativo sin rol', async () => {
-    const { service, access, repository } = setupCv();
-    access.hasRole.mockResolvedValueOnce(false);
-    await expect(service.reprocessCv(admin, cvId)).rejects.toThrow('Se requiere rol administrativo');
-    expect(repository.cvById).not.toHaveBeenCalled();
+  it('protege el reprocesamiento y la descarga administrativa con roles', () => {
+    expect(Reflect.getMetadata(ROLES_KEY, RadarIntegrationController.prototype.reprocessCv)).toEqual(['administrativo']);
+    expect(Reflect.getMetadata(ROLES_KEY, RadarIntegrationController.prototype.download)).toEqual(['administrativo']);
   });
-  it('restringe la cola administrativa a cuentas autorizadas', async () => {
-    const { service, access, repository } = setupReview();
-    access.hasRole.mockResolvedValueOnce(false);
-    await expect(service.queue(admin)).rejects.toThrow('Se requiere rol administrativo');
-    expect(repository.listReviewQueue).not.toHaveBeenCalled();
+  it('protege la cola y las decisiones con roles administrativos', () => {
+    expect(Reflect.getMetadata(ROLES_KEY, RadarIntegrationController.prototype.queue)).toEqual(['administrativo']);
+    expect(Reflect.getMetadata(ROLES_KEY, RadarIntegrationController.prototype.decision)).toEqual(['administrativo']);
   });
   it('aprueba habilidades sin perder auditoría ni recálculo publicado', async () => {
     const { service, repository, access, publication } = setupReview();

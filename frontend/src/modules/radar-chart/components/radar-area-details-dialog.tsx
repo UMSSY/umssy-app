@@ -1,21 +1,15 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import type { AreaEvidenceDetails } from '../types/radar-evidence-details.types';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { getAreaLevel } from '../utils/get-area-level';
 
-export interface AreaEvidenceDetails {
-  education: Array<{id:string;degree:string;institution:string;year:number|null;description?:string|null}>;
-  certifications: Array<{id:string;name:string;issuer:string;year:number|null;credentialId?:string|null}>;
-  experiences: Array<{id:string;position:string;companyName:string;duration:string;description?:string|null}>;
-  tags: string[];
-}
 
-export const EMPTY_AREA_EVIDENCE: AreaEvidenceDetails = {
-  education: [], certifications: [], experiences: [], tags: [],
-};
+
+
 
 interface Props {
   areaName: string;
@@ -82,3 +76,6 @@ export function RadarAreaDetailsDialog({areaName,position,score,globalAverage,ev
     </DialogContent>
   </Dialog>;
 }
+
+export type { AreaEvidenceDetails } from '../types/radar-evidence-details.types';
+export { EMPTY_AREA_EVIDENCE } from '../constants/radar-area-evidence.constants';

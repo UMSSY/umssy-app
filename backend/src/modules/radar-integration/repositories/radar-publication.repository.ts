@@ -1,28 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type { Prisma as PrismaTypes } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { RUBRIC_VERSION, type Scores, scoreVerifiedSkills } from '../radar-scoring.js';
-
-export type PublishedSkill = {
-  id: string;
-  name: string;
-  areaId: string | null;
-  isHighRelevance: boolean;
-  evidenceRefs: { type: string; id: string }[];
-};
-
-export type SnapshotRow = {
-  user_id: string;
-  version: number;
-  rubric_version: string;
-  fingerprint: string;
-  scores: Scores;
-  evidence: Record<string, { id: string; name: string }[]>;
-  average_score: string | number;
-  created_at: Date;
-  source_revision: number | null;
-  skills: PublishedSkill[];
-};
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
+import { RUBRIC_VERSION, scoreVerifiedSkills } from '../radar-scoring.js';
+import type { PublishedSkill, SnapshotRow } from '../types/radar-publication.types.js';
 
 // The transaction-scoped repository prevents calls from escaping the lock or
 // publishing a partially computed snapshot.
@@ -40,26 +21,6 @@ export class RadarPublicationTransaction {
       SELECT input_revision,processed_revision,status FROM profile_skill_processing_states
       WHERE user_id=${userId}::uuid FOR SHARE`;
     return { startedAt: lock[0]?.started_at ?? new Date(), state: states[0] };
-  }
-
-  sourceEvidence(userId: string) {
-    return Promise.all([
-      this.tx.userSkill.findMany({
-        where: { userId, verificationStatus: 'approved' },
-        select: {
-          skillId: true, source: true, isHighRelevance: true, evidenceRefs: true,
-          skill: { select: { name: true, areaId: true } },
-        },
-      }),
-      this.tx.$queryRaw<{
-        cv_id: string; review_status: string; extraction_status: string;
-      }[]>`SELECT cv_id,review_status,extraction_status FROM radar_cv_evidence WHERE user_id=${userId}::uuid`,
-      this.tx.workExperience.findMany({ where: { userId }, select: { id: true } }),
-      this.tx.education.findMany({ where: { userId }, select: { id: true } }),
-      this.tx.certification.findMany({
-        where: { userId, documentUrl: { not: null } }, select: { id: true },
-      }),
-    ]);
   }
 
   snapshots(userId: string, limit: number) {
@@ -112,8 +73,8 @@ function querySnapshots(
 export class RadarPublicationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  withTransaction<T>(operation: (store: RadarPublicationTransaction) => Promise<T>): Promise<T> {
-    return this.prisma.$transaction(async (tx) => operation(new RadarPublicationTransaction(tx)));
+  withTransaction<T>(operation: (store: RadarPublicationTransaction, context: TransactionContext) => Promise<T>): Promise<T> {
+    return this.prisma.$transaction(async (tx) => operation(new RadarPublicationTransaction(tx), { client: tx }));
   }
 
   snapshots(userId: string, limit: number) {
@@ -121,12 +82,11 @@ export class RadarPublicationRepository {
   }
 
   async radarState(userId: string) {
-    const [snapshots, pendingDocs, pendingSkills, state, attempts] = await Promise.all([
+    const [snapshots, pendingDocs, state, attempts] = await Promise.all([
       this.snapshots(userId, 2),
       this.prisma.$queryRaw<{ count: bigint }[]>`
         SELECT COUNT(*)::bigint AS count FROM radar_cv_evidence
         WHERE user_id=${userId}::uuid AND review_status='pending'`,
-      this.prisma.userSkill.count({ where: { userId, verificationStatus: 'pending' } }),
       this.prisma.profileSkillProcessingState.findUnique({
         where: { userId },
         select: { status: true, inputRevision: true, processedRevision: true, dictionaryVersion: true },
@@ -138,7 +98,7 @@ export class RadarPublicationRepository {
           AND event_type IN ('radar.published','radar.synchronized','radar.recalculation_failed')
         ORDER BY occurred_at DESC,id DESC LIMIT 1`,
     ]);
-    return { snapshots, pendingDocs, pendingSkills, state, attempts };
+    return { snapshots, pendingDocs, state, attempts };
   }
 
   async recordFailure(userId: string, actorId: string | null, revision: number, attemptStartedAt: Date) {

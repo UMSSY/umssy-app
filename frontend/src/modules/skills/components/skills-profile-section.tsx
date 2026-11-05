@@ -29,6 +29,7 @@ export function SkillsProfileSection() {
 
     return isSaved;
   }
+
   return (
     <section
       id="skills"
@@ -113,6 +114,7 @@ export function SkillsProfileSection() {
           }
         />
       ) : null}
+       <DetectedSkillsPanel />
     </section>
   );
 }

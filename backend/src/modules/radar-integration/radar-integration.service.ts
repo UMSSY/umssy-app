@@ -1,11 +1,11 @@
-import { ConflictException, Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { RadarAnalysisNotReadyException } from './exceptions/radar-analysis-not-ready.exception.js';
 import { ProfileSkillsEvents, type ProfileSkillsPublished } from '../../common/profile-skills/profile-skills-events.service.js';
 import { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-analysis.service.js';
 import { RadarPublicationService } from './radar-publication.service.js';
 import { RadarCvService } from './radar-cv.service.js';
 import { RadarReviewService } from './radar-review.service.js';
 
-/** Fachada publica de HU1-HU3: orquesta servicios, sin consultas directas a Prisma. */
 @Injectable()
 export class RadarIntegrationService implements OnModuleInit, OnModuleDestroy {
   private unsubscribe?: () => void;
@@ -25,7 +25,7 @@ export class RadarIntegrationService implements OnModuleInit, OnModuleDestroy {
 
   async retry(userId: string) {
     const analysis = await this.nlp.analyzeNow(userId);
-    if (analysis.status !== 'ready') throw new ConflictException('El análisis sigue pendiente o falló; puedes reintentarlo.');
+    if (analysis.status !== 'ready') throw new RadarAnalysisNotReadyException();
     await this.recalculate(userId, userId);
     return this.myRadar(userId);
   }

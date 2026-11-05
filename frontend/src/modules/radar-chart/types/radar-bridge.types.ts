@@ -1,16 +1,5 @@
-import type { AreaId } from "../types/area-detail.types";
-import type { RadarAreaScore } from "../types/radar-profile.types";
+import type { RadarAreaScore } from "./radar-profile.types";
 
-export const RADAR_AXIS_NAMES: ReadonlyArray<{ id: AreaId; name: string }> = [
-  { id: "desarrollo", name: "Desarrollo" },
-  { id: "cloud-devops", name: "Cloud/DevOps" },
-  { id: "data-ai", name: "Data/AI" },
-  { id: "qa", name: "QA" },
-  { id: "ciberseguridad", name: "Ciberseguridad" },
-  { id: "gobernanza-ti", name: "Gobernanza TI" },
-];
-
-/** Respuesta de epic/grupo-2-perfiles-y-NLP, no un contrato inventado. */
 export interface Epic2Skill {
   id: string;
   text: string;
@@ -42,6 +31,5 @@ export interface RadarBridgeView {
   pendingCount: number;
   keywordCount: number;
   highRelevanceCount: number;
-  /** A stable rubric marker: provisional, NOT yet agreed with PO. */
   rubric: string;
 }

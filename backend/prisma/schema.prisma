@@ -1358,7 +1358,8 @@ model MentorIntakeOperation {
 }
 
 model RadarCvEvidence {
-  cvId             String    @id @map("cv_id") @db.Uuid
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cvId             String    @unique @map("cv_id") @db.Uuid
   userId           String    @map("user_id") @db.Uuid
   extractedText    String    @default("") @map("extracted_text") @db.Text
   extractionStatus String    @default("pending") @map("extraction_status") @db.VarChar(24)
@@ -1366,16 +1367,25 @@ model RadarCvEvidence {
   submittedAt      DateTime  @default(now()) @map("submitted_at") @db.Timestamptz(6)
   decidedAt        DateTime? @map("decided_at") @db.Timestamptz(6)
   reviewerId       String?   @map("reviewer_id") @db.Uuid
+  extractionStatusId String? @map("extraction_status_id") @db.Uuid
+  reviewStatusId     String? @map("review_status_id") @db.Uuid
 
   cv       UserCvFile @relation(fields: [cvId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   owner    User       @relation("RadarCvOwner", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  reviewer User?      @relation("RadarCvReviewer", fields: [reviewerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewer User?      @relation("RadarCvReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  extractionState RadarCvExtractionStatus? @relation(fields: [extractionStatusId], references: [id], onDelete: SetNull)
+  reviewState     RadarCvReviewStatus?     @relation(fields: [reviewStatusId], references: [id], onDelete: SetNull)
 
   @@index([reviewStatus, submittedAt], map: "radar_cv_evidence_review_idx")
+  @@index([userId], map: "radar_cv_evidence_user_idx")
+  @@index([reviewerId], map: "radar_cv_evidence_reviewer_idx")
+  @@index([extractionStatusId], map: "radar_cv_evidence_extraction_status_idx")
+  @@index([reviewStatusId], map: "radar_cv_evidence_review_status_idx")
   @@map("radar_cv_evidence")
 }
 
 model RadarScoreSnapshot {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId        String   @map("user_id") @db.Uuid
   version       Int
   rubricVersion String   @map("rubric_version") @db.VarChar(80)
@@ -1387,7 +1397,8 @@ model RadarScoreSnapshot {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@id([userId, version])
+  @@unique([userId, version], map: "radar_score_snapshots_user_version_key")
+  @@index([userId], map: "radar_score_snapshots_user_idx")
   @@map("radar_score_snapshots")
 }
 
@@ -1401,10 +1412,36 @@ model RadarAuditEvent {
   occurredAt DateTime @default(now()) @map("occurred_at") @db.Timestamptz(6)
 
   subject User  @relation("RadarAuditSubject", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  actor   User? @relation("RadarAuditActor", fields: [actorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  actor   User? @relation("RadarAuditActor", fields: [actorId], references: [id], onDelete: SetNull)
 
   @@index([userId, occurredAt(sort: Desc)], map: "radar_audit_user_idx")
+  @@index([userId], map: "radar_audit_subject_idx")
+  @@index([actorId], map: "radar_audit_actor_idx")
   @@map("radar_audit_events")
+}
+
+model RadarCvExtractionStatus {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String   @unique @db.VarChar(24)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  evidences RadarCvEvidence[]
+
+  @@map("radar_cv_extraction_statuses")
+}
+
+model RadarCvReviewStatus {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String   @unique @db.VarChar(24)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  evidences RadarCvEvidence[]
+
+  @@map("radar_cv_review_statuses")
 }
 
 model RadarCompanyAccess {

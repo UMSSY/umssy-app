@@ -22,3 +22,5 @@ export const radarIntegrationApi = {
     return response.data;
   },
 };
+
+export type { IntegrationRadar, ReviewRow, Scores } from '../types/radar-integration.types';

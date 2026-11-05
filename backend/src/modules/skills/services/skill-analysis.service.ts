@@ -14,8 +14,16 @@ export class SkillAnalysisService {
     return this.repository.findCatalog();
   }
 
+  countPendingPublicationSkills(userId: string): Promise<number> {
+    return this.repository.countPendingPublicationSkills(userId);
+  }
+
   findProfileSkillRows(userId: string): Promise<ProfileSkillRowResponse[]> {
     return this.repository.findProfileSkillRows(userId);
+  }
+
+  findApprovedPublicationSkills(userId: string, context: TransactionContext) {
+    return this.repository.findApprovedPublicationSkills(userId, context);
   }
 
   async reconcileDetected(
@@ -23,6 +31,7 @@ export class SkillAnalysisService {
     detected: readonly DetectedSkillPayload[],
     context: TransactionContext,
   ): Promise<boolean> {
+
     const rows = await this.repository.findProfileSkillRows(userId, context);
 
     const plan = planSkillReconciliation(rows, detected);

@@ -1,12 +1,12 @@
-import type { IntegrationRadar } from '../sprint2-integration/radar-integration-api';
-import { RADAR_AXIS_NAMES } from '../sprint2/types';
-import type { RadarBridgeView, Epic2Skill } from '../sprint2/types';
+import type { IntegrationRadar } from '../services/radar-integration.service';
+import { RADAR_AXIS_NAMES } from '../constants/radar-axis-names.constants';
+import type { RadarBridgeView, Epic2Skill } from '../types/radar-bridge.types';
 
 /** Única fuente de puntuaciones: snapshot persistida del backend. */
 export function mapPublishedRadar(stored?: IntegrationRadar | null): RadarBridgeView {
   const safeStored = stored ?? ({} as Partial<IntegrationRadar>);
   const skillsList = Array.isArray(safeStored.skills) ? safeStored.skills : [];
-  const scoresObj = safeStored.scores && typeof safeStored.scores === 'object' ? safeStored.scores : {};
+  const scoresObj = (safeStored.scores && typeof safeStored.scores === 'object' ? safeStored.scores : {}) as Record<string, number | undefined>;
   const approved: Epic2Skill[] = skillsList.map(skill => ({
     ...skill,
     text: skill.name ?? '',
@@ -22,7 +22,7 @@ export function mapPublishedRadar(stored?: IntegrationRadar | null): RadarBridge
     dictionaryVersion: safeStored.dictionaryVersion ?? null,
     areas: RADAR_AXIS_NAMES.map(axis => ({
       ...axis,
-      score: typeof scoresObj[axis.id] === 'number' ? scoresObj[axis.id] : 0,
+      score: typeof scoresObj[axis.id] === 'number' ? (scoresObj[axis.id] as number) : 0,
     })),
     average: typeof safeStored.average === 'number' ? safeStored.average : 0,
     approved,

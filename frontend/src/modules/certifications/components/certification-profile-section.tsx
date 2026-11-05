@@ -2,10 +2,10 @@
 
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CertificationCard } from "../components/certification-card";
-import { CertificationDeleteDialog } from "../components/certification-delete-dialog";
-import { CertificationDocumentViewer } from "../components/certification-document-viewer";
-import { CertificationForm } from "../components/certification-form";
+import { CertificationCard } from "./certification-card";
+import { CertificationDeleteDialog } from "./certification-delete-dialog";
+import { CertificationDocumentViewer } from "./certification-document-viewer";
+import { CertificationForm } from "./certification-form";
 import { DEFAULT_DOCUMENT_TITLE } from "../constants/certification-form.constants";
 import { FeedbackMessage } from "@/modules/profile";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
