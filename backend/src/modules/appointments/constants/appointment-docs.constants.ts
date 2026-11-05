@@ -80,3 +80,41 @@ export const FIND_APPOINTMENT_DOCS = {
   notFoundDescription: 'La cita no existe',
   responseDescription: 'Detalle de una cita del participante autenticado',
 } as const;
+
+export const APPOINTMENT_DOCUMENT_RESPONSE_SCHEMA = {
+  type: 'object' as const,
+  required: ['fileName', 'mimeType', 'sizeBytes', 'uploadedAt'],
+  properties: {
+    fileName: { type: 'string' as const, example: 'Tesis_capitulo_2.pdf' },
+    mimeType: {
+      type: 'string' as const,
+      enum: ['application/pdf', 'image/png', 'image/jpeg'],
+    },
+    sizeBytes: { type: 'integer' as const, example: 2516582 },
+    uploadedAt: { type: 'string' as const, format: 'date-time' },
+  },
+};
+
+export const UPLOAD_APPOINTMENT_DOCUMENT_DOCS = {
+  summary: 'Adjunta un documento a una cita confirmada',
+  description:
+    'Solo quien reservó la cita puede adjuntar un PDF, PNG o JPG de hasta 5 MB mientras la cita esté confirmada y no haya terminado; si ya había un documento, se reemplaza',
+  fileDescription: 'Documento PDF, PNG o JPG de hasta 5 MB',
+  createdDescription: 'Documento guardado y asociado a la cita',
+  badRequestDescription:
+    'Falta el archivo, está vacío o está dañado, o el id de la cita no es válido',
+  forbiddenDescription: 'El usuario no reservó la cita o no participa en ella',
+  notFoundDescription: 'La cita no existe',
+  conflictDescription: 'La cita no está confirmada o ya terminó',
+  payloadTooLargeDescription: 'El archivo supera los 5 MB',
+  unsupportedMediaTypeDescription: 'El archivo no es PDF, PNG ni JPG',
+} as const;
+
+export const DOWNLOAD_APPOINTMENT_DOCUMENT_DOCS = {
+  summary: 'Descarga el documento de una cita',
+  description:
+    'Solo el mentor y quien reservó la cita pueden descargarlo; se entrega con su nombre original',
+  okDescription: 'Contenido binario del documento',
+  forbiddenDescription: 'El usuario no participa en la cita',
+  notFoundDescription: 'La cita no existe o no tiene documento',
+} as const;
