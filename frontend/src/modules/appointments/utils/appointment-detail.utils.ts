@@ -2,6 +2,8 @@ import { toBoliviaTime } from "@/shared/utils/date-time";
 import {
   APPOINTMENT_DOCUMENT_FALLBACK_TYPE_LABEL,
   APPOINTMENT_DOCUMENT_TYPE_LABELS,
+} from "../constants/appointment-document.constants";
+import {
   APPOINTMENT_MONTH_LABELS,
   APPOINTMENT_WEEKDAY_LABELS,
 } from "../constants/appointments.constants";

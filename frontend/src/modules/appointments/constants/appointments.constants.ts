@@ -82,11 +82,3 @@ export const APPOINTMENT_MONTH_LABELS = [
   "noviembre",
   "diciembre",
 ] as const;
-
-export const APPOINTMENT_DOCUMENT_TYPE_LABELS: Record<string, string> = {
-  "application/pdf": "PDF",
-  "image/png": "PNG",
-  "image/jpeg": "JPG",
-};
-
-export const APPOINTMENT_DOCUMENT_FALLBACK_TYPE_LABEL = "DOC";

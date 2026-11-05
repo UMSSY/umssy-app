@@ -9,3 +9,7 @@ export type { AppointmentStatus } from "./types/appointment-status.types";
 export type { AppointmentCounterpart } from "./types/appointment-counterpart.types";
 export type { AppointmentOrientationType } from "./types/appointment-orientation-type.types";
 export { APPOINTMENTS_QUERY_KEYS } from "./constants/appointments-query-keys.constants";
+export {
+  APPOINTMENT_DOCUMENT_FALLBACK_TYPE_LABEL,
+  APPOINTMENT_DOCUMENT_TYPE_LABELS,
+} from "./constants/appointment-document.constants";
