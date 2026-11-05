@@ -12,8 +12,8 @@ export function AccountMenu({ roles }: AccountMenuProps) {
   const canViewProfile = roles.some((role) => getRouteRoles("/profile").includes(role));
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="ghost" className="group/account gap-2 px-3 text-app-header-foreground hover:bg-app-header-foreground/10 hover:text-app-header-foreground focus-visible:ring-app-header-foreground aria-expanded:bg-app-header-foreground/10 aria-expanded:text-app-header-foreground" />}>
-        <UserRound aria-hidden="true" />Mi cuenta<ChevronDown className="size-3.5 text-app-header-foreground/70 transition-transform duration-150 group-aria-expanded/account:rotate-180" aria-hidden="true" />
+      <DropdownMenuTrigger render={<Button variant="ghost" aria-label="Mi cuenta" className="group/account gap-2 px-2 text-app-header-foreground hover:bg-app-header-foreground/10 hover:text-app-header-foreground focus-visible:ring-app-header-foreground aria-expanded:bg-app-header-foreground/10 aria-expanded:text-app-header-foreground sm:px-3" />}>
+        <UserRound aria-hidden="true" /><span className="hidden sm:inline">Mi cuenta</span><ChevronDown className="hidden size-3.5 text-app-header-foreground/70 transition-transform duration-150 group-aria-expanded/account:rotate-180 sm:block" aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={12} className="w-60 p-2">
         <DropdownMenuGroup>

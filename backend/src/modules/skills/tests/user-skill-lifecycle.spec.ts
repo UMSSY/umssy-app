@@ -1,3 +1,4 @@
+import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import type { SkillAnalysisService } from '../services/skill-analysis.service.js';
 import { Logger } from '@nestjs/common';
@@ -172,6 +173,7 @@ describe('Skill changes sent to the radar', () => {
       new SkillValidationService(),
       new ProfileSkillsRadarMapper(),
       store.skills as unknown as SkillAnalysisService,
+      new ProfileSkillsEvents(),
     );
     const skillRepository = {
       findByIds: async (ids: string[]) =>

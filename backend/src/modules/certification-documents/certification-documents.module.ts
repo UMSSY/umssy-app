@@ -3,6 +3,8 @@ import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { FileValidationService } from '../../common/services/file-validation.service.js';
 import { CertificationsModule } from '../certifications/certifications.module.js';
+import { NlpModule } from '../nlp/nlp.module.js';
+import { RadarAuditModule } from '../radar-integration/radar-audit.module.js';
 import { CertificationDocumentFileController } from './controllers/certification-document-file.controller.js';
 import { CertificationDocumentsController } from './controllers/certification-documents.controller.js';
 import { CertificationDocumentMapper } from './mappers/certification-document.mapper.js';
@@ -13,6 +15,8 @@ import { CertificationDocumentsService } from './services/certification-document
   imports: [
     PrismaModule,
     JwtAuthModule,
+    NlpModule,
+    RadarAuditModule,
     forwardRef(() => CertificationsModule),
   ],
   controllers: [
@@ -25,6 +29,6 @@ import { CertificationDocumentsService } from './services/certification-document
     CertificationDocumentMapper,
     FileValidationService,
   ],
-  exports: [CertificationDocumentsRepository],
+  exports: [CertificationDocumentsRepository, CertificationDocumentsService],
 })
 export class CertificationDocumentsModule {}

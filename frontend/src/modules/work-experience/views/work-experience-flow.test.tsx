@@ -53,7 +53,13 @@ function useInMemoryService() {
 
 async function addExperience(
   user: ReturnType<typeof userEvent.setup>,
-  values: { companyName: string; position: string; startDate: string; endDate?: string },
+  values: {
+    companyName: string;
+    position: string;
+    startDate: string;
+    endDate?: string;
+    description: string;
+  },
 ) {
   await user.click(screen.getByRole("button", { name: "Añadir experiencia" }));
   await user.type(screen.getByLabelText(/Empresa/), values.companyName);
@@ -64,6 +70,7 @@ async function addExperience(
   } else {
     await user.click(screen.getByRole("checkbox", { name: "Trabajo actualmente aquí" }));
   }
+  await user.type(screen.getByLabelText(/Descripción de funciones/), values.description);
   await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
   await screen.findByText(values.position);
 }
@@ -88,11 +95,13 @@ describe("WorkExperienceView flow", () => {
       position: "Asistente de laboratorio",
       startDate: "2023-03-01",
       endDate: "2024-12-31",
+      description: "Soporte en prácticas de redes",
     });
     await addExperience(user, {
       companyName: "Synapse Labs",
       position: "Desarrolladora web junior",
       startDate: "2025-03-01",
+      description: "Desarrollo con Python y Scrum",
     });
 
     const list = screen.getByText("Asistente de laboratorio").closest("ul") as HTMLElement;
@@ -145,6 +154,7 @@ describe("WorkExperienceView flow", () => {
       position: "Asistente de laboratorio",
       startDate: "2023-03-01",
       endDate: "2024-12-31",
+      description: "Soporte en prácticas de redes",
     });
 
     await user.click(screen.getByRole("button", { name: "Añadir experiencia" }));
@@ -152,6 +162,7 @@ describe("WorkExperienceView flow", () => {
     await user.type(screen.getByLabelText(/Cargo/), "Practicante");
     fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2024-07-01" } });
     fireEvent.change(screen.getByLabelText("Hasta"), { target: { value: "2024-06-30" } });
+    await user.type(screen.getByLabelText(/Descripción de funciones/), "Soporte técnico");
     await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
     expect(
@@ -179,13 +190,17 @@ describe("WorkExperienceView flow", () => {
       companyName: "Synapse Labs",
       position: "Desarrolladora web junior",
       startDate: "2025-03-01",
+      description: "Desarrollo con Python y Scrum",
     });
 
     expect(await screen.findByText("Habilidades detectadas automáticamente")).toBeInTheDocument();
     expect(screen.getByText("Python")).toBeInTheDocument();
     expect(screen.getByText("Scrum")).toBeInTheDocument();
     expect(screen.getByText("Análisis completado en 0.42 s")).toBeInTheDocument();
-    expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledWith("experience-1", null);
+    expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledWith(
+      "experience-1",
+      "Desarrollo con Python y Scrum",
+    );
   }, 20_000);
 
   it("saves an experience without detected skills and shows no tags (AC-01.9)", async () => {
@@ -197,6 +212,7 @@ describe("WorkExperienceView flow", () => {
       companyName: "Synapse Labs",
       position: "Desarrolladora web junior",
       startDate: "2025-03-01",
+      description: "Desarrollo con Python y Scrum",
     });
 
     await waitFor(() => expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledTimes(1));

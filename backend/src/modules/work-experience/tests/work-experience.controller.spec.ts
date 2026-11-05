@@ -182,6 +182,8 @@ describe('WorkExperienceController', () => {
     { ...body, startDate: '2024-02-30' },
     { ...body, isCurrent: undefined },
     { ...body, userId: otherUserId },
+    { ...body, description: '' },
+    { ...body, description: null },
   ])('rejects invalid creation data before persisting', async (input) => {
     const response = await request(app.getHttpServer())
       .post('/api/work-experiences')

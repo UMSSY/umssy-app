@@ -242,4 +242,19 @@ describe('EducationsRepository', () => {
       select: expectedSelect,
     });
   });
+
+  it('extracts text sources for NLP processing', async () => {
+    education.findMany.mockResolvedValue([
+      { id: 'e1', degree: 'Ingeniería de Sistemas', description: 'Mención software' },
+    ]);
+
+    await expect(repository.findTextSources(userId)).resolves.toEqual([
+      { id: 'e1', type: 'education', text: 'Ingeniería de Sistemas.\nMención software' },
+    ]);
+    expect(education.findMany).toHaveBeenCalledWith({
+      where: { userId },
+      orderBy: { startDate: 'desc' },
+      select: { id: true, degree: true, description: true },
+    });
+  });
 });

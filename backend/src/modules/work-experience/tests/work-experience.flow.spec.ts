@@ -155,6 +155,7 @@ describe('Work experience flow', () => {
       startDate: '2023-03-01',
       endDate: '2024-12-31',
       isCurrent: false,
+      description: 'Soporte en prácticas de redes',
     });
     const recent = await createAs(ownerToken, {
       companyName: 'UMSS',
@@ -162,6 +163,7 @@ describe('Work experience flow', () => {
       startDate: '2024-07-01',
       endDate: '2024-12-31',
       isCurrent: false,
+      description: 'Soporte en prácticas de redes',
     });
     const current = await createAs(ownerToken, {
       companyName: 'Synapse Labs',
@@ -246,6 +248,7 @@ describe('Work experience flow', () => {
       position: 'Desarrolladora web junior',
       startDate: '2025-03-01',
       isCurrent: true,
+      description: 'Interfaces con React',
     });
 
     expect(await listAs(otherToken)).toEqual([]);

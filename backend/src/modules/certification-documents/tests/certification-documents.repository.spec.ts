@@ -3,6 +3,7 @@ import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
 import { CertificationNotFoundException } from '../../certifications/exceptions/certification-not-found.exception.js';
 import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
+import type { RadarAuditRepository } from '../../radar-integration/radar-audit.repository.js';
 
 const recordNotFoundError = new Prisma.PrismaClientKnownRequestError(
   'Record not found',
@@ -14,6 +15,7 @@ const certificationId = '33333333-3333-4333-8333-333333333333';
 
 describe('CertificationDocumentsRepository', () => {
   let repository: CertificationDocumentsRepository;
+  const audit = { saveDocumentMetadata: vi.fn().mockResolvedValue(undefined) };
   let certification: {
     findUnique: ReturnType<typeof vi.fn>;
     findFirst: ReturnType<typeof vi.fn>;
@@ -28,13 +30,15 @@ describe('CertificationDocumentsRepository', () => {
       findMany: vi.fn(),
       update: vi.fn(),
     };
-    repository = new CertificationDocumentsRepository({
+    const db = {
       certification,
-    } as unknown as PrismaService);
+      $transaction: vi.fn(async operation => operation(db)),
+    };
+    repository = new CertificationDocumentsRepository(db as unknown as PrismaService, audit as unknown as RadarAuditRepository);
   });
 
   it('saves the content in the document column of the certification', async () => {
-    certification.update.mockResolvedValue({ id: certificationId });
+    certification.update.mockResolvedValue({ id: certificationId, userId });
 
     await expect(
       repository.save(certificationId, Buffer.from([1, 2, 3])),
@@ -73,14 +77,15 @@ describe('CertificationDocumentsRepository', () => {
   });
 
   it('clears the document column when removing the document', async () => {
-    certification.update.mockResolvedValue({ id: certificationId });
+    certification.update.mockResolvedValue({ id: certificationId, userId });
 
     await expect(repository.remove(certificationId)).resolves.toBeUndefined();
     expect(certification.update).toHaveBeenCalledWith({
       where: { id: certificationId },
       data: { documentUrl: null },
-      select: { id: true },
+      select: { id: true, userId: true },
     });
+    expect(audit.saveDocumentMetadata).toHaveBeenCalledWith(userId, certificationId, null, expect.any(Object));
   });
 
   it('fails with a domain exception when the certification no longer exists', async () => {

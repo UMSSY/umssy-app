@@ -5,6 +5,10 @@ import { isRecordNotFoundError } from '../../../common/utils/map-record-not-foun
 import type { WorkExperiencePeriodSnapshot } from '../types/work-experience-period-snapshot.type.js';
 import type { WorkExperienceRecord } from '../types/work-experience-record.type.js';
 import type { WorkExperienceWriteData } from '../types/work-experience-write-data.type.js';
+import type { NlpTextSource } from '../../nlp/types/nlp-text-source.type.js';
+
+const joinText = (title: string, description: string | null) =>
+  [title, description].filter((part) => Boolean(part?.trim())).join('.\n');
 
 const workExperienceSelect = {
   id: true,
@@ -37,6 +41,19 @@ export class WorkExperienceRepository {
       orderBy: [{ isCurrent: 'desc' }, { startDate: 'desc' }, { id: 'desc' }],
       select: workExperienceSelect,
     });
+  }
+
+  async findTextSources(userId: string): Promise<NlpTextSource[]> {
+    const records = await this.prisma.workExperience.findMany({
+      where: { userId },
+      orderBy: { startDate: 'desc' },
+      select: { id: true, position: true, description: true },
+    });
+    return records.map((record) => ({
+      id: record.id,
+      type: 'work-experience',
+      text: joinText(record.position, record.description),
+    }));
   }
 
   findByIdAndUserId(

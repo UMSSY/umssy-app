@@ -4,6 +4,27 @@ export const CUSTOM_SKILL_ENDPOINT = "/skills/custom";
 
 export const MY_SKILLS_ENDPOINT = "/profile/me/skills";
 
+export const SKILLS_FOR_RADAR_ENDPOINT = "/profile/skills-for-radar";
+
+export const SKILLS_ANALYSIS_ENDPOINT = "/profile/me/skills/analysis";
+
+export const DETECTED_SKILLS_QUERY_KEY = ["skills", "detected"] as const;
+
+export const SKILLS_ANALYSIS_MUTATION_KEY = ["skills", "analysis"] as const;
+
+export const DETECTED_SKILLS_TEXTS = {
+  title: "Habilidades detectadas",
+  description: "Se detectan en experiencia, formación, certificaciones y el CV vigente. Las pendientes de revisión no aumentan el radar verificado.",
+  loading: "Cargando habilidades detectadas…",
+  loadError: "No se pudieron cargar las habilidades detectadas.",
+  pending: "El análisis de tu perfil está pendiente. Puedes iniciarlo o volver a intentarlo.",
+  error: "No pudimos analizar tu perfil. Tus habilidades registradas siguen disponibles.",
+  empty: "Aún no encontramos habilidades técnicas en las fuentes de tu perfil.",
+  analyze: "Volver a analizar",
+  analyzing: "Analizando…",
+  evidence: (count: number) => (count === 1 ? "En 1 registro" : `En ${count} registros`),
+} as const;
+
 export const PENDING_SKILL_ID_PREFIX = "pending-";
 
 export const SKILL_NAME_MAX_LENGTH = 50;

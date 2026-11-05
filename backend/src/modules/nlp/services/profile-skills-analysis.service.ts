@@ -1,3 +1,4 @@
+import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
 import { randomUUID } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
 import { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
@@ -24,6 +25,7 @@ export class ProfileSkillsAnalysisService {
     private readonly validation: SkillValidationService,
     private readonly mapper: ProfileSkillsRadarMapper,
     private readonly skills: SkillAnalysisService,
+    private readonly events: ProfileSkillsEvents,
   ) {}
 
   async refreshAfterChange(userId: string): Promise<void> {
@@ -72,6 +74,13 @@ export class ProfileSkillsAnalysisService {
         (context) => this.skills.reconcileDetected(userId, detection.accepted, context),
       );
       outcome.status = published ? 'ready' : 'stale';
+      if (published) {
+        await this.events.published({
+          userId,
+          inputRevision: published.state.inputRevision,
+          resultVersion: published.state.resultVersion,
+        });
+      }
       this.write('log', published ? NLP_LOG_EVENTS.finished : NLP_LOG_EVENTS.stale, {
         correlationId,
         userId,
