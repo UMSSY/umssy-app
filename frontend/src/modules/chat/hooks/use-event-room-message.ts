@@ -8,14 +8,6 @@ import { sendMessage } from "../services/chat-api";
 import { messagesQueryKey } from "../constants/messages-query-key";
 import type { Message } from "../types/conversation.types";
 
-/**
- * Hook para enviar mensajes en la sala de evento.
- *
- * Notas del comportamiento (ajuste HU-10):
- * - El campo se limpia tras un envío exitoso (la view limpia el input cuando `send` retorna un mensaje).
- * - El aviso de error solo aparece si la petición realmente falla.
- * - No se modifica ChatRoom.
- */
 export function useSendEventRoomMessage(conversationId: string | null) {
   const queryClient = useQueryClient();
   const [isSending, setIsSending] = useState(false);

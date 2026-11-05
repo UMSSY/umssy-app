@@ -12,7 +12,7 @@ export class EventRoomService {
   ) {}
 
   async joinEventRoom(userId: string, registrationId: string): Promise<EventRoomJoinedPayload> {
-    // getPassById valida pertenencia, vigencia y estado confirmado.
+    
     const pass = await this.registrationsService
       .getPassById(registrationId, userId)
       .catch(() => {

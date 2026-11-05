@@ -6,9 +6,6 @@ import { cn } from "@/lib/utils";
 
 import type { EventRoomEmptyStateProps } from "../types/event-room-empty-state-props.types";
 
-/**
- * Estado vacío de la sala: 1 participante y 0 mensajes.
- */
 export function EventRoomEmptyState({
   description,
 }: EventRoomEmptyStateProps) {

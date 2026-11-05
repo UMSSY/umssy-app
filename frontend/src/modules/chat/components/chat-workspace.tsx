@@ -227,8 +227,6 @@ export function ChatWorkspace({
         return;
       }
 
-      // La postulación permite abrir el chat directamente.
-      // El backend vuelve a comprobar este permiso.
       if (contactUser.canChatByApplication === true) {
         await startConversationWithContact(contactUser);
         setSelectedRequestId(null);
