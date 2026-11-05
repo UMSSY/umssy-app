@@ -3,7 +3,7 @@ export const SURVEYS_QUERY_KEYS = {
   list: ["surveys", "list"] as const,
   careers: ["surveys", "careers"] as const,
   detail: (id: string) => ["surveys", "detail", id] as const,
-  statistics: (id: string) => ["surveys", "statistics", id] as const,
+  statistics: (id: string, period?: string) => ["surveys", "statistics", id, period ?? "ALL"] as const,
 };
 
 export const SURVEY_TOAST_DURATION_MS = 7_000;

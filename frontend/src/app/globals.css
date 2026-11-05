@@ -47,7 +47,7 @@
 
   --color-ink: #0B1F2E;
   --color-ink-soft: #33465A;
-  --color-accent: #003770;
+  --color-accent: var(--accent);
   --color-brand-hover: var(--brand-hover, #002A56);
   --color-brand-red: #E30613;
   --color-brand-red-foreground: #FFFFFF;
@@ -58,6 +58,8 @@
   --grid-template-columns-event-browser-open: minmax(0, 1fr) 24rem;
   --grid-template-columns-event-cards: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
   --color-brand-coral: #FF806B;
+  --color-voting-progress: var(--color-orange-500);
+  --color-voting-progress-foreground: var(--color-orange-700);
   --color-progress: var(--progress, var(--primary));
   --color-critical-action: var(--critical-action, #0B1F2E);
   --color-critical-action-hover: var(--critical-action-hover, #33465A);
@@ -117,8 +119,8 @@
   --secondary-foreground: #0B1F2E;
   --muted: #F6F7F9;
   --muted-foreground: #5B6470;
-  --accent: #EEF3F8;
-  --accent-foreground: #0B1F2E;
+  --accent: #003770;
+  --accent-foreground: #FFFFFF;
   --destructive: #B4050F;
   --border: #E3E7EC;
   --input: #C9CFD8;

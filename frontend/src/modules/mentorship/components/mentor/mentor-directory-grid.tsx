@@ -8,6 +8,7 @@ type MentorDirectoryGridProps = {
   returnTo?: string;
   showAffinityBadge?: boolean;
   selectedArea?: string;
+  highlightAvailability?: boolean;
 };
 
 export function MentorDirectoryGrid({
@@ -16,6 +17,7 @@ export function MentorDirectoryGrid({
   returnTo = "/mentorship/mentors",
   showAffinityBadge = false,
   selectedArea,
+  highlightAvailability = false,
 }: MentorDirectoryGridProps) {
   return (
     <section
@@ -31,6 +33,7 @@ export function MentorDirectoryGrid({
             returnTo={returnTo}
             showAffinityBadge={showAffinityBadge}
             selectedArea={selectedArea}
+            highlightAvailability={highlightAvailability}
           />
         ))}
       </div>

@@ -3,10 +3,12 @@ import {
   CompanyNotFoundException,
   JobOfferCatalogNotFoundException,
   JobOfferNotFoundException,
+  JobOfferNotReopenableException,
 } from '../exceptions/index.js';
 import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
 import { JobOffersRepository } from '../repositories/job-offers.repository.js';
 import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
+import type { UpdateJobOfferRequest } from '../requests/update-job-offer.request.js';
 import {
   DEFAULT_COMPANY_JOB_OFFERS_FILTERS,
   type ListCompanyJobOffersRequest,
@@ -18,6 +20,7 @@ import type {
   PublishedJobOfferResponse,
 } from '../responses/job-offer.response.js';
 import { JobOfferStatus } from '../types/job-offer.enum.js';
+import type { UpdateJobOfferData } from '../types/update-job-offer-data.type.js';
 import { formatSalaryRange } from '../utils/format-salary-range.js';
 import { JobOfferSkillsService } from './job-offer-skills.service.js';
 
@@ -71,7 +74,13 @@ export class JobOffersService {
       companyId,
       filters,
     );
-    return records.map((record) => this.jobOfferMapper.toResponse(record));
+    const responses = records.map((record) => this.jobOfferMapper.toResponse(record));
+    if (filters.sortBy !== 'applicants') return responses;
+
+    const direction = filters.order === 'asc' ? 1 : -1;
+    return responses.sort(
+      (a, b) => (a.applicantsCount - b.applicantsCount) * direction,
+    );
   }
 
   async getByCompanyAndId(
@@ -92,7 +101,7 @@ export class JobOffersService {
   async update(
     companyId: string,
     jobOfferId: string,
-    request: CreateJobOfferRequest,
+    request: UpdateJobOfferRequest,
   ): Promise<JobOfferResponse> {
     await this.ensureCompanyExists(companyId);
     const existing = await this.jobOffersRepository.findByCompanyAndId(
@@ -115,7 +124,7 @@ export class JobOffersService {
     const record = await this.jobOffersRepository.update(jobOfferId, {
       modalityId,
       contractTypeId,
-      ...this.toOfferFields(request),
+      ...this.toUpdateFields(request),
     });
     return this.jobOfferMapper.toResponse(record);
   }
@@ -130,16 +139,25 @@ export class JobOffersService {
       throw new JobOfferNotFoundException();
     }
 
-    const { statusId } = await this.jobOffersRepository.findCatalogIds(
-      '',
-      '',
-      JobOfferStatus.DELETED,
-    );
+    const statusId = await this.jobOffersRepository.findStatusId(JobOfferStatus.DELETED);
     if (!statusId) {
       throw new JobOfferCatalogNotFoundException('estado');
     }
 
     await this.jobOffersRepository.updateStatus(jobOfferId, statusId);
+  }
+
+  async reopen(companyId: string, jobOfferId: string): Promise<JobOfferResponse> {
+    await this.ensureCompanyExists(companyId);
+    const existing = await this.jobOffersRepository.findByCompanyAndId(companyId, jobOfferId);
+    if (!existing) throw new JobOfferNotFoundException();
+    if (existing.status.title !== JobOfferStatus.CLOSED) throw new JobOfferNotReopenableException();
+
+    const statusId = await this.jobOffersRepository.findStatusId(JobOfferStatus.PUBLISHED);
+    if (!statusId) throw new JobOfferCatalogNotFoundException('estado');
+
+    const record = await this.jobOffersRepository.reopen(jobOfferId, statusId, new Date());
+    return this.jobOfferMapper.toResponse(record);
   }
 
   findScoringOffers(ids: string[]) {
@@ -156,6 +174,30 @@ export class JobOffersService {
 
   private toOfferFields(request: CreateJobOfferRequest) {
     return {
+      ...this.toBaseFields(request),
+      requiredCareers: request.requiredCareers,
+      minExperienceYears: request.minExperienceYears ?? null,
+      otherRequirements: request.otherRequirements,
+    };
+  }
+
+  private toUpdateFields(
+    request: UpdateJobOfferRequest,
+  ): Omit<UpdateJobOfferData, 'modalityId' | 'contractTypeId'> {
+    return {
+      ...this.toBaseFields(request),
+      ...(request.requiredCareers !== undefined && { requiredCareers: request.requiredCareers }),
+      ...(request.minExperienceYears !== undefined && {
+        minExperienceYears: request.minExperienceYears,
+      }),
+      ...(request.otherRequirements !== undefined && {
+        otherRequirements: request.otherRequirements,
+      }),
+    };
+  }
+
+  private toBaseFields(request: UpdateJobOfferRequest) {
+    return {
       title: request.title,
       description: request.description,
       category: request.category,
@@ -163,9 +205,6 @@ export class JobOffersService {
       salaryRange: formatSalaryRange(request.salaryMin, request.salaryMax),
       languages: request.languages,
       locationUrl: request.locationUrl,
-      requiredCareers: request.requiredCareers,
-      minExperienceYears: request.minExperienceYears ?? null,
-      otherRequirements: request.otherRequirements,
       skillIds: request.skillIds,
     };
   }

@@ -32,7 +32,7 @@ describe('UserPresenceService', () => {
     const now = new Date();
     
     await service.markOnline(userId, now);
-    // eslint-disable-next-line @typescript-eslint/unbound-method
+     
     expect(repository.upsert).toHaveBeenCalledWith(userId, true, now);
   });
 
@@ -41,7 +41,7 @@ describe('UserPresenceService', () => {
     const now = new Date();
     
     await service.markOffline(userId, now);
-    // eslint-disable-next-line @typescript-eslint/unbound-method
+     
     expect(repository.upsert).toHaveBeenCalledWith(userId, false, now);
   });
 });

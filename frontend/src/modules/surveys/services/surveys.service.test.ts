@@ -36,4 +36,26 @@ describe("surveysService", () => {
     expect(get).toHaveBeenNthCalledWith(1, "/surveys");
     expect(get).toHaveBeenNthCalledWith(2, "/careers");
   });
+
+  it("pide las estadísticas de un semestre con GET /surveys/:id/statistics?period=", async () => {
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue({ data: apiResponse({ id: "survey-1" }) });
+
+    await surveysService.getSurveyStatistics("survey-1", "II-2026");
+    await surveysService.getSurveyStatistics("survey-1");
+
+    expect(get).toHaveBeenNthCalledWith(1, "/surveys/survey-1/statistics", { params: { period: "II-2026" } });
+    expect(get).toHaveBeenNthCalledWith(2, "/surveys/survey-1/statistics", { params: { period: undefined } });
+  });
+
+  it("exporta el PDF del semestre elegido con GET /surveys/:id/export-pdf?period=", async () => {
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue({
+      data: new Blob(["pdf"]),
+      headers: { "content-disposition": 'attachment; filename="reporte.pdf"' },
+    });
+
+    const { fileName } = await surveysService.exportSurveyPdf("survey-1", "I-2026");
+
+    expect(get).toHaveBeenCalledWith("/surveys/survey-1/export-pdf", { responseType: "blob", params: { period: "I-2026" } });
+    expect(fileName).toBe("reporte.pdf");
+  });
 });

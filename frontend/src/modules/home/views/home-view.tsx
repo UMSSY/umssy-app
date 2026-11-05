@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "cn";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { PUBLIC_SLANT_BUTTON_CLASS } from "@/shared/constants/public-navigation.constants";
 import { PublicHeader, PublicFooter } from "@/shared/components/layout";
 import { PublicEventsSection } from "@/modules/events";

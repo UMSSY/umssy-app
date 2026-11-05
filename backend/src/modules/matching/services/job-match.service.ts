@@ -1,24 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { UserSkillService } from '../../skills/services/user-skill.service.js';
 import { JobOfferNotAvailableException } from '../exceptions/job-offer-not-available.exception.js';
 import { JobMatchRepository } from '../repositories/job-match.repository.js';
 import type { JobMatchResponse } from '../types/job-match.types.js';
-import { toVacancyRequirements } from '../utils/build-vacancy-requirements.js';
 import {
-  buildScoreRequirements,
   hasPendingRequirements,
   toCategorizedRequirements,
 } from '../utils/build-score-requirements.js';
-import { CandidateProfileService } from './candidate-profile.service.js';
-import { WeightedScoreService } from './weighted-score.service.js';
+import { VacancyScoringService } from './vacancy-scoring.service.js';
 
 @Injectable()
 export class JobMatchService {
   constructor(
     private readonly jobMatchRepository: JobMatchRepository,
-    private readonly userSkillService: UserSkillService,
-    private readonly candidateProfileService: CandidateProfileService,
-    private readonly weightedScoreService: WeightedScoreService,
+    private readonly vacancyScoring: VacancyScoringService,
   ) {}
 
   async getMatch(
@@ -33,16 +27,11 @@ export class JobMatchService {
       throw new JobOfferNotAvailableException();
     }
 
-    const [userSkills, profile] = await Promise.all([
-      this.userSkillService.getUserSkills(userId),
-      this.candidateProfileService.findCandidateProfile(userId),
-    ]);
-
-    const requirements = buildScoreRequirements(toVacancyRequirements(vacancy), {
-      skills: userSkills.map(({ name }) => name),
-      career: profile.career,
-      experienceYears: profile.experienceYears,
-    });
+    const candidate = await this.vacancyScoring.getCandidate(userId);
+    const { requirements, score } = await this.vacancyScoring.evaluate(
+      vacancy,
+      candidate,
+    );
 
     return {
       jobOfferId: vacancy.id,
@@ -50,7 +39,7 @@ export class JobMatchService {
       companyName: vacancy.company.title,
       modality: vacancy.modality.title,
       description: vacancy.description,
-      score: this.weightedScoreService.calculate(requirements),
+      score,
       hasPendingRequirements: hasPendingRequirements(requirements),
       requirements: toCategorizedRequirements(requirements),
     };

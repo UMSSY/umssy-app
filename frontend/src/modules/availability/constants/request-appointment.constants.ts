@@ -5,11 +5,12 @@ export const APPOINTMENT_CONFLICT_STATUS = 409;
 export const REQUEST_APPOINTMENT_TEXT = {
   topicLabel: "Tema de la sesión",
   topicPlaceholder: "Selecciona un tema",
-  messageLabel: "Mensaje para el mentor (opcional)",
+  messageLabel: "Mensaje para el mentor",
   submit: "Solicitar cita",
   submitting: "Solicitando...",
   instantConfirmationNote: "La cita se confirma al instante y el horario queda reservado para ti.",
   missingTopic: "Selecciona el tema de la sesión",
+  missingMessage: "Escribe un mensaje para el mentor",
   messageTooLong: `El mensaje no puede superar los ${APPOINTMENT_MESSAGE_MAX_LENGTH} caracteres`,
   confirmed: "Cita confirmada",
   alreadyBooked: "Este horario ya fue reservado",

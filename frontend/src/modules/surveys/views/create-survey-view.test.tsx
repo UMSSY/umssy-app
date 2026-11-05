@@ -3,10 +3,20 @@ import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
+import { SURVEY_CREATE_DRAFT_STORAGE_KEY } from "../constants/survey-builder.constants";
 import { SURVEY_MESSAGES } from "../constants/survey-messages.constants";
 import { surveysService } from "../services/surveys.service";
 import { apiResponse, buildAxiosError, CAREERS, CREATED_SURVEY, FIXED_NOW } from "../testing/survey-fixtures";
+import { removeSurveyStorage } from "../utils/survey-draft-storage";
 import { CreateSurveyView } from "./create-survey-view";
+
+const records = vi.hoisted(() => new Map<string, unknown>());
+
+vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
+  readIndexedDb: vi.fn(async (key: string) => records.get(key) ?? null),
+  writeIndexedDb: vi.fn(async (key: string, value: unknown) => { records.set(key, value); }),
+  removeIndexedDb: vi.fn(async (key: string) => { records.delete(key); }),
+}));
 
 const push = vi.fn();
 const VIEW_TEST_TIMEOUT_MS = 20_000;
@@ -18,9 +28,10 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
-function renderView() {
+async function renderView() {
   const user = userEvent.setup({ delay: null });
   renderWithQuery(<CreateSurveyView />);
+  await screen.findByLabelText("Título");
   return user;
 }
 
@@ -55,8 +66,10 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     vi.spyOn(surveysService, "createSurvey").mockResolvedValue(apiResponse(CREATED_SURVEY, 201));
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     cleanup();
+    await removeSurveyStorage(SURVEY_CREATE_DRAFT_STORAGE_KEY);
+    records.clear();
     vi.useRealTimers();
     vi.restoreAllMocks();
     push.mockReset();
@@ -64,8 +77,8 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     vi.mocked(toast.error).mockReset();
   });
 
-  it("CA1: muestra el formulario en borrador con encabezado, una pregunta vacía y las acciones", () => {
-    renderView();
+  it("CA1: muestra el formulario en borrador con encabezado, una pregunta vacía y las acciones", async () => {
+    await renderView();
 
     expect(screen.getByRole("heading", { name: /Crear encuesta/ })).toBeInTheDocument();
     expect(screen.getByText("Borrador")).toBeInTheDocument();
@@ -84,7 +97,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA2: añade una pregunta numerada, de opción única, obligatoria y con el foco en el enunciado", async () => {
-    const user = renderView();
+    const user = await renderView();
 
     await user.click(screen.getByText("Añadir pregunta", { selector: "button" }));
 
@@ -99,7 +112,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA2: el botón + de la barra flotante inserta la pregunta debajo de la activa", async () => {
-    const user = renderView();
+    const user = await renderView();
     await user.type(screen.getByLabelText("Enunciado de la pregunta 1"), "Primera");
     await user.click(screen.getByText("Añadir pregunta", { selector: "button" }));
     await user.type(screen.getByLabelText("Enunciado de la pregunta 2"), "Segunda");
@@ -113,7 +126,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA5: activa la tarjeta al hacer clic y resume las demás", async () => {
-    const user = renderView();
+    const user = await renderView();
     await user.type(screen.getByLabelText("Enunciado de la pregunta 1"), "Primera");
     await user.click(screen.getByText("Añadir pregunta", { selector: "button" }));
 
@@ -129,7 +142,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA5: duplica, elimina y reordena con teclado actualizando la numeración", async () => {
-    const user = renderView();
+    const user = await renderView();
     await user.type(screen.getByLabelText("Enunciado de la pregunta 1"), "Primera");
 
     await user.click(screen.getAllByRole("button", { name: "Duplicar pregunta" })[0]);
@@ -150,7 +163,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA5: reordena arrastrando la tarjeta desde su manejador", async () => {
-    const user = renderView();
+    const user = await renderView();
     await user.type(screen.getByLabelText("Enunciado de la pregunta 1"), "Primera");
     await user.click(screen.getByText("Añadir pregunta", { selector: "button" }));
     await user.type(screen.getByLabelText("Enunciado de la pregunta 2"), "Segunda");
@@ -171,7 +184,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA4: añade opciones con foco, las quita y oculta la X con solo 2 opciones", async () => {
-    const user = renderView();
+    const user = await renderView();
 
     expect(screen.queryByRole("button", { name: /^Eliminar opción/ })).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Añadir opción" }));
@@ -189,12 +202,12 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA3: ofrece solo preguntas cerradas y conserva las opciones al cambiar de tipo", async () => {
-    const user = renderView();
+    const user = await renderView();
     await user.type(screen.getByLabelText("Texto de la opción 1"), "Sí");
 
     await user.click(screen.getByRole("combobox", { name: "Tipo de pregunta" }));
     const options = await screen.findAllByRole("option");
-    expect(options.map((option) => option.textContent)).toEqual(["Opción única", "Opción múltiple", "Lista desplegable"]);
+    expect(options.map((option) => option.textContent)).toEqual(["Opción única", "Opción múltiple"]);
     await user.click(screen.getByRole("option", { name: "Opción múltiple" }));
 
     expect(screen.getByLabelText("Texto de la opción 1")).toHaveValue("Sí");
@@ -207,7 +220,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA10: limita la longitud de los campos de texto", async () => {
-    const user = renderView();
+    const user = await renderView();
 
     expect(screen.getByLabelText("Título")).toHaveAttribute("maxLength", "150");
     expect(screen.getByLabelText("Descripción")).toHaveAttribute("maxLength", "500");
@@ -223,7 +236,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA7: no publica con campos vacíos, lista los errores y resalta cada campo", async () => {
-    const user = renderView();
+    const user = await renderView();
 
     await user.click(screen.getByRole("button", { name: /Publicar encuesta/ }));
 
@@ -244,7 +257,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA7: los errores desaparecen al corregir los campos", async () => {
-    const user = renderView();
+    const user = await renderView();
     await user.click(screen.getByRole("button", { name: /Publicar encuesta/ }));
 
     await user.type(screen.getByLabelText("Título"), "Encuesta válida");
@@ -254,7 +267,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA8: rechaza opciones repetidas sin distinguir mayúsculas ni espacios", async () => {
-    const user = renderView();
+    const user = await renderView();
     await fillValidSurvey(user);
     await user.clear(screen.getByLabelText("Texto de la opción 2"));
     await user.type(screen.getByLabelText("Texto de la opción 2"), "  SÍ ");
@@ -267,7 +280,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA9: rechaza una fecha de cierre igual o anterior a la apertura", async () => {
-    const user = renderView();
+    const user = await renderView();
     await fillValidSurvey(user);
     await pickDate(user, /^Cierre/, "24102026");
 
@@ -278,7 +291,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA9: no permite elegir una apertura anterior a hoy en el calendario", async () => {
-    const user = renderView();
+    const user = await renderView();
 
     const [opensAtCalendarButton] = screen.getAllByRole("button", { name: "Elegir fecha en el calendario" });
     await user.click(opensAtCalendarButton);
@@ -289,7 +302,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA6: confirma en el diálogo, publica y redirige al listado", async () => {
-    const user = renderView();
+    const user = await renderView();
     await fillValidSurvey(user);
     await user.click(screen.getByText("Añadir pregunta", { selector: "button" }));
     await user.type(screen.getByLabelText("Enunciado de la pregunta 2"), "Beneficios");
@@ -345,7 +358,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
         resolveRequest = resolve;
       }),
     );
-    const user = renderView();
+    const user = await renderView();
     await fillValidSurvey(user);
     await user.click(screen.getByRole("button", { name: /Publicar encuesta/ }));
     const dialog = await screen.findByRole("alertdialog");
@@ -363,7 +376,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
 
   it("CA14: muestra el error de conexión, conserva los datos y rehabilita el botón", async () => {
     vi.mocked(surveysService.createSurvey).mockRejectedValue(buildAxiosError(undefined));
-    const user = renderView();
+    const user = await renderView();
     await fillValidSurvey(user);
     await user.click(screen.getByRole("button", { name: /Publicar encuesta/ }));
     const dialog = await screen.findByRole("alertdialog");
@@ -371,7 +384,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     await user.click(within(dialog).getByRole("button", { name: "Publicar" }));
 
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith("Error 503/504: Sin conexión con el servidor", expect.anything()),
+      expect(toast.error).toHaveBeenCalledWith("Sin conexión con el servidor. Vuelve a intentarlo en unos minutos", expect.anything()),
     );
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(screen.getByRole("button", { name: /Publicar encuesta/ })).toBeEnabled();
@@ -380,7 +393,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA14: sin internet no envía la petición, cierra el modal y avisa con un toast", async () => {
-    const user = renderView();
+    const user = await renderView();
     await fillValidSurvey(user);
     await user.click(screen.getByRole("button", { name: /Publicar encuesta/ }));
     const dialog = await screen.findByRole("alertdialog");
@@ -396,7 +409,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("permite dirigir la encuesta a todas las carreras", async () => {
-    const user = renderView();
+    const user = await renderView();
     await fillValidSurvey(user);
     await selectOption(user, "Carrera dirigida", "Todas las carreras");
     await user.click(screen.getByRole("button", { name: /Publicar encuesta/ }));
@@ -419,7 +432,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
         data: { field: "title" },
       }),
     );
-    const user = renderView();
+    const user = await renderView();
     await fillValidSurvey(user);
     await user.click(screen.getByRole("button", { name: /Publicar encuesta/ }));
     await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Publicar" }));
@@ -434,7 +447,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     vi.mocked(surveysService.createSurvey).mockRejectedValue(
       buildAxiosError(409, { detail: SURVEY_MESSAGES.duplicatedTitle, data: { field: "title" } }),
     );
-    const user = renderView();
+    const user = await renderView();
     await user.type(screen.getByLabelText("Título"), "Encuesta repetida");
 
     await user.click(screen.getByRole("button", { name: /Guardar borrador/ }));
@@ -445,7 +458,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
 
   it("muestra el detalle del servidor ante un error inesperado", async () => {
     vi.mocked(surveysService.createSurvey).mockRejectedValue(buildAxiosError(500, { detail: "Fallo interno" }));
-    const user = renderView();
+    const user = await renderView();
     await user.type(screen.getByLabelText("Título"), "Encuesta con error");
 
     await user.click(screen.getByRole("button", { name: /Guardar borrador/ }));
@@ -453,8 +466,33 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Fallo interno", { richColors: true }));
   });
 
+  it("TC-HU6-25: autoguarda el formulario y lo recupera al volver a montar la vista", async () => {
+    const user = await renderView();
+    await user.type(screen.getByLabelText("Título"), "Encuesta sin conexión");
+
+    await waitFor(() =>
+      expect(records.get(SURVEY_CREATE_DRAFT_STORAGE_KEY)).toMatchObject({ title: "Encuesta sin conexión" }),
+    );
+
+    cleanup();
+    await renderView();
+
+    expect(screen.getByLabelText("Título")).toHaveValue("Encuesta sin conexión");
+  });
+
+  it("TC-HU6-25: limpia el autoguardado al guardar el borrador en el servidor", async () => {
+    const user = await renderView();
+    await user.type(screen.getByLabelText("Título"), "Borrador persistido");
+    await waitFor(() => expect(records.has(SURVEY_CREATE_DRAFT_STORAGE_KEY)).toBe(true));
+
+    await user.click(screen.getByRole("button", { name: /Guardar borrador/ }));
+
+    await waitFor(() => expect(toast.success).toHaveBeenCalled());
+    await waitFor(() => expect(records.has(SURVEY_CREATE_DRAFT_STORAGE_KEY)).toBe(false));
+  });
+
   it("CA12: guarda un borrador solo con el título sin validar la publicación", async () => {
-    const user = renderView();
+    const user = await renderView();
     await user.type(screen.getByLabelText("Título"), "Borrador inicial");
 
     await user.click(screen.getByRole("button", { name: /Guardar borrador/ }));
@@ -467,7 +505,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA12: la vista previa muestra la encuesta como la verá el titulado sin enviar nada", async () => {
-    const user = renderView();
+    const user = await renderView();
     await user.type(screen.getByLabelText("Título"), "Encuesta de prueba");
     await user.type(screen.getByLabelText("Enunciado de la pregunta 1"), "¿Trabajas?");
     await user.type(screen.getByLabelText("Texto de la opción 1"), "Sí");
@@ -483,7 +521,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA13: cancela sin cambios y vuelve al listado directamente", async () => {
-    const user = renderView();
+    const user = await renderView();
 
     await user.click(screen.getByRole("button", { name: /Cancelar/ }));
 
@@ -491,7 +529,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA13: con cambios pide confirmación y permite seguir editando o descartar", async () => {
-    const user = renderView();
+    const user = await renderView();
     await user.type(screen.getByLabelText("Título"), "Cambios sin guardar");
 
     await user.click(screen.getByRole("button", { name: /Cancelar/ }));
@@ -512,7 +550,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
   });
 
   it("CA13: con cambios bloquea la recarga y los enlaces internos", async () => {
-    const user = renderView();
+    const user = await renderView();
     await user.type(screen.getByLabelText("Título"), "Cambios");
 
     const unload = new Event("beforeunload", { cancelable: true });
@@ -533,7 +571,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
 
   it("muestra un aviso si no se pudieron cargar las carreras", async () => {
     vi.mocked(surveysService.listCareers).mockRejectedValue(new Error("down"));
-    renderView();
+    await renderView();
 
     expect(await screen.findByText(SURVEY_MESSAGES.careersLoadError)).toBeInTheDocument();
   });

@@ -18,8 +18,7 @@ describe("Oferta real HU7", () => {
     const confirm = vi.spyOn(mentorParticipationService, "confirm").mockReturnValue(new Promise<void>((done) => { resolve = done; }));
     const onConfirmed = vi.fn();
     renderWithQuery(<SlotOfferParticipation request={future} onConfirmed={onConfirmed} />);
-    fireEvent.click(screen.getByRole("button", { name: "Ver oferta" }));
-    expect(screen.getByRole("dialog")).toHaveTextContent("BOT (UTC-4)");
+    expect(screen.getByRole("dialog", { name: "¡Tienes un cupo disponible!" })).toHaveTextContent("BOT (UTC-4)");
     const button = screen.getByRole("button", { name: "Confirmar participación" });
     fireEvent.click(button);
     fireEvent.click(button);
@@ -35,7 +34,6 @@ describe("Oferta real HU7", () => {
     vi.setSystemTime(new Date("2026-10-27T11:59:50Z"));
     const confirm = vi.spyOn(mentorParticipationService, "confirm");
     renderWithQuery(<SlotOfferParticipation request={request} onConfirmed={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: "Ver oferta" }));
     expect(screen.getByRole("timer", { name: "Tiempo restante para confirmar" })).toHaveTextContent("0h 0m 10s");
     fireEvent.click(screen.getByRole("button", { name: "Volver" }));
     await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
@@ -51,7 +49,6 @@ describe("Oferta real HU7", () => {
     const future = { ...request, offer: { ...request.offer, expiresAt: new Date(Date.now() + 3600000).toISOString() } };
     vi.spyOn(mentorParticipationService, "confirm").mockRejectedValue(new Error("Network"));
     renderWithQuery(<SlotOfferParticipation request={future} onConfirmed={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: "Ver oferta" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirmar participación" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Comprueba tu conexión");
     expect(screen.getByRole("button", { name: "Confirmar participación" })).toBeEnabled();
