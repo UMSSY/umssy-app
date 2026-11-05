@@ -1,3 +1,4 @@
+
 import { Injectable } from '@nestjs/common';
 import { USER_SKILL_SOURCES } from '../../skills/constants/user-skill.constants.js';
 import { NLP_PROCESSING_STATUSES } from '../constants/nlp-processing.constants.js';
@@ -21,7 +22,10 @@ export class ProfileSkillsRadarMapper {
     rows: readonly ProfileSkillRow[],
   ): ProfileSkillsRadarResponse {
     const status = this.toStatus(state?.status);
-    const isCurrent = status === NLP_PROCESSING_STATUSES.ready && state?.processedRevision === state?.inputRevision;
+    const isCurrent =
+      status === NLP_PROCESSING_STATUSES.ready &&
+      state?.processedRevision === state?.inputRevision;
+
     const skills = rows
       .flatMap((row) => this.toItem(row, isCurrent))
       .sort((first, second) => first.name.localeCompare(second.name, 'es'));
@@ -42,28 +46,39 @@ export class ProfileSkillsRadarMapper {
   ): ProfileSkillsAnalysisResponse {
     return {
       ...snapshot,
-      analysis: { discarded: outcome.discarded, rejectedSources: outcome.rejectedSources },
+      analysis: {
+        discarded: outcome.discarded,
+        rejectedSources: outcome.rejectedSources,
+      },
     };
   }
 
-  private toItem(row: ProfileSkillRow, isCurrent: boolean): ProfileSkillRadarItemResponse[] {
+  private toItem(
+    row: ProfileSkillRow,
+    isCurrent: boolean,
+  ): ProfileSkillRadarItemResponse[] {
     const isNlp = row.source === USER_SKILL_SOURCES.nlp;
     const nameCheck = validateSkillName(row.skill.name);
-    if ((isNlp && !isCurrent) || !nameCheck.isValid) return [];
+
+    if (!nameCheck.isValid) return [];
 
     return [{
       id: row.skillId,
       text: nameCheck.name,
       name: nameCheck.name,
-      source: isNlp ? USER_SKILL_SOURCES.nlp : USER_SKILL_SOURCES.manual,
+      source: isNlp
+        ? USER_SKILL_SOURCES.nlp
+        : USER_SKILL_SOURCES.manual,
       areaId: row.skill.areaId,
       verificationStatus: row.verificationStatus,
       isHighRelevance: isCurrent && row.isHighRelevance,
-      evidenceRefs: isCurrent ? parseEvidenceRefs(row.evidenceRefs) : [],
+      evidenceRefs: parseEvidenceRefs(row.evidenceRefs),
     }];
   }
 
   private toStatus(value: string | undefined): NlpProcessingStatus {
-    return value && STATUSES.has(value) ? (value as NlpProcessingStatus) : NLP_PROCESSING_STATUSES.pending;
+    return value && STATUSES.has(value)
+      ? (value as NlpProcessingStatus)
+      : NLP_PROCESSING_STATUSES.pending;
   }
 }
