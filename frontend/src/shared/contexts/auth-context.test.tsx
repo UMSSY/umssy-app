@@ -13,9 +13,10 @@ afterEach(() => {
 });
 
 function SessionConsumer() {
-  const { roles, refreshRoles } = useAuth();
+  const { currentUserId, roles, refreshRoles } = useAuth();
   return (
     <>
+      <p data-testid="user-id">{currentUserId}</p>
       <p data-testid="roles">{roles.join(",")}</p>
       <TestButton onClick={() => void refreshRoles()}>Actualizar roles</TestButton>
     </>
@@ -32,6 +33,7 @@ describe("AuthProvider", () => {
     saveAccessToken(`h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
     const getSession = vi.spyOn(authService, "getSession").mockResolvedValue({ id: "u1", email: "user@test.com", roles: ["titulado", "mentor"] });
     renderSession();
+    await waitFor(() => expect(screen.getByTestId("user-id")).toHaveTextContent("u1"));
     await waitFor(() => expect(screen.getByTestId("roles")).toHaveTextContent("titulado,mentor"));
 
     getSession.mockResolvedValue({ id: "u1", email: "user@test.com", roles: ["titulado"] });
@@ -39,6 +41,7 @@ describe("AuthProvider", () => {
     await waitFor(() => expect(screen.getByTestId("roles").textContent).toBe("titulado"));
 
     act(() => { clearAccessToken(); });
+    expect(screen.getByTestId("user-id").textContent).toBe("");
     expect(screen.getByTestId("roles").textContent).toBe("");
   });
 
