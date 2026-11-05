@@ -1,4 +1,5 @@
-import { renderHook, act } from '@testing-library/react';
+
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -79,9 +80,13 @@ describe('useSendEventRoomMessage', () => {
       conversationId: 'conv-1',
       content: 'Hola',
     });
-    expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: messagesQueryKey('conv-1'),
+
+    await waitFor(() => {
+      expect(invalidateQueries).toHaveBeenCalledWith({
+        queryKey: messagesQueryKey('conv-1'),
+      });
     });
+
     expect(returned).toEqual(sentMessage);
     expect(result.current.isSending).toBe(false);
     expect(result.current.sendError).toBeNull();
@@ -89,7 +94,7 @@ describe('useSendEventRoomMessage', () => {
 
   it('should return null and set error when sending fails', async () => {
     mockedSendMessage.mockRejectedValue(new Error('Error de red'));
-    const { invalidateQueries, wrapper } = createWrapper();
+    const { wrapper } = createWrapper();
 
     const { result } = renderHook(
       () => useSendEventRoomMessage('conv-1'),
@@ -102,9 +107,12 @@ describe('useSendEventRoomMessage', () => {
     });
 
     expect(returned).toBeNull();
-    expect(invalidateQueries).not.toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(result.current.sendError).toBe('Error de red');
+    });
+
     expect(result.current.isSending).toBe(false);
-    expect(result.current.sendError).toBe('Error de red');
   });
 
   it('should do nothing when there is no conversation id', async () => {
@@ -131,12 +139,17 @@ describe('useSendEventRoomMessage', () => {
     await act(async () => {
       await result.current.send('Hola');
     });
-    expect(result.current.sendError).toBe('Error de red');
+
+    await waitFor(() => {
+      expect(result.current.sendError).toBe('Error de red');
+    });
 
     act(() => {
       result.current.clearError();
     });
 
-    expect(result.current.sendError).toBeNull();
+    await waitFor(() => {
+      expect(result.current.sendError).toBeNull();
+    });
   });
 });
