@@ -35,7 +35,6 @@ import {
   getCurrentSessionUserId,
   blockUser,
   unblockUser,
-  sendMessage,
 } from '../services/chat-api';
 import { getChatSocket } from '../services/chat-socket';
 import { useChatConnection } from '../hooks/use-chat-connection';
@@ -270,7 +269,7 @@ export function ChatWorkspace({
       setContactSelectionError(
         error instanceof Error
           ? error.message
-          : "No se pudo iniciar la conversación.",
+          : "No se pudo iniciar la conversaci├│n.",
       );
     } finally {
       startingConversationRef.current = false;
@@ -297,13 +296,13 @@ export function ChatWorkspace({
       setSelectedContactForRequest(null);
 
       setRequestSuccess(
-        `Solicitud de conexión enviada a ${contact.fullName}.`,
+        `Solicitud de conexi├│n enviada a ${contact.fullName}.`,
       );
     } catch (error) {
       setRequestError(
         error instanceof Error
           ? error.message
-          : "No se pudo enviar la solicitud de conexión.",
+          : "No se pudo enviar la solicitud de conexi├│n.",
       );
     }
   };
@@ -343,14 +342,14 @@ export function ChatWorkspace({
 
       setRequestSuccess(
         action === "accept"
-          ? "Solicitud de conexión aceptada correctamente."
-          : "Solicitud de conexión rechazada correctamente.",
+          ? "Solicitud de conexi├│n aceptada correctamente."
+          : "Solicitud de conexi├│n rechazada correctamente.",
       );
     } catch (error) {
       setResponseError(
         error instanceof Error
           ? error.message
-          : "No se pudo responder a la solicitud de conexión.",
+          : "No se pudo responder a la solicitud de conexi├│n.",
       );
     }
   };
@@ -361,14 +360,14 @@ export function ChatWorkspace({
   ): Promise<void> => {
     if (!selectedId || selectedRequestId || isSending || connectionStatus !== "connected") {
       throw new Error(
-        "No hay una conversación seleccionada o ya se está enviando un mensaje."
+        "No hay una conversaci├│n seleccionada o ya se est├í enviando un mensaje."
       );
     }
 
     const trimmedContent = content.trim();
 
     if (!trimmedContent && !file) {
-      throw new Error('El mensaje no puede estar vacío.');
+      throw new Error('El mensaje no puede estar vac├¡o.');
     }
 
     setIsSending(true);
@@ -383,82 +382,47 @@ export function ChatWorkspace({
           currentUserId,
         );
       } else {
-        let sentContent = trimmedContent;
-        let sentSenderId = currentUserId;
-
         const socket = getChatSocket();
-        if (socket.connected) {
-          let socketTimedOut = false;
-          try {
-            const response = await new Promise<SocketSendResponse>(
-              (resolve, reject) => {
-                const timeoutId = setTimeout(() => {
-                  socketTimedOut = true;
-                  reject(new Error('SOCKET_TIMEOUT'));
-                }, 4000);
 
-                socket.emit(
-                  'message:send',
-                  {
-                    conversationId: selectedId,
-                    content: trimmedContent,
-                  },
-                  (result: SocketSendResponse) => {
-                    clearTimeout(timeoutId);
-                    const acknowledgement = result?.data ?? result;
-                    if (acknowledgement?.ok && acknowledgement.message) {
-                      resolve(acknowledgement);
-                    } else {
-                      reject(
-                        new Error(
-                          acknowledgement?.error || 'No se pudo enviar el mensaje.',
-                        ),
-                      );
-                    }
-                  },
-                );
-              },
-            );
+        if (!socket.connected) {
+          throw new Error("No est├ís conectado al servidor de chat. Revisa tu conexi├│n a internet.");
+        }
 
-            sentContent = response.message?.content || trimmedContent;
-            sentSenderId = response.message?.senderId || currentUserId;
-          } catch (error) {
-            if (socketTimedOut) {
-              const httpResponse = await sendMessage({
+        const response = await new Promise<SocketSendResponse>(
+          (resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+              reject(new Error('El servidor tard├│ demasiado en responder. Intenta de nuevo.'));
+            }, 10000);
+
+            socket.emit(
+              'message:send',
+              {
                 conversationId: selectedId,
                 content: trimmedContent,
-              });
-              if (httpResponse?.data) {
-                sentContent = httpResponse.data.content || trimmedContent;
-                sentSenderId = httpResponse.data.senderId || currentUserId;
-              }
-            } else {
-              throw error;
-            }
-          }
-        } else {
-          const httpResponse = await sendMessage({
-            conversationId: selectedId,
-            content: trimmedContent,
-          });
-          if (httpResponse?.data) {
-            sentContent = httpResponse.data.content || trimmedContent;
-            sentSenderId = httpResponse.data.senderId || currentUserId;
-          }
-        }
+              },
+              (result: SocketSendResponse) => {
+                clearTimeout(timeoutId);
+                const acknowledgement = result?.data ?? result;
+                if (acknowledgement?.ok && acknowledgement.message) {
+                  resolve(acknowledgement);
+                } else {
+                  reject(new Error(acknowledgement?.error || 'No se pudo enviar el mensaje.'));
+                }
+              },
+            );
+          },
+        );
 
         updateConversationLastMessage(
           selectedId,
-          sentContent,
-          sentSenderId,
+          response.message?.content || trimmedContent,
+          response.message?.senderId || currentUserId,
         );
       }
 
+      await queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
       refreshMessages(selectedId);
 
-      await queryClient.invalidateQueries({
-        queryKey: ['chat', 'conversations'],
-      });
     } finally {
       setIsSending(false);
     }
@@ -594,10 +558,10 @@ export function ChatWorkspace({
           <EmptyChatState
             description={
               isStartingConversation
-                ? "Comprobando conexión e iniciando conversación..."
-                : "Selecciona una conversación existente en el panel izquierdo o inicia una nueva para comenzar a comunicarte."
+                ? "Comprobando conexi├│n e iniciando conversaci├│n..."
+                : "Selecciona una conversaci├│n existente en el panel izquierdo o inicia una nueva para comenzar a comunicarte."
             }
-            actionLabel="Iniciar una nueva conversación"
+            actionLabel="Iniciar una nueva conversaci├│n"
             onAction={handleStartNewChat}
           />
         )}
