@@ -1,6 +1,11 @@
 import type { Prisma } from '../../../prisma/client.js';
 import type { FixtureContext } from '../../../common/database/fixture-context.js';
 
+const WORKSHOP_CAPACITY_SCENARIOS = {
+  full: { key: 'record-01700', capacity: 13 },
+  oneSpotLeft: { key: 'record-00376', capacity: 14 },
+} as const;
+
 export async function seedEventsFixtures(
   tx: Prisma.TransactionClient,
   context: FixtureContext,
@@ -248,7 +253,7 @@ export async function seedEventsFixtures(
       endTime: new Date('1970-01-01T12:00:00Z'),
       modalityId: context.getReference('event_modalities', 'Virtual'),
       location: 'https://events.example.invalid/seed/11',
-      capacity: 73,
+      capacity: WORKSHOP_CAPACITY_SCENARIOS.full.capacity,
       originId: context.getReference('event_origins', 'Institucional'),
       statusId: context.getReference('event_statuses', 'Publicado'),
       supportThreshold: 0,
@@ -363,7 +368,7 @@ export async function seedEventsFixtures(
       endTime: new Date('1970-01-01T12:00:00Z'),
       modalityId: context.getReference('event_modalities', 'Presencial'),
       location: 'Aula ficticia 16, campus de demostración',
-      capacity: 88,
+      capacity: WORKSHOP_CAPACITY_SCENARIOS.oneSpotLeft.capacity,
       originId: context.getReference('event_origins', 'Comunidad'),
       statusId: context.getReference('event_statuses', 'Publicado'),
       supportThreshold: 10,
@@ -468,5 +473,11 @@ export async function seedEventsFixtures(
     },
   ];
   await tx.event.createMany({ data, skipDuplicates: true });
+  for (const scenario of Object.values(WORKSHOP_CAPACITY_SCENARIOS)) {
+    await tx.event.updateMany({
+      where: { id: context.getId(scenario.key) },
+      data: { capacity: scenario.capacity },
+    });
+  }
   return data.length;
 }

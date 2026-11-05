@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Pencil } from "lucide-react";
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeading } from "@/shared/components/layout";
 

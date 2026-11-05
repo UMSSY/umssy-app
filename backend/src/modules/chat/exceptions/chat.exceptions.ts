@@ -42,3 +42,13 @@ export class InvalidMessageContentException extends DomainException {
     super(message, HttpStatus.BAD_REQUEST, 'INVALID_MESSAGE_CONTENT');
   }
 }
+
+export class ChatRoleNotAllowedException extends DomainException {
+  constructor() {
+    super(
+      'El chat privado solo está permitido entre estudiantes y titulados.',
+      HttpStatus.FORBIDDEN,
+      'CHAT_ROLE_NOT_ALLOWED',
+    );
+  }
+}
