@@ -1,9 +1,10 @@
+
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { EventRegistrationsService } from '../../event-registrations/services/event-registrations.service.js';
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
 import { EventRoomService } from '../services/event-room.service.js';
-
+import { ConversationMapper } from '../mappers/conversation.mapper.js'; 
 describe('EventRoomService', () => {
   let service: EventRoomService;
   let registrationsService: { getPassById: ReturnType<typeof vi.fn> };
@@ -20,9 +21,13 @@ describe('EventRoomService', () => {
       findById: vi.fn(),
       findParticipantsByConversationId: vi.fn(),
     };
+    
+    const conversationMapper = new ConversationMapper();
+
     service = new EventRoomService(
       registrationsService as unknown as EventRegistrationsService,
       conversationRepository as unknown as ConversationRepository,
+      conversationMapper,
     );
   });
 
@@ -64,6 +69,7 @@ describe('EventRoomService', () => {
         createdAt: '2026-11-01T10:00:00.000Z',
         participants: [{ id: 'user-1', fullName: 'Maria Fernandez' }],
       });
+      
       expect(registrationsService.getPassById).toHaveBeenCalledWith(
         'registration-1',
         'user-1',
