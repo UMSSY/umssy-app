@@ -15,7 +15,7 @@ import type { SaveAppointmentDocumentData } from '../types/save-appointment-docu
 
 const UNSAFE_HEADER_CHARACTERS = /[^\x20-\x7e]|["\\]/g;
 const COMBINING_MARKS = /[\u0300-\u036f]/g;
-const CONTROL_CHARACTERS = /\p{Cc}/gu;
+const INVISIBLE_CHARACTERS = /[\p{Cc}\p{Cf}]/gu;
 const RFC5987_RESERVED_CHARACTERS = /['()*]/g;
 
 @Injectable()
@@ -61,7 +61,7 @@ export class AppointmentDocumentMapper {
 
   private toStoredFileName(originalName: string): string {
     const name = decodeUploadFileName(originalName)
-      .replace(CONTROL_CHARACTERS, '')
+      .replace(INVISIBLE_CHARACTERS, '')
       .trim();
 
     return Array.from(name || APPOINTMENT_DOCUMENT_DEFAULT_FILE_NAME)

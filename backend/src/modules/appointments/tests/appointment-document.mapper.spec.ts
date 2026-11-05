@@ -58,6 +58,12 @@ describe('AppointmentDocumentMapper', () => {
     );
   });
 
+  it('removes invisible format characters that disguise the extension', () => {
+    expect(
+      mapper.toSaveData(validated('factura\u202Efdp.png\u200B')).fileName,
+    ).toBe('facturafdp.png');
+  });
+
   it('falls back to a default name when nothing remains', () => {
     expect(mapper.toSaveData(validated(' \n ')).fileName).toBe('documento');
   });
