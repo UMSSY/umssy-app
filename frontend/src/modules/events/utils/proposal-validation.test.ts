@@ -80,7 +80,7 @@ describe('Basic proposal text validation', () => {
   });
 });
 
-it('accepts an image at the 2 MiB upload limit', () => {
+it('accepts an image at the 5 MiB upload limit', () => {
   expect(validateProposalCover(new File([new Uint8Array(5 * 1024 * 1024)], 'cover.png', { type: 'image/png' }))).toBeNull();
 });
 

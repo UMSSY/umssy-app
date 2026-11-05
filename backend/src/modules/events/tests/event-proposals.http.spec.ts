@@ -91,7 +91,7 @@ describe('proposal errors through the shared HTTP filter', () => {
   });
 });
 
-it('rejects a cover over 2 MiB before persistence', async () => {
+it('rejects a cover over 5 MiB before persistence', async () => {
   await submit(VALID, KEY, Buffer.alloc(5 * 1024 * 1024 + 1)).expect(413);
   expect(prisma.tx.event.create).not.toHaveBeenCalled();
 });
