@@ -12,6 +12,20 @@ export const APPOINTMENT_MESSAGES = {
   forbiddenAccess: 'El usuario no tiene acceso a las citas solicitadas',
 } as const;
 
+export const APPOINTMENT_DOCUMENT_RESPONSE_SCHEMA = {
+  type: 'object' as const,
+  required: ['fileName', 'mimeType', 'sizeBytes', 'uploadedAt'],
+  properties: {
+    fileName: { type: 'string' as const, example: 'Tesis_capitulo_2.pdf' },
+    mimeType: {
+      type: 'string' as const,
+      enum: ['application/pdf', 'image/png', 'image/jpeg'],
+    },
+    sizeBytes: { type: 'integer' as const, example: 2516582 },
+    uploadedAt: { type: 'string' as const, format: 'date-time' },
+  },
+};
+
 export const APPOINTMENT_RESPONSE_SCHEMA = {
   type: 'object' as const,
   required: [
@@ -56,16 +70,7 @@ export const APPOINTMENT_RESPONSE_SCHEMA = {
       maxLength: APPOINTMENT_MESSAGE_MAX_LENGTH,
     },
     requestedAt: { type: 'string' as const, format: 'date-time' },
-    document: {
-      type: 'object' as const,
-      nullable: true,
-      required: ['fileName', 'sizeBytes', 'mimeType'],
-      properties: {
-        fileName: { type: 'string' as const, example: 'cv.pdf' },
-        sizeBytes: { type: 'integer' as const, example: 245760 },
-        mimeType: { type: 'string' as const, example: 'application/pdf' },
-      },
-    },
+    document: { ...APPOINTMENT_DOCUMENT_RESPONSE_SCHEMA, nullable: true },
   },
 };
 
@@ -108,20 +113,6 @@ export const FIND_COUNTERPART_PHOTO_DOCS = {
   responseDescription: 'Foto de perfil de la contraparte',
   notFoundDescription: 'La cita no existe o la contraparte no tiene foto',
 } as const;
-
-export const APPOINTMENT_DOCUMENT_RESPONSE_SCHEMA = {
-  type: 'object' as const,
-  required: ['fileName', 'mimeType', 'sizeBytes', 'uploadedAt'],
-  properties: {
-    fileName: { type: 'string' as const, example: 'Tesis_capitulo_2.pdf' },
-    mimeType: {
-      type: 'string' as const,
-      enum: ['application/pdf', 'image/png', 'image/jpeg'],
-    },
-    sizeBytes: { type: 'integer' as const, example: 2516582 },
-    uploadedAt: { type: 'string' as const, format: 'date-time' },
-  },
-};
 
 export const UPLOAD_APPOINTMENT_DOCUMENT_DOCS = {
   summary: 'Adjunta un documento a una cita confirmada',
