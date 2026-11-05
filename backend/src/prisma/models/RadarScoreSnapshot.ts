@@ -44,6 +44,7 @@ export type RadarScoreSnapshotMinAggregateOutputType = {
   fingerprint: string | null
   averageScore: runtime.Decimal | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type RadarScoreSnapshotMaxAggregateOutputType = {
@@ -54,6 +55,7 @@ export type RadarScoreSnapshotMaxAggregateOutputType = {
   fingerprint: string | null
   averageScore: runtime.Decimal | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type RadarScoreSnapshotCountAggregateOutputType = {
@@ -66,6 +68,7 @@ export type RadarScoreSnapshotCountAggregateOutputType = {
   evidence: number
   averageScore: number
   createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -88,6 +91,7 @@ export type RadarScoreSnapshotMinAggregateInputType = {
   fingerprint?: true
   averageScore?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type RadarScoreSnapshotMaxAggregateInputType = {
@@ -98,6 +102,7 @@ export type RadarScoreSnapshotMaxAggregateInputType = {
   fingerprint?: true
   averageScore?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type RadarScoreSnapshotCountAggregateInputType = {
@@ -110,6 +115,7 @@ export type RadarScoreSnapshotCountAggregateInputType = {
   evidence?: true
   averageScore?: true
   createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -209,6 +215,7 @@ export type RadarScoreSnapshotGroupByOutputType = {
   evidence: runtime.JsonValue
   averageScore: runtime.Decimal
   createdAt: Date
+  updatedAt: Date
   _count: RadarScoreSnapshotCountAggregateOutputType | null
   _avg: RadarScoreSnapshotAvgAggregateOutputType | null
   _sum: RadarScoreSnapshotSumAggregateOutputType | null
@@ -244,6 +251,7 @@ export type RadarScoreSnapshotWhereInput = {
   evidence?: Prisma.JsonFilter<"RadarScoreSnapshot">
   averageScore?: Prisma.DecimalFilter<"RadarScoreSnapshot"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"RadarScoreSnapshot"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"RadarScoreSnapshot"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -257,6 +265,7 @@ export type RadarScoreSnapshotOrderByWithRelationInput = {
   evidence?: Prisma.SortOrder
   averageScore?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -274,6 +283,7 @@ export type RadarScoreSnapshotWhereUniqueInput = Prisma.AtLeast<{
   evidence?: Prisma.JsonFilter<"RadarScoreSnapshot">
   averageScore?: Prisma.DecimalFilter<"RadarScoreSnapshot"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"RadarScoreSnapshot"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"RadarScoreSnapshot"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "userId_version">
 
@@ -287,6 +297,7 @@ export type RadarScoreSnapshotOrderByWithAggregationInput = {
   evidence?: Prisma.SortOrder
   averageScore?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.RadarScoreSnapshotCountOrderByAggregateInput
   _avg?: Prisma.RadarScoreSnapshotAvgOrderByAggregateInput
   _max?: Prisma.RadarScoreSnapshotMaxOrderByAggregateInput
@@ -307,6 +318,7 @@ export type RadarScoreSnapshotScalarWhereWithAggregatesInput = {
   evidence?: Prisma.JsonWithAggregatesFilter<"RadarScoreSnapshot">
   averageScore?: Prisma.DecimalWithAggregatesFilter<"RadarScoreSnapshot"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"RadarScoreSnapshot"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"RadarScoreSnapshot"> | Date | string
 }
 
 export type RadarScoreSnapshotCreateInput = {
@@ -318,6 +330,7 @@ export type RadarScoreSnapshotCreateInput = {
   evidence: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
+  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutRadarSnapshotsInput
 }
 
@@ -331,6 +344,7 @@ export type RadarScoreSnapshotUncheckedCreateInput = {
   evidence: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarScoreSnapshotUpdateInput = {
@@ -342,6 +356,7 @@ export type RadarScoreSnapshotUpdateInput = {
   evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutRadarSnapshotsNestedInput
 }
 
@@ -355,6 +370,7 @@ export type RadarScoreSnapshotUncheckedUpdateInput = {
   evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarScoreSnapshotCreateManyInput = {
@@ -367,6 +383,7 @@ export type RadarScoreSnapshotCreateManyInput = {
   evidence: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarScoreSnapshotUpdateManyMutationInput = {
@@ -378,6 +395,7 @@ export type RadarScoreSnapshotUpdateManyMutationInput = {
   evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarScoreSnapshotUncheckedUpdateManyInput = {
@@ -390,6 +408,7 @@ export type RadarScoreSnapshotUncheckedUpdateManyInput = {
   evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarScoreSnapshotListRelationFilter = {
@@ -417,6 +436,7 @@ export type RadarScoreSnapshotCountOrderByAggregateInput = {
   evidence?: Prisma.SortOrder
   averageScore?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type RadarScoreSnapshotAvgOrderByAggregateInput = {
@@ -432,6 +452,7 @@ export type RadarScoreSnapshotMaxOrderByAggregateInput = {
   fingerprint?: Prisma.SortOrder
   averageScore?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type RadarScoreSnapshotMinOrderByAggregateInput = {
@@ -442,6 +463,7 @@ export type RadarScoreSnapshotMinOrderByAggregateInput = {
   fingerprint?: Prisma.SortOrder
   averageScore?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type RadarScoreSnapshotSumOrderByAggregateInput = {
@@ -508,6 +530,7 @@ export type RadarScoreSnapshotCreateWithoutUserInput = {
   evidence: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarScoreSnapshotUncheckedCreateWithoutUserInput = {
@@ -519,6 +542,7 @@ export type RadarScoreSnapshotUncheckedCreateWithoutUserInput = {
   evidence: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarScoreSnapshotCreateOrConnectWithoutUserInput = {
@@ -560,6 +584,7 @@ export type RadarScoreSnapshotScalarWhereInput = {
   evidence?: Prisma.JsonFilter<"RadarScoreSnapshot">
   averageScore?: Prisma.DecimalFilter<"RadarScoreSnapshot"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"RadarScoreSnapshot"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"RadarScoreSnapshot"> | Date | string
 }
 
 export type RadarScoreSnapshotCreateManyUserInput = {
@@ -571,6 +596,7 @@ export type RadarScoreSnapshotCreateManyUserInput = {
   evidence: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarScoreSnapshotUpdateWithoutUserInput = {
@@ -582,6 +608,7 @@ export type RadarScoreSnapshotUpdateWithoutUserInput = {
   evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarScoreSnapshotUncheckedUpdateWithoutUserInput = {
@@ -593,6 +620,7 @@ export type RadarScoreSnapshotUncheckedUpdateWithoutUserInput = {
   evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarScoreSnapshotUncheckedUpdateManyWithoutUserInput = {
@@ -604,6 +632,7 @@ export type RadarScoreSnapshotUncheckedUpdateManyWithoutUserInput = {
   evidence?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   averageScore?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -618,6 +647,7 @@ export type RadarScoreSnapshotSelect<ExtArgs extends runtime.Types.Extensions.In
   evidence?: boolean
   averageScore?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarScoreSnapshot"]>
 
@@ -631,6 +661,7 @@ export type RadarScoreSnapshotSelectCreateManyAndReturn<ExtArgs extends runtime.
   evidence?: boolean
   averageScore?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarScoreSnapshot"]>
 
@@ -644,6 +675,7 @@ export type RadarScoreSnapshotSelectUpdateManyAndReturn<ExtArgs extends runtime.
   evidence?: boolean
   averageScore?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarScoreSnapshot"]>
 
@@ -657,9 +689,10 @@ export type RadarScoreSnapshotSelectScalar = {
   evidence?: boolean
   averageScore?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type RadarScoreSnapshotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "version" | "rubricVersion" | "fingerprint" | "scores" | "evidence" | "averageScore" | "createdAt", ExtArgs["result"]["radarScoreSnapshot"]>
+export type RadarScoreSnapshotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "version" | "rubricVersion" | "fingerprint" | "scores" | "evidence" | "averageScore" | "createdAt" | "updatedAt", ExtArgs["result"]["radarScoreSnapshot"]>
 export type RadarScoreSnapshotInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -685,6 +718,7 @@ export type $RadarScoreSnapshotPayload<ExtArgs extends runtime.Types.Extensions.
     evidence: runtime.JsonValue
     averageScore: runtime.Decimal
     createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["radarScoreSnapshot"]>
   composites: {}
 }
@@ -1118,6 +1152,7 @@ export interface RadarScoreSnapshotFieldRefs {
   readonly evidence: Prisma.FieldRef<"RadarScoreSnapshot", 'Json'>
   readonly averageScore: Prisma.FieldRef<"RadarScoreSnapshot", 'Decimal'>
   readonly createdAt: Prisma.FieldRef<"RadarScoreSnapshot", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"RadarScoreSnapshot", 'DateTime'>
 }
     
 

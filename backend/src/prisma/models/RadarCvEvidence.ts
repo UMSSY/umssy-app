@@ -29,13 +29,13 @@ export type RadarCvEvidenceMinAggregateOutputType = {
   cvId: string | null
   userId: string | null
   extractedText: string | null
-  extractionStatus: string | null
-  reviewStatus: string | null
   submittedAt: Date | null
   decidedAt: Date | null
   reviewerId: string | null
   extractionStatusId: string | null
   reviewStatusId: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type RadarCvEvidenceMaxAggregateOutputType = {
@@ -43,13 +43,13 @@ export type RadarCvEvidenceMaxAggregateOutputType = {
   cvId: string | null
   userId: string | null
   extractedText: string | null
-  extractionStatus: string | null
-  reviewStatus: string | null
   submittedAt: Date | null
   decidedAt: Date | null
   reviewerId: string | null
   extractionStatusId: string | null
   reviewStatusId: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type RadarCvEvidenceCountAggregateOutputType = {
@@ -57,13 +57,13 @@ export type RadarCvEvidenceCountAggregateOutputType = {
   cvId: number
   userId: number
   extractedText: number
-  extractionStatus: number
-  reviewStatus: number
   submittedAt: number
   decidedAt: number
   reviewerId: number
   extractionStatusId: number
   reviewStatusId: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -73,13 +73,13 @@ export type RadarCvEvidenceMinAggregateInputType = {
   cvId?: true
   userId?: true
   extractedText?: true
-  extractionStatus?: true
-  reviewStatus?: true
   submittedAt?: true
   decidedAt?: true
   reviewerId?: true
   extractionStatusId?: true
   reviewStatusId?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type RadarCvEvidenceMaxAggregateInputType = {
@@ -87,13 +87,13 @@ export type RadarCvEvidenceMaxAggregateInputType = {
   cvId?: true
   userId?: true
   extractedText?: true
-  extractionStatus?: true
-  reviewStatus?: true
   submittedAt?: true
   decidedAt?: true
   reviewerId?: true
   extractionStatusId?: true
   reviewStatusId?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type RadarCvEvidenceCountAggregateInputType = {
@@ -101,13 +101,13 @@ export type RadarCvEvidenceCountAggregateInputType = {
   cvId?: true
   userId?: true
   extractedText?: true
-  extractionStatus?: true
-  reviewStatus?: true
   submittedAt?: true
   decidedAt?: true
   reviewerId?: true
   extractionStatusId?: true
   reviewStatusId?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -188,13 +188,13 @@ export type RadarCvEvidenceGroupByOutputType = {
   cvId: string
   userId: string
   extractedText: string
-  extractionStatus: string
-  reviewStatus: string
   submittedAt: Date
   decidedAt: Date | null
   reviewerId: string | null
-  extractionStatusId: string | null
-  reviewStatusId: string | null
+  extractionStatusId: string
+  reviewStatusId: string
+  createdAt: Date
+  updatedAt: Date
   _count: RadarCvEvidenceCountAggregateOutputType | null
   _min: RadarCvEvidenceMinAggregateOutputType | null
   _max: RadarCvEvidenceMaxAggregateOutputType | null
@@ -223,18 +223,18 @@ export type RadarCvEvidenceWhereInput = {
   cvId?: Prisma.UuidFilter<"RadarCvEvidence"> | string
   userId?: Prisma.UuidFilter<"RadarCvEvidence"> | string
   extractedText?: Prisma.StringFilter<"RadarCvEvidence"> | string
-  extractionStatus?: Prisma.StringFilter<"RadarCvEvidence"> | string
-  reviewStatus?: Prisma.StringFilter<"RadarCvEvidence"> | string
   submittedAt?: Prisma.DateTimeFilter<"RadarCvEvidence"> | Date | string
   decidedAt?: Prisma.DateTimeNullableFilter<"RadarCvEvidence"> | Date | string | null
   reviewerId?: Prisma.UuidNullableFilter<"RadarCvEvidence"> | string | null
-  extractionStatusId?: Prisma.UuidNullableFilter<"RadarCvEvidence"> | string | null
-  reviewStatusId?: Prisma.UuidNullableFilter<"RadarCvEvidence"> | string | null
+  extractionStatusId?: Prisma.UuidFilter<"RadarCvEvidence"> | string
+  reviewStatusId?: Prisma.UuidFilter<"RadarCvEvidence"> | string
+  createdAt?: Prisma.DateTimeFilter<"RadarCvEvidence"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"RadarCvEvidence"> | Date | string
   cv?: Prisma.XOR<Prisma.UserCvFileScalarRelationFilter, Prisma.UserCvFileWhereInput>
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   reviewer?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  extractionState?: Prisma.XOR<Prisma.RadarCvExtractionStatusNullableScalarRelationFilter, Prisma.RadarCvExtractionStatusWhereInput> | null
-  reviewState?: Prisma.XOR<Prisma.RadarCvReviewStatusNullableScalarRelationFilter, Prisma.RadarCvReviewStatusWhereInput> | null
+  extractionState?: Prisma.XOR<Prisma.RadarCvExtractionStatusScalarRelationFilter, Prisma.RadarCvExtractionStatusWhereInput>
+  reviewState?: Prisma.XOR<Prisma.RadarCvReviewStatusScalarRelationFilter, Prisma.RadarCvReviewStatusWhereInput>
 }
 
 export type RadarCvEvidenceOrderByWithRelationInput = {
@@ -242,13 +242,13 @@ export type RadarCvEvidenceOrderByWithRelationInput = {
   cvId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   extractedText?: Prisma.SortOrder
-  extractionStatus?: Prisma.SortOrder
-  reviewStatus?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewerId?: Prisma.SortOrderInput | Prisma.SortOrder
-  extractionStatusId?: Prisma.SortOrderInput | Prisma.SortOrder
-  reviewStatusId?: Prisma.SortOrderInput | Prisma.SortOrder
+  extractionStatusId?: Prisma.SortOrder
+  reviewStatusId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   cv?: Prisma.UserCvFileOrderByWithRelationInput
   owner?: Prisma.UserOrderByWithRelationInput
   reviewer?: Prisma.UserOrderByWithRelationInput
@@ -264,18 +264,18 @@ export type RadarCvEvidenceWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.RadarCvEvidenceWhereInput | Prisma.RadarCvEvidenceWhereInput[]
   userId?: Prisma.UuidFilter<"RadarCvEvidence"> | string
   extractedText?: Prisma.StringFilter<"RadarCvEvidence"> | string
-  extractionStatus?: Prisma.StringFilter<"RadarCvEvidence"> | string
-  reviewStatus?: Prisma.StringFilter<"RadarCvEvidence"> | string
   submittedAt?: Prisma.DateTimeFilter<"RadarCvEvidence"> | Date | string
   decidedAt?: Prisma.DateTimeNullableFilter<"RadarCvEvidence"> | Date | string | null
   reviewerId?: Prisma.UuidNullableFilter<"RadarCvEvidence"> | string | null
-  extractionStatusId?: Prisma.UuidNullableFilter<"RadarCvEvidence"> | string | null
-  reviewStatusId?: Prisma.UuidNullableFilter<"RadarCvEvidence"> | string | null
+  extractionStatusId?: Prisma.UuidFilter<"RadarCvEvidence"> | string
+  reviewStatusId?: Prisma.UuidFilter<"RadarCvEvidence"> | string
+  createdAt?: Prisma.DateTimeFilter<"RadarCvEvidence"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"RadarCvEvidence"> | Date | string
   cv?: Prisma.XOR<Prisma.UserCvFileScalarRelationFilter, Prisma.UserCvFileWhereInput>
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   reviewer?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  extractionState?: Prisma.XOR<Prisma.RadarCvExtractionStatusNullableScalarRelationFilter, Prisma.RadarCvExtractionStatusWhereInput> | null
-  reviewState?: Prisma.XOR<Prisma.RadarCvReviewStatusNullableScalarRelationFilter, Prisma.RadarCvReviewStatusWhereInput> | null
+  extractionState?: Prisma.XOR<Prisma.RadarCvExtractionStatusScalarRelationFilter, Prisma.RadarCvExtractionStatusWhereInput>
+  reviewState?: Prisma.XOR<Prisma.RadarCvReviewStatusScalarRelationFilter, Prisma.RadarCvReviewStatusWhereInput>
 }, "id" | "cvId">
 
 export type RadarCvEvidenceOrderByWithAggregationInput = {
@@ -283,13 +283,13 @@ export type RadarCvEvidenceOrderByWithAggregationInput = {
   cvId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   extractedText?: Prisma.SortOrder
-  extractionStatus?: Prisma.SortOrder
-  reviewStatus?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewerId?: Prisma.SortOrderInput | Prisma.SortOrder
-  extractionStatusId?: Prisma.SortOrderInput | Prisma.SortOrder
-  reviewStatusId?: Prisma.SortOrderInput | Prisma.SortOrder
+  extractionStatusId?: Prisma.SortOrder
+  reviewStatusId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.RadarCvEvidenceCountOrderByAggregateInput
   _max?: Prisma.RadarCvEvidenceMaxOrderByAggregateInput
   _min?: Prisma.RadarCvEvidenceMinOrderByAggregateInput
@@ -303,27 +303,27 @@ export type RadarCvEvidenceScalarWhereWithAggregatesInput = {
   cvId?: Prisma.UuidWithAggregatesFilter<"RadarCvEvidence"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"RadarCvEvidence"> | string
   extractedText?: Prisma.StringWithAggregatesFilter<"RadarCvEvidence"> | string
-  extractionStatus?: Prisma.StringWithAggregatesFilter<"RadarCvEvidence"> | string
-  reviewStatus?: Prisma.StringWithAggregatesFilter<"RadarCvEvidence"> | string
   submittedAt?: Prisma.DateTimeWithAggregatesFilter<"RadarCvEvidence"> | Date | string
   decidedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"RadarCvEvidence"> | Date | string | null
   reviewerId?: Prisma.UuidNullableWithAggregatesFilter<"RadarCvEvidence"> | string | null
-  extractionStatusId?: Prisma.UuidNullableWithAggregatesFilter<"RadarCvEvidence"> | string | null
-  reviewStatusId?: Prisma.UuidNullableWithAggregatesFilter<"RadarCvEvidence"> | string | null
+  extractionStatusId?: Prisma.UuidWithAggregatesFilter<"RadarCvEvidence"> | string
+  reviewStatusId?: Prisma.UuidWithAggregatesFilter<"RadarCvEvidence"> | string
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"RadarCvEvidence"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"RadarCvEvidence"> | Date | string
 }
 
 export type RadarCvEvidenceCreateInput = {
   id?: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   cv: Prisma.UserCvFileCreateNestedOneWithoutRadarEvidenceInput
   owner: Prisma.UserCreateNestedOneWithoutRadarCvOwnedInput
   reviewer?: Prisma.UserCreateNestedOneWithoutRadarCvReviewedInput
-  extractionState?: Prisma.RadarCvExtractionStatusCreateNestedOneWithoutEvidencesInput
-  reviewState?: Prisma.RadarCvReviewStatusCreateNestedOneWithoutEvidencesInput
+  extractionState: Prisma.RadarCvExtractionStatusCreateNestedOneWithoutEvidencesInput
+  reviewState: Prisma.RadarCvReviewStatusCreateNestedOneWithoutEvidencesInput
 }
 
 export type RadarCvEvidenceUncheckedCreateInput = {
@@ -331,27 +331,27 @@ export type RadarCvEvidenceUncheckedCreateInput = {
   cvId: string
   userId: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
-  extractionStatusId?: string | null
-  reviewStatusId?: string | null
+  extractionStatusId: string
+  reviewStatusId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarCvEvidenceUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cv?: Prisma.UserCvFileUpdateOneRequiredWithoutRadarEvidenceNestedInput
   owner?: Prisma.UserUpdateOneRequiredWithoutRadarCvOwnedNestedInput
   reviewer?: Prisma.UserUpdateOneWithoutRadarCvReviewedNestedInput
-  extractionState?: Prisma.RadarCvExtractionStatusUpdateOneWithoutEvidencesNestedInput
-  reviewState?: Prisma.RadarCvReviewStatusUpdateOneWithoutEvidencesNestedInput
+  extractionState?: Prisma.RadarCvExtractionStatusUpdateOneRequiredWithoutEvidencesNestedInput
+  reviewState?: Prisma.RadarCvReviewStatusUpdateOneRequiredWithoutEvidencesNestedInput
 }
 
 export type RadarCvEvidenceUncheckedUpdateInput = {
@@ -359,13 +359,13 @@ export type RadarCvEvidenceUncheckedUpdateInput = {
   cvId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extractionStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reviewStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCvEvidenceCreateManyInput = {
@@ -373,22 +373,22 @@ export type RadarCvEvidenceCreateManyInput = {
   cvId: string
   userId: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
-  extractionStatusId?: string | null
-  reviewStatusId?: string | null
+  extractionStatusId: string
+  reviewStatusId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarCvEvidenceUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCvEvidenceUncheckedUpdateManyInput = {
@@ -396,13 +396,13 @@ export type RadarCvEvidenceUncheckedUpdateManyInput = {
   cvId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extractionStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reviewStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCvEvidenceListRelationFilter = {
@@ -425,13 +425,13 @@ export type RadarCvEvidenceCountOrderByAggregateInput = {
   cvId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   extractedText?: Prisma.SortOrder
-  extractionStatus?: Prisma.SortOrder
-  reviewStatus?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrder
   reviewerId?: Prisma.SortOrder
   extractionStatusId?: Prisma.SortOrder
   reviewStatusId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type RadarCvEvidenceMaxOrderByAggregateInput = {
@@ -439,13 +439,13 @@ export type RadarCvEvidenceMaxOrderByAggregateInput = {
   cvId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   extractedText?: Prisma.SortOrder
-  extractionStatus?: Prisma.SortOrder
-  reviewStatus?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrder
   reviewerId?: Prisma.SortOrder
   extractionStatusId?: Prisma.SortOrder
   reviewStatusId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type RadarCvEvidenceMinOrderByAggregateInput = {
@@ -453,13 +453,13 @@ export type RadarCvEvidenceMinOrderByAggregateInput = {
   cvId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   extractedText?: Prisma.SortOrder
-  extractionStatus?: Prisma.SortOrder
-  reviewStatus?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrder
   reviewerId?: Prisma.SortOrder
   extractionStatusId?: Prisma.SortOrder
   reviewStatusId?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type RadarCvEvidenceCreateNestedManyWithoutOwnerInput = {
@@ -665,27 +665,27 @@ export type RadarCvEvidenceUncheckedUpdateManyWithoutReviewStateNestedInput = {
 export type RadarCvEvidenceCreateWithoutOwnerInput = {
   id?: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   cv: Prisma.UserCvFileCreateNestedOneWithoutRadarEvidenceInput
   reviewer?: Prisma.UserCreateNestedOneWithoutRadarCvReviewedInput
-  extractionState?: Prisma.RadarCvExtractionStatusCreateNestedOneWithoutEvidencesInput
-  reviewState?: Prisma.RadarCvReviewStatusCreateNestedOneWithoutEvidencesInput
+  extractionState: Prisma.RadarCvExtractionStatusCreateNestedOneWithoutEvidencesInput
+  reviewState: Prisma.RadarCvReviewStatusCreateNestedOneWithoutEvidencesInput
 }
 
 export type RadarCvEvidenceUncheckedCreateWithoutOwnerInput = {
   id?: string
   cvId: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
-  extractionStatusId?: string | null
-  reviewStatusId?: string | null
+  extractionStatusId: string
+  reviewStatusId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarCvEvidenceCreateOrConnectWithoutOwnerInput = {
@@ -701,14 +701,14 @@ export type RadarCvEvidenceCreateManyOwnerInputEnvelope = {
 export type RadarCvEvidenceCreateWithoutReviewerInput = {
   id?: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   cv: Prisma.UserCvFileCreateNestedOneWithoutRadarEvidenceInput
   owner: Prisma.UserCreateNestedOneWithoutRadarCvOwnedInput
-  extractionState?: Prisma.RadarCvExtractionStatusCreateNestedOneWithoutEvidencesInput
-  reviewState?: Prisma.RadarCvReviewStatusCreateNestedOneWithoutEvidencesInput
+  extractionState: Prisma.RadarCvExtractionStatusCreateNestedOneWithoutEvidencesInput
+  reviewState: Prisma.RadarCvReviewStatusCreateNestedOneWithoutEvidencesInput
 }
 
 export type RadarCvEvidenceUncheckedCreateWithoutReviewerInput = {
@@ -716,12 +716,12 @@ export type RadarCvEvidenceUncheckedCreateWithoutReviewerInput = {
   cvId: string
   userId: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
-  extractionStatusId?: string | null
-  reviewStatusId?: string | null
+  extractionStatusId: string
+  reviewStatusId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarCvEvidenceCreateOrConnectWithoutReviewerInput = {
@@ -758,13 +758,13 @@ export type RadarCvEvidenceScalarWhereInput = {
   cvId?: Prisma.UuidFilter<"RadarCvEvidence"> | string
   userId?: Prisma.UuidFilter<"RadarCvEvidence"> | string
   extractedText?: Prisma.StringFilter<"RadarCvEvidence"> | string
-  extractionStatus?: Prisma.StringFilter<"RadarCvEvidence"> | string
-  reviewStatus?: Prisma.StringFilter<"RadarCvEvidence"> | string
   submittedAt?: Prisma.DateTimeFilter<"RadarCvEvidence"> | Date | string
   decidedAt?: Prisma.DateTimeNullableFilter<"RadarCvEvidence"> | Date | string | null
   reviewerId?: Prisma.UuidNullableFilter<"RadarCvEvidence"> | string | null
-  extractionStatusId?: Prisma.UuidNullableFilter<"RadarCvEvidence"> | string | null
-  reviewStatusId?: Prisma.UuidNullableFilter<"RadarCvEvidence"> | string | null
+  extractionStatusId?: Prisma.UuidFilter<"RadarCvEvidence"> | string
+  reviewStatusId?: Prisma.UuidFilter<"RadarCvEvidence"> | string
+  createdAt?: Prisma.DateTimeFilter<"RadarCvEvidence"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"RadarCvEvidence"> | Date | string
 }
 
 export type RadarCvEvidenceUpsertWithWhereUniqueWithoutReviewerInput = {
@@ -786,27 +786,27 @@ export type RadarCvEvidenceUpdateManyWithWhereWithoutReviewerInput = {
 export type RadarCvEvidenceCreateWithoutCvInput = {
   id?: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutRadarCvOwnedInput
   reviewer?: Prisma.UserCreateNestedOneWithoutRadarCvReviewedInput
-  extractionState?: Prisma.RadarCvExtractionStatusCreateNestedOneWithoutEvidencesInput
-  reviewState?: Prisma.RadarCvReviewStatusCreateNestedOneWithoutEvidencesInput
+  extractionState: Prisma.RadarCvExtractionStatusCreateNestedOneWithoutEvidencesInput
+  reviewState: Prisma.RadarCvReviewStatusCreateNestedOneWithoutEvidencesInput
 }
 
 export type RadarCvEvidenceUncheckedCreateWithoutCvInput = {
   id?: string
   userId: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
-  extractionStatusId?: string | null
-  reviewStatusId?: string | null
+  extractionStatusId: string
+  reviewStatusId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarCvEvidenceCreateOrConnectWithoutCvInput = {
@@ -828,40 +828,40 @@ export type RadarCvEvidenceUpdateToOneWithWhereWithoutCvInput = {
 export type RadarCvEvidenceUpdateWithoutCvInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutRadarCvOwnedNestedInput
   reviewer?: Prisma.UserUpdateOneWithoutRadarCvReviewedNestedInput
-  extractionState?: Prisma.RadarCvExtractionStatusUpdateOneWithoutEvidencesNestedInput
-  reviewState?: Prisma.RadarCvReviewStatusUpdateOneWithoutEvidencesNestedInput
+  extractionState?: Prisma.RadarCvExtractionStatusUpdateOneRequiredWithoutEvidencesNestedInput
+  reviewState?: Prisma.RadarCvReviewStatusUpdateOneRequiredWithoutEvidencesNestedInput
 }
 
 export type RadarCvEvidenceUncheckedUpdateWithoutCvInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extractionStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reviewStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCvEvidenceCreateWithoutExtractionStateInput = {
   id?: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   cv: Prisma.UserCvFileCreateNestedOneWithoutRadarEvidenceInput
   owner: Prisma.UserCreateNestedOneWithoutRadarCvOwnedInput
   reviewer?: Prisma.UserCreateNestedOneWithoutRadarCvReviewedInput
-  reviewState?: Prisma.RadarCvReviewStatusCreateNestedOneWithoutEvidencesInput
+  reviewState: Prisma.RadarCvReviewStatusCreateNestedOneWithoutEvidencesInput
 }
 
 export type RadarCvEvidenceUncheckedCreateWithoutExtractionStateInput = {
@@ -869,12 +869,12 @@ export type RadarCvEvidenceUncheckedCreateWithoutExtractionStateInput = {
   cvId: string
   userId: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
-  reviewStatusId?: string | null
+  reviewStatusId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarCvEvidenceCreateOrConnectWithoutExtractionStateInput = {
@@ -906,14 +906,14 @@ export type RadarCvEvidenceUpdateManyWithWhereWithoutExtractionStateInput = {
 export type RadarCvEvidenceCreateWithoutReviewStateInput = {
   id?: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
   cv: Prisma.UserCvFileCreateNestedOneWithoutRadarEvidenceInput
   owner: Prisma.UserCreateNestedOneWithoutRadarCvOwnedInput
   reviewer?: Prisma.UserCreateNestedOneWithoutRadarCvReviewedInput
-  extractionState?: Prisma.RadarCvExtractionStatusCreateNestedOneWithoutEvidencesInput
+  extractionState: Prisma.RadarCvExtractionStatusCreateNestedOneWithoutEvidencesInput
 }
 
 export type RadarCvEvidenceUncheckedCreateWithoutReviewStateInput = {
@@ -921,12 +921,12 @@ export type RadarCvEvidenceUncheckedCreateWithoutReviewStateInput = {
   cvId: string
   userId: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
-  extractionStatusId?: string | null
+  extractionStatusId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarCvEvidenceCreateOrConnectWithoutReviewStateInput = {
@@ -959,13 +959,13 @@ export type RadarCvEvidenceCreateManyOwnerInput = {
   id?: string
   cvId: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
-  extractionStatusId?: string | null
-  reviewStatusId?: string | null
+  extractionStatusId: string
+  reviewStatusId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarCvEvidenceCreateManyReviewerInput = {
@@ -973,64 +973,64 @@ export type RadarCvEvidenceCreateManyReviewerInput = {
   cvId: string
   userId: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
-  extractionStatusId?: string | null
-  reviewStatusId?: string | null
+  extractionStatusId: string
+  reviewStatusId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarCvEvidenceUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cv?: Prisma.UserCvFileUpdateOneRequiredWithoutRadarEvidenceNestedInput
   reviewer?: Prisma.UserUpdateOneWithoutRadarCvReviewedNestedInput
-  extractionState?: Prisma.RadarCvExtractionStatusUpdateOneWithoutEvidencesNestedInput
-  reviewState?: Prisma.RadarCvReviewStatusUpdateOneWithoutEvidencesNestedInput
+  extractionState?: Prisma.RadarCvExtractionStatusUpdateOneRequiredWithoutEvidencesNestedInput
+  reviewState?: Prisma.RadarCvReviewStatusUpdateOneRequiredWithoutEvidencesNestedInput
 }
 
 export type RadarCvEvidenceUncheckedUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   cvId?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extractionStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reviewStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCvEvidenceUncheckedUpdateManyWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   cvId?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extractionStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reviewStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCvEvidenceUpdateWithoutReviewerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cv?: Prisma.UserCvFileUpdateOneRequiredWithoutRadarEvidenceNestedInput
   owner?: Prisma.UserUpdateOneRequiredWithoutRadarCvOwnedNestedInput
-  extractionState?: Prisma.RadarCvExtractionStatusUpdateOneWithoutEvidencesNestedInput
-  reviewState?: Prisma.RadarCvReviewStatusUpdateOneWithoutEvidencesNestedInput
+  extractionState?: Prisma.RadarCvExtractionStatusUpdateOneRequiredWithoutEvidencesNestedInput
+  reviewState?: Prisma.RadarCvReviewStatusUpdateOneRequiredWithoutEvidencesNestedInput
 }
 
 export type RadarCvEvidenceUncheckedUpdateWithoutReviewerInput = {
@@ -1038,12 +1038,12 @@ export type RadarCvEvidenceUncheckedUpdateWithoutReviewerInput = {
   cvId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  extractionStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reviewStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCvEvidenceUncheckedUpdateManyWithoutReviewerInput = {
@@ -1051,12 +1051,12 @@ export type RadarCvEvidenceUncheckedUpdateManyWithoutReviewerInput = {
   cvId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  extractionStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reviewStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCvEvidenceCreateManyExtractionStateInput = {
@@ -1064,25 +1064,25 @@ export type RadarCvEvidenceCreateManyExtractionStateInput = {
   cvId: string
   userId: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
-  reviewStatusId?: string | null
+  reviewStatusId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarCvEvidenceUpdateWithoutExtractionStateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cv?: Prisma.UserCvFileUpdateOneRequiredWithoutRadarEvidenceNestedInput
   owner?: Prisma.UserUpdateOneRequiredWithoutRadarCvOwnedNestedInput
   reviewer?: Prisma.UserUpdateOneWithoutRadarCvReviewedNestedInput
-  reviewState?: Prisma.RadarCvReviewStatusUpdateOneWithoutEvidencesNestedInput
+  reviewState?: Prisma.RadarCvReviewStatusUpdateOneRequiredWithoutEvidencesNestedInput
 }
 
 export type RadarCvEvidenceUncheckedUpdateWithoutExtractionStateInput = {
@@ -1090,12 +1090,12 @@ export type RadarCvEvidenceUncheckedUpdateWithoutExtractionStateInput = {
   cvId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reviewStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCvEvidenceUncheckedUpdateManyWithoutExtractionStateInput = {
@@ -1103,12 +1103,12 @@ export type RadarCvEvidenceUncheckedUpdateManyWithoutExtractionStateInput = {
   cvId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reviewStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCvEvidenceCreateManyReviewStateInput = {
@@ -1116,25 +1116,25 @@ export type RadarCvEvidenceCreateManyReviewStateInput = {
   cvId: string
   userId: string
   extractedText?: string
-  extractionStatus?: string
-  reviewStatus?: string
   submittedAt?: Date | string
   decidedAt?: Date | string | null
   reviewerId?: string | null
-  extractionStatusId?: string | null
+  extractionStatusId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type RadarCvEvidenceUpdateWithoutReviewStateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cv?: Prisma.UserCvFileUpdateOneRequiredWithoutRadarEvidenceNestedInput
   owner?: Prisma.UserUpdateOneRequiredWithoutRadarCvOwnedNestedInput
   reviewer?: Prisma.UserUpdateOneWithoutRadarCvReviewedNestedInput
-  extractionState?: Prisma.RadarCvExtractionStatusUpdateOneWithoutEvidencesNestedInput
+  extractionState?: Prisma.RadarCvExtractionStatusUpdateOneRequiredWithoutEvidencesNestedInput
 }
 
 export type RadarCvEvidenceUncheckedUpdateWithoutReviewStateInput = {
@@ -1142,12 +1142,12 @@ export type RadarCvEvidenceUncheckedUpdateWithoutReviewStateInput = {
   cvId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extractionStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type RadarCvEvidenceUncheckedUpdateManyWithoutReviewStateInput = {
@@ -1155,12 +1155,12 @@ export type RadarCvEvidenceUncheckedUpdateManyWithoutReviewStateInput = {
   cvId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   extractedText?: Prisma.StringFieldUpdateOperationsInput | string
-  extractionStatus?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewStatus?: Prisma.StringFieldUpdateOperationsInput | string
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  extractionStatusId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionStatusId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -1170,18 +1170,18 @@ export type RadarCvEvidenceSelect<ExtArgs extends runtime.Types.Extensions.Inter
   cvId?: boolean
   userId?: boolean
   extractedText?: boolean
-  extractionStatus?: boolean
-  reviewStatus?: boolean
   submittedAt?: boolean
   decidedAt?: boolean
   reviewerId?: boolean
   extractionStatusId?: boolean
   reviewStatusId?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   cv?: boolean | Prisma.UserCvFileDefaultArgs<ExtArgs>
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarCvEvidence$reviewerArgs<ExtArgs>
-  extractionState?: boolean | Prisma.RadarCvEvidence$extractionStateArgs<ExtArgs>
-  reviewState?: boolean | Prisma.RadarCvEvidence$reviewStateArgs<ExtArgs>
+  extractionState?: boolean | Prisma.RadarCvExtractionStatusDefaultArgs<ExtArgs>
+  reviewState?: boolean | Prisma.RadarCvReviewStatusDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarCvEvidence"]>
 
 export type RadarCvEvidenceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1189,18 +1189,18 @@ export type RadarCvEvidenceSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   cvId?: boolean
   userId?: boolean
   extractedText?: boolean
-  extractionStatus?: boolean
-  reviewStatus?: boolean
   submittedAt?: boolean
   decidedAt?: boolean
   reviewerId?: boolean
   extractionStatusId?: boolean
   reviewStatusId?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   cv?: boolean | Prisma.UserCvFileDefaultArgs<ExtArgs>
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarCvEvidence$reviewerArgs<ExtArgs>
-  extractionState?: boolean | Prisma.RadarCvEvidence$extractionStateArgs<ExtArgs>
-  reviewState?: boolean | Prisma.RadarCvEvidence$reviewStateArgs<ExtArgs>
+  extractionState?: boolean | Prisma.RadarCvExtractionStatusDefaultArgs<ExtArgs>
+  reviewState?: boolean | Prisma.RadarCvReviewStatusDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarCvEvidence"]>
 
 export type RadarCvEvidenceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1208,18 +1208,18 @@ export type RadarCvEvidenceSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   cvId?: boolean
   userId?: boolean
   extractedText?: boolean
-  extractionStatus?: boolean
-  reviewStatus?: boolean
   submittedAt?: boolean
   decidedAt?: boolean
   reviewerId?: boolean
   extractionStatusId?: boolean
   reviewStatusId?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   cv?: boolean | Prisma.UserCvFileDefaultArgs<ExtArgs>
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarCvEvidence$reviewerArgs<ExtArgs>
-  extractionState?: boolean | Prisma.RadarCvEvidence$extractionStateArgs<ExtArgs>
-  reviewState?: boolean | Prisma.RadarCvEvidence$reviewStateArgs<ExtArgs>
+  extractionState?: boolean | Prisma.RadarCvExtractionStatusDefaultArgs<ExtArgs>
+  reviewState?: boolean | Prisma.RadarCvReviewStatusDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["radarCvEvidence"]>
 
 export type RadarCvEvidenceSelectScalar = {
@@ -1227,36 +1227,36 @@ export type RadarCvEvidenceSelectScalar = {
   cvId?: boolean
   userId?: boolean
   extractedText?: boolean
-  extractionStatus?: boolean
-  reviewStatus?: boolean
   submittedAt?: boolean
   decidedAt?: boolean
   reviewerId?: boolean
   extractionStatusId?: boolean
   reviewStatusId?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type RadarCvEvidenceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "cvId" | "userId" | "extractedText" | "extractionStatus" | "reviewStatus" | "submittedAt" | "decidedAt" | "reviewerId" | "extractionStatusId" | "reviewStatusId", ExtArgs["result"]["radarCvEvidence"]>
+export type RadarCvEvidenceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "cvId" | "userId" | "extractedText" | "submittedAt" | "decidedAt" | "reviewerId" | "extractionStatusId" | "reviewStatusId" | "createdAt" | "updatedAt", ExtArgs["result"]["radarCvEvidence"]>
 export type RadarCvEvidenceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cv?: boolean | Prisma.UserCvFileDefaultArgs<ExtArgs>
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarCvEvidence$reviewerArgs<ExtArgs>
-  extractionState?: boolean | Prisma.RadarCvEvidence$extractionStateArgs<ExtArgs>
-  reviewState?: boolean | Prisma.RadarCvEvidence$reviewStateArgs<ExtArgs>
+  extractionState?: boolean | Prisma.RadarCvExtractionStatusDefaultArgs<ExtArgs>
+  reviewState?: boolean | Prisma.RadarCvReviewStatusDefaultArgs<ExtArgs>
 }
 export type RadarCvEvidenceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cv?: boolean | Prisma.UserCvFileDefaultArgs<ExtArgs>
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarCvEvidence$reviewerArgs<ExtArgs>
-  extractionState?: boolean | Prisma.RadarCvEvidence$extractionStateArgs<ExtArgs>
-  reviewState?: boolean | Prisma.RadarCvEvidence$reviewStateArgs<ExtArgs>
+  extractionState?: boolean | Prisma.RadarCvExtractionStatusDefaultArgs<ExtArgs>
+  reviewState?: boolean | Prisma.RadarCvReviewStatusDefaultArgs<ExtArgs>
 }
 export type RadarCvEvidenceIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cv?: boolean | Prisma.UserCvFileDefaultArgs<ExtArgs>
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.RadarCvEvidence$reviewerArgs<ExtArgs>
-  extractionState?: boolean | Prisma.RadarCvEvidence$extractionStateArgs<ExtArgs>
-  reviewState?: boolean | Prisma.RadarCvEvidence$reviewStateArgs<ExtArgs>
+  extractionState?: boolean | Prisma.RadarCvExtractionStatusDefaultArgs<ExtArgs>
+  reviewState?: boolean | Prisma.RadarCvReviewStatusDefaultArgs<ExtArgs>
 }
 
 export type $RadarCvEvidencePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1265,21 +1265,21 @@ export type $RadarCvEvidencePayload<ExtArgs extends runtime.Types.Extensions.Int
     cv: Prisma.$UserCvFilePayload<ExtArgs>
     owner: Prisma.$UserPayload<ExtArgs>
     reviewer: Prisma.$UserPayload<ExtArgs> | null
-    extractionState: Prisma.$RadarCvExtractionStatusPayload<ExtArgs> | null
-    reviewState: Prisma.$RadarCvReviewStatusPayload<ExtArgs> | null
+    extractionState: Prisma.$RadarCvExtractionStatusPayload<ExtArgs>
+    reviewState: Prisma.$RadarCvReviewStatusPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     cvId: string
     userId: string
     extractedText: string
-    extractionStatus: string
-    reviewStatus: string
     submittedAt: Date
     decidedAt: Date | null
     reviewerId: string | null
-    extractionStatusId: string | null
-    reviewStatusId: string | null
+    extractionStatusId: string
+    reviewStatusId: string
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["radarCvEvidence"]>
   composites: {}
 }
@@ -1677,8 +1677,8 @@ export interface Prisma__RadarCvEvidenceClient<T, Null = never, ExtArgs extends 
   cv<T extends Prisma.UserCvFileDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserCvFileDefaultArgs<ExtArgs>>): Prisma.Prisma__UserCvFileClient<runtime.Types.Result.GetResult<Prisma.$UserCvFilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   owner<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   reviewer<T extends Prisma.RadarCvEvidence$reviewerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RadarCvEvidence$reviewerArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  extractionState<T extends Prisma.RadarCvEvidence$extractionStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RadarCvEvidence$extractionStateArgs<ExtArgs>>): Prisma.Prisma__RadarCvExtractionStatusClient<runtime.Types.Result.GetResult<Prisma.$RadarCvExtractionStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  reviewState<T extends Prisma.RadarCvEvidence$reviewStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RadarCvEvidence$reviewStateArgs<ExtArgs>>): Prisma.Prisma__RadarCvReviewStatusClient<runtime.Types.Result.GetResult<Prisma.$RadarCvReviewStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  extractionState<T extends Prisma.RadarCvExtractionStatusDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RadarCvExtractionStatusDefaultArgs<ExtArgs>>): Prisma.Prisma__RadarCvExtractionStatusClient<runtime.Types.Result.GetResult<Prisma.$RadarCvExtractionStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  reviewState<T extends Prisma.RadarCvReviewStatusDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RadarCvReviewStatusDefaultArgs<ExtArgs>>): Prisma.Prisma__RadarCvReviewStatusClient<runtime.Types.Result.GetResult<Prisma.$RadarCvReviewStatusPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1712,13 +1712,13 @@ export interface RadarCvEvidenceFieldRefs {
   readonly cvId: Prisma.FieldRef<"RadarCvEvidence", 'String'>
   readonly userId: Prisma.FieldRef<"RadarCvEvidence", 'String'>
   readonly extractedText: Prisma.FieldRef<"RadarCvEvidence", 'String'>
-  readonly extractionStatus: Prisma.FieldRef<"RadarCvEvidence", 'String'>
-  readonly reviewStatus: Prisma.FieldRef<"RadarCvEvidence", 'String'>
   readonly submittedAt: Prisma.FieldRef<"RadarCvEvidence", 'DateTime'>
   readonly decidedAt: Prisma.FieldRef<"RadarCvEvidence", 'DateTime'>
   readonly reviewerId: Prisma.FieldRef<"RadarCvEvidence", 'String'>
   readonly extractionStatusId: Prisma.FieldRef<"RadarCvEvidence", 'String'>
   readonly reviewStatusId: Prisma.FieldRef<"RadarCvEvidence", 'String'>
+  readonly createdAt: Prisma.FieldRef<"RadarCvEvidence", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"RadarCvEvidence", 'DateTime'>
 }
     
 
@@ -2136,44 +2136,6 @@ export type RadarCvEvidence$reviewerArgs<ExtArgs extends runtime.Types.Extension
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
-}
-
-/**
- * RadarCvEvidence.extractionState
- */
-export type RadarCvEvidence$extractionStateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the RadarCvExtractionStatus
-   */
-  select?: Prisma.RadarCvExtractionStatusSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the RadarCvExtractionStatus
-   */
-  omit?: Prisma.RadarCvExtractionStatusOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.RadarCvExtractionStatusInclude<ExtArgs> | null
-  where?: Prisma.RadarCvExtractionStatusWhereInput
-}
-
-/**
- * RadarCvEvidence.reviewState
- */
-export type RadarCvEvidence$reviewStateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the RadarCvReviewStatus
-   */
-  select?: Prisma.RadarCvReviewStatusSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the RadarCvReviewStatus
-   */
-  omit?: Prisma.RadarCvReviewStatusOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.RadarCvReviewStatusInclude<ExtArgs> | null
-  where?: Prisma.RadarCvReviewStatusWhereInput
 }
 
 /**

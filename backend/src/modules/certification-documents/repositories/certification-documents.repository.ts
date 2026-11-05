@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { mapRecordNotFound } from '../../../common/utils/map-record-not-found.js';
 import { CertificationNotFoundException } from '../../certifications/exceptions/certification-not-found.exception.js';
-import type { CertificationDocumentMetadata } from '../types/certification-document-metadata.type.js';
-import { RadarAuditRepository } from '../../radar-integration/radar-audit.repository.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 
 const documentSelect = { documentUrl: true } as const;
 
@@ -11,18 +10,16 @@ const idSelect = { id: true } as const;
 
 @Injectable()
 export class CertificationDocumentsRepository {
-  constructor(private readonly prisma: PrismaService, private readonly audit: RadarAuditRepository) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async save(id: string, content: Buffer, metadata?: CertificationDocumentMetadata): Promise<void> {
-    if (metadata) {
-      await mapRecordNotFound(this.prisma.$transaction(async tx => {
-        const row = await tx.certification.update({ where: { id }, data: { documentUrl: new Uint8Array(content) }, select: { id: true, userId: true } });
-        await this.audit.saveDocumentMetadata(row.userId, id, metadata, tx);
-      }), () => new CertificationNotFoundException());
-      return;
-    }
+  async save(
+    id: string,
+    content: Buffer,
+    context?: TransactionContext,
+  ): Promise<void> {
+    const client = context?.client ?? this.prisma;
     await mapRecordNotFound(
-      this.prisma.certification.update({
+      client.certification.update({
         where: { id },
         data: { documentUrl: new Uint8Array(content) },
         select: idSelect,
@@ -40,11 +37,13 @@ export class CertificationDocumentsRepository {
     return record?.documentUrl ? Buffer.from(record.documentUrl) : null;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, context?: TransactionContext): Promise<void> {
+    const client = context?.client ?? this.prisma;
     await mapRecordNotFound(
-      this.prisma.$transaction(async tx => {
-        const row = await tx.certification.update({ where: { id }, data: { documentUrl: null }, select: { id: true, userId: true } });
-        await this.audit.saveDocumentMetadata(row.userId, id, null, tx);
+      client.certification.update({
+        where: { id },
+        data: { documentUrl: null },
+        select: idSelect,
       }),
       () => new CertificationNotFoundException(),
     );

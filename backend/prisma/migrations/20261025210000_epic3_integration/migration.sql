@@ -1,4 +1,3 @@
--- Épica 3, Sprint 2. Tablas autónomas: no alterar ni eliminar datos de Épicas 2, 4 o 5.
 CREATE TABLE IF NOT EXISTS radar_cv_evidence (
   cv_id UUID PRIMARY KEY REFERENCES user_cv_file(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

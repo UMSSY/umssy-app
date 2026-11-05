@@ -288,9 +288,9 @@ export type RadarCvReviewStatusUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type RadarCvReviewStatusNullableScalarRelationFilter = {
-  is?: Prisma.RadarCvReviewStatusWhereInput | null
-  isNot?: Prisma.RadarCvReviewStatusWhereInput | null
+export type RadarCvReviewStatusScalarRelationFilter = {
+  is?: Prisma.RadarCvReviewStatusWhereInput
+  isNot?: Prisma.RadarCvReviewStatusWhereInput
 }
 
 export type RadarCvReviewStatusCountOrderByAggregateInput = {
@@ -323,12 +323,10 @@ export type RadarCvReviewStatusCreateNestedOneWithoutEvidencesInput = {
   connect?: Prisma.RadarCvReviewStatusWhereUniqueInput
 }
 
-export type RadarCvReviewStatusUpdateOneWithoutEvidencesNestedInput = {
+export type RadarCvReviewStatusUpdateOneRequiredWithoutEvidencesNestedInput = {
   create?: Prisma.XOR<Prisma.RadarCvReviewStatusCreateWithoutEvidencesInput, Prisma.RadarCvReviewStatusUncheckedCreateWithoutEvidencesInput>
   connectOrCreate?: Prisma.RadarCvReviewStatusCreateOrConnectWithoutEvidencesInput
   upsert?: Prisma.RadarCvReviewStatusUpsertWithoutEvidencesInput
-  disconnect?: Prisma.RadarCvReviewStatusWhereInput | boolean
-  delete?: Prisma.RadarCvReviewStatusWhereInput | boolean
   connect?: Prisma.RadarCvReviewStatusWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.RadarCvReviewStatusUpdateToOneWithWhereWithoutEvidencesInput, Prisma.RadarCvReviewStatusUpdateWithoutEvidencesInput>, Prisma.RadarCvReviewStatusUncheckedUpdateWithoutEvidencesInput>
 }

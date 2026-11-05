@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
-/** Persistence for Radar role checks and append-only audit events. */
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
+
 @Injectable()
 export class RadarAccessRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -28,8 +29,10 @@ export class RadarAccessRepository {
     event: string,
     targetId: string | null,
     details: object = {},
+    context?: TransactionContext,
   ): Promise<void> {
-    await this.prisma.$executeRaw`
+    const client = context?.client ?? this.prisma;
+    await client.$executeRaw`
       INSERT INTO radar_audit_events (user_id,actor_id,event_type,target_id,details)
       VALUES (${userId}::uuid,${actorId}::uuid,${event},${targetId}::uuid,${JSON.stringify(details)}::jsonb)`;
   }

@@ -15,16 +15,14 @@ import type { CreateEducationRequest } from '../requests/create-education.reques
 import type { UpdateEducationRequest } from '../requests/update-education.request.js';
 import type { EducationRecord } from '../types/education-record.type.js';
 import type { EducationPeriodSnapshot } from '../types/education-period-snapshot.type.js';
-import type { NlpTextSource } from '../../nlp/types/nlp-text-source.type.js';
-
-const joinText = (title: string, description: string | null) =>
-  [title, description].filter((part) => Boolean(part?.trim())).join('.\n');
 
 @Injectable()
 export class EducationsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAnalysisSources(userId: string): Promise<EducationAnalysisSourceResponse[]> {
+  findAnalysisSources(
+    userId: string,
+  ): Promise<EducationAnalysisSourceResponse[]> {
     return this.prisma.education.findMany({
       where: { userId },
       orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
@@ -33,7 +31,10 @@ export class EducationsRepository {
   }
 
   findPublicationEvidenceIds(userId: string, context: TransactionContext) {
-    return context.client.education.findMany({ where: { userId }, select: { id: true } });
+    return context.client.education.findMany({
+      where: { userId },
+      select: { id: true },
+    });
   }
 
   findManyByUserId(userId: string): Promise<EducationRecord[]> {
@@ -42,19 +43,6 @@ export class EducationsRepository {
       orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
       select: EDUCATION_SELECT,
     });
-  }
-
-  async findTextSources(userId: string): Promise<NlpTextSource[]> {
-    const records = await this.prisma.education.findMany({
-      where: { userId },
-      orderBy: { startDate: 'desc' },
-      select: { id: true, degree: true, description: true },
-    });
-    return records.map((record) => ({
-      id: record.id,
-      type: 'education',
-      text: joinText(record.degree, record.description),
-    }));
   }
 
   findByIdAndUserId(
@@ -88,12 +76,20 @@ export class EducationsRepository {
   ): Promise<EducationRecord | null> {
     return this.withSerializableWrite(async (tx) => {
       const where = { id, userId, ...expectedPeriod };
-      const current = await tx.education.findFirst({ where, select: EDUCATION_SELECT });
+      const current = await tx.education.findFirst({
+        where,
+        select: EDUCATION_SELECT,
+      });
       if (!current) return null;
-      validateEducationDegree(data.institution ?? current.institution, data.degree ?? current.degree);
+      validateEducationDegree(
+        data.institution ?? current.institution,
+        data.degree ?? current.degree,
+      );
       await this.assertNoDuplicate(tx, userId, { ...current, ...data }, id);
       const records = await tx.education.updateManyAndReturn({
-        where, data, select: EDUCATION_SELECT,
+        where,
+        data,
+        select: EDUCATION_SELECT,
       });
       return records[0] ?? null;
     });
@@ -102,31 +98,66 @@ export class EducationsRepository {
   private async assertNoDuplicate(
     tx: Prisma.TransactionClient,
     userId: string,
-    candidate: Pick<EducationRecord, 'institution' | 'degree' | 'startDate' | 'endDate'>,
+    candidate: Pick<
+      EducationRecord,
+      'institution' | 'degree' | 'startDate' | 'endDate'
+    >,
     excludedId?: string,
   ): Promise<void> {
     const records = await tx.education.findMany({
       where: {
-        userId, startDate: candidate.startDate, endDate: candidate.endDate,
+        userId,
+        startDate: candidate.startDate,
+        endDate: candidate.endDate,
         ...(excludedId ? { id: { not: excludedId } } : {}),
       },
       select: { institution: true, degree: true },
     });
-    const institution = normalizeEducationText(resolveEducationInstitution(candidate.institution) ?? candidate.institution);
-    if (records.some((record) => normalizeEducationText(resolveEducationInstitution(record.institution) ?? record.institution) === institution
-      && normalizeEducationText(resolveEducationDegree(record.institution, record.degree) ?? record.degree)
-        === normalizeEducationText(resolveEducationDegree(candidate.institution, candidate.degree) ?? candidate.degree))) {
+    const institution = normalizeEducationText(
+      resolveEducationInstitution(candidate.institution) ??
+        candidate.institution,
+    );
+    if (
+      records.some(
+        (record) =>
+          normalizeEducationText(
+            resolveEducationInstitution(record.institution) ??
+              record.institution,
+          ) === institution &&
+          normalizeEducationText(
+            resolveEducationDegree(record.institution, record.degree) ??
+              record.degree,
+          ) ===
+            normalizeEducationText(
+              resolveEducationDegree(candidate.institution, candidate.degree) ??
+                candidate.degree,
+            ),
+      )
+    ) {
       throw new DuplicateEducationException();
     }
   }
 
-  private async withSerializableWrite<T>(operation: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
-    for (let attempt = 0; attempt < EDUCATION_TRANSACTION_ATTEMPTS; attempt += 1) {
+  private async withSerializableWrite<T>(
+    operation: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    for (
+      let attempt = 0;
+      attempt < EDUCATION_TRANSACTION_ATTEMPTS;
+      attempt += 1
+    ) {
       try {
-        return await this.prisma.$transaction(operation, { isolationLevel: 'Serializable' });
+        return await this.prisma.$transaction(operation, {
+          isolationLevel: 'Serializable',
+        });
       } catch (error: unknown) {
-        if (typeof error !== 'object' || error === null || !('code' in error)
-          || error.code !== 'P2034') throw error;
+        if (
+          typeof error !== 'object' ||
+          error === null ||
+          !('code' in error) ||
+          error.code !== 'P2034'
+        )
+          throw error;
       }
     }
     throw new EducationWriteConflictException();

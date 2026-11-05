@@ -10,6 +10,22 @@ import { planSkillReconciliation } from '../utils/plan-skill-reconciliation.js';
 export class SkillAnalysisService {
   constructor(private readonly repository: SkillAnalysisRepository) {}
 
+  listReviewQueue() {
+    return this.repository.listReviewQueue();
+  }
+
+  skillForDecision(skillId: string, context: TransactionContext) {
+    return this.repository.skillForDecision(skillId, context);
+  }
+
+  changeSkillDecision(
+    skillId: string,
+    action: string,
+    context: TransactionContext,
+  ) {
+    return this.repository.changeSkillDecision(skillId, action, context);
+  }
+
   findCatalog(): Promise<SkillAnalysisCatalogResponse[]> {
     return this.repository.findCatalog();
   }
@@ -31,7 +47,6 @@ export class SkillAnalysisService {
     detected: readonly DetectedSkillPayload[],
     context: TransactionContext,
   ): Promise<boolean> {
-
     const rows = await this.repository.findProfileSkillRows(userId, context);
 
     const plan = planSkillReconciliation(rows, detected);
@@ -39,10 +54,7 @@ export class SkillAnalysisService {
     await this.repository.applyReconciliation(userId, plan, context);
 
     return (
-      plan.creates.length +
-        plan.updates.length +
-        plan.deleteIds.length >
-      0
+      plan.creates.length + plan.updates.length + plan.deleteIds.length > 0
     );
   }
 }
