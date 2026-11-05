@@ -4,9 +4,15 @@ import { CertificationsRepository } from './repositories/certifications.reposito
 import { RadarAuditModule } from '../radar-integration/radar-audit.module.js';
 import { CertificationSourcesService } from './services/certification-sources.service.js';
 
+import { CertificationRecordsService } from './services/certification-records.service.js';
+
 @Module({
   imports: [PrismaModule, RadarAuditModule],
-  providers: [CertificationsRepository, CertificationSourcesService],
-  exports: [CertificationSourcesService],
+  providers: [
+    CertificationsRepository,
+    CertificationRecordsService,
+    CertificationSourcesService,
+  ],
+  exports: [CertificationSourcesService, CertificationRecordsService],
 })
 export class CertificationSourcesModule {}

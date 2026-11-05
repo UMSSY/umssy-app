@@ -1155,13 +1155,13 @@ export const RadarCvEvidenceScalarFieldEnum = {
   cvId: 'cvId',
   userId: 'userId',
   extractedText: 'extractedText',
-  extractionStatus: 'extractionStatus',
-  reviewStatus: 'reviewStatus',
   submittedAt: 'submittedAt',
   decidedAt: 'decidedAt',
   reviewerId: 'reviewerId',
   extractionStatusId: 'extractionStatusId',
-  reviewStatusId: 'reviewStatusId'
+  reviewStatusId: 'reviewStatusId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type RadarCvEvidenceScalarFieldEnum = (typeof RadarCvEvidenceScalarFieldEnum)[keyof typeof RadarCvEvidenceScalarFieldEnum]
@@ -1176,7 +1176,8 @@ export const RadarScoreSnapshotScalarFieldEnum = {
   scores: 'scores',
   evidence: 'evidence',
   averageScore: 'averageScore',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type RadarScoreSnapshotScalarFieldEnum = (typeof RadarScoreSnapshotScalarFieldEnum)[keyof typeof RadarScoreSnapshotScalarFieldEnum]
@@ -1189,7 +1190,9 @@ export const RadarAuditEventScalarFieldEnum = {
   eventType: 'eventType',
   targetId: 'targetId',
   details: 'details',
-  occurredAt: 'occurredAt'
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type RadarAuditEventScalarFieldEnum = (typeof RadarAuditEventScalarFieldEnum)[keyof typeof RadarAuditEventScalarFieldEnum]

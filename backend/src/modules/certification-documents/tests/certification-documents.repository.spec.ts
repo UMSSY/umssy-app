@@ -3,7 +3,6 @@ import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
 import { CertificationNotFoundException } from '../../certifications/exceptions/certification-not-found.exception.js';
 import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
-import type { RadarAuditRepository } from '../../radar-integration/radar-audit.repository.js';
 
 const recordNotFoundError = new Prisma.PrismaClientKnownRequestError(
   'Record not found',
@@ -15,7 +14,6 @@ const certificationId = '33333333-3333-4333-8333-333333333333';
 
 describe('CertificationDocumentsRepository', () => {
   let repository: CertificationDocumentsRepository;
-  const audit = { saveDocumentMetadata: vi.fn().mockResolvedValue(undefined) };
   let certification: {
     findUnique: ReturnType<typeof vi.fn>;
     findFirst: ReturnType<typeof vi.fn>;
@@ -32,9 +30,11 @@ describe('CertificationDocumentsRepository', () => {
     };
     const db = {
       certification,
-      $transaction: vi.fn(async operation => operation(db)),
+      $transaction: vi.fn(async (operation) => operation(db)),
     };
-    repository = new CertificationDocumentsRepository(db as unknown as PrismaService, audit as unknown as RadarAuditRepository);
+    repository = new CertificationDocumentsRepository(
+      db as unknown as PrismaService,
+    );
   });
 
   it('saves the content in the document column of the certification', async () => {
@@ -83,9 +83,8 @@ describe('CertificationDocumentsRepository', () => {
     expect(certification.update).toHaveBeenCalledWith({
       where: { id: certificationId },
       data: { documentUrl: null },
-      select: { id: true, userId: true },
+      select: { id: true },
     });
-    expect(audit.saveDocumentMetadata).toHaveBeenCalledWith(userId, certificationId, null, expect.any(Object));
   });
 
   it('fails with a domain exception when the certification no longer exists', async () => {

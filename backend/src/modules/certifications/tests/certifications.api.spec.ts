@@ -8,7 +8,7 @@ import { DomainExceptionFilter } from '../../../common/filters/domain-exception.
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { CertificationsModule } from '../certifications.module.js';
 import { CertificationDocumentsRepository } from '../../certification-documents/repositories/certification-documents.repository.js';
-import { CertificationsRepository } from '../repositories/certifications.repository.js';
+import { CertificationRecordsService } from '../services/certification-records.service.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const otherUserId = '22222222-2222-4222-8222-222222222222';
@@ -62,16 +62,19 @@ describe('Certifications API', () => {
       providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
     })
       .overrideProvider(PrismaService)
-      .useValue({ user: {
-          findFirst: ({ where }: { where: { id: string } }) => Promise.resolve({
-            id: where.id,
-            email: 'user@test.com',
-            roles: [{ role: { name: 'titulado' } }],
-          }),
-        } })
+      .useValue({
+        user: {
+          findFirst: ({ where }: { where: { id: string } }) =>
+            Promise.resolve({
+              id: where.id,
+              email: 'user@test.com',
+              roles: [{ role: { name: 'titulado' } }],
+            }),
+        },
+      })
       .overrideProvider(JwtService)
       .useValue(jwt)
-      .overrideProvider(CertificationsRepository)
+      .overrideProvider(CertificationRecordsService)
       .useValue(repository)
       .overrideProvider(CertificationDocumentsRepository)
       .useValue(documentsRepository)

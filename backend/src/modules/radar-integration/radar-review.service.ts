@@ -8,49 +8,105 @@ import { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-ana
 import { RadarPublicationService } from './radar-publication.service.js';
 import { RadarReviewMapper } from './mappers/radar-review.mapper.js';
 
+import { SkillAnalysisService } from '../skills/services/skill-analysis.service.js';
+import { TransactionService } from '../../common/prisma/transaction.service.js';
 
 @Injectable()
 export class RadarReviewService {
-  constructor(private readonly repository: RadarReviewRepository, private readonly access: RadarAccessRepository, private readonly nlp: ProfileSkillsAnalysisService, private readonly publication: RadarPublicationService, private readonly mapper: RadarReviewMapper) {}
-  private async audit(userId:string,actorId:string|null,event:string,targetId:string|null,details:object={}){
+  constructor(
+    private readonly repository: RadarReviewRepository,
+    private readonly access: RadarAccessRepository,
+    private readonly nlp: ProfileSkillsAnalysisService,
+    private readonly publication: RadarPublicationService,
+    private readonly mapper: RadarReviewMapper,
+    private readonly skills: SkillAnalysisService,
+    private readonly transactions: TransactionService,
+  ) {}
+  private async audit(
+    userId: string,
+    actorId: string | null,
+    event: string,
+    targetId: string | null,
+    details: object = {},
+  ) {
     await this.access.recordAudit(userId, actorId, event, targetId, details);
   }
-  async queue(_adminId:string){
-    return this.mapper.queue(await this.repository.listReviewQueue());
+  async queue(_adminId: string) {
+    return this.mapper.queue(
+      await Promise.all([
+        this.repository.listReviewQueue(),
+        this.skills.listReviewQueue(),
+      ]),
+    );
   }
-  async decision(adminId:string,kind:string,id:string,action:string){
-    if(!['approved','rejected','revoked'].includes(action))throw new RadarReviewInvalidDecisionException();
-    if(kind==='cv'){
-      const rows=await this.repository.changeCvDecision(adminId, id, action);
-      if(!rows.length){
-        const existing=await this.repository.cvOwner(id);
-        if(!existing.length)throw new RadarReviewNotFoundException('CV inexistente');
-        return this.recalculateAfterDecision(existing[0].user_id,adminId);
+  async decision(adminId: string, kind: string, id: string, action: string) {
+    if (!['approved', 'rejected', 'revoked'].includes(action))
+      throw new RadarReviewInvalidDecisionException();
+    if (kind !== 'cv' && kind !== 'skill')
+      throw new RadarReviewInvalidEvidenceException();
+    const result = await this.transactions.run(async (context) => {
+      if (kind === 'cv') {
+        const rows = await this.repository.changeCvDecision(
+          adminId,
+          id,
+          action,
+          context,
+        );
+        if (!rows.length) {
+          const existing = await this.repository.cvOwner(id, context);
+          if (!existing.length)
+            throw new RadarReviewNotFoundException('CV inexistente');
+          return { userId: existing[0].user_id, changed: false };
+        }
+        await this.access.recordAudit(
+          rows[0].user_id,
+          adminId,
+          `cv.${action}`,
+          id,
+          {},
+          context,
+        );
+        return { userId: rows[0].user_id, changed: true };
       }
-      await this.audit(rows[0].user_id,adminId,`cv.${action}`,id);
-      await this.nlp.refreshAfterChange(rows[0].user_id);
-      return this.recalculateAfterDecision(rows[0].user_id,adminId);
-    }
-    if(kind==='skill'){
-      const old=await this.repository.skillForDecision(id);
-      if(!old)throw new RadarReviewNotFoundException('Habilidad no encontrada');
-      const changed=await this.repository.changeSkillDecision(id, action);
-      if(changed.count)await this.audit(old.userId,adminId,`skill.${action}`,id);
-      return this.recalculateAfterDecision(old.userId,adminId);
-    }
-    throw new RadarReviewInvalidEvidenceException();
+      const old = await this.skills.skillForDecision(id, context);
+      if (!old)
+        throw new RadarReviewNotFoundException('Habilidad no encontrada');
+      const changed = await this.skills.changeSkillDecision(
+        id,
+        action,
+        context,
+      );
+      if (changed.count)
+        await this.access.recordAudit(
+          old.userId,
+          adminId,
+          `skill.${action}`,
+          id,
+          {},
+          context,
+        );
+      return { userId: old.userId, changed: changed.count > 0 };
+    });
+    if (kind === 'cv' && result.changed)
+      await this.nlp.refreshAfterChange(result.userId);
+    return this.recalculateAfterDecision(result.userId, adminId);
   }
-  private async recalculateAfterDecision(userId:string,actorId:string){
-    try{await this.publication.recalculate(userId,actorId);}catch{
+  private async recalculateAfterDecision(userId: string, actorId: string) {
+    try {
+      await this.publication.recalculate(userId, actorId);
+    } catch {
       // La decisión ya se guardó; informar el estado recuperable sin indicar que se revirtió.
     }
     return this.publication.myRadar(userId);
   }
-  async downloadForAdmin(adminId:string,cvId:string){
-    const rows=await this.repository.cvForAdmin(cvId);
-    if(!rows?.cvPdfData)throw new RadarReviewNotFoundException('Archivo no encontrado');
-    await this.audit(rows.userId,adminId,'cv.viewed',cvId);
-    return {filename:rows.cvFileName??'curriculum.pdf',buffer:Buffer.from(rows.cvPdfData,'base64')};
+  async downloadForAdmin(adminId: string, cvId: string) {
+    const rows = await this.repository.cvForAdmin(cvId);
+    if (!rows?.cvPdfData)
+      throw new RadarReviewNotFoundException('Archivo no encontrado');
+    await this.audit(rows.userId, adminId, 'cv.viewed', cvId);
+    return {
+      filename: rows.cvFileName ?? 'curriculum.pdf',
+      buffer: Buffer.from(rows.cvPdfData, 'base64'),
+    };
   }
-
 }

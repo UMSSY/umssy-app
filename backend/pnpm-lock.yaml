@@ -248,6 +248,9 @@ importers:
         specifier: ^4.6.5
         version: 4.6.5
     devDependencies:
+      '@electric-sql/pglite':
+        specifier: 0.5.15
+        version: 0.5.15
       '@nestjs/cli':
         specifier: ^12.0.7
         version: 12.0.7(@types/node@24.19.0)(prettier@3.9.9)
@@ -416,6 +419,9 @@ packages:
     resolution: {integrity: sha512-AlzLJTRJ8+UFgK8CmxIpyIpJ0+YaFw02IiOSdYrqxwPXdSyeIShz8aa9Tq+tYFXdPwcaMp/Fc80mQZ1dkOQ/wg==}
     peerDependencies:
       '@electric-sql/pglite': 0.4.3
+
+  '@electric-sql/pglite@0.5.15':
+    resolution: {integrity: sha512-ERZWgaRTxueGV4cvL1tfpAOzFCWTXoUtbCBqnf2FhHDVs/so9eAKaanvrwWF9Dntx7BYsmFQujVQ0/B4S8Mmiw==}
 
   '@electric-sql/pglite@0.4.3':
     resolution: {integrity: sha512-ichuWTgtd4mOM1G4SpyGJa5trT03lWbMypDV0fUXUCXg5hiHqVAz/bZyV68NqmkLB7WcYmj1RMJVSp8HV/v/ZQ==}
@@ -4508,6 +4514,8 @@ snapshots:
   '@electric-sql/pglite-tools@0.3.3(@electric-sql/pglite@0.4.3)':
     dependencies:
       '@electric-sql/pglite': 0.4.3
+
+  '@electric-sql/pglite@0.5.15': {}
 
   '@electric-sql/pglite@0.4.3': {}
 
