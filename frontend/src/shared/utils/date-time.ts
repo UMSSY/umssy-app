@@ -1,5 +1,7 @@
 import {
+  BOLIVIA_MONTH_SHORT_LABELS,
   BOLIVIA_OFFSET_MS,
+  BOLIVIA_WEEKDAY_SHORT_LABELS,
   DATE_PATTERN,
   DAY_MS,
   TIME_PATTERN,
@@ -89,3 +91,12 @@ export const formatBlockRange = (
   startAt: DateInput,
   endAt: DateInput,
 ): string => `${toBoliviaTime(startAt).time} - ${toBoliviaTime(endAt).time}`;
+
+export const formatBoliviaWeekdayShort = (value: DateInput): string =>
+  BOLIVIA_WEEKDAY_SHORT_LABELS[toBoliviaTime(value).weekday - 1];
+
+export const formatBoliviaDay = (value: DateInput): string =>
+  String(toBoliviaTime(value).day);
+
+export const formatBoliviaMonthShort = (value: DateInput): string =>
+  BOLIVIA_MONTH_SHORT_LABELS[toBoliviaTime(value).month - 1];
