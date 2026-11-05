@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, Settings, UserRound } from "lucide-react";
-import { SessionLogoutMenuItem, getRolesLabel } from "@/modules/auth";
+import { LogoutConfirmDialog, SessionLogoutMenuItem, getRolesLabel } from "@/modules/auth";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getRouteRoles } from "@/shared/utils/get-route-roles";
@@ -10,7 +11,9 @@ import type { AccountMenuProps } from "@/shared/types/account-menu-props.types";
 
 export function AccountMenu({ roles }: AccountMenuProps) {
   const canViewProfile = roles.some((role) => getRouteRoles("/profile").includes(role));
+  const [isConfirmingLogout, setIsConfirmingLogout] = useState(false);
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="ghost" className="group/account gap-2 px-3 text-app-header-foreground hover:bg-app-header-foreground/10 hover:text-app-header-foreground focus-visible:ring-app-header-foreground aria-expanded:bg-app-header-foreground/10 aria-expanded:text-app-header-foreground" />}>
         <UserRound aria-hidden="true" />Mi cuenta<ChevronDown className="size-3.5 text-app-header-foreground/70 transition-transform duration-150 group-aria-expanded/account:rotate-180" aria-hidden="true" />
@@ -22,8 +25,10 @@ export function AccountMenu({ roles }: AccountMenuProps) {
           {canViewProfile ? <DropdownMenuItem render={<Link href="/profile/settings" />} className="gap-3 px-3 py-2.5"><Settings aria-hidden="true" />Configuración del perfil</DropdownMenuItem> : null}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <SessionLogoutMenuItem />
+        <SessionLogoutMenuItem onSelect={() => setIsConfirmingLogout(true)} />
       </DropdownMenuContent>
     </DropdownMenu>
+    <LogoutConfirmDialog open={isConfirmingLogout} onOpenChange={setIsConfirmingLogout} />
+    </>
   );
 }

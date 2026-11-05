@@ -30,13 +30,28 @@ describe("Account menu", () => {
     expect(screen.queryByRole("menuitem", { name: "Mi perfil" })).not.toBeInTheDocument();
     expect(screen.queryByRole("menuitem", { name: "Solicitudes de acceso" })).not.toBeInTheDocument();
   });
-  it("closes the session and removes private cached data", async () => {
+  it("asks for confirmation before closing the session and keeps it open when the user cancels", async () => {
+    saveAccessToken("test-token");
+    const user = userEvent.setup();
+    renderWithQuery(<AccountMenu roles={["mentor"]} />);
+    await user.click(screen.getByRole("button", { name: "Mi cuenta" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Cerrar sesión" }));
+
+    expect(await screen.findByText("¿Seguro que deseas cerrar sesión?")).toBeInTheDocument();
+    expect(getAccessToken()).toBe("test-token");
+
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(getAccessToken()).toBe("test-token");
+    expect(replace).not.toHaveBeenCalled();
+  });
+  it("closes the session and removes private cached data once confirmed", async () => {
     saveAccessToken("test-token");
     const user = userEvent.setup();
     const { client } = renderWithQuery(<AccountMenu roles={["mentor"]} />);
     client.setQueryData(["private-data"], { name: "Usuario" });
     await user.click(screen.getByRole("button", { name: "Mi cuenta" }));
     await user.click(await screen.findByRole("menuitem", { name: "Cerrar sesión" }));
+    await user.click(await screen.findByRole("button", { name: "Cerrar sesión" }));
     expect(getAccessToken()).toBeNull();
     expect(client.getQueryCache().getAll()).toHaveLength(0);
     expect(replace).toHaveBeenCalledWith("/login");

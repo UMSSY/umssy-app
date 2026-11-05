@@ -358,12 +358,12 @@ describe('MentorsRepository', () => {
         'mentorOrientationTypes',
         'mentorTechnicalAreas',
         'photoUrl',
-        'userSkills',
         'workExperiences',
       ].sort(),
     );
 
     expect(query?.select).not.toHaveProperty('email');
+    expect(query?.select).not.toHaveProperty('userSkills');
     expect(query?.select).not.toHaveProperty('password');
     expect(query?.select).not.toHaveProperty('phone');
     expect(query?.select).not.toHaveProperty('personalEmail');

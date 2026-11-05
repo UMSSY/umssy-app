@@ -18,9 +18,9 @@ export function AutomationStatus({ status, validation }: AutomationStatusProps) 
   const style = STATE_STYLES[state.key];
   const Icon = style.icon;
   return (
-    <div className="flex flex-col items-start gap-1">
-      <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[12.5px] font-semibold whitespace-nowrap", style.className)}>
-        <Icon className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+    <div className="flex min-w-0 flex-col items-start gap-1">
+      <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[12.5px] font-semibold", style.className)}>
+        <Icon className="size-3.5 shrink-0" strokeWidth={1.75} aria-hidden="true" />
         {state.label}
       </span>
       {state.description ? <span className="text-xs text-text-secondary">{state.description}</span> : null}

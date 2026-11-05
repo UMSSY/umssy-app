@@ -7,7 +7,7 @@ import { WORKSPACE_AREAS } from "@/shared/config/workspace-navigation.config";
 import { getWorkspaceTasks } from "@/shared/utils/get-workspace-tasks";
 import { getRouteRoles } from "@/shared/utils/get-route-roles";
 import { getRolesLabel } from "@/modules/auth";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { PageHeading } from "@/shared/components/layout";
 import { cn } from "cn";
 

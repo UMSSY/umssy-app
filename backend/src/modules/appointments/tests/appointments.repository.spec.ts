@@ -8,6 +8,7 @@ import {
   MENTOR_ID,
   NOW,
 } from './fixtures/appointment-record.fixture.js';
+import { APPOINTMENT_DOCUMENT_METADATA_SELECT } from '../constants/appointment-document-select.constants.js';
 
 describe('AppointmentsRepository', () => {
   const findMany = vi.fn();
@@ -64,10 +65,13 @@ describe('AppointmentsRepository', () => {
       studentId: true,
       startAt: true,
       endAt: true,
+      message: true,
+      requestedAt: true,
       mentor: { select: { id: true, firstName: true, lastName: true } },
       student: { select: { id: true, firstName: true, lastName: true } },
       orientationType: { select: { id: true, name: true } },
       status: { select: { title: true } },
+      document: { select: APPOINTMENT_DOCUMENT_METADATA_SELECT },
     });
   });
 

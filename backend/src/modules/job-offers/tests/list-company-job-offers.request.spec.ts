@@ -16,7 +16,7 @@ function firstIssue(query: Record<string, unknown>) {
 
 describe('listCompanyJobOffersSchema', () => {
   it('sin filtros ordena por fecha de la más reciente a la más antigua', () => {
-    expect(listCompanyJobOffersSchema.parse({})).toEqual({ sortBy: 'createdAt', order: 'desc' });
+    expect(listCompanyJobOffersSchema.parse({})).toEqual({ sortBy: 'publishedAt', order: 'desc' });
   });
 
   it('acepta todos los filtros válidos a la vez', () => {
@@ -128,6 +128,6 @@ describe('listCompanyJobOffersSchema', () => {
         sortBy: '',
         order: '',
       }),
-    ).toEqual({ sortBy: 'createdAt', order: 'desc' });
+    ).toEqual({ sortBy: 'publishedAt', order: 'desc' });
   });
 });

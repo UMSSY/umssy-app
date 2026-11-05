@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
 import { TechnicalAreaCard } from "../components/technical-area-card";
 import { useTechnicalAreas } from "../hooks/use-technical-areas";
