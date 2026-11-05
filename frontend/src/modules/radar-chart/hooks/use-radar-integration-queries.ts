@@ -3,7 +3,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { radarIntegrationApi } from '../services/radar-integration.service';
 
-/** Claves de HU1-HU3: mantener fuera ofertas, postulantes y consentimientos. */
 export const radarQueryKeys = {
   all: ['radar-integration'] as const,
   reviews: () => [...radarQueryKeys.all, 'reviews'] as const,

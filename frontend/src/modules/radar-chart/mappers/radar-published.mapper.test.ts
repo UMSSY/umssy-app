@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { mapPublishedRadar } from './radar-published.mapper';
-import type { IntegrationRadar } from '../sprint2-integration/radar-integration-api';
+import type { IntegrationRadar } from '../services/radar-integration.service';
 
 const createSnapshot = (overrides: Partial<IntegrationRadar> = {}): IntegrationRadar => ({
   dictionaryVersion: '1', userId: 'user-1', status: 'published', version: 4,

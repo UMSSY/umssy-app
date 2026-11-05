@@ -1,6 +1,6 @@
-import type { IntegrationRadar } from '../sprint2-integration/radar-integration-api';
-import { RADAR_AXIS_NAMES } from '../sprint2/types';
-import type { RadarBridgeView, Epic2Skill } from '../sprint2/types';
+import type { IntegrationRadar } from '../services/radar-integration.service';
+import { RADAR_AXIS_NAMES } from '../constants/radar-axis-names.constants';
+import type { RadarBridgeView, Epic2Skill } from '../types/radar-bridge.types';
 
 /** Única fuente de puntuaciones: snapshot persistida del backend. */
 export function mapPublishedRadar(stored: IntegrationRadar): RadarBridgeView {

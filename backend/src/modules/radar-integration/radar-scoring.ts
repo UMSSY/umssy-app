@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 export const AREA_IDS = ['desarrollo','cloud-devops','data-ai','qa','ciberseguridad','gobernanza-ti'] as const;
 export type RadarAreaId = (typeof AREA_IDS)[number];
 export type Scores = Record<RadarAreaId,number>;
-export const RUBRIC_VERSION = 'epic3-provisional-1'; // Pendiente de aprobación formal del PO.
+export const RUBRIC_VERSION = 'epic3-provisional-1';
 export const emptyScores = (): Scores => Object.fromEntries(AREA_IDS.map(id => [id,0])) as Scores;
 export interface EvidenceSkill { id:string; name:string; areaId:string|null; isHighRelevance:boolean; evidenceRefs?:readonly {type:string;id:string}[] }
 export function scoreVerifiedSkills(skills: readonly EvidenceSkill[]): {scores:Scores; evidence:Record<string,{id:string;name:string}[]>; average:number; fingerprint:string} {

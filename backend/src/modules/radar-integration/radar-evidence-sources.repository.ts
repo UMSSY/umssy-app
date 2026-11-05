@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import type { TransactionContext } from '../../common/types/transaction-context.types.js';
 
 @Injectable()
 export class RadarEvidenceSourcesRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  findPublicationCvStates(userId: string, context: TransactionContext) {
+    return context.client.$queryRaw<{ cv_id: string; review_status: string; extraction_status: string }[]>`
+      SELECT cv_id, review_status, extraction_status
+      FROM radar_cv_evidence WHERE user_id=${userId}::uuid`;
+  }
 
   async findCurrentCvText(userId: string): Promise<{ id: string; type: 'cv'; text: string }[]> {
     // Choose the current document before checking readability/review. An unreadable

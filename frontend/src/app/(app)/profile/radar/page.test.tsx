@@ -19,7 +19,7 @@ vi.mock("recharts", async (importOriginal) => {
   };
 });
 
-vi.mock("@/modules/radar-chart/sprint2/use-live-radar", () => ({ useLiveRadar: () => ({
+vi.mock("@/modules/radar-chart/hooks/use-live-radar", () => ({ useLiveRadar: () => ({
  data: mapPublishedRadar({userId:'owner',status:'published',version:1,updatedAt:null,dictionaryVersion:'1',
    rubricVersion:'servidor-v1',scores:{desarrollo:0,'cloud-devops':0,'data-ai':0,qa:0,ciberseguridad:0,'gobernanza-ti':0},
    average:0,variation:null,pending:0,hasPending:false,evidence:{},sourceRevision:1,inputRevision:1,

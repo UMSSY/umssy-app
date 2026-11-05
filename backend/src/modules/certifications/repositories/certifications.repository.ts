@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { mapRecordNotFound } from '../../../common/utils/map-record-not-found.js';
 import { RadarAuditRepository } from '../../radar-integration/radar-audit.repository.js';
 import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
@@ -19,6 +20,12 @@ function metadataOf(document: CertificationDocumentData): CertificationDocumentM
 @Injectable()
 export class CertificationsRepository {
   constructor(private readonly prisma: PrismaService, private readonly audit: RadarAuditRepository) {}
+
+  findPublicationEvidenceIds(userId: string, context: TransactionContext) {
+    return context.client.certification.findMany({
+      where: { userId, documentUrl: { not: null } }, select: { id: true },
+    });
+  }
 
   async findManyByUserId(userId: string): Promise<CertificationRecord[]> {
     const rows = await this.prisma.certification.findMany({ where: { userId }, orderBy: { issueDate: 'desc' }, select: certificationSelect });

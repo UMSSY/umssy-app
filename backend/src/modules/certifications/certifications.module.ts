@@ -8,11 +8,14 @@ import { CertificationMapper } from './mappers/certification.mapper.js';
 import { CertificationsService } from './services/certifications.service.js';
 import { NlpModule } from '../nlp/nlp.module.js';
 import { CertificationSourcesModule } from './certification-sources.module.js';
+import { CertificationsRepository } from './repositories/certifications.repository.js';
+import { RadarAuditModule } from '../radar-integration/radar-audit.module.js';
 
 @Module({
   imports: [
     PrismaModule,
     CertificationSourcesModule,
+    RadarAuditModule,
     JwtAuthModule,
     forwardRef(() => CertificationDocumentsModule),
     NlpModule,
@@ -20,6 +23,7 @@ import { CertificationSourcesModule } from './certification-sources.module.js';
   controllers: [CertificationsController, CertificationSaveController],
   providers: [
     CertificationsService,
+    CertificationsRepository,
     CertificationMapper,
   ],
   exports: [CertificationSourcesModule, CertificationMapper],
