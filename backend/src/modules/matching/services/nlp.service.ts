@@ -3,12 +3,30 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class NlpService {
   private static readonly STOPWORDS = new Set([
-    'a', 'al', 'con', 'de', 'del', 'el', 'en', 'la', 'las', 'los', 'para', 'por', 'un', 'una', 'y',
-    'e', 'o', 'u', 'lo', 'le', 'les', 'se', 'su', 'sus', 'que', 'sin', 'sobre', 'como', 'muy',
-    'unas', 'unos', 'es', 'son', 'ser', 'ha', 'han', 'lidero', 'proyectos', 'desarrollo', 'amplia',
-    'experiencia', 'usamos', 'metodolia', 'uso', 'magistral', 'campos',
-    'the', 'and', 'or', 'of', 'in', 'on', 'to', 'for', 'with', 'an', 'is', 'are',
+    'a', 'al', 'con', 'de', 'del', 'el', 'en', 'la', 'las', 'los',
+    'para', 'por', 'un', 'una', 'y', 'e', 'o', 'u', 'lo', 'le',
+    'les', 'se', 'su', 'sus', 'que', 'sin', 'sobre', 'como', 'muy',
+    'unas', 'unos', 'es', 'son', 'ser', 'ha', 'han', 'lidero',
+    'proyectos', 'desarrollo', 'usamos', 'metodolia', 'uso',
+    'magistral', 'campos',
+    'the', 'and', 'or', 'of', 'in', 'on', 'to', 'for', 'with',
+    'an', 'is', 'are',
   ]);
+
+  private static readonly TECH_ALIASES = [
+    ['java script', 'javascript'],
+    ['react js', 'react'],
+    ['vue js', 'vue.js'],
+    ['next js', 'next.js'],
+    ['node js', 'node.js'],
+    ['nodejs', 'node.js'],
+    ['reactjs', 'react'],
+    ['vuejs', 'vue.js'],
+    ['dotnet', '.net'],
+    ['cc++', 'c++'],
+    ['c #', 'c#'],
+    ['js', 'javascript'],
+  ] as const;
 
   private static readonly INSTITUTIONAL_EXCEPTIONS = new Map<string, string>([
     ['umss', 'UMSS'],
@@ -19,80 +37,83 @@ export class NlpService {
     ['fcyt', 'FCyT'],
   ]);
 
-  private static readonly TECH_ALIASES = new Map<string, string>([
-    ['java script', 'javascript'],
-    ['js', 'javascript'],
-    ['c++', 'cpp'],
-    ['cc++', 'c++'],
-    ['c #', 'c#'],
-    ['node js', 'nodejs'],
-    ['react js', 'react'],
-    ['vue js', 'vue'],
-  ]);
-
-  private static readonly CLEAN_PUNCTUATION_REGEX = /[^\w\sñáéíóúü+#-]/g;
   private static readonly MULTIPLE_SPACES_REGEX = /\s+/g;
-  private static readonly TOKEN_SEPARATOR_REGEX = /[\s,;:!?()[\]{}"'¿¡/|\\•·*]+/u;
 
   normalizeText(text: string): string {
     if (!text) return '';
 
-    let cleaned = text
-      .toLowerCase()
+    return text
       .normalize('NFC')
-      .replace(NlpService.CLEAN_PUNCTUATION_REGEX, '')
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
       .replace(NlpService.MULTIPLE_SPACES_REGEX, ' ')
       .trim();
+  }
 
-    for (const [alias, canonical] of NlpService.TECH_ALIASES.entries()) {
-      if (cleaned.includes(alias)) {
-        cleaned = cleaned.replace(new RegExp(alias, 'g'), canonical);
-      }
-    }
+  private normalizeTechnicalAliases(text: string): string {
+    const aliases = [...NlpService.TECH_ALIASES].sort(
+      (a, b) => b[0].length - a[0].length,
+    );
 
-    return cleaned;
+    return aliases.reduce((result, [alias, canonical]) => {
+      const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      const pattern = new RegExp(
+        `(?<![\\p{L}\\p{N}_.])${escaped}(?![\\p{L}\\p{N}_.])`,
+        'giu',
+      );
+
+      return result.replace(pattern, canonical);
+    }, text);
   }
 
   tokenizeAndFilter(text: string): string[] {
     if (!text) return [];
 
-    const normalized = this.normalizeText(text);
-    const parts = normalized.split(NlpService.TOKEN_SEPARATOR_REGEX);
-    const result: string[] = [];
+    const normalized = this.normalizeTechnicalAliases(
+      text.normalize('NFC').toLowerCase(),
+    );
 
-    for (const part of parts) {
-      const token = part.trim();
-      if (token.length > 0 && !NlpService.STOPWORDS.has(token)) {
-        result.push(token);
-      }
-    }
-    return result;
+    const matches = normalized.match(
+      /\.net|[\p{L}\p{N}_]+(?:\.[\p{L}\p{N}_]+)*(?:\+\+|#)?/giu,
+    );
+
+    if (!matches) return [];
+
+    return matches.filter(
+      (token) =>
+        token.length > 0 &&
+        !NlpService.STOPWORDS.has(token),
+    );
   }
 
   generateNGrams(tokens: string[]): string[] {
     const len = tokens.length;
+
     if (len < 2) return [];
 
     const ngrams: string[] = [];
 
     for (let i = 0; i < len - 1; i++) {
-
       ngrams.push(`${tokens[i]}_${tokens[i + 1]}`);
-      ngrams.push(`${tokens[i]} ${tokens[i + 1]}`);
-
 
       if (i < len - 2) {
-        ngrams.push(`${tokens[i]}_${tokens[i + 1]}_${tokens[i + 2]}`);
-        ngrams.push(`${tokens[i]} ${tokens[i + 1]} ${tokens[i + 2]}`);
+        ngrams.push(
+          `${tokens[i]}_${tokens[i + 1]}_${tokens[i + 2]}`,
+        );
       }
     }
 
-    return ngrams;
+    return [...new Set(ngrams)];
   }
 
   extractRequirementTerms(text: string): string[] {
     if (!text) return [];
+
     const tokens = this.tokenizeAndFilter(text);
+
+    if (tokens.length === 0) return [];
+
     const ngrams = this.generateNGrams(tokens);
 
     return [...new Set([...tokens, ...ngrams])];
