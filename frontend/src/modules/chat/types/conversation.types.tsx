@@ -1,5 +1,5 @@
 import type { MessageAttachment } from './attachment.types';
-import type { EventRoomParticipant } from './event-room.types';
+import type { EventRoomParticipant } from './event-room-participant.types';
 
 export type AttachmentType = 'image' | 'file' | 'audio';
 

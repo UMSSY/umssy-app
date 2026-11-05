@@ -105,7 +105,6 @@ export function EventChatRoomView({
 
   return (
     <div className={cn("flex h-full min-h-0 flex-col")}>
-      {/* Cabecera central: nombre del grupo, N participantes. */}
       <header className={cn("shrink-0 border-b border-border bg-surface px-4 py-3")}>
         <EventRoomHeader
           groupName={room.name}
@@ -114,7 +113,6 @@ export function EventChatRoomView({
       </header>
 
       <main className={cn("flex min-w-0 flex-1 overflow-hidden lg:flex-row")}>
-        {/* Columna central: zona de mensajes + barra de entrada. */}
         <section
           data-testid="event-room-conversation"
           className={cn(
@@ -151,7 +149,6 @@ export function EventChatRoomView({
           />
         </section>
 
-        {/* Columna derecha: Info del grupo (solo pantallas grandes). */}
         <aside className={cn("hidden flex-col border-l border-border bg-surface p-4 lg:flex lg:w-80")}>
           <EventRoomInfoPanel
             groupName={room.name}

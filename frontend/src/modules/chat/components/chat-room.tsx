@@ -461,7 +461,7 @@ function ChatRoomContent({
                 <span
                   data-testid="chat-room-group-icon"
                   aria-hidden="true"
-                  className="absolute -right-1 -bottom-1 flex size-5 items-center justify-center rounded-full border-2 border-surface bg-accent text-surface"
+                  className="absolute -right-1 -bottom-1 flex size-5 items-center justify-center rounded-full border-2 border-surface bg-accent text-accent-foreground"
                 >
                   <Users className="size-2.5" />
                 </span>

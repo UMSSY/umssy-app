@@ -1,4 +1,4 @@
-// Exportacion publica de tipos del modulo de mensajeria
+
 export * from './attachment.types';
 export * from './chat-api.types';
 export * from './chat-connection-status.types';
@@ -11,7 +11,8 @@ export * from './chat-workspace-props.types';
 export * from './connection-request.types';
 export * from './conversation.types';
 export * from './event-chat-room-view-props.types';
-export * from './event-room.types';
+export * from './event-room-participant.types';
+export * from './event-room-summary.types';
 export * from './event-room-empty-state-props.types';
 export * from './event-room-header-props.types';
 export * from './event-room-info-panel-props.types';

@@ -166,7 +166,7 @@ export function MessageItem({
             "min-w-0 rounded-2xl px-3.5 py-2.5 text-sm [overflow-wrap:anywhere] break-words shadow-xs md:max-w-[70%]",
             resolvedAttachment ? "max-w-[90%]" : "max-w-[85%]",
             isOwn
-              ? "rounded-tr-xs bg-accent text-surface"
+              ? "rounded-tr-xs bg-accent text-accent-foreground"
               : "rounded-tl-xs border border-border bg-surface text-ink"
           )}
         >

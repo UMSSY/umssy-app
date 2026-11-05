@@ -1,7 +1,4 @@
-export interface EventRoomParticipant {
-  id: string;
-  fullName: string;
-}
+import type { EventRoomParticipant } from './event-room-participant.types';
 
 export interface EventRoomSummary {
   conversationId: string;

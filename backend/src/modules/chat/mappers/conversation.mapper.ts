@@ -9,7 +9,7 @@ import type {
 import type { RawConversationMessage } from '../types/raw-conversation-message.types.js';
 import type { RawConversationUser } from '../types/raw-conversation-user.types.js';
 import type { RawConversationRecord } from '../types/raw-conversation-record.types.js';
-import type { EventRoomJoinedPayload } from '../types/chat-gateway.types.js';
+import type { EventRoomJoinedPayload } from '../types/event-room-joined-payload.types.js';
 
 @Injectable()
 export class ConversationMapper {
