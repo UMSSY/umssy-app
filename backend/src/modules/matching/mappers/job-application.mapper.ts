@@ -28,11 +28,17 @@ export class JobApplicationMapper {
   toMyApplicationResponse(
     record: JobApplicationRecord | null,
   ): MyJobApplicationResponse {
-    const active = record !== null && record.status.title !== ApplicationStatus.WITHDRAWN;
-    return {
-      hasApplied: active,
-      application: active ? this.toResponse(record) : null,
-    };
+    if (!record || record.status.title === JOB_APPLICATION_STATUS.WITHDRAWN) {
+  return {
+    hasApplied: false,
+    application: null,
+  };
+}
+return {
+  hasApplied: true,
+  application: this.toResponse(record),
+};
+
   }
 
   toApplicantResponse(record: JobApplicantRecord): JobApplicantResponse {
