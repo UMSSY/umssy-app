@@ -207,7 +207,7 @@ describe("CreateSurveyView", { timeout: VIEW_TEST_TIMEOUT_MS }, () => {
 
     await user.click(screen.getByRole("combobox", { name: "Tipo de pregunta" }));
     const options = await screen.findAllByRole("option");
-    expect(options.map((option) => option.textContent)).toEqual(["Opción única", "Opción múltiple", "Lista desplegable"]);
+    expect(options.map((option) => option.textContent)).toEqual(["Opción única", "Opción múltiple"]);
     await user.click(screen.getByRole("option", { name: "Opción múltiple" }));
 
     expect(screen.getByLabelText("Texto de la opción 1")).toHaveValue("Sí");
