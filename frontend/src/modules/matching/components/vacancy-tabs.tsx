@@ -1,10 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { Vacancy } from "../types/matching-types";
 
 interface VacancyTabsProps {
-  vacancies: Vacancy[];
+  vacancies: { id: string; title: string }[];
   activeVacancyId: string;
   onChange: (vacancyId: string) => void;
 }

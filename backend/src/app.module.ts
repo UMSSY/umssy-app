@@ -25,6 +25,7 @@ import { WorkExperienceModule } from './modules/work-experience/work-experience.
 import { ReportsModule } from './modules/reports/reports.module.js';
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js';
 import { MatchingModule } from './modules/matching/matching.module.js';
+import { RadarIntegrationModule } from './modules/radar-integration/radar-integration.module.js';
 
 @Module({
   imports: [
@@ -48,7 +49,7 @@ import { MatchingModule } from './modules/matching/matching.module.js';
     AccessRequestsModule,
     ReportsModule,
     MatchingModule,
-
+    RadarIntegrationModule,
   ],
   controllers: [AppController],
   providers: [

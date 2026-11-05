@@ -1,75 +1,178 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useMatching } from "../hooks/use-matching";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  useRecruiterApplicants,
+  useRecruiterVacancies,
+} from "../hooks/use-radar-recruiter";
+import { RADAR_AXES, type RecruiterApplicant } from "../types/radar-recruiter.types";
+import { RecruiterCandidateList } from "../components/recruiter-candidate-list";
+import { RecruiterCandidatePanel } from "../components/recruiter-candidate-panel";
 import { VacancyTabs } from "../components/vacancy-tabs";
-import { CandidateList } from "../components/candidate-list";
-import { CandidateDetailPanel } from "../components/candidate-detail-panel";
+
+function filterByName(candidates: RecruiterApplicant[], query: string) {
+  const normalized = query.trim().toLocaleLowerCase();
+  if (!normalized) return candidates;
+
+  return candidates.filter((candidate) =>
+    candidate.name.toLocaleLowerCase().includes(normalized)
+  );
+}
 
 export function MatchingView() {
-  const {
-    axes,
-    vacancies,
-    vacancy,
-    vacancyId,
-    selectVacancy,
-    query,
-    setQuery,
-    candidates,
-    selectedCandidate,
-    selectCandidate,
-    pendingDiscardId,
-    requestDiscard,
-    confirmDiscard,
-    cancelDiscard,
-    confirmSchedule,
-    actionFeedback,
-  } = useMatching();
+  const vacanciesQuery = useRecruiterVacancies();
+  const vacancies = vacanciesQuery.data ?? [];
+  const [vacancyId, setVacancyId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(
+    null
+  );
+
+  const activeVacancy =
+    vacancies.find((vacancy) => vacancy.id === vacancyId) ?? vacancies[0] ?? null;
+
+  const applicantsQuery = useRecruiterApplicants(activeVacancy?.id ?? "");
+  const target = applicantsQuery.data?.vacancy ?? null;
+
+  const filteredCandidates = useMemo(
+    () => filterByName(applicantsQuery.data?.applicants ?? [], query),
+    [applicantsQuery.data, query]
+  );
+  const selectedCandidate =
+    filteredCandidates.find(
+      (candidate) => candidate.applicationId === selectedApplicationId
+    ) ??
+    filteredCandidates[0] ??
+    null;
+
+  function selectVacancy(id: string) {
+    setVacancyId(id);
+    setQuery("");
+    setSelectedApplicationId(null);
+  }
+
+  function renderVacancyState() {
+    if (vacanciesQuery.isPending) {
+      return (
+        <Card>
+          <CardContent className="p-6 text-sm text-muted-foreground">
+            Cargando vacantes publicadas...
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (vacanciesQuery.isError) {
+      return (
+        <Card>
+          <CardContent className="flex flex-col gap-3 p-6">
+            <p role="alert" className="text-sm text-destructive">
+              No se pudieron cargar las vacantes publicadas.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="self-start"
+              onClick={() => void vacanciesQuery.refetch()}
+            >
+              Reintentar vacantes
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (vacancies.length === 0) {
+      return (
+        <Card>
+          <CardContent className="p-6 text-sm text-muted-foreground">
+            No hay vacantes publicadas en las empresas vinculadas a tu sesión.
+          </CardContent>
+        </Card>
+      );
+    }
+
+    return (
+      <>
+        <VacancyTabs
+          vacancies={vacancies}
+          activeVacancyId={activeVacancy?.id ?? ""}
+          onChange={selectVacancy}
+        />
+
+        <div className="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-[360px_1fr]">
+          <Card className="flex min-h-[420px] flex-col lg:h-full">
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {target ? `Candidatos · ${target.title}` : "Candidatos"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-1 flex-col">
+              {applicantsQuery.isPending ? (
+                <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                  Cargando postulantes...
+                </p>
+              ) : applicantsQuery.isError ? (
+                <div className="flex flex-col gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+                  <p role="alert" className="text-sm text-destructive">
+                    No se pudieron cargar los postulantes de esta vacante.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="self-start"
+                    onClick={() => void applicantsQuery.refetch()}
+                  >
+                    Reintentar candidatos
+                  </Button>
+                </div>
+              ) : (
+                <RecruiterCandidateList
+                  query={query}
+                  onQueryChange={setQuery}
+                  candidates={filteredCandidates}
+                  selectedApplicationId={selectedCandidate?.applicationId ?? null}
+                  onSelectCandidate={setSelectedApplicationId}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="min-h-[420px] lg:h-full">
+            <RecruiterCandidatePanel
+              key={`${activeVacancy?.id ?? "none"}:${selectedCandidate?.applicationId ?? "none"}`}
+              candidate={selectedCandidate}
+              vacancy={target}
+              axes={RADAR_AXES}
+            />
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-4 p-4 md:p-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold text-foreground">Buscar candidatos por afinidad</h1>
+        <h1 className="text-xl font-semibold text-foreground">
+          Buscar candidatos por afinidad
+        </h1>
         <p className="text-sm text-muted-foreground">
-          Radar Charts · Reclutamiento — HU3: Matriz de Compatibilidad y Análisis de Brechas
+          Radar Charts · Reclutamiento — HU4: Radar de afinidad entre vacantes y
+          egresados publicados
         </p>
       </div>
 
-      <VacancyTabs vacancies={vacancies} activeVacancyId={vacancyId} onChange={selectVacancy} />
-
-      <div className="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-[360px_1fr]">
-        <Card className="flex min-h-[420px] flex-col lg:h-full">
-          <CardHeader>
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {vacancy ? `Candidatos · ${vacancy.title}` : "Candidatos"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-1 flex-col">
-            <CandidateList
-              query={query}
-              onQueryChange={setQuery}
-              candidates={candidates}
-              selectedCandidateId={selectedCandidate?.id ?? null}
-              onSelectCandidate={selectCandidate}
-            />
-          </CardContent>
-        </Card>
-
-        <div className="min-h-[420px] lg:h-full">
-          <CandidateDetailPanel
-            key={`${vacancyId}:${selectedCandidate?.id ?? "none"}`}
-            candidate={selectedCandidate}
-            vacancy={vacancy}
-            axes={axes}
-            pendingDiscardId={pendingDiscardId}
-            onRequestDiscard={requestDiscard}
-            onConfirmDiscard={confirmDiscard}
-            onCancelDiscard={cancelDiscard}
-            onConfirmSchedule={confirmSchedule}
-            actionFeedback={actionFeedback}
-          />
-        </div>
-      </div>
+      {renderVacancyState()}
     </div>
   );
 }
