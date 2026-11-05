@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { CalendarDays } from "lucide-react";
 import { PageHeading } from "@/shared/components/layout/page-heading";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { useMyPasses } from "../hooks/use-my-passes";
 import { RequestFeedback } from "../components/request-feedback";
 import { PassCard } from "../components/pass-card";

@@ -20,6 +20,11 @@ export class UserSkillService {
     private readonly skillsAnalysis: ProfileSkillsAnalysisService,
   ) {}
 
+  async getProfessionalSkills(userId: string): Promise<SkillResponse[]> {
+    const records = await this.userSkillRepository.findAllByUserId(userId);
+    return records.map((record) => this.skillMapper.toUserSkillResponse(record));
+  }
+
   async getUserSkills(userId: string): Promise<SkillResponse[]> {
     await this.ensureProfileExists(userId);
 

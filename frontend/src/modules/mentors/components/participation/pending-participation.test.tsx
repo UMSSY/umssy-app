@@ -1,6 +1,6 @@
 
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { PendingParticipation } from "./pending-participation";
 import * as participationService from "../../services/mentor-participation.service";
@@ -30,13 +30,6 @@ const pendingRequest: participationService.MentorParticipationRequest = {
   orientationTypeIds: ["orientation-technical"],
 };
 
-beforeEach(() => {
-  vi.spyOn(
-    participationService.mentorParticipationService,
-    "getHistory",
-  ).mockResolvedValue([]);
-});
-
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -49,23 +42,24 @@ describe("Participación pendiente HU7-2", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Solicitud pendiente" }),
+      screen.getByRole("heading", { name: "Estado de participación" }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText("PENDING")).toBeInTheDocument();
+    expect(screen.getByText("PENDIENTE")).toBeInTheDocument();
+    expect(screen.queryByText("PENDING")).not.toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", { name: "Modificar solicitud" }),
+      screen.getByRole("button", { name: "Editar áreas técnicas" }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", { name: "Cancelar solicitud" }),
+      screen.getByRole("button", { name: "Cancelar cupo" }),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", { name: "Ver historial" }),
+      screen.getByRole("button", { name: "Editar tipos de orientación" }),
     ).toBeInTheDocument();
   });
 
@@ -75,7 +69,7 @@ describe("Participación pendiente HU7-2", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Modificar solicitud" }),
+      screen.getByRole("button", { name: "Editar áreas técnicas" }),
     );
 
     expect(
@@ -109,7 +103,7 @@ describe("Participación pendiente HU7-2", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Modificar solicitud" }),
+      screen.getByRole("button", { name: "Editar tipos de orientación" }),
     );
 
     fireEvent.click(
@@ -138,7 +132,7 @@ describe("Participación pendiente HU7-2", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Cancelar solicitud" }),
+      screen.getByRole("button", { name: "Cancelar cupo" }),
     );
 
     expect(
@@ -149,6 +143,7 @@ describe("Participación pendiente HU7-2", () => {
   });
 
   it("cancela la solicitud mediante el servicio", async () => {
+    const onCancelled = vi.fn();
     const cancel = vi
       .spyOn(
         participationService.mentorParticipationService,
@@ -160,11 +155,11 @@ describe("Participación pendiente HU7-2", () => {
       });
 
     renderWithQuery(
-      <PendingParticipation request={pendingRequest} />,
+      <PendingParticipation request={pendingRequest} onCancelled={onCancelled} />,
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Cancelar solicitud" }),
+      screen.getByRole("button", { name: "Cancelar cupo" }),
     );
 
     fireEvent.click(
@@ -175,37 +170,19 @@ describe("Participación pendiente HU7-2", () => {
 
     await waitFor(() => {
       expect(cancel).toHaveBeenCalledTimes(1);
+      expect(onCancelled).toHaveBeenCalledTimes(1);
     });
+    expect(screen.queryByText("Solicitud cancelada correctamente")).not.toBeInTheDocument();
   });
 
-  it("consulta el historial de solicitudes", async () => {
-    const getHistory = vi
-      .spyOn(
-        participationService.mentorParticipationService,
-        "getHistory",
-      )
-      .mockResolvedValue([
-        {
-          ...pendingRequest,
-          id: "request-previous",
-          status: "CANCELLED",
-        },
-      ]);
-
-    renderWithQuery(
-      <PendingParticipation request={pendingRequest} />,
-    );
-
-    fireEvent.click(
-      screen.getByRole("button", { name: "Ver historial" }),
-    );
-
-    await waitFor(() => {
-      expect(getHistory).toHaveBeenCalledTimes(1);
-    });
-
-    expect(
-      await screen.findByText("Estado: CANCELLED"),
-    ).toBeInTheDocument();
+  it("muestra el detalle pendiente y permite volver sin historial", () => {
+    renderWithQuery(<PendingParticipation request={{ ...pendingRequest, email: "titulado@umssy.test" }} />);
+    fireEvent.click(screen.getByRole("button", { name: "Ver detalle" }));
+    expect(screen.getByRole("dialog", { name: "Solicitud pendiente" })).toBeInTheDocument();
+    expect(screen.getByText(/Solicitud enviada hace/)).toBeInTheDocument();
+    expect(screen.getByText("titulado@umssy.test")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ver historial" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Volver" }));
+    expect(screen.queryByRole("dialog", { name: "Solicitud pendiente" })).not.toBeInTheDocument();
   });
 });

@@ -38,13 +38,33 @@ describe('UserSkillRepository', () => {
     } as unknown as PrismaService);
   });
 
-  it('lists the manual skills of the user ordered by name', async () => {
-    const records = [{ skill: { id: skillId, name: 'Python', isCustom: false } }];
+  it('reads all professional skills in one query without source or verification filters', async () => {
+    const records = [
+      { skill: { id: skillId, name: 'Python', isCustom: false } },
+      { skill: { id: detectedSkillId, name: 'HTML5', isCustom: false } },
+    ];
+    userSkill.findMany.mockResolvedValue(records);
+
+    await expect(repository.findAllByUserId(userId)).resolves.toBe(records);
+    expect(userSkill.findMany).toHaveBeenCalledExactlyOnceWith({
+      where: { userId },
+      orderBy: { skill: { name: 'asc' } },
+      select,
+    });
+    expect(transaction).not.toHaveBeenCalled();
+  });
+
+  it('lists manual and detected skills of the user ordered by name', async () => {
+    const records = [
+      { skill: { id: skillId, name: 'Python', isCustom: false } },
+      { skill: { id: detectedSkillId, name: 'HTML5', isCustom: false } },
+    ];
     userSkill.findMany.mockResolvedValue(records);
 
     await expect(repository.findByUserId(userId)).resolves.toBe(records);
+
     expect(userSkill.findMany).toHaveBeenCalledWith({
-      where: { userId, source: 'manual' },
+      where: { userId },
       orderBy: { skill: { name: 'asc' } },
       select,
     });

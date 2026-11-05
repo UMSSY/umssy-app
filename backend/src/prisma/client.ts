@@ -177,6 +177,11 @@ export type BlockedDate = Prisma.BlockedDateModel
  */
 export type Appointment = Prisma.AppointmentModel
 /**
+ * Model AppointmentDocument
+ * 
+ */
+export type AppointmentDocument = Prisma.AppointmentDocumentModel
+/**
  * Model TimeProposal
  * 
  */

@@ -1,3 +1,4 @@
+
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -19,7 +20,11 @@ vi.mock("../services/work-experience.service", () => ({
 
 vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
   skillsAnalysisService: {
-    analyzeExperience: vi.fn().mockResolvedValue({ experienceId: "experience-1", skills: [], processingTimeMs: 0 }),
+    analyzeExperience: vi.fn().mockResolvedValue({
+      experienceId: "experience-1",
+      skills: [],
+      processingTimeMs: 0,
+    }),
   },
 }));
 
@@ -30,6 +35,7 @@ function useInMemoryService() {
   vi.mocked(workExperienceService.getWorkExperiences).mockImplementation(() =>
     Promise.resolve([...records]),
   );
+
   vi.mocked(workExperienceService.createWorkExperience).mockImplementation(
     (payload: WorkExperiencePayload) => {
       sequence += 1;
@@ -38,6 +44,7 @@ function useInMemoryService() {
       return Promise.resolve(created);
     },
   );
+
   vi.mocked(workExperienceService.updateWorkExperience).mockImplementation(
     (id: string, payload: WorkExperiencePayload) => {
       const updated = { id, ...payload };
@@ -45,10 +52,13 @@ function useInMemoryService() {
       return Promise.resolve(updated);
     },
   );
-  vi.mocked(workExperienceService.deleteWorkExperience).mockImplementation((id: string) => {
-    records = records.filter((record) => record.id !== id);
-    return Promise.resolve();
-  });
+
+  vi.mocked(workExperienceService.deleteWorkExperience).mockImplementation(
+    (id: string) => {
+      records = records.filter((record) => record.id !== id);
+      return Promise.resolve();
+    },
+  );
 }
 
 async function addExperience(
@@ -64,14 +74,29 @@ async function addExperience(
   await user.click(screen.getByRole("button", { name: "Añadir experiencia" }));
   await user.type(screen.getByLabelText(/Empresa/), values.companyName);
   await user.type(screen.getByLabelText(/Cargo/), values.position);
-  fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: values.startDate } });
+
+  fireEvent.change(screen.getByLabelText(/Desde/), {
+    target: { value: values.startDate },
+  });
+
   if (values.endDate) {
-    fireEvent.change(screen.getByLabelText("Hasta"), { target: { value: values.endDate } });
+    fireEvent.change(screen.getByLabelText("Hasta"), {
+      target: { value: values.endDate },
+    });
   } else {
-    await user.click(screen.getByRole("checkbox", { name: "Trabajo actualmente aquí" }));
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: "Trabajo actualmente aquí",
+      }),
+    );
   }
-  await user.type(screen.getByLabelText(/Descripción de funciones/), values.description);
-  await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
+  await user.type(
+    screen.getByLabelText(/Descripción de funciones/),
+    values.description,
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Guardar experiencia" }),
+  );
   await screen.findByText(values.position);
 }
 
@@ -87,8 +112,12 @@ describe("WorkExperienceView flow", () => {
 
   it("creates two experiences, edits one, cancels a deletion and deletes only the confirmed one", async () => {
     const user = userEvent.setup();
+
     render(<WorkExperienceView />);
-    expect(await screen.findByText("Aún no registraste experiencia laboral.")).toBeInTheDocument();
+
+    expect(
+      await screen.findByText("Aún no registraste experiencia laboral."),
+    ).toBeInTheDocument();
 
     await addExperience(user, {
       companyName: "Tecnored",
@@ -97,6 +126,7 @@ describe("WorkExperienceView flow", () => {
       endDate: "2024-12-31",
       description: "Soporte en prácticas de redes",
     });
+
     await addExperience(user, {
       companyName: "Synapse Labs",
       position: "Desarrolladora web junior",
@@ -104,49 +134,106 @@ describe("WorkExperienceView flow", () => {
       description: "Desarrollo con Python y Scrum",
     });
 
-    const list = screen.getByText("Asistente de laboratorio").closest("ul") as HTMLElement;
-    expect(within(list).getAllByRole("heading").map((item) => item.textContent)).toEqual([
+    const list = screen
+      .getByText("Asistente de laboratorio")
+      .closest("ul") as HTMLElement;
+
+    expect(
+      within(list).getAllByRole("heading").map((item) => item.textContent),
+    ).toEqual([
       "Desarrolladora web junior",
       "Asistente de laboratorio",
     ]);
-    expect(screen.getByText(/Mar 2025 – Actualidad/)).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Editar Asistente de laboratorio" }));
+    expect(
+      screen.getByText(/Mar 2025 – Actualidad/),
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Editar Asistente de laboratorio",
+      }),
+    );
+
     const position = screen.getByLabelText(/Cargo/);
+
     await user.clear(position);
     await user.type(position, "Técnico de laboratorio");
-    await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
-    expect(await screen.findByText("Técnico de laboratorio")).toBeInTheDocument();
-    expect(screen.queryByText("Asistente de laboratorio")).not.toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Guardar experiencia" }),
+    );
+
+    expect(
+      await screen.findByText("Técnico de laboratorio"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("Asistente de laboratorio"),
+    ).not.toBeInTheDocument();
+
     expect(workExperienceService.updateWorkExperience).toHaveBeenCalledWith(
       "experience-1",
-      expect.objectContaining({ companyName: "Tecnored", position: "Técnico de laboratorio" }),
+      expect.objectContaining({
+        companyName: "Tecnored",
+        position: "Técnico de laboratorio",
+      }),
     );
 
-    await user.click(screen.getByRole("button", { name: "Eliminar Técnico de laboratorio" }));
     await user.click(
-      within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Cancelar" }),
+      screen.getByRole("button", {
+        name: "Eliminar Técnico de laboratorio",
+      }),
     );
-    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
-    expect(screen.getByText("Técnico de laboratorio")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Eliminar Desarrolladora web junior" }));
     await user.click(
-      within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Eliminar" }),
+      within(await screen.findByRole("alertdialog")).getByRole("button", {
+        name: "Cancelar",
+      }),
     );
 
     await waitFor(() =>
-      expect(screen.queryByText("Desarrolladora web junior")).not.toBeInTheDocument(),
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument(),
     );
-    expect(screen.getByText("Técnico de laboratorio")).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Técnico de laboratorio"),
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Eliminar Desarrolladora web junior",
+      }),
+    );
+
+    await user.click(
+      within(await screen.findByRole("alertdialog")).getByRole("button", {
+        name: "Eliminar",
+      }),
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Desarrolladora web junior"),
+      ).not.toBeInTheDocument(),
+    );
+
+    expect(
+      screen.getByText("Técnico de laboratorio"),
+    ).toBeInTheDocument();
+
     expect(workExperienceService.deleteWorkExperience).toHaveBeenCalledTimes(1);
-    expect(workExperienceService.deleteWorkExperience).toHaveBeenCalledWith("experience-2");
+
+    expect(workExperienceService.deleteWorkExperience).toHaveBeenCalledWith(
+      "experience-2",
+    );
   }, 20_000);
 
   it("does not save an experience with invalid dates and keeps the saved ones", async () => {
     const user = userEvent.setup();
+
     render(<WorkExperienceView />);
+
     await screen.findByText("Aún no registraste experiencia laboral.");
 
     await addExperience(user, {
@@ -157,23 +244,49 @@ describe("WorkExperienceView flow", () => {
       description: "Soporte en prácticas de redes",
     });
 
-    await user.click(screen.getByRole("button", { name: "Añadir experiencia" }));
+    await user.click(
+      screen.getByRole("button", { name: "Añadir experiencia" }),
+    );
+
     await user.type(screen.getByLabelText(/Empresa/), "UMSS");
     await user.type(screen.getByLabelText(/Cargo/), "Practicante");
-    fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2024-07-01" } });
-    fireEvent.change(screen.getByLabelText("Hasta"), { target: { value: "2024-06-30" } });
-    await user.type(screen.getByLabelText(/Descripción de funciones/), "Soporte técnico");
-    await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
+    fireEvent.change(screen.getByLabelText(/Desde/), {
+      target: { value: "2024-07-01" },
+    });
+
+    fireEvent.change(screen.getByLabelText("Hasta"), {
+      target: { value: "2024-06-30" },
+    });
+
+    await user.type(
+      screen.getByLabelText(/Descripción de funciones/),
+      "Soporte técnico",
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Guardar experiencia" }),
+    );
 
     expect(
-      screen.getByText("La fecha de fin no puede ser anterior a la fecha de inicio."),
+      screen.getByText(
+        "La fecha de fin no puede ser anterior a la fecha de inicio.",
+      ),
     ).toBeInTheDocument();
-    expect(workExperienceService.createWorkExperience).toHaveBeenCalledTimes(1);
-    expect(screen.getByText("Asistente de laboratorio")).toBeInTheDocument();
-    expect(screen.queryByText("Practicante")).not.toBeInTheDocument();
+
+    expect(
+      workExperienceService.createWorkExperience,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      screen.getByText("Asistente de laboratorio"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("Practicante"),
+    ).not.toBeInTheDocument();
   }, 20_000);
 
-  it("shows the detected skills with the analysis time after saving (AC-01.8)", async () => {
+  it("runs the skills analysis silently after saving (AC-01.8)", async () => {
     vi.mocked(skillsAnalysisService.analyzeExperience).mockResolvedValueOnce({
       experienceId: "experience-1",
       skills: [
@@ -182,8 +295,11 @@ describe("WorkExperienceView flow", () => {
       ],
       processingTimeMs: 420,
     });
+
     const user = userEvent.setup();
+
     render(<WorkExperienceView />);
+
     await screen.findByText("Aún no registraste experiencia laboral.");
 
     await addExperience(user, {
@@ -193,19 +309,31 @@ describe("WorkExperienceView flow", () => {
       description: "Desarrollo con Python y Scrum",
     });
 
-    expect(await screen.findByText("Habilidades detectadas automáticamente")).toBeInTheDocument();
-    expect(screen.getByText("Python")).toBeInTheDocument();
-    expect(screen.getByText("Scrum")).toBeInTheDocument();
-    expect(screen.getByText("Análisis completado en 0.42 s")).toBeInTheDocument();
-    expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledWith(
-      "experience-1",
-      "Desarrollo con Python y Scrum",
-    );
+    await waitFor(() => {
+      expect(
+        skillsAnalysisService.analyzeExperience,
+      ).toHaveBeenCalledWith(
+        "experience-1",
+        "Desarrollo con Python y Scrum",
+      );
+    });
+
+    expect(
+      screen.queryByText("Habilidades detectadas automáticamente"),
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByText("Análisis completado en 0.42 s"),
+    ).not.toBeInTheDocument();
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   }, 20_000);
 
   it("saves an experience without detected skills and shows no tags (AC-01.9)", async () => {
     const user = userEvent.setup();
+
     render(<WorkExperienceView />);
+
     await screen.findByText("Aún no registraste experiencia laboral.");
 
     await addExperience(user, {
@@ -215,8 +343,16 @@ describe("WorkExperienceView flow", () => {
       description: "Desarrollo con Python y Scrum",
     });
 
-    await waitFor(() => expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledTimes(1));
-    expect(screen.queryByText("Habilidades detectadas automáticamente")).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        skillsAnalysisService.analyzeExperience,
+      ).toHaveBeenCalledTimes(1),
+    );
+
+    expect(
+      screen.queryByText("Habilidades detectadas automáticamente"),
+    ).not.toBeInTheDocument();
+
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   }, 20_000);
 });

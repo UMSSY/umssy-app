@@ -254,6 +254,7 @@ describe('ProfileSkillsAnalysisService', () => {
     results.markError = vi.fn().mockRejectedValue(new Error('down'));
 
     await expect(service.analyzeNow(userId)).resolves.toMatchObject({ status: 'pending' });
+    expect(logs.some((line) => line.includes('nlp.analysis.mark_error_failed'))).toBe(true);
   });
 
   it('reports the discarded keywords to the owner', async () => {

@@ -41,7 +41,6 @@ export function ActivationConfirmDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isActivating}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            variant="brand"
             disabled={isActivating}
             onClick={(event) => {
               event.preventDefault();

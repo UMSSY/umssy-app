@@ -13,8 +13,8 @@ describe("parseMentorDirectoryState", () => {
       search: "",
       area: "",
       orientation: "",
-      available: false,
-      sort: "name_asc",
+      available: true,
+      sort: "default",
     });
   });
 
@@ -42,7 +42,7 @@ describe("parseMentorDirectoryState", () => {
   it("normaliza parámetros propios sin alterar los ajenos", () => {
     const params = new URLSearchParams("page=02&sort=unknown&available=yes&module=chat");
     expect(normalizeMentorDirectoryParams(params).toString())
-      .toBe("page=1&sort=name_asc&available=false&module=chat");
+      .toBe("page=1&available=true&module=chat");
   });
 
   it("ajusta la página fuera de rango cuando se conoce totalPages", () => {
@@ -63,6 +63,30 @@ describe("updateMentorDirectoryParams", () => {
     expect(next.get("module")).toBe("chat");
   });
 
+  it("conserva filtros y orden al cambiar de página", () => {
+    const current = new URLSearchParams(
+      "page=1&area=Backend&sort=name_desc&module=chat",
+    );
+
+    const next = updateMentorDirectoryParams(current, { page: 2 });
+
+    expect(next.toString()).toBe(
+      "page=2&area=Backend&sort=name_desc&module=chat",
+    );
+  });
+
+  it("representa Por defecto sin sort y reinicia la página", () => {
+    const current = new URLSearchParams(
+      "page=3&sort=affinity&module=chat",
+    );
+
+    const next = updateMentorDirectoryParams(current, { sort: "default" });
+
+    expect(next.get("page")).toBe("1");
+    expect(next.has("sort")).toBe(false);
+    expect(next.get("module")).toBe("chat");
+  });
+
   it("reinicia la página al cambiar un filtro", () => {
     const current = new URLSearchParams("page=3&area=Backend");
 
@@ -76,14 +100,14 @@ describe("updateMentorDirectoryParams", () => {
 
   it("elimina filtros vacíos", () => {
     const current = new URLSearchParams(
-      "page=2&search=hugo&area=Backend&orientation=Orientaci%C3%B3n%20t%C3%A9cnica&available=true",
+      "page=2&search=hugo&area=Backend&orientation=Orientaci%C3%B3n%20t%C3%A9cnica&available=false",
     );
 
     const next = updateMentorDirectoryParams(current, {
       search: "",
       area: "",
       orientation: "",
-      available: false,
+      available: true,
     });
 
     expect(next.get("page")).toBe("1");

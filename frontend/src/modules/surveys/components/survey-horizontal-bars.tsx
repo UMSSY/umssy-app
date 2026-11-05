@@ -22,7 +22,7 @@ export function SurveyHorizontalBars({ options, highlightedId }: SurveyHorizonta
                   "block h-full rounded-full transition-all duration-500",
                   isHighlighted ? "bg-accent" : "bg-primary"
                 )}
-                style={{ width: `${Math.max(option.percentage, option.count > 0 ? 3 : 0)}%` }}
+                style={{ width: `${option.percentage}%` }}
               />
             </span>
             <span className="text-right text-xs whitespace-nowrap tabular-nums sm:text-sm" aria-hidden="true">
