@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { formatAppointmentSchedule, validateAppointmentRequest } from "./appointment-request.utils"
 import { REQUEST_APPOINTMENT_TEXT } from "../constants/request-appointment.constants"
 import type { AvailabilityBlock } from "../types/availability-block.types"
+import { FILE_VALIDATION_MESSAGES } from "@/modules/profile"
 
 const block: AvailabilityBlock = {
   id: "1",
@@ -14,20 +15,38 @@ const block: AvailabilityBlock = {
 }
 
 describe("validateAppointmentRequest", () => {
-  it("acepta un tema elegido y un mensaje vacío", () => {
-    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "" })).toEqual({})
+  it("acepta un tema elegido y un mensaje escrito", () => {
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "Hola", document: null })).toEqual({})
+  })
+
+  it.each(["", "   "])("exige el mensaje para el mentor (%j)", (message) => {
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message, document: null })).toEqual({
+      message: REQUEST_APPOINTMENT_TEXT.missingMessage,
+    })
   })
 
   it("exige el tema de la sesión", () => {
-    expect(validateAppointmentRequest({ orientationTypeId: "", message: "" })).toEqual({
+    expect(validateAppointmentRequest({ orientationTypeId: "", message: "Hola", document: null })).toEqual({
       orientationTypeId: REQUEST_APPOINTMENT_TEXT.missingTopic,
     })
   })
 
   it("acepta 300 caracteres y rechaza 301", () => {
-    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "a".repeat(300) })).toEqual({})
-    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "a".repeat(301) })).toEqual({
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "a".repeat(300), document: null })).toEqual({})
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "a".repeat(301), document: null })).toEqual({
       message: REQUEST_APPOINTMENT_TEXT.messageTooLong,
+    })
+  })
+})
+
+describe("validateAppointmentRequest con documento", () => {
+  it("acepta un documento válido y rechaza uno de otro tipo", () => {
+    const pdf = new File(["x"], "Tesis.pdf", { type: "application/pdf" })
+    const docx = new File(["x"], "notas.docx", { type: "application/msword" })
+
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "Hola", document: pdf })).toEqual({})
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "Hola", document: docx })).toEqual({
+      document: FILE_VALIDATION_MESSAGES.invalidCertificateType,
     })
   })
 })
