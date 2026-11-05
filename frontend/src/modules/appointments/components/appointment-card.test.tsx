@@ -13,6 +13,9 @@ function makeAppointment(overrides: Partial<Appointment> = {}): Appointment {
     counterpart: { id: "mentor-1", fullName: "Ana Pérez", role: "mentor" },
     orientationType: { id: "topic-1", name: "Desarrollo profesional" },
     status: "CONFIRMED",
+    message: "Quiero revisar mi CV",
+    requestedAt: "2026-10-20T22:42:00.000Z",
+    document: null,
     ...overrides,
   };
 }

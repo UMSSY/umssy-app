@@ -1,6 +1,8 @@
 import type { AppointmentCounterpart } from "../types/appointment-counterpart.types";
 import type { AppointmentStatus } from "../types/appointment-status.types";
 
+export const NOT_FOUND_STATUS = 404;
+
 export const APPOINTMENTS_EYEBROW = "Mentorías";
 
 export const APPOINTMENTS_TEXT = {
