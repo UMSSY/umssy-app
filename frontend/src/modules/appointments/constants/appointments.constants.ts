@@ -39,6 +39,7 @@ export const APPOINTMENT_STATUS_CLASSES: Record<AppointmentStatus, string> = {
 };
 
 export const APPOINTMENT_DETAIL_TEXT = {
+  fallbackTitle: "Detalle de la cita",
   titlePrefix: "Cita con",
   loading: "Cargando el detalle de la cita",
   loadError: "No se pudo cargar el detalle de la cita.",
