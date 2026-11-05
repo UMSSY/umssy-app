@@ -33,6 +33,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return (
     <AuthContext.Provider value={{
+      currentUserId: accessToken ? session.data?.id ?? null : null,
       roles: accessToken ? session.data?.roles ?? getSessionRoles(accessToken) : [],
       isLoading: Boolean(accessToken) && session.isPending,
       refreshRoles,
@@ -45,5 +46,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   const accessToken = useSyncExternalStore(subscribeAccessToken, getAccessToken, getServerToken);
-  return context ?? { roles: getSessionRoles(accessToken), isLoading: false, refreshRoles: async () => {} };
+  return context ?? {
+    currentUserId: null,
+    roles: getSessionRoles(accessToken),
+    isLoading: false,
+    refreshRoles: async () => {},
+  };
 }

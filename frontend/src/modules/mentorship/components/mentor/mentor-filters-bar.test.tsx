@@ -105,7 +105,7 @@ describe("MentorFiltersBar", () => {
 
     for (const option of orientationTypes) {
       expect(
-        screen.getByRole("option", { name: option }),
+        await screen.findByRole("option", { name: option }),
       ).toBeInTheDocument();
     }
 

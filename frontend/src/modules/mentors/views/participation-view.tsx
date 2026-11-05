@@ -32,6 +32,14 @@ import {
 
 const getServerToken = () => null;
 
+const notifySuccess = (message: string) => {
+  toast.success(message, {
+    id: "mentor-participation-feedback",
+    duration: 4000,
+    closeButton: true,
+  });
+};
+
 export function ParticipationView({
   registered = false,
   activated = false,
@@ -41,7 +49,7 @@ export function ParticipationView({
 }) {
   const router = useRouter();
   const client = useQueryClient();
-  const { refreshRoles } = useAuth();
+  const { currentUserId, refreshRoles } = useAuth();
   const token = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
@@ -60,23 +68,45 @@ export function ParticipationView({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [hasDraftStorageError, setHasDraftStorageError] = useState(false);
-  const [notice, setNotice] = useState<string | null>(
-    activated
-      ? "Participación activada correctamente"
-      : registered
-        ? "Solicitud de cupo registrada correctamente"
-        : null,
-  );
   const inFlight = useRef(false);
+  const navigationFeedbackHandled = useRef(false);
 
   useEffect(() => {
-    if (!notice) return;
-    toast.success(notice, {
-      id: "mentor-participation-feedback",
-      duration: 4000,
-      closeButton: true,
-    });
-  }, [notice]);
+    if (navigationFeedbackHandled.current || (!registered && !activated)) return;
+    if (participation.isLoading || !request.isSuccess) return;
+    navigationFeedbackHandled.current = true;
+
+    const url = new URL(window.location.href);
+    const hasActivationFeedback =
+      activated && url.searchParams.get("activated") === "1";
+    const hasRegistrationFeedback =
+      registered && url.searchParams.get("registered") === "1";
+    url.searchParams.delete("registered");
+    url.searchParams.delete("activated");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+
+    if (hasActivationFeedback && participation.state?.status === "ACTIVE") {
+      notifySuccess("Participación activada correctamente");
+    } else if (
+      hasRegistrationFeedback &&
+      !hasActivationFeedback &&
+      participation.state?.status !== "ACTIVE" &&
+      ["PENDING", "OFFERED"].includes(request.data?.status ?? "")
+    ) {
+      notifySuccess("Solicitud de cupo registrada correctamente");
+    }
+  }, [
+    registered,
+    activated,
+    participation.isLoading,
+    participation.state?.status,
+    request.isSuccess,
+    request.data?.status,
+  ]);
 
   const deactivate = async () => {
     if (inFlight.current) return;
@@ -95,7 +125,7 @@ export function ParticipationView({
         client.invalidateQueries({ queryKey: ["mentorship", "profile"] }),
       ]);
       setModal(null);
-      setNotice("Participación desactivada correctamente");
+      notifySuccess("Participación desactivada correctamente");
     } catch (failure) {
       setError(failure);
     } finally {
@@ -110,6 +140,7 @@ export function ParticipationView({
   const isActive = state?.status === "ACTIVE";
   const hasHistory = state?.status === "DEACTIVATED";
   const currentRequest = request.data;
+  const hasOpenRequest = ["PENDING", "OFFERED"].includes(currentRequest?.status ?? "");
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -133,7 +164,7 @@ export function ParticipationView({
           </Button>
         </Alert>
       )}
-      {(isActive || hasHistory) && (
+      {(isActive || (hasHistory && !request.isPending && !hasOpenRequest)) && (
         <ParticipationOverview
           isActive={isActive}
           actionEnabled={
@@ -155,8 +186,7 @@ export function ParticipationView({
       {!isActive && currentRequest?.status === "PENDING" && (
         <PendingParticipation
           request={currentRequest}
-          showHeading={!hasHistory}
-          onCancelled={() => setNotice("Solicitud cancelada correctamente")}
+          onCancelled={() => notifySuccess("Solicitud cancelada correctamente")}
         />
       )}
       {!isActive &&
@@ -165,7 +195,6 @@ export function ParticipationView({
           <SlotOfferParticipation
             key={currentRequest.offer.id}
             request={currentRequest}
-            showHeading={!hasHistory}
             onConfirmed={() => {
               void refreshRoles();
               void client.invalidateQueries({
@@ -177,7 +206,7 @@ export function ParticipationView({
               void client.invalidateQueries({
                 queryKey: ["mentorship", "profile"],
               });
-              setNotice("Participación activada correctamente");
+              notifySuccess("Participación activada correctamente");
             }}
           />
         ) : (
@@ -196,16 +225,12 @@ export function ParticipationView({
             <ParticipationEmptyState />
           </div>
         )}
-      {!isActive &&
-        ["EXPIRED", "CANCELLED"].includes(currentRequest?.status ?? "") && (
-          <p role="status">
-            {currentRequest?.status === "EXPIRED"
-              ? "La oferta venció."
-              : "La solicitud fue cancelada."}{" "}
-            Puedes revisar las condiciones vigentes en el proceso de
-            incorporación.
-          </p>
-        )}
+      {!isActive && currentRequest?.status === "EXPIRED" && (
+        <p role="status">
+          La oferta venció. Puedes revisar las condiciones vigentes en el proceso
+          de incorporación.
+        </p>
+      )}
       <DeactivateParticipationModal
         isOpen={modal === "deactivate"}
         onClose={() => setModal(null)}
@@ -231,9 +256,10 @@ export function ParticipationView({
               return;
             }
             try {
-              const draft = await loadMentorshipWizardDraft();
+              if (!currentUserId) throw new Error("Identidad no disponible");
+              const draft = await loadMentorshipWizardDraft(currentUserId);
               if (!draft)
-                await saveMentorshipWizardDraft({
+                await saveMentorshipWizardDraft(currentUserId, {
                   currentStep: 1,
                   wantsToParticipate: true,
                   selectedTechnicalAreaIds: (state?.areas ?? []).map(

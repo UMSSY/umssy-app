@@ -49,7 +49,7 @@ export function MentorDirectoryPagination({
       </p>
 
       <Pagination aria-label="Páginas de mentores" className="mx-0 w-auto">
-        <PaginationContent className="flex-wrap justify-center gap-2">
+        <PaginationContent className="flex-nowrap justify-center gap-1">
           {totalPages > 1 && (
             <PaginationItem>
               <Button
