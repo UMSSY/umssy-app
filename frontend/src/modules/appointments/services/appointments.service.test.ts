@@ -63,3 +63,59 @@ describe("uploadDocument", () => {
     expect(result).toEqual(document)
   })
 })
+
+describe("getById", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("pide el detalle de la cita", async () => {
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue(envelope({ id: "a1" }))
+
+    const result = await appointmentsApi.getById("a1")
+
+    expect(get).toHaveBeenCalledWith("/appointments/a1")
+    expect(result).toEqual({ id: "a1" })
+  })
+})
+
+describe("getCounterpartPhoto", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("descarga la foto de la otra persona como blob", async () => {
+    const photo = new Blob(["png"], { type: "image/png" })
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue({ data: photo })
+
+    await expect(appointmentsApi.getCounterpartPhoto("a1")).resolves.toBe(photo)
+    expect(get).toHaveBeenCalledWith("/appointments/a1/counterpart-photo", { responseType: "blob" })
+  })
+
+  it("devuelve null si la otra persona no tiene foto", async () => {
+    vi.spyOn(apiClient, "get").mockRejectedValue({ isAxiosError: true, response: { status: 404 } })
+
+    await expect(appointmentsApi.getCounterpartPhoto("a1")).resolves.toBeNull()
+  })
+
+  it("propaga otros errores", async () => {
+    const error = { isAxiosError: true, response: { status: 500 } }
+    vi.spyOn(apiClient, "get").mockRejectedValue(error)
+
+    await expect(appointmentsApi.getCounterpartPhoto("a1")).rejects.toBe(error)
+  })
+})
+
+describe("downloadDocument", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("descarga el documento de la cita como blob", async () => {
+    const file = new Blob(["%PDF"], { type: "application/pdf" })
+    const get = vi.spyOn(apiClient, "get").mockResolvedValue({ data: file })
+
+    await expect(appointmentsApi.downloadDocument("a1")).resolves.toBe(file)
+    expect(get).toHaveBeenCalledWith("/appointments/a1/document", { responseType: "blob" })
+  })
+})
