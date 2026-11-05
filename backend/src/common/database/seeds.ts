@@ -10,6 +10,7 @@ import { seedEventRegistrations } from '../../modules/event-registrations/seeds/
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
 import { seedJobOffers } from '../../modules/job-offers/seeds/job-offers.seed.js';
+import { seedRadar } from '../../modules/radar-integration/seeds/radar.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
 import { SEED_USERS } from '../../modules/users/constants/seed-users.constants.js';
@@ -57,6 +58,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
 
       const usersResult = await seedUsers(tx, password);
       const { users } = usersResult;
+      await seedRadar(tx, users);
       await seedEvents(tx, users.eventGraduate.id);
       await seedEventRegistrations(tx, users.eventGraduate.id);
       const availabilityResult = await seedAvailability(

@@ -11,6 +11,7 @@ import { seedAvailability } from '../../modules/availability/seeds/availability.
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
+import { seedRadar } from '../../modules/radar-integration/seeds/radar.seed.js';
 
 vi.mock('../../modules/users/seeds/users.seed.js', () => ({
   hashSeedPassword: vi.fn(),
@@ -38,6 +39,9 @@ vi.mock('../../modules/orientation-types/seeds/orientation-types.seed.js', () =>
 }));
 vi.mock('../../modules/job-offers/seeds/job-offers.seed.js', () => ({
   seedJobOffers: vi.fn(),
+}));
+vi.mock('../../modules/radar-integration/seeds/radar.seed.js', () => ({
+  seedRadar: vi.fn(),
 }));
 
 const users = {
@@ -89,6 +93,7 @@ describe('combined events and availability seed', () => {
     expect(seedTechnicalAreas).toHaveBeenCalledBefore(vi.mocked(seedUsers));
     expect(seedOrientationTypes).toHaveBeenCalledBefore(vi.mocked(seedUsers));
     expect(seedUsers).toHaveBeenCalledBefore(vi.mocked(seedEvents));
+    expect(seedRadar).toHaveBeenCalledWith(tx, expect.any(Object));
     expect(seedEvents).toHaveBeenCalledWith(tx, 'event-graduate');
     expect(seedEventRegistrations).toHaveBeenCalledWith(tx, 'event-graduate');
     expect(seedEvents).toHaveBeenCalledBefore(
