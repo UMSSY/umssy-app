@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { AppointmentStatusTitle } from '../../availability/enums/appointment-status-title.enum.js';
+import { AppointmentDocumentMapper } from './appointment-document.mapper.js';
 import type { AppointmentRecord } from '../types/appointment-record.types.js';
 import type { MyAppointmentResponse } from '../types/my-appointment-response.types.js';
 
 @Injectable()
 export class AppointmentMapper {
+  constructor(private readonly documentMapper: AppointmentDocumentMapper) {}
+
   toResponse(
     appointment: AppointmentRecord,
     userId: string,
@@ -31,7 +34,9 @@ export class AppointmentMapper {
           : appointment.status.title,
       message: appointment.message,
       requestedAt: appointment.requestedAt.toISOString(),
-      document: appointment.document,
+      document: appointment.document
+        ? this.documentMapper.toResponse(appointment.document)
+        : null,
     };
   }
 

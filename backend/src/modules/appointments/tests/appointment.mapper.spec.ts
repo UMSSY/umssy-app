@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { AppointmentDocumentMapper } from '../mappers/appointment-document.mapper.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
 import {
   createAppointmentRecord,
@@ -11,7 +12,7 @@ describe('AppointmentMapper', () => {
   let mapper: AppointmentMapper;
 
   beforeEach(() => {
-    mapper = new AppointmentMapper();
+    mapper = new AppointmentMapper(new AppointmentDocumentMapper());
   });
 
   it('returns the persisted appointment times as ISO UTC and the student to its mentor', () => {
@@ -39,6 +40,7 @@ describe('AppointmentMapper', () => {
       fileName: 'cv-luis-flores.pdf',
       sizeBytes: 245760,
       mimeType: 'application/pdf',
+      uploadedAt: new Date('2026-10-22T09:20:00-04:00'),
     };
     const record = createAppointmentRecord({
       message: 'Quiero revisar mi CV',
@@ -49,7 +51,12 @@ describe('AppointmentMapper', () => {
     expect(mapper.toResponse(record, MENTOR_ID)).toMatchObject({
       message: 'Quiero revisar mi CV',
       requestedAt: '2026-10-22T13:15:00.000Z',
-      document,
+      document: {
+        fileName: 'cv-luis-flores.pdf',
+        sizeBytes: 245760,
+        mimeType: 'application/pdf',
+        uploadedAt: '2026-10-22T13:20:00.000Z',
+      },
     });
   });
 
