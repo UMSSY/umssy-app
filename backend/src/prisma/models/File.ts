@@ -434,10 +434,6 @@ export type FileNullableScalarRelationFilter = {
   isNot?: Prisma.FileWhereInput | null
 }
 
-export type BytesFieldUpdateOperationsInput = {
-  set?: runtime.Bytes
-}
-
 export type FileCreateNestedOneWithoutAccessRequestInput = {
   create?: Prisma.XOR<Prisma.FileCreateWithoutAccessRequestInput, Prisma.FileUncheckedCreateWithoutAccessRequestInput>
   connectOrCreate?: Prisma.FileCreateOrConnectWithoutAccessRequestInput
