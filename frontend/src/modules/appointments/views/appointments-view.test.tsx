@@ -24,9 +24,12 @@ function makeAppointment(
     blockId: "block-1",
     startAt: "2026-10-27T00:00:00.000Z",
     endAt: "2026-10-27T01:00:00.000Z",
-    counterpart: { id: "mentor-1", fullName: "Ana Pérez" },
+    counterpart: { id: "mentor-1", fullName: "Ana Pérez", role: "mentor" },
     orientationType: { id: "topic-1", name: "Desarrollo profesional" },
     status: "CONFIRMED",
+    message: "Quiero revisar mi CV",
+    requestedAt: "2026-10-20T22:42:00.000Z",
+    document: null,
     ...overrides,
   };
 }
@@ -49,6 +52,43 @@ afterEach(() => {
 });
 
 describe("AppointmentsView", () => {
+  it.each(["upcoming", "past"] as const)(
+    "en %s muestra a la otra persona con su rol para usuarios con ambos roles",
+    async (scope) => {
+      vi.mocked(useAuth).mockReturnValue({
+        currentUserId: "user-a",
+        roles: ["mentor", "titulado"],
+        isLoading: false,
+        refreshRoles: vi.fn().mockResolvedValue(undefined),
+      });
+      vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue([
+        makeAppointment(),
+        makeAppointment({
+          id: "as-mentor",
+          counterpart: { id: "student-1", fullName: "Luis Flores", role: "student" },
+        }),
+      ]);
+      const user = userEvent.setup();
+      renderWithQuery(<AppointmentsView />);
+      if (scope === "past") {
+        await user.click(screen.getByRole("tab", { name: "Pasadas" }));
+      }
+      expect(
+        await screen.findByRole("button", { name: /Ana Pérez/ }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /Luis Flores/ }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Mentor · Desarrollo profesional"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Titulado · Desarrollo profesional"),
+      ).toBeInTheDocument();
+      expect(appointmentsApi.getMyAppointments).toHaveBeenCalledWith(scope);
+    },
+  );
+
   it("muestra próximas inicialmente y ofrece buscar mentores al titulado sin citas", async () => {
     renderWithQuery(<AppointmentsView />);
 
@@ -151,7 +191,7 @@ describe("AppointmentsView", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("muestra nombre, tema, estado y fecha y horario de Bolivia", async () => {
+  it("muestra día, nombre, tema, estado y horario de Bolivia", async () => {
     vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue([
       makeAppointment(),
     ]);
@@ -159,15 +199,14 @@ describe("AppointmentsView", () => {
     renderWithQuery(<AppointmentsView />);
 
     expect(await screen.findByText("Ana Pérez")).toBeInTheDocument();
+    expect(screen.getByText("LUN")).toBeInTheDocument();
+    expect(screen.getByText("26")).toBeInTheDocument();
+    expect(screen.getByText("oct")).toBeInTheDocument();
     expect(
-      screen.getByText("Tema: Desarrollo profesional"),
+      screen.getByText("Mentor · Desarrollo profesional"),
     ).toBeInTheDocument();
+    expect(screen.getByText("20:00 - 21:00 · Hora de Bolivia (GMT-4)")).toBeInTheDocument();
     expect(screen.getByText("Confirmada")).toBeInTheDocument();
-    expect(screen.getByText("26 de octubre de 2026")).toBeInTheDocument();
-    expect(screen.getByText("20:00 - 21:00")).toBeInTheDocument();
-    expect(
-      screen.getByText("Hora de Bolivia (GMT-4)"),
-    ).toBeInTheDocument();
   });
 
   it("muestra una alternativa cuando la cita no tiene tema", async () => {
@@ -178,7 +217,7 @@ describe("AppointmentsView", () => {
     renderWithQuery(<AppointmentsView />);
 
     expect(
-      await screen.findByText("Tema: Tema no especificado"),
+      await screen.findByText("Mentor · Tema no especificado"),
     ).toBeInTheDocument();
   });
 
@@ -191,13 +230,13 @@ describe("AppointmentsView", () => {
           ? [
               makeAppointment({
                 id: "next-1",
-                counterpart: { id: "m1", fullName: "Primera próxima" },
+                counterpart: { id: "m1", fullName: "Primera próxima", role: "mentor" },
               }),
               makeAppointment({
                 id: "next-2",
                 startAt: "2026-10-28T00:00:00.000Z",
                 endAt: "2026-10-28T01:00:00.000Z",
-                counterpart: { id: "m2", fullName: "Segunda próxima" },
+                counterpart: { id: "m2", fullName: "Segunda próxima", role: "mentor" },
               }),
             ]
           : [
@@ -205,13 +244,13 @@ describe("AppointmentsView", () => {
                 id: "past-1",
                 startAt: "2026-10-25T00:00:00.000Z",
                 endAt: "2026-10-25T01:00:00.000Z",
-                counterpart: { id: "m3", fullName: "Pasada reciente" },
+                counterpart: { id: "m3", fullName: "Pasada reciente", role: "mentor" },
               }),
               makeAppointment({
                 id: "past-2",
                 startAt: "2026-10-24T00:00:00.000Z",
                 endAt: "2026-10-24T01:00:00.000Z",
-                counterpart: { id: "m4", fullName: "Pasada anterior" },
+                counterpart: { id: "m4", fullName: "Pasada anterior", role: "mentor" },
               }),
             ],
     );
@@ -254,5 +293,41 @@ describe("AppointmentsView", () => {
         screen.queryByText("Pasada reciente"),
       ).not.toBeInTheDocument();
     });
+  });
+
+  it("abre el detalle al tocar una cita y lo cierra", async () => {
+    const user = userEvent.setup();
+    vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue([makeAppointment()]);
+    const getById = vi.spyOn(appointmentsApi, "getById").mockResolvedValue(makeAppointment());
+    vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null);
+
+    renderWithQuery(<AppointmentsView />);
+    await user.click(await screen.findByRole("button", { name: /Ana Pérez/ }));
+
+    expect(
+      await screen.findByRole("heading", { name: "Cita con Ana Pérez" }),
+    ).toBeInTheDocument();
+    expect(getById).toHaveBeenCalledWith("appointment-1");
+
+    await user.click(screen.getByRole("button", { name: "Cerrar" }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: "Cita con Ana Pérez" })).not.toBeInTheDocument(),
+    );
+  });
+
+  it("abre el detalle con el teclado", async () => {
+    const user = userEvent.setup();
+    vi.mocked(appointmentsApi.getMyAppointments).mockResolvedValue([makeAppointment()]);
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(makeAppointment());
+    vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null);
+
+    renderWithQuery(<AppointmentsView />);
+    (await screen.findByRole("button", { name: /Ana Pérez/ })).focus();
+    await user.keyboard("{Enter}");
+
+    expect(
+      await screen.findByRole("heading", { name: "Cita con Ana Pérez" }),
+    ).toBeInTheDocument();
   });
 });

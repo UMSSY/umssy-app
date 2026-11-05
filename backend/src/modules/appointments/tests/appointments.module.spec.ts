@@ -9,6 +9,8 @@ import { AvailabilityModule } from '../../availability/availability.module.js';
 import { AvailabilityService } from '../../availability/services/availability.service.js';
 import { MentorsModule } from '../../mentors/mentors.module.js';
 import { MentorsService } from '../../mentors/services/mentors.service.js';
+import { ProfileModule } from '../../profile/profile.module.js';
+import { ProfilePhotoService } from '../../profile/services/profile-photo.service.js';
 import { AppointmentsModule } from '../appointments.module.js';
 import { AppointmentsController } from '../controllers/appointments.controller.js';
 import { AppointmentMapper } from '../mappers/appointment.mapper.js';
@@ -47,12 +49,13 @@ describe('AppointmentsModule', () => {
     expect(moduleRef.get(provider)).toBeInstanceOf(provider);
   });
 
-  it('reutiliza las instancias de los servicios de availability y mentors', () => {
+  it('reutiliza las instancias de los servicios de availability, mentors y profile', () => {
     const appointmentsContext = moduleRef.select(AppointmentsModule);
 
     for (const [dependencyModule, service] of [
       [AvailabilityModule, AvailabilityService],
       [MentorsModule, MentorsService],
+      [ProfileModule, ProfilePhotoService],
     ] as const) {
       expect(appointmentsContext.get(service)).toBe(
         moduleRef.select(dependencyModule).get(service, { strict: true }),
