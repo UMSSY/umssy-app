@@ -62,4 +62,23 @@ describe('useLiveRadar', () => {
     await act(async () => { resolve(stored); await Promise.resolve(); });
     expect(result.current.data).toBeNull();
   });
+
+  it('keeps previous snapshot when recalculate fails with 409 or network error', async () => {
+    vi.mocked(radarIntegrationApi.me).mockResolvedValue({ ...stored, sourceRevision: null });
+    vi.mocked(radarIntegrationApi.recalculate).mockRejectedValueOnce({
+      isAxiosError: true,
+      response: { status: 409, data: { detail: 'El cálculo de afinidad se encuentra en proceso. Se actualizará en breve.' } },
+    });
+    const { result } = renderHook(useLiveRadar);
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.data?.version).toBe(2);
+    expect(result.current.data?.status).toBe('pending');
+  });
+
+  it('resolves descriptive error messages for different failure kinds', async () => {
+    vi.mocked(radarIntegrationApi.me).mockRejectedValueOnce(new Error('Syntax breakdown'));
+    const { result } = renderHook(useLiveRadar);
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.error).toBe('Error al procesar los datos del radar: Syntax breakdown');
+  });
 });
