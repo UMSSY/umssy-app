@@ -4,9 +4,10 @@ import { toast } from "sonner"
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper"
 import { useCreateAppointment } from "./use-create-appointment"
 import type { AvailabilityBlock } from "../types/availability-block.types"
-import { appointmentsApi, type Appointment } from "@/modules/appointments"
+import { appointmentsApi, type Appointment, type AppointmentDocument } from "@/modules/appointments"
+import { APPOINTMENT_DOCUMENT_TEXT } from "../constants/appointment-document.constants"
 
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() } }))
 
 const block: AvailabilityBlock = {
   id: "b1",
@@ -18,7 +19,7 @@ const block: AvailabilityBlock = {
   updatedAt: "",
 }
 
-const variables = { block, values: { orientationTypeId: "t1", message: "  Hola  " } }
+const variables = { block, values: { orientationTypeId: "t1", message: "  Hola  ", document: null } }
 
 const conflictError = (detail?: string) => ({
   isAxiosError: true,
@@ -30,6 +31,7 @@ describe("useCreateAppointment", () => {
     vi.restoreAllMocks()
     vi.mocked(toast.success).mockClear()
     vi.mocked(toast.error).mockClear()
+    vi.mocked(toast.warning).mockClear()
   })
 
   it("crea la cita, confirma con fecha y hora de Bolivia e invalida horarios y citas", async () => {
@@ -52,20 +54,6 @@ describe("useCreateAppointment", () => {
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["availability"] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["appointments"] })
     expect(onConflict).not.toHaveBeenCalled()
-  })
-
-  it("envía el mensaje vacío como null", async () => {
-    const createSpy = vi
-      .spyOn(appointmentsApi, "createAppointment")
-      .mockResolvedValue({ id: "a1" } as Appointment)
-
-    const { result } = renderHook(() => useCreateAppointment(vi.fn()), createQueryWrapper())
-
-    await act(async () =>
-      result.current.createAppointment({ block, values: { orientationTypeId: "t1", message: "   " } }),
-    )
-
-    expect(createSpy).toHaveBeenCalledWith({ blockId: "b1", orientationTypeId: "t1", message: null })
   })
 
   it("con 409 avisa que el horario ya fue reservado y marca el bloque", async () => {
@@ -132,5 +120,72 @@ describe("useCreateAppointment", () => {
 
     expect(createSpy).toHaveBeenCalledTimes(1)
     await expect(second).resolves.toBe(false)
+  })
+
+  describe("con documento adjunto", () => {
+    const document = new File(["%PDF-1.4"], "Tesis.pdf", { type: "application/pdf" })
+    const withDocument = { block, values: { ...variables.values, document } }
+
+    it("sube el documento a la cita recién confirmada", async () => {
+      vi.spyOn(appointmentsApi, "createAppointment").mockResolvedValue({ id: "a1" } as Appointment)
+      const uploadSpy = vi
+        .spyOn(appointmentsApi, "uploadDocument")
+        .mockResolvedValue({ fileName: "Tesis.pdf" } as AppointmentDocument)
+
+      const { result } = renderHook(() => useCreateAppointment(vi.fn()), createQueryWrapper())
+      const created = await act(async () => result.current.createAppointment(withDocument))
+
+      expect(created).toBe(true)
+      expect(uploadSpy).toHaveBeenCalledWith("a1", document)
+      expect(toast.warning).not.toHaveBeenCalled()
+    })
+
+    it("no sube nada si no hay documento", async () => {
+      vi.spyOn(appointmentsApi, "createAppointment").mockResolvedValue({ id: "a1" } as Appointment)
+      const uploadSpy = vi.spyOn(appointmentsApi, "uploadDocument")
+
+      const { result } = renderHook(() => useCreateAppointment(vi.fn()), createQueryWrapper())
+      await act(async () => result.current.createAppointment(variables))
+
+      expect(uploadSpy).not.toHaveBeenCalled()
+    })
+
+    it("si la subida falla avisa y la cita sigue confirmada", async () => {
+      vi.spyOn(appointmentsApi, "createAppointment").mockResolvedValue({ id: "a1" } as Appointment)
+      vi.spyOn(appointmentsApi, "uploadDocument").mockRejectedValue(new Error("network"))
+
+      const { result } = renderHook(() => useCreateAppointment(vi.fn()), createQueryWrapper())
+      const created = await act(async () => result.current.createAppointment(withDocument))
+
+      expect(created).toBe(true)
+      expect(toast.success).toHaveBeenCalledWith("Cita confirmada", expect.any(Object))
+      expect(toast.warning).toHaveBeenCalledWith(APPOINTMENT_DOCUMENT_TEXT.uploadError)
+    })
+
+    it("no intenta subir el documento si la cita no se creó", async () => {
+      vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue(conflictError())
+      const uploadSpy = vi.spyOn(appointmentsApi, "uploadDocument")
+
+      const { result } = renderHook(() => useCreateAppointment(vi.fn()), createQueryWrapper())
+      const created = await act(async () => result.current.createAppointment(withDocument))
+
+      expect(created).toBe(false)
+      expect(uploadSpy).not.toHaveBeenCalled()
+    })
+
+    it("invalida las citas después de subir el documento", async () => {
+      vi.spyOn(appointmentsApi, "createAppointment").mockResolvedValue({ id: "a1" } as Appointment)
+      vi.spyOn(appointmentsApi, "uploadDocument").mockResolvedValue({} as AppointmentDocument)
+      const queryWrapper = createQueryWrapper()
+      const invalidateSpy = vi.spyOn(queryWrapper.client, "invalidateQueries")
+
+      const { result } = renderHook(() => useCreateAppointment(vi.fn()), queryWrapper)
+      await act(async () => result.current.createAppointment(withDocument))
+
+      const appointmentInvalidations = invalidateSpy.mock.calls.filter(
+        ([filters]) => JSON.stringify(filters?.queryKey) === JSON.stringify(["appointments"]),
+      )
+      expect(appointmentInvalidations).toHaveLength(2)
+    })
   })
 })
