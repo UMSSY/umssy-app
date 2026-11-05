@@ -7,11 +7,13 @@ import {
 import type { AppointmentRequestErrors } from "../types/appointment-request-errors.types";
 import type { AppointmentRequestValues } from "../types/appointment-request-values.types";
 import type { AvailabilityBlock } from "../types/availability-block.types";
+import { validateAppointmentDocument } from "./appointment-document.utils";
 import { formatBlockDate } from "./block-selection.utils";
 
 export function validateAppointmentRequest({
   orientationTypeId,
   message,
+  document,
 }: AppointmentRequestValues): AppointmentRequestErrors {
   const errors: AppointmentRequestErrors = {};
   if (!orientationTypeId) errors.orientationTypeId = REQUEST_APPOINTMENT_TEXT.missingTopic;
@@ -20,6 +22,8 @@ export function validateAppointmentRequest({
   else if (trimmedMessage.length > APPOINTMENT_MESSAGE_MAX_LENGTH) {
     errors.message = REQUEST_APPOINTMENT_TEXT.messageTooLong;
   }
+  const documentError = document ? validateAppointmentDocument(document) : null;
+  if (documentError) errors.document = documentError;
   return errors;
 }
 

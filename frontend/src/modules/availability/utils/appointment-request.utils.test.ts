@@ -15,24 +15,24 @@ const block: AvailabilityBlock = {
 
 describe("validateAppointmentRequest", () => {
   it("acepta un tema elegido y un mensaje escrito", () => {
-    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "Hola" })).toEqual({})
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "Hola", document: null })).toEqual({})
   })
 
   it.each(["", "   "])("exige el mensaje para el mentor (%j)", (message) => {
-    expect(validateAppointmentRequest({ orientationTypeId: "t1", message })).toEqual({
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message, document: null })).toEqual({
       message: REQUEST_APPOINTMENT_TEXT.missingMessage,
     })
   })
 
   it("exige el tema de la sesión", () => {
-    expect(validateAppointmentRequest({ orientationTypeId: "", message: "Hola" })).toEqual({
+    expect(validateAppointmentRequest({ orientationTypeId: "", message: "Hola", document: null })).toEqual({
       orientationTypeId: REQUEST_APPOINTMENT_TEXT.missingTopic,
     })
   })
 
   it("acepta 300 caracteres y rechaza 301", () => {
-    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "a".repeat(300) })).toEqual({})
-    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "a".repeat(301) })).toEqual({
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "a".repeat(300), document: null })).toEqual({})
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "a".repeat(301), document: null })).toEqual({
       message: REQUEST_APPOINTMENT_TEXT.messageTooLong,
     })
   })

@@ -51,7 +51,11 @@ describe("RequestAppointmentForm", () => {
     await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
 
     expect(screen.getByText("20 / 300")).toBeInTheDocument()
-    expect(onSubmit).toHaveBeenCalledWith({ orientationTypeId: "t1", message: "Quiero revisar mi CV" })
+    expect(onSubmit).toHaveBeenCalledWith({
+      orientationTypeId: "t1",
+      message: "Quiero revisar mi CV",
+      document: null,
+    })
   })
 
   it("con más de 300 caracteres muestra el error junto al mensaje y no envía", async () => {

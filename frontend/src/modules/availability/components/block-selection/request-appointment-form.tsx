@@ -10,10 +10,12 @@ import {
   APPOINTMENT_MESSAGE_MAX_LENGTH,
   REQUEST_APPOINTMENT_TEXT,
 } from "../../constants/request-appointment.constants";
+import { validateAppointmentDocument } from "../../utils/appointment-document.utils";
 import type { AppointmentRequestErrors } from "../../types/appointment-request-errors.types";
 import type { AppointmentRequestValues } from "../../types/appointment-request-values.types";
 import type { RequestAppointmentFormProps } from "../../types/request-appointment-form-props.types";
 import { validateAppointmentRequest } from "../../utils/appointment-request.utils";
+import { AppointmentDocumentField } from "./appointment-document-field";
 
 export function RequestAppointmentForm({
   orientationTypes,
@@ -22,17 +24,32 @@ export function RequestAppointmentForm({
   onSubmit,
   onDirtyChange,
 }: RequestAppointmentFormProps) {
-  const [values, setValues] = useState<AppointmentRequestValues>({ orientationTypeId: "", message: "" });
+  const [values, setValues] = useState<AppointmentRequestValues>({
+    orientationTypeId: "",
+    message: "",
+    document: null,
+  });
   const [errors, setErrors] = useState<AppointmentRequestErrors>({});
 
   const topicItems = orientationTypes.map((type) => ({ value: type.id, label: type.name }));
   const isMessageTooLong = values.message.trim().length > APPOINTMENT_MESSAGE_MAX_LENGTH;
 
-  const updateValues = (field: keyof AppointmentRequestValues, value: string) => {
+  const updateValues = <Key extends keyof AppointmentRequestValues>(
+    field: Key,
+    value: AppointmentRequestValues[Key],
+  ) => {
     const next = { ...values, [field]: value };
     setValues(next);
     setErrors((prev) => ({ ...prev, [field]: undefined }));
-    onDirtyChange(next.orientationTypeId !== "" || next.message.trim() !== "");
+    onDirtyChange(
+      next.orientationTypeId !== "" || next.message.trim() !== "" || next.document !== null,
+    );
+  };
+
+  const handleSelectDocument = (document: File) => {
+    updateValues("document", document);
+    const documentError = validateAppointmentDocument(document);
+    if (documentError) setErrors((prev) => ({ ...prev, document: documentError }));
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -105,10 +122,18 @@ export function RequestAppointmentForm({
         {errors.message && <FieldError id="appointment-message-error">{errors.message}</FieldError>}
       </Field>
 
+      <AppointmentDocumentField
+        file={values.document}
+        error={errors.document}
+        disabled={isSubmitting}
+        onSelect={handleSelectDocument}
+        onRemove={() => updateValues("document", null)}
+      />
+
       <Button
         type="submit"
         className="w-full bg-primary text-primary-foreground hover:bg-brand-hover"
-        disabled={isSubmitting}
+        disabled={isSubmitting || Boolean(errors.document)}
       >
         {isSubmitting ? REQUEST_APPOINTMENT_TEXT.submitting : REQUEST_APPOINTMENT_TEXT.submit}
       </Button>

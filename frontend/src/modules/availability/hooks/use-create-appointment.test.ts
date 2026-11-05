@@ -18,7 +18,7 @@ const block: AvailabilityBlock = {
   updatedAt: "",
 }
 
-const variables = { block, values: { orientationTypeId: "t1", message: "  Hola  " } }
+const variables = { block, values: { orientationTypeId: "t1", message: "  Hola  ", document: null } }
 
 const conflictError = (detail?: string) => ({
   isAxiosError: true,
