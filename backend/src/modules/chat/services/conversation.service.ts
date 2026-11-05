@@ -94,11 +94,10 @@ export class ConversationService {
       throw new UserBlockedException();
     }
 
-    const authorization =
-      await this.chatRolePolicyService.assertCanCommunicate(
-        normalizedCurrentUserId,
-        normalizedContactId,
-      );
+       await this.chatRolePolicyService.assertCanCommunicate(
+      normalizedCurrentUserId,
+      normalizedContactId,
+    );
 
     const existing = await this.conversationRepository.findByOrderedPair(
       userAId,
@@ -124,7 +123,7 @@ export class ConversationService {
         userBId,
       );
 
-    if (!acceptedRequest && authorization !== 'application') {
+     if (!acceptedRequest) {
       throw new ForbiddenException(
         'Debes tener una solicitud de conexión aceptada para iniciar una conversación.',
       );
