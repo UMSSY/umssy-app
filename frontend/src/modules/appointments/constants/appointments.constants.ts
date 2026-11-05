@@ -37,3 +37,22 @@ export const APPOINTMENT_STATUS_CLASSES: Record<AppointmentStatus, string> = {
   CANCELLED: "text-text-secondary",
   COMPLETED: "text-text-secondary",
 };
+
+export const APPOINTMENT_DETAIL_TEXT = {
+  titlePrefix: "Cita con",
+  loading: "Cargando el detalle de la cita",
+  loadError: "No se pudo cargar el detalle de la cita.",
+  dateLabel: "Fecha",
+  scheduleLabel: "Horario",
+  topicLabel: "Tema",
+  requestedAtLabel: "Reservada el",
+  messageTitle: "Mensaje del titulado",
+  noMessage: "Sin mensaje",
+  documentTitle: "Documento compartido",
+  download: "Descargar",
+  downloading: "Descargando...",
+  downloadError: "No se pudo descargar el documento. Intenta de nuevo.",
+  close: "Cerrar",
+  mentorProfile: "Ver perfil del mentor",
+  photoAlt: "Foto de perfil de",
+} as const;
