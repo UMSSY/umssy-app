@@ -20,7 +20,7 @@ export class EventProposalsService {
     const parsed = CreateProposalSchema.safeParse(body);
     if (!parsed.success) throw new RequestValidationException(parsed.error.issues.map((issue) => ({ field: issue.path.join('.') || 'body', message: issue.message })));
     const values = parsed.data;
-    const cover = this.files.validate(file ? { originalName: file.originalname, mimeType: file.mimetype, size: file.size, buffer: file.buffer } : undefined, { allowedTypes: ['jpg', 'png'], maxSizeBytes: 2 * 1024 * 1024 });
+    const cover = this.files.validate(file ? { originalName: file.originalname, mimeType: file.mimetype, size: file.size, buffer: file.buffer } : undefined, { allowedTypes: ['jpg', 'png'], maxSizeBytes: 5 * 1024 * 1024 });
     const hash = createHash('sha256').update(JSON.stringify(values)).update(cover.buffer).digest('hex');
     const existing = await this.repository.findByKey(userId, key);
     if (existing) return this.replay(existing, hash);

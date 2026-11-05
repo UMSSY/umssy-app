@@ -84,7 +84,7 @@ export function ProposalCoverField({ value, onChange, error, disabled, onBusyCha
             <p className="text-sm text-text-secondary">Elige una imagen que represente el tema. Se mostrará en la tarjeta del taller y en su ficha de detalles.</p>
             <div id="proposal-cover-help" className="flex min-w-0 flex-wrap justify-start gap-1.5 text-xs font-medium text-accent">
               <span className="inline-flex max-w-full min-w-0 items-center gap-1 rounded-md border border-availability-border/25 bg-surface px-1.5 py-0.5"><FileImage className="size-3" aria-hidden="true" />JPG / PNG</span>
-              <span className="inline-flex max-w-full min-w-0 items-center gap-1 rounded-md border border-availability-border/25 bg-surface px-1.5 py-0.5"><HardDrive className="size-3" aria-hidden="true" />Máx. 2 MB</span>
+              <span className="inline-flex max-w-full min-w-0 items-center gap-1 rounded-md border border-availability-border/25 bg-surface px-1.5 py-0.5"><HardDrive className="size-3" aria-hidden="true" />Máx. 5 MB</span>
               <span className="inline-flex max-w-full min-w-0 items-center gap-1 rounded-md border border-availability-border/25 bg-surface px-1.5 py-0.5"><Ratio className="size-3 shrink-0" aria-hidden="true" /><span className="min-w-0 wrap-anywhere">1200 × 600 px</span></span>
             </div>
             {value && <p className="text-xs wrap-anywhere text-text-secondary">{value.file.name}</p>}

@@ -49,7 +49,7 @@ describe('Proposal validation', () => {
   it('rejects unsupported, empty and oversized images', () => {
     expect(validateProposalCover(new File(['svg'], 'cover.svg', { type: 'image/svg+xml' }))).toMatch(/JPG/);
     expect(validateProposalCover(new File([], 'empty.png', { type: 'image/png' }))).toMatch(/vacía/);
-    expect(validateProposalCover(new File([new Uint8Array(PROPOSAL_COVER_MAX_BYTES + 1)], 'large.png', { type: 'image/png' }))).toMatch(/2 MB/);
+    expect(validateProposalCover(new File([new Uint8Array(PROPOSAL_COVER_MAX_BYTES + 1)], 'large.png', { type: 'image/png' }))).toMatch(/5 MB/);
   });
 });
 
@@ -75,7 +75,7 @@ describe('Basic proposal text validation', () => {
 });
 
 it('accepts an image at the 2 MiB upload limit', () => {
-  expect(validateProposalCover(new File([new Uint8Array(2 * 1024 * 1024)], 'cover.png', { type: 'image/png' }))).toBeNull();
+  expect(validateProposalCover(new File([new Uint8Array(5 * 1024 * 1024)], 'cover.png', { type: 'image/png' }))).toBeNull();
 });
 
 describe('Location and meeting link structure', () => {

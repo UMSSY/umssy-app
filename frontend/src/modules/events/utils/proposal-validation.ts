@@ -5,7 +5,7 @@ import type { ProposalErrors, ProposalValues } from '../types/proposal.types';
 export function validateProposalCover(file: File): string | null {
   if (!['image/jpeg', 'image/png'].includes(file.type)) return 'Selecciona una imagen JPG o PNG.';
   if (!file.size) return 'La imagen está vacía. Selecciona otra.';
-  if (file.size > PROPOSAL_COVER_MAX_BYTES) return 'Selecciona una imagen de hasta 2 MB.';
+  if (file.size > PROPOSAL_COVER_MAX_BYTES) return 'Selecciona una imagen de hasta 5 MB.';
   return null;
 }
 

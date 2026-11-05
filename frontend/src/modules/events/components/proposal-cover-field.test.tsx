@@ -9,7 +9,7 @@ describe('Proposal cover preview', () => {
   it('preserves the upload instructions and the new size limit', () => {
     render(<ProposalCoverField value={null} onChange={vi.fn()} onBusyChange={vi.fn()} />);
     expect(screen.getByText('JPG / PNG')).toBeInTheDocument();
-    expect(screen.getByText('Máx. 2 MB')).toBeInTheDocument();
+    expect(screen.getByText('Máx. 5 MB')).toBeInTheDocument();
     expect(screen.getByText('1200 × 600 px')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Seleccionar imagen' })).toBeEnabled();
     expect(screen.queryByRole('button', { name: 'Ampliar imagen de portada' })).not.toBeInTheDocument();

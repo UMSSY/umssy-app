@@ -25,7 +25,7 @@ describe('proposal field errors', () => {
 it.each([
   ['INVALID_FILE_TYPE', 'Selecciona una imagen JPG o PNG.'],
   ['CORRUPTED_FILE', 'La imagen está dañada. Selecciona otra.'],
-  ['FILE_TOO_LARGE', 'Selecciona una imagen de hasta 2 MB.'],
+  ['FILE_TOO_LARGE', 'Selecciona una imagen de hasta 5 MB.'],
 ])('maps %s to the cover field', (code, message) => {
   expect(getProposalError({ isAxiosError: true, response: { status: 400, data: { code } } })).toEqual({
     fields: { cover: message }, message: 'Corrige los campos indicados.',

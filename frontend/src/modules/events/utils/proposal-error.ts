@@ -21,9 +21,9 @@ export function getProposalError(error: unknown): ProposalError {
       EMPTY_FILE: 'Selecciona una imagen que no esté vacía.',
       INVALID_FILE_TYPE: 'Selecciona una imagen JPG o PNG.',
       CORRUPTED_FILE: 'La imagen está dañada. Selecciona otra.',
-      FILE_TOO_LARGE: 'Selecciona una imagen de hasta 2 MB.',
+      FILE_TOO_LARGE: 'Selecciona una imagen de hasta 5 MB.',
     };
-    if (coverMessages[code] || status === 413) fields.cover = coverMessages[code] ?? 'Selecciona una imagen de hasta 2 MB.';
+    if (coverMessages[code] || status === 413) fields.cover = coverMessages[code] ?? 'Selecciona una imagen de hasta 5 MB.';
     if (Object.keys(fields).length) return { fields, message: 'Corrige los campos indicados.' };
     if (!status) return { fields, message: 'No pudimos confirmar el envío. Revisa tu conexión y reintenta.' };
     const messages: Record<number, string> = {
@@ -32,7 +32,7 @@ export function getProposalError(error: unknown): ProposalError {
       403: 'Tu cuenta no tiene permiso para proponer talleres.',
       404: 'El servicio de propuestas no está disponible. Tus datos se conservan en este formulario.',
       409: 'La propuesta cambió. Vuelve a revisarla antes de enviar.',
-      413: 'La portada debe pesar como máximo 2 MB.',
+      413: 'La portada debe pesar como máximo 5 MB.',
       422: 'Revisa los campos indicados antes de enviar.',
       429: 'Demasiados intentos. Espera un momento y reintenta.',
       500: 'El servidor tuvo un problema. Tus datos se conservan; reintenta.',
