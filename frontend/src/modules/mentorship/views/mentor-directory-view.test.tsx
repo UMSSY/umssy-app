@@ -142,7 +142,7 @@ function makeDirectoryPage(
     pageSize: 6,
     totalItems: items.length,
     totalPages: Math.ceil(items.length / 6),
-    effectiveSort: "name_asc",
+    effectiveSort: "default",
     ...overrides,
   };
 }
@@ -180,13 +180,16 @@ function mockDirectoryWithParams() {
         );
       });
 
-      const sorted = [...filtered].sort((a, b) => {
-        const comparison = a.fullName.localeCompare(b.fullName, "es", {
-          sensitivity: "base",
-        });
+      const sorted = [...filtered];
+      if (params.sort === "name_asc" || params.sort === "name_desc") {
+        sorted.sort((a, b) => {
+          const comparison = a.fullName.localeCompare(b.fullName, "es", {
+            sensitivity: "base",
+          });
 
-        return params.sort === "name_desc" ? -comparison : comparison;
-      });
+          return params.sort === "name_desc" ? -comparison : comparison;
+        });
+      }
 
       const pageSize = 6;
       const totalItems = sorted.length;
@@ -204,7 +207,7 @@ function mockDirectoryWithParams() {
         totalItems,
         totalPages,
         effectiveSort:
-          params.sort === "affinity" ? "name_asc" : params.sort,
+          params.sort === "affinity" ? "default" : params.sort,
       });
     });
 }
@@ -373,7 +376,7 @@ describe("MentorDirectoryView", () => {
     await user.keyboard(" ");
 
     expect(navigationMocks.replace).toHaveBeenCalledWith(
-      "/mentorship/mentors?page=1&available=true",
+      "/mentorship/mentors?page=1&available=false",
       { scroll: false },
     );
 
@@ -449,7 +452,7 @@ describe("MentorDirectoryView", () => {
     );
 
     expect(screen.getByText("Disponible para mentoría")).toBeInTheDocument();
-    expect(screen.getByText("No disponible")).toBeInTheDocument();
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
     expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
 
     expect(getProfile).toHaveBeenCalledTimes(1);
@@ -474,14 +477,14 @@ describe("MentorDirectoryView", () => {
     expect(getProfile).not.toHaveBeenCalled();
   });
 
-  it("muestra todos los mentores por defecto y Limpiar restablece los filtros", async () => {
-    mockDirectoryWithParams();
+  it("aplica Solo disponibles por defecto y Limpiar restablece los filtros", async () => {
+    const request = mockDirectoryWithParams();
 
     const { rerender } = render(<MentorDirectoryView />);
 
     expect(
       screen.getByRole("checkbox", { name: "Solo disponibles" }),
-    ).not.toBeChecked();
+    ).toBeChecked();
 
     expect(
       await screen.findByRole("link", {
@@ -493,11 +496,20 @@ describe("MentorDirectoryView", () => {
       screen.queryByRole("link", {
         name: /Ver perfil de Carlos/,
       }),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: "Limpiar" }),
     ).toBeVisible();
+
+    expect(
+      screen.getByRole("combobox", { name: "Ordenar mentores" }),
+    ).toHaveValue("default");
+
+    expect(request).toHaveBeenCalledWith(
+      expect.objectContaining({ sort: "default" }),
+      expect.any(AbortSignal),
+    );
 
     fireEvent.click(
       screen.getByRole("checkbox", {
@@ -507,8 +519,15 @@ describe("MentorDirectoryView", () => {
 
     applyNavigation(rerender);
 
-    await waitFor(() => expect(screen.queryByRole("link", { name: /Ver perfil de Carlos/ })).not.toBeInTheDocument());
-    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", {
+        name: /Ver perfil de Carlos/,
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("No disponible"),
+    ).not.toBeInTheDocument();
 
     const searchCallsBeforeMaria =
       navigationMocks.replace.mock.calls.length;
@@ -539,8 +558,20 @@ describe("MentorDirectoryView", () => {
 
     applyNavigation(rerender);
 
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Ordenar mentores" }),
+      { target: { value: "name_desc" } },
+    );
+
+    applyNavigation(rerender);
+
     fireEvent.click(
       screen.getByRole("button", { name: "Limpiar" }),
+    );
+
+    expect(navigationMocks.replace).toHaveBeenLastCalledWith(
+      "/mentorship/mentors?page=1",
+      { scroll: false },
     );
 
     applyNavigation(rerender);
@@ -561,7 +592,11 @@ describe("MentorDirectoryView", () => {
 
     expect(
       screen.getByRole("checkbox", { name: "Solo disponibles" }),
-    ).not.toBeChecked();
+    ).toBeChecked();
+
+    expect(
+      screen.getByRole("combobox", { name: "Ordenar mentores" }),
+    ).toHaveValue("default");
 
     expect(
       await screen.findByRole("link", {
@@ -573,7 +608,7 @@ describe("MentorDirectoryView", () => {
       screen.queryByRole("link", {
         name: /Ver perfil de Carlos/,
       }),
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
   });
 
   it("restaura búsqueda, área, orientación y disponibilidad al volver desde el perfil", async () => {
@@ -767,7 +802,7 @@ describe("MentorDirectoryView", () => {
     expect(navigationMocks.search).toContain("module=chat");
   });
 
-  it("conserva el selector de tres opciones y restaura el orden solicitado desde la URL", async () => {
+  it("conserva las cuatro opciones y restaura el orden solicitado desde la URL", async () => {
     navigationMocks.search =
       "?page=2&area=Backend&sort=name_desc&module=chat";
 
@@ -794,7 +829,18 @@ describe("MentorDirectoryView", () => {
       within(selector)
         .getAllByRole("option")
         .map((option) => option.getAttribute("value")),
-    ).toEqual(["name_asc", "name_desc", "affinity"]);
+    ).toEqual(["default", "name_asc", "name_desc", "affinity"]);
+
+    expect(
+      within(selector)
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual([
+      "Por defecto",
+      "Nombre (A–Z)",
+      "Nombre (Z–A)",
+      "Mayor afinidad",
+    ]);
 
     fireEvent.change(selector, { target: { value: "affinity" } });
 
@@ -812,6 +858,22 @@ describe("MentorDirectoryView", () => {
     expect(
       await screen.findByRole("heading", { name: "Preferencias" }),
     ).toBeVisible();
+
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Ordenar mentores" }),
+      { target: { value: "default" } },
+    );
+
+    expect(navigationMocks.replace).toHaveBeenLastCalledWith(
+      "/mentorship/mentors?page=1&area=Backend&module=chat",
+      { scroll: false },
+    );
+
+    applyNavigation(rerender);
+
+    expect(
+      screen.getByRole("combobox", { name: "Ordenar mentores" }),
+    ).toHaveValue("default");
   });
 
   it("muestra insignias solo con afinidad efectiva y conteos provistos", async () => {
@@ -856,12 +918,12 @@ describe("MentorDirectoryView", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("omite la insignia si el servidor aplicó A–Z aunque la URL solicite afinidad", async () => {
+  it("omite la insignia si el servidor aplicó el orden general aunque la URL solicite afinidad", async () => {
     navigationMocks.search = "?sort=affinity";
 
     vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
       makeDirectoryPage([{ ...mentors[0], sharedInterestsCount: 2 }], {
-        effectiveSort: "name_asc",
+        effectiveSort: "default",
         affinityStatus: "unmapped_skills",
       }),
     );
@@ -880,7 +942,7 @@ describe("MentorDirectoryView", () => {
   });
 
   it("ordena por nombre A–Z y Z–A según el parámetro solicitado", async () => {
-    navigationMocks.search = "?available=false";
+    navigationMocks.search = "?available=false&sort=name_asc";
     mockDirectoryWithParams();
 
     const { rerender } = render(<MentorDirectoryView />);
@@ -929,7 +991,7 @@ describe("MentorDirectoryView", () => {
     render(
       <MentorDirectoryView
         directoryState={{
-          effectiveSort: "name_asc",
+          effectiveSort: "default",
           affinityStatus: "no_skills",
           totalPages: 3,
         }}
@@ -953,14 +1015,14 @@ describe("MentorDirectoryView", () => {
 
       vi.spyOn(directoryService, "getMentorDirectory").mockResolvedValue(
         makeDirectoryPage(mentors, {
-          effectiveSort: "name_asc",
+          effectiveSort: "default",
         }),
       );
 
       render(
         <MentorDirectoryView
           directoryState={{
-            effectiveSort: "name_asc",
+            effectiveSort: "default",
             affinityStatus,
           }}
         />,
