@@ -54,20 +54,6 @@ describe("useCreateAppointment", () => {
     expect(onConflict).not.toHaveBeenCalled()
   })
 
-  it("envía el mensaje vacío como null", async () => {
-    const createSpy = vi
-      .spyOn(appointmentsApi, "createAppointment")
-      .mockResolvedValue({ id: "a1" } as Appointment)
-
-    const { result } = renderHook(() => useCreateAppointment(vi.fn()), createQueryWrapper())
-
-    await act(async () =>
-      result.current.createAppointment({ block, values: { orientationTypeId: "t1", message: "   " } }),
-    )
-
-    expect(createSpy).toHaveBeenCalledWith({ blockId: "b1", orientationTypeId: "t1", message: null })
-  })
-
   it("con 409 avisa que el horario ya fue reservado y marca el bloque", async () => {
     vi.spyOn(appointmentsApi, "createAppointment").mockRejectedValue(conflictError())
     const onConflict = vi.fn()

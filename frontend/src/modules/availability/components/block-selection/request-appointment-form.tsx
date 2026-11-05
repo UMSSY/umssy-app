@@ -82,9 +82,13 @@ export function RequestAppointmentForm({
       <Field data-invalid={errors.message ? true : undefined}>
         <FieldLabel htmlFor="appointment-message" className="font-semibold">
           {REQUEST_APPOINTMENT_TEXT.messageLabel}
+          <span aria-hidden="true" className="text-destructive">
+            *
+          </span>
         </FieldLabel>
         <Textarea
           id="appointment-message"
+          aria-required="true"
           value={values.message}
           disabled={isSubmitting}
           onChange={(event) => updateValues("message", event.target.value)}

@@ -24,7 +24,7 @@ export function useCreateAppointment(onConflict: (block: AvailabilityBlock) => v
       appointmentsApi.createAppointment({
         blockId: block.id,
         orientationTypeId: values.orientationTypeId,
-        message: values.message.trim() || null,
+        message: values.message.trim(),
       }),
     onSuccess: (_appointment, { block }) => {
       toast.success(REQUEST_APPOINTMENT_TEXT.confirmed, {

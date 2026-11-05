@@ -73,6 +73,11 @@ async function chooseTopic(user: ReturnType<typeof userEvent.setup>, topic: stri
   await user.click(await screen.findByRole("option", { name: topic }))
 }
 
+async function fillRequest(user: ReturnType<typeof userEvent.setup>) {
+  await chooseTopic(user, "Revisión de CV")
+  await user.type(screen.getByLabelText(/Mensaje para el mentor/), "Quiero revisar mi CV")
+}
+
 describe("BlockSelection", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
@@ -153,7 +158,7 @@ describe("BlockSelection", () => {
     expect(createSpy).not.toHaveBeenCalled()
   })
 
-  it("con tema confirma la cita y el horario deja de estar seleccionado", async () => {
+  it("con tema y mensaje confirma la cita y el horario deja de estar seleccionado", async () => {
     const user = userEvent.setup()
     const createSpy = vi
       .spyOn(appointmentsApi, "createAppointment")
@@ -161,11 +166,15 @@ describe("BlockSelection", () => {
     renderSelection(vi.fn().mockResolvedValue([tuesdayBlock]))
 
     await selectTuesday(user)
-    await chooseTopic(user, "Revisión de CV")
+    await fillRequest(user)
     await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
 
     await waitFor(() => expect(screen.getByText(BLOCK_SELECTION_TEXT.empty)).toBeInTheDocument())
-    expect(createSpy).toHaveBeenCalledWith({ blockId: "1", orientationTypeId: "t1", message: null })
+    expect(createSpy).toHaveBeenCalledWith({
+      blockId: "1",
+      orientationTypeId: "t1",
+      message: "Quiero revisar mi CV",
+    })
   })
 
   it("con 409 marca el bloque como no disponible y permite elegir otro", async () => {
@@ -177,7 +186,7 @@ describe("BlockSelection", () => {
     renderSelection(vi.fn().mockResolvedValue([tuesdayBlock, saturdayBlock]))
 
     await selectTuesday(user)
-    await chooseTopic(user, "Revisión de CV")
+    await fillRequest(user)
     await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
 
     await waitFor(() => {

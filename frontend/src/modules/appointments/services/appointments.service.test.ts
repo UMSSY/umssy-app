@@ -28,7 +28,7 @@ describe("createAppointment", () => {
   })
 
   it("envía el bloque, el tema y el mensaje a /appointments", async () => {
-    const input = { blockId: "b1", orientationTypeId: "t1", message: null }
+    const input = { blockId: "b1", orientationTypeId: "t1", message: "Quiero revisar mi CV" }
     const appointment = { id: "a1" }
     const post = vi.spyOn(apiClient, "post").mockResolvedValue(envelope(appointment))
 

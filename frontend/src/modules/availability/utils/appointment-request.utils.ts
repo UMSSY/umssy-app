@@ -15,7 +15,9 @@ export function validateAppointmentRequest({
 }: AppointmentRequestValues): AppointmentRequestErrors {
   const errors: AppointmentRequestErrors = {};
   if (!orientationTypeId) errors.orientationTypeId = REQUEST_APPOINTMENT_TEXT.missingTopic;
-  if (message.trim().length > APPOINTMENT_MESSAGE_MAX_LENGTH) {
+  const trimmedMessage = message.trim();
+  if (!trimmedMessage) errors.message = REQUEST_APPOINTMENT_TEXT.missingMessage;
+  else if (trimmedMessage.length > APPOINTMENT_MESSAGE_MAX_LENGTH) {
     errors.message = REQUEST_APPOINTMENT_TEXT.messageTooLong;
   }
   return errors;

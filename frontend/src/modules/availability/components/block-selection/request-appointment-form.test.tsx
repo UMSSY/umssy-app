@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { RequestAppointmentForm } from "./request-appointment-form"
 import { REQUEST_APPOINTMENT_TEXT } from "../../constants/request-appointment.constants"
 
+const messageLabel = new RegExp(REQUEST_APPOINTMENT_TEXT.messageLabel)
+
 const orientationTypes = [{ id: "t1", name: "Revisión de CV", description: null }]
 
 function renderForm(props: Partial<React.ComponentProps<typeof RequestAppointmentForm>> = {}) {
@@ -36,7 +38,7 @@ describe("RequestAppointmentForm", () => {
     renderForm()
 
     expect(screen.getByLabelText(/Tema de la sesión/)).toBeInTheDocument()
-    expect(screen.getByLabelText(REQUEST_APPOINTMENT_TEXT.messageLabel)).toBeInTheDocument()
+    expect(screen.getByLabelText(messageLabel)).toBeInTheDocument()
     expect(screen.getByText("0 / 300")).toBeInTheDocument()
     expect(screen.getByText(REQUEST_APPOINTMENT_TEXT.instantConfirmationNote)).toBeInTheDocument()
   })
@@ -45,7 +47,7 @@ describe("RequestAppointmentForm", () => {
     const { onSubmit, user } = renderForm()
 
     await chooseTopic(user)
-    await user.type(screen.getByLabelText(REQUEST_APPOINTMENT_TEXT.messageLabel), "Quiero revisar mi CV")
+    await user.type(screen.getByLabelText(messageLabel), "Quiero revisar mi CV")
     await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
 
     expect(screen.getByText("20 / 300")).toBeInTheDocument()
@@ -56,17 +58,34 @@ describe("RequestAppointmentForm", () => {
     const { onSubmit, user } = renderForm()
 
     await chooseTopic(user)
-    fireEvent.change(screen.getByLabelText(REQUEST_APPOINTMENT_TEXT.messageLabel), {
+    fireEvent.change(screen.getByLabelText(messageLabel), {
       target: { value: "a".repeat(301) },
     })
     await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
 
     const error = screen.getByText(REQUEST_APPOINTMENT_TEXT.messageTooLong)
-    expect(screen.getByLabelText(REQUEST_APPOINTMENT_TEXT.messageLabel)).toHaveAttribute(
+    expect(screen.getByLabelText(messageLabel)).toHaveAttribute(
       "aria-describedby",
       error.id,
     )
     expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it("sin mensaje muestra el error junto al campo y no envía", async () => {
+    const { onSubmit, user } = renderForm()
+
+    await chooseTopic(user)
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+
+    const error = screen.getByText(REQUEST_APPOINTMENT_TEXT.missingMessage)
+    expect(screen.getByLabelText(messageLabel)).toHaveAttribute("aria-describedby", error.id)
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it("marca el mensaje como obligatorio", () => {
+    renderForm()
+
+    expect(screen.getByLabelText(messageLabel)).toHaveAttribute("aria-required", "true")
   })
 
   it("avisa si el formulario tiene datos cargados", async () => {

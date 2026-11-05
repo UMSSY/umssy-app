@@ -14,12 +14,18 @@ const block: AvailabilityBlock = {
 }
 
 describe("validateAppointmentRequest", () => {
-  it("acepta un tema elegido y un mensaje vacío", () => {
-    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "" })).toEqual({})
+  it("acepta un tema elegido y un mensaje escrito", () => {
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "Hola" })).toEqual({})
+  })
+
+  it.each(["", "   "])("exige el mensaje para el mentor (%j)", (message) => {
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message })).toEqual({
+      message: REQUEST_APPOINTMENT_TEXT.missingMessage,
+    })
   })
 
   it("exige el tema de la sesión", () => {
-    expect(validateAppointmentRequest({ orientationTypeId: "", message: "" })).toEqual({
+    expect(validateAppointmentRequest({ orientationTypeId: "", message: "Hola" })).toEqual({
       orientationTypeId: REQUEST_APPOINTMENT_TEXT.missingTopic,
     })
   })
