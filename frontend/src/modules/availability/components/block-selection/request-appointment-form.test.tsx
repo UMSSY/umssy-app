@@ -3,8 +3,16 @@ import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { RequestAppointmentForm } from "./request-appointment-form"
 import { REQUEST_APPOINTMENT_TEXT } from "../../constants/request-appointment.constants"
+import { APPOINTMENT_DOCUMENT_TEXT } from "../../constants/appointment-document.constants"
+import { FILE_VALIDATION_MESSAGES } from "@/modules/profile"
 
 const messageLabel = new RegExp(REQUEST_APPOINTMENT_TEXT.messageLabel)
+
+const makeFile = (name: string, type: string, size = 1024) => {
+  const file = new File(["x"], name, { type })
+  Object.defineProperty(file, "size", { value: size })
+  return file
+}
 
 const orientationTypes = [{ id: "t1", name: "Revisión de CV", description: null }]
 
@@ -104,5 +112,74 @@ describe("RequestAppointmentForm", () => {
     renderForm({ isSubmitting: true })
 
     expect(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submitting })).toBeDisabled()
+  })
+
+  it("envía el documento adjunto junto con el tema y el mensaje", async () => {
+    const { onSubmit, user } = renderForm()
+    const pdf = makeFile("Tesis.pdf", "application/pdf")
+
+    await chooseTopic(user)
+    await user.type(screen.getByLabelText(messageLabel), "Revisa mi tesis")
+    await user.upload(screen.getByLabelText(APPOINTMENT_DOCUMENT_TEXT.label), pdf)
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      orientationTypeId: "t1",
+      message: "Revisa mi tesis",
+      document: pdf,
+    })
+  })
+
+  it("permite quitar el documento antes de solicitar la cita", async () => {
+    const { onSubmit, user } = renderForm()
+
+    await chooseTopic(user)
+    await user.type(screen.getByLabelText(messageLabel), "Hola")
+    await user.upload(
+      screen.getByLabelText(APPOINTMENT_DOCUMENT_TEXT.label),
+      makeFile("Tesis.pdf", "application/pdf"),
+    )
+    await user.click(screen.getByRole("button", { name: APPOINTMENT_DOCUMENT_TEXT.removeLabel }))
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+
+    expect(screen.queryByText("Tesis.pdf")).not.toBeInTheDocument()
+    expect(onSubmit).toHaveBeenCalledWith({ orientationTypeId: "t1", message: "Hola", document: null })
+  })
+
+  it.each([
+    ["de otro tipo", makeFile("notas.docx", "application/msword"), FILE_VALIDATION_MESSAGES.invalidCertificateType],
+    ["de más de 5 MB", makeFile("cv.pdf", "application/pdf", 5 * 1024 * 1024 + 1), FILE_VALIDATION_MESSAGES.fileTooLarge],
+  ])("con un archivo %s muestra el error y no deja solicitar", async (_case, file, message) => {
+    const { onSubmit } = renderForm()
+    const user = userEvent.setup({ applyAccept: false })
+
+    await user.upload(screen.getByLabelText(APPOINTMENT_DOCUMENT_TEXT.label), file)
+
+    expect(screen.getByText(message)).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit })).toBeDisabled()
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it("al quitar un archivo inválido vuelve a habilitar el envío", async () => {
+    renderForm()
+    const user = userEvent.setup({ applyAccept: false })
+    const input = screen.getByLabelText(APPOINTMENT_DOCUMENT_TEXT.label)
+
+    await user.upload(input, makeFile("notas.docx", "application/msword"))
+    await user.click(screen.getByRole("button", { name: APPOINTMENT_DOCUMENT_TEXT.removeLabel }))
+
+    expect(screen.queryByText(FILE_VALIDATION_MESSAGES.invalidCertificateType)).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit })).toBeEnabled()
+  })
+
+  it("avisa que hay datos cargados al adjuntar solo un documento", async () => {
+    const { onDirtyChange, user } = renderForm()
+
+    await user.upload(
+      screen.getByLabelText(APPOINTMENT_DOCUMENT_TEXT.label),
+      makeFile("Tesis.pdf", "application/pdf"),
+    )
+
+    expect(onDirtyChange).toHaveBeenLastCalledWith(true)
   })
 })

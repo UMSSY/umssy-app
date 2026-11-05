@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { formatAppointmentSchedule, validateAppointmentRequest } from "./appointment-request.utils"
 import { REQUEST_APPOINTMENT_TEXT } from "../constants/request-appointment.constants"
 import type { AvailabilityBlock } from "../types/availability-block.types"
+import { FILE_VALIDATION_MESSAGES } from "@/modules/profile"
 
 const block: AvailabilityBlock = {
   id: "1",
@@ -34,6 +35,18 @@ describe("validateAppointmentRequest", () => {
     expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "a".repeat(300), document: null })).toEqual({})
     expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "a".repeat(301), document: null })).toEqual({
       message: REQUEST_APPOINTMENT_TEXT.messageTooLong,
+    })
+  })
+})
+
+describe("validateAppointmentRequest con documento", () => {
+  it("acepta un documento válido y rechaza uno de otro tipo", () => {
+    const pdf = new File(["x"], "Tesis.pdf", { type: "application/pdf" })
+    const docx = new File(["x"], "notas.docx", { type: "application/msword" })
+
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "Hola", document: pdf })).toEqual({})
+    expect(validateAppointmentRequest({ orientationTypeId: "t1", message: "Hola", document: docx })).toEqual({
+      document: FILE_VALIDATION_MESSAGES.invalidCertificateType,
     })
   })
 })
