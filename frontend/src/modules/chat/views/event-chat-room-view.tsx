@@ -15,12 +15,6 @@ import { EventRoomMessages } from "../components/event-room-messages";
 import { EventRoomInfoPanel } from "../components/event-room-info-panel";
 import { MessageInputBar } from "../components/message-input-bar";
 
-/**
- * Vista de la sala de evento (HU-10).
- *
- * La sala reutiliza la conexión del chat para unirse a la conversación por
- * conversation_participants y recibir message:new sin recargar la página.
- */
 export function EventChatRoomView({
   registrationId,
 }: EventChatRoomViewProps) {
@@ -49,7 +43,6 @@ export function EventChatRoomView({
   const participantCount = participants.length;
   const isEmpty = participantCount <= 1 && messages.length === 0;
 
-  // Únase a la sala con el registrationId del contrato Epic 8.
   useEffect(() => {
     if (registrationId && !isJoined && !error) {
       joinEventRoom(registrationId);
@@ -73,7 +66,6 @@ export function EventChatRoomView({
     }
   };
 
-  // Error de sala: no se puede abrir.
   if (error) {
     return (
       <div
@@ -97,7 +89,6 @@ export function EventChatRoomView({
     );
   }
 
-  // Cargando / uniéndose.
   if (!isJoined || !conversationId || !room) {
     return (
       <div

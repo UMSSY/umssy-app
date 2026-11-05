@@ -108,6 +108,7 @@ import { ChatGateway } from './gateways/chat.gateway.js';
     AttachmentService,
     AttachmentRepository,
     EventRoomService,
+    ConversationMapper,
     BlockService,
   ],
 })

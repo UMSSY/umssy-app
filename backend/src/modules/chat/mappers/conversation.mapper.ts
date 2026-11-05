@@ -9,6 +9,7 @@ import type {
 import type { RawConversationMessage } from '../types/raw-conversation-message.types.js';
 import type { RawConversationUser } from '../types/raw-conversation-user.types.js';
 import type { RawConversationRecord } from '../types/raw-conversation-record.types.js';
+import type { EventRoomJoinedPayload } from '../types/chat-gateway.types.js';
 
 @Injectable()
 export class ConversationMapper {
@@ -92,6 +93,27 @@ export class ConversationMapper {
       unreadCount,
       isBlockedByMe,
       updatedAt: conversation.updatedAt.toISOString(),
+    };
+  }
+toEventRoomJoinedPayload(params: {
+    conversationId: string;
+    eventId: string;
+    eventTitle: string;
+    createdAt: Date;
+    participants: Array<{
+      userId: string;
+      user: { firstName: string; lastName: string };
+    }>;
+  }): EventRoomJoinedPayload {
+    return {
+      conversationId: params.conversationId,
+      eventId: params.eventId,
+      name: params.eventTitle,
+      createdAt: params.createdAt.toISOString(),
+      participants: params.participants.map((p) => ({
+        id: p.userId,
+        fullName: `${p.user.firstName} ${p.user.lastName}`.trim(),
+      })),
     };
   }
 }

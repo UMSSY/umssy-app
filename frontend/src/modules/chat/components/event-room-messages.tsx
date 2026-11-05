@@ -17,7 +17,6 @@ export function EventRoomMessages({
 }: EventRoomMessagesProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Desplazarse al último mensaje cuando cambien los mensajes.
   useEffect(() => {
     const container = containerRef.current;
     if (container) {
@@ -25,7 +24,6 @@ export function EventRoomMessages({
     }
   }, [messages]);
 
-  // Estado vacío: 1 participante y 0 mensajes.
   if (isEmpty) {
     return (
       <div
