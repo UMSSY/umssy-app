@@ -4,7 +4,8 @@ import Link from "next/link"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { renderWithQuery } from "@/shared/testing/render-with-query"
 import { getWeekRange } from "@/shared/utils/date-time"
-import { appointmentsApi, type Appointment } from "@/modules/appointments"
+import { appointmentsApi, type Appointment, type AppointmentDocument } from "@/modules/appointments"
+import { APPOINTMENT_DOCUMENT_TEXT } from "../../constants/appointment-document.constants"
 import { BlockSelection } from "./block-selection"
 import { BLOCK_SELECTION_TEXT } from "../../constants/block-selection.constants"
 import {
@@ -175,6 +176,24 @@ describe("BlockSelection", () => {
       orientationTypeId: "t1",
       message: "Quiero revisar mi CV",
     })
+  })
+
+  it("con documento adjunto confirma la cita y sube el archivo", async () => {
+    const user = userEvent.setup()
+    vi.spyOn(appointmentsApi, "createAppointment").mockResolvedValue({ id: "a1" } as Appointment)
+    const uploadSpy = vi
+      .spyOn(appointmentsApi, "uploadDocument")
+      .mockResolvedValue({} as AppointmentDocument)
+    const pdf = new File(["%PDF-1.4"], "Tesis.pdf", { type: "application/pdf" })
+    renderSelection(vi.fn().mockResolvedValue([tuesdayBlock]))
+
+    await selectTuesday(user)
+    await fillRequest(user)
+    await user.upload(screen.getByLabelText(APPOINTMENT_DOCUMENT_TEXT.label), pdf)
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+
+    await waitFor(() => expect(screen.getByText(BLOCK_SELECTION_TEXT.empty)).toBeInTheDocument())
+    expect(uploadSpy).toHaveBeenCalledWith("a1", pdf)
   })
 
   it("con 409 marca el bloque como no disponible y permite elegir otro", async () => {
