@@ -1,3 +1,6 @@
+export * from './appointment-closed.exception.js';
+export * from './appointment-document-not-found.exception.js';
+export * from './appointment-document-upload-forbidden.exception.js';
 export * from './appointment-not-found.exception.js';
 export * from './appointment-not-owned.exception.js';
 export * from './block-already-booked.exception.js';
