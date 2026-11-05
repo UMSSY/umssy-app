@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MentorsRepository } from '../repositories/mentors.repository.js';
 import { MentorMapper } from '../mappers/mentor.mapper.js';
 import { MentorsService } from '../services/mentors.service.js';
+import type { UserSkillService } from '../../skills/services/user-skill.service.js';
 import {
   AlreadyMentorException,
   InvalidOrientationTypesException,
@@ -11,6 +12,9 @@ import {
 } from '../exceptions/index.js';
 
 describe('MentorsService', () => {
+  const skills = [{ id: 'skill-1', name: 'TypeScript', isCustom: false }];
+  const getProfessionalSkills = vi.fn().mockResolvedValue(skills);
+  const userSkillService = { getProfessionalSkills } as unknown as UserSkillService;
   const mapper = new MentorMapper();
   const toDirectoryResponseList = vi.spyOn(mapper, 'toDirectoryResponseList');
   const toProfileResponse = vi.spyOn(mapper, 'toProfileResponse');
@@ -37,7 +41,7 @@ describe('MentorsService', () => {
   ])(
     'rechaza el formulario incompleto antes de consultar o escribir',
     async (form) => {
-      const service = new MentorsService({} as MentorsRepository, mapper);
+      const service = new MentorsService({} as MentorsRepository, mapper, userSkillService);
       await expect(service.activate(userId, form)).rejects.toMatchObject({
         statusCode: 400,
       });
@@ -72,7 +76,7 @@ describe('MentorsService', () => {
     const repository = {
       findActiveMentors,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = await service.findAll();
 
@@ -113,7 +117,7 @@ describe('MentorsService', () => {
     const repository = {
       findActiveMentors,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = await service.findAll();
 
@@ -148,7 +152,7 @@ describe('MentorsService', () => {
     const repository = {
       findActiveMentors,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = await service.findAll();
 
@@ -160,7 +164,7 @@ describe('MentorsService', () => {
     const repository = {
       findActiveMentors,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = await service.findAll();
 
@@ -200,11 +204,6 @@ describe('MentorsService', () => {
           company: { id: 'company-1', title: 'Acme' },
         },
       ],
-      userSkills: [
-        {
-          skill: { id: 'skill-1', name: 'TypeScript', isCustom: false },
-        },
-      ],
       certifications: [
         {
           id: 'certification-1',
@@ -236,13 +235,15 @@ describe('MentorsService', () => {
     const repository = {
       findActiveMentorById,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = await service.findOne(userId);
 
     expect(toProfileResponse).toHaveBeenCalledWith(
       await findActiveMentorById.mock.results[0]?.value,
+      skills,
     );
+    expect(getProfessionalSkills).toHaveBeenCalledExactlyOnceWith(userId);
     expect(result).toBe(toProfileResponse.mock.results[0]?.value);
     expect(findActiveMentorById).toHaveBeenCalledWith(userId, expect.any(Date));
     expect(result).toEqual({
@@ -308,7 +309,7 @@ describe('MentorsService', () => {
     const repository = {
       findActiveMentorById,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = service.findOne(userId);
 
@@ -332,7 +333,7 @@ describe('MentorsService', () => {
       findActiveMentorParticipation,
       updateAvailability,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = await service.updateAvailability(userId, false);
 
@@ -353,7 +354,7 @@ describe('MentorsService', () => {
       findActiveMentorParticipation: vi.fn().mockResolvedValue(null),
       updateAvailability,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     await expect(
       service.updateAvailability(userId, false),
@@ -377,7 +378,7 @@ describe('MentorsService', () => {
       findActiveMentorParticipation,
       findMentorTechnicalAreas,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = await service.findMyTechnicalAreas(userId);
 
@@ -408,7 +409,7 @@ describe('MentorsService', () => {
       findTechnicalAreas,
       replaceMentorTechnicalAreas,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = await service.updateMyTechnicalAreas(userId, {
       technicalAreaIds,
@@ -430,7 +431,7 @@ describe('MentorsService', () => {
       replaceMentorTechnicalAreas,
       replaceMentorOrientationTypes,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     await expect(service.findMyTechnicalAreas(userId)).rejects.toBeInstanceOf(
       MentorNotFoundException,
@@ -461,7 +462,7 @@ describe('MentorsService', () => {
       findTechnicalAreas: vi.fn().mockResolvedValue([]),
       replaceMentorTechnicalAreas,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     await expect(
       service.updateMyTechnicalAreas(userId, {
@@ -487,7 +488,7 @@ describe('MentorsService', () => {
       findActiveMentorParticipation,
       findMentorOrientationTypes,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = await service.findMyOrientationTypes(userId);
 
@@ -520,7 +521,7 @@ describe('MentorsService', () => {
       findActiveOrientationTypes,
       replaceMentorOrientationTypes,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = await service.updateMyOrientationTypes(userId, {
       orientationTypeIds,
@@ -541,7 +542,7 @@ describe('MentorsService', () => {
       findActiveOrientationTypes: vi.fn().mockResolvedValue([]),
       replaceMentorOrientationTypes,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     await expect(
       service.updateMyOrientationTypes(userId, {
@@ -569,7 +570,7 @@ describe('MentorsService', () => {
       findActiveOrientationTypes,
       activate,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     const result = await service.activate(userId, data);
 
@@ -599,7 +600,7 @@ describe('MentorsService', () => {
       findMentorRole: vi.fn().mockResolvedValue(null),
       activate,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     await expect(service.activate(userId, data)).rejects.toBeInstanceOf(
       MentorRoleNotFoundException,
@@ -614,7 +615,7 @@ describe('MentorsService', () => {
       findActiveUserRole: vi.fn().mockResolvedValue({ id: 'user-role-id' }),
       activate,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     await expect(service.activate(userId, data)).rejects.toBeInstanceOf(
       AlreadyMentorException,
@@ -630,7 +631,7 @@ describe('MentorsService', () => {
       findTechnicalAreas: vi.fn().mockResolvedValue([]),
       activate,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     await expect(service.activate(userId, data)).rejects.toBeInstanceOf(
       InvalidTechnicalAreasException,
@@ -649,7 +650,7 @@ describe('MentorsService', () => {
       findActiveOrientationTypes: vi.fn().mockResolvedValue([]),
       activate,
     } as unknown as MentorsRepository;
-    const service = new MentorsService(repository, mapper);
+    const service = new MentorsService(repository, mapper, userSkillService);
 
     await expect(service.activate(userId, data)).rejects.toBeInstanceOf(
       InvalidOrientationTypesException,

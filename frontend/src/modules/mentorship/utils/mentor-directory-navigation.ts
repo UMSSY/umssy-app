@@ -5,8 +5,8 @@ export const MENTOR_DIRECTORY_DEFAULTS = {
   search: "",
   area: "",
   orientation: "",
-  available: false,
-  sort: "name_asc",
+  available: true,
+  sort: "default",
 } as const;
 
 export interface MentorDirectoryNavigationState {
@@ -19,6 +19,7 @@ export interface MentorDirectoryNavigationState {
 }
 
 const VALID_SORTS: readonly MentorSort[] = [
+  "default",
   "name_asc",
   "name_desc",
   "affinity",
@@ -43,7 +44,7 @@ export function parseMentorDirectoryState(
     search: params.get("search") ?? "",
     area: params.get("area") ?? "",
     orientation: params.get("orientation") ?? "",
-    available: params.get("available") === "true",
+    available: params.get("available") !== "false",
     sort,
   };
 }
@@ -62,7 +63,11 @@ export function normalizeMentorDirectoryParams(
     next.set("page", String(page));
   }
   if (current.has("sort")) {
-    next.set("sort", state.sort);
+    if (state.sort === MENTOR_DIRECTORY_DEFAULTS.sort) {
+      next.delete("sort");
+    } else {
+      next.set("sort", state.sort);
+    }
   }
   if (current.has("available")) {
     next.set("available", String(state.available));
@@ -118,7 +123,7 @@ export function updateMentorDirectoryParams(
     if (updates.available === MENTOR_DIRECTORY_DEFAULTS.available) {
       next.delete("available");
     } else {
-      next.set("available", "true");
+      next.set("available", "false");
     }
   }
 

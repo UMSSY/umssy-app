@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { isApiError } from "@/shared/services/api-client";
 import {
@@ -60,13 +60,37 @@ function extractErrorMessage(error: unknown): string | null {
 export function MentorshipView() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { refreshRoles } = useAuth();
+  const { currentUserId, refreshRoles } = useAuth();
   const token = useSyncExternalStore(
     subscribeAccessToken,
     getAccessToken,
     () => null,
   );
-  const participation = useParticipation(token);
+  const participation = useParticipation(token, "always");
+  const request = useQuery({
+    queryKey: ["mentor-participation-requests", token],
+    queryFn: () => mentorParticipationService.getCurrent(),
+    enabled: Boolean(token),
+    retry: false,
+    refetchOnMount: "always",
+  });
+
+  useEffect(() => {
+    const recheck = () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["mentors", "participation", token],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: ["mentor-participation-requests", token],
+      });
+    };
+    window.addEventListener("pageshow", recheck);
+    window.addEventListener("popstate", recheck);
+    return () => {
+      window.removeEventListener("pageshow", recheck);
+      window.removeEventListener("popstate", recheck);
+    };
+  }, [queryClient, token]);
 
   const {
     currentStep,
@@ -81,7 +105,7 @@ export function MentorshipView() {
     canGoNext,
     hasDraftStorageError,
     setState,
-  } = useMentorshipWizard();
+  } = useMentorshipWizard(currentUserId);
 
   const {
     technicalAreas,
@@ -94,11 +118,13 @@ export function MentorshipView() {
     retryOrientationTypes,
   } = useMentorshipCatalogs();
 
+  const [verificationError, setVerificationError] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
   const [activationError, setActivationError] = useState<string | null>(null);
   const [hasIntakeConflict, setHasIntakeConflict] = useState(false);
   const [unavailableOpen, setUnavailableOpen] = useState(false);
+  const [requestRegistered, setRequestRegistered] = useState(false);
   const inFlight = useRef(false);
 
   const canAdvance = currentStep === 1 ? wantsToParticipate : canGoNext;
@@ -124,6 +150,31 @@ export function MentorshipView() {
   const selectedOrientationTypes = orientationTypes.filter((orientation) =>
     selectedOrientationTypeIds.includes(orientation.id),
   );
+
+  const verifyBeforeSubmit = async () => {
+    try {
+      const [state, currentRequest] = await Promise.all([
+        mentorParticipationService.getMyParticipation(),
+        mentorParticipationService.getCurrent(),
+      ]);
+      queryClient.setQueryData(["mentors", "participation", token], state);
+      queryClient.setQueryData(
+        ["mentor-participation-requests", token], currentRequest,
+      );
+      if (
+        state.status === "ACTIVE" ||
+        ["PENDING", "OFFERED"].includes(currentRequest?.status ?? "")
+      ) {
+        setUnavailableOpen(false);
+        return false;
+      }
+      return true;
+    } catch {
+      setUnavailableOpen(false);
+      setVerificationError(true);
+      return false;
+    }
+  };
 
   const handleActivate = async () => {
     if (
@@ -154,8 +205,10 @@ export function MentorshipView() {
     };
 
     try {
+      if (!(await verifyBeforeSubmit())) return;
       const capacity = await mentorParticipationService.capacity();
       if (capacity.available < 1) {
+        if (!(await verifyBeforeSubmit())) return;
         setUnavailableOpen(true);
         return;
       }
@@ -173,7 +226,9 @@ export function MentorshipView() {
         }),
         queryClient.invalidateQueries({ queryKey: ["mentorship", "profile"] }),
       ]);
-      await clearMentorshipWizardDraft().catch(() => {});
+      if (currentUserId) {
+        await clearMentorshipWizardDraft(currentUserId).catch(() => {});
+      }
       setIsActivated(true);
     } catch (error) {
       if (
@@ -182,11 +237,13 @@ export function MentorshipView() {
           "REQUEST_ALREADY_EXISTS",
         ].includes(participationErrorCode(error) ?? "")
       ) {
+        if (!(await verifyBeforeSubmit())) return;
         setHasIntakeConflict(true);
         setActivationError(participationErrorMessage(error));
         return;
       }
       if (participationErrorCode(error) === "NO_SLOTS") {
+        if (!(await verifyBeforeSubmit())) return;
         setUnavailableOpen(true);
         return;
       }
@@ -239,16 +296,18 @@ export function MentorshipView() {
     setIsActivating(true);
     setActivationError(null);
     try {
+      if (!(await verifyBeforeSubmit())) return;
       await mentorParticipationService.create({
         technicalAreaIds: selectedTechnicalAreaIds,
         orientationTypeIds: selectedOrientationTypeIds,
       });
-      await clearMentorshipWizardDraft().catch(() => {});
+      if (currentUserId) {
+        await clearMentorshipWizardDraft(currentUserId).catch(() => {});
+      }
       await queryClient.invalidateQueries({
         queryKey: ["mentor-participation-requests"],
       });
-      setUnavailableOpen(false);
-      router.push("/mentors/participation?registered=1");
+      setRequestRegistered(true);
     } catch (error) {
       const code = participationErrorCode(error);
       if (code === "REQUEST_ALREADY_EXISTS") {
@@ -282,32 +341,55 @@ export function MentorshipView() {
     );
   }
 
-  if (token && participation.isLoading)
+  if (
+    !token || participation.isLoading || participation.isFetching ||
+    request.isPending || request.isFetching
+  )
     return (
       <main role="status" className="p-6">
         Verificando tu participación...
       </main>
     );
 
-  if (token && participation.hasLoadError)
+  if (verificationError || participation.hasLoadError || request.isError)
     return (
       <main className="mx-auto max-w-4xl space-y-4 p-6">
         <p role="alert">No se pudo verificar tu participación.</p>
-        <Button type="button" onClick={participation.retry}>
+        <Button
+          type="button"
+          onClick={() => {
+            setVerificationError(false);
+            participation.retry();
+            void request.refetch();
+          }}
+        >
           Reintentar
         </Button>
       </main>
     );
 
-  if (participation.state?.status === "ACTIVE") {
+  const blockingStatus = participation.state?.status === "ACTIVE"
+    ? "ACTIVE"
+    : request.data?.status;
+  if (["ACTIVE", "PENDING", "OFFERED"].includes(blockingStatus ?? "")) {
     return (
       <main className="mx-auto max-w-4xl space-y-4 p-6">
         <h1 className="text-2xl font-bold text-ink">
-          Ya se encuentra registrado como mentor
+          {blockingStatus === "ACTIVE"
+            ? "Ya se encuentra registrado como mentor"
+            : blockingStatus === "PENDING"
+              ? "Ya tienes una solicitud pendiente"
+              : "Ya tienes un cupo ofrecido"}
         </h1>
-        <p className="text-text-secondary">Tu participación está activa.</p>
+        <p className="text-text-secondary">
+          {blockingStatus === "ACTIVE"
+            ? "Tu participación está activa."
+            : blockingStatus === "PENDING"
+              ? "Ya tienes una solicitud registrada. Revisa su estado en Mi participación."
+              : "Revisa y confirma tu oferta de cupo antes de su vencimiento."}
+        </p>
         <Link href="/mentors/participation" className={buttonVariants()}>
-          Mi participación
+          {blockingStatus === "OFFERED" ? "Ver mi cupo ofrecido" : "Mi participación"}
         </Link>
       </main>
     );
@@ -388,7 +470,7 @@ export function MentorshipView() {
           selectedTechnicalAreas={selectedTechnicalAreas}
           selectedOrientationTypes={selectedOrientationTypes}
           isActivating={isActivating}
-          activationError={activationError}
+          activationError={unavailableOpen ? null : activationError}
           onEditTechnicalAreas={() => goToStep(2)}
           onEditOrientationTypes={() => goToStep(3)}
           onActivate={handleActivate}
@@ -430,8 +512,12 @@ export function MentorshipView() {
         onOpenChange={(open) => {
           setUnavailableOpen(open);
           setActivationError(null);
+          if (!open && requestRegistered) {
+            router.push("/mentors/participation?registered=1");
+          }
         }}
         isSubmitting={isActivating}
+        isRegistered={requestRegistered}
         error={activationError}
         onSubmit={() => void handleRequest()}
       />
