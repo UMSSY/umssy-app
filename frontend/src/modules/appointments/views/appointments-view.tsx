@@ -13,6 +13,7 @@ import {
 import { WorkspacePage } from "@/shared/components/layout";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { AppointmentCard } from "../components/appointment-card";
+import { AppointmentDetailDialog } from "../components/appointment-detail-dialog";
 import {
   APPOINTMENTS_EYEBROW,
   APPOINTMENTS_TEXT,
@@ -22,6 +23,7 @@ import type { AppointmentScope } from "../types/appointment-scope.types";
 
 export function AppointmentsView() {
   const [scope, setScope] = useState<AppointmentScope>("upcoming");
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   const { roles } = useAuth();
   const { appointments, isLoading, error } = useAppointments(scope);
 
@@ -110,13 +112,20 @@ export function AppointmentsView() {
             <ul className="grid min-w-0 grid-cols-1 gap-4">
               {appointments.map((appointment) => (
                 <li key={appointment.id} className="min-w-0">
-                  <AppointmentCard appointment={appointment} />
+                  <AppointmentCard
+                    appointment={appointment}
+                    onSelect={(selected) => setSelectedAppointmentId(selected.id)}
+                  />
                 </li>
               ))}
             </ul>
           )}
         </TabsContent>
       </Tabs>
+      <AppointmentDetailDialog
+        appointmentId={selectedAppointmentId}
+        onClose={() => setSelectedAppointmentId(null)}
+      />
     </WorkspacePage>
   );
 }
