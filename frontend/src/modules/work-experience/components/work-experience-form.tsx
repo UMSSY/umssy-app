@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
@@ -43,7 +42,9 @@ export function WorkExperienceForm({
   const [values, setValues] = useState<WorkExperienceFormValues>(
     initialValues ?? EMPTY_WORK_EXPERIENCE_FORM_VALUES,
   );
+
   const [errors, setErrors] = useState<WorkExperienceErrors>({});
+
   const [detectedSkills, setDetectedSkills] = useState<DetectedSkill[]>(
     normalizeWorkExperienceDescription(
       initialValues?.description ?? EMPTY_WORK_EXPERIENCE_FORM_VALUES.description,
@@ -51,6 +52,7 @@ export function WorkExperienceForm({
       ? initialDetectedSkills
       : [],
   );
+
   const [processingTimeMs, setProcessingTimeMs] = useState<number | undefined>();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -285,6 +287,7 @@ export function WorkExperienceForm({
             id="work-experience-description"
             error={errors.description}
             label="Descripción de funciones"
+            isRequired
           >
             <Textarea
               id="work-experience-description"
