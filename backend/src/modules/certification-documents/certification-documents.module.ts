@@ -11,9 +11,12 @@ import { CertificationDocumentMapper } from './mappers/certification-document.ma
 import { CertificationDocumentsRepository } from './repositories/certification-documents.repository.js';
 import { CertificationDocumentsService } from './services/certification-documents.service.js';
 
+import { CertificationSourcesModule } from '../certifications/certification-sources.module.js';
+
 @Module({
   imports: [
     PrismaModule,
+    CertificationSourcesModule,
     JwtAuthModule,
     NlpModule,
     RadarAuditModule,
@@ -29,6 +32,6 @@ import { CertificationDocumentsService } from './services/certification-document
     CertificationDocumentMapper,
     FileValidationService,
   ],
-  exports: [CertificationDocumentsRepository, CertificationDocumentsService],
+  exports: [CertificationDocumentsService],
 })
 export class CertificationDocumentsModule {}

@@ -1,3 +1,6 @@
+import { RadarAuditService } from '../../radar-integration/radar-audit.service.js';
+import { TransactionService } from '../../../common/prisma/transaction.service.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import type { INestApplication } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
@@ -9,13 +12,13 @@ import { DomainExceptionFilter } from '../../../common/filters/domain-exception.
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { CertificationDocumentsModule } from '../certification-documents.module.js';
 import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
-import { CertificationsRepository } from '../../certifications/repositories/certifications.repository.js';
+import { CertificationRecordsService } from '../../certifications/services/certification-records.service.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const otherUserId = '22222222-2222-4222-8222-222222222222';
 const certificationId = '33333333-3333-4333-8333-333333333333';
 const documentPath = `/api/certifications/${certificationId}/document`;
-const pdfBytes = Buffer.from("%PDF-1.4\n" + " ".repeat(50) + "\n%%EOF\n");
+const pdfBytes = Buffer.from('%PDF-1.4\n' + ' '.repeat(50) + '\n%%EOF\n');
 const record = {
   id: certificationId,
   userId,
@@ -52,18 +55,28 @@ describe('Certification documents API', () => {
       providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
     })
       .overrideProvider(PrismaService)
-      .useValue({ user: {
-          findFirst: ({ where }: { where: { id: string } }) => Promise.resolve({
-            id: where.id,
-            email: 'user@test.com',
-            roles: [{ role: { name: 'titulado' } }],
-          }),
-        } })
+      .useValue({
+        user: {
+          findFirst: ({ where }: { where: { id: string } }) =>
+            Promise.resolve({
+              id: where.id,
+              email: 'user@test.com',
+              roles: [{ role: { name: 'titulado' } }],
+            }),
+        },
+      })
       .overrideProvider(ProfileSkillsAnalysisService)
-      .useValue({refreshAfterChange: vi.fn().mockResolvedValue(undefined)})
+      .useValue({ refreshAfterChange: vi.fn().mockResolvedValue(undefined) })
+      .overrideProvider(RadarAuditService)
+      .useValue({ saveDocumentMetadata: vi.fn() })
+      .overrideProvider(TransactionService)
+      .useValue({
+        run: (operation: (context: TransactionContext) => Promise<unknown>) =>
+          operation({ client: {} } as TransactionContext),
+      })
       .overrideProvider(JwtService)
       .useValue(jwt)
-      .overrideProvider(CertificationsRepository)
+      .overrideProvider(CertificationRecordsService)
       .useValue(repository)
       .overrideProvider(CertificationDocumentsRepository)
       .useValue(documentsRepository)
@@ -80,11 +93,7 @@ describe('Certification documents API', () => {
   });
 
   it.each([
-    [
-      'pdf',
-      'application/pdf',
-      Buffer.from('%PDF-1.4\n' + ' '.repeat(80)),
-    ],
+    ['pdf', 'application/pdf', Buffer.from('%PDF-1.4\n' + ' '.repeat(80))],
     [
       'png',
       'image/png',
@@ -96,7 +105,10 @@ describe('Certification documents API', () => {
     [
       'jpg',
       'image/jpeg',
-      Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(80, 0x00)]),
+      Buffer.concat([
+        Buffer.from([0xff, 0xd8, 0xff, 0xe0]),
+        Buffer.alloc(80, 0x00),
+      ]),
     ],
     ['pdf below the minimum size', 'application/pdf', Buffer.from('%PDF')],
   ])(
@@ -136,7 +148,7 @@ describe('Certification documents API', () => {
     expect(documentsRepository.save).toHaveBeenCalledWith(
       certificationId,
       pdfBytes,
-      expect.objectContaining({documentFileName:"certificate.pdf", documentSizeBytes:pdfBytes.length, documentUploadedAt:expect.any(Date)}),
+      expect.objectContaining({ client: expect.any(Object) }),
     );
 
     const downloaded = await request(app.getHttpServer())
@@ -165,7 +177,10 @@ describe('Certification documents API', () => {
       detail: 'OK',
       ok: true,
     });
-    expect(documentsRepository.remove).toHaveBeenCalledWith(certificationId);
+    expect(documentsRepository.remove).toHaveBeenCalledWith(
+      certificationId,
+      expect.objectContaining({ client: expect.any(Object) }),
+    );
   });
 
   it.each(['get', 'put', 'delete'] as const)(
@@ -202,10 +217,14 @@ describe('Certification documents API', () => {
     await request(app.getHttpServer())
       .put(documentPath)
       .set('Authorization', `Bearer ${token}`)
-      .attach('file', Buffer.concat([pdfBytes, Buffer.alloc(6 * 1024 * 1024)]), {
-        filename: 'certificate.pdf',
-        contentType: 'application/pdf',
-      })
+      .attach(
+        'file',
+        Buffer.concat([pdfBytes, Buffer.alloc(6 * 1024 * 1024)]),
+        {
+          filename: 'certificate.pdf',
+          contentType: 'application/pdf',
+        },
+      )
       .expect(413);
     expect(documentsRepository.save).not.toHaveBeenCalled();
   });

@@ -3,21 +3,27 @@ import type { Prisma as PrismaTypes } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { RUBRIC_VERSION, scoreVerifiedSkills } from '../radar-scoring.js';
-import type { PublishedSkill, SnapshotRow } from '../types/radar-publication.types.js';
+import type {
+  PublishedSkill,
+  SnapshotRow,
+} from '../types/radar-publication.types.js';
 
-// The transaction-scoped repository prevents calls from escaping the lock or
-// publishing a partially computed snapshot.
+// Todas las operaciones comparten la transacción y el bloqueo de publicación.
 export class RadarPublicationTransaction {
   constructor(private readonly tx: PrismaTypes.TransactionClient) {}
 
   async lockAndReadRevision(userId: string) {
-    const lock = await this.tx.$queryRaw<{ locked: number; started_at: Date }[]>`
+    const lock = await this.tx.$queryRaw<
+      { locked: number; started_at: Date }[]
+    >`
       SELECT 1 AS locked,clock_timestamp() AS started_at FROM pg_advisory_xact_lock(hashtext(${userId}))`;
-    const states = await this.tx.$queryRaw<{
-      input_revision: number;
-      processed_revision: number | null;
-      status: string;
-    }[]>`
+    const states = await this.tx.$queryRaw<
+      {
+        input_revision: number;
+        processed_revision: number | null;
+        status: string;
+      }[]
+    >`
       SELECT input_revision,processed_revision,status FROM profile_skill_processing_states
       WHERE user_id=${userId}::uuid FOR SHARE`;
     return { startedAt: lock[0]?.started_at ?? new Date(), state: states[0] };
@@ -28,8 +34,11 @@ export class RadarPublicationTransaction {
   }
 
   async recordSynchronized(
-    userId: string, actorId: string | null, version: number,
-    revision: number, skills: PublishedSkill[],
+    userId: string,
+    actorId: string | null,
+    version: number,
+    revision: number,
+    skills: PublishedSkill[],
   ): Promise<void> {
     await this.tx.$executeRaw`
       INSERT INTO radar_audit_events (user_id,actor_id,event_type,details,occurred_at)
@@ -37,7 +46,11 @@ export class RadarPublicationTransaction {
         ${JSON.stringify({ version, sourceRevision: revision, skills })}::jsonb,clock_timestamp())`;
   }
 
-  insertSnapshot(userId: string, version: number, calculated: ReturnType<typeof scoreVerifiedSkills>) {
+  insertSnapshot(
+    userId: string,
+    version: number,
+    calculated: ReturnType<typeof scoreVerifiedSkills>,
+  ) {
     return this.tx.$queryRaw<SnapshotRow[]>`
       INSERT INTO radar_score_snapshots (user_id,version,rubric_version,fingerprint,scores,evidence,average_score)
       VALUES (${userId}::uuid,${version},${RUBRIC_VERSION},${calculated.fingerprint},
@@ -46,8 +59,11 @@ export class RadarPublicationTransaction {
   }
 
   async recordPublished(
-    userId: string, actorId: string | null, version: number,
-    revision: number, skills: PublishedSkill[],
+    userId: string,
+    actorId: string | null,
+    version: number,
+    revision: number,
+    skills: PublishedSkill[],
   ): Promise<void> {
     await this.tx.$executeRaw`
       INSERT INTO radar_audit_events (user_id,actor_id,event_type,details,occurred_at)
@@ -57,7 +73,9 @@ export class RadarPublicationTransaction {
 }
 
 function querySnapshots(
-  client: PrismaService | PrismaTypes.TransactionClient, userId: string, limit: number,
+  client: PrismaService | PrismaTypes.TransactionClient,
+  userId: string,
+  limit: number,
 ) {
   return client.$queryRaw<SnapshotRow[]>`
     SELECT s.*,(a.details->>'sourceRevision')::integer AS source_revision,
@@ -73,8 +91,15 @@ function querySnapshots(
 export class RadarPublicationRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  withTransaction<T>(operation: (store: RadarPublicationTransaction, context: TransactionContext) => Promise<T>): Promise<T> {
-    return this.prisma.$transaction(async (tx) => operation(new RadarPublicationTransaction(tx), { client: tx }));
+  withTransaction<T>(
+    operation: (
+      store: RadarPublicationTransaction,
+      context: TransactionContext,
+    ) => Promise<T>,
+  ): Promise<T> {
+    return this.prisma.$transaction(async (tx) =>
+      operation(new RadarPublicationTransaction(tx), { client: tx }),
+    );
   }
 
   snapshots(userId: string, limit: number) {
@@ -85,13 +110,21 @@ export class RadarPublicationRepository {
     const [snapshots, pendingDocs, state, attempts] = await Promise.all([
       this.snapshots(userId, 2),
       this.prisma.$queryRaw<{ count: bigint }[]>`
-        SELECT COUNT(*)::bigint AS count FROM radar_cv_evidence
-        WHERE user_id=${userId}::uuid AND review_status='pending'`,
+        SELECT COUNT(*)::bigint AS count FROM radar_cv_evidence e
+        JOIN radar_cv_review_statuses review ON review.id=e.review_status_id
+        WHERE e.user_id=${userId}::uuid AND review.title='pending'`,
       this.prisma.profileSkillProcessingState.findUnique({
         where: { userId },
-        select: { status: true, inputRevision: true, processedRevision: true, dictionaryVersion: true },
+        select: {
+          status: true,
+          inputRevision: true,
+          processedRevision: true,
+          dictionaryVersion: true,
+        },
       }),
-      this.prisma.$queryRaw<{ source_revision: number | null; status: string }[]>`
+      this.prisma.$queryRaw<
+        { source_revision: number | null; status: string }[]
+      >`
         SELECT COALESCE((details->>'sourceRevision')::integer,(details->>'revision')::integer) AS source_revision,
           CASE WHEN event_type='radar.recalculation_failed' THEN 'error' ELSE 'ready' END AS status
         FROM radar_audit_events WHERE user_id=${userId}::uuid
@@ -101,7 +134,12 @@ export class RadarPublicationRepository {
     return { snapshots, pendingDocs, state, attempts };
   }
 
-  async recordFailure(userId: string, actorId: string | null, revision: number, attemptStartedAt: Date) {
+  async recordFailure(
+    userId: string,
+    actorId: string | null,
+    revision: number,
+    attemptStartedAt: Date,
+  ) {
     await this.prisma.$executeRaw`
       INSERT INTO radar_audit_events (user_id,actor_id,event_type,details,occurred_at)
       SELECT ${userId}::uuid,${actorId}::uuid,'radar.recalculation_failed',

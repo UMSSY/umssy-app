@@ -120,9 +120,7 @@ describe('WorkExperienceRepository', () => {
   it('creates the record for the owner and links the company by its name', async () => {
     workExperience.create.mockResolvedValue(record);
 
-    await expect(repository.create(userId, writeData)).resolves.toEqual(
-      record,
-    );
+    await expect(repository.create(userId, writeData)).resolves.toEqual(record);
     expect(workExperience.create).toHaveBeenCalledWith({
       data: {
         position: 'Junior web developer',
@@ -216,17 +214,25 @@ describe('WorkExperienceRepository', () => {
 
   it('extracts text sources for NLP processing', async () => {
     workExperience.findMany.mockResolvedValue([
-      { id: 'w1', position: 'Desarrollador backend', description: 'APIs con Node.js' },
+      {
+        id: 'w1',
+        position: 'Desarrollador backend',
+        description: 'APIs con Node.js',
+      },
       { id: 'w2', position: 'Analista', description: null },
     ]);
 
-    await expect(repository.findTextSources(userId)).resolves.toEqual([
-      { id: 'w1', type: 'work-experience', text: 'Desarrollador backend.\nAPIs con Node.js' },
-      { id: 'w2', type: 'work-experience', text: 'Analista' },
+    await expect(repository.findAnalysisSources(userId)).resolves.toEqual([
+      {
+        id: 'w1',
+        position: 'Desarrollador backend',
+        description: 'APIs con Node.js',
+      },
+      { id: 'w2', position: 'Analista', description: null },
     ]);
     expect(workExperience.findMany).toHaveBeenCalledWith({
       where: { userId },
-      orderBy: { startDate: 'desc' },
+      orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
       select: { id: true, position: true, description: true },
     });
   });

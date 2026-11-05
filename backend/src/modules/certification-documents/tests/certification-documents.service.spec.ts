@@ -1,3 +1,6 @@
+import type { RadarAuditService } from '../../radar-integration/radar-audit.service.js';
+import { TransactionService } from '../../../common/prisma/transaction.service.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import type { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EmptyFileException } from '../../../common/exceptions/empty-file.exception.js';
@@ -7,7 +10,7 @@ import { FileValidationService } from '../../../common/services/file-validation.
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { CertificationNotFoundException } from '../../certifications/exceptions/certification-not-found.exception.js';
 import { CertificationMapper } from '../../certifications/mappers/certification.mapper.js';
-import { CertificationsRepository } from '../../certifications/repositories/certifications.repository.js';
+import { CertificationRecordsService } from '../../certifications/services/certification-records.service.js';
 import type { CertificationRecord } from '../../certifications/types/certification-record.type.js';
 import { CertificationDocumentNotFoundException } from '../exceptions/certification-document-not-found.exception.js';
 import { CertificationDocumentMapper } from '../mappers/certification-document.mapper.js';
@@ -18,9 +21,23 @@ const userId = '11111111-1111-4111-8111-111111111111';
 const otherUserId = '22222222-2222-4222-8222-222222222222';
 const certificationId = '33333333-3333-4333-8333-333333333333';
 
-const pdfBytes = Array.from(Buffer.from("%PDF-1.4\n" + " ".repeat(50) + "\n%%EOF\n"));
-const pngBytes = Array.from(Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(50), Buffer.from([0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82])]));
-const jpgBytes = Array.from(Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(50), Buffer.from([0xff, 0xd9])]));
+const pdfBytes = Array.from(
+  Buffer.from('%PDF-1.4\n' + ' '.repeat(50) + '\n%%EOF\n'),
+);
+const pngBytes = Array.from(
+  Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    Buffer.alloc(50),
+    Buffer.from([0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82]),
+  ]),
+);
+const jpgBytes = Array.from(
+  Buffer.concat([
+    Buffer.from([0xff, 0xd8, 0xff, 0xe0]),
+    Buffer.alloc(50),
+    Buffer.from([0xff, 0xd9]),
+  ]),
+);
 
 const buildRecord = (
   overrides: Partial<CertificationRecord> = {},
@@ -48,6 +65,7 @@ const buildFile = (
 
 describe('CertificationDocumentsService', () => {
   let service: CertificationDocumentsService;
+  const audit = { saveDocumentMetadata: vi.fn() };
   let certificationsRepository: { findById: ReturnType<typeof vi.fn> };
   let documentsRepository: {
     save: ReturnType<typeof vi.fn>;
@@ -57,6 +75,7 @@ describe('CertificationDocumentsService', () => {
   };
 
   beforeEach(() => {
+    audit.saveDocumentMetadata.mockReset();
     certificationsRepository = { findById: vi.fn() };
     documentsRepository = {
       save: vi.fn(),
@@ -65,12 +84,47 @@ describe('CertificationDocumentsService', () => {
       hasDocument: vi.fn(),
     };
     service = new CertificationDocumentsService(
-      certificationsRepository as unknown as CertificationsRepository,
+      certificationsRepository as unknown as CertificationRecordsService,
       documentsRepository as unknown as CertificationDocumentsRepository,
       new FileValidationService(),
       new CertificationMapper(),
       new CertificationDocumentMapper(),
-      { refreshAfterChange: vi.fn().mockResolvedValue(undefined) } as unknown as ProfileSkillsAnalysisService,
+      {
+        refreshAfterChange: vi.fn().mockResolvedValue(undefined),
+      } as unknown as ProfileSkillsAnalysisService,
+      audit as unknown as RadarAuditService,
+      {
+        run: (operation: (context: TransactionContext) => Promise<unknown>) =>
+          operation({ client: {} } as TransactionContext),
+      } as TransactionService,
+    );
+  });
+
+  it('propaga el fallo de auditoría al reemplazar el archivo', async () => {
+    certificationsRepository.findById.mockResolvedValue(buildRecord());
+    audit.saveDocumentMetadata.mockRejectedValue(
+      new Error('audit unavailable'),
+    );
+    await expect(
+      service.upload(userId, certificationId, buildFile(pdfBytes)),
+    ).rejects.toThrow('audit unavailable');
+    expect(documentsRepository.save).toHaveBeenCalledOnce();
+  });
+
+  it('propaga el fallo de auditoría al retirar el archivo', async () => {
+    certificationsRepository.findById.mockResolvedValue(buildRecord());
+    documentsRepository.hasDocument.mockResolvedValue(true);
+    audit.saveDocumentMetadata.mockRejectedValue(
+      new Error('audit unavailable'),
+    );
+    await expect(service.remove(userId, certificationId)).rejects.toThrow(
+      'audit unavailable',
+    );
+    expect(audit.saveDocumentMetadata).toHaveBeenCalledWith(
+      userId,
+      certificationId,
+      null,
+      expect.objectContaining({ client: expect.any(Object) }),
     );
   });
 
@@ -79,24 +133,30 @@ describe('CertificationDocumentsService', () => {
       ['pdf', pdfBytes],
       ['png', pngBytes],
       ['jpg', jpgBytes],
-    ])('saves a valid %s document and flags the certification', async (_type, bytes) => {
-      certificationsRepository.findById.mockResolvedValue(buildRecord());
-      documentsRepository.save.mockResolvedValue(undefined);
+    ])(
+      'saves a valid %s document and flags the certification',
+      async (_type, bytes) => {
+        certificationsRepository.findById.mockResolvedValue(buildRecord());
+        documentsRepository.save.mockResolvedValue(undefined);
 
-      const result = await service.upload(
-        userId,
-        certificationId,
-        buildFile(bytes),
-      );
+        const result = await service.upload(
+          userId,
+          certificationId,
+          buildFile(bytes),
+        );
 
-      expect(documentsRepository.save).toHaveBeenCalledWith(
-        certificationId,
-        Buffer.from(bytes),
-        expect.objectContaining({ documentFileName: "certificate.pdf", documentSizeBytes: bytes.length, documentUploadedAt: expect.any(Date) }),
-      );
-      expect(result).toMatchObject({ id: certificationId, hasDocument: true });
-      expect(result).not.toHaveProperty('userId');
-    });
+        expect(documentsRepository.save).toHaveBeenCalledWith(
+          certificationId,
+          Buffer.from(bytes),
+          expect.objectContaining({ client: expect.any(Object) }),
+        );
+        expect(result).toMatchObject({
+          id: certificationId,
+          hasDocument: true,
+        });
+        expect(result).not.toHaveProperty('userId');
+      },
+    );
 
     it('rejects a missing file', async () => {
       certificationsRepository.findById.mockResolvedValue(buildRecord());
@@ -202,7 +262,10 @@ describe('CertificationDocumentsService', () => {
       await expect(
         service.remove(userId, certificationId),
       ).resolves.toBeUndefined();
-      expect(documentsRepository.remove).toHaveBeenCalledWith(certificationId);
+      expect(documentsRepository.remove).toHaveBeenCalledWith(
+        certificationId,
+        expect.objectContaining({ client: expect.any(Object) }),
+      );
     });
 
     it('throws document not found when there is nothing to remove', async () => {
