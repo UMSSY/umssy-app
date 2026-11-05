@@ -1,9 +1,10 @@
-import { cleanup, screen } from "@testing-library/react"
+import { cleanup, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { toast } from "sonner"
 import { renderWithQuery } from "@/shared/testing/render-with-query"
 import * as downloadModule from "@/shared/utils/download-file"
-import { APPOINTMENT_DETAIL_TEXT } from "../constants/appointments.constants"
+import { APPOINTMENT_DETAIL_TEXT, APPOINTMENTS_TEXT } from "../constants/appointments.constants"
 import { appointmentsApi } from "../services/appointments.service"
 import type { Appointment } from "../types/appointment.types"
 import { AppointmentDetailDialog } from "./appointment-detail-dialog"
@@ -159,6 +160,91 @@ describe("AppointmentDetailDialog", () => {
 
     await screen.findByRole("heading", { name: "Cita con Ana Rojas" })
     await user.click(screen.getByRole("button", { name: APPOINTMENT_DETAIL_TEXT.close }))
+
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+})
+
+describe("AppointmentDetailDialog: foto, tema y descarga", () => {
+  class LoadedImage {
+    complete = true
+    naturalWidth = 1
+    src = ""
+    onload: (() => void) | null = null
+    onerror: (() => void) | null = null
+  }
+
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.mocked(toast.error).mockClear()
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(makeAppointment())
+    vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    cleanup()
+  })
+
+  it("muestra la foto de perfil de la otra persona cuando tiene una", async () => {
+    vi.stubGlobal("Image", LoadedImage)
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:foto-ana")
+    vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined)
+    vi.mocked(appointmentsApi.getCounterpartPhoto).mockResolvedValue(
+      new Blob(["png"], { type: "image/png" }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByRole("img", { name: "Foto de perfil de Ana Rojas" })).toHaveAttribute(
+      "src",
+      "blob:foto-ana",
+    )
+  })
+
+  it("no pide la foto hasta tener los datos de la cita", () => {
+    vi.mocked(appointmentsApi.getById).mockReturnValue(new Promise(() => undefined))
+
+    renderDialog()
+
+    expect(appointmentsApi.getCounterpartPhoto).not.toHaveBeenCalled()
+  })
+
+  it("muestra una alternativa cuando la cita no tiene tema", async () => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(makeAppointment({ orientationType: null }))
+
+    renderDialog()
+
+    expect(await screen.findByText(`Mentor · ${APPOINTMENTS_TEXT.noTopic}`)).toBeInTheDocument()
+    expect(screen.getAllByText(APPOINTMENTS_TEXT.noTopic)).toHaveLength(1)
+  })
+
+  it("deshabilita «Descargar» mientras baja el documento", async () => {
+    vi.spyOn(appointmentsApi, "downloadDocument").mockReturnValue(new Promise(() => undefined))
+    const { user } = renderDialog()
+
+    await user.click(await screen.findByRole("button", { name: APPOINTMENT_DETAIL_TEXT.download }))
+
+    expect(screen.getByRole("button", { name: APPOINTMENT_DETAIL_TEXT.downloading })).toBeDisabled()
+  })
+
+  it("avisa si la descarga falla y deja volver a intentarlo", async () => {
+    vi.spyOn(appointmentsApi, "downloadDocument").mockRejectedValue(new Error("network"))
+    const { user } = renderDialog()
+
+    await user.click(await screen.findByRole("button", { name: APPOINTMENT_DETAIL_TEXT.download }))
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(APPOINTMENT_DETAIL_TEXT.downloadError),
+    )
+    expect(screen.getByRole("button", { name: APPOINTMENT_DETAIL_TEXT.download })).toBeEnabled()
+  })
+
+  it("se cierra con la tecla Escape", async () => {
+    const { onClose, user } = renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Ana Rojas" })
+    await user.keyboard("{Escape}")
 
     expect(onClose).toHaveBeenCalledOnce()
   })

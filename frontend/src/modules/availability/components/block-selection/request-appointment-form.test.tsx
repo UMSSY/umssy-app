@@ -182,4 +182,37 @@ describe("RequestAppointmentForm", () => {
 
     expect(onDirtyChange).toHaveBeenLastCalledWith(true)
   })
+
+  it("con un mensaje de solo espacios muestra el error y no envía", async () => {
+    const { onSubmit, user } = renderForm()
+
+    await chooseTopic(user)
+    await user.type(screen.getByLabelText(messageLabel), "     ")
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+
+    expect(screen.getByText(REQUEST_APPOINTMENT_TEXT.missingMessage)).toBeInTheDocument()
+    expect(screen.getByLabelText(messageLabel)).toHaveAttribute("aria-invalid", "true")
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it("quita el error del mensaje al escribir", async () => {
+    const { user } = renderForm()
+
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+    expect(screen.getByText(REQUEST_APPOINTMENT_TEXT.missingMessage)).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText(messageLabel), "Hola")
+
+    expect(screen.queryByText(REQUEST_APPOINTMENT_TEXT.missingMessage)).not.toBeInTheDocument()
+  })
+
+  it("muestra a la vez los errores del tema y del mensaje", async () => {
+    const { onSubmit, user } = renderForm()
+
+    await user.click(screen.getByRole("button", { name: REQUEST_APPOINTMENT_TEXT.submit }))
+
+    expect(screen.getByText(REQUEST_APPOINTMENT_TEXT.missingTopic)).toBeInTheDocument()
+    expect(screen.getByText(REQUEST_APPOINTMENT_TEXT.missingMessage)).toBeInTheDocument()
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
 })

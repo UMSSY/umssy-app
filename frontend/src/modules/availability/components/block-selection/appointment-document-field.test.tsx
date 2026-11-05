@@ -75,4 +75,24 @@ describe("AppointmentDocumentField", () => {
     expect(screen.getByRole("button", { name: APPOINTMENT_DOCUMENT_TEXT.removeLabel })).toBeDisabled()
     expect(screen.getByLabelText(APPOINTMENT_DOCUMENT_TEXT.label)).toBeDisabled()
   })
+
+  it("abre el selector de archivos al presionar «Adjuntar documento»", async () => {
+    const { user } = renderField()
+    const input = screen.getByLabelText(APPOINTMENT_DOCUMENT_TEXT.label)
+    const openPicker = vi.spyOn(input, "click")
+
+    await user.click(screen.getByRole("button", { name: APPOINTMENT_DOCUMENT_TEXT.select }))
+
+    expect(openPicker).toHaveBeenCalledOnce()
+  })
+
+  it("permite volver a elegir el mismo archivo después de quitarlo", async () => {
+    const { onSelect, user } = renderField()
+    const input = screen.getByLabelText<HTMLInputElement>(APPOINTMENT_DOCUMENT_TEXT.label)
+
+    await user.upload(input, pdf)
+
+    expect(onSelect).toHaveBeenCalledWith(pdf)
+    expect(input.value).toBe("")
+  })
 })
