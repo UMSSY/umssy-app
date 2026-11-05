@@ -20,16 +20,41 @@ describe('SkillAnalysisService', () => {
   });
 
   it('reconciles manual evidence, removes unsupported detections and preserves approved skills', async () => {
-    const row = { verificationStatus: 'pending', isHighRelevance: true, evidenceRefs: [], skill: { name: 'Python', areaId: null } };
-    repository.findProfileSkillRows.mockResolvedValue([
-      { ...row, id: 'manual-row', skillId: 'manual', source: 'manual' },
-      { ...row, id: 'obsolete-row', skillId: 'obsolete', source: 'nlp' },
-      { ...row, id: 'approved-row', skillId: 'approved', source: 'nlp', verificationStatus: 'approved' },
-    ]);
     const evidenceRefs = [{ type: 'education' as const, id: 'e1' }];
 
+    repository.findProfileSkillRows.mockResolvedValue([
+      {
+        id: 'manual-row',
+        skillId: 'manual',
+        source: 'manual',
+        verificationStatus: 'pending',
+        isHighRelevance: true,
+        evidenceRefs: [],
+        skill: { name: 'Python', areaId: null },
+      },
+      {
+        id: 'obsolete-row',
+        skillId: 'obsolete',
+        source: 'nlp',
+        verificationStatus: 'pending',
+        isHighRelevance: true,
+        evidenceRefs: [],
+        skill: { name: 'Java', areaId: null },
+      },
+      {
+        id: 'approved-row',
+        skillId: 'approved',
+        source: 'nlp',
+        verificationStatus: 'approved',
+        isHighRelevance: true,
+        evidenceRefs: [],
+        skill: { name: 'React', areaId: null },
+      },
+    ]);
+
     await expect(service.reconcileDetected(userId, [
-      { id: 'manual', evidenceRefs }, { id: 'new', evidenceRefs },
+      { id: 'manual', name: 'Python', evidenceRefs },
+      { id: 'new', name: 'TypeScript', evidenceRefs },
     ], context)).resolves.toBe(true);
 
     expect(repository.findProfileSkillRows).toHaveBeenCalledWith(userId, context);
@@ -49,7 +74,9 @@ describe('SkillAnalysisService', () => {
       { id: 'row', skillId: 's1', source: 'nlp', verificationStatus: 'pending', isHighRelevance: true, evidenceRefs },
     ]);
 
-    await expect(service.reconcileDetected(userId, [{ id: 's1', evidenceRefs }], context)).resolves.toBe(false);
+    await expect(service.reconcileDetected(userId, [
+      { id: 's1', name: 'Python', evidenceRefs },
+    ], context)).resolves.toBe(false);
   });
 
   it('propagates write failures so the publishing transaction rolls back', async () => {

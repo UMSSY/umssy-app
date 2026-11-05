@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { AlertCircle, Users } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Card, CardContent } from "@/components/ui/card";
 
 type MentorQueryFeedbackProps = {

@@ -1,8 +1,10 @@
+
 import { Injectable } from '@nestjs/common';
 import { MessageRepository } from '../repositories/message.repository.js';
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { ConversationParticipantRepository } from '../repositories/conversation-participant.repository.js';
 import { MessageStatusService } from './message-status.service.js';
+import { ChatRolePolicyService } from './chat-role-policy.service.js';
 import { BlockService } from './block.service.js';
 import {
   ConversationNotFoundException,
@@ -22,15 +24,19 @@ export class MessageService {
     private readonly participantRepository: ConversationParticipantRepository,
     private readonly messageStatusService: MessageStatusService,
     private readonly blockService: BlockService,
-    ) {}
+    private readonly chatRolePolicyService: ChatRolePolicyService,
+  ) {}
+
   async send(params: {
     conversationId: string;
     senderId: string;
     content: string;
   }): Promise<MessageResponse> {
+
     const conversation = await this.conversationRepository.findById(
       params.conversationId,
     );
+
     if (!conversation) {
       throw new ConversationNotFoundException();
     }
@@ -40,6 +46,7 @@ export class MessageService {
         params.conversationId,
         params.senderId,
       );
+
     if (!participant) {
       throw new NotConversationParticipantException();
     }
@@ -48,11 +55,22 @@ export class MessageService {
       conversation,
       params.senderId,
     );
+
     if (
       otherParticipantId &&
-      (await this.blockService.isBlockedBetween(params.senderId, otherParticipantId))
+      (await this.blockService.isBlockedBetween(
+        params.senderId,
+        otherParticipantId,
+      ))
     ) {
       throw new UserBlockedException();
+    }
+
+    if (otherParticipantId) {
+      await this.chatRolePolicyService.assertCanCommunicate(
+        params.senderId,
+        otherParticipantId,
+      );
     }
 
     const content = this.sanitize(params.content);
@@ -112,11 +130,13 @@ export class MessageService {
     cursor: string | null;
     limit: number;
   }) {
+
     const participant =
       await this.participantRepository.findByConversationAndUser(
         params.conversationId,
         params.userId,
       );
+
     if (!participant) {
       throw new NotConversationParticipantException();
     }
@@ -130,6 +150,7 @@ export class MessageService {
     return {
       data: page.data.map((m) => {
         const rawContent = m.content ?? '';
+
         const rawAttachments = (m as {
           attachments?: Array<{
             id: string;
@@ -146,21 +167,31 @@ export class MessageService {
         }).attachments;
 
         const firstAttachment = rawAttachments?.[0];
+
         const isAttachment = Boolean(
           firstAttachment || rawContent.startsWith('[Archivo] '),
         );
+
         const content = rawContent.startsWith('[Archivo] ')
           ? rawContent.slice(10)
           : rawContent;
+
         const attachmentType = firstAttachment
-          ? (firstAttachment.type?.title?.toLowerCase() === 'image'
-              ? ('image' as const)
-              : ('file' as const))
+          ? firstAttachment.type?.title?.toLowerCase() === 'image'
+            ? ('image' as const)
+            : ('file' as const)
           : isAttachment
             ? ('file' as const)
             : null;
-        const statusTitle = (m as { status?: { title?: string } }).status?.title?.toLowerCase();
-        const status = statusTitle === 'read' ? ('read' as const) : ('sent' as const);
+
+        const statusTitle = (
+          m as { status?: { title?: string } }
+        ).status?.title?.toLowerCase();
+
+        const status =
+          statusTitle === 'read'
+            ? ('read' as const)
+            : ('sent' as const);
 
         const mappedAttachments = rawAttachments?.map((att) => ({
           id: att.id,
@@ -168,7 +199,9 @@ export class MessageService {
           fileName: att.fileName,
           mimeType: att.mimeType ?? 'application/octet-stream',
           fileSize: att.fileSize ?? 0,
-          url: att.url ?? `/api/chat/attachments/${att.id}/download`,
+          url:
+            att.url ??
+            `/api/chat/attachments/${att.id}/download`,
           thumbnailUrl: att.thumbnailUrl,
           type: att.type?.title ?? 'FILE',
           createdAt:
@@ -196,12 +229,17 @@ export class MessageService {
     };
   }
 
-  async markRead(conversationId: string, userId: string): Promise<void> {
+  async markRead(
+    conversationId: string,
+    userId: string,
+  ): Promise<void> {
+
     const participant =
       await this.participantRepository.findByConversationAndUser(
         conversationId,
         userId,
       );
+
     if (!participant) {
       throw new NotConversationParticipantException();
     }
@@ -213,18 +251,28 @@ export class MessageService {
     );
   }
 
-   private getOtherParticipantId(
-    conversation: { userAId?: string | null; userBId?: string | null },
+  private getOtherParticipantId(
+    conversation: {
+      userAId?: string | null;
+      userBId?: string | null;
+    },
     senderId: string,
   ): string | null {
     const { userAId, userBId } = conversation;
-    if (!userAId || !userBId) return null;
+
+    if (!userAId || !userBId) {
+      return null;
+    }
+
     const sender = senderId.trim().toLowerCase();
-    return userAId.toLowerCase() === sender ? userBId : userAId;
+
+    return userAId.toLowerCase() === sender
+      ? userBId
+      : userAId;
   }
 
-    private sanitize(raw: string): string {
-  
+  private sanitize(raw: string): string {
+
     const cleaned = raw
       .split('')
       .filter((char) => {

@@ -5,13 +5,8 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveTechnicalAreaIcon } from "../../utils/technical-area-icon";
-import type { TechnicalAreaResponse } from "../../types/technical-area-response.types";
+import type { TechnicalAreaCardProps } from "../../types/technical-area-card-props.types";
 
-type TechnicalAreaCardProps = {
-  area: TechnicalAreaResponse;
-  isSelected: boolean;
-  onToggle: (id: string) => void;
-};
 
 export function TechnicalAreaCard({
   area,
@@ -20,20 +15,21 @@ export function TechnicalAreaCard({
 }: TechnicalAreaCardProps) {
   return (
     <Button
+      variant="ghost"
       type="button"
       onClick={() => onToggle(area.id)}
-      className={cn("flex w-full flex-col items-start gap-3 rounded-lg border p-4 text-left transition-colors", isSelected ? "border-accent bg-interaction" : "border-border bg-surface hover:border-border-strong")}
+      className={cn("flex h-auto w-full min-w-0 flex-col items-stretch justify-start gap-3 self-stretch rounded-lg border p-4 text-left whitespace-normal transition-colors", isSelected ? "border-accent bg-interaction" : "border-border bg-surface hover:border-border-strong")}
       aria-pressed={isSelected}
     >
       <div className="flex w-full items-start justify-between">
         <div
-          className={cn("flex size-10 items-center justify-center rounded-md", isSelected ? "bg-accent text-white" : "bg-surface text-text-secondary")}
+          className={cn("flex size-10 shrink-0 items-center justify-center rounded-md", isSelected ? "bg-accent text-accent-foreground" : "bg-surface text-text-secondary")}
         >
           {createElement(resolveTechnicalAreaIcon(area.name), { className: "size-5", "aria-hidden": true })}
         </div>
 
         <div
-          className={cn("flex size-5 items-center justify-center rounded border", isSelected ? "border-accent bg-accent text-white" : "border-border bg-surface")}
+          className={cn("flex size-5 shrink-0 items-center justify-center rounded border", isSelected ? "border-accent bg-accent text-accent-foreground" : "border-border bg-surface")}
         >
           {isSelected && (
             <CheckCircle className="size-3.5" strokeWidth={3} aria-hidden />
@@ -41,9 +37,9 @@ export function TechnicalAreaCard({
         </div>
       </div>
 
-      <div>
-        <h3 className="text-sm font-semibold text-ink">{area.name}</h3>
-        <p className="mt-1 text-xs text-text-secondary">{area.description}</p>
+      <div className="min-w-0">
+        <h3 className="text-sm font-semibold break-words text-ink">{area.name}</h3>
+        <p className="mt-1 text-xs leading-relaxed font-normal break-words text-text-secondary">{area.description}</p>
       </div>
     </Button>
   );

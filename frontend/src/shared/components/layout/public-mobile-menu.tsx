@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { cn } from "cn";
 import { MenuIcon } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { PUBLIC_NAV_LABELS, PUBLIC_NAV_LINKS, PUBLIC_SLANT_BUTTON_CLASS } from "@/shared/constants/public-navigation.constants";
 

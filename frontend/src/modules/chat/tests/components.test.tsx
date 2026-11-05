@@ -276,7 +276,6 @@ describe("Chat Components", () => {
       />,
     );
 
-    // Caso 1: No existen mensajes ni solicitudes pendientes.
     expect(
       screen.getByText(
         "No tienes mensajes ni solicitudes pendientes.",
@@ -301,7 +300,6 @@ describe("Chat Components", () => {
       />,
     );
 
-    // Caso 2: No existen coincidencias en la búsqueda.
     expect(
       screen.getByText(
         "No se encontraron conversaciones ni solicitudes que coincidan con tu búsqueda.",
@@ -326,7 +324,6 @@ describe("Chat Components", () => {
       />,
     );
 
-    // Caso 3: No existen conversaciones ni solicitudes.
     expect(
       screen.getByText(
         "Aún no tienes conversaciones ni solicitudes registradas.",

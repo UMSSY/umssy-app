@@ -78,6 +78,32 @@ describe("HU-02A T2.4 - RecommendedJobsView", () => {
     ).toBeInTheDocument();
   });
 
+  it("explains the affinity only with the skills of the profile", () => {
+    setQueryState({
+      data: {
+        isProfileComplete: true,
+        items: [
+          {
+            jobOfferId: "123",
+            title: "Vacante de prueba",
+            companyName: "Empresa de prueba",
+            modality: "Remoto",
+            score: 90,
+            matchedSkills: ["React"],
+            skills: ["React", "SQL"],
+          },
+        ],
+      },
+    });
+
+    const { container } = render(<RecommendedJobsView />);
+    const text = container.textContent ?? "";
+
+    expect(text).toContain("Encuentra ofertas según las habilidades de tu perfil.");
+    expect(text).toContain("Comparamos tus habilidades con las que pide cada vacante");
+    expect(text).not.toMatch(/carrera|experiencia/i);
+  });
+
   it("shows an empty state when there are no matching jobs", () => {
     setQueryState({
       data: {

@@ -46,8 +46,10 @@ export const surveysService = {
     await apiClient.patch(`/surveys/${id}/unpublish`, undefined, { timeout: SURVEY_SAVE_TIMEOUT_MS });
   },
 
-  getSurveyStatistics: async (id: string): Promise<ApiResponse<SurveyStatistics>> => {
-    const { data } = await apiClient.get<ApiResponse<SurveyStatistics>>(`/surveys/${id}/statistics`);
+  getSurveyStatistics: async (id: string, period?: string): Promise<ApiResponse<SurveyStatistics>> => {
+    const { data } = await apiClient.get<ApiResponse<SurveyStatistics>>(`/surveys/${id}/statistics`, {
+      params: { period },
+    });
     return data;
   },
 
@@ -62,9 +64,10 @@ export const surveysService = {
     return data;
   },
 
-  exportSurveyPdf: async (id: string): Promise<{ file: Blob; fileName: string }> => {
+  exportSurveyPdf: async (id: string, period?: string): Promise<{ file: Blob; fileName: string }> => {
     const response = await apiClient.get<Blob>(`/surveys/${id}/export-pdf`, {
       responseType: "blob",
+      params: { period },
     });
     return {
       file: response.data,

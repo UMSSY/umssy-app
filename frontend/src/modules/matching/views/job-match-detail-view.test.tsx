@@ -21,7 +21,7 @@ vi.mock("../services/job-matching.service", () => ({
 }));
 
 const JOB_ID = "11111111-1111-4111-8111-111111111111";
-const NO_PENDING = "No tienes habilidades ni requisitos visibles pendientes para esta oportunidad";
+const NO_PENDING = "Para esta oportunidad no tienes habilidades pendientes";
 
 function getGroup(title: string) {
   const heading = screen.getByRole("heading", { name: title, level: 4 });
