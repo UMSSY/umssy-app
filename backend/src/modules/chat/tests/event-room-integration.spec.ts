@@ -3,6 +3,7 @@ import { EventRegistrationsService } from '../../event-registrations/services/ev
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
 import { EventRoomService } from '../services/event-room.service.js';
+import { ConversationMapper } from '../mappers/conversation.mapper.js'; // <-- IMPORTAMOS EL MAPPER
 
 describe('EventRoomService — Integration Tests', () => {
   let service: EventRoomService;
@@ -20,9 +21,12 @@ describe('EventRoomService — Integration Tests', () => {
       findById: vi.fn(),
       findParticipantsByConversationId: vi.fn(),
     };
+    const conversationMapper = new ConversationMapper();
+
     service = new EventRoomService(
       registrationsService as unknown as EventRegistrationsService,
       conversationRepository as unknown as ConversationRepository,
+      conversationMapper, // <-- LO PASAMOS AL CONSTRUCTOR
     );
   });
 
