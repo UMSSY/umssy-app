@@ -1,4 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { lookup } from 'node:dns/promises';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('node:dns/promises', () => ({ lookup: vi.fn() }));
+afterEach(() => vi.resetAllMocks());
 import {
   isPrivateOrReservedIPv4,
   isPrivateOrReservedIPv6,
@@ -106,7 +110,27 @@ describe('SSRF Validator', () => {
       expect(await validateSafeUrl('http://0x7f000001/')).toBe(false);
     });
 
+    it('acepta un dominio que solo resuelve a direcciones públicas', async () => {
+      vi.mocked(lookup).mockResolvedValueOnce([{ address: '93.184.216.34', family: 4 }]);
+      expect(await validateSafeUrl('https://example.com')).toBe(true);
+      expect(lookup).toHaveBeenCalledWith('example.com', { all: true });
+    });
+
+    it('rechaza un dominio si cualquiera de sus direcciones es privada', async () => {
+      vi.mocked(lookup).mockResolvedValueOnce([
+        { address: '93.184.216.34', family: 4 },
+        { address: '127.0.0.1', family: 4 },
+      ]);
+      expect(await validateSafeUrl('https://example.com')).toBe(false);
+    });
+
+    it('rechaza una respuesta DNS vacía', async () => {
+      vi.mocked(lookup).mockResolvedValueOnce([]);
+      expect(await validateSafeUrl('https://example.com')).toBe(false);
+    });
+
     it('rejects unresolvable domains safely', async () => {
+      vi.mocked(lookup).mockRejectedValueOnce(Object.assign(new Error('No resuelto'), { code: 'ENOTFOUND' }));
       expect(await validateSafeUrl('http://non-existent-domain-xyz-12345.org')).toBe(false);
     });
   });

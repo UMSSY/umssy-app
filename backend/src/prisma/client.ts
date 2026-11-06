@@ -416,3 +416,28 @@ export type MentorParticipationSanction = Prisma.MentorParticipationSanctionMode
  * 
  */
 export type MentorIntakeOperation = Prisma.MentorIntakeOperationModel
+/**
+ * Model RadarCvEvidence
+ * 
+ */
+export type RadarCvEvidence = Prisma.RadarCvEvidenceModel
+/**
+ * Model RadarScoreSnapshot
+ * 
+ */
+export type RadarScoreSnapshot = Prisma.RadarScoreSnapshotModel
+/**
+ * Model RadarAuditEvent
+ * 
+ */
+export type RadarAuditEvent = Prisma.RadarAuditEventModel
+/**
+ * Model RadarCvExtractionStatus
+ * 
+ */
+export type RadarCvExtractionStatus = Prisma.RadarCvExtractionStatusModel
+/**
+ * Model RadarCvReviewStatus
+ * 
+ */
+export type RadarCvReviewStatus = Prisma.RadarCvReviewStatusModel

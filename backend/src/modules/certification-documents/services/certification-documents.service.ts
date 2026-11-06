@@ -3,24 +3,61 @@ import { FileValidationService } from '../../../common/services/file-validation.
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { CertificationNotFoundException } from '../../certifications/exceptions/certification-not-found.exception.js';
 import { CertificationMapper } from '../../certifications/mappers/certification.mapper.js';
-import { CertificationsRepository } from '../../certifications/repositories/certifications.repository.js';
+import { CertificationRecordsService } from '../../certifications/services/certification-records.service.js';
 import type { CertificationRecord } from '../../certifications/types/certification-record.type.js';
 import type { CertificationResponse } from '../../certifications/types/certification-response.type.js';
 import { CERTIFICATION_DOCUMENT_VALIDATION_RULES } from '../constants/certification-document.constants.js';
 import { CertificationDocumentNotFoundException } from '../exceptions/certification-document-not-found.exception.js';
 import { CertificationDocumentMapper } from '../mappers/certification-document.mapper.js';
 import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
+import { ProfileSkillsAnalysisService } from '../../nlp/services/profile-skills-analysis.service.js';
 import type { CertificationDocumentDownload } from '../types/certification-document-download.type.js';
+import type { CertificationDocumentMetadata } from '../types/certification-document-metadata.type.js';
+
+import { TransactionService } from '../../../common/prisma/transaction.service.js';
+import { RadarAuditService } from '../../radar-integration/radar-audit.service.js';
 
 @Injectable()
 export class CertificationDocumentsService {
   constructor(
-    private readonly certificationsRepository: CertificationsRepository,
+    private readonly records: CertificationRecordsService,
     private readonly documentsRepository: CertificationDocumentsRepository,
     private readonly fileValidationService: FileValidationService,
     private readonly certificationMapper: CertificationMapper,
     private readonly documentMapper: CertificationDocumentMapper,
+    private readonly skillsAnalysis: ProfileSkillsAnalysisService,
+    private readonly audit: RadarAuditService,
+    private readonly transactions: TransactionService,
   ) {}
+
+  hasDocument(id: string) {
+    return this.documentsRepository.hasDocument(id);
+  }
+
+  findIdsWithDocument(userId: string) {
+    return this.documentsRepository.findIdsWithDocument(userId);
+  }
+
+  prepare(file: MulterFile | undefined): {
+    content: Buffer;
+    metadata: CertificationDocumentMetadata;
+  } {
+    const validated = this.fileValidationService.validate(
+      file ? this.documentMapper.toUploadedFile(file) : undefined,
+      CERTIFICATION_DOCUMENT_VALIDATION_RULES,
+    );
+    return {
+      content: validated.buffer,
+      metadata: {
+        documentFileName: (
+          file?.originalname.split(/[\\/]/).at(-1) || 'respaldo'
+        ).slice(0, 255),
+        documentMimeType: validated.detectedMimeType,
+        documentSizeBytes: validated.buffer.length,
+        documentUploadedAt: new Date(),
+      },
+    };
+  }
 
   async upload(
     userId: string,
@@ -29,12 +66,17 @@ export class CertificationDocumentsService {
   ): Promise<CertificationResponse> {
     await this.getOwnedOrFail(userId, id);
 
-    const validatedFile = this.fileValidationService.validate(
-      file ? this.documentMapper.toUploadedFile(file) : undefined,
-      CERTIFICATION_DOCUMENT_VALIDATION_RULES,
-    );
-
-    await this.documentsRepository.save(id, validatedFile.buffer);
+    const prepared = this.prepare(file);
+    await this.transactions.run(async (context) => {
+      await this.documentsRepository.save(id, prepared.content, context);
+      await this.audit.saveDocumentMetadata(
+        userId,
+        id,
+        prepared.metadata,
+        context,
+      );
+    });
+    await this.skillsAnalysis.refreshAfterChange(userId);
 
     const updated = await this.getOwnedOrFail(userId, id);
     return this.certificationMapper.toResponse(updated, true);
@@ -65,14 +107,18 @@ export class CertificationDocumentsService {
       throw new CertificationDocumentNotFoundException();
     }
 
-    await this.documentsRepository.remove(id);
+    await this.transactions.run(async (context) => {
+      await this.documentsRepository.remove(id, context);
+      await this.audit.saveDocumentMetadata(userId, id, null, context);
+    });
+    await this.skillsAnalysis.refreshAfterChange(userId);
   }
 
   private async getOwnedOrFail(
     userId: string,
     id: string,
   ): Promise<CertificationRecord> {
-    const record = await this.certificationsRepository.findById(id);
+    const record = await this.records.findById(id);
 
     if (!record || record.userId !== userId) {
       throw new CertificationNotFoundException();
