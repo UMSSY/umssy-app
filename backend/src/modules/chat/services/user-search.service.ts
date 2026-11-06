@@ -24,7 +24,7 @@ export class UserSearchService {
     const rows = await this.userLookupRepository.searchActiveByName(
       normalized,
       currentUserId,
-      MAX_SEARCH_RESULTS * 2, 
+      MAX_SEARCH_RESULTS * 2,
     );
 
     const results: ChatUserResponse[] = [];
@@ -32,7 +32,7 @@ export class UserSearchService {
     for (const row of rows) {
       try {
         await this.chatRolePolicyService.assertCanCommunicate(currentUserId, row.id);
-        
+
         results.push({
           id: row.id,
           fullName: `${row.first_name} ${row.last_name}`.trim(),
@@ -46,7 +46,7 @@ export class UserSearchService {
       } catch {
         continue;
       }
-      
+
       if (results.length >= MAX_SEARCH_RESULTS) break;
     }
 

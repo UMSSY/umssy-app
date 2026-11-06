@@ -1,5 +1,5 @@
 export interface ProfileSkillEvidenceRef {
-  type: "work-experience" | "education";
+  type: "work-experience" | "education" | "certification" | "cv";
   id: string;
 }
 
@@ -16,7 +16,7 @@ export interface ProfileSkillRadarItem {
 
 export interface ProfileSkillsRadarResponse {
   userId: string;
-  status: string;
+  status: "ready" | "pending" | "error";
   version: number;
   updatedAt: string | null;
   dictionaryVersion: string | null;

@@ -16,6 +16,14 @@ export class CertificationMapper {
       hasDocument,
       createdAt: record.createdAt.toISOString(),
       updatedAt: record.updatedAt.toISOString(),
+      ...(hasDocument && record.documentFileName && record.documentMimeType && record.documentSizeBytes != null && record.documentUploadedAt ? {
+        document: {
+          fileName: record.documentFileName,
+          mimeType: record.documentMimeType,
+          sizeBytes: record.documentSizeBytes,
+          uploadedAt: record.documentUploadedAt.toISOString(),
+        },
+      } : {}),
     };
   }
 
