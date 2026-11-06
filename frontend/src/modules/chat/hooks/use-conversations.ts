@@ -1,61 +1,97 @@
-'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { Conversation, ConversationFilter } from '../types/conversation.types';
-import { User } from '../types/user.types';
+"use client";
+
+import { useState, useMemo } from "react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+
+import type {
+  Conversation,
+  ConversationFilter,
+} from "../types/conversation.types";
+
+import type { User } from "../types/user.types";
+
 import {
   getConversations,
   getOrCreateConversation,
   markConversationAsRead,
-} from '../services/chat-api';
-import { setStoredConversationUnreadCount } from '../services/message-storage';
+} from "../services/chat-api";
+
+import { setStoredConversationUnreadCount } from "../services/message-storage";
+import { useMessagingUi } from "../contexts/messaging-ui-context";
 
 const PAGE_SIZE = 10;
 
 export function useConversations() {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<ConversationFilter>('all');
-  const [keptInUnreadId, setKeptInUnreadId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [conversationsData, setConversationsData] = useState<Conversation[]>([]);
-  const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isError, setIsError] = useState<boolean>(false);
-  const [loadAttempt, setLoadAttempt] = useState(0);
-  const [pendingContactId, setPendingContactId] = useState<string | null>(null);
+  const ui = useMessagingUi();
 
-  useEffect(() => {
-    let isMounted = true;
+  const [localSelectedId, setLocalSelectedId] =
+    useState<string | null>(null);
 
-    getConversations()
-      .then((data) => {
-        if (isMounted) {
-          setConversationsData(data);
-          setIsLoading(false);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setIsError(true);
-          setIsLoading(false);
-        }
-      });
+  const selectedId = ui ? ui.selectedId : localSelectedId;
+  const setSelectedId = ui?.setSelectedId ?? setLocalSelectedId;
 
-    return () => {
-      isMounted = false;
-    };
-  }, [loadAttempt]);
+  const [filter, setFilter] =
+    useState<ConversationFilter>("all");
+
+  const [keptInUnreadId, setKeptInUnreadId] =
+    useState<string | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [visibleCount, setVisibleCount] =
+    useState<number>(PAGE_SIZE);
+
+  const [pendingContactId, setPendingContactId] =
+    useState<string | null>(null);
+
+  const queryClient = useQueryClient();
+  const queryKey = ["chat", "conversations"];
+
+  const query = useQuery({
+    queryKey,
+    queryFn: () => getConversations(),
+  });
+
+  const conversationsData = useMemo(
+    () => query.data ?? [],
+    [query.data],
+  );
+
+  const isLoading = query.isFetching;
+  const isError = query.isError && !query.isFetching;
+
+  function setConversationsData(
+    update: (current: Conversation[]) => Conversation[],
+  ) {
+    queryClient.setQueryData<Conversation[]>(
+      queryKey,
+      (current) => update(current ?? []),
+    );
+  }
+
+  const startMutation = useMutation({
+    mutationFn: (id: string) => getOrCreateConversation(id),
+  });
+
+  const readMutation = useMutation({
+    mutationFn: (id: string) => markConversationAsRead(id),
+  });
 
   const retryConversations = () => {
-    setIsError(false);
-    setIsLoading(true);
-    setLoadAttempt((attempt) => attempt + 1);
+    void query.refetch();
   };
 
   const sortedConversations = useMemo(() => {
     return [...conversationsData].sort((a, b) => {
-      const dateA = new Date(a.lastMessage?.createdAt || a.updatedAt).getTime();
-      const dateB = new Date(b.lastMessage?.createdAt || b.updatedAt).getTime();
+      const dateA = new Date(
+        a.lastMessage?.createdAt || a.updatedAt,
+      ).getTime();
+
+      const dateB = new Date(
+        b.lastMessage?.createdAt || b.updatedAt,
+      ).getTime();
+
       return dateB - dateA;
     });
   }, [conversationsData]);
@@ -63,26 +99,36 @@ export function useConversations() {
   const filteredConversations = useMemo(() => {
     let list = sortedConversations;
 
-    if (filter === 'unread') {
-      list = list.filter((item) => item.unreadCount > 0 || item.id === keptInUnreadId);
+    if (filter === "unread") {
+      list = list.filter(
+        (item) =>
+          item.unreadCount > 0 ||
+          item.id === keptInUnreadId,
+      );
     }
 
     if (searchQuery.trim().length > 0) {
       const normalizedQuery = searchQuery
         .trim()
         .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
 
       list = list.filter((item) => {
-        const normalizedName = (item.contact?.fullName || '')
+        const normalizedName = (
+          (item.eventId ? item.eventTitle : item.contact?.fullName) || ""
+        )
           .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '');
-        const normalizedContent = (item.lastMessage?.content || '')
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+
+        const normalizedContent = (
+          item.lastMessage?.content || ""
+        )
           .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '');
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+
         return (
           normalizedName.includes(normalizedQuery) ||
           normalizedContent.includes(normalizedQuery)
@@ -91,7 +137,12 @@ export function useConversations() {
     }
 
     return list;
-  }, [sortedConversations, filter, searchQuery, keptInUnreadId]);
+  }, [
+    sortedConversations,
+    filter,
+    searchQuery,
+    keptInUnreadId,
+  ]);
 
   const paginatedConversations = useMemo(() => {
     return filteredConversations.slice(0, visibleCount);
@@ -99,10 +150,16 @@ export function useConversations() {
 
   const selectedConversation = useMemo(() => {
     if (!selectedId) return null;
-    return conversationsData.find((item) => item.id === selectedId) || null;
+
+    return (
+      conversationsData.find(
+        (item) => item.id === selectedId,
+      ) || null
+    );
   }, [conversationsData, selectedId]);
 
-  const hasMore = visibleCount < filteredConversations.length;
+  const hasMore =
+    visibleCount < filteredConversations.length;
 
   const loadMore = () => {
     if (hasMore) {
@@ -110,28 +167,37 @@ export function useConversations() {
     }
   };
 
-  const setActiveFilter = (newFilter: ConversationFilter) => {
+  const setActiveFilter = (
+    newFilter: ConversationFilter,
+  ) => {
     setFilter(newFilter);
     setSelectedId(null);
     setKeptInUnreadId(null);
   };
 
-  const handleSelectConversation = (conversation: Conversation) => {
+  const handleSelectConversation = (
+    conversation: Conversation,
+  ) => {
     setSelectedId(conversation.id);
 
-    if (filter === 'unread' && conversation.unreadCount > 0) {
+    if (
+      filter === "unread" &&
+      conversation.unreadCount > 0
+    ) {
       setKeptInUnreadId(conversation.id);
-    } else if (filter === 'all') {
+    } else if (filter === "all") {
       setKeptInUnreadId(null);
     }
 
-    markConversationAsRead(conversation.id);
+    readMutation.mutate(conversation.id);
 
     if (conversation.unreadCount > 0) {
       setConversationsData((prev) =>
         prev.map((item) =>
-          item.id === conversation.id ? { ...item, unreadCount: 0 } : item
-        )
+          item.id === conversation.id
+            ? { ...item, unreadCount: 0 }
+            : item,
+        ),
       );
     }
   };
@@ -141,75 +207,122 @@ export function useConversations() {
     setKeptInUnreadId(null);
   };
 
-  const simulateIncomingMessage = (conversationId: string, newContent: string) => {
+  const simulateIncomingMessage = (
+    conversationId: string,
+    newContent: string,
+  ) => {
     const timestamp = new Date().toISOString();
-    setConversationsData((prev) => {
-      return prev.map((item) => {
-        if (item.id === conversationId) {
-          const newUnread = selectedId === conversationId ? 0 : item.unreadCount + 1;
-          setStoredConversationUnreadCount(conversationId, newUnread);
-          return {
-            ...item,
-            updatedAt: timestamp,
-            unreadCount: newUnread,
-            lastMessage: {
-              id: `msg-${Date.now()}`,
-              senderId: item.contact.id,
-              content: newContent,
-              isAttachment: false,
-              createdAt: timestamp,
-            },
-          };
+
+    setConversationsData((prev) =>
+      prev.map((item) => {
+        if (item.id !== conversationId) {
+          return item;
         }
-        return item;
-      });
-    });
+
+        const newUnread =
+          selectedId === conversationId
+            ? 0
+            : item.unreadCount + 1;
+
+        setStoredConversationUnreadCount(
+          conversationId,
+          newUnread,
+        );
+
+        return {
+          ...item,
+          updatedAt: timestamp,
+          unreadCount: newUnread,
+          lastMessage: {
+            id: `msg-${Date.now()}`,
+            senderId: item.contact?.id ?? '',
+            content: newContent,
+            isAttachment: false,
+            createdAt: timestamp,
+          },
+        };
+      }),
+    );
   };
 
   const updateConversationLastMessage = (
     conversationId: string,
     content: string,
-    senderId: string
+    senderId: string,
   ) => {
     const timestamp = new Date().toISOString();
-    setConversationsData((prev) => {
-      return prev.map((item) => {
-        if (item.id === conversationId) {
-          return {
-            ...item,
-            updatedAt: timestamp,
-            lastMessage: {
-              id: `msg-${Date.now()}`,
-              senderId,
-              content,
-              isAttachment: false,
-              createdAt: timestamp,
-            },
-          };
+
+    setConversationsData((prev) =>
+      prev.map((item) => {
+        if (item.id !== conversationId) {
+          return item;
         }
-        return item;
-      });
-    });
+
+        return {
+          ...item,
+          updatedAt: timestamp,
+          lastMessage: {
+            id: `msg-${Date.now()}`,
+            senderId,
+            content,
+            isAttachment: false,
+            createdAt: timestamp,
+          },
+        };
+      }),
+    );
+  };
+  const setConversationBlocked = (
+    conversationId: string,
+    isBlocked: boolean,
+  ) => {
+    setConversationsData((prev) =>
+      prev.map((item) =>
+        item.id === conversationId
+          ? { ...item, isBlockedByMe: isBlocked }
+          : item,
+      ),
+    );
   };
 
-  const startConversationWithContact = async (contactUser: User) => {
+  const findExistingConversationByContact = (
+    contactId: string,
+  ): Conversation | null => {
+    return (
+      conversationsData.find(
+        (conversation) =>
+          conversation.contact?.id === contactId,
+      ) ?? null
+    );
+  };
+
+  const startConversationWithContact = async (
+    contactUser: User,
+  ) => {
     if (pendingContactId) return;
 
-    const alreadyInList = conversationsData.find(
-      (conv) => conv.contact.id === contactUser.id
-    );
+    const alreadyInList =
+      findExistingConversationByContact(contactUser.id);
+
     if (alreadyInList) {
       handleSelectConversation(alreadyInList);
       return;
     }
 
     setPendingContactId(contactUser.id);
+
     try {
-      const conversation = await getOrCreateConversation(contactUser.id);
+      const conversation =
+        await startMutation.mutateAsync(contactUser.id);
 
       setConversationsData((prev) => {
-        const exists = prev.some((c) => c.id === conversation.id);
-        return exists ? prev : [conversation, ...prev];
+        const exists = prev.some(
+          (item) => item.id === conversation.id,
+        );
+
+        return exists
+          ? prev
+          : [conversation, ...prev];
       });
 
       setSelectedId(conversation.id);
@@ -236,6 +349,9 @@ export function useConversations() {
     clearSelectedConversation,
     simulateIncomingMessage,
     updateConversationLastMessage,
+
+    setConversationBlocked,
+    findExistingConversationByContact,
     startConversationWithContact,
   };
 }

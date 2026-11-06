@@ -64,11 +64,13 @@ export const ModelName = {
   UserRole: 'UserRole',
   Education: 'Education',
   WorkExperience: 'WorkExperience',
+  RadarArea: 'RadarArea',
   Skill: 'Skill',
   JobOfferSkill: 'JobOfferSkill',
   UserSkill: 'UserSkill',
   Certification: 'Certification',
   UserCvFile: 'UserCvFile',
+  ProfileSkillProcessingState: 'ProfileSkillProcessingState',
   TechnicalArea: 'TechnicalArea',
   OrientationType: 'OrientationType',
   MentorTechnicalArea: 'MentorTechnicalArea',
@@ -76,6 +78,7 @@ export const ModelName = {
   AvailabilityBlock: 'AvailabilityBlock',
   BlockedDate: 'BlockedDate',
   Appointment: 'Appointment',
+  AppointmentDocument: 'AppointmentDocument',
   TimeProposal: 'TimeProposal',
   AppointmentHistory: 'AppointmentHistory',
   EventCategory: 'EventCategory',
@@ -92,12 +95,42 @@ export const ModelName = {
   File: 'File',
   Career: 'Career',
   AccessRequest: 'AccessRequest',
+  MentorParticipationRequest: 'MentorParticipationRequest',
+  MentorSlotOffer: 'MentorSlotOffer',
   ActivationOtp: 'ActivationOtp',
   MessageStatus: 'MessageStatus',
+  ConnectionRequestStatus: 'ConnectionRequestStatus',
+  AttachmentType: 'AttachmentType',
   Conversation: 'Conversation',
   ConversationParticipant: 'ConversationParticipant',
   Message: 'Message',
-  UserPresence: 'UserPresence'
+  MessageAttachment: 'MessageAttachment',
+  ChatUserBlock: 'ChatUserBlock',
+  ConnectionRequest: 'ConnectionRequest',
+  UserPresence: 'UserPresence',
+  PasswordResetOtp: 'PasswordResetOtp',
+  MentorParticipationAttemptLimit: 'MentorParticipationAttemptLimit',
+  JobApplicationStatus: 'JobApplicationStatus',
+  JobApplication: 'JobApplication',
+  SurveyStatus: 'SurveyStatus',
+  SurveyQuestionType: 'SurveyQuestionType',
+  SurveyTargetAudience: 'SurveyTargetAudience',
+  Survey: 'Survey',
+  SurveyQuestion: 'SurveyQuestion',
+  SurveyQuestionOption: 'SurveyQuestionOption',
+  SurveyResponse: 'SurveyResponse',
+  SurveyAnswer: 'SurveyAnswer',
+  AuditAction: 'AuditAction',
+  AuditEvent: 'AuditEvent',
+  DocumentValidation: 'DocumentValidation',
+  MentorIntakeAttempt: 'MentorIntakeAttempt',
+  MentorParticipationSanction: 'MentorParticipationSanction',
+  MentorIntakeOperation: 'MentorIntakeOperation',
+  RadarCvEvidence: 'RadarCvEvidence',
+  RadarScoreSnapshot: 'RadarScoreSnapshot',
+  RadarAuditEvent: 'RadarAuditEvent',
+  RadarCvExtractionStatus: 'RadarCvExtractionStatus',
+  RadarCvReviewStatus: 'RadarCvReviewStatus'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -214,6 +247,7 @@ export const UserScalarFieldEnum = {
   isAvailableForMentoring: 'isAvailableForMentoring',
   photoUrl: 'photoUrl',
   cityId: 'cityId',
+  companyId: 'companyId',
   phone: 'phone',
   personalEmail: 'personalEmail',
   headline: 'headline',
@@ -279,10 +313,22 @@ export const WorkExperienceScalarFieldEnum = {
 export type WorkExperienceScalarFieldEnum = (typeof WorkExperienceScalarFieldEnum)[keyof typeof WorkExperienceScalarFieldEnum]
 
 
+export const RadarAreaScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarAreaScalarFieldEnum = (typeof RadarAreaScalarFieldEnum)[keyof typeof RadarAreaScalarFieldEnum]
+
+
 export const SkillScalarFieldEnum = {
   id: 'id',
   name: 'name',
   isCustom: 'isCustom',
+  areaId: 'areaId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -305,6 +351,10 @@ export const UserSkillScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   skillId: 'skillId',
+  source: 'source',
+  verificationStatus: 'verificationStatus',
+  isHighRelevance: 'isHighRelevance',
+  evidenceRefs: 'evidenceRefs',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -335,6 +385,19 @@ export const UserCvFileScalarFieldEnum = {
 } as const
 
 export type UserCvFileScalarFieldEnum = (typeof UserCvFileScalarFieldEnum)[keyof typeof UserCvFileScalarFieldEnum]
+
+
+export const ProfileSkillProcessingStateScalarFieldEnum = {
+  userId: 'userId',
+  status: 'status',
+  inputRevision: 'inputRevision',
+  processedRevision: 'processedRevision',
+  resultVersion: 'resultVersion',
+  updatedAt: 'updatedAt',
+  dictionaryVersion: 'dictionaryVersion'
+} as const
+
+export type ProfileSkillProcessingStateScalarFieldEnum = (typeof ProfileSkillProcessingStateScalarFieldEnum)[keyof typeof ProfileSkillProcessingStateScalarFieldEnum]
 
 
 export const TechnicalAreaScalarFieldEnum = {
@@ -430,6 +493,19 @@ export const AppointmentScalarFieldEnum = {
 export type AppointmentScalarFieldEnum = (typeof AppointmentScalarFieldEnum)[keyof typeof AppointmentScalarFieldEnum]
 
 
+export const AppointmentDocumentScalarFieldEnum = {
+  id: 'id',
+  appointmentId: 'appointmentId',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  data: 'data',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type AppointmentDocumentScalarFieldEnum = (typeof AppointmentDocumentScalarFieldEnum)[keyof typeof AppointmentDocumentScalarFieldEnum]
+
+
 export const TimeProposalScalarFieldEnum = {
   id: 'id',
   appointmentId: 'appointmentId',
@@ -470,6 +546,10 @@ export type EventCategoryScalarFieldEnum = (typeof EventCategoryScalarFieldEnum)
 
 
 export const EventScalarFieldEnum = {
+  coverData: 'coverData',
+  coverMimeType: 'coverMimeType',
+  proposalKey: 'proposalKey',
+  proposalHash: 'proposalHash',
   id: 'id',
   title: 'title',
   description: 'description',
@@ -537,7 +617,11 @@ export const JobOfferScalarFieldEnum = {
   salaryRange: 'salaryRange',
   languages: 'languages',
   locationUrl: 'locationUrl',
+  requiredCareers: 'requiredCareers',
+  minExperienceYears: 'minExperienceYears',
+  otherRequirements: 'otherRequirements',
   expiresAt: 'expiresAt',
+  publishedAt: 'publishedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -653,6 +737,7 @@ export const AccessRequestScalarFieldEnum = {
   openedById: 'openedById',
   openedAt: 'openedAt',
   reviewedById: 'reviewedById',
+  approvedUserId: 'approvedUserId',
   reviewedAt: 'reviewedAt',
   rejectionReason: 'rejectionReason',
   createdAt: 'createdAt',
@@ -660,6 +745,32 @@ export const AccessRequestScalarFieldEnum = {
 } as const
 
 export type AccessRequestScalarFieldEnum = (typeof AccessRequestScalarFieldEnum)[keyof typeof AccessRequestScalarFieldEnum]
+
+
+export const MentorParticipationRequestScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  status: 'status',
+  queuedAt: 'queuedAt',
+  createdAt: 'createdAt',
+  technicalAreaIds: 'technicalAreaIds',
+  orientationTypeIds: 'orientationTypeIds'
+} as const
+
+export type MentorParticipationRequestScalarFieldEnum = (typeof MentorParticipationRequestScalarFieldEnum)[keyof typeof MentorParticipationRequestScalarFieldEnum]
+
+
+export const MentorSlotOfferScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  status: 'status',
+  offeredAt: 'offeredAt',
+  expiresAt: 'expiresAt',
+  requestId: 'requestId',
+  confirmedAt: 'confirmedAt'
+} as const
+
+export type MentorSlotOfferScalarFieldEnum = (typeof MentorSlotOfferScalarFieldEnum)[keyof typeof MentorSlotOfferScalarFieldEnum]
 
 
 export const ActivationOtpScalarFieldEnum = {
@@ -687,12 +798,35 @@ export const MessageStatusScalarFieldEnum = {
 export type MessageStatusScalarFieldEnum = (typeof MessageStatusScalarFieldEnum)[keyof typeof MessageStatusScalarFieldEnum]
 
 
+export const ConnectionRequestStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConnectionRequestStatusScalarFieldEnum = (typeof ConnectionRequestStatusScalarFieldEnum)[keyof typeof ConnectionRequestStatusScalarFieldEnum]
+
+
+export const AttachmentTypeScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AttachmentTypeScalarFieldEnum = (typeof AttachmentTypeScalarFieldEnum)[keyof typeof AttachmentTypeScalarFieldEnum]
+
+
 export const ConversationScalarFieldEnum = {
   id: 'id',
   userAId: 'userAId',
   userBId: 'userBId',
   lastMessageId: 'lastMessageId',
   lastMessageAt: 'lastMessageAt',
+  eventId: 'eventId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -729,6 +863,46 @@ export const MessageScalarFieldEnum = {
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
 
 
+export const MessageAttachmentScalarFieldEnum = {
+  id: 'id',
+  messageId: 'messageId',
+  typeId: 'typeId',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  fileSize: 'fileSize',
+  fileData: 'fileData',
+  url: 'url',
+  thumbnailUrl: 'thumbnailUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MessageAttachmentScalarFieldEnum = (typeof MessageAttachmentScalarFieldEnum)[keyof typeof MessageAttachmentScalarFieldEnum]
+
+
+export const ChatUserBlockScalarFieldEnum = {
+  id: 'id',
+  blockerId: 'blockerId',
+  blockedId: 'blockedId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChatUserBlockScalarFieldEnum = (typeof ChatUserBlockScalarFieldEnum)[keyof typeof ChatUserBlockScalarFieldEnum]
+
+
+export const ConnectionRequestScalarFieldEnum = {
+  id: 'id',
+  senderId: 'senderId',
+  receiverId: 'receiverId',
+  statusId: 'statusId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConnectionRequestScalarFieldEnum = (typeof ConnectionRequestScalarFieldEnum)[keyof typeof ConnectionRequestScalarFieldEnum]
+
+
 export const UserPresenceScalarFieldEnum = {
   userId: 'userId',
   isOnline: 'isOnline',
@@ -739,12 +913,335 @@ export const UserPresenceScalarFieldEnum = {
 export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
 
 
+export const PasswordResetOtpScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  attempts: 'attempts',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PasswordResetOtpScalarFieldEnum = (typeof PasswordResetOtpScalarFieldEnum)[keyof typeof PasswordResetOtpScalarFieldEnum]
+
+
+export const MentorParticipationAttemptLimitScalarFieldEnum = {
+  userId: 'userId',
+  attemptCount: 'attemptCount',
+  windowStartedAt: 'windowStartedAt',
+  blockedUntil: 'blockedUntil'
+} as const
+
+export type MentorParticipationAttemptLimitScalarFieldEnum = (typeof MentorParticipationAttemptLimitScalarFieldEnum)[keyof typeof MentorParticipationAttemptLimitScalarFieldEnum]
+
+
+export const JobApplicationStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobApplicationStatusScalarFieldEnum = (typeof JobApplicationStatusScalarFieldEnum)[keyof typeof JobApplicationStatusScalarFieldEnum]
+
+
+export const JobApplicationScalarFieldEnum = {
+  id: 'id',
+  jobOfferId: 'jobOfferId',
+  userId: 'userId',
+  statusId: 'statusId',
+  appliedAt: 'appliedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobApplicationScalarFieldEnum = (typeof JobApplicationScalarFieldEnum)[keyof typeof JobApplicationScalarFieldEnum]
+
+
+export const SurveyStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyStatusScalarFieldEnum = (typeof SurveyStatusScalarFieldEnum)[keyof typeof SurveyStatusScalarFieldEnum]
+
+
+export const SurveyQuestionTypeScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyQuestionTypeScalarFieldEnum = (typeof SurveyQuestionTypeScalarFieldEnum)[keyof typeof SurveyQuestionTypeScalarFieldEnum]
+
+
+export const SurveyTargetAudienceScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyTargetAudienceScalarFieldEnum = (typeof SurveyTargetAudienceScalarFieldEnum)[keyof typeof SurveyTargetAudienceScalarFieldEnum]
+
+
+export const SurveyScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  careerId: 'careerId',
+  targetsAllCareers: 'targetsAllCareers',
+  academicPeriod: 'academicPeriod',
+  targetAudienceId: 'targetAudienceId',
+  opensAt: 'opensAt',
+  closesAt: 'closesAt',
+  statusId: 'statusId',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyScalarFieldEnum = (typeof SurveyScalarFieldEnum)[keyof typeof SurveyScalarFieldEnum]
+
+
+export const SurveyQuestionScalarFieldEnum = {
+  id: 'id',
+  surveyId: 'surveyId',
+  position: 'position',
+  statement: 'statement',
+  typeId: 'typeId',
+  isRequired: 'isRequired',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyQuestionScalarFieldEnum = (typeof SurveyQuestionScalarFieldEnum)[keyof typeof SurveyQuestionScalarFieldEnum]
+
+
+export const SurveyQuestionOptionScalarFieldEnum = {
+  id: 'id',
+  questionId: 'questionId',
+  position: 'position',
+  label: 'label',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyQuestionOptionScalarFieldEnum = (typeof SurveyQuestionOptionScalarFieldEnum)[keyof typeof SurveyQuestionOptionScalarFieldEnum]
+
+
+export const SurveyResponseScalarFieldEnum = {
+  id: 'id',
+  surveyId: 'surveyId',
+  respondentId: 'respondentId',
+  submittedAt: 'submittedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyResponseScalarFieldEnum = (typeof SurveyResponseScalarFieldEnum)[keyof typeof SurveyResponseScalarFieldEnum]
+
+
+export const SurveyAnswerScalarFieldEnum = {
+  id: 'id',
+  responseId: 'responseId',
+  questionId: 'questionId',
+  optionId: 'optionId',
+  textValue: 'textValue',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SurveyAnswerScalarFieldEnum = (typeof SurveyAnswerScalarFieldEnum)[keyof typeof SurveyAnswerScalarFieldEnum]
+
+
+export const AuditActionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AuditActionScalarFieldEnum = (typeof AuditActionScalarFieldEnum)[keyof typeof AuditActionScalarFieldEnum]
+
+
+export const AuditEventScalarFieldEnum = {
+  id: 'id',
+  number: 'number',
+  accessRequestId: 'accessRequestId',
+  requestCode: 'requestCode',
+  applicantName: 'applicantName',
+  applicantCareer: 'applicantCareer',
+  actionId: 'actionId',
+  actorId: 'actorId',
+  actorName: 'actorName',
+  actorRole: 'actorRole',
+  detail: 'detail',
+  evidenceFileId: 'evidenceFileId',
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AuditEventScalarFieldEnum = (typeof AuditEventScalarFieldEnum)[keyof typeof AuditEventScalarFieldEnum]
+
+
+export const DocumentValidationScalarFieldEnum = {
+  id: 'id',
+  accessRequestId: 'accessRequestId',
+  result: 'result',
+  matchScore: 'matchScore',
+  reason: 'reason',
+  fieldResults: 'fieldResults',
+  queuedAt: 'queuedAt',
+  readAt: 'readAt',
+  revertedAt: 'revertedAt',
+  revertedById: 'revertedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentValidationScalarFieldEnum = (typeof DocumentValidationScalarFieldEnum)[keyof typeof DocumentValidationScalarFieldEnum]
+
+
+export const MentorIntakeAttemptScalarFieldEnum = {
+  operationId: 'operationId',
+  id: 'id',
+  userId: 'userId',
+  operation: 'operation',
+  idempotencyKey: 'idempotencyKey',
+  payloadHash: 'payloadHash',
+  occurredAt: 'occurredAt',
+  counted: 'counted',
+  responseStatus: 'responseStatus',
+  responseData: 'responseData'
+} as const
+
+export type MentorIntakeAttemptScalarFieldEnum = (typeof MentorIntakeAttemptScalarFieldEnum)[keyof typeof MentorIntakeAttemptScalarFieldEnum]
+
+
+export const MentorParticipationSanctionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  triggerAttemptId: 'triggerAttemptId',
+  startedAt: 'startedAt',
+  endsAt: 'endsAt'
+} as const
+
+export type MentorParticipationSanctionScalarFieldEnum = (typeof MentorParticipationSanctionScalarFieldEnum)[keyof typeof MentorParticipationSanctionScalarFieldEnum]
+
+
+export const MentorIntakeOperationScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MentorIntakeOperationScalarFieldEnum = (typeof MentorIntakeOperationScalarFieldEnum)[keyof typeof MentorIntakeOperationScalarFieldEnum]
+
+
+export const RadarCvEvidenceScalarFieldEnum = {
+  id: 'id',
+  cvId: 'cvId',
+  userId: 'userId',
+  extractedText: 'extractedText',
+  submittedAt: 'submittedAt',
+  decidedAt: 'decidedAt',
+  reviewerId: 'reviewerId',
+  extractionStatusId: 'extractionStatusId',
+  reviewStatusId: 'reviewStatusId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarCvEvidenceScalarFieldEnum = (typeof RadarCvEvidenceScalarFieldEnum)[keyof typeof RadarCvEvidenceScalarFieldEnum]
+
+
+export const RadarScoreSnapshotScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  version: 'version',
+  rubricVersion: 'rubricVersion',
+  fingerprint: 'fingerprint',
+  scores: 'scores',
+  evidence: 'evidence',
+  averageScore: 'averageScore',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarScoreSnapshotScalarFieldEnum = (typeof RadarScoreSnapshotScalarFieldEnum)[keyof typeof RadarScoreSnapshotScalarFieldEnum]
+
+
+export const RadarAuditEventScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  actorId: 'actorId',
+  eventType: 'eventType',
+  targetId: 'targetId',
+  details: 'details',
+  occurredAt: 'occurredAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarAuditEventScalarFieldEnum = (typeof RadarAuditEventScalarFieldEnum)[keyof typeof RadarAuditEventScalarFieldEnum]
+
+
+export const RadarCvExtractionStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarCvExtractionStatusScalarFieldEnum = (typeof RadarCvExtractionStatusScalarFieldEnum)[keyof typeof RadarCvExtractionStatusScalarFieldEnum]
+
+
+export const RadarCvReviewStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RadarCvReviewStatusScalarFieldEnum = (typeof RadarCvReviewStatusScalarFieldEnum)[keyof typeof RadarCvReviewStatusScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -761,4 +1258,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

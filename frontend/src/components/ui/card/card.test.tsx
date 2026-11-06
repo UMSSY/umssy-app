@@ -12,11 +12,11 @@ import {
 
 describe("Card components", () => {
   it("renders Card with default size and custom className", () => {
-    render(<Card className="custom-class" data-testid="card" />)
+    render(<Card className="mt-2" data-testid="card" />)
     const card = screen.getByTestId("card")
     expect(card).toHaveAttribute("data-slot", "card")
     expect(card).toHaveAttribute("data-size", "default")
-    expect(card.className).toContain("custom-class")
+    expect(card.className).toContain("mt-2")
   })
 
   it("renders Card with size sm", () => {

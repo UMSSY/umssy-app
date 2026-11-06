@@ -1,8 +1,10 @@
+
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { getInitials } from "@/shared/utils/get-initials";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -13,19 +15,66 @@ import type { MentorDirectoryItem } from "../../types/mentor-directory.types";
 type MentorCardProps = {
   mentor: MentorDirectoryItem;
   isOwnProfile?: boolean;
+  returnTo?: string;
+  showAffinityBadge?: boolean;
+  selectedArea?: string;
+  highlightAvailability?: boolean;
 };
 
-export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
+function getSafeReturnTo(returnTo?: string): string | null {
+  if (!returnTo) {
+    return null;
+  }
+
+  if (
+    !returnTo.startsWith("/mentorship/mentors") ||
+    returnTo.startsWith("//") ||
+    returnTo.includes("\\") ||
+    returnTo.includes("#")
+  ) {
+    return null;
+  }
+
+  try {
+    const url = new URL(returnTo, "http://localhost");
+
+    if (url.origin !== "http://localhost") {
+      return null;
+    }
+
+    if (url.pathname !== "/mentorship/mentors") {
+      return null;
+    }
+
+    return `${url.pathname}${url.search}`;
+  } catch {
+    return null;
+  }
+}
+
+export function MentorCard({
+  mentor,
+  isOwnProfile = false,
+  returnTo,
+  showAffinityBadge = false,
+  selectedArea,
+  highlightAvailability = false,
+}: MentorCardProps) {
   const hasTechnicalAreas = mentor.technicalAreas.length > 0;
+  const safeReturnTo = getSafeReturnTo(returnTo);
+
+  const profileHref = safeReturnTo
+    ? `/mentors/${mentor.id}?returnTo=${encodeURIComponent(safeReturnTo)}`
+    : `/mentors/${mentor.id}`;
 
   return (
     <Card
-      className="h-full min-w-0 border-border bg-surface shadow-sm"
+      className="h-full min-w-0 border-border bg-surface shadow-none"
       aria-labelledby={`mentor-${mentor.id}`}
     >
       <CardContent className="flex flex-1 flex-col gap-5">
         <div className="flex flex-wrap items-start gap-4">
-          <div className="flex min-w-0 flex-1 basis-36 items-start gap-4">
+          <div className="flex min-w-0 flex-1 basis-56 items-start gap-4">
             <Avatar className="size-14 shrink-0">
               {mentor.photoUrl ? (
                 <AvatarImage
@@ -36,36 +85,56 @@ export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
               ) : null}
               <AvatarFallback>{getInitials(mentor.fullName)}</AvatarFallback>
             </Avatar>
+
             <div className="min-w-0 flex-1">
               <h2
                 id={`mentor-${mentor.id}`}
-                className="[overflow-wrap:anywhere] text-lg font-semibold text-ink"
+                className="text-lg font-semibold [overflow-wrap:anywhere] text-ink"
               >
                 {mentor.fullName}
               </h2>
 
               {mentor.headline ? (
-                <p className="mt-1 [overflow-wrap:anywhere] text-sm text-text-secondary">
+                <p className="mt-1 text-sm [overflow-wrap:anywhere] text-text-secondary">
                   {mentor.headline}
                 </p>
               ) : null}
+
               {mentor.education ? (
-                <p className="mt-2 [overflow-wrap:anywhere] text-sm text-text-secondary">
+                <p className="mt-2 text-sm [overflow-wrap:anywhere] text-text-secondary">
                   {mentor.education.degree} · {mentor.education.institution}
                 </p>
               ) : null}
             </div>
           </div>
-          <Badge
-            variant="outline"
-            className={`ml-auto gap-1.5 px-2.5 ${mentor.isAvailable ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-border bg-surface-soft text-text-secondary"}`}
-          >
-            <span
-              aria-hidden="true"
-              className={`size-1.5 shrink-0 rounded-full ${mentor.isAvailable ? "bg-emerald-600" : "bg-text-secondary"}`}
-            />
-            {mentor.isAvailable ? "Disponible para mentoría" : "No disponible"}
-          </Badge>
+
+          <div className="ml-auto flex shrink-0 flex-col items-end gap-2">
+            {mentor.isAvailable ? (
+              <Badge
+                variant="outline"
+                aria-current={
+                  highlightAvailability ? "true" : undefined
+                }
+                className={cn(
+                  "border-border bg-surface-soft px-2.5 whitespace-nowrap text-ink",
+                  highlightAvailability &&
+                    "border-accent bg-interaction font-semibold text-accent ring-1 ring-accent",
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-1.5 rounded-full bg-accent"
+                />
+                Disponible para mentoría
+              </Badge>
+            ) : null}
+            {showAffinityBadge &&
+              mentor.sharedInterestsCount !== undefined && (
+                <Badge variant="secondary" className="whitespace-nowrap">
+                  {mentor.sharedInterestsCount} {mentor.sharedInterestsCount === 1 ? "interés" : "intereses"} en común
+                </Badge>
+              )}
+          </div>
         </div>
 
         <div>
@@ -78,7 +147,8 @@ export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
               {mentor.technicalAreas.map((area) => (
                 <li
                   key={area}
-                  className="min-w-0 max-w-full [overflow-wrap:anywhere] rounded-md border border-border bg-surface-soft px-2.5 py-1 text-xs text-ink-soft"
+                  aria-current={area === selectedArea ? "true" : undefined}
+                  className={cn("max-w-full min-w-0 rounded-md border bg-interaction px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-accent", area === selectedArea ? "border-accent font-semibold ring-1 ring-accent" : "border-accent/15")}
                 >
                   {area}
                 </li>
@@ -90,16 +160,18 @@ export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
             </p>
           )}
         </div>
+
         <div>
           <p className="mb-2 text-sm font-semibold text-ink">
             Tipos de orientación
           </p>
+
           {mentor.orientationTypes.length > 0 ? (
             <ul className="flex flex-wrap gap-2">
               {mentor.orientationTypes.map((orientationType) => (
                 <li
                   key={orientationType}
-                  className="min-w-0 max-w-full [overflow-wrap:anywhere] rounded-md border border-border bg-surface-soft px-2.5 py-1 text-xs text-ink-soft"
+                  className="max-w-full min-w-0 rounded-md border border-border bg-surface-soft px-2.5 py-1 text-xs [overflow-wrap:anywhere] text-ink-soft"
                 >
                   {orientationType}
                 </li>
@@ -115,7 +187,7 @@ export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
 
       <CardFooter className="mt-auto justify-end bg-surface">
         <Link
-          href={`/mentors/${mentor.id}`}
+          href={profileHref}
           className={buttonVariants({
             variant: "outline",
             className: "max-w-full border-border-strong text-ink",

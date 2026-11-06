@@ -6,7 +6,7 @@ import {
   type GeneratedReport,
   type GeneratedReportsPage,
   type RegisterGeneratedReportInput,
-  type ReportType,
+  type ReportHistoryFilters,
 } from '../types/generated-report.types.js';
 
 @Injectable()
@@ -17,16 +17,20 @@ export class GeneratedReportsRepository {
     userId: string,
     skip: number,
     take: number,
-    reportType?: ReportType,
+    { reportType, search, snapshotAt }: ReportHistoryFilters = {},
   ): Promise<GeneratedReportsPage> {
     const where = {
       userId,
       reportType: reportType ?? { in: [...REPORT_TYPES] },
+      ...(search && {
+        reportName: { contains: search, mode: 'insensitive' as const },
+      }),
+      ...(snapshotAt && { createdAt: { lte: new Date(snapshotAt) } }),
     };
     const [records, total] = await Promise.all([
       this.prisma.adminExportHistory.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         skip,
         take,
       }),

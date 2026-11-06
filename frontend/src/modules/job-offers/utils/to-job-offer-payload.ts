@@ -1,9 +1,14 @@
-import type { ContractType, Modality, VacancyConditions } from "../types/vacancy-conditions.types";
-import type { CreateJobOfferPayload } from "../types/job-offer.types";
+import { INTERNSHIP_CONTRACT_TYPE } from "../constants/job-offers.constants";
+import type { VacancyConditions } from "../types/vacancy-conditions.types";
+import type { ContractType } from "../types/contract-type.types";
+import type { Modality } from "../types/modality.types";
+import type { CreateJobOfferPayload } from "../types/create-job-offer-payload.types";
 import { parseSalary } from "./parse-salary";
 
 export function toJobOfferPayload(conditions: VacancyConditions): CreateJobOfferPayload {
-  const salary = parseSalary(conditions.salary);
+  const salary = conditions.contractType === INTERNSHIP_CONTRACT_TYPE
+    ? { min: null, max: null }
+    : parseSalary(conditions.salary);
 
   return {
     title: conditions.title.trim(),
@@ -12,7 +17,7 @@ export function toJobOfferPayload(conditions: VacancyConditions): CreateJobOffer
     contractType: conditions.contractType as ContractType,
     category: conditions.category.trim(),
     positionsAvailable: Number.parseInt(conditions.vacancyCount, 10),
-    salaryMin: salary.min ?? 0,
+    ...(salary.min === null ? {} : { salaryMin: salary.min }),
     ...(salary.max === null ? {} : { salaryMax: salary.max }),
     languages: conditions.languages.trim(),
     locationUrl: conditions.mapsLink.trim(),

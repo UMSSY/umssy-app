@@ -14,12 +14,14 @@ const RECORD: JobOfferRecord = {
   languages: 'Español',
   locationUrl: 'https://maps.google.com/?q=x',
   expiresAt: null,
+  publishedAt: CREATED_AT,
   createdAt: CREATED_AT,
   company: { id: 'company-1', title: 'TechBolivia S.R.L.' },
   modality: { title: 'Híbrido' },
   contractType: { title: 'Tiempo completo' },
   status: { title: 'Publicada' },
   skills: [{ skill: { id: 'skill-1', name: 'Docker' } }],
+  _count: { applications: 3 },
 };
 
 describe('JobOfferMapper', () => {
@@ -39,10 +41,19 @@ describe('JobOfferMapper', () => {
       languages: 'Español',
       locationUrl: 'https://maps.google.com/?q=x',
       expiresAt: null,
+      publishedAt: CREATED_AT.toISOString(),
       createdAt: CREATED_AT.toISOString(),
       company: { id: 'company-1', name: 'TechBolivia S.R.L.' },
       skills: [{ id: 'skill-1', name: 'Docker' }],
+      applicantsCount: 3,
     });
+  });
+
+  it('no incluye la cantidad de postulantes en la respuesta pública', () => {
+    const { applicantsCount: _applicantsCount, ...expected } = mapper.toResponse(RECORD);
+
+    expect(mapper.toPublishedResponse(RECORD)).toEqual(expected);
+    expect(mapper.toPublishedResponse(RECORD)).not.toHaveProperty('applicantsCount');
   });
 
   it('convierte la fecha de vencimiento a texto ISO', () => {

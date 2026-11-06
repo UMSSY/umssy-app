@@ -4,15 +4,33 @@ import {
   CERTIFICATIONS_ENDPOINT,
   getCertificationDocumentEndpoint,
 } from "../config/certification-api.config";
-import { NOT_FOUND_STATUS } from "@/modules/profile/constants/http-status.constants";
-import type { ApiResponse } from "@/modules/profile/types/api-response.types";
+import { NOT_FOUND_STATUS } from "@/modules/profile";
+import type { ApiResponse } from "@/modules/profile";
 import type { Certification } from "../types/certification.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
 import type { UpdateCertificationDto } from "../types/update-certification-dto.types";
-import { getAuthHeaders } from "@/modules/profile/utils/get-auth-headers";
-import { getHttpStatus } from "@/modules/profile/utils/get-http-status";
+import type { CertificationDocumentChange } from '../types/certification-document-change.types';
+import { getAuthHeaders } from "@/modules/profile";
+import { getHttpStatus } from "@/modules/profile";
+
+function toDocumentForm(data: UpdateCertificationDto, change: CertificationDocumentChange): FormData {
+  const form = new FormData();
+  for (const [key, value] of Object.entries(data)) if (typeof value === 'string') form.set(key, value);
+  form.set('documentAction', change.type);
+  if (change.type === 'replace') form.set(CERTIFICATION_DOCUMENT_FIELD_NAME, change.file);
+  return form;
+}
 
 export const certificationsService = {
+  createWithDocument: async (data: CreateCertificationDto, file: File): Promise<Certification> => {
+    const response = await apiClient.post<ApiResponse<Certification>>(`${CERTIFICATIONS_ENDPOINT}/with-document`, toDocumentForm(data, { type: 'replace', file }), { headers: getAuthHeaders() });
+    return response.data.data;
+  },
+
+  updateWithDocument: async (id: string, data: UpdateCertificationDto, change: CertificationDocumentChange): Promise<Certification> => {
+    const response = await apiClient.patch<ApiResponse<Certification>>(`${CERTIFICATIONS_ENDPOINT}/${id}/with-document`, toDocumentForm(data, change), { headers: getAuthHeaders() });
+    return response.data.data;
+  },
   getCertifications: async (): Promise<Certification[]> => {
     const response = await apiClient.get<ApiResponse<Certification[]>>(CERTIFICATIONS_ENDPOINT, {
       headers: getAuthHeaders(),

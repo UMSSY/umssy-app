@@ -100,13 +100,19 @@ model Company {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  recruiters User[]
+
   workExperiences WorkExperience[]
   jobOffers       JobOffer[]
+  radarCompanyAccess RadarCompanyAccess[] @ignore
+
 
   @@map("companies")
 }
 
 model User {
+  mentorIntakeAttempts MentorIntakeAttempt[]
+  mentorParticipationSanctions MentorParticipationSanction[]
   id                      String   @id @default(uuid()) @db.Uuid
   firstName               String   @map("first_name") @db.VarChar(100)
   lastName                String   @map("last_name") @db.VarChar(100)
@@ -116,6 +122,8 @@ model User {
   isAvailableForMentoring Boolean  @default(false) @map("is_available_for_mentoring")
   photoUrl                Bytes?   @map("photo_url")
   cityId                  String?  @map("city_id") @db.Uuid
+  companyId               String?  @map("company_id") @db.Uuid
+  company                 Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
   phone                   String?
   personalEmail           String?  @map("personal_email")
   headline                String?
@@ -125,12 +133,13 @@ model User {
 
   city City? @relation(fields: [cityId], references: [id], onDelete: SetNull)
 
-  roles           UserRole[]
-  educations      Education[]
-  workExperiences WorkExperience[]
-  userSkills      UserSkill[]
-  certifications  Certification[]
-  cvFile          UserCvFile?
+  roles                UserRole[]
+  educations           Education[]
+  workExperiences      WorkExperience[]
+  userSkills           UserSkill[]
+  certifications       Certification[]
+  cvFiles              UserCvFile[]
+  skillProcessingState ProfileSkillProcessingState?
 
   mentorTechnicalAreas   MentorTechnicalArea[]
   mentorOrientationTypes MentorOrientationType[]
@@ -147,17 +156,49 @@ model User {
   eventRegistrations   EventRegistration[]
   checkedInAttendances EventAttendance[]
 
-  exportHistories        AdminExportHistory[] @relation("AdminExportHistories")
-  openedAccessRequests   AccessRequest[]      @relation("AccessRequestOpenedBy")
-  reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
+  exportHistories                 AdminExportHistory[]             @relation("AdminExportHistories")
+  openedAccessRequests            AccessRequest[]                  @relation("AccessRequestOpenedBy")
+  reviewedAccessRequests          AccessRequest[]                  @relation("AccessRequestReviewedBy")
+  approvedAccessRequest           AccessRequest?                   @relation("ApprovedGraduateAccount")
+  mentorSlotOffers                MentorSlotOffer[]
+  mentorParticipationRequests     MentorParticipationRequest[]
+  mentorParticipationAttemptLimit MentorParticipationAttemptLimit?
+  createdSurveys                  Survey[]                         @relation("SurveyCreatedBy")
+  surveyResponses                 SurveyResponse[]                 @relation("SurveyRespondent")
 
   conversationsAsUserA Conversation[]            @relation("UserAConversations")
   conversationsAsUserB Conversation[]            @relation("UserBConversations")
   chatMessages         Message[]
   chatParticipants     ConversationParticipant[]
   presence             UserPresence?
+  chatBlocksMade       ChatUserBlock[]          @relation("ChatBlocker")
+  chatBlocksReceived   ChatUserBlock[]          @relation("ChatBlocked")
+  sentRequests         ConnectionRequest[]      @relation("SentConnectionRequests")
+  receivedRequests     ConnectionRequest[]      @relation("ReceivedConnectionRequests")
+  passwordResetOtps    PasswordResetOtp[]
+  auditEvents          AuditEvent[]              @relation("AuditEventActor")
+  revertedValidations  DocumentValidation[]      @relation("DocumentValidationRevertedBy")
+  jobApplications      JobApplication[]
+  radarCvOwned       RadarCvEvidence[]     @relation("RadarCvOwner")
+  radarCvReviewed    RadarCvEvidence[]     @relation("RadarCvReviewer")
+  radarSnapshots     RadarScoreSnapshot[]
+  radarAuditSubjects RadarAuditEvent[]     @relation("RadarAuditSubject")
+  radarAuditActors   RadarAuditEvent[]     @relation("RadarAuditActor")
+  radarCompanyAccess RadarCompanyAccess[] @ignore
+  radarApplications  RadarJobApplication[] @relation("RadarApplicant") @ignore
+  radarDecisions     RadarJobApplication[] @relation("RadarDecision") @ignore
+
+
+
+
+
+
+
+
+
 
   @@index([cityId])
+  @@index([companyId])
   @@map("users")
 }
 
@@ -227,16 +268,31 @@ model WorkExperience {
   @@map("work_experiences")
 }
 
+model RadarArea {
+  id          String   @id @db.VarChar(50)
+  name        String   @unique @db.VarChar(80)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  skills Skill[]
+
+  @@map("radar_areas")
+}
+
 model Skill {
   id        String   @id @default(uuid()) @db.Uuid
   name      String   @unique
   isCustom  Boolean  @default(false) @map("is_custom")
+  areaId    String?  @map("area_id") @db.VarChar(50)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  area           RadarArea?      @relation(fields: [areaId], references: [id], onDelete: SetNull)
   userSkills     UserSkill[]
   jobOfferSkills JobOfferSkill[]
 
+  @@index([areaId])
   @@map("skills")
 }
 
@@ -256,11 +312,15 @@ model JobOfferSkill {
 }
 
 model UserSkill {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  skillId   String   @map("skill_id") @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  skillId            String   @map("skill_id") @db.Uuid
+  source             String   @default("manual") @db.VarChar(20)
+  verificationStatus String   @default("pending") @map("verification_status") @db.VarChar(20)
+  isHighRelevance    Boolean  @default(false) @map("is_high_relevance")
+  evidenceRefs       Json?    @default("[]") @map("evidence_refs")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   skill Skill @relation(fields: [skillId], references: [id], onDelete: Restrict)
@@ -288,14 +348,31 @@ model Certification {
 
 model UserCvFile {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId       String    @unique @map("user_id") @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
   cvFileName   String?   @map("cv_file_name") @db.VarChar
   cvUploadedAt DateTime? @map("cv_uploaded_at") @db.Timestamptz(6)
   cvPdfData    String?   @map("cv_pdf_data")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  radarEvidence RadarCvEvidence?
 
+
+  @@index([userId])
   @@map("user_cv_file")
+}
+
+model ProfileSkillProcessingState {
+  userId            String   @id @map("user_id") @db.Uuid
+  status            String   @default("pending") @db.VarChar(20)
+  inputRevision     Int      @default(0) @map("input_revision")
+  processedRevision Int?     @map("processed_revision")
+  resultVersion     Int      @default(0) @map("result_version")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  dictionaryVersion String?  @map("dictionary_version") @db.VarChar(64)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profile_skill_processing_states")
 }
 
 model TechnicalArea {
@@ -414,12 +491,28 @@ model Appointment {
 
   proposals TimeProposal[]
   history   AppointmentHistory[]
+  document  AppointmentDocument?
 
   @@index([mentorId, startAt])
   @@index([studentId, startAt])
   @@index([statusId])
   @@index([blockId])
+  @@index([cancelledById])
+  @@index([orientationTypeId])
   @@map("appointments")
+}
+
+model AppointmentDocument {
+  id            String      @id @default(uuid()) @db.Uuid
+  appointmentId String      @unique @map("appointment_id") @db.Uuid
+  fileName      String      @map("file_name") @db.VarChar(255)
+  mimeType      String      @map("mime_type") @db.VarChar(50)
+  sizeBytes     Int         @map("size_bytes")
+  data          Bytes
+  uploadedAt    DateTime    @default(now()) @map("uploaded_at") @db.Timestamptz(6)
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@map("appointment_documents")
 }
 
 model TimeProposal {
@@ -461,6 +554,7 @@ model AppointmentHistory {
   @@index([appointmentId, changedAt])
   @@index([previousStatusId])
   @@index([newStatusId])
+  @@index([changedById])
   @@map("appointment_histories")
 }
 
@@ -476,6 +570,10 @@ model EventCategory {
 }
 
 model Event {
+  coverData        Bytes?    @map("cover_data")
+  coverMimeType    String?   @map("cover_mime_type") @db.VarChar(30)
+  proposalKey      String?   @map("proposal_key") @db.VarChar(36)
+  proposalHash     String?   @map("proposal_hash") @db.VarChar(64)
   id               String    @id @default(uuid()) @db.Uuid
   title            String    @db.VarChar(150)
   description      String?
@@ -506,11 +604,15 @@ model Event {
 
   registrations EventRegistration[]
 
+  chatRoom Conversation?
+
+  @@unique([createdById, proposalKey])
   @@index([categoryId])
   @@index([modalityId])
   @@index([originId])
   @@index([statusId])
   @@index([eventDate])
+  @@index([moderatedById])
   @@map("events")
 }
 
@@ -549,6 +651,7 @@ model EventAttendance {
   registration EventRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
   checkedInBy  User?             @relation(fields: [checkedInById], references: [id], onDelete: SetNull)
 
+  @@index([checkedInById])
   @@map("event_attendances")
 }
 
@@ -565,7 +668,11 @@ model JobOffer {
   salaryRange        String    @map("salary_range")
   languages          String
   locationUrl        String    @map("location_url")
+  requiredCareers    String[]  @default([]) @map("required_careers")
+  minExperienceYears Int?      @map("min_experience_years")
+  otherRequirements  String[]  @default([]) @map("other_requirements")
   expiresAt          DateTime? @map("expires_at") @db.Timestamptz(6)
+  publishedAt        DateTime  @default(now()) @map("published_at") @db.Timestamptz(6)
   createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -574,6 +681,9 @@ model JobOffer {
   contractType JobOfferContractType @relation(fields: [contractTypeId], references: [id], onDelete: Restrict)
   status       JobOfferStatus       @relation(fields: [statusId], references: [id], onDelete: Restrict)
   skills       JobOfferSkill[]
+  applications JobApplication[]
+  radarApplications RadarJobApplication[] @ignore
+
 
   @@index([companyId])
   @@index([modalityId])
@@ -614,6 +724,7 @@ model JobOfferStatus {
 
   @@map("job_offer_statuses")
 }
+
 model AdminExportHistory {
   id         String   @id @default(uuid()) @db.Uuid
   userId     String   @map("user_id") @db.Uuid
@@ -662,6 +773,7 @@ model File {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   accessRequest AccessRequest?
+  auditEvents   AuditEvent[]   @relation("AuditEventEvidence")
 
   @@map("files")
 }
@@ -674,6 +786,7 @@ model Career {
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   accessRequests AccessRequest[]
+  surveys        Survey[]
 
   @@map("careers")
 }
@@ -698,6 +811,7 @@ model AccessRequest {
   openedById      String?   @map("opened_by_id") @db.Uuid
   openedAt        DateTime? @map("opened_at") @db.Timestamptz(6)
   reviewedById    String?   @map("reviewed_by_id") @db.Uuid
+  approvedUserId  String?   @unique @map("approved_user_id") @db.Uuid
   reviewedAt      DateTime? @map("reviewed_at") @db.Timestamptz(6)
   rejectionReason String?   @map("rejection_reason") @db.VarChar(500)
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -708,16 +822,57 @@ model AccessRequest {
   documentFile File?                      @relation(fields: [documentFileId], references: [id], onDelete: SetNull)
   openedBy     User?                      @relation("AccessRequestOpenedBy", fields: [openedById], references: [id], onDelete: SetNull)
   reviewedBy   User?                      @relation("AccessRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  approvedUser User?                      @relation("ApprovedGraduateAccount", fields: [approvedUserId], references: [id], onDelete: SetNull)
   career       Career                     @relation(fields: [careerId], references: [id], onDelete: Restrict)
 
-  activationOtps ActivationOtp[]
+  activationOtps     ActivationOtp[]
+  auditEvents        AuditEvent[]
+  documentValidation DocumentValidation?
 
   @@index([statusId])
   @@index([careerId])
   @@index([sisCode])
   @@index([idCardNumber])
   @@index([email])
+  @@index([documentTypeId])
+  @@index([openedById])
+  @@index([reviewedById])
   @@map("access_requests")
+}
+
+// Contrato persistido para las solicitudes de HU-7-2; una postulación nueva crea otro ID.
+model MentorParticipationRequest {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  status             String   @default("PENDING") @db.VarChar(20)
+  queuedAt           DateTime @default(now()) @map("queued_at") @db.Timestamptz(6)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  technicalAreaIds   String[] @map("technical_area_ids") @db.Uuid
+  orientationTypeIds String[] @map("orientation_type_ids") @db.Uuid
+
+  user  User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  offer MentorSlotOffer?
+
+  @@index([status, queuedAt, id])
+  @@index([userId])
+  @@map("mentor_participation_requests")
+}
+
+model MentorSlotOffer {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  status      String    @default("OFFERED") @db.VarChar(20)
+  offeredAt   DateTime  @default(now()) @map("offered_at") @db.Timestamptz(6)
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz(6)
+  requestId   String?   @unique @map("request_id") @db.Uuid
+  confirmedAt DateTime? @map("confirmed_at") @db.Timestamptz(6)
+
+  user    User                        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  request MentorParticipationRequest? @relation(fields: [requestId], references: [id], onDelete: Restrict)
+
+  @@index([status, expiresAt])
+  @@index([userId])
+  @@map("mentor_slot_offers")
 }
 
 model ActivationOtp {
@@ -748,17 +903,43 @@ model MessageStatus {
   @@map("message_statuses")
 }
 
+model ConnectionRequestStatus {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(30)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  connectionRequests ConnectionRequest[]
+
+  @@map("connection_request_statuses")
+}
+
+model AttachmentType {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(30)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  messageAttachments MessageAttachment[]
+
+  @@map("attachment_types")
+}
+
 model Conversation {
   id            String    @id @default(uuid()) @db.Uuid
-  userAId       String    @map("user_a_id") @db.Uuid
-  userBId       String    @map("user_b_id") @db.Uuid
+  userAId       String?    @map("user_a_id") @db.Uuid
+  userBId       String?    @map("user_b_id") @db.Uuid
   lastMessageId String?   @map("last_message_id") @db.Uuid
   lastMessageAt DateTime? @map("last_message_at") @db.Timestamptz(6)
+  eventId       String?   @unique @map("event_id") @db.Uuid
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  userA User @relation("UserAConversations", fields: [userAId], references: [id], onDelete: Cascade)
-  userB User @relation("UserBConversations", fields: [userBId], references: [id], onDelete: Cascade)
+  userA User? @relation("UserAConversations", fields: [userAId], references: [id], onDelete: Cascade)
+  userB User? @relation("UserBConversations", fields: [userBId], references: [id], onDelete: Cascade)
+  event Event? @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   participants ConversationParticipant[]
   messages     Message[]                 @relation("ConversationMessages")
@@ -782,6 +963,7 @@ model ConversationParticipant {
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([conversationId, userId])
+  @@index([userId])
   @@map("conversation_participants")
 }
 
@@ -789,7 +971,7 @@ model Message {
   id             String    @id @default(uuid()) @db.Uuid
   conversationId String    @map("conversation_id") @db.Uuid
   senderId       String    @map("sender_id") @db.Uuid
-  content        String    @db.VarChar(500)
+  content        String?    @db.VarChar(4000)
   statusId       String    @map("status_id") @db.Uuid
   sentAt         DateTime  @default(now()) @map("sent_at") @db.Timestamptz(6)
   deliveredAt    DateTime? @map("delivered_at") @db.Timestamptz(6)
@@ -801,10 +983,67 @@ model Message {
   sender       User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
   status       MessageStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
 
+  attachments  MessageAttachment[]
+
   @@index([conversationId, sentAt(sort: Desc)])
   @@index([senderId])
   @@index([statusId])
   @@map("messages")
+}
+
+model MessageAttachment {
+  id        String   @id @default(uuid()) @db.Uuid
+  messageId String   @map("message_id") @db.Uuid
+  typeId    String   @map("type_id") @db.Uuid
+  fileName  String   @map("file_name") @db.VarChar(255)
+  mimeType  String   @map("mime_type") @db.VarChar(100)
+  fileSize  Int      @map("file_size")
+  fileData  Bytes?   @map("file_data")
+  url       String?  @db.VarChar(1000)
+  thumbnailUrl String?  @map("thumbnail_url") @db.VarChar(1000)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  message Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  type    AttachmentType @relation(fields: [typeId], references: [id], onDelete: Restrict)
+
+  @@index([messageId])
+  @@index([typeId])
+  @@map("message_attachments")
+}
+
+model ChatUserBlock {
+  id        String   @id @default(uuid()) @db.Uuid
+  blockerId String   @map("blocker_id") @db.Uuid
+  blockedId String   @map("blocked_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  blocker User @relation("ChatBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("ChatBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+  @@map("chat_user_blocks")
+}
+
+model ConnectionRequest {
+  id         String   @id @default(uuid()) @db.Uuid
+  senderId   String   @map("sender_id") @db.Uuid
+  receiverId String   @map("receiver_id") @db.Uuid
+  statusId   String   @map("status_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  sender   User                    @relation("SentConnectionRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User                    @relation("ReceivedConnectionRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  status   ConnectionRequestStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([receiverId, statusId])
+  @@index([statusId])
+  @@map("connection_requests")
 }
 
 model UserPresence {
@@ -818,3 +1057,434 @@ model UserPresence {
   @@map("user_presences")
 }
 
+model PasswordResetOtp {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  codeHash  String    @map("code_hash") @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  attempts  Int       @default(0) @db.SmallInt
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_otps")
+}
+
+model MentorParticipationAttemptLimit {
+  userId          String    @id @map("user_id") @db.Uuid
+  attemptCount    Int       @default(0) @map("attempt_count")
+  windowStartedAt DateTime? @map("window_started_at") @db.Timestamptz(6)
+  blockedUntil    DateTime? @map("blocked_until") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("mentor_participation_attempt_limits")
+}
+
+model JobApplicationStatus {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  applications JobApplication[]
+
+  @@map("job_application_statuses")
+}
+
+model JobApplication {
+  id         String   @id @default(uuid()) @db.Uuid
+  jobOfferId String   @map("job_offer_id") @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  statusId   String   @map("status_id") @db.Uuid
+  appliedAt  DateTime @default(now()) @map("applied_at") @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  jobOffer JobOffer             @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status   JobApplicationStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
+
+  @@unique([jobOfferId, userId])
+  @@index([userId])
+  @@index([statusId])
+  @@map("job_applications")
+}
+
+model SurveyStatus {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  surveys Survey[]
+
+  @@map("survey_statuses")
+}
+
+model SurveyQuestionType {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  questions SurveyQuestion[]
+
+  @@map("survey_question_types")
+}
+
+model SurveyTargetAudience {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  surveys Survey[]
+
+  @@map("survey_target_audiences")
+}
+
+model Survey {
+  id                String    @id @default(uuid()) @db.Uuid
+  title             String    @db.VarChar(150)
+  description       String?   @db.VarChar(500)
+  careerId          String?   @map("career_id") @db.Uuid
+  targetsAllCareers Boolean   @default(false) @map("targets_all_careers")
+  academicPeriod    String?   @map("academic_period") @db.VarChar(7)
+  targetAudienceId  String?   @map("target_audience_id") @db.Uuid
+  opensAt           DateTime? @map("opens_at") @db.Timestamptz(6)
+  closesAt          DateTime? @map("closes_at") @db.Timestamptz(6)
+  statusId          String    @map("status_id") @db.Uuid
+  createdById       String    @map("created_by_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  career         Career?               @relation(fields: [careerId], references: [id], onDelete: Restrict)
+  status         SurveyStatus          @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  targetAudience SurveyTargetAudience? @relation(fields: [targetAudienceId], references: [id], onDelete: Restrict)
+  createdBy      User                  @relation("SurveyCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  questions      SurveyQuestion[]
+  responses      SurveyResponse[]
+
+  @@index([careerId, academicPeriod])
+  @@index([createdById])
+  @@index([statusId])
+  @@index([targetAudienceId])
+  @@map("surveys")
+}
+
+model SurveyQuestion {
+  id         String   @id @default(uuid()) @db.Uuid
+  surveyId   String   @map("survey_id") @db.Uuid
+  position   Int
+  statement  String   @db.VarChar(250)
+  typeId     String   @map("type_id") @db.Uuid
+  isRequired Boolean  @default(true) @map("is_required")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  survey  Survey                 @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  type    SurveyQuestionType     @relation(fields: [typeId], references: [id], onDelete: Restrict)
+  options SurveyQuestionOption[]
+  answers SurveyAnswer[]
+
+  @@unique([surveyId, position])
+  @@index([typeId])
+  @@map("survey_questions")
+}
+
+model SurveyQuestionOption {
+  id         String   @id @default(uuid()) @db.Uuid
+  questionId String   @map("question_id") @db.Uuid
+  position   Int
+  label      String   @db.VarChar(100)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  question SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers  SurveyAnswer[]
+
+  @@unique([questionId, position])
+  @@map("survey_question_options")
+}
+
+model SurveyResponse {
+  id           String   @id @default(uuid()) @db.Uuid
+  surveyId     String   @map("survey_id") @db.Uuid
+  respondentId String   @map("respondent_id") @db.Uuid
+  submittedAt  DateTime @default(now()) @map("submitted_at") @db.Timestamptz(6)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  survey     Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  respondent User           @relation("SurveyRespondent", fields: [respondentId], references: [id], onDelete: Restrict)
+  answers    SurveyAnswer[]
+
+  @@unique([surveyId, respondentId])
+  @@index([respondentId])
+  @@map("survey_responses")
+}
+
+model SurveyAnswer {
+  id         String   @id @default(uuid()) @db.Uuid
+  responseId String   @map("response_id") @db.Uuid
+  questionId String   @map("question_id") @db.Uuid
+  optionId   String?  @map("option_id") @db.Uuid
+  textValue  String?  @map("text_value") @db.Text
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  response SurveyResponse        @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  question SurveyQuestion        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  option   SurveyQuestionOption? @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@index([responseId])
+  @@index([optionId])
+  @@index([questionId, optionId])
+  @@map("survey_answers")
+}
+
+// HU 1.5.2 · Catálogo de acciones de auditoría (aprobada, rechazada, código enviado, etc.)
+model AuditAction {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(100)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  auditEvents AuditEvent[]
+
+  @@map("audit_actions")
+}
+
+model AuditEvent {
+  id              String   @id @default(uuid()) @db.Uuid
+  number          Int      @unique @default(autoincrement())
+  accessRequestId String   @map("access_request_id") @db.Uuid
+  requestCode     String   @map("request_code") @db.VarChar(20)
+  applicantName   String   @map("applicant_name") @db.VarChar(201)
+  applicantCareer String   @map("applicant_career") @db.VarChar(100)
+  actionId        String   @map("action_id") @db.Uuid
+  actorId         String?  @map("actor_id") @db.Uuid
+  actorName       String   @map("actor_name") @db.VarChar(201)
+  actorRole       String   @map("actor_role") @db.VarChar(50)
+  detail          String?  @db.VarChar(500)
+  evidenceFileId  String?  @map("evidence_file_id") @db.Uuid
+  occurredAt      DateTime @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  accessRequest AccessRequest @relation(fields: [accessRequestId], references: [id], onDelete: Restrict)
+  action        AuditAction   @relation(fields: [actionId], references: [id], onDelete: Restrict)
+  actor         User?         @relation("AuditEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+  evidenceFile  File?         @relation("AuditEventEvidence", fields: [evidenceFileId], references: [id], onDelete: Restrict)
+
+  @@index([occurredAt(sort: Desc), number(sort: Desc)])
+  @@index([accessRequestId, occurredAt])
+  @@index([actionId])
+  @@index([actorId])
+  @@index([evidenceFileId])
+  @@map("audit_events")
+}
+
+model DocumentValidation {
+  id              String    @id @default(uuid()) @db.Uuid
+  accessRequestId String    @unique @map("access_request_id") @db.Uuid
+  result          String    @db.VarChar(30)
+  matchScore      Int?      @map("match_score") @db.SmallInt
+  reason          String?   @db.VarChar(200)
+  fieldResults    Json?     @map("field_results")
+  queuedAt        DateTime  @default(now()) @map("queued_at") @db.Timestamptz(6)
+  readAt          DateTime? @map("read_at") @db.Timestamptz(6)
+  revertedAt      DateTime? @map("reverted_at") @db.Timestamptz(6)
+  revertedById    String?   @map("reverted_by_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  accessRequest AccessRequest @relation(fields: [accessRequestId], references: [id], onDelete: Cascade)
+  revertedBy    User?         @relation("DocumentValidationRevertedBy", fields: [revertedById], references: [id], onDelete: SetNull)
+
+  @@index([result])
+  @@index([revertedById])
+  @@map("document_validations")
+}
+
+model MentorIntakeAttempt {
+  operationId     String                @default(dbgenerated("mentor_intake_operation('LEGACY'::text)")) @map("operation_id") @db.Uuid
+  intakeOperation MentorIntakeOperation @relation(fields: [operationId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  id              String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String                @map("user_id") @db.Uuid
+  operation       String                @db.VarChar(20)
+  idempotencyKey  String                @map("idempotency_key") @db.Uuid
+  payloadHash     String                @map("payload_hash") @db.VarChar(64)
+  occurredAt      DateTime              @default(dbgenerated("clock_timestamp()")) @map("occurred_at") @db.Timestamptz(6)
+  counted         Boolean               @default(true)
+  responseStatus  Int                   @map("response_status")
+  responseData    Json                  @map("response_data")
+
+  user     User                         @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  sanction MentorParticipationSanction?
+
+  @@unique([userId, operation, idempotencyKey], map: "mentor_intake_attempts_identity")
+  @@index([operationId])
+  @@map("mentor_intake_attempts")
+}
+
+model MentorParticipationSanction {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String   @map("user_id") @db.Uuid
+  triggerAttemptId String?  @unique @map("trigger_attempt_id") @db.Uuid
+  startedAt        DateTime @map("started_at") @db.Timestamptz(6)
+  endsAt           DateTime @map("ends_at") @db.Timestamptz(6)
+
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  triggerAttempt MentorIntakeAttempt? @relation(fields: [triggerAttemptId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@index([userId, endsAt], map: "mentor_participation_sanctions_active")
+  @@map("mentor_participation_sanctions")
+}
+
+model MentorIntakeOperation {
+  id          String                @id @default(uuid()) @db.Uuid
+  title       String                @unique @db.VarChar(30)
+  description String?
+  createdAt   DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  attempts    MentorIntakeAttempt[]
+
+  @@map("mentor_intake_operations")
+}
+
+model RadarCvEvidence {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cvId             String    @unique @map("cv_id") @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  extractedText    String    @default("") @map("extracted_text") @db.Text
+  submittedAt      DateTime  @default(now()) @map("submitted_at") @db.Timestamptz(6)
+  decidedAt        DateTime? @map("decided_at") @db.Timestamptz(6)
+  reviewerId       String?   @map("reviewer_id") @db.Uuid
+  extractionStatusId String @map("extraction_status_id") @db.Uuid
+  reviewStatusId     String @map("review_status_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cv       UserCvFile @relation(fields: [cvId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  owner    User       @relation("RadarCvOwner", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  reviewer User?      @relation("RadarCvReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  extractionState RadarCvExtractionStatus @relation(fields: [extractionStatusId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  reviewState     RadarCvReviewStatus     @relation(fields: [reviewStatusId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([reviewStatusId, submittedAt], map: "radar_cv_evidence_review_idx")
+  @@index([userId], map: "radar_cv_evidence_user_idx")
+  @@index([reviewerId], map: "radar_cv_evidence_reviewer_idx")
+  @@index([extractionStatusId], map: "radar_cv_evidence_extraction_status_idx")
+  @@index([reviewStatusId], map: "radar_cv_evidence_review_status_idx")
+  @@map("radar_cv_evidence")
+}
+
+model RadarScoreSnapshot {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  version       Int
+  rubricVersion String   @map("rubric_version") @db.VarChar(80)
+  fingerprint   String   @db.VarChar(64)
+  scores        Json
+  evidence      Json
+  averageScore  Decimal  @map("average_score") @db.Decimal(5, 2)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, version], map: "radar_score_snapshots_user_version_key")
+  @@index([userId], map: "radar_score_snapshots_user_idx")
+  @@map("radar_score_snapshots")
+}
+
+model RadarAuditEvent {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  actorId    String?  @map("actor_id") @db.Uuid
+  eventType  String   @map("event_type") @db.VarChar(80)
+  targetId   String?  @map("target_id") @db.Uuid
+  details    Json     @default("{}")
+  occurredAt DateTime @default(now()) @map("occurred_at") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  subject User  @relation("RadarAuditSubject", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  actor   User? @relation("RadarAuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, occurredAt(sort: Desc)], map: "radar_audit_user_idx")
+  @@index([userId], map: "radar_audit_subject_idx")
+  @@index([actorId], map: "radar_audit_actor_idx")
+  @@map("radar_audit_events")
+}
+
+model RadarCvExtractionStatus {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String   @unique @db.VarChar(24)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  evidences RadarCvEvidence[]
+
+  @@map("radar_cv_extraction_statuses")
+}
+
+model RadarCvReviewStatus {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String   @unique @db.VarChar(24)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  evidences RadarCvEvidence[]
+
+  @@map("radar_cv_review_statuses")
+}
+
+model RadarCompanyAccess {
+  companyId String @map("company_id") @db.Uuid
+  userId    String @map("user_id") @db.Uuid
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([companyId, userId])
+  @@map("radar_company_access")
+  @@ignore
+}
+
+model RadarJobApplication {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  jobOfferId         String    @map("job_offer_id") @db.Uuid
+  userId             String    @map("user_id") @db.Uuid
+  consentToRecruiter Boolean   @default(false) @map("consent_to_recruiter")
+  consentToCv        Boolean   @default(false) @map("consent_to_cv")
+  consentToContact   Boolean   @default(false) @map("consent_to_contact")
+  state              String    @default("applied") @db.VarChar(24)
+  appliedAt          DateTime  @default(now()) @map("applied_at") @db.Timestamptz(6)
+  decidedAt          DateTime? @map("decided_at") @db.Timestamptz(6)
+  decidedBy          String?   @map("decided_by") @db.Uuid
+
+  jobOffer JobOffer @relation(fields: [jobOfferId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user     User     @relation("RadarApplicant", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  decider  User?    @relation("RadarDecision", fields: [decidedBy], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([jobOfferId, userId])
+  @@index([jobOfferId, appliedAt(sort: Desc)], map: "radar_job_applications_vacancy_idx")
+  @@map("radar_job_applications")
+  @@ignore
+}

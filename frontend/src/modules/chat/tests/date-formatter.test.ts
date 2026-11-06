@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { formatConversationDate, formatTime12h, getInitials } from '../utils/date-formatter';
+import {
+  formatConversationDate,
+  formatEventRoomCreatedAt,
+  formatEventRoomTime,
+  formatMessageDateSeparator,
+  formatTime12h,
+  getInitials,
+} from '../utils/date-formatter';
 
 describe('date-formatter', () => {
   it('debe devolver string vacio si la fecha es nula, indefinida o invalida', () => {
@@ -46,5 +53,51 @@ describe('date-formatter', () => {
     expect(getInitials('Maria')).toBe('MA');
     expect(getInitials('Maria Fernandez')).toBe('MF');
     expect(getInitials('Carlos Alberto Torrico')).toBe('CT');
+  });
+
+  it('debe devolver HOY para la fecha actual en formatMessageDateSeparator', () => {
+    const today = new Date().toISOString();
+    expect(formatMessageDateSeparator(today)).toBe('HOY');
+  });
+
+  it('debe devolver AYER para la fecha de ayer en formatMessageDateSeparator', () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    expect(formatMessageDateSeparator(yesterday.toISOString())).toBe('AYER');
+  });
+
+  it('debe devolver fecha completa en mayusculas para fechas anteriores a ayer en formatMessageDateSeparator', () => {
+    const oldDate = new Date('2025-05-15T12:00:00.000Z');
+    const result = formatMessageDateSeparator(oldDate.toISOString());
+    expect(result).toContain('2025');
+    expect(result).toBe(result.toUpperCase());
+  });
+
+  it('debe devolver vacio ante fecha invalida en formatMessageDateSeparator', () => {
+    expect(formatMessageDateSeparator(null)).toBe('');
+    expect(formatMessageDateSeparator(undefined)).toBe('');
+    expect(formatMessageDateSeparator('fecha-invalida')).toBe('');
+  });
+
+  it('debe formatear la fecha de creacion como dd/mm/aa en zona horaria de Bolivia', () => {
+    const resultado = formatEventRoomCreatedAt('2026-11-01T10:00:00.000Z');
+    expect(resultado).toMatch(/^\d{2}\/\d{2}\/\d{2}$/);
+  });
+
+  it('debe devolver vacio ante fecha invalida en formatEventRoomCreatedAt', () => {
+    expect(formatEventRoomCreatedAt(null)).toBe('');
+    expect(formatEventRoomCreatedAt(undefined)).toBe('');
+    expect(formatEventRoomCreatedAt('fecha-invalida')).toBe('');
+  });
+
+  it('debe formatear la hora del mensaje en zona horaria de Bolivia', () => {
+    const resultado = formatEventRoomTime('2026-11-01T10:00:00.000Z');
+    expect(resultado).toMatch(/\d{1,2}:\d{2}/);
+  });
+
+  it('debe devolver vacio ante fecha invalida en formatEventRoomTime', () => {
+    expect(formatEventRoomTime(null)).toBe('');
+    expect(formatEventRoomTime(undefined)).toBe('');
+    expect(formatEventRoomTime('fecha-invalida')).toBe('');
   });
 });

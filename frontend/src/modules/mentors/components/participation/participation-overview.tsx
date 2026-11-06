@@ -1,129 +1,86 @@
 import Link from "next/link";
-import { Check, Pencil } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Breadcrumbs } from "@/shared/components/layout";
-import { PARTICIPATION_BREADCRUMB_ITEMS } from "../../constants/participation-breadcrumb.constants";
+import { CircleX, FileText, Pencil, UsersRound } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
+import { cn } from "@/lib/utils";
+import { PageHeading } from "@/shared/components/layout";
 
 type ParticipationOverviewProps = {
+  isActive: boolean;
   areas: string[];
   orientations: string[];
+  onAction: () => void;
+  actionEnabled?: boolean;
 };
 
-type ParticipationPreferencesCardProps = {
+type ParticipationPreferencesProps = {
   title: string;
   editHref: string;
   editLabel: string;
   items: string[];
+  isEditable: boolean;
+  showIcon?: boolean;
 };
 
-function ParticipationPreferencesCard({
-  title,
-  editHref,
-  editLabel,
-  items,
-}: ParticipationPreferencesCardProps) {
+function ParticipationPreferences({ title, editHref, editLabel, items, isEditable, showIcon }: ParticipationPreferencesProps) {
   return (
-    <Card className="gap-0 overflow-visible rounded-lg border border-border bg-surface py-0 text-base shadow-sm ring-0">
-      <CardHeader className="px-5 pt-5 sm:px-6 sm:pt-6">
-        <div className="flex items-center justify-between gap-4">
-          <CardTitle
-            role="heading"
-            aria-level={2}
-            className="text-base font-semibold text-ink"
-          >
-            {title}
-          </CardTitle>
-
-          <Link
-            href={editHref}
-            className={buttonVariants({
-               variant: "outline",
-               className:
-               "h-auto gap-2 rounded-md bg-surface-soft px-3 py-2 text-xs font-semibold text-ink hover:bg-border hover:text-ink active:translate-y-0",
-})}
-          >
-            <Pencil size={14} /> {editLabel}
+    <section className="space-y-3 border-t border-border pt-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-bold text-ink">{title}</h2>
+        {isEditable && (
+          <Link href={editHref} className={buttonVariants({ variant: "outline", className: "h-auto min-h-10 gap-2 bg-interaction px-3 py-2 text-availability-foreground whitespace-normal" })}>
+            <Pencil aria-hidden="true" className="size-4" />{editLabel}
           </Link>
-        </div>
-      </CardHeader>
-
-      <CardContent className="px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
-        <div className="flex flex-wrap gap-2">
-          {items.map((item) => (
-            <span
-              key={item}
-              className="rounded-md bg-surface-soft px-3 py-1.5 text-xs text-ink"
-            >
-              {item}
-            </span>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {items.map((item) => (
+          <span key={item} className="inline-flex max-w-full items-center gap-2 rounded-md bg-interaction px-3 py-2 text-sm break-words text-availability-foreground">
+            {showIcon && <FileText aria-hidden="true" className="size-4 shrink-0" />}{item}
+          </span>
+        ))}
+        {items.length === 0 && <span className="text-sm text-text-secondary">Sin configuración</span>}
+      </div>
+    </section>
   );
 }
 
-export function ParticipationOverview({
-  areas,
-  orientations,
-}: ParticipationOverviewProps) {
+export function ParticipationOverview({ isActive, areas, orientations, onAction, actionEnabled = true }: ParticipationOverviewProps) {
   return (
-    <main className="min-h-full bg-surface-soft px-4 py-6 sm:py-8">
-      <div className="mx-auto max-w-5xl space-y-5">
-        <div>
-          <div className="[&>nav]:mb-0 [&>nav]:text-xs [&_[aria-current=page]]:font-normal [&_[aria-current=page]]:text-text-secondary">
-            <Breadcrumbs items={PARTICIPATION_BREADCRUMB_ITEMS} />
+    <section className="min-h-full bg-background">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <PageHeading title="Mi participación como mentor" description="Gestiona la información relacionada con tu participación en la red de mentorías." />
+        <div className="space-y-5 rounded-lg border border-border bg-surface p-5 sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
+              <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-full", isActive ? "bg-interaction text-availability-foreground" : "bg-surface-soft text-text-secondary")}>
+                <UsersRound aria-hidden="true" className="size-6" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-bold text-ink">Estado de participación</h2>
+                  <span className={cn("inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold", isActive ? "bg-interaction text-availability-foreground" : "bg-surface-soft text-text-secondary")}>
+                    <span aria-hidden="true" className={cn("size-2 rounded-full", isActive ? "bg-availability-foreground" : "bg-text-secondary")} />
+                    {isActive ? "Activo" : "Desactivado"}
+                  </span>
+                </div>
+                <p className="text-sm text-text-secondary">
+                  {isActive ? "Tu perfil puede aparecer como mentor disponible en el directorio." : "Tu participación está desactivada y tu perfil no aparece en el directorio. Para regresar deberás completar la incorporación y validar los cupos disponibles."}
+                </p>
+              </div>
+            </div>
+            {actionEnabled && (
+              <Button type="button" variant={isActive ? "outline" : "default"} onClick={onAction} className="h-auto min-h-10 max-w-full gap-2 py-2 whitespace-normal">
+                {isActive && <CircleX aria-hidden="true" className="size-4" />}
+                {isActive ? "Desactivar participación" : "Activar participación"}
+              </Button>
+            )}
           </div>
-          <h1 className="mt-2 text-2xl font-bold text-ink">
-            Mi participación como mentor
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Gestiona la información relacionada con tu participación en la red
-            de mentorías.
-          </p>
+          <ParticipationPreferences title="Áreas técnicas" editHref="/mentors/participation/technical-areas" editLabel="Editar áreas técnicas" items={areas} isEditable={isActive} />
+          <ParticipationPreferences title="Tipos de orientación" editHref="/mentorship/orientation" editLabel="Editar tipos de orientación" items={orientations} isEditable={isActive} showIcon />
         </div>
-
-        <Card className="gap-0 overflow-visible rounded-lg border border-border bg-surface py-0 text-base shadow-sm ring-0">
-          <CardHeader className="gap-0 px-5 pt-5 sm:px-6 sm:pt-6">
-            <CardTitle
-              role="heading"
-              aria-level={2}
-              className="text-base font-semibold text-ink"
-            >
-              Estado de participación
-            </CardTitle>
-            <p className="mt-1 text-sm text-text-secondary">
-              Tu perfil puede aparecer como mentor disponible en el directorio.
-            </p>
-          </CardHeader>
-
-          <CardContent className="px-5 pb-5 pt-3 sm:px-6 sm:pb-6">
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-              <Check size={13} /> Activo
-            </span>
-          </CardContent>
-        </Card>
-
-        <ParticipationPreferencesCard
-          title="Áreas técnicas"
-          editHref="/mentors/participation/technical-areas"
-          editLabel="Editar áreas técnicas"
-          items={areas}
-        />
-
-        <ParticipationPreferencesCard
-          title="Tipos de orientación"
-          editHref="/mentorship/orientation"
-          editLabel="Editar tipos de orientación"
-          items={orientations}
-        />
       </div>
-    </main>
+    </section>
   );
 }

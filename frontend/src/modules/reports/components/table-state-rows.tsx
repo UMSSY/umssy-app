@@ -11,8 +11,8 @@ export function TableSkeletonRows({ columnCount }: TableSkeletonRowsProps) {
   return Array.from({ length: TABLE_SKELETON_ROWS }, (_, index) => (
     <TableRow key={index} data-testid="skeleton-row" className="border-border hover:bg-transparent">
       {Array.from({ length: columnCount }, (_, cellIndex) => (
-        <TableCell key={cellIndex} className="px-6 py-4">
-          <Skeleton className="h-4 w-3/4 rounded bg-border" />
+        <TableCell key={cellIndex} className="px-4 py-3">
+          <Skeleton className="h-5 w-3/4 rounded bg-border" />
         </TableCell>
       ))}
     </TableRow>

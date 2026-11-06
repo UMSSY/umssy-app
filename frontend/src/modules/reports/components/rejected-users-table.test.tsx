@@ -7,7 +7,7 @@ describe("RejectedUsersTable", () => {
     cleanup();
   });
 
-  it("mantiene el alto del recuadro aunque la búsqueda devuelva un solo resultado", () => {
+  it("ajusta el recuadro al resultado sin imponer espacio vacío", () => {
     render(
       <RejectedUsersTable
         users={[
@@ -15,6 +15,7 @@ describe("RejectedUsersTable", () => {
             id: "rejected-1",
             fullName: "Luis Cruz Camacho",
             email: "rechazado.luis.cruz23@hotmail.com",
+            userType: "titulado",
             identifier: "202334283",
             documentType: "academic_diploma",
             rejectionReason: null,
@@ -29,7 +30,9 @@ describe("RejectedUsersTable", () => {
     const container = screen.getByRole("table").closest('[data-slot="table-container"]')?.parentElement;
 
     expect(screen.getAllByRole("row")).toHaveLength(2);
-    expect(container).toHaveClass("min-h-151");
+    expect(screen.getByRole("columnheader", { name: "Tipo de Usuario" })).toBeDefined();
+    expect(screen.getByRole("cell", { name: "Titulado" })).toBeDefined();
+    expect(container).not.toHaveClass("min-h-151");
     expect(container).toHaveClass("@container");
   });
 

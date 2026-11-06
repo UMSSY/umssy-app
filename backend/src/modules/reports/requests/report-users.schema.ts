@@ -6,7 +6,11 @@ import {
 import { ROLE_NAMES } from '../../../common/enums/roles.enum.js';
 import { ACADEMIC_PERIOD_PATTERN } from '../utils/academic-period.js';
 
-const searchSchema = z.string().trim().optional();
+export const searchSchema = z.string().trim().optional();
+
+export const snapshotAtSchema = z.iso
+  .datetime({ offset: true, message: 'La fecha de corte no es válida' })
+  .optional();
 
 export const ALL_FILTER_VALUE = 'ALL';
 
@@ -35,6 +39,7 @@ export const registeredUsersFiltersSchema = z.object({
   userType: userTypeSchema,
   period: academicPeriodSchema,
   search: searchSchema,
+  snapshotAt: snapshotAtSchema,
 });
 
 export const registeredUsersQuerySchema = paginationSchema.extend({
@@ -48,7 +53,10 @@ export const registeredUsersQuerySchema = paginationSchema.extend({
 });
 
 export const rejectedUsersFiltersSchema = z.object({
+  userType: userTypeSchema,
+  period: academicPeriodSchema,
   search: searchSchema,
+  snapshotAt: snapshotAtSchema,
 });
 
 export const rejectedUsersQuerySchema = paginationSchema.extend(

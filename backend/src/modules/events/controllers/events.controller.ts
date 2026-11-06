@@ -1,5 +1,6 @@
 import { GetEventIdSchema } from '../requests/get-event-id.request.js';
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
+import { OptionalJwtAuthGuard } from '../../../common/guards/optional-jwt-auth.guard.js';
 import {
   ApiOperation,
   ApiParam,
@@ -14,10 +15,13 @@ import {
   MAX_PAGE_SIZE,
   MAX_SEARCH_LENGTH,
 } from '../requests/get-events.request.js';
-import type { GetEventsPayload } from '../requests/get-events.request.js';
+import type { GetEventsPayload } from '../types/get-events-payload.types.js';
+import type { AuthenticatedRequest } from '../../../common/types/authenticated-request.types.js';
 
 @ApiTags('Events')
 @Controller('events')
+@UseGuards(OptionalJwtAuthGuard)
+
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
@@ -67,10 +71,11 @@ export class EventsController {
   @ApiResponse({ status: 400, description: 'Parámetros de consulta inválidos' })
   findAll(
     @Query(new ZodValidationPipe(GetEventsSchema)) query: GetEventsPayload,
+    @Req() req: AuthenticatedRequest,
   ) {
-    return this.eventsService.findAll(query);
+    return this.eventsService.findAll(query, req.user?.id);
   }
-
+  
   @Get(':id')
   @ApiOperation({
     summary: 'Obtener un evento por ID',
@@ -83,7 +88,9 @@ export class EventsController {
   findOne(
     @Param('id', new ZodValidationPipe(GetEventIdSchema))
     id: string,
+    @Req() req: AuthenticatedRequest,
   ) {
-    return this.eventsService.findOne(id);
+    return this.eventsService.findOne(id, req.user?.id);
   }
 }
+

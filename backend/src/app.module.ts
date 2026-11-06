@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { MailModule } from './modules/mail/index.js';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
@@ -24,16 +25,23 @@ import { TechnicalAreasModule } from './modules/technical-areas/technical-areas.
 import { WorkExperienceModule } from './modules/work-experience/work-experience.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js';
+import { AuditEventsModule } from './modules/audit-events/audit-events.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
+import { ApplicationsModule } from './modules/applications/applications.module.js';
 import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
-
+import { NlpModule } from './modules/nlp/nlp.module.js';
+import { RadarIntegrationModule } from './modules/radar-integration/radar-integration.module.js';
+import { SurveysModule } from './modules/surveys/surveys.module.js';
+import { AppointmentsModule } from './modules/appointments/appointments.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
+    MailModule,
     AvailabilityModule,
+    AppointmentsModule,
     AuthModule,
     EventsModule,
     EventCategoriesModule,
@@ -49,11 +57,15 @@ import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
     OrientationTypesModule,
     MentorsModule,
     AccessRequestsModule,
+    AuditEventsModule,
     ReportsModule,
     ChatModule,
     MatchingModule,
+    ApplicationsModule,
     JobOffersModule,
-
+    NlpModule,
+    RadarIntegrationModule,
+    SurveysModule,
   ],
   controllers: [AppController],
   providers: [

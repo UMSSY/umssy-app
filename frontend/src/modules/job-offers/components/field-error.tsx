@@ -1,13 +1,10 @@
-interface FieldErrorProps {
-  fieldId: string;
-  message?: string;
-}
+import type { FieldErrorProps } from "../types/field-error-props.types";
 
 export function FieldError({ fieldId, message }: FieldErrorProps) {
   if (!message) return null;
 
   return (
-    <p id={`${fieldId}-error`} role="alert" className="mt-1.5 text-[12px] font-medium text-danger">
+    <p id={`${fieldId}-error`} role="alert" className="mt-1.5 text-xs font-medium text-danger">
       {message}
     </p>
   );

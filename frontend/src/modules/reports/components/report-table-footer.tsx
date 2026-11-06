@@ -14,19 +14,21 @@ export function ReportTableFooter({
 }: ReportTableFooterProps) {
   const firstVisibleItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const lastVisibleItem = Math.min(currentPage * pageSize, totalItems);
+  const hasNoResults = !isLoading && totalItems === 0;
 
   return (
-    <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-3">
+    <div className="grid grid-cols-1 items-center gap-4 border-t border-border pt-4 md:grid-cols-3">
       <p className="text-center text-sm text-text-secondary md:text-left">
-        {isLoading
-          ? `Cargando ${itemLabel}...`
-          : `Mostrando ${firstVisibleItem}-${lastVisibleItem} de ${totalItems} ${itemLabel}`}
+        {!hasNoResults &&
+          (isLoading
+            ? `Cargando ${itemLabel}...`
+            : `Mostrando ${firstVisibleItem}-${lastVisibleItem} de ${totalItems} ${itemLabel}`)}
       </p>
       <div className="flex justify-center">
         <RefreshButton onClick={onRefresh} isRefreshing={isLoading} />
       </div>
       <div className="flex justify-center md:justify-end">
-        {totalItems > 0 && (
+        {totalPages > 1 && (
           <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
         )}
       </div>

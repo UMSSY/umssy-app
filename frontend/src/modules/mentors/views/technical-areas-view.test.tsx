@@ -1,10 +1,5 @@
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-} from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { act, cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getMentorTechnicalAreas,
@@ -131,6 +126,16 @@ describe("TechnicalAreasView", () => {
     expect(await screen.findByText("2 seleccionadas")).toBeInTheDocument();
     expect(getTechnicalAreas).toHaveBeenCalledTimes(2);
     expect(getMentorTechnicalAreas).toHaveBeenCalledTimes(2);
+  });
+
+  it("deriva al flujo de participación sin reintento ni guardado ante 403", async () => {
+    vi.mocked(getMentorTechnicalAreas).mockRejectedValueOnce({ isAxiosError: true, response: { status: 403 } });
+    render(<TechnicalAreasView />);
+    expect(await screen.findByText("Necesitas una participación activa como mentor para editar áreas técnicas.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Iniciar incorporación" })).toHaveAttribute("href", "/mentorship");
+    expect(screen.queryByRole("button", { name: "Reintentar" })).not.toBeInTheDocument();
+    expect(button(/Guardar cambios/)).toBeDisabled();
+    expect(updateMentorTechnicalAreas).not.toHaveBeenCalled();
   });
 
   it("Volver sin cambios regresa directo a Mi participación", async () => {

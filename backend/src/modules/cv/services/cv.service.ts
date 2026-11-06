@@ -1,33 +1,99 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CV_VALIDATION_RULES } from '../constants/cv.constants.js';
 import { CvNotFoundException } from '../exceptions/cv-not-found.exception.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import { CvMapper } from '../mappers/cv.mapper.js';
+import { RadarIntegrationService } from '../../radar-integration/radar-integration.service.js';
 import { CvMetadataRepository } from '../repositories/cv-metadata.repository.js';
+import type { ListCvsRequest } from '../requests/list-cvs.request.js';
 import type { CvResponse } from '../responses/cv.response.js';
 import type { CvFileDownload } from '../types/cv-file-download.type.js';
+import { CvFileStorage } from '../types/cv-file-storage.type.js';
 import type { CvMetadataRecord } from '../types/cv-metadata-record.type.js';
-import { FileStorage } from '../../../common/types/file-storage.type.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
+import type { PaginatedResult } from '../../../common/types/api-response.types.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 
 @Injectable()
 export class CvService {
+  private readonly logger = new Logger(CvService.name);
   constructor(
     private readonly cvMetadataRepository: CvMetadataRepository,
-    private readonly fileStorage: FileStorage,
+    private readonly cvFileStorage: CvFileStorage,
     private readonly fileValidationService: FileValidationService,
     private readonly cvMapper: CvMapper,
+    private readonly radarIntegration: RadarIntegrationService,
   ) {}
 
-  async getMetadata(userId: string): Promise<CvResponse | null> {
-    const record = await this.getRecordOrFail(userId);
-    return this.cvMapper.toResponse(record);
+  async list(userId: string, request: ListCvsRequest): Promise<PaginatedResult<CvResponse>> {
+    const { page, limit } = request;
+    const totalItems = await this.cvMetadataRepository.countByUserId(userId);
+
+    if (totalItems === null) {
+      throw new ProfileNotFoundException();
+    }
+
+    const offset = (page - 1) * limit;
+    const records =
+      offset < totalItems
+        ? await this.cvMetadataRepository.findPageByUserId(userId, offset, limit)
+        : [];
+
+    return this.cvMapper.toPage(records, totalItems, page, limit);
   }
 
-  async getFile(userId: string): Promise<CvFileDownload> {
-    const record = await this.getRecordOrFail(userId);
-    const content = await this.fileStorage.read(userId);
+  async getFileById(userId: string, cvId: string): Promise<CvFileDownload> {
+    const record = await this.cvMetadataRepository.findByIdForUser(userId, cvId);
+
+    if (!record) {
+      throw new CvNotFoundException();
+    }
+
+    return this.readDownload(userId, cvId, record);
+  }
+
+  async upload(userId: string, file: MulterFile | undefined): Promise<CvResponse | null> {
+    await this.ensureProfileExists(userId);
+
+    const validatedFile = this.fileValidationService.validate(
+      file ? this.cvMapper.toUploadedFile(file) : undefined,
+      CV_VALIDATION_RULES,
+    );
+
+    const cvId = await this.cvFileStorage.create(
+      userId,
+      validatedFile.buffer,
+      this.cvMapper.toStoredFileName(file?.originalname),
+    );
+
+    try {
+      await this.radarIntegration.ingestCv(userId, cvId, validatedFile.buffer);
+    } catch {
+      this.logger.error(JSON.stringify({ event: 'cv.analysis_failed', userId, cvId }));
+    }
+    const record = await this.cvMetadataRepository.findByIdForUser(userId, cvId);
+    return record ? this.cvMapper.toResponse(record) : null;
+  }
+
+  async removeById(userId: string, cvId: string): Promise<void> {
+    const isRemoved = await this.cvFileStorage.removeById(userId, cvId);
+
+    if (!isRemoved) {
+      throw new CvNotFoundException();
+    }
+    try {
+      await this.radarIntegration.cvRemoved(userId, cvId);
+    } catch {
+      this.logger.error(JSON.stringify({ event: 'cv.removal_refresh_failed', userId, cvId }));
+    }
+  }
+
+  private async readDownload(
+    userId: string,
+    cvId: string,
+    record: CvMetadataRecord,
+  ): Promise<CvFileDownload> {
+    const content = await this.cvFileStorage.readById(userId, cvId);
 
     if (!content) {
       throw new CvNotFoundException();
@@ -36,43 +102,9 @@ export class CvService {
     return this.cvMapper.toFileDownload(content, record);
   }
 
-  async upload(
-    userId: string,
-    file: MulterFile | undefined,
-  ): Promise<CvResponse | null> {
-    await this.getRecordOrFail(userId);
-
-    const validatedFile = this.fileValidationService.validate(
-      file ? this.cvMapper.toUploadedFile(file) : undefined,
-      CV_VALIDATION_RULES,
-    );
-
-    await this.fileStorage.save(
-      userId,
-      validatedFile.buffer,
-      this.cvMapper.toStoredFileName(file?.originalname),
-    );
-
-    return this.getMetadata(userId);
-  }
-
-  async remove(userId: string): Promise<void> {
-    const record = await this.getRecordOrFail(userId);
-
-    if (record.sizeBytes === null) {
-      throw new CvNotFoundException();
-    }
-
-    await this.fileStorage.remove(userId);
-  }
-
-  private async getRecordOrFail(userId: string): Promise<CvMetadataRecord> {
-    const record = await this.cvMetadataRepository.findByUserId(userId);
-
-    if (!record) {
+  private async ensureProfileExists(userId: string): Promise<void> {
+    if ((await this.cvMetadataRepository.countByUserId(userId)) === null) {
       throw new ProfileNotFoundException();
     }
-
-    return record;
   }
 }

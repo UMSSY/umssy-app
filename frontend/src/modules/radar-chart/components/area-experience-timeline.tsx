@@ -25,7 +25,7 @@ export function AreaExperienceTimeline({ experience }: AreaExperienceTimelinePro
           <p className="text-sm font-semibold break-words text-ink">{item.role}</p>
           <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
             <span className="min-w-0 text-xs break-words text-ink-soft">{item.company}</span>
-            <span className="rounded-full bg-surface-soft px-2 py-0.5 text-[11px] font-medium whitespace-nowrap text-ink-soft tabular-nums">
+            <span className="rounded-full bg-surface-soft px-2 py-0.5 text-xs font-medium whitespace-nowrap text-ink-soft tabular-nums">
               {formatDurationYears(item.durationYears)}
             </span>
           </div>

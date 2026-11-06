@@ -12,7 +12,9 @@ const buildPrismaError = (code: string) =>
     clientVersion: 'test',
   });
 
-const createNotFound = () => new DomainException('Record not found', 404);
+class RecordNotFoundException extends DomainException {}
+
+const createNotFound = () => new RecordNotFoundException('Record not found', 404, 'RECORD_NOT_FOUND');
 
 describe('isRecordNotFoundError', () => {
   it('recognizes the Prisma record not found error', () => {

@@ -1,10 +1,5 @@
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getMentorOrientationTypes,
@@ -50,20 +45,20 @@ const expectOrientationStyle = (
   expect(card).not.toBeNull();
   if (state === "unselected") {
     expect(input).not.toBeChecked();
-    expect(card).toHaveClass("border-transparent", "bg-gray-50/50");
-    expect(input).toHaveClass("bg-gray-200");
-    expect(input).not.toHaveClass("data-checked:bg-green-600");
-    expect(input).not.toHaveClass("data-checked:bg-red-600");
+    expect(card).toHaveClass("border-transparent", "bg-surface-soft/50");
+    expect(input).toHaveClass("bg-border");
+    expect(input).not.toHaveClass("data-checked:bg-ink-soft");
+    expect(input).not.toHaveClass("data-checked:bg-accent");
     return;
   }
 
   expect(input).toBeChecked();
   if (state === "saved") {
-    expect(card).toHaveClass("border-green-200", "bg-green-50/50");
-    expect(input).toHaveClass("data-checked:bg-green-600");
+    expect(card).toHaveClass("border-border", "bg-surface-soft/50");
+    expect(input).toHaveClass("data-checked:bg-accent");
   } else {
-    expect(card).toHaveClass("border-red-200", "bg-red-50/50");
-    expect(input).toHaveClass("data-checked:bg-red-600");
+    expect(card).toHaveClass("border-accent", "bg-interaction/50");
+    expect(input).toHaveClass("data-checked:bg-accent");
   }
 };
 
@@ -123,7 +118,7 @@ describe("OrientationConfigView", () => {
     expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
   });
 
-  it("recupera el verde al volver a seleccionar una orientación guardada", async () => {
+  it("recupera el estilo persistido al volver a seleccionar una orientación guardada", async () => {
     render(<OrientationConfigView />);
     await screen.findByRole("checkbox", { name: "Orientación técnica" });
 
@@ -178,6 +173,23 @@ describe("OrientationConfigView", () => {
     expectOrientationStyle("Orientación técnica", "unselected");
   });
 
+  it("permite cancelar la confirmación sin guardar", async () => {
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+
+    fireEvent.click(checkbox("Orientación profesional"));
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument(),
+    );
+    expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
+    expect(checkbox("Orientación profesional")).toBeChecked();
+  });
+
   it("mantiene la selección bloqueada mientras el backend confirma el guardado", async () => {
     let resolveSave!: () => void;
     vi.mocked(updateMentorOrientationTypes).mockReturnValueOnce(
@@ -194,7 +206,7 @@ describe("OrientationConfigView", () => {
       screen.getByRole("button", { name: "Sí, guardar cambios" }),
     );
 
-    expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
+    expect(await screen.findByRole("button", { name: "Guardando..." })).toBeDisabled();
     expect(checkbox("Orientación profesional")).toHaveAttribute(
       "aria-disabled",
       "true",
@@ -208,7 +220,7 @@ describe("OrientationConfigView", () => {
     );
   });
 
-  it("muestra en verde las orientaciones persistidas tras recargar", async () => {
+  it("muestra el estado guardado de las orientaciones persistidas tras recargar", async () => {
     const { unmount } = render(<OrientationConfigView />);
     await screen.findByRole("checkbox", { name: "Orientación profesional" });
     fireEvent.click(checkbox("Orientación profesional"));
@@ -312,6 +324,7 @@ describe("OrientationConfigView", () => {
 
     render(<OrientationConfigView />);
     await screen.findByRole("checkbox", { name: "Orientación técnica" });
+    fireEvent.click(checkbox("Orientación profesional"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
     fireEvent.click(
       screen.getByRole("button", { name: "Sí, guardar cambios" }),
@@ -332,4 +345,18 @@ describe("OrientationConfigView", () => {
       "/mentors/participation",
     );
   });
+  it("confirms leaving only when there are unsaved changes", async () => {
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+    expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled();
+    fireEvent.click(checkbox("Orientación profesional"));
+    fireEvent.click(screen.getByRole("link", { name: "Volver" }));
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "¿Descartar cambios?" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Seguir editando" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(checkbox("Orientación profesional")).toBeChecked();
+    expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
+  });
+
 });

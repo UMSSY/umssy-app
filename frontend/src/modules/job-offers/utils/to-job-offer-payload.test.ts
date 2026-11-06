@@ -14,7 +14,7 @@ describe("toJobOfferPayload", () => {
       salaryMin: 6500,
       salaryMax: 8000,
       languages: "Español, inglés intermedio",
-      locationUrl: "https://maps.google.com/?q=Av.+Ballivian+742+Cochabamba",
+      locationUrl: "https://maps.app.goo.gl/TechBolivia",
       skillIds: [DOCKER.id, KUBERNETES.id],
     });
   });
@@ -23,6 +23,13 @@ describe("toJobOfferPayload", () => {
     const payload = toJobOfferPayload({ ...VALID_CONDITIONS, salary: "Bs 5.000" });
 
     expect(payload.salaryMin).toBe(5000);
+    expect(payload).not.toHaveProperty("salaryMax");
+  });
+
+  it("no envía salario en una pasantía", () => {
+    const payload = toJobOfferPayload({ ...VALID_CONDITIONS, contractType: "Pasantía", salary: "" });
+
+    expect(payload).not.toHaveProperty("salaryMin");
     expect(payload).not.toHaveProperty("salaryMax");
   });
 

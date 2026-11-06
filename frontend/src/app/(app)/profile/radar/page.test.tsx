@@ -1,3 +1,4 @@
+import { mapPublishedRadar } from "@/modules/radar-chart/mappers/radar-published.mapper";
 import { cloneElement, type ReactElement } from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -18,6 +19,14 @@ vi.mock("recharts", async (importOriginal) => {
   };
 });
 
+vi.mock("@/modules/radar-chart/hooks/use-live-radar", () => ({ useLiveRadar: () => ({
+ data: mapPublishedRadar({userId:'owner',status:'published',version:1,updatedAt:null,dictionaryVersion:'1',
+   rubricVersion:'servidor-v1',scores:{desarrollo:0,'cloud-devops':0,'data-ai':0,qa:0,ciberseguridad:0,'gobernanza-ti':0},
+   average:0,variation:null,pending:0,hasPending:false,evidence:{},sourceRevision:1,inputRevision:1,
+   processingStatus:'ready',skills:[]}),
+ loading:false,error:null,variation:null,refresh:vi.fn(),retry:vi.fn(),retrying:false,
+}) }));
+
 describe("RadarProfilePage", () => {
   beforeEach(() => {
     stubMatchMedia();
@@ -31,7 +40,7 @@ describe("RadarProfilePage", () => {
   it("renders the affinity radar view of the profile", () => {
     render(<RadarProfilePage />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Carlos Mendoza Ríos" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 2, name: "Mi perfil profesional" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Desglose vectorial de afinidad" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Desglose por área" })).toBeDefined();
   });

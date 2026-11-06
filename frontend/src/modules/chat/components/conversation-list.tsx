@@ -1,171 +1,323 @@
 
-'use client';
+"use client";
 
-import { Conversation, ConversationFilter } from '../types/conversation.types';
-import { ConversationItem } from './conversation-item';
-import { ConversationSkeleton } from './conversation-skeleton';
-import { EmptyChatState } from './empty-chat-state';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, Search } from "lucide-react";
+
+import type {
+  Conversation,
+  ConversationFilter,
+} from "../types/conversation.types";
+import type { ConnectionRequest } from "../types/connection-request.types";
+
+import { ConversationItem } from "./conversation-item";
+import { ConnectionRequestItem } from "./connection-request-item";
+import { ConversationSkeleton } from "./conversation-skeleton";
+import { EmptyChatState } from "./empty-chat-state";
 
 interface ConversationListProps {
   conversations: Conversation[];
+  connectionRequests?: ConnectionRequest[];
   selectedId?: string | null;
+  selectedRequestId?: string | null;
   isLoading: boolean;
   isError?: boolean;
+  isLoadingRequests?: boolean;
+  isRequestsError?: boolean;
+  onRetryRequests?: () => void;
   hasMore: boolean;
   activeFilter: ConversationFilter;
   searchQuery: string;
   onSelectConversation: (conversation: Conversation) => void;
+  onSelectRequest?: (request: ConnectionRequest) => void;
   onFilterChange: (filter: ConversationFilter) => void;
   onSearchChange: (query: string) => void;
   onLoadMore?: () => void;
   onStartNewChat?: () => void;
 }
 
+type ChatListEntry =
+  | {
+      type: "conversation";
+      id: string;
+      date: string;
+      conversation: Conversation;
+    }
+  | {
+      type: "request";
+      id: string;
+      date: string;
+      request: ConnectionRequest;
+    };
+
+function getSenderName(request: ConnectionRequest): string {
+  if (!request.sender) return "";
+
+  return `${request.sender.firstName} ${request.sender.lastName}`
+    .trim();
+}
+
 export function ConversationList({
   conversations,
+  connectionRequests = [],
   selectedId,
+  selectedRequestId,
   isLoading,
   isError = false,
+  isLoadingRequests = false,
+  isRequestsError = false,
+  onRetryRequests,
   hasMore,
   activeFilter,
   searchQuery,
   onSelectConversation,
+  onSelectRequest,
   onFilterChange,
   onSearchChange,
   onLoadMore,
   onStartNewChat,
 }: ConversationListProps) {
-  const isFiltered = Boolean(searchQuery.trim() || activeFilter === 'unread');
+  const normalizedSearch = searchQuery.trim().toLocaleLowerCase();
+
+  const visibleRequests = connectionRequests.filter((request) => {
+    if (request.status?.title !== "PENDING") {
+      return false;
+    }
+
+    if (!normalizedSearch) {
+      return true;
+    }
+
+    return getSenderName(request)
+      .toLocaleLowerCase()
+      .includes(normalizedSearch);
+  });
+
+  const entries: ChatListEntry[] = [
+    ...conversations.map(
+      (conversation): ChatListEntry => ({
+        type: "conversation",
+        id: conversation.id,
+        date: conversation.updatedAt,
+        conversation,
+      }),
+    ),
+    ...visibleRequests.map(
+      (request): ChatListEntry => ({
+        type: "request",
+        id: request.id,
+        date: request.createdAt,
+        request,
+      }),
+    ),
+  ].sort(
+    (a, b) =>
+      new Date(b.date).getTime() -
+      new Date(a.date).getTime(),
+  );
+
+  const isFiltered = Boolean(
+    normalizedSearch || activeFilter === "unread",
+  );
 
   const getEmptyMessage = () => {
-    if (activeFilter === 'unread') {
-      return 'No tienes mensajes sin leer.';
+    if (normalizedSearch) {
+      return "No se encontraron conversaciones ni solicitudes que coincidan con tu búsqueda.";
     }
-    if (searchQuery.trim().length > 0) {
-      return 'No se encontraron conversaciones que coincidan con tu busqueda.';
+
+    if (activeFilter === "unread") {
+      return "No tienes mensajes ni solicitudes pendientes.";
     }
-    return 'Aun no tienes ninguna conversacion registrada.';
+
+    return "Aún no tienes conversaciones ni solicitudes registradas.";
   };
 
   return (
-    <div className="relative flex flex-col h-full bg-white border-r border-slate-200">
-      <div className="p-4 border-b border-slate-100 space-y-3">
+    <div className="relative flex h-full flex-col border-r border-border bg-surface">
+      <div className="space-y-3 border-b border-border p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Chats</h2>
-          {onStartNewChat && activeFilter !== 'unread' && (
-            <button
+          <h2 className="text-xl font-bold tracking-tight text-ink">
+            Chats
+          </h2>
+
+          {onStartNewChat && activeFilter !== "unread" && (
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={onStartNewChat}
-              className="hidden md:inline-flex items-center text-xs font-bold text-red-600 hover:text-red-700"
+              className="hidden items-center gap-1.5 text-sm font-bold text-accent hover:text-accent md:inline-flex"
             >
-              + Nuevo
-            </button>
+              <Plus className="size-4" aria-hidden="true" />
+              Nuevo
+            </Button>
           )}
         </div>
 
         <div className="relative">
-          <input
+          <Input
             type="text"
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={(event) =>
+              onSearchChange(event.target.value)
+            }
+            aria-label="Buscar conversaciones"
             placeholder="Buscar personas..."
-            className="w-full pl-9 pr-3 py-2 text-sm bg-slate-100 border border-transparent rounded-lg focus:outline-none focus:bg-white focus:border-[#0B2545] transition-all text-slate-800 placeholder-slate-400"
+            className="w-full rounded-lg border border-border bg-surface py-2 pr-3 pl-9 text-sm text-ink placeholder:text-text-secondary focus:border-accent focus-visible:ring-2 focus-visible:ring-ring"
           />
-          <svg
-            className="w-4 h-4 text-slate-400 absolute left-3 top-3"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+
+          <Search
+            className="pointer-events-none absolute top-3 left-3 size-4 text-text-secondary"
+            aria-hidden="true"
+          />
         </div>
 
         <div className="flex items-center gap-2 pt-1">
-          <button
+          <Button
             type="button"
-            onClick={() => onFilterChange('all')}
-            className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all ${
-              activeFilter === 'all'
-                ? 'bg-[#0B2545] text-white shadow-xs'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            variant="ghost"
+            size="sm"
+            onClick={() => onFilterChange("all")}
+            aria-pressed={activeFilter === "all"}
+            className={`rounded-md px-3.5 py-1 text-xs font-semibold ${
+              activeFilter === "all"
+                ? "bg-interaction text-accent"
+                : "bg-surface text-text-secondary hover:bg-surface-soft"
             }`}
           >
             Todos
-          </button>
-          <button
+          </Button>
+
+          <Button
             type="button"
-            onClick={() => onFilterChange('unread')}
-            className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all ${
-              activeFilter === 'unread'
-                ? 'bg-[#0B2545] text-white shadow-xs'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            variant="ghost"
+            size="sm"
+            onClick={() => onFilterChange("unread")}
+            aria-pressed={activeFilter === "unread"}
+            className={`rounded-md px-3.5 py-1 text-xs font-semibold ${
+              activeFilter === "unread"
+                ? "bg-interaction text-accent"
+                : "bg-surface text-text-secondary hover:bg-surface-soft"
             }`}
           >
             Sin leer
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
-          <div role="status" aria-label="Cargando conversaciones">
-            <span className="sr-only">Cargando conversaciones...</span>
+          <div
+            role="status"
+            aria-label="Cargando conversaciones"
+          >
+            <span className="sr-only">
+              Cargando conversaciones...
+            </span>
             <ConversationSkeleton />
           </div>
-        ) : isError ? null : conversations.length === 0 ? (
-          <EmptyChatState
-            description={getEmptyMessage()}
-            actionLabel="Iniciar una nueva conversacion"
-            onAction={isFiltered ? undefined : onStartNewChat}
-          />
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {conversations.map((item) => (
-              <ConversationItem
-                key={item.id}
-                conversation={item}
-                isSelected={selectedId === item.id}
-                onSelect={onSelectConversation}
-              />
-            ))}
+        ) : isError ? null : (
+          <>
+            {isLoadingRequests && (
+              <p
+                role="status"
+                className="p-3 text-center text-xs text-text-secondary"
+              >
+                Cargando solicitudes...
+              </p>
+            )}
 
-            {hasMore && (
-              <div className="p-3 text-center">
-                <button
-                  type="button"
-                  onClick={onLoadMore}
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-800"
-                >
-                  Cargar mas conversaciones
-                </button>
+            {isRequestsError && (
+              <div
+                role="alert"
+                className="space-y-2 border-b border-border p-3 text-center"
+              >
+                <p className="text-xs text-text-secondary">
+                  No se pudieron cargar las solicitudes.
+                </p>
+
+                {onRetryRequests && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={onRetryRequests}
+                  >
+                    Reintentar
+                  </Button>
+                )}
               </div>
             )}
-          </div>
+
+            {entries.length === 0 &&
+            !isLoadingRequests &&
+            !isRequestsError ? (
+              <EmptyChatState
+                description={getEmptyMessage()}
+                actionLabel="Iniciar una nueva conversación"
+                onAction={
+                  isFiltered ? undefined : onStartNewChat
+                }
+              />
+            ) : (
+              <div className="divide-y divide-border">
+                {entries.map((entry) =>
+                  entry.type === "request" ? (
+                    <ConnectionRequestItem
+                      key={`request-${entry.id}`}
+                      request={entry.request}
+                      isSelected={
+                        selectedRequestId === entry.id
+                      }
+                      onSelect={(request) =>
+                        onSelectRequest?.(request)
+                      }
+                    />
+                  ) : (
+                    <ConversationItem
+                      key={`conversation-${entry.id}`}
+                      conversation={entry.conversation}
+                      isSelected={
+                        !selectedRequestId &&
+                        selectedId === entry.id
+                      }
+                      onSelect={onSelectConversation}
+                    />
+                  ),
+                )}
+
+                {hasMore && (
+                  <div className="p-3 text-center">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={onLoadMore}
+                      disabled={!onLoadMore}
+                      className="text-xs font-semibold text-ink-soft"
+                    >
+                      Cargar más conversaciones
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {onStartNewChat && activeFilter !== 'unread' && (
-        <button
+      {onStartNewChat && activeFilter !== "unread" && (
+        <Button
           type="button"
+          variant="default"
+          size="icon-lg"
           onClick={onStartNewChat}
-          className="md:hidden absolute bottom-6 right-4 w-12 h-12 bg-red-600 text-white rounded-xl shadow-lg flex items-center justify-center hover:bg-red-700 active:scale-95 transition-all focus:outline-none"
-          aria-label="Iniciar nueva conversacion"
+          className="absolute right-4 bottom-6 flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-none hover:bg-brand-hover md:hidden"
+          aria-label="Iniciar nueva conversación"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-        </button>
+          <Plus className="size-6" aria-hidden="true" />
+        </Button>
       )}
     </div>
   );

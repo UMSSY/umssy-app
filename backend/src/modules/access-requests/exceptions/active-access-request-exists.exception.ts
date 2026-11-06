@@ -2,6 +2,6 @@ import { DomainException } from '../../../common/exceptions/domain.exception.js'
 
 export class ActiveAccessRequestExistsException extends DomainException {
   constructor(message = 'Ya tienes una solicitud activa') {
-    super(message, 409);
+    super(message, 409, 'ACTIVE_ACCESS_REQUEST_EXISTS');
   }
 }

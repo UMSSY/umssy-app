@@ -12,7 +12,7 @@ describe("RejectDialog: estilo", () => {
 
     const cancel = await screen.findByRole("button", { name: "Cancelar" });
     expect(cancel).toHaveClass("bg-surface", "border", "border-border");
-    expect(screen.getByText("Documento ilegible").closest("label")).toHaveClass("text-[15px]");
+    expect(screen.getByText("Documento ilegible").closest("label")).toHaveClass("text-base");
     fireEvent.click(cancel);
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });

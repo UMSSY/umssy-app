@@ -8,7 +8,7 @@ export function AreaSection({ title, icon: Icon, count, children }: AreaSectionP
         <h3 className="min-w-0 text-xs font-semibold tracking-[0.12em] break-words uppercase">
           {title}
         </h3>
-        <span className="rounded-full bg-surface-soft px-1.5 py-0.5 text-[11px] leading-none font-medium text-text-secondary tabular-nums">
+        <span className="rounded-full bg-surface-soft px-1.5 py-0.5 text-xs leading-none font-medium text-text-secondary tabular-nums">
           {count}
         </span>
       </div>

@@ -107,6 +107,11 @@ export type Education = Prisma.EducationModel
  */
 export type WorkExperience = Prisma.WorkExperienceModel
 /**
+ * Model RadarArea
+ * 
+ */
+export type RadarArea = Prisma.RadarAreaModel
+/**
  * Model Skill
  * 
  */
@@ -131,6 +136,11 @@ export type Certification = Prisma.CertificationModel
  * 
  */
 export type UserCvFile = Prisma.UserCvFileModel
+/**
+ * Model ProfileSkillProcessingState
+ * 
+ */
+export type ProfileSkillProcessingState = Prisma.ProfileSkillProcessingStateModel
 /**
  * Model TechnicalArea
  * 
@@ -166,6 +176,11 @@ export type BlockedDate = Prisma.BlockedDateModel
  * 
  */
 export type Appointment = Prisma.AppointmentModel
+/**
+ * Model AppointmentDocument
+ * 
+ */
+export type AppointmentDocument = Prisma.AppointmentDocumentModel
 /**
  * Model TimeProposal
  * 
@@ -247,6 +262,16 @@ export type Career = Prisma.CareerModel
  */
 export type AccessRequest = Prisma.AccessRequestModel
 /**
+ * Model MentorParticipationRequest
+ * 
+ */
+export type MentorParticipationRequest = Prisma.MentorParticipationRequestModel
+/**
+ * Model MentorSlotOffer
+ * 
+ */
+export type MentorSlotOffer = Prisma.MentorSlotOfferModel
+/**
  * Model ActivationOtp
  * 
  */
@@ -256,6 +281,16 @@ export type ActivationOtp = Prisma.ActivationOtpModel
  * 
  */
 export type MessageStatus = Prisma.MessageStatusModel
+/**
+ * Model ConnectionRequestStatus
+ * 
+ */
+export type ConnectionRequestStatus = Prisma.ConnectionRequestStatusModel
+/**
+ * Model AttachmentType
+ * 
+ */
+export type AttachmentType = Prisma.AttachmentTypeModel
 /**
  * Model Conversation
  * 
@@ -272,7 +307,137 @@ export type ConversationParticipant = Prisma.ConversationParticipantModel
  */
 export type Message = Prisma.MessageModel
 /**
+ * Model MessageAttachment
+ * 
+ */
+export type MessageAttachment = Prisma.MessageAttachmentModel
+/**
+ * Model ChatUserBlock
+ * 
+ */
+export type ChatUserBlock = Prisma.ChatUserBlockModel
+/**
+ * Model ConnectionRequest
+ * 
+ */
+export type ConnectionRequest = Prisma.ConnectionRequestModel
+/**
  * Model UserPresence
  * 
  */
 export type UserPresence = Prisma.UserPresenceModel
+/**
+ * Model PasswordResetOtp
+ * 
+ */
+export type PasswordResetOtp = Prisma.PasswordResetOtpModel
+/**
+ * Model MentorParticipationAttemptLimit
+ * 
+ */
+export type MentorParticipationAttemptLimit = Prisma.MentorParticipationAttemptLimitModel
+/**
+ * Model JobApplicationStatus
+ * 
+ */
+export type JobApplicationStatus = Prisma.JobApplicationStatusModel
+/**
+ * Model JobApplication
+ * 
+ */
+export type JobApplication = Prisma.JobApplicationModel
+/**
+ * Model SurveyStatus
+ * 
+ */
+export type SurveyStatus = Prisma.SurveyStatusModel
+/**
+ * Model SurveyQuestionType
+ * 
+ */
+export type SurveyQuestionType = Prisma.SurveyQuestionTypeModel
+/**
+ * Model SurveyTargetAudience
+ * 
+ */
+export type SurveyTargetAudience = Prisma.SurveyTargetAudienceModel
+/**
+ * Model Survey
+ * 
+ */
+export type Survey = Prisma.SurveyModel
+/**
+ * Model SurveyQuestion
+ * 
+ */
+export type SurveyQuestion = Prisma.SurveyQuestionModel
+/**
+ * Model SurveyQuestionOption
+ * 
+ */
+export type SurveyQuestionOption = Prisma.SurveyQuestionOptionModel
+/**
+ * Model SurveyResponse
+ * 
+ */
+export type SurveyResponse = Prisma.SurveyResponseModel
+/**
+ * Model SurveyAnswer
+ * 
+ */
+export type SurveyAnswer = Prisma.SurveyAnswerModel
+/**
+ * Model AuditAction
+ * 
+ */
+export type AuditAction = Prisma.AuditActionModel
+/**
+ * Model AuditEvent
+ * 
+ */
+export type AuditEvent = Prisma.AuditEventModel
+/**
+ * Model DocumentValidation
+ * 
+ */
+export type DocumentValidation = Prisma.DocumentValidationModel
+/**
+ * Model MentorIntakeAttempt
+ * 
+ */
+export type MentorIntakeAttempt = Prisma.MentorIntakeAttemptModel
+/**
+ * Model MentorParticipationSanction
+ * 
+ */
+export type MentorParticipationSanction = Prisma.MentorParticipationSanctionModel
+/**
+ * Model MentorIntakeOperation
+ * 
+ */
+export type MentorIntakeOperation = Prisma.MentorIntakeOperationModel
+/**
+ * Model RadarCvEvidence
+ * 
+ */
+export type RadarCvEvidence = Prisma.RadarCvEvidenceModel
+/**
+ * Model RadarScoreSnapshot
+ * 
+ */
+export type RadarScoreSnapshot = Prisma.RadarScoreSnapshotModel
+/**
+ * Model RadarAuditEvent
+ * 
+ */
+export type RadarAuditEvent = Prisma.RadarAuditEventModel
+/**
+ * Model RadarCvExtractionStatus
+ * 
+ */
+export type RadarCvExtractionStatus = Prisma.RadarCvExtractionStatusModel
+/**
+ * Model RadarCvReviewStatus
+ * 
+ */
+export type RadarCvReviewStatus = Prisma.RadarCvReviewStatusModel

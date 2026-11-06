@@ -1,5 +1,6 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent, cleanup } from "@testing-library/react";
 import { ChatRoom } from '../components/chat-room';
 import { MessageInputBar } from '../components/message-input-bar';
 import { Conversation, Message } from '../types/conversation.types';
@@ -20,6 +21,20 @@ const mockConversation: Conversation = {
   lastMessage: null,
   unreadCount: 0,
   updatedAt: new Date().toISOString(),
+};
+
+const mockEventConversation: Conversation = {
+  id: 'event-conversation-1',
+  eventId: 'event-1',
+  eventTitle: 'Taller de Prisma',
+  createdAt: '2026-11-01T10:00:00.000Z',
+  participants: [
+    { id: 'user-1', fullName: 'Maria Fernandez' },
+    { id: 'user-2', fullName: 'Carlos Rojas' },
+  ],
+  lastMessage: null,
+  unreadCount: 0,
+  updatedAt: '2026-11-01T10:00:00.000Z',
 };
 
 const mockMessages: Message[] = [
@@ -60,7 +75,7 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
     expect(inputBar).toBeDefined();
     expect(inputBar.className).toContain('shrink-0');
     expect(inputBar.className).toContain('border-t');
-    expect(inputBar.className).toContain('bg-white');
+    expect(inputBar.className).toContain('bg-surface');
 
     const textarea = screen.getByTestId('message-textarea');
     expect(textarea).toBeDefined();
@@ -120,7 +135,118 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
 
     expect(screen.getByText('Maria Fernandez')).toBeDefined();
-    expect(screen.getByText('En linea')).toBeDefined();
+    expect(screen.getByText('En línea')).toBeDefined();
+  });
+
+  it('muestra el icono del grupo y abre la informacion lateral desde la cabecera', async () => {
+    render(
+      <ChatRoom
+        conversation={mockEventConversation}
+        messages={[]}
+        currentUserId="user-1"
+        onBack={vi.fn()}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('TP')).toBeInTheDocument();
+    expect(screen.getByTestId('chat-room-group-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('chat-event-participant-count')).toHaveTextContent(
+      '2 participantes',
+    );
+    expect(screen.queryByText('Chat del evento')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Sala de chat con/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Aún no hay mensajes. Envía el primero para comenzar la conversación.',
+      ),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('chat-contact-profile-trigger'));
+
+    expect(await screen.findByText('Info del grupo')).toBeInTheDocument();
+    expect(screen.getAllByText('2 participantes').length).toBeGreaterThan(0);
+    expect(screen.getByText('Carlos Rojas')).toBeInTheDocument();
+  });
+
+  it('muestra el nombre y las iniciales del remitente en los mensajes ajenos del grupo', () => {
+    const now = new Date().toISOString();
+    const eventMessages: Message[] = [
+      {
+        id: 'event-msg-1',
+        conversationId: 'event-conversation-1',
+        senderId: 'user-2',
+        content: 'Hola a todos',
+        timestamp: now,
+        status: 'sent',
+        createdAt: now,
+      },
+      {
+        id: 'event-msg-2',
+        conversationId: 'event-conversation-1',
+        senderId: 'user-1',
+        content: 'Hola Carlos',
+        timestamp: now,
+        status: 'sent',
+        createdAt: now,
+      },
+    ];
+
+    render(
+      <ChatRoom
+        conversation={mockEventConversation}
+        messages={eventMessages}
+        currentUserId="user-1"
+        onBack={vi.fn()}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText('Hola a todos')).toBeInTheDocument();
+    expect(screen.getByText('Carlos Rojas')).toBeInTheDocument();
+    expect(screen.getByTestId('message-sender-avatar')).toHaveTextContent('CR');
+    expect(screen.getAllByTestId('message-sender-name')).toHaveLength(1);
+  });
+
+  it('usa el singular cuando el grupo tiene un solo participante', () => {
+    render(
+      <ChatRoom
+        conversation={{
+          ...mockEventConversation,
+          participants: [{ id: 'user-1', fullName: 'Maria Fernandez' }],
+        }}
+        messages={[]}
+        currentUserId="user-1"
+        onBack={vi.fn()}
+        onSendMessage={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('chat-event-participant-count')).toHaveTextContent(
+      '1 participante',
+    );
+  });
+
+  it('abre la informacion lateral del grupo en el panel compacto de mensajes', async () => {
+    render(
+      <ChatRoom
+        conversation={mockEventConversation}
+        messages={[]}
+        currentUserId="user-1"
+        onBack={vi.fn()}
+        onSendMessage={vi.fn()}
+        isCompact
+      />
+    );
+
+    expect(screen.getByTestId('chat-event-participant-count')).toHaveTextContent(
+      '2 participantes',
+    );
+
+    fireEvent.click(screen.getByTestId('chat-contact-profile-trigger'));
+
+    expect(await screen.findByText('Info del grupo')).toBeInTheDocument();
+    expect(screen.getByText('Carlos Rojas')).toBeInTheDocument();
   });
 
   it('debe deshabilitar el boton de enviar cuando el input esta vacio', () => {

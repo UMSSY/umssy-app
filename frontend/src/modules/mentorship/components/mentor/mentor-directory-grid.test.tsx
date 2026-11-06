@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { MentorDirectoryItem } from "../../types/mentor-directory.types";
 import { MentorDirectoryGrid } from "./mentor-directory-grid";
@@ -55,5 +56,12 @@ describe("MentorDirectoryGrid", () => {
     render(<MentorDirectoryGrid mentors={[]} />);
 
     expect(screen.queryByRole("link")).toBeNull();
+  });
+
+  it("resalta el área seleccionada solo en las tarjetas que la tienen", () => {
+    render(<MentorDirectoryGrid mentors={mentors} selectedArea="Backend" />);
+
+    expect(screen.getByText("Backend", { selector: "li" })).toHaveAttribute("aria-current", "true");
+    expect(screen.getByText("QA", { selector: "li" })).not.toHaveAttribute("aria-current");
   });
 });

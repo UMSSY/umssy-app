@@ -183,6 +183,7 @@ export type UserCvFileWhereInput = {
   cvUploadedAt?: Prisma.DateTimeNullableFilter<"UserCvFile"> | Date | string | null
   cvPdfData?: Prisma.StringNullableFilter<"UserCvFile"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  radarEvidence?: Prisma.XOR<Prisma.RadarCvEvidenceNullableScalarRelationFilter, Prisma.RadarCvEvidenceWhereInput> | null
 }
 
 export type UserCvFileOrderByWithRelationInput = {
@@ -192,19 +193,21 @@ export type UserCvFileOrderByWithRelationInput = {
   cvUploadedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   cvPdfData?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  radarEvidence?: Prisma.RadarCvEvidenceOrderByWithRelationInput
 }
 
 export type UserCvFileWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  userId?: string
   AND?: Prisma.UserCvFileWhereInput | Prisma.UserCvFileWhereInput[]
   OR?: Prisma.UserCvFileWhereInput[]
   NOT?: Prisma.UserCvFileWhereInput | Prisma.UserCvFileWhereInput[]
+  userId?: Prisma.UuidFilter<"UserCvFile"> | string
   cvFileName?: Prisma.StringNullableFilter<"UserCvFile"> | string | null
   cvUploadedAt?: Prisma.DateTimeNullableFilter<"UserCvFile"> | Date | string | null
   cvPdfData?: Prisma.StringNullableFilter<"UserCvFile"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "id" | "userId">
+  radarEvidence?: Prisma.XOR<Prisma.RadarCvEvidenceNullableScalarRelationFilter, Prisma.RadarCvEvidenceWhereInput> | null
+}, "id">
 
 export type UserCvFileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -233,7 +236,8 @@ export type UserCvFileCreateInput = {
   cvFileName?: string | null
   cvUploadedAt?: Date | string | null
   cvPdfData?: string | null
-  user: Prisma.UserCreateNestedOneWithoutCvFileInput
+  user: Prisma.UserCreateNestedOneWithoutCvFilesInput
+  radarEvidence?: Prisma.RadarCvEvidenceCreateNestedOneWithoutCvInput
 }
 
 export type UserCvFileUncheckedCreateInput = {
@@ -242,6 +246,7 @@ export type UserCvFileUncheckedCreateInput = {
   cvFileName?: string | null
   cvUploadedAt?: Date | string | null
   cvPdfData?: string | null
+  radarEvidence?: Prisma.RadarCvEvidenceUncheckedCreateNestedOneWithoutCvInput
 }
 
 export type UserCvFileUpdateInput = {
@@ -249,7 +254,8 @@ export type UserCvFileUpdateInput = {
   cvFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvUploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cvPdfData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  user?: Prisma.UserUpdateOneRequiredWithoutCvFileNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutCvFilesNestedInput
+  radarEvidence?: Prisma.RadarCvEvidenceUpdateOneWithoutCvNestedInput
 }
 
 export type UserCvFileUncheckedUpdateInput = {
@@ -258,6 +264,7 @@ export type UserCvFileUncheckedUpdateInput = {
   cvFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvUploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cvPdfData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  radarEvidence?: Prisma.RadarCvEvidenceUncheckedUpdateOneWithoutCvNestedInput
 }
 
 export type UserCvFileCreateManyInput = {
@@ -283,9 +290,14 @@ export type UserCvFileUncheckedUpdateManyInput = {
   cvPdfData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-export type UserCvFileNullableScalarRelationFilter = {
-  is?: Prisma.UserCvFileWhereInput | null
-  isNot?: Prisma.UserCvFileWhereInput | null
+export type UserCvFileListRelationFilter = {
+  every?: Prisma.UserCvFileWhereInput
+  some?: Prisma.UserCvFileWhereInput
+  none?: Prisma.UserCvFileWhereInput
+}
+
+export type UserCvFileOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type UserCvFileCountOrderByAggregateInput = {
@@ -312,36 +324,65 @@ export type UserCvFileMinOrderByAggregateInput = {
   cvPdfData?: Prisma.SortOrder
 }
 
-export type UserCvFileCreateNestedOneWithoutUserInput = {
-  create?: Prisma.XOR<Prisma.UserCvFileCreateWithoutUserInput, Prisma.UserCvFileUncheckedCreateWithoutUserInput>
-  connectOrCreate?: Prisma.UserCvFileCreateOrConnectWithoutUserInput
+export type UserCvFileScalarRelationFilter = {
+  is?: Prisma.UserCvFileWhereInput
+  isNot?: Prisma.UserCvFileWhereInput
+}
+
+export type UserCvFileCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.UserCvFileCreateWithoutUserInput, Prisma.UserCvFileUncheckedCreateWithoutUserInput> | Prisma.UserCvFileCreateWithoutUserInput[] | Prisma.UserCvFileUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.UserCvFileCreateOrConnectWithoutUserInput | Prisma.UserCvFileCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.UserCvFileCreateManyUserInputEnvelope
+  connect?: Prisma.UserCvFileWhereUniqueInput | Prisma.UserCvFileWhereUniqueInput[]
+}
+
+export type UserCvFileUncheckedCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.UserCvFileCreateWithoutUserInput, Prisma.UserCvFileUncheckedCreateWithoutUserInput> | Prisma.UserCvFileCreateWithoutUserInput[] | Prisma.UserCvFileUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.UserCvFileCreateOrConnectWithoutUserInput | Prisma.UserCvFileCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.UserCvFileCreateManyUserInputEnvelope
+  connect?: Prisma.UserCvFileWhereUniqueInput | Prisma.UserCvFileWhereUniqueInput[]
+}
+
+export type UserCvFileUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCvFileCreateWithoutUserInput, Prisma.UserCvFileUncheckedCreateWithoutUserInput> | Prisma.UserCvFileCreateWithoutUserInput[] | Prisma.UserCvFileUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.UserCvFileCreateOrConnectWithoutUserInput | Prisma.UserCvFileCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.UserCvFileUpsertWithWhereUniqueWithoutUserInput | Prisma.UserCvFileUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.UserCvFileCreateManyUserInputEnvelope
+  set?: Prisma.UserCvFileWhereUniqueInput | Prisma.UserCvFileWhereUniqueInput[]
+  disconnect?: Prisma.UserCvFileWhereUniqueInput | Prisma.UserCvFileWhereUniqueInput[]
+  delete?: Prisma.UserCvFileWhereUniqueInput | Prisma.UserCvFileWhereUniqueInput[]
+  connect?: Prisma.UserCvFileWhereUniqueInput | Prisma.UserCvFileWhereUniqueInput[]
+  update?: Prisma.UserCvFileUpdateWithWhereUniqueWithoutUserInput | Prisma.UserCvFileUpdateWithWhereUniqueWithoutUserInput[]
+  updateMany?: Prisma.UserCvFileUpdateManyWithWhereWithoutUserInput | Prisma.UserCvFileUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.UserCvFileScalarWhereInput | Prisma.UserCvFileScalarWhereInput[]
+}
+
+export type UserCvFileUncheckedUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCvFileCreateWithoutUserInput, Prisma.UserCvFileUncheckedCreateWithoutUserInput> | Prisma.UserCvFileCreateWithoutUserInput[] | Prisma.UserCvFileUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.UserCvFileCreateOrConnectWithoutUserInput | Prisma.UserCvFileCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.UserCvFileUpsertWithWhereUniqueWithoutUserInput | Prisma.UserCvFileUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.UserCvFileCreateManyUserInputEnvelope
+  set?: Prisma.UserCvFileWhereUniqueInput | Prisma.UserCvFileWhereUniqueInput[]
+  disconnect?: Prisma.UserCvFileWhereUniqueInput | Prisma.UserCvFileWhereUniqueInput[]
+  delete?: Prisma.UserCvFileWhereUniqueInput | Prisma.UserCvFileWhereUniqueInput[]
+  connect?: Prisma.UserCvFileWhereUniqueInput | Prisma.UserCvFileWhereUniqueInput[]
+  update?: Prisma.UserCvFileUpdateWithWhereUniqueWithoutUserInput | Prisma.UserCvFileUpdateWithWhereUniqueWithoutUserInput[]
+  updateMany?: Prisma.UserCvFileUpdateManyWithWhereWithoutUserInput | Prisma.UserCvFileUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.UserCvFileScalarWhereInput | Prisma.UserCvFileScalarWhereInput[]
+}
+
+export type UserCvFileCreateNestedOneWithoutRadarEvidenceInput = {
+  create?: Prisma.XOR<Prisma.UserCvFileCreateWithoutRadarEvidenceInput, Prisma.UserCvFileUncheckedCreateWithoutRadarEvidenceInput>
+  connectOrCreate?: Prisma.UserCvFileCreateOrConnectWithoutRadarEvidenceInput
   connect?: Prisma.UserCvFileWhereUniqueInput
 }
 
-export type UserCvFileUncheckedCreateNestedOneWithoutUserInput = {
-  create?: Prisma.XOR<Prisma.UserCvFileCreateWithoutUserInput, Prisma.UserCvFileUncheckedCreateWithoutUserInput>
-  connectOrCreate?: Prisma.UserCvFileCreateOrConnectWithoutUserInput
+export type UserCvFileUpdateOneRequiredWithoutRadarEvidenceNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCvFileCreateWithoutRadarEvidenceInput, Prisma.UserCvFileUncheckedCreateWithoutRadarEvidenceInput>
+  connectOrCreate?: Prisma.UserCvFileCreateOrConnectWithoutRadarEvidenceInput
+  upsert?: Prisma.UserCvFileUpsertWithoutRadarEvidenceInput
   connect?: Prisma.UserCvFileWhereUniqueInput
-}
-
-export type UserCvFileUpdateOneWithoutUserNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCvFileCreateWithoutUserInput, Prisma.UserCvFileUncheckedCreateWithoutUserInput>
-  connectOrCreate?: Prisma.UserCvFileCreateOrConnectWithoutUserInput
-  upsert?: Prisma.UserCvFileUpsertWithoutUserInput
-  disconnect?: Prisma.UserCvFileWhereInput | boolean
-  delete?: Prisma.UserCvFileWhereInput | boolean
-  connect?: Prisma.UserCvFileWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserCvFileUpdateToOneWithWhereWithoutUserInput, Prisma.UserCvFileUpdateWithoutUserInput>, Prisma.UserCvFileUncheckedUpdateWithoutUserInput>
-}
-
-export type UserCvFileUncheckedUpdateOneWithoutUserNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCvFileCreateWithoutUserInput, Prisma.UserCvFileUncheckedCreateWithoutUserInput>
-  connectOrCreate?: Prisma.UserCvFileCreateOrConnectWithoutUserInput
-  upsert?: Prisma.UserCvFileUpsertWithoutUserInput
-  disconnect?: Prisma.UserCvFileWhereInput | boolean
-  delete?: Prisma.UserCvFileWhereInput | boolean
-  connect?: Prisma.UserCvFileWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserCvFileUpdateToOneWithWhereWithoutUserInput, Prisma.UserCvFileUpdateWithoutUserInput>, Prisma.UserCvFileUncheckedUpdateWithoutUserInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserCvFileUpdateToOneWithWhereWithoutRadarEvidenceInput, Prisma.UserCvFileUpdateWithoutRadarEvidenceInput>, Prisma.UserCvFileUncheckedUpdateWithoutRadarEvidenceInput>
 }
 
 export type UserCvFileCreateWithoutUserInput = {
@@ -349,6 +390,7 @@ export type UserCvFileCreateWithoutUserInput = {
   cvFileName?: string | null
   cvUploadedAt?: Date | string | null
   cvPdfData?: string | null
+  radarEvidence?: Prisma.RadarCvEvidenceCreateNestedOneWithoutCvInput
 }
 
 export type UserCvFileUncheckedCreateWithoutUserInput = {
@@ -356,6 +398,7 @@ export type UserCvFileUncheckedCreateWithoutUserInput = {
   cvFileName?: string | null
   cvUploadedAt?: Date | string | null
   cvPdfData?: string | null
+  radarEvidence?: Prisma.RadarCvEvidenceUncheckedCreateNestedOneWithoutCvInput
 }
 
 export type UserCvFileCreateOrConnectWithoutUserInput = {
@@ -363,15 +406,91 @@ export type UserCvFileCreateOrConnectWithoutUserInput = {
   create: Prisma.XOR<Prisma.UserCvFileCreateWithoutUserInput, Prisma.UserCvFileUncheckedCreateWithoutUserInput>
 }
 
-export type UserCvFileUpsertWithoutUserInput = {
+export type UserCvFileCreateManyUserInputEnvelope = {
+  data: Prisma.UserCvFileCreateManyUserInput | Prisma.UserCvFileCreateManyUserInput[]
+  skipDuplicates?: boolean
+}
+
+export type UserCvFileUpsertWithWhereUniqueWithoutUserInput = {
+  where: Prisma.UserCvFileWhereUniqueInput
   update: Prisma.XOR<Prisma.UserCvFileUpdateWithoutUserInput, Prisma.UserCvFileUncheckedUpdateWithoutUserInput>
   create: Prisma.XOR<Prisma.UserCvFileCreateWithoutUserInput, Prisma.UserCvFileUncheckedCreateWithoutUserInput>
+}
+
+export type UserCvFileUpdateWithWhereUniqueWithoutUserInput = {
+  where: Prisma.UserCvFileWhereUniqueInput
+  data: Prisma.XOR<Prisma.UserCvFileUpdateWithoutUserInput, Prisma.UserCvFileUncheckedUpdateWithoutUserInput>
+}
+
+export type UserCvFileUpdateManyWithWhereWithoutUserInput = {
+  where: Prisma.UserCvFileScalarWhereInput
+  data: Prisma.XOR<Prisma.UserCvFileUpdateManyMutationInput, Prisma.UserCvFileUncheckedUpdateManyWithoutUserInput>
+}
+
+export type UserCvFileScalarWhereInput = {
+  AND?: Prisma.UserCvFileScalarWhereInput | Prisma.UserCvFileScalarWhereInput[]
+  OR?: Prisma.UserCvFileScalarWhereInput[]
+  NOT?: Prisma.UserCvFileScalarWhereInput | Prisma.UserCvFileScalarWhereInput[]
+  id?: Prisma.UuidFilter<"UserCvFile"> | string
+  userId?: Prisma.UuidFilter<"UserCvFile"> | string
+  cvFileName?: Prisma.StringNullableFilter<"UserCvFile"> | string | null
+  cvUploadedAt?: Prisma.DateTimeNullableFilter<"UserCvFile"> | Date | string | null
+  cvPdfData?: Prisma.StringNullableFilter<"UserCvFile"> | string | null
+}
+
+export type UserCvFileCreateWithoutRadarEvidenceInput = {
+  id?: string
+  cvFileName?: string | null
+  cvUploadedAt?: Date | string | null
+  cvPdfData?: string | null
+  user: Prisma.UserCreateNestedOneWithoutCvFilesInput
+}
+
+export type UserCvFileUncheckedCreateWithoutRadarEvidenceInput = {
+  id?: string
+  userId: string
+  cvFileName?: string | null
+  cvUploadedAt?: Date | string | null
+  cvPdfData?: string | null
+}
+
+export type UserCvFileCreateOrConnectWithoutRadarEvidenceInput = {
+  where: Prisma.UserCvFileWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCvFileCreateWithoutRadarEvidenceInput, Prisma.UserCvFileUncheckedCreateWithoutRadarEvidenceInput>
+}
+
+export type UserCvFileUpsertWithoutRadarEvidenceInput = {
+  update: Prisma.XOR<Prisma.UserCvFileUpdateWithoutRadarEvidenceInput, Prisma.UserCvFileUncheckedUpdateWithoutRadarEvidenceInput>
+  create: Prisma.XOR<Prisma.UserCvFileCreateWithoutRadarEvidenceInput, Prisma.UserCvFileUncheckedCreateWithoutRadarEvidenceInput>
   where?: Prisma.UserCvFileWhereInput
 }
 
-export type UserCvFileUpdateToOneWithWhereWithoutUserInput = {
+export type UserCvFileUpdateToOneWithWhereWithoutRadarEvidenceInput = {
   where?: Prisma.UserCvFileWhereInput
-  data: Prisma.XOR<Prisma.UserCvFileUpdateWithoutUserInput, Prisma.UserCvFileUncheckedUpdateWithoutUserInput>
+  data: Prisma.XOR<Prisma.UserCvFileUpdateWithoutRadarEvidenceInput, Prisma.UserCvFileUncheckedUpdateWithoutRadarEvidenceInput>
+}
+
+export type UserCvFileUpdateWithoutRadarEvidenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  cvFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cvUploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cvPdfData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user?: Prisma.UserUpdateOneRequiredWithoutCvFilesNestedInput
+}
+
+export type UserCvFileUncheckedUpdateWithoutRadarEvidenceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  cvFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cvUploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cvPdfData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type UserCvFileCreateManyUserInput = {
+  id?: string
+  cvFileName?: string | null
+  cvUploadedAt?: Date | string | null
+  cvPdfData?: string | null
 }
 
 export type UserCvFileUpdateWithoutUserInput = {
@@ -379,9 +498,18 @@ export type UserCvFileUpdateWithoutUserInput = {
   cvFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvUploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cvPdfData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  radarEvidence?: Prisma.RadarCvEvidenceUpdateOneWithoutCvNestedInput
 }
 
 export type UserCvFileUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  cvFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cvUploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cvPdfData?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  radarEvidence?: Prisma.RadarCvEvidenceUncheckedUpdateOneWithoutCvNestedInput
+}
+
+export type UserCvFileUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   cvFileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cvUploadedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -397,6 +525,7 @@ export type UserCvFileSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   cvUploadedAt?: boolean
   cvPdfData?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  radarEvidence?: boolean | Prisma.UserCvFile$radarEvidenceArgs<ExtArgs>
 }, ExtArgs["result"]["userCvFile"]>
 
 export type UserCvFileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -428,6 +557,7 @@ export type UserCvFileSelectScalar = {
 export type UserCvFileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "cvFileName" | "cvUploadedAt" | "cvPdfData", ExtArgs["result"]["userCvFile"]>
 export type UserCvFileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  radarEvidence?: boolean | Prisma.UserCvFile$radarEvidenceArgs<ExtArgs>
 }
 export type UserCvFileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -440,6 +570,7 @@ export type $UserCvFilePayload<ExtArgs extends runtime.Types.Extensions.Internal
   name: "UserCvFile"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    radarEvidence: Prisma.$RadarCvEvidencePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -842,6 +973,7 @@ readonly fields: UserCvFileFieldRefs;
 export interface Prisma__UserCvFileClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  radarEvidence<T extends Prisma.UserCvFile$radarEvidenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserCvFile$radarEvidenceArgs<ExtArgs>>): Prisma.Prisma__RadarCvEvidenceClient<runtime.Types.Result.GetResult<Prisma.$RadarCvEvidencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1274,6 +1406,25 @@ export type UserCvFileDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many UserCvFiles to delete.
    */
   limit?: number
+}
+
+/**
+ * UserCvFile.radarEvidence
+ */
+export type UserCvFile$radarEvidenceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RadarCvEvidence
+   */
+  select?: Prisma.RadarCvEvidenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RadarCvEvidence
+   */
+  omit?: Prisma.RadarCvEvidenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RadarCvEvidenceInclude<ExtArgs> | null
+  where?: Prisma.RadarCvEvidenceWhereInput
 }
 
 /**

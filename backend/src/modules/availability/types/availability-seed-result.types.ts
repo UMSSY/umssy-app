@@ -7,5 +7,7 @@ export interface AvailabilitySeedResult {
   statuses: number;
   blocks: number;
   appointments: number;
+  blockedDates: number;
+  series: number;
   warnings: string[];
 }

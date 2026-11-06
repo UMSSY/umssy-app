@@ -3,6 +3,6 @@ import { GRADUATION_YEAR_COHERENCE_MESSAGE } from '../constants/access-request-f
 
 export class InvalidGraduationYearException extends DomainException {
   constructor(message = GRADUATION_YEAR_COHERENCE_MESSAGE) {
-    super(message, 400);
+    super(message, 400, 'INVALID_GRADUATION_YEAR');
   }
 }

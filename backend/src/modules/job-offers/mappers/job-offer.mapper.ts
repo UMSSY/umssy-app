@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type { JobOfferCreatedResponse } from '../responses/job-offer-created.response.js';
-import type { JobOfferResponse } from '../responses/job-offer.response.js';
+import type {
+  JobOfferResponse,
+  PublishedJobOfferResponse,
+} from '../responses/job-offer.response.js';
 import type {
   JobOfferCreatedRecord,
   JobOfferRecord,
@@ -10,6 +13,11 @@ import type {
 export class JobOfferMapper {
   toCreatedResponse(record: JobOfferCreatedRecord): JobOfferCreatedResponse {
     return { id: record.id, createdAt: record.createdAt.toISOString() };
+  }
+
+  toPublishedResponse(record: JobOfferRecord): PublishedJobOfferResponse {
+    const { applicantsCount: _applicantsCount, ...published } = this.toResponse(record);
+    return published;
   }
 
   toResponse(record: JobOfferRecord): JobOfferResponse {
@@ -26,9 +34,11 @@ export class JobOfferMapper {
       languages: record.languages,
       locationUrl: record.locationUrl,
       expiresAt: record.expiresAt?.toISOString() ?? null,
+      publishedAt: record.publishedAt.toISOString(),
       createdAt: record.createdAt.toISOString(),
       company: { id: record.company.id, name: record.company.title },
       skills: record.skills.map(({ skill }) => ({ id: skill.id, name: skill.name })),
+      applicantsCount: record._count.applications,
     };
   }
 }

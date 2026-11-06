@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { AvailabilityBlock } from "./availability-block.types";
 
 export interface BlockSelectionPanelProps {
@@ -5,4 +6,5 @@ export interface BlockSelectionPanelProps {
   unavailableBlock: AvailabilityBlock | null;
   isChecking: boolean;
   error: string | null;
+  children?: ReactNode;
 }

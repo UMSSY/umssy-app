@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { BlockAppointmentDetail } from "./block-appointment-detail";
 import { BlockForm } from "./block-form";
 import { DeleteBlockDialog } from "./delete-block-dialog";
+import { DangerZone } from "@/shared/components/layout/danger-zone";
 import { BLOCK_LOAD_ERROR, EDIT_BLOCK_HINT } from "../constants/availability.constants";
 import { DELETE_BLOCK_TEXT } from "../constants/delete-block.constants";
 import { useUpdateAvailabilityBlock } from "../hooks/use-update-availability-block";
@@ -33,6 +35,8 @@ export function EditBlockPanel({ block, onClose }: EditBlockPanelProps) {
 
   return (
     <aside aria-label="Panel de edición del bloque" className="flex flex-col gap-4">
+      {block.appointment && <BlockAppointmentDetail block={block} appointment={block.appointment} />}
+
       <BlockForm
         mode="edit"
         initialValues={{ startAt: block.startAt, endAt: block.endAt }}
@@ -42,12 +46,12 @@ export function EditBlockPanel({ block, onClose }: EditBlockPanelProps) {
         onCancel={onClose}
       />
 
-      <div className="flex flex-col items-center gap-2">
+      <DangerZone title="Eliminar bloque" description="Este horario dejará de estar disponible para solicitar una mentoría.">
         <Button
           type="button"
-          variant="outline"
+          variant="destructive"
           size="lg"
-          className="w-full border-danger text-danger hover:bg-danger/10 hover:text-danger"
+          className="w-full"
           disabled={!isEditable}
           onClick={() => setIsDeleteOpen(true)}
         >
@@ -56,7 +60,7 @@ export function EditBlockPanel({ block, onClose }: EditBlockPanelProps) {
         {!isEditable && (
           <p className="text-center text-xs text-muted-foreground">{EDIT_BLOCK_HINT}</p>
         )}
-      </div>
+      </DangerZone>
 
       <DeleteBlockDialog
         block={block}

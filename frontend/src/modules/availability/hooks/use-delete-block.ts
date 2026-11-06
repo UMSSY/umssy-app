@@ -6,7 +6,7 @@ import { getApiErrorDetail } from "@/shared/utils/api-error-detail";
 import { AVAILABILITY_QUERY_KEYS } from "../constants/availability-query-keys.constants";
 import { AVAILABILITY_TOAST_TEXT } from "../constants/availability-toast.constants";
 import { DELETE_BLOCK_ERROR } from "../constants/delete-block.constants";
-import { availabilityApi } from "../services/availability.api";
+import { availabilityApi } from "../services/availability.service";
 
 export function useDeleteBlock() {
   const queryClient = useQueryClient();

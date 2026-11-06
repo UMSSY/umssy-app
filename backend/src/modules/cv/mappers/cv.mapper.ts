@@ -3,6 +3,7 @@ import { CV_FILE_NAME_MAX_LENGTH, CV_MIME_TYPE } from '../constants/cv.constants
 import type { CvResponse } from '../responses/cv.response.js';
 import type { CvFileDownload } from '../types/cv-file-download.type.js';
 import type { CvMetadataRecord } from '../types/cv-metadata-record.type.js';
+import type { PaginatedResult } from '../../../common/types/api-response.types.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import type { UploadedFile } from '../../../common/types/uploaded-file.type.js';
 
@@ -18,15 +19,32 @@ export class CvMapper {
   }
 
   toResponse(record: CvMetadataRecord): CvResponse | null {
-    if (record.sizeBytes === null || record.uploadedAt === null) {
+    if (record.id === null || record.sizeBytes === null || record.uploadedAt === null) {
       return null;
     }
 
     return {
+      id: record.id,
       fileName: record.fileName ?? this.buildFileName(record),
       fileType: CV_MIME_TYPE,
       sizeInBytes: record.sizeBytes,
       updatedAt: record.uploadedAt.toISOString(),
+      isCurrent: record.isCurrent,
+    };
+  }
+
+  toPage(
+    records: readonly CvMetadataRecord[],
+    totalItems: number,
+    page: number,
+    limit: number,
+  ): PaginatedResult<CvResponse> {
+    return {
+      items: records.flatMap((record) => this.toResponse(record) ?? []),
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+      page,
+      limit,
     };
   }
 

@@ -20,6 +20,10 @@ function buildRecord(overrides: Partial<EventWithRelations> = {}): EventWithRela
     statusId: 'status-uuid',
     instructorName: 'Ana Lopez',
     modalityId: 'modality-uuid',
+    supportThreshold: null,
+    votingDeadline: null,
+    status: { title: 'Publicado' },
+    origin: { title: 'Institucional' },
     category: { id: 'cat-uuid', name: 'Tecnologia' },
     _count: { registrations: 5 },
     ...overrides,
@@ -66,6 +70,14 @@ describe('mapEventToResponse', () => {
       modalityId: 'modality-uuid',
       category: { id: 'cat-uuid', name: 'Tecnologia' },
       statusId: 'status-uuid',
+      status: 'Publicado',
+      origin: 'Institucional',
+      supportCount: 5,
+      supportThreshold: null,
+      supportsRemaining: null,
+      progressPercent: null,
+      votingDeadline: null,
+      hasSupported: false,
     });
   });
 
@@ -119,5 +131,68 @@ describe('mapEventsToListResponse', () => {
     const record = buildRecord({ capacity: null, _count: { registrations: 3 } });
     const result = mapEventsToListResponse([record], 1, 1, 10);
     expect(result.data.items[0].availableSpots).toBeNull();
+  });
+});
+
+describe('mapEventToResponse - apoyos', () => {
+  it.each(['Votacion', 'En votación'])('preserves the HU4 response for status %s and the proposal cover', (title) => {
+    const record = buildRecord({ status: { title }, coverMimeType: 'image/png' });
+    expect(mapEventToResponse(record, 15)).toMatchObject({ status: 'voting', coverUrl: `/events/${record.id}/cover` });
+  });
+
+  it('calcula el progreso de una propuesta en votación', () => {
+    const record = buildRecord({
+      status: { title: 'Votacion' },
+      origin: { title: 'Comunidad' },
+      supportThreshold: 20,
+      votingDeadline: new Date('2026-10-12T23:59:00.000Z'),
+      capacity: 40,
+      _count: { registrations: 14 },
+    });
+
+    expect(mapEventToResponse(record, 26)).toMatchObject({
+      status: 'voting',
+      origin: 'Comunidad',
+      supportCount: 14,
+      supportThreshold: 20,
+      supportsRemaining: 6,
+      progressPercent: 70,
+      votingDeadline: '2026-10-12T23:59:00.000Z',
+      hasSupported: false,
+    });
+  });
+
+  it('marca hasSupported cuando el usuario tiene un apoyo registrado', () => {
+    const record = buildRecord({ registrations: [{ id: 'reg-1' }] });
+    expect(mapEventToResponse(record, 15).hasSupported).toBe(true);
+  });
+
+  it('respeta el umbral mínimo de 8 apoyos', () => {
+    const record = buildRecord({
+      supportThreshold: 8,
+      _count: { registrations: 4 },
+    });
+    const result = mapEventToResponse(record, 16);
+    expect(result.supportThreshold).toBe(8);
+    expect(result.supportsRemaining).toBe(4);
+    expect(result.progressPercent).toBe(50);
+  });
+
+  it('no deja apoyos restantes negativos ni pasa de 100%', () => {
+    const record = buildRecord({
+      supportThreshold: 20,
+      _count: { registrations: 25 },
+    });
+    const result = mapEventToResponse(record, 0);
+    expect(result.supportsRemaining).toBe(0);
+    expect(result.progressPercent).toBe(100);
+  });
+
+  it('deja los campos de progreso en null cuando el umbral es 0', () => {
+    const record = buildRecord({ supportThreshold: 0 });
+    const result = mapEventToResponse(record, 15);
+    expect(result.supportThreshold).toBeNull();
+    expect(result.supportsRemaining).toBeNull();
+    expect(result.progressPercent).toBeNull();
   });
 });

@@ -52,7 +52,17 @@ export const REQUIRED_MESSAGES: Record<BlockFormField, string> = {
   date: "Selecciona una fecha",
   startAt: "Selecciona la hora de inicio",
   endAt: "Selecciona la hora de fin",
+  repeatUntil: "Elige hasta qué fecha se repite el bloque",
 };
+
+export const MAX_REPEAT_WEEKS = 12;
+export const REPEAT_INTERVAL_DAYS = 7;
+
+export const REPEAT_WEEKLY_TEXT = {
+  checkboxLabel: "Repetir cada semana",
+  untilLabel: "Repetir hasta",
+  hint: `Se crea un bloque por semana hasta la fecha elegida (máximo ${MAX_REPEAT_WEEKS} semanas).`,
+} as const;
 
 export const TIME_OPTIONS: string[] = Array.from(
   { length: ((BLOCK_MAX_HOUR - BLOCK_MIN_HOUR) * 60) / BLOCK_STEP_MINUTES + 1 },

@@ -2,7 +2,8 @@
 
 import type { CertificationDocumentsPanelProps } from "../types/certification-documents-panel-props.types";
 import { CertificationDocumentItem } from "./certification-document-item";
-import { SectionCard } from "@/modules/profile/components/section-card";
+import { getCertificationDocumentInfo } from '../utils/get-certification-document-info';
+import { SectionCard } from "@/modules/profile";
 
 export function CertificationDocumentsPanel({
   certifications = [],
@@ -19,11 +20,11 @@ export function CertificationDocumentsPanel({
     <SectionCard title="Documentos de respaldo">
       <div className="flex flex-col gap-6">
         {form ? (
-          <div className="animate-in fade-in slide-in-from-top-4 duration-300 ease-out">{form}</div>
+          <div className="animate-in duration-300 ease-out fade-in slide-in-from-top-4">{form}</div>
         ) : null}
         <section aria-label="Documentos cargados" className="flex flex-col gap-1">
           {certificationsWithDocument.length === 0 ? (
-            <p className="py-3 text-[14px] text-text-secondary">
+            <p className="py-3 text-sm text-text-secondary">
               Aún no has cargado documentos de respaldo.
             </p>
           ) : (
@@ -32,7 +33,7 @@ export function CertificationDocumentsPanel({
                 <li key={certification.id}>
                   <CertificationDocumentItem
                     certification={certification}
-                    info={uploadedInfo[certification.id]}
+                    info={getCertificationDocumentInfo(certification) ?? uploadedInfo[certification.id]}
                     isBusy={isBusy}
                     onView={onView}
                   />

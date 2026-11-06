@@ -3,7 +3,7 @@ import { renderHook, act, waitFor } from "@testing-library/react"
 import { toast } from "sonner"
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper"
 import { useUpdateAvailabilityBlock } from "./use-update-availability-block"
-import { availabilityApi } from "../services/availability.api"
+import { availabilityApi } from "../services/availability.service"
 import type { AvailabilityBlock } from "../types/availability-block.types"
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))

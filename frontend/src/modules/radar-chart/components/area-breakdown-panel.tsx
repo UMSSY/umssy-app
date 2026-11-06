@@ -11,7 +11,7 @@ const MAX_SCORE = 10;
 
 const BAR_CLASS: Record<AreaLevel, string> = {
   Bajo: "bg-border-strong",
-  Medio: "bg-gold",
+  Medio: "bg-ink-soft",
   Alto: "bg-ink",
   Experto: "bg-accent",
 };
@@ -28,7 +28,7 @@ export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownP
       <h2 id={titleId} className="font-heading text-lg font-semibold tracking-tight text-ink">
         Desglose por área
       </h2>
-      <p className="mt-1 text-xs text-text-secondary">Puntuaciones NLP tokenizadas</p>
+      <p className="mt-1 text-xs text-text-secondary">Puntuaciones de habilidades aprobadas</p>
 
       <ul className="mt-5 flex flex-col gap-4">
         {areas.map((area) => {
@@ -57,7 +57,7 @@ export function AreaBreakdownPanel({ areas, average, className }: AreaBreakdownP
       </ul>
 
       <div className="mt-auto flex items-baseline justify-between gap-3 border-t border-border pt-4 max-lg:mt-6 lg:pt-5">
-        <span className="text-[11px] font-semibold tracking-[0.12em] text-text-secondary uppercase">
+        <span className="text-xs font-semibold tracking-[0.12em] text-text-secondary uppercase">
           Media global
         </span>
         <p className="whitespace-nowrap">

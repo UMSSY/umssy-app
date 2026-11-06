@@ -1,0 +1,27 @@
+<mj-section
+  background-color="#FFFFFF"
+  padding="32px 24px"
+  border-bottom="4px solid #003770"
+>
+  <mj-column>
+    <mj-image
+      src="{{logoUrl}}"
+      alt="{{brandName}}"
+      align="left"
+      width="180px"
+      padding="0 0 16px"
+    />
+    <mj-text
+      align="left"
+      font-family="Inter Tight, Inter, Arial, sans-serif"
+      color="#0B1F2E"
+      font-size="30px"
+      line-height="36px"
+      font-weight="800"
+      letter-spacing="-0.6px"
+      text-transform="uppercase"
+      padding="0"
+      >{{ brandName }}</mj-text
+    >
+  </mj-column>
+</mj-section>

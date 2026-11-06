@@ -3,6 +3,9 @@ export const SEED_CATEGORY_NAMES = [
   'IA & Datos',
   'Diseño',
   'Seguridad',
+  'Empleabilidad',
+  'Investigación',
+  'Emprendimiento',
 ];
 export const SEED_EVENTS = [
   {
@@ -81,5 +84,38 @@ export const SEED_EVENTS = [
     enroll: false,
     categoryIndex: 3,
     capacity: 20,
+  },
+  {
+    id: '33333333-3333-3333-3333-333333333338',
+    title: 'Preparación de CV y entrevistas laborales',
+    date: '2026-11-07',
+    location: 'Aula 105, Facultad de Ciencias y Tecnología',
+    instructorName: 'Valeria Pérez',
+    description: 'Mejora tu currículum y practica entrevistas para oportunidades de distintas áreas profesionales. Prerrequisitos: interés en la búsqueda laboral. Materiales: currículum actualizado y cuaderno de apuntes.',
+    enroll: false,
+    categoryIndex: 4,
+    capacity: 30,
+  },
+  {
+    id: '33333333-3333-3333-3333-333333333339',
+    title: 'Metodología de investigación',
+    date: '2026-11-08',
+    location: 'Aula 106, Facultad de Ciencias y Tecnología',
+    instructorName: 'Roberto Salazar',
+    description: 'Aprende a formular preguntas de investigación y organizar un proyecto académico en diferentes disciplinas. Prerrequisitos: contar con una idea de investigación. Materiales: cuaderno de apuntes y bibliografía de interés.',
+    enroll: false,
+    categoryIndex: 5,
+    capacity: 25,
+  },
+  {
+    id: '33333333-3333-3333-3333-333333333340',
+    title: 'Emprendimiento y modelo de negocio',
+    date: '2026-11-09',
+    location: 'Aula 107, Facultad de Ciencias y Tecnología',
+    instructorName: 'Patricia Flores',
+    description: 'Desarrolla una propuesta de valor y un modelo de negocio para iniciativas de distintos sectores. Prerrequisitos: una idea de emprendimiento. Materiales: cuaderno de apuntes y una descripción de la idea.',
+    enroll: false,
+    categoryIndex: 6,
+    capacity: 30,
   },
 ];

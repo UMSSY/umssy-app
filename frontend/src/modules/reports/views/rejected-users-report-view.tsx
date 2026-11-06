@@ -1,32 +1,48 @@
 "use client";
 
 import { useState } from "react";
-import { PageBreadcrumb } from "@/shared/components/layout";
+import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import {
-  REJECTED_USERS_BREADCRUMB,
+  EMAIL_SEARCH_LABEL,
   REJECTED_USERS_PAGE_SIZE,
   SEARCH_DEBOUNCE_MS,
 } from "../constants/reports.constants";
-import { EmailSearchInput } from "../components/email-search-input";
-import { ExportCsvButton } from "../components/export-csv-button";
 import { ExportSuccessToast } from "../components/export-success-toast";
 import { RefreshButton } from "../components/refresh-button";
 import { RejectedUsersTable } from "../components/rejected-users-table";
+import { ReportActions } from "../components/report-actions";
+import { ReportSearchInput } from "../components/report-search-input";
 import { TablePagination } from "../components/table-pagination";
+import { UserTypeFilter } from "../components/user-type-filter";
 import { useExportRejectedUsersCsv } from "../hooks/use-export-rejected-users-csv";
 import { useRejectedUsers } from "../hooks/use-rejected-users";
+import type { AcademicPeriod } from "../types/registered-user.types";
+import type { RoleTag } from "@/modules/auth";
 
 export function RejectedUsersReportView() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [userType, setUserType] = useState<RoleTag | undefined>(undefined);
+  const [period, setPeriod] = useState<AcademicPeriod | undefined>(undefined);
   const [searchInput, setSearchInput] = useState("");
   const search = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
-  const { users, totalItems, totalPages, isLoading, errorMessage, refresh } = useRejectedUsers(currentPage, search);
+  const { users, totalItems, totalPages, isLoading, errorMessage, refresh } = useRejectedUsers(
+    currentPage,
+    userType,
+    period,
+    search,
+  );
   const {
     exportCsv,
     isExporting,
     successMessage: exportSuccessMessage,
-  } = useExportRejectedUsersCsv(search);
+  } = useExportRejectedUsersCsv(userType, period, search);
+
+  const handleUserTypeChange = (selectedUserType?: RoleTag) => {
+    if (selectedUserType === userType) return;
+    setUserType(selectedUserType);
+    setCurrentPage(1);
+  };
 
   const handleSearchChange = (value: string) => {
     if (value.trim() !== searchInput.trim()) {
@@ -35,21 +51,26 @@ export function RejectedUsersReportView() {
     setSearchInput(value);
   };
 
+  const handlePeriodChange = (selectedPeriod?: AcademicPeriod) => {
+    if (selectedPeriod === period) return;
+    setPeriod(selectedPeriod);
+    setCurrentPage(1);
+  };
+
   const firstVisibleItem = totalItems === 0 ? 0 : (currentPage - 1) * REJECTED_USERS_PAGE_SIZE + 1;
   const lastVisibleItem = Math.min(currentPage * REJECTED_USERS_PAGE_SIZE, totalItems);
   const hideSummary = Boolean(search) && !errorMessage && !isLoading && totalItems === 0;
-  const showPagination = !errorMessage && totalItems > 0;
+  const showPagination = !errorMessage && totalPages > 1;
 
   return (
-    <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <PageBreadcrumb items={REJECTED_USERS_BREADCRUMB} />
-        <h1 className="font-tight text-3xl font-extrabold text-ink">Reporte de usuarios registrados rechazados</h1>
-      </header>
+    <WorkspacePage title="Usuarios rechazados" description="Consulta los motivos de rechazo y exporta el listado filtrado.">
 
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <EmailSearchInput value={searchInput} onChange={handleSearchChange} />
-        <ExportCsvButton onClick={exportCsv} isExporting={isExporting} />
+      <div role="search" aria-label="Filtros de usuarios rechazados" className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+          <UserTypeFilter value={userType} onChange={handleUserTypeChange} />
+          <ReportSearchInput value={searchInput} onChange={handleSearchChange} label={EMAIL_SEARCH_LABEL} />
+        </div>
+        <ReportActions onExport={exportCsv} isExporting={isExporting} period={period} onPeriodChange={handlePeriodChange} />
       </div>
 
       <RejectedUsersTable
@@ -75,6 +96,6 @@ export function RejectedUsersReportView() {
       </div>
 
       <ExportSuccessToast message={exportSuccessMessage} />
-    </section>
+    </WorkspacePage>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CircleAlert, CircleCheck } from "lucide-react";
+import { CircleAlert, CircleCheck, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -21,30 +21,38 @@ function buildFields(detail: ReviewDetail): ContrastField[] {
   ];
 }
 
-const HEAD_CLASS = "h-9 px-4 text-[12.5px] font-semibold text-text-secondary";
+const HEAD_CLASS = "h-9 px-4 text-xs font-semibold text-text-secondary";
 
 // TODO: reemplazar la captura manual por el valor leído del documento cuando exista la lectura automática
 export function DataContrastPanel({ detail }: DataContrastPanelProps) {
   const fields = buildFields(detail);
   const [documentValues, setDocumentValues] = useState<Record<string, string>>({});
+  const isEditable = detail.status === "in_review";
 
   const matching = fields.filter((field) => valuesMatch(field.declared, documentValues[field.key] ?? "")).length;
   const pending = fields.length - matching;
 
   return (
-    <section className="overflow-hidden rounded-[10px] border border-border bg-surface" aria-label="Contraste de datos">
+    <section className="overflow-hidden rounded-lg border border-border bg-surface" aria-label="Contraste de datos">
       <header className="flex flex-wrap items-center justify-between gap-2 px-5 py-4">
-        <h2 className="font-tight text-[17px] font-bold text-ink">Contraste de datos</h2>
-        <p className="flex items-center gap-4 text-sm text-ink" aria-live="polite">
-          <span className="inline-flex items-center gap-1.5">
-            <CircleCheck className="size-4" strokeWidth={1.75} aria-hidden="true" />
-            {matching} coinciden
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <CircleAlert className="size-4 text-gold" strokeWidth={1.75} aria-hidden="true" />
-            {pending} por verificar
-          </span>
-        </p>
+        <h2 className="font-tight text-lg font-bold text-ink">Contraste de datos</h2>
+        {isEditable ? (
+          <p className="flex items-center gap-4 text-sm text-ink" aria-live="polite">
+            <span className="inline-flex items-center gap-1.5">
+              <CircleCheck className="size-4" strokeWidth={1.75} aria-hidden="true" />
+              {matching} coinciden
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <CircleAlert className="size-4 text-ink-soft" strokeWidth={1.75} aria-hidden="true" />
+              {pending} por verificar
+            </span>
+          </p>
+        ) : (
+          <p className="inline-flex items-center gap-1.5 text-sm text-text-secondary">
+            <Lock className="size-4" strokeWidth={1.75} aria-hidden="true" />
+            Solo lectura
+          </p>
+        )}
       </header>
 
       <Table className="table-fixed">
@@ -53,9 +61,11 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
             <TableHead className={`${HEAD_CLASS} w-[28%]`}>Dato</TableHead>
             <TableHead className={`${HEAD_CLASS} w-[30%]`}>Declarado</TableHead>
             <TableHead className={HEAD_CLASS}>En el documento</TableHead>
-            <TableHead className="w-11 px-2">
-              <span className="sr-only">Resultado</span>
-            </TableHead>
+            {isEditable ? (
+              <TableHead className="w-11 px-2">
+                <span className="sr-only">Resultado</span>
+              </TableHead>
+            ) : null}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -65,7 +75,7 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
             return (
               <TableRow key={field.key} className="border-border">
                 <TableCell className="px-4 py-3 align-middle whitespace-normal">
-                  <Label htmlFor={`contrast-${field.key}`} className="font-semibold leading-snug break-words text-ink">
+                  <Label htmlFor={`contrast-${field.key}`} className="leading-snug font-semibold break-words text-ink">
                     {field.label}
                   </Label>
                 </TableCell>
@@ -75,19 +85,28 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
                     id={`contrast-${field.key}`}
                     value={documentValues[field.key] ?? ""}
                     onChange={(event) => setDocumentValues((current) => ({ ...current, [field.key]: event.target.value }))}
-                    placeholder="Valor en el documento"
+                    placeholder={isEditable ? "Valor leído" : "No editable"}
+                    readOnly={!isEditable}
+                    disabled={!isEditable}
                     className="h-[34px] rounded-lg"
                   />
                 </TableCell>
-                <TableCell className="px-2 align-middle">
-                  <Icon className={matches ? "size-5 text-ink" : "size-5 text-gold"} strokeWidth={1.75} aria-hidden="true" />
-                  <span className="sr-only">{matches ? "Coincide" : "Por verificar"}</span>
-                </TableCell>
+                {isEditable ? (
+                  <TableCell className="px-2 align-middle">
+                    <Icon className={matches ? "size-5 text-ink" : "size-5 text-ink-soft"} strokeWidth={1.75} aria-hidden="true" />
+                    <span className="sr-only">{matches ? "Coincide" : "Por verificar"}</span>
+                  </TableCell>
+                ) : null}
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
+      {isEditable ? null : (
+        <p className="border-t border-border px-5 py-3 text-sm text-text-secondary">
+          La solicitud ya tiene dictamen o todavía no está en revisión, por eso estos campos no se pueden editar.
+        </p>
+      )}
     </section>
   );
 }

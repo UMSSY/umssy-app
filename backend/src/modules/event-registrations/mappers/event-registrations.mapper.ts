@@ -5,12 +5,15 @@ export class EventRegistrationsMapper {
   static toMyRegistration(entity: RegistrationEntity): MyRegistrationResponse {
     return {
       id: entity.id,
+      eventId: entity.eventId,
       eventName: entity.event.title,
       date: entity.event.eventDate,
       startTime: entity.event.startTime,
       endTime: entity.event.endTime,
       location: entity.event.location ?? 'Virtual',
       status: entity.status.title,
+      registeredAt: entity.registeredAt.toISOString(),
+      cancelledAt: entity.cancelledAt?.toISOString() ?? null,
     };
   }
 

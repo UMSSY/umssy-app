@@ -1,3 +1,4 @@
+import type { CategorizedJobRequirement } from "./requirement-category.types";
 export type RequirementStatus = "Cumple" | "Pendiente";
 
 export interface JobRequirement {
@@ -10,6 +11,7 @@ export interface RecommendedJob {
   title: string;
   companyName: string;
   modality: string;
+  locationUrl?: string;
   score: number;
   matchedSkills: string[];
   skills: string[];
@@ -27,6 +29,6 @@ export interface JobMatch {
   modality: string;
   description: string;
   score: number;
-  requirements: JobRequirement[];
+  requirements: CategorizedJobRequirement[];
   hasPendingRequirements: boolean;
 }

@@ -8,6 +8,7 @@ export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
   COMPANIES: "Empresas",
   ADMINS: "Administradores",
   REJECTED_USERS: "Rechazados",
+  SURVEY_STATISTICS: "Estadísticas de Encuestas",
 };
 
 export const REPORT_TYPE_FILTER_OPTIONS: ReportType[] = [
@@ -27,3 +28,4 @@ export const REPORT_TYPE_SELECT_OPTIONS = REPORT_TYPE_FILTER_OPTIONS.map((report
 
 export const REPORT_HISTORY_EMPTY_MESSAGE = "Aún no se generaron reportes.";
 export const REPORT_HISTORY_EMPTY_TYPE_MESSAGE = "No hay reportes generados de este tipo.";
+export const FILE_NAME_SEARCH_NO_RESULTS_MESSAGE = "No se encontraron reportes que coincidan con la búsqueda";

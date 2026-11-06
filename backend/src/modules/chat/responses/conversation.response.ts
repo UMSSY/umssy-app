@@ -1,10 +1,16 @@
-export interface ConversationResponse {
+interface ConversationBaseResponse {
   id: string;
+
   contact: {
     id: string;
     fullName: string;
     avatarUrl: string | null;
     isOnline: boolean;
+    role?: string | null;
+    roleName?: string | null;
+    email?: string | null;
+    academicTitle?: string | null;
+    skills?: string[];
   };
   lastMessage: {
     id: string;
@@ -15,5 +21,26 @@ export interface ConversationResponse {
     createdAt: string;
   } | null;
   unreadCount: number;
+  isBlockedByMe: boolean;
   updatedAt: string;
 }
+export interface DirectConversationResponse extends ConversationBaseResponse {
+  eventId?: never;
+}
+
+export interface EventConversationResponse extends Omit<
+  ConversationBaseResponse,
+  'contact'
+> {
+  eventId: string;
+  eventTitle: string;
+  createdAt: string;
+  participants: Array<{
+    id: string;
+    fullName: string;
+  }>;
+  contact?: never;
+}
+
+export type ConversationResponse =
+  DirectConversationResponse | EventConversationResponse;

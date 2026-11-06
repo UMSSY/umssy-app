@@ -10,11 +10,9 @@ function renderStep(overrides: Partial<React.ComponentProps<typeof PreviewStep>>
     conditions: VALID_CONDITIONS,
     company: COMPANY,
     isSubmitting: false,
-    isPublished: false,
     error: null,
     onPrevious: vi.fn(),
     onConfirm: vi.fn(),
-    onFinish: vi.fn(),
     ...overrides,
   };
   render(<PreviewStep {...props} />);
@@ -39,6 +37,12 @@ describe("PreviewStep", () => {
     expect(screen.getByText("Bs 6.500 - 8.000")).toBeInTheDocument();
     expect(screen.getByText("Español, inglés intermedio")).toBeInTheDocument();
     expect(screen.getByText(/Buscamos un perfil DevOps/)).toBeInTheDocument();
+  });
+
+  it("en una pasantía muestra el salario como a convenir", () => {
+    renderStep({ conditions: { ...VALID_CONDITIONS, contractType: "Pasantía", salary: "" } });
+
+    expect(screen.getByText("A convenir")).toBeInTheDocument();
   });
 
   it("muestra solo las habilidades elegidas, sin datos de ejemplo", () => {
@@ -79,6 +83,16 @@ describe("PreviewStep", () => {
     expect(screen.queryByText(/FINAL/)).not.toBeInTheDocument();
   });
 
+  it("muestra completas una categoría y unos idiomas largos, ajustados al ancho de la tarjeta", () => {
+    const category = "a".repeat(100);
+    const languages = `Españo${"o".repeat(94)}`;
+    renderStep({ conditions: { ...VALID_CONDITIONS, category, languages } });
+
+    expect(screen.getByText(category)).toHaveClass("break-words");
+    expect(screen.getByText(languages)).toHaveClass("break-words");
+    expect(screen.queryByRole("button", { name: /Ver más/ })).not.toBeInTheDocument();
+  });
+
   it("no muestra Ver más si la descripción es corta", () => {
     renderStep();
 
@@ -114,14 +128,14 @@ describe("PreviewStep", () => {
     expect(screen.getByRole("button", { name: "Confirmar publicación" })).toBeEnabled();
   });
 
-  it("muestra el mensaje de éxito y reinicia el formulario al aceptar", () => {
-    const { onFinish } = renderStep({ isPublished: true });
+  it("en la edición muestra Confirmar edición y Guardando... mientras guarda", () => {
+    const { onConfirm } = renderStep({ isEditMode: true });
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar edición" }));
+    expect(onConfirm).toHaveBeenCalledOnce();
 
-    expect(screen.getByText("Vacante publicada")).toBeInTheDocument();
-    expect(screen.getByText("Tu vacante se publicó correctamente.")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
-
-    expect(onFinish).toHaveBeenCalledOnce();
+    cleanup();
+    renderStep({ isEditMode: true, isSubmitting: true });
+    expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
   });
 
   it("muestra un nombre de habilidad por cada elemento seleccionado", () => {

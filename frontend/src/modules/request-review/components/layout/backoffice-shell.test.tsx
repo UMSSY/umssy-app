@@ -1,3 +1,4 @@
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -33,7 +34,7 @@ describe("BackofficeShell", () => {
   });
 
   it("un administrativo ve el layout con la opción Solicitudes y su contenido", () => {
-    sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+    saveAccessToken(tokenFor("administrativo"));
     renderWithQuery(
       <BackofficeShell>
         <p>Contenido del backoffice</p>
@@ -58,7 +59,7 @@ describe("BackofficeShell", () => {
   });
 
   it.each(["titulado", "estudiante", "mentor", "empresa"])("el rol %s es redirigido al inicio", async (role) => {
-    sessionStorage.setItem("accessToken", tokenFor(role));
+    saveAccessToken(tokenFor(role));
     renderWithQuery(
       <BackofficeShell>
         <p>Contenido del backoffice</p>
@@ -70,7 +71,7 @@ describe("BackofficeShell", () => {
   });
 
   it("Cerrar sesión borra el token y va al login", () => {
-    sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+    saveAccessToken(tokenFor("administrativo"));
     renderWithQuery(
       <BackofficeShell>
         <p>Contenido</p>
@@ -88,7 +89,7 @@ describe("BackofficeShell", () => {
     beforeEach(() => listRequests.mockReset());
 
     it("muestra la insignia de pendientes con el total que devuelve el listado (limit=1)", async () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+      saveAccessToken(tokenFor("administrativo"));
       listRequests.mockResolvedValue({ ok: true, data: { items: [], total: 18, page: 1, offset: 0 } });
       renderWithQuery(
         <BackofficeShell>
@@ -101,7 +102,7 @@ describe("BackofficeShell", () => {
     });
 
     it("si el conteo falla no hay insignia ni error", async () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+      saveAccessToken(tokenFor("administrativo"));
       listRequests.mockResolvedValue({ ok: false, status: 0, message: "sin red" });
       renderWithQuery(
         <BackofficeShell>
@@ -124,7 +125,7 @@ describe("BackofficeShell", () => {
     });
 
     it("la barra tiene la marca de texto, el pie con iniciales y no menciona egresados ni el lema", async () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+      saveAccessToken(tokenFor("administrativo"));
       listRequests.mockResolvedValue({ ok: false, status: 0, message: "x" });
       renderWithQuery(
         <BackofficeShell>
@@ -132,10 +133,10 @@ describe("BackofficeShell", () => {
         </BackofficeShell>,
       );
 
-      expect(screen.getByText("UMSSY")).toBeInTheDocument();
-      expect(screen.getByText("Backoffice de verificación")).toBeInTheDocument();
+      expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeInTheDocument();
+
       expect(screen.getByText("PA")).toBeInTheDocument();
-      expect(screen.queryByText("Registro de auditoría")).toBeNull();
+      expect(screen.getByText("Registro de auditoría")).toBeInTheDocument();
       const text = document.body.textContent?.toLowerCase() ?? "";
       expect(text).not.toContain("egres");
       expect(text).not.toContain("certificado de egreso");
@@ -148,8 +149,8 @@ describe("BackofficeShell", () => {
     const listRequests = vi.spyOn(requestReviewService, "listRequests");
     beforeEach(() => listRequests.mockResolvedValue({ ok: false, status: 0, message: "x" }));
 
-    it("usa un solo AppShell: una barra lateral de 248 px y el botón de menú solo en móvil", () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+    it("usa un solo AppShell: una barra lateral de 264 px y el botón de menú accesible", () => {
+      saveAccessToken(tokenFor("administrativo"));
       const { container } = renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>
@@ -157,25 +158,25 @@ describe("BackofficeShell", () => {
       );
 
       expect(container.querySelectorAll("[data-slot='sidebar']").length).toBeLessThanOrEqual(1);
-      expect(container.querySelector("[style*='--sidebar-width: 15.5rem']")).not.toBeNull();
-      const toggle = screen.getByRole("button", { name: /menú/i });
-      expect(toggle.parentElement).toHaveClass("md:hidden");
-      expect(screen.getByText("Contenido").parentElement).not.toHaveClass("px-8");
+      expect(container.querySelector("[style*='--sidebar-width: 16.5rem']")).not.toBeNull();
+      expect(screen.getByRole("button", { name: "Cerrar barra lateral" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Abrir menú" })).not.toBeInTheDocument();
+      expect(screen.getByText("Contenido").parentElement).toHaveClass("px-4", "py-6", "lg:px-12", "lg:py-10");
     });
 
-    it("la barra lateral no muestra un chevron junto a la marca y el ítem activo permite la barra roja en el borde", () => {
-      sessionStorage.setItem("accessToken", tokenFor("administrativo"));
+    it("la barra lateral no muestra un chevron junto a la marca y el ítem activo muestra un punto claro", () => {
+      saveAccessToken(tokenFor("administrativo"));
       renderWithQuery(
         <BackofficeShell>
           <p>Contenido</p>
         </BackofficeShell>,
       );
 
-      const brand = screen.getByText("UMSSY").parentElement as HTMLElement;
+      const brand = screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" }).parentElement as HTMLElement;
       expect(brand.querySelector("svg")).toBeNull();
       expect(screen.queryByText("›")).toBeNull();
-      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("overflow-visible");
-      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("data-active:before:-left-3");
+      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("data-active:bg-sidebar-accent");
+      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("data-active:before:rounded-full");
     });
   });
 });

@@ -88,4 +88,26 @@ describe("useBlockSelection", () => {
 
     expect(result.current.selectedBlock?.id).toBe("2")
   })
+
+  it("markUnavailable marca el bloque como no disponible y quita la selección", async () => {
+    const fetchFreeBlocks = vi.fn().mockResolvedValue([block("1")])
+    const { result } = renderHook(() => useBlockSelection(fetchFreeBlocks))
+
+    await act(() => result.current.selectBlock(block("1")))
+    act(() => result.current.markUnavailable(block("1")))
+
+    expect(result.current.selectedBlock).toBeNull()
+    expect(result.current.unavailableBlock?.id).toBe("1")
+    expect(result.current.unavailableBlockIds).toEqual(["1"])
+  })
+
+  it("clearSelection quita el bloque seleccionado", async () => {
+    const fetchFreeBlocks = vi.fn().mockResolvedValue([block("1")])
+    const { result } = renderHook(() => useBlockSelection(fetchFreeBlocks))
+
+    await act(() => result.current.selectBlock(block("1")))
+    act(() => result.current.clearSelection())
+
+    expect(result.current.selectedBlock).toBeNull()
+  })
 })

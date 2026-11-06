@@ -21,11 +21,11 @@ export function CertificationDocumentItem({
           aria-label={`Ver documento de ${certification.name}`}
           disabled={isBusy}
           onClick={() => onView(certification)}
-          className="h-auto max-w-full justify-start p-0 text-[15px] font-bold break-all text-ink"
+          className="h-auto max-w-full justify-start p-0 text-base font-bold break-all text-ink"
         >
           {info?.fileName ?? DEFAULT_DOCUMENT_TITLE}
         </Button>
-        <p className="mt-0.5 break-words text-[13px] text-text-secondary [overflow-wrap:anywhere]">{subtitle}</p>
+        <p className="mt-0.5 text-sm [overflow-wrap:anywhere] break-words text-text-secondary">{subtitle}</p>
       </div>
     </article>
   );

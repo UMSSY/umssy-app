@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { toast } from "sonner"
 import { renderWithQuery } from "@/shared/testing/render-with-query"
 import { MentorAvailabilityView } from "./mentor-availability-view"
-import { availabilityApi } from "../services/availability.api"
+import { availabilityApi } from "../services/availability.service"
 import type { AvailabilityBlock } from "../types/availability-block.types"
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
@@ -26,9 +26,12 @@ const lastRequestedRange = () => vi.mocked(availabilityApi.getAvailabilityBlocks
 describe("MentorAvailabilityView", () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    vi.spyOn(availabilityApi, "getBlockedDates").mockResolvedValue([])
+    vi.spyOn(availabilityApi, "getFutureBlockedDates").mockResolvedValue([])
     vi.mocked(toast.success).mockClear()
     vi.mocked(toast.error).mockClear()
     vi.useFakeTimers({ toFake: ["Date"], now: NOW })
+    vi.spyOn(availabilityApi, "getMyAvailabilityStatus").mockResolvedValue({ mentorId: "m1", isAvailable: true })
   })
 
   afterEach(() => {
@@ -46,12 +49,23 @@ describe("MentorAvailabilityView", () => {
     expect(screen.getByText("Cargando disponibilidad...")).toBeInTheDocument()
   })
 
+  it("muestra el interruptor «Recibir solicitudes de mentoría» con el estado actual", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+
+    renderWithQuery(<MentorAvailabilityView />)
+
+    const toggle = screen.getByRole("switch", { name: "Recibir solicitudes de mentoría" })
+    await waitFor(() => expect(toggle).toHaveAttribute("aria-checked", "true"))
+  })
+
   it("muestra la sección y la zona horaria de Bolivia", async () => {
     vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
 
     renderWithQuery(<MentorAvailabilityView />)
 
-    expect(screen.getByText("Mentorías")).toBeInTheDocument()
+    expect(
+      screen.getByText("Mentorías. Selecciona el encabezado de un día para bloquear o desbloquear la fecha."),
+    ).toBeInTheDocument()
     expect(screen.getByText("Hora de Bolivia (GMT-4)")).toBeInTheDocument()
     await waitFor(() => expect(availabilityApi.getAvailabilityBlocks).toHaveBeenCalled())
   })
@@ -176,13 +190,13 @@ describe("MentorAvailabilityView", () => {
 
   it("al tocar un bloque con cita abre el panel con las acciones deshabilitadas y el aviso", async () => {
     vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([
-      { ...blockAt("p", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z"), state: "pending" },
+      { ...blockAt("c", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z"), state: "confirmed" },
     ])
     const user = userEvent.setup()
 
     renderWithQuery(<MentorAvailabilityView />)
 
-    await user.click(await screen.findByRole("button", { name: "pendiente, 10:00 a 11:00" }))
+    await user.click(await screen.findByRole("button", { name: "confirmada, 10:00 a 11:00" }))
 
     expect(await screen.findByText("Editar bloque")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled()
@@ -190,6 +204,30 @@ describe("MentorAvailabilityView", () => {
     expect(
       screen.getByText("Solo se puede editar si el bloque no tiene ninguna cita asociada."),
     ).toBeInTheDocument()
+  })
+
+  it("al tocar un bloque con cita muestra quién reservó y el tema (HU-06 CA5)", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([
+      {
+        ...blockAt("c", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z"),
+        state: "confirmed",
+        appointment: {
+          id: "a1",
+          counterpart: { id: "s1", fullName: "Titulado Uno", role: "student" },
+          orientationType: { id: "o1", name: "Orientación profesional" },
+        },
+      },
+    ])
+    const user = userEvent.setup()
+
+    renderWithQuery(<MentorAvailabilityView />)
+
+    await user.click(await screen.findByRole("button", { name: "confirmada, 10:00 a 11:00" }))
+
+    const detail = await screen.findByLabelText("Cita confirmada")
+    expect(within(detail).getByText("Titulado Uno")).toBeInTheDocument()
+    expect(within(detail).getByText("Orientación profesional")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Eliminar bloque" })).toBeDisabled()
   })
 
   it("arranca en la semana de la URL si viene indicada", async () => {
@@ -212,12 +250,44 @@ describe("MentorAvailabilityView", () => {
 
     await user.click(await screen.findByRole("button", { name: "libre, 10:00 a 11:00" }))
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
-    expect(screen.queryByText("Nuevo bloque de disponibilidad")).not.toBeInTheDocument()
+    expect(screen.getByText("Nuevo bloque de disponibilidad")).not.toBeVisible()
 
     await user.click(screen.getByRole("button", { name: "Cancelar" }))
 
     expect(screen.queryByText("Editar bloque")).not.toBeInTheDocument()
-    expect(screen.getByText("Nuevo bloque de disponibilidad")).toBeInTheDocument()
+    expect(screen.getByText("Nuevo bloque de disponibilidad")).toBeVisible()
+  })
+
+  it("deja fijo el panel lateral al bajar desde 1200 px, con su propio scroll (#1456)", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+
+    renderWithQuery(<MentorAvailabilityView />)
+
+    const panel = (await screen.findByText("Nuevo bloque de disponibilidad")).closest(".min-w-0.min-\\[1200px\\]\\:sticky")
+    expect(panel).not.toBeNull()
+    expect(panel).toHaveClass("min-[1200px]:overflow-y-auto")
+    expect(panel?.parentElement).toHaveClass("min-[1200px]:items-start")
+  })
+
+  it("conserva lo que se llenó en Nuevo bloque al abrir otro panel y volver", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([
+      blockAt("a", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z"),
+    ])
+    const user = userEvent.setup()
+
+    renderWithQuery(<MentorAvailabilityView />)
+
+    const block = await screen.findByRole("button", { name: "libre, 10:00 a 11:00" })
+    await user.click(screen.getByRole("button", { name: "viernes, 9 de octubre de 2026" }))
+    await user.click(screen.getByLabelText(/Hora de inicio/))
+    await user.click(await screen.findByRole("option", { name: "15:00" }))
+
+    await user.click(block)
+    expect(screen.getByText("Editar bloque")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Cancelar" }))
+
+    expect(screen.getByLabelText(/Fecha/, { selector: "input" })).toHaveValue("Viernes 9 de octubre de 2026")
+    expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("15:00")
   })
 
   it("cambiar de semana cierra el panel de edición", async () => {
@@ -280,7 +350,7 @@ describe("MentorAvailabilityView", () => {
     })
 
     it("si el bloque nuevo es de otra semana, la grilla pasa a esa semana", async () => {
-      const nextWeekBlock = blockAt("nuevo-2", "2026-10-15T22:00:00.000Z", "2026-10-15T22:30:00.000Z")
+      const nextWeekBlock = blockAt("nuevo-2", "2026-10-14T22:00:00.000Z", "2026-10-14T22:30:00.000Z")
       vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockImplementation(async (filters) =>
         filters?.from === "2026-10-12T04:00:00.000Z" ? [nextWeekBlock] : [],
       )
@@ -288,7 +358,13 @@ describe("MentorAvailabilityView", () => {
       const user = userEvent.setup()
 
       renderWithQuery(<MentorAvailabilityView />)
-      await fillAndSave(user)
+      await screen.findByText("Aún no registraste bloques esta semana")
+      await user.click(screen.getByRole("button", { name: "miércoles, 14 de octubre de 2026" }))
+      await user.click(screen.getByLabelText(/Hora de inicio/))
+      await user.click(await screen.findByRole("option", { name: "18:00" }))
+      await user.click(screen.getByLabelText(/Hora de fin/))
+      await user.click(await screen.findByRole("option", { name: "18:30" }))
+      await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
 
       await waitFor(() =>
         expect(lastRequestedRange()).toEqual({
@@ -321,10 +397,10 @@ describe("MentorAvailabilityView", () => {
       )
     })
 
-    it("muestra el detalle del backend en un toast cuando el guardado falla (409)", async () => {
+    it.each(["Ya tienes un bloque en ese horario", "Ese día está bloqueado"])("muestra el detail del backend al crear un bloque: %s", async (detail) => {
       vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
       vi.spyOn(availabilityApi, "createAvailabilityBlock").mockRejectedValue({
-        response: { data: { statusCode: 409, detail: "Ya tienes un bloque en ese horario", ok: false } },
+        response: { data: { statusCode: 409, detail, ok: false } },
       })
       const user = userEvent.setup()
 
@@ -332,8 +408,52 @@ describe("MentorAvailabilityView", () => {
       await fillAndSave(user)
 
       await waitFor(() =>
-        expect(toast.error).toHaveBeenCalledWith("Ya tienes un bloque en ese horario"),
+        expect(toast.error).toHaveBeenCalledWith(detail),
       )
+    })
+
+    async function fillAndSaveWithRepeat(user: ReturnType<typeof userEvent.setup>) {
+      await screen.findByText("Aún no registraste bloques esta semana")
+      await user.click(screen.getByRole("button", { name: "jueves, 8 de octubre de 2026" }))
+      await user.click(screen.getByLabelText(/Hora de inicio/))
+      await user.click(await screen.findByRole("option", { name: "18:00" }))
+      await user.click(screen.getByLabelText(/Hora de fin/))
+      await user.click(await screen.findByRole("option", { name: "18:30" }))
+      await user.click(screen.getByRole("checkbox", { name: /Repetir cada semana/ }))
+      const repeatGroup = screen.getByRole("group", { name: "Repetir hasta" })
+      await user.click(within(repeatGroup).getByRole("button", { name: "jueves, 15 de octubre de 2026" }))
+      await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
+    }
+
+    it("si la serie no creó ningún bloque, no limpia el formulario ni cambia de semana", async () => {
+      vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+      vi.spyOn(availabilityApi, "createAvailabilityBlock").mockResolvedValue({
+        created: 0,
+        skipped: ["2026-10-08", "2026-10-15"],
+      })
+      const user = userEvent.setup()
+
+      renderWithQuery(<MentorAvailabilityView />)
+      await fillAndSaveWithRepeat(user)
+
+      await waitFor(() =>
+        expect(toast.error).toHaveBeenCalledWith("No se creó ningún bloque.", expect.any(Object)),
+      )
+      expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("18:00")
+    })
+
+    it("con una serie semanal, la grilla pasa a la semana del bloque aunque la respuesta no tenga startAt", async () => {
+      vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
+      vi.spyOn(availabilityApi, "createAvailabilityBlock").mockResolvedValue({ created: 2, skipped: [] })
+      const user = userEvent.setup()
+
+      renderWithQuery(<MentorAvailabilityView />)
+      await fillAndSaveWithRepeat(user)
+
+      await waitFor(() =>
+        expect(toast.success).toHaveBeenCalledWith("Se crearon 2 bloques.", expect.any(Object)),
+      )
+      expect(screen.getByLabelText(/Hora de inicio/)).toHaveTextContent("--:--")
     })
   })
 })

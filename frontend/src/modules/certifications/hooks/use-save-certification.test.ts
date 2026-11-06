@@ -1,192 +1,80 @@
-import { act, renderHook } from "@testing-library/react";
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+import { act } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedback.config";
 import { certificationsService } from "../services/certifications.service";
 import type { Certification } from "../types/certification.types";
 import type { CertificationSaveResult } from "../types/certification-save-result.types";
+import type { CertificationDocumentChange } from "../types/certification-document-change.types";
 import { useSaveCertification } from "./use-save-certification";
 
-vi.mock("../services/certifications.service", () => ({
-  certificationsService: {
-    createCertification: vi.fn(),
-    updateCertification: vi.fn(),
-    deleteCertification: vi.fn(),
-  },
-}));
-
+vi.mock("../services/certifications.service", () => ({ certificationsService: {
+  createCertification: vi.fn(), updateCertification: vi.fn(), createWithDocument: vi.fn(), updateWithDocument: vi.fn(), deleteCertification: vi.fn(),
+} }));
 const VALUES = { name: "CCNA", issuingOrganization: "Cisco", issueDate: "2024-01-15" };
 const FILE = new File(["certificate"], "certificate.pdf", { type: "application/pdf" });
 const REPLACE = { type: "replace", file: FILE } as const;
-const UPLOAD_ERROR = "No se pudo adjuntar el documento.";
-
-function createCertification(id: string): Certification {
-  return {
-    id,
-    ...VALUES,
-    hasDocument: false,
-    createdAt: "2025-01-01T00:00:00.000Z",
-    updatedAt: "2025-01-01T00:00:00.000Z",
-  };
-}
-
-function renderSave(applyDocumentChange = vi.fn().mockResolvedValue({ ok: true })) {
-  const onPersisted = vi.fn();
-  const hook = renderHook(() => useSaveCertification({ applyDocumentChange, onPersisted }));
-  return { ...hook, applyDocumentChange, onPersisted };
-}
-
-async function save(
-  hook: ReturnType<typeof renderSave>,
-  editingId: string | null,
-  change: Parameters<ReturnType<typeof renderSave>["result"]["current"]["save"]>[2] = REPLACE,
-) {
+const SAVED: Certification = { id: "ccna", ...VALUES, hasDocument: true, createdAt: "2026-10-27T00:00:00Z", updatedAt: "2026-10-27T00:00:00Z" };
+function renderSave() { const onPersisted = vi.fn(); return { ...renderHook(() => useSaveCertification({ onPersisted })), onPersisted }; }
+async function save(hook: ReturnType<typeof renderSave>, id: string | null, change: CertificationDocumentChange = REPLACE) {
   let outcome: CertificationSaveResult = { status: "failed", fileError: null };
-  await act(async () => {
-    outcome = await hook.result.current.save(editingId, VALUES, change);
-  });
+  await act(async () => { outcome = await hook.result.current.save(id, VALUES, change); });
   return outcome;
 }
+afterEach(() => vi.resetAllMocks());
 
-describe("useSaveCertification", () => {
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("creates the certification and attaches its document", async () => {
-    vi.mocked(certificationsService.createCertification).mockResolvedValue(createCertification("ccna"));
+describe("useSaveCertification atomic requests", () => {
+  it("creates the fields and document in one request", async () => {
+    vi.mocked(certificationsService.createWithDocument).mockResolvedValue(SAVED);
     const hook = renderSave();
-
-    const outcome = await save(hook, null);
-
-    expect(outcome).toEqual({ status: "saved" });
-    expect(certificationsService.createCertification).toHaveBeenCalledWith(VALUES);
-    expect(hook.applyDocumentChange).toHaveBeenCalledWith("ccna", REPLACE);
-    expect(hook.onPersisted).toHaveBeenCalledTimes(1);
-    expect(hook.result.current.feedback).toEqual({
-      type: "success",
-      message: CERTIFICATION_FEEDBACK_MESSAGES.createSuccess,
-    });
-  });
-
-  it("does not touch the document when the creation fails", async () => {
-    vi.mocked(certificationsService.createCertification).mockRejectedValue(new Error("failed"));
-    const hook = renderSave();
-
-    const outcome = await save(hook, null);
-
-    expect(outcome).toEqual({ status: "failed", fileError: null });
-    expect(hook.applyDocumentChange).not.toHaveBeenCalled();
-    expect(hook.result.current.feedback?.type).toBe("error");
-  });
-
-  it("rolls back the created certification when the document fails and returns the message", async () => {
-    vi.mocked(certificationsService.createCertification).mockResolvedValue(createCertification("ccna"));
-    vi.mocked(certificationsService.deleteCertification).mockResolvedValue(undefined);
-    const hook = renderSave(vi.fn().mockResolvedValue({ ok: false, message: UPLOAD_ERROR }));
-
-    const outcome = await save(hook, null);
-
-    expect(outcome).toEqual({ status: "failed", fileError: UPLOAD_ERROR });
-    expect(certificationsService.deleteCertification).toHaveBeenCalledWith("ccna");
-    expect(hook.onPersisted).not.toHaveBeenCalled();
-    expect(hook.result.current.feedback).toBeNull();
-  });
-
-  it("retries without creating a duplicate when the rollback fails", async () => {
-    vi.mocked(certificationsService.createCertification).mockResolvedValue(createCertification("ccna"));
-    vi.mocked(certificationsService.deleteCertification).mockRejectedValue(new Error("failed"));
-    vi.mocked(certificationsService.updateCertification).mockResolvedValue(createCertification("ccna"));
-    const applyDocumentChange = vi
-      .fn()
-      .mockResolvedValueOnce({ ok: false, message: UPLOAD_ERROR })
-      .mockResolvedValueOnce({ ok: true });
-    const hook = renderSave(applyDocumentChange);
-
-    const first = await save(hook, null);
-    const second = await save(hook, null);
-
-    expect(first).toEqual({ status: "failed", fileError: UPLOAD_ERROR });
-    expect(second).toEqual({ status: "saved" });
-    expect(certificationsService.createCertification).toHaveBeenCalledTimes(1);
-    expect(certificationsService.updateCertification).toHaveBeenCalledWith("ccna", VALUES);
-    expect(applyDocumentChange).toHaveBeenLastCalledWith("ccna", REPLACE);
-  });
-
-  it("creates again after a reset", async () => {
-    vi.mocked(certificationsService.createCertification).mockResolvedValue(createCertification("ccna"));
-    vi.mocked(certificationsService.deleteCertification).mockRejectedValue(new Error("failed"));
-    const applyDocumentChange = vi
-      .fn()
-      .mockResolvedValueOnce({ ok: false, message: UPLOAD_ERROR })
-      .mockResolvedValueOnce({ ok: true });
-    const hook = renderSave(applyDocumentChange);
-
-    await save(hook, null);
-    act(() => {
-      hook.result.current.reset();
-    });
-    await save(hook, null);
-
-    expect(certificationsService.createCertification).toHaveBeenCalledTimes(2);
-    expect(certificationsService.updateCertification).not.toHaveBeenCalled();
-  });
-
-  it("updates the fields first and then applies the document change", async () => {
-    const order: string[] = [];
-    vi.mocked(certificationsService.updateCertification).mockImplementation(async () => {
-      order.push("update");
-      return createCertification("scrum");
-    });
-    const hook = renderSave(
-      vi.fn().mockImplementation(async () => {
-        order.push("document");
-        return { ok: true };
-      }),
-    );
-
-    const outcome = await save(hook, "scrum", { type: "remove" });
-
-    expect(outcome).toEqual({ status: "saved" });
-    expect(order).toEqual(["update", "document"]);
-    expect(hook.applyDocumentChange).toHaveBeenCalledWith("scrum", { type: "remove" });
+    expect(await save(hook, null)).toEqual({ status: "saved" });
+    expect(certificationsService.createWithDocument).toHaveBeenCalledWith(VALUES, FILE);
     expect(certificationsService.createCertification).not.toHaveBeenCalled();
+    expect(certificationsService.deleteCertification).not.toHaveBeenCalled();
+    expect(hook.onPersisted).toHaveBeenCalledOnce();
   });
-
-  it("keeps the fields saved, reloads and reports the document error when editing", async () => {
-    vi.mocked(certificationsService.updateCertification).mockResolvedValue(createCertification("scrum"));
-    const hook = renderSave(vi.fn().mockResolvedValue({ ok: false, message: UPLOAD_ERROR }));
-
-    const outcome = await save(hook, "scrum");
-
-    expect(outcome).toEqual({ status: "failed", fileError: UPLOAD_ERROR });
-    expect(hook.onPersisted).toHaveBeenCalledTimes(1);
-    expect(hook.result.current.feedback).toBeNull();
+  it("keeps the form unchanged and permits retry after an atomic create fails", async () => {
+    vi.mocked(certificationsService.createWithDocument).mockRejectedValueOnce(new Error("unavailable")).mockResolvedValue(SAVED);
+    const hook = renderSave();
+    expect(await save(hook, null)).toEqual({ status: "failed", fileError: null });
+    expect(hook.onPersisted).not.toHaveBeenCalled();
+    expect(hook.result.current.feedback?.type).toBe("error");
+    expect(await save(hook, null)).toEqual({ status: "saved" });
     expect(certificationsService.deleteCertification).not.toHaveBeenCalled();
   });
-
-  it("skips the document when the update of the fields fails", async () => {
-    vi.mocked(certificationsService.updateCertification).mockRejectedValue(new Error("failed"));
+  it("edits fields and replaces the document together", async () => {
+    vi.mocked(certificationsService.updateWithDocument).mockResolvedValue(SAVED);
     const hook = renderSave();
-
-    const outcome = await save(hook, "scrum");
-
-    expect(outcome).toEqual({ status: "failed", fileError: null });
-    expect(hook.applyDocumentChange).not.toHaveBeenCalled();
-    expect(hook.result.current.feedback).toEqual({
-      type: "error",
-      message: CERTIFICATION_FEEDBACK_MESSAGES.updateError,
-    });
+    expect(await save(hook, "ccna")).toEqual({ status: "saved" });
+    expect(certificationsService.updateWithDocument).toHaveBeenCalledWith("ccna", VALUES, REPLACE);
+    expect(certificationsService.updateCertification).not.toHaveBeenCalled();
   });
-
-  it("clears the feedback of both mutations", async () => {
-    vi.mocked(certificationsService.updateCertification).mockRejectedValue(new Error("failed"));
+  it("does not report persisted changes when the combined update fails", async () => {
+    vi.mocked(certificationsService.updateWithDocument).mockRejectedValue(new Error("invalid document"));
     const hook = renderSave();
-
-    await save(hook, "scrum");
-    act(() => {
-      hook.result.current.clearFeedback();
-    });
-
+    expect(await save(hook, "ccna")).toEqual({ status: "failed", fileError: null });
+    expect(hook.onPersisted).not.toHaveBeenCalled();
+    expect(certificationsService.updateCertification).not.toHaveBeenCalled();
+  });
+  it("removes the document in the same request as the edited fields", async () => {
+    vi.mocked(certificationsService.updateWithDocument).mockResolvedValue(SAVED);
+    const hook = renderSave();
+    await save(hook, "ccna", { type: "remove" });
+    expect(certificationsService.updateWithDocument).toHaveBeenCalledWith("ccna", VALUES, { type: "remove" });
+  });
+  it("keeps the existing document for an ordinary field update", async () => {
+    vi.mocked(certificationsService.updateCertification).mockResolvedValue(SAVED);
+    const hook = renderSave();
+    await save(hook, "ccna", { type: "keep" });
+    expect(certificationsService.updateCertification).toHaveBeenCalledWith("ccna", VALUES);
+    expect(certificationsService.updateWithDocument).not.toHaveBeenCalled();
+  });
+  it("preserves the metadata-only API and clears feedback on reset", async () => {
+    vi.mocked(certificationsService.createCertification).mockRejectedValue(new Error("unavailable"));
+    const hook = renderSave();
+    await save(hook, null, { type: "keep" });
+    expect(certificationsService.createCertification).toHaveBeenCalledWith(VALUES);
+    expect(hook.result.current.feedback?.type).toBe("error");
+    act(() => hook.result.current.clearFeedback());
     expect(hook.result.current.feedback).toBeNull();
   });
 });

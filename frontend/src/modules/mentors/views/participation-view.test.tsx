@@ -1,122 +1,410 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { renderToString } from "react-dom/server";
+import { StrictMode } from "react";
+import { toast } from "sonner";
+import {
+  cleanup,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getMentorTechnicalAreas } from "../services/technical-areas.service";
-import { getMentorOrientationTypes } from "@/modules/mentorship/services/orientation-type.service";
+import { renderWithQuery } from "@/shared/testing/render-with-query";
+import {
+  loadMentorshipWizardDraft,
+  saveMentorshipWizardDraft,
+} from "@/modules/mentorship/services/mentorship-wizard-draft.service";
+import {
+  mentorParticipationService,
+  type MyMentorParticipation,
+} from "../services/mentor-participation.service";
 import { ParticipationView } from "./participation-view";
+import { writeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 
-vi.mock("../services/technical-areas.service", () => ({
-  getMentorTechnicalAreas: vi.fn(),
-}));
-vi.mock("@/modules/mentorship/services/orientation-type.service", () => ({
-  getMentorOrientationTypes: vi.fn(),
+vi.mock("@/modules/mentorship/hooks/use-mentorship-catalogs", () => ({
+  useMentorshipCatalogs: () => ({ technicalAreas: [], orientationTypes: [], isTechnicalAreasLoading: false, isOrientationTypesLoading: false }),
 }));
 
-describe("ParticipationView", () => {
+vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
+
+const navigation = vi.hoisted(() => ({ push: vi.fn() }));
+const drafts = vi.hoisted(() => new Map<string, unknown>());
+const USER_ID = "user-a";
+vi.mock("next/navigation", () => ({ useRouter: () => navigation }));
+vi.mock("@/shared/contexts/auth-context", () => ({
+  useAuth: () => ({
+    currentUserId: "user-a",
+    roles: [],
+    isLoading: false,
+    refreshRoles: vi.fn(),
+  }),
+}));
+vi.mock("@/shared/services/storage/browser-indexed-db", () => ({
+  readIndexedDb: vi.fn(async (key: string) => drafts.get(key) ?? null),
+  writeIndexedDb: vi.fn(async (key: string, value: unknown) => {
+    drafts.set(key, value);
+  }),
+  removeIndexedDb: vi.fn(async (key: string) => {
+    drafts.delete(key);
+  }),
+}));
+
+const active: MyMentorParticipation = {
+  status: "ACTIVE",
+  areas: [{ id: "area-1", name: "Backend" }],
+  orientations: [{ id: "orientation-1", name: "Orientación profesional" }],
+};
+const deactivated: MyMentorParticipation = { ...active, status: "DEACTIVATED" };
+
+describe("ParticipationView HU-MEN-06", () => {
   beforeEach(() => {
-    localStorage.clear();
-    vi.mocked(getMentorTechnicalAreas).mockResolvedValue([
-      { id: "area-1", name: "Backend", description: null },
-      { id: "area-2", name: "QA", description: null },
-    ]);
-    vi.mocked(getMentorOrientationTypes).mockResolvedValue([
-      { id: "orientation-1", name: "Orientación profesional", description: null },
-      { id: "orientation-2", name: "Búsqueda de empleo", description: null },
-    ]);
+    vi.mocked(toast.success).mockClear();
+    window.history.replaceState(null, "", "/mentors/participation");
+    vi.spyOn(mentorParticipationService, "capacity").mockResolvedValue({ available: 1, capacity: 1, occupied: 0 });
+    sessionStorage.setItem("accessToken", "test-token");
+    vi.spyOn(mentorParticipationService, "getCurrent").mockResolvedValue(null);
+    vi.spyOn(
+      mentorParticipationService,
+      "getMyParticipation",
+    ).mockResolvedValue(active);
   });
 
   afterEach(() => {
     cleanup();
+    drafts.clear();
     localStorage.clear();
+    sessionStorage.clear();
     vi.restoreAllMocks();
-    vi.clearAllMocks();
+    navigation.push.mockReset();
   });
 
-  it("mantiene un estado inicial estable mientras resuelve la participación", () => {
-    const html = renderToString(<ParticipationView />);
-
-    expect(html).toContain("Cargando participación...");
-    expect(html).not.toContain("Mi participación como mentor");
-    expect(html).not.toContain("Participa como mentor");
-  });
-
-  it("muestra la participación activa con sus datos y enlaces de edición", async () => {
-    render(<ParticipationView />);
-
-    expect(
-      await screen.findByRole("heading", { name: "Mi participación como mentor" }),
-    ).toBeInTheDocument();
+  it("muestra el rol activo sin inferirlo de la disponibilidad y permite editar", async () => {
+    renderWithQuery(<ParticipationView />);
+    expect(await screen.findByText("Activo")).toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
-    expect(screen.getByText("QA")).toBeInTheDocument();
-    expect(screen.getByText("Orientación profesional")).toBeInTheDocument();
-    expect(screen.getByText("Búsqueda de empleo")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Editar áreas técnicas" }),
     ).toHaveAttribute("href", "/mentors/participation/technical-areas");
+    expect(screen.getByRole("link", { name: "Editar tipos de orientación" }))
+      .toHaveAttribute("href", "/mentorship/orientation");
     expect(
-      screen.getByRole("link", { name: "Editar tipos de orientación" }),
-    ).toHaveAttribute("href", "/mentorship/orientation");
+      screen.getByRole("button", { name: "Desactivar participación" }),
+    ).toBeInTheDocument();
   });
 
-  it("muestra la activación cuando no existe participación", async () => {
-    vi.mocked(getMentorTechnicalAreas).mockRejectedValue({
-      isAxiosError: true,
-      response: { status: 404 },
-    });
-    render(<ParticipationView />);
-
+  it("conserva preferencias y oculta acciones de edición al desactivar", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(
+      deactivated,
+    );
+    renderWithQuery(<ParticipationView />);
+    expect(await screen.findByText("Desactivado")).toBeInTheDocument();
+    expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(
-      await screen.findByRole("heading", { name: "Mi participación" }),
+      screen.queryByRole("link", { name: "Editar áreas técnicas" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Activar participación" }),
+    ).toBeInTheDocument();
+  });
+
+  it("muestra solo la solicitud pendiente cuando la participación anterior está desactivada", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(deactivated);
+    vi.mocked(mentorParticipationService.getCurrent).mockResolvedValue({
+      id: "request", userId: "user", status: "PENDING",
+      queuedAt: "2026-10-26T15:00:00Z", createdAt: "2026-10-26T15:00:00Z",
+      technicalAreaIds: [], orientationTypeIds: [],
+    });
+    renderWithQuery(<ParticipationView />);
+    expect(await screen.findByText("PENDIENTE")).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: "Estado de participación" })).toHaveLength(1);
+    expect(screen.getByRole("heading", { name: "Mi participación como mentor" })).toBeInTheDocument();
+    expect(screen.queryByText("Desactivado")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ver detalle" })).toBeInTheDocument();
+  });
+
+  it("cancelar no llama al servidor; confirmar sale una sola vez", async () => {
+    const leave = vi
+      .spyOn(mentorParticipationService, "leave")
+      .mockResolvedValue();
+    vi.mocked(mentorParticipationService.getMyParticipation)
+      .mockResolvedValueOnce(active)
+      .mockResolvedValue(deactivated);
+    renderWithQuery(<ParticipationView />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Desactivar participación" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(leave).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Desactivar participación" }),
+    );
+    fireEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Desactivar participación",
+      }),
+    );
+    await waitFor(() => expect(leave).toHaveBeenCalledTimes(1));
+    expect(await screen.findByText("Desactivado")).toBeInTheDocument();
+  });
+
+  it("mantiene abierto el modal y explica las citas futuras cuando falla la salida", async () => {
+    vi.spyOn(mentorParticipationService, "leave").mockRejectedValue({
+      isAxiosError: true,
+      response: {
+        status: 409,
+        data: {
+          message: "Resuelve las citas futuras",
+          data: { code: "MENTOR_HAS_FUTURE_APPOINTMENTS" },
+        },
+      },
+    });
+    renderWithQuery(<ParticipationView />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Desactivar participación" }),
+    );
+    fireEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Desactivar participación",
+      }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Resuelve las citas futuras",
+    );
+    expect(
+      screen.getByRole("link", { name: "Resolver mis citas en la agenda" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Activo")).toBeInTheDocument();
+  });
+
+  it("bloquea el doble envío de desactivación", async () => {
+    const leave = vi
+      .spyOn(mentorParticipationService, "leave")
+      .mockImplementation(() => new Promise<void>(() => {}));
+    renderWithQuery(<ParticipationView />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Desactivar participación" }),
+    );
+    const confirm = within(screen.getByRole("dialog")).getByRole("button", {
+      name: "Desactivar participación",
+    });
+    fireEvent.click(confirm);
+    fireEvent.click(confirm);
+    expect(leave).toHaveBeenCalledTimes(1);
+  });
+
+  it("precarga el wizard al iniciar reincorporación sin activar antes del servidor", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(
+      deactivated,
+    );
+    renderWithQuery(<ParticipationView />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Activar participación" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continuar a incorporación" }),
+    );
+    await waitFor(() =>
+      expect(navigation.push).toHaveBeenCalledWith("/mentorship"),
+    );
+    expect(await loadMentorshipWizardDraft(USER_ID)).toEqual({
+      currentStep: 1,
+      wantsToParticipate: true,
+      selectedTechnicalAreaIds: ["area-1"],
+      selectedOrientationTypeIds: ["orientation-1"],
+    });
+    expect(navigation.push).toHaveBeenCalledWith("/mentorship");
+    expect(screen.getByText("Desactivado")).toBeInTheDocument();
+  });
+
+  it("permite continuar sin precarga cuando falla IndexedDB", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(
+      deactivated,
+    );
+    vi.mocked(writeIndexedDb).mockRejectedValueOnce(
+      new Error("IndexedDB no está disponible"),
+    );
+    renderWithQuery(<ParticipationView />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Activar participación" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continuar a incorporación" }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No se pudo recuperar el borrador",
+    );
+    expect(navigation.push).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continuar a incorporación" }),
+    );
+    expect(navigation.push).toHaveBeenCalledWith("/mentorship");
+  });
+
+  it("respeta un borrador existente del wizard", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue(
+      deactivated,
+    );
+    await saveMentorshipWizardDraft(USER_ID, {
+      currentStep: 3,
+      wantsToParticipate: true,
+      selectedTechnicalAreaIds: ["area-editada"],
+      selectedOrientationTypeIds: ["orientation-1"],
+    });
+    renderWithQuery(<ParticipationView />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Activar participación" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continuar a incorporación" }),
+    );
+    await waitFor(() =>
+      expect(navigation.push).toHaveBeenCalledWith("/mentorship"),
+    );
+    expect(
+      (await loadMentorshipWizardDraft(USER_ID))?.selectedTechnicalAreaIds,
+    ).toEqual(["area-editada"]);
+  });
+
+  it("permite reintentar cuando falla la consulta de participación", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation)
+      .mockRejectedValueOnce(new Error("Network"))
+      .mockResolvedValue(active);
+    renderWithQuery(<ParticipationView />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Reintentar participación" }),
+    );
+    expect(await screen.findByText("Activo")).toBeInTheDocument();
+  });
+
+  it("muestra un éxito confirmado durante cuatro segundos y permite cerrarlo", async () => {
+    window.history.replaceState(null, "", "/mentors/participation?activated=1");
+    renderWithQuery(<StrictMode><ParticipationView activated /></StrictMode>);
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith(
+        "Participación activada correctamente",
+        {
+          id: "mentor-participation-feedback",
+          duration: 4000,
+          closeButton: true,
+        },
+      ),
+    );
+  });
+
+  it("un fallo HU7 no oculta el mentor activo ni impide su salida HU6", async () => {
+    vi.mocked(mentorParticipationService.getCurrent).mockRejectedValue(
+      new Error("HTTP 500"),
+    );
+    renderWithQuery(<ParticipationView />);
+    expect(await screen.findByText("Activo")).toBeInTheDocument();
+    expect(
+      await screen.findByText("No se pudo consultar tu solicitud de cupo."),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Participa como mentor" }),
-    ).toHaveAttribute("href", "/mentorship");
+      screen.getByRole("button", { name: "Desactivar participación" }),
+    ).toBeEnabled();
+    expect(
+      screen.queryByText("No se pudo cargar tu participación como mentor."),
+    ).not.toBeInTheDocument();
   });
 
-  it("muestra loading hasta que ambas peticiones terminan y comparte la cancelación", () => {
-    vi.mocked(getMentorTechnicalAreas).mockReturnValue(new Promise(() => {}));
-    const { unmount } = render(<ParticipationView />);
-    expect(screen.getByText("Cargando participación...")).toBeInTheDocument();
-    const signal = vi.mocked(getMentorTechnicalAreas).mock.calls[0][0];
-    expect(signal).toBeInstanceOf(AbortSignal);
-    expect(getMentorOrientationTypes).toHaveBeenCalledWith(signal);
-    unmount();
-    expect(signal?.aborted).toBe(true);
-  });
-
-  it("muestra errores reales y permite reintentar", async () => {
-    vi.mocked(getMentorOrientationTypes).mockRejectedValueOnce(new Error("Network"));
-    render(<ParticipationView />);
-    expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo cargar");
-    expect(screen.queryByText("Participa como mentor")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
-    expect(await screen.findByText("Backend")).toBeInTheDocument();
-    expect(getMentorTechnicalAreas).toHaveBeenCalledTimes(2);
-    expect(getMentorOrientationTypes).toHaveBeenCalledTimes(2);
-  });
-
-  it("no oculta un error real aunque el otro endpoint devuelva 404", async () => {
-    vi.mocked(getMentorTechnicalAreas).mockRejectedValue({
-      isAxiosError: true,
-      response: { status: 404 },
+  it("no ofrece una nueva incorporación mientras la solicitud es desconocida por error", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue({
+      status: "NEVER",
+      areas: [],
+      orientations: [],
     });
-    vi.mocked(getMentorOrientationTypes).mockRejectedValue({
-      isAxiosError: true,
-      response: { status: 500 },
-    });
-    render(<ParticipationView />);
-    expect(await screen.findByRole("alert")).toBeInTheDocument();
-  });
-
-  it("ignora los datos antiguos de localStorage y muestra nombres del backend", async () => {
-    localStorage.setItem(
-      "umssy-mentor-participation",
-      JSON.stringify({ status: "active", areas: ["Datos antiguos"], orientations: [] }),
+    vi.mocked(mentorParticipationService.getCurrent).mockRejectedValue(
+      new Error("HTTP 500"),
     );
-    const readStorage = vi.spyOn(Storage.prototype, "getItem");
-    render(<ParticipationView />);
-    expect(await screen.findByText("Backend")).toBeInTheDocument();
-    expect(screen.queryByText("Datos antiguos")).not.toBeInTheDocument();
-    expect(readStorage).not.toHaveBeenCalled();
+    renderWithQuery(<ParticipationView />);
+    expect(
+      await screen.findByText("No se pudo consultar tu solicitud de cupo."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Participar como mentor"),
+    ).not.toBeInTheDocument();
   });
+
+  it("muestra solicitudes válidas aunque falle la consulta independiente HU6", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockRejectedValue(
+      new Error("HTTP 500"),
+    );
+    vi.mocked(mentorParticipationService.getCurrent).mockResolvedValue({
+      id: "request",
+      userId: "user",
+      status: "CANCELLED",
+      queuedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      technicalAreaIds: [],
+      orientationTypeIds: [],
+    });
+    renderWithQuery(<ParticipationView />);
+    expect(
+      screen.queryByText(/La solicitud fue cancelada/),
+    ).not.toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        "No se pudo cargar tu participación como mentor.",
+      ),
+    ).toBeInTheDocument();
+  });
+  const pendingRequest = {
+    id: "request", userId: "user", status: "PENDING",
+    queuedAt: "2026-10-26T15:00:00.000Z", createdAt: "2026-10-26T15:00:00.000Z",
+    technicalAreaIds: [], orientationTypeIds: [],
+  };
+
+  it("cancela con un solo toast y no repite avisos al recargar o volver a entrar", async () => {
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue({ status: "NEVER", areas: [], orientations: [] });
+    const cancelled = { ...pendingRequest, status: "CANCELLED" };
+    vi.mocked(mentorParticipationService.getCurrent).mockResolvedValue(pendingRequest);
+    const cancel = vi.spyOn(mentorParticipationService, "cancel").mockImplementation(async () => {
+      vi.mocked(mentorParticipationService.getCurrent).mockResolvedValue(cancelled);
+      return cancelled;
+    });
+    const view = renderWithQuery(<ParticipationView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Cancelar cupo" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar cancelación" }));
+    expect(await screen.findByRole("link", { name: "Participa como mentor" })).toBeInTheDocument();
+    await waitFor(() => expect(toast.success).toHaveBeenCalledTimes(1));
+    expect(toast.success).toHaveBeenCalledWith("Solicitud cancelada correctamente", expect.any(Object));
+    expect(cancel).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText(/La solicitud fue cancelada/)).not.toBeInTheDocument();
+    expect(screen.queryByText("Solicitud cancelada correctamente")).not.toBeInTheDocument();
+    view.unmount();
+    for (let visit = 0; visit < 2; visit++) {
+      const next = renderWithQuery(<ParticipationView />);
+      await screen.findByRole("link", { name: "Participa como mentor" });
+      expect(toast.success).toHaveBeenCalledTimes(1);
+      next.unmount();
+    }
+  });
+
+  it.each(["CANCELLED", "EXPIRED"])("descarta parámetros antiguos para %s", async (status) => {
+    window.history.replaceState(null, "", "/mentors/participation?registered=1&activated=1&other=keep#details");
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue({ status: "NEVER", areas: [], orientations: [] });
+    vi.mocked(mentorParticipationService.getCurrent).mockResolvedValue({ ...pendingRequest, status });
+    renderWithQuery(<ParticipationView registered activated />);
+    await screen.findByRole("link", { name: "Participa como mentor" });
+    await waitFor(() => expect(window.location.search).toBe("?other=keep"));
+    expect(window.location.hash).toBe("#details");
+    expect(toast.success).not.toHaveBeenCalled();
+    if (status === "EXPIRED") expect(screen.getByText(/La oferta venció/)).toBeInTheDocument();
+  });
+
+  it.each(["PENDING", "OFFERED"])("consume el aviso de registro una sola vez para %s", async (status) => {
+    window.history.replaceState(null, "", "/mentors/participation?registered=1");
+    vi.mocked(mentorParticipationService.getMyParticipation).mockResolvedValue({ status: "NEVER", areas: [], orientations: [] });
+    vi.mocked(mentorParticipationService.getCurrent).mockResolvedValue({ ...pendingRequest, status });
+    const view = renderWithQuery(<StrictMode><ParticipationView registered /></StrictMode>);
+    await waitFor(() => expect(toast.success).toHaveBeenCalledTimes(1));
+    expect(window.location.search).toBe("");
+    await view.client.invalidateQueries({ queryKey: ["mentor-participation-requests"] });
+    expect(toast.success).toHaveBeenCalledTimes(1);
+    view.unmount();
+    renderWithQuery(<ParticipationView registered />);
+    await waitFor(() => expect(mentorParticipationService.getCurrent).toHaveBeenCalled());
+    expect(toast.success).toHaveBeenCalledTimes(1);
+  });
+
 });

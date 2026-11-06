@@ -1,5 +1,34 @@
+import { removeLocalStorage } from "@/shared/services/storage/browser-local-storage";
+import { readIndexedDb, writeIndexedDb, removeIndexedDb } from "@/shared/services/storage/browser-indexed-db";
 import { MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY } from "../constants/mentorship-wizard.constants";
 import type { MentorshipWizardState } from "../types/mentorship-wizard-state.types";
+
+const pendingOperations = new Map<string, Promise<unknown>>();
+
+export function getMentorshipWizardDraftStorageKey(userId: string): string {
+  if (!userId) throw new Error("Se requiere un identificador de usuario.");
+  return `${MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY}:${encodeURIComponent(userId)}`;
+}
+
+function enqueueStorageOperation<T>(
+  storageKey: string,
+  operation: () => Promise<T>,
+): Promise<T> {
+  const previous = pendingOperations.get(storageKey) ?? Promise.resolve();
+  const next = previous.catch(() => {}).then(operation);
+  pendingOperations.set(storageKey, next);
+  void next.finally(() => {
+    if (pendingOperations.get(storageKey) === next) {
+      pendingOperations.delete(storageKey);
+    }
+  }).catch(() => {});
+  return next;
+}
+
+async function discardUnownedLegacyDraft(): Promise<void> {
+  removeLocalStorage(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
+  await removeIndexedDb(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
+}
 
 function isMentorshipWizardState(value: unknown): value is MentorshipWizardState {
   if (typeof value !== "object" || value === null) return false;
@@ -18,48 +47,42 @@ function isMentorshipWizardState(value: unknown): value is MentorshipWizardState
   );
 }
 
-export function saveMentorshipWizardDraft(
+export async function saveMentorshipWizardDraft(
+  userId: string,
   state: MentorshipWizardState,
-): void {
+): Promise<void> {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.localStorage.setItem(
-    MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY,
-    JSON.stringify(state),
+  const storageKey = getMentorshipWizardDraftStorageKey(userId);
+  await enqueueStorageOperation(storageKey, () =>
+    writeIndexedDb(storageKey, state),
   );
 }
 
-export function loadMentorshipWizardDraft(): MentorshipWizardState | null {
+export async function loadMentorshipWizardDraft(
+  userId: string,
+): Promise<MentorshipWizardState | null> {
   if (typeof window === "undefined") {
     return null;
   }
 
-  const stored = window.localStorage.getItem(
-    MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY,
-  );
-
-  if (stored === null) {
+  const storageKey = getMentorshipWizardDraftStorageKey(userId);
+  return enqueueStorageOperation(storageKey, async () => {
+    await discardUnownedLegacyDraft();
+    const saved = await readIndexedDb<unknown>(storageKey);
+    if (isMentorshipWizardState(saved)) return saved;
+    if (saved !== null) await removeIndexedDb(storageKey);
     return null;
-  }
-
-  try {
-    const draft: unknown = JSON.parse(stored);
-    if (isMentorshipWizardState(draft)) return draft;
-  } catch {
-    window.localStorage.removeItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
-    return null;
-  }
-
-  window.localStorage.removeItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
-  return null;
+  });
 }
 
-export function clearMentorshipWizardDraft(): void {
+export async function clearMentorshipWizardDraft(userId: string): Promise<void> {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.localStorage.removeItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
+  const storageKey = getMentorshipWizardDraftStorageKey(userId);
+  await enqueueStorageOperation(storageKey, () => removeIndexedDb(storageKey));
 }

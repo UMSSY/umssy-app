@@ -2,7 +2,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '@/shared/services/api-client';
 import { authService } from './auth.service';
-vi.mock('@/shared/services/api-client', () => ({ apiClient: { defaults: { baseURL: 'http://localhost:8080/api' }, post: vi.fn(), get: vi.fn() } }));
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { defaults: { baseURL: 'http://localhost:8080/api' }, post: vi.fn(), get: vi.fn() } }));
 const payload = { email: 'prueba@umss.edu.bo', password: 'Prueba123', roleTag: 'titulado' as const };
 beforeEach(() => { vi.clearAllMocks(); apiClient.defaults.baseURL = 'http://localhost:8080/api'; });
 describe('authService', () => {
@@ -49,6 +50,27 @@ describe('authService', () => {
     vi.mocked(apiClient.get).mockResolvedValue({ data: { data: session } });
     await expect(authService.getSession('session-token')).resolves.toEqual(session);
     expect(apiClient.get).toHaveBeenCalledWith('/auth/session', { headers: { Authorization: 'Bearer session-token' } });
+  });
+
+  it('requestPasswordResetCode llama al endpoint y retorna resultado', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { ok: true, message: 'Código enviado' } });
+    const res = await authService.requestPasswordResetCode({ email: 'user@test.com' });
+    expect(res).toEqual({ ok: true, message: 'Código enviado' });
+    expect(apiClient.post).toHaveBeenCalledWith('/auth/forgot-password/request', { email: 'user@test.com' });
+  });
+
+  it('verifyPasswordResetCode llama al endpoint y retorna resultado', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { ok: true } });
+    const res = await authService.verifyPasswordResetCode({ email: 'user@test.com', code: '123456' });
+    expect(res).toEqual({ ok: true });
+    expect(apiClient.post).toHaveBeenCalledWith('/auth/forgot-password/verify', { email: 'user@test.com', code: '123456' });
+  });
+
+  it('resetPassword llama al endpoint y retorna resultado', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { ok: true } });
+    const res = await authService.resetPassword({ email: 'user@test.com', code: '123456', password: 'NewPassword1' });
+    expect(res).toEqual({ ok: true });
+    expect(apiClient.post).toHaveBeenCalledWith('/auth/forgot-password/reset', { email: 'user@test.com', code: '123456', password: 'NewPassword1' });
   });
 
 });

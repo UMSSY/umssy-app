@@ -1,5 +1,5 @@
-import type { EventRegistrationsRepository } from '../repositories/event-registrations.repository.js';
+import type { EventRegistrationsService } from '../services/event-registrations.service.js';
 
 export type RegistrationEntity = Awaited<
-  ReturnType<EventRegistrationsRepository['findByUserId']>
+  ReturnType<EventRegistrationsService['findByUserId']>
 >[number];

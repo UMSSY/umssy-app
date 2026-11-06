@@ -1,5 +1,6 @@
 import { notifyManager } from "@tanstack/react-query";
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
 import type { ApiResponse, PaginatedData } from "@/shared/types/api-response.types";
@@ -13,6 +14,7 @@ const REJECTED_USERS: RejectedUser[] = Array.from({ length: 24 }, (_, index) => 
   id: `rejected-${index + 1}`,
   fullName: index === 0 ? "Juan Carlos Peres Rojas" : `Usuario rechazado ${index + 1}`,
   email: index === 0 ? "juan.perez@gmail.com" : `usuario${index + 1}@gmail.com`,
+  userType: "titulado",
   identifier: `2019${index.toString().padStart(5, "0")}`,
   documentType: index === 1 ? "national_title" : "academic_diploma",
   rejectionReason: null,
@@ -67,7 +69,7 @@ describe("RejectedUsersReportView", () => {
   it("muestra el título, el buscador, los botones y la primera página", async () => {
     renderWithQuery(<RejectedUsersReportView />);
 
-    expect(screen.getByRole("heading", { name: "Reporte de usuarios registrados rechazados" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Usuarios rechazados" })).toBeDefined();
     expect(screen.getByPlaceholderText("Buscar por correo electrónico")).toBeDefined();
     expect(screen.getByRole("button", { name: "actualizar" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
@@ -80,6 +82,65 @@ describe("RejectedUsersReportView", () => {
     expect(screen.getByText("Título en provisión nacional")).toBeDefined();
     expect(screen.getByText("Mostrando 1-10 de 24 usuarios")).toBeDefined();
     expect(reportsService.getRejectedUsers).toHaveBeenCalledWith({ page: 1, limit: 10, search: "" }, expect.any(AbortSignal));
+  });
+
+  it("filtra por gestión, vuelve a la primera página y permite quitar el filtro", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-08T12:00:00-04:00"));
+    const user = userEvent.setup();
+    renderWithQuery(<RejectedUsersReportView />);
+    await waitFor(() => {
+      expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Página 2" }));
+    await waitFor(() => {
+      expect(screen.getByText("Mostrando 11-20 de 24 usuarios")).toBeDefined();
+    });
+
+    await user.click(screen.getByRole("button", { name: "Gestión" }));
+    await user.click(await screen.findByRole("menuitemradio", { name: "I-2026" }));
+
+    expect(await screen.findByRole("button", { name: "Gestión I-2026" })).toBeDefined();
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith(
+      { page: 1, limit: 10, period: "I-2026", search: "" },
+      expect.any(AbortSignal),
+    );
+
+    await user.click(screen.getByRole("button", { name: "Gestión I-2026" }));
+    await user.click(await screen.findByRole("menuitemradio", { name: "Todas" }));
+
+    expect(await screen.findByRole("button", { name: "Gestión" })).toBeDefined();
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith(
+      { page: 1, limit: 10, period: undefined, search: "" },
+      expect.any(AbortSignal),
+    );
+  });
+
+  it("filtra por tipo de usuario, vuelve a la primera página y lo incluye en la exportación", async () => {
+    const user = userEvent.setup();
+    const exportSpy = vi.spyOn(reportsService, "exportRejectedUsersCsv").mockResolvedValueOnce({ file: new Blob([]), fileName: "usuarios-rechazados.csv" });
+    vi.spyOn(downloadFileModule, "downloadFile").mockImplementation(() => undefined);
+    renderWithQuery(<RejectedUsersReportView />);
+    await waitFor(() => {
+      expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Página 2" }));
+    await waitFor(() => {
+      expect(screen.getByText("Mostrando 11-20 de 24 usuarios")).toBeDefined();
+    });
+
+    await user.click(screen.getByRole("combobox", { name: "Tipo de usuario" }));
+    await user.click(await screen.findByRole("option", { name: "Empresa" }));
+
+    await waitFor(() => {
+      expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith(
+        { page: 1, limit: 10, userType: "empresa", search: "" },
+        expect.any(AbortSignal),
+      );
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Exportar CSV" }));
+    expect(exportSpy).toHaveBeenCalledWith({ userType: "empresa", search: "" });
   });
 
   it("navega a la última página", async () => {
@@ -204,7 +265,7 @@ describe("RejectedUsersReportView", () => {
       expect(screen.getByText("Mostrando 11-20 de 23 usuarios")).toBeDefined();
     });
     expect(getSearchInput().value).toBe("usuario");
-    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 2, limit: 10, search: "usuario" }, expect.any(AbortSignal));
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 2, limit: 10, search: "usuario", snapshotAt: expect.any(String) }, expect.any(AbortSignal));
   });
 
   it("se mantiene en la página actual si solo se agregan espacios al inicio o al final de la búsqueda", async () => {
@@ -224,7 +285,7 @@ describe("RejectedUsersReportView", () => {
 
     expect(screen.getByText("Mostrando 21-23 de 23 usuarios")).toBeDefined();
     expect(screen.getByRole("button", { name: "Página 3" }).getAttribute("aria-current")).toBe("page");
-    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 3, limit: 10, search: "usuario" }, expect.any(AbortSignal));
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 3, limit: 10, search: "usuario", snapshotAt: expect.any(String) }, expect.any(AbortSignal));
   });
 
   it("oculta el contador y la paginación cuando la búsqueda no encuentra usuarios", async () => {
@@ -235,13 +296,11 @@ describe("RejectedUsersReportView", () => {
     expect(screen.queryByRole("navigation", { name: "Paginación" })).toBeNull();
   });
 
-  it("muestra solo la página 1 cuando los resultados caben en una página", async () => {
+  it("oculta la paginación cuando los resultados caben en una página", async () => {
     renderWithQuery(<RejectedUsersReportView />);
     await searchFor("juan.perez@", "Mostrando 1-1 de 1 usuarios");
 
-    const pageButtons = screen.getAllByRole("button", { name: /^Página \d+$/ });
-    expect(pageButtons.map((button) => button.textContent)).toEqual(["1"]);
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Página siguiente" }).disabled).toBe(true);
+    expect(screen.queryByRole("navigation", { name: "Paginación" })).not.toBeInTheDocument();
   });
 
   it("al volver a entrar muestra la barra vacía y la lista completa", async () => {

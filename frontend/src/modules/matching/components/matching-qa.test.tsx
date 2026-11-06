@@ -8,6 +8,8 @@ import { CandidateList } from "./candidate-list";
 import { CandidateDetailPanel } from "./candidate-detail-panel";
 import { RadarChart } from "./radar-chart";
 
+const radarMock = vi.hoisted(() => vi.fn(() => null));
+
 vi.mock("recharts", () => ({
   ResponsiveContainer: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   RadarChart: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -20,7 +22,7 @@ vi.mock("recharts", () => ({
   ),
   PolarGrid: () => null,
   PolarRadiusAxis: () => null,
-  Radar: () => null,
+  Radar: radarMock,
   Tooltip: () => null,
   Text: () => null,
 }));
@@ -74,7 +76,27 @@ describe("QA HU3 y conexión HU4", () => {
     );
     const legend = screen.getByRole("list", { name: "Leyenda del radar comparativo" });
     const entries = within(legend).getAllByRole("listitem");
-    expect(entries.map((entry) => entry.textContent)).toEqual(["Perfil objetivo", "Lucía Flores Mamani"]);
+    expect(entries.map((entry) => entry.textContent)).toEqual(["Perfil objetivo, línea discontinua", "Lucía Flores Mamani, línea continua"]);
+  });
+
+  it("distinguishes the applicant and vacancy target by color, line style and label", () => {
+    render(<Panel />);
+    const legend = screen.getByRole("list", { name: "Leyenda del radar comparativo" });
+    const [targetEntry, candidateEntry] = within(legend).getAllByRole("listitem");
+    expect(targetEntry).toHaveTextContent("Objetivo de la vacante");
+    expect(targetEntry.querySelector("[aria-hidden]")).toHaveClass("border-dashed");
+    expect(radarMock).toHaveBeenCalledWith(expect.objectContaining({ dataKey: "target", stroke: "var(--color-radar-target)", strokeDasharray: "4 3" }), undefined);
+    expect(candidateEntry).toHaveTextContent(`Postulante: ${lucia.name}`);
+    expect(candidateEntry.querySelector("[aria-hidden]")).toHaveClass("border-solid");
+    expect(radarMock).toHaveBeenCalledWith(expect.objectContaining({ dataKey: "candidate", stroke: "var(--color-radar-candidate)", strokeDasharray: undefined }), undefined);
+  });
+
+  it("does not confirm an interview with a nonempty invalid date", () => {
+    render(<Panel />);
+    fireEvent.click(screen.getByRole("button", { name: "Agendar entrevista" }));
+    fireEvent.change(screen.getByLabelText("Fecha de entrevista"), { target: { value: "31/02/2026" } });
+    fireEvent.change(screen.getByLabelText("Hora de entrevista"), { target: { value: "14:30" } });
+    expect(screen.getByRole("button", { name: "Confirmar propuesta" })).toBeDisabled();
   });
 
   it("selecciona un eje del radar tanto con ratón como con teclado", () => {
@@ -90,14 +112,16 @@ describe("QA HU3 y conexión HU4", () => {
     expect(onAxisSelect).toHaveBeenNthCalledWith(2, "qa");
   });
 
-  it("muestra teléfono numérico y los tres botones con la misma variante", () => {
+  it("muestra teléfono y distingue las acciones en una sola fila", () => {
     render(<Panel candidate={mariana} />);
     fireEvent.click(screen.getByRole("button", { name: "Contactar candidato" }));
     expect(screen.getByLabelText("Teléfono de demostración").textContent).toBe(mariana.demoPhone);
     const actions = ["Contactar candidato", "Agendar entrevista", "Descartar perfil"].map(
       (name) => screen.getByRole("button", { name }),
     );
-    actions.forEach((button) => expect(button.className).toBe(actions[0].className));
+    expect(actions[0].parentElement).toHaveClass("grid", "grid-cols-3");
+    expect(actions[1]).toHaveClass("text-accent");
+    expect(actions[2]).toHaveClass("text-danger");
   });
 
 });

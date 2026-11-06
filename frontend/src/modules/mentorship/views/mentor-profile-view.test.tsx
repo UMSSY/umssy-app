@@ -8,6 +8,8 @@ import * as service from "../services/mentor-profile.service";
 import { MENTOR_PROFILE_FIXTURE } from "../testing/mentor-profile.fixture";
 import { MentorProfileView } from "./mentor-profile-view";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -30,6 +32,20 @@ function mockCurrentUser(id: string) {
 }
 
 describe("MentorProfileView", () => {
+  it("muestra intereses profesionales reales", async () => {
+    vi.spyOn(service, "getMentorProfile").mockResolvedValue(MENTOR_PROFILE_FIXTURE);
+    render(<MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />);
+    expect(await screen.findByRole("heading", { name: "Intereses profesionales" })).toBeInTheDocument();
+    for (const skill of MENTOR_PROFILE_FIXTURE.skills) expect(screen.getByText(skill.name)).toBeInTheDocument();
+  });
+
+  it("informa un perfil sin nombre en lugar de presentar datos vacíos", async () => {
+    vi.spyOn(service, "getMentorProfile").mockResolvedValue({ ...MENTOR_PROFILE_FIXTURE, fullName: " " });
+    render(<MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />);
+    expect(await screen.findByText("Perfil incompleto")).toBeInTheDocument();
+    expect(screen.queryByText("Solicitar mentoría")).not.toBeInTheDocument();
+  });
+
   it("muestra la información real del mentor", async () => {
     vi.spyOn(service, "getMentorProfile").mockResolvedValue(
       MENTOR_PROFILE_FIXTURE,
@@ -47,8 +63,7 @@ describe("MentorProfileView", () => {
     expect(screen.getByRole("heading", { name: "Sobre mí" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Trayectoria actual" })).toBeInTheDocument();
     expect(container.querySelector("main > div > div.grid")).toHaveClass(
-      "grid-cols-1",
-      "xl:grid-cols-12",
+      "grid-cols-12",
     );
   });
 
@@ -112,20 +127,17 @@ describe("MentorProfileView", () => {
     expect(screen.getByText(isAvailable ? "Disponible para mentoría" : "No disponible")).toBeInTheDocument();
   });
 
-  it("conserva la acción y la ruta de otro mentor disponible", async () => {
+  it("conserva la acción habilitada de otro mentor disponible", async () => {
     saveAccessToken("test-token");
     mockCurrentUser("0fa5e6de-63a4-430e-87fb-22f5eb700ecd");
     vi.spyOn(service, "getMentorProfile").mockResolvedValue(MENTOR_PROFILE_FIXTURE);
 
     render(<MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />);
 
-    expect(await screen.findByRole("link", { name: "Solicitar mentoría" })).toHaveAttribute(
-      "href",
-      `/mentors/${MENTOR_PROFILE_FIXTURE.id}/availability`,
-    );
+    expect(await screen.findByRole("button", { name: "Solicitar mentoría" })).toBeEnabled();
   });
 
-  it("mantiene deshabilitada la acción de otro mentor no disponible", async () => {
+  it("mantiene deshabilitada la acción de otro mentor no disponible, con el texto del CA6", async () => {
     saveAccessToken("test-token");
     mockCurrentUser("0fa5e6de-63a4-430e-87fb-22f5eb700ecd");
     vi.spyOn(service, "getMentorProfile").mockResolvedValue({
@@ -135,7 +147,11 @@ describe("MentorProfileView", () => {
 
     render(<MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />);
 
-    expect(await screen.findByRole("button", { name: "Solicitar mentoría" })).toBeDisabled();
+    expect(
+      await screen.findByRole("button", {
+        name: "Este mentor no está recibiendo solicitudes por ahora",
+      }),
+    ).toBeDisabled();
   });
 
   it("no muestra la solicitud mientras se resuelve la identidad", async () => {

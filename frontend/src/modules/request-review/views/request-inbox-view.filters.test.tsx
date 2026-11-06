@@ -2,24 +2,14 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { automaticValidationService } from "../services/automatic-validation.service";
 import { requestReviewService } from "../services/request-review.service";
 import type { ReviewListItem } from "../types/request-review.types";
 import { RequestInboxView } from "./request-inbox-view";
 
 const listRequests = vi.spyOn(requestReviewService, "listRequests");
 const getSummary = vi.spyOn(requestReviewService, "getSummary");
-
-const SUMMARY = {
-  pendingCount: 3,
-  pendingOver24hCount: 1,
-  decidedTodayCount: 0,
-  approvedTodayCount: 0,
-  rejectedTodayCount: 0,
-  averageReviewHours: null,
-  reviewTimeGoalHours: 48,
-  rejectedThisMonthCount: 0,
-  topRejectionReason: null,
-};
+const getAutomationSummary = vi.spyOn(automaticValidationService, "getAutomationSummary");
 
 function row(index: number): ReviewListItem {
   return {
@@ -40,12 +30,12 @@ const listCalls = () => listRequests.mock.calls.filter((call) => call[2] === und
 const lastCall = () => listCalls().at(-1);
 const EMPTY_FILTERS = { search: "", career: "", period: "all" };
 
-describe("RequestInboxView: filtros y resumen", () => {
+describe("RequestInboxView: filtros", () => {
   beforeEach(() => {
     listRequests.mockReset();
     getSummary.mockReset();
-    getSummary.mockResolvedValue({ ok: true, data: SUMMARY });
     listRequests.mockResolvedValue(page([row(1)]));
+    getAutomationSummary.mockResolvedValue({ ok: true, data: { manualReviewCount: 0, autoApprovedTodayCount: 0, autoRejectedTodayCount: 0, receivedTodayCount: 0 } });
   });
   afterEach(() => cleanup());
 
@@ -194,32 +184,11 @@ describe("RequestInboxView: filtros y resumen", () => {
     expect(await screen.findByText("Persona 1")).toBeInTheDocument();
   });
 
-  it("muestra las tarjetas de resumen con los datos del servicio", async () => {
-    renderWithQuery(<RequestInboxView />);
-
-    expect(await screen.findByText("Pendientes de dictamen")).toBeInTheDocument();
-    expect(screen.getByText("1 lleva más de 24 h")).toBeInTheDocument();
-    expect(screen.getByText("Sin datos")).toBeInTheDocument();
-    expect(screen.getByText("Meta: menos de 48 h")).toBeInTheDocument();
-  });
-
-  it("si el resumen falla muestra el error y Reintentar lo pide de nuevo sin afectar la lista", async () => {
-    const user = userEvent.setup();
-    getSummary.mockResolvedValueOnce({ ok: false, status: 0, message: "No se pudo conectar con el servidor. Inténtalo de nuevo." });
-    renderWithQuery(<RequestInboxView />);
-
-    expect(await screen.findByText("No se pudo conectar con el servidor. Inténtalo de nuevo.")).toBeInTheDocument();
-    expect(await screen.findByText("Persona 1")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Reintentar" }));
-
-    expect(await screen.findByText("Pendientes de dictamen")).toBeInTheDocument();
-    expect(getSummary).toHaveBeenCalledTimes(2);
-  });
-  it("cambiar de pestaña o de filtro no vuelve a pedir el resumen ni muestra su esqueleto", async () => {
+  it("cambiar de pestaña o de filtro conserva la lista y no vuelve a pedir el resumen", async () => {
     const user = userEvent.setup();
     renderWithQuery(<RequestInboxView />);
-    await screen.findByText("Pendientes de dictamen");
+    await screen.findByText("Persona 1");
+    expect(screen.queryByText("Pendientes de dictamen")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("tab", { name: /^Aprobadas/ }));
     await waitFor(() => expect(lastCall()?.[0]).toBe("approved"));

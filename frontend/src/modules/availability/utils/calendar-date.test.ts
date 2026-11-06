@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { formatDayAndMonth, formatLongDate, getBoliviaToday, toCalendarDate, toDateString } from "./calendar-date"
+import {
+  addDaysToDateString,
+  formatDayAndMonth,
+  formatLongDate,
+  getBoliviaToday,
+  toCalendarDate,
+  toDateString,
+} from "./calendar-date"
 import { pad } from "./pad"
 
 describe("calendar-date", () => {
@@ -34,5 +41,13 @@ describe("calendar-date", () => {
     vi.setSystemTime(new Date("2026-10-09T02:00:00Z"))
 
     expect(toDateString(getBoliviaToday())).toBe("2026-10-08")
+  })
+
+  it("suma días a una fecha cruzando de mes", () => {
+    expect(addDaysToDateString("2026-10-13", 84)).toBe("2027-01-05")
+  })
+
+  it("suma cero días y devuelve la misma fecha", () => {
+    expect(addDaysToDateString("2026-10-13", 0)).toBe("2026-10-13")
   })
 })

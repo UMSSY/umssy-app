@@ -6,4 +6,5 @@ export interface CertificationResponse {
   hasDocument: boolean;
   createdAt: string;
   updatedAt: string;
+  document?: { fileName: string; mimeType: string; sizeBytes: number; uploadedAt: string };
 }

@@ -12,10 +12,10 @@ export function FeedbackMessage({ feedback }: FeedbackMessageProps) {
   return (
     <div
       role={isError ? "alert" : "status"}
-      className={cn("mb-6 flex items-center gap-3 rounded-2xl border px-6 py-4 text-[15px]", isError ? "border-accent/30 bg-interaction text-danger" : "border-border bg-surface text-ink")}
+      className={cn("mb-5 flex animate-in items-center gap-3 rounded-lg border px-4 py-3 text-sm duration-150 fade-in-0 slide-in-from-top-1", isError ? "border-danger/25 bg-brand-red/5 text-danger" : "border-availability-border bg-availability text-availability-foreground")}
     >
       {isError ? (
-        <CircleAlert aria-hidden="true" className="size-5 shrink-0 text-accent" />
+        <CircleAlert aria-hidden="true" className="size-5 shrink-0 text-danger" />
       ) : (
         <CircleCheck aria-hidden="true" className="size-5 shrink-0 text-ink-soft" />
       )}

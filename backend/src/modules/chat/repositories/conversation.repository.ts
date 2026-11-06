@@ -1,6 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
+const CONTACT_USER_SELECT = {
+  select: {
+    id: true,
+    firstName: true,
+    lastName: true,
+    photoUrl: true,
+    email: true,
+    headline: true,
+    roles: {
+      where: { deletedAt: null },
+      select: {
+        role: {
+          select: { name: true },
+        },
+      },
+    },
+  },
+};
+
 @Injectable()
 export class ConversationRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -15,8 +34,8 @@ export class ConversationRepository {
     return this.prisma.conversation.findUnique({
       where: { userAId_userBId: { userAId, userBId } },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true } },
-        userB: { select: { id: true, firstName: true, lastName: true } },
+        userA: CONTACT_USER_SELECT,
+        userB: CONTACT_USER_SELECT,
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
@@ -45,13 +64,47 @@ export class ConversationRepository {
         },
       },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true } },
-        userB: { select: { id: true, firstName: true, lastName: true } },
+        userA: CONTACT_USER_SELECT,
+        userB: CONTACT_USER_SELECT,
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
           include: { status: { select: { title: true } } },
         },
+      },
+    });
+  }
+
+  async upsertByEventId(eventId: string, userId: string, now: Date) {
+    return this.prisma.$transaction(async tx => {
+      const conversation = await tx.conversation.upsert({
+        where: { eventId },
+        update: {},
+        create: {
+          eventId,
+          userAId: null,
+          userBId: null,
+          updatedAt: now,
+          createdAt: now,
+        },
+        select: { id: true, userAId: true, userBId: true },
+      });
+
+      await tx.conversationParticipant.upsert({
+        where: { conversationId_userId: { conversationId: conversation.id, userId } },
+        update: { lastReadAt: now },
+        create: { conversationId: conversation.id, userId, lastReadAt: now },
+      });
+
+      return conversation.id;
+    });
+  }
+
+  async findParticipantsByConversationId(conversationId: string) {
+    return this.prisma.conversationParticipant.findMany({
+      where: { conversationId },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true } },
       },
     });
   }
@@ -71,13 +124,30 @@ export class ConversationRepository {
     return this.prisma.conversation.findMany({
       where: {
         OR: [
-          { userAId: userId },
-          { userBId: userId },
+          {
+            eventId: null,
+            OR: [
+              { userAId: userId },
+              { userBId: userId },
+            ],
+          },
+          {
+            eventId: { not: null },
+            participants: {
+              some: { userId },
+            },
+          },
         ],
       },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true } },
-        userB: { select: { id: true, firstName: true, lastName: true } },
+        userA: CONTACT_USER_SELECT,
+        userB: CONTACT_USER_SELECT,
+        event: { select: { id: true, title: true } },
+        participants: {
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true } },
+          },
+        },
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,

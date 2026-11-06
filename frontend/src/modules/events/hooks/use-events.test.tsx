@@ -1,7 +1,9 @@
-import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useEvents } from './use-events';
-import type { EventsListResponse } from '../types/event.types';
+import { clearAccessToken, saveAccessToken } from '@/shared/services/storage/access-token-storage';
+import type { EventItem, EventsListResponse } from '../types/event.types';
 
 const getEventsMock = vi.hoisted(() => vi.fn());
 
@@ -11,13 +13,27 @@ vi.mock('../services/events.service', () => ({
 
 afterEach(() => {
   cleanup();
+  clearAccessToken();
 });
 
 beforeEach(() => {
+  clearAccessToken();
   getEventsMock.mockReset();
 });
 
 describe('useEvents', () => {
+  it('merges repeated event IDs across pages using the latest counter without merging different workshops', async () => {
+    const first = Array.from({ length: 50 }, (_, index) => ({ id: `event-${index}`, title: 'Same title', registrationCount: 1 }));
+    getEventsMock.mockResolvedValueOnce({ data: first, page: 1, offset: 0 })
+      .mockResolvedValueOnce({ data: [{ ...first[0], registrationCount: 2 }, { ...first[0], id: 'other-event' }], page: 2, offset: 50 });
+    const { result } = renderHook(() => useEvents());
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+    act(() => result.current.loadMore());
+    await waitFor(() => expect(result.current.events).toHaveLength(51));
+    expect(result.current.events.filter(event => event.id === 'event-0')).toHaveLength(1);
+    expect(result.current.events.find(event => event.id === 'event-0')?.registrationCount).toBe(2);
+    expect(result.current.events.some(event => event.id === 'other-event')).toBe(true);
+  });
   it('carga la primera pagina y actualiza el estado', async () => {
     const response: EventsListResponse = {
       data: [],
@@ -31,8 +47,9 @@ describe('useEvents', () => {
     expect(result.current.isLoading).toBe(true);
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(getEventsMock).toHaveBeenCalledWith(
-      { page: 1, limit: 50 },
+      { page: 1, includeProposals: true, limit: 50 },
       expect.any(AbortSignal),
+      null,
     );
     expect(result.current.events).toEqual([]);
     expect(result.current.hasMore).toBe(false);
@@ -67,10 +84,38 @@ describe('useEvents', () => {
     await waitFor(() => expect(result.current.events).toHaveLength(51));
 
     expect(getEventsMock).toHaveBeenLastCalledWith(
-      { page: 2, limit: 50 },
+      { page: 2, includeProposals: true, limit: 50 },
       expect.any(AbortSignal),
+      null,
     );
     expect(result.current.hasMore).toBe(false);
+  });
+
+  it('keeps loaded pages when the event list is refreshed', async () => {
+    const firstPage: EventsListResponse = {
+      data: Array.from({ length: 50 }, (_, index) => ({ id: `event-${index}`, availableSpots: 5 })) as EventsListResponse['data'],
+      page: 1,
+      offset: 0,
+    };
+    const secondPage: EventsListResponse = {
+      data: [{ id: 'event-50', availableSpots: 5 }] as EventsListResponse['data'],
+      page: 2,
+      offset: 50,
+    };
+    getEventsMock
+      .mockResolvedValueOnce(firstPage)
+      .mockResolvedValueOnce(secondPage)
+      .mockResolvedValueOnce({ ...firstPage, data: firstPage.data.map((item, index) => index === 0 ? { ...item, availableSpots: 4 } : item) })
+      .mockResolvedValueOnce(secondPage);
+
+    const { result, client } = renderHook(() => useEvents());
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+    act(() => result.current.loadMore());
+    await waitFor(() => expect(result.current.events).toHaveLength(51));
+    await act(async () => { await client.invalidateQueries({ queryKey: ['events', 'list'] }); });
+    await waitFor(() => expect(result.current.events[0].availableSpots).toBe(4));
+    expect(result.current.events).toHaveLength(51);
+    expect(getEventsMock).toHaveBeenCalledTimes(4);
   });
 
   it('expone error y permite volver a solicitar la primera pagina', async () => {
@@ -101,5 +146,40 @@ describe('useEvents', () => {
     unmount();
 
     expect(requestSignal?.aborted).toBe(true);
+  });
+
+  it('separa hasSupported entre la sesión anónima y dos usuarios', async () => {
+    getEventsMock.mockImplementation((
+      _params: unknown,
+      _signal: AbortSignal,
+      token: string | null,
+    ) => Promise.resolve({
+      data: [{ id: 'proposal-1', hasSupported: token === 'token-a' }] as EventItem[],
+      page: 1,
+      offset: 0,
+    }));
+
+    const { result } = renderHook(() => useEvents());
+    await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(false));
+
+    act(() => saveAccessToken('token-a'));
+    await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(true));
+
+    act(() => saveAccessToken('token-b'));
+    await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(false));
+
+    act(() => clearAccessToken());
+    await waitFor(() => expect(result.current.events[0]?.hasSupported).toBe(false));
+
+    expect(getEventsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ includeProposals: true }),
+      expect.any(AbortSignal),
+      'token-a',
+    );
+    expect(getEventsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ includeProposals: true }),
+      expect.any(AbortSignal),
+      'token-b',
+    );
   });
 });

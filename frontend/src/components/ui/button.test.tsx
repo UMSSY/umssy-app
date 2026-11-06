@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-import { Button, buttonVariants } from "./button"
+import { Button } from "./button"
+import { buttonVariants } from "./button-variants"
 
 describe("Button", () => {
   it("renders with default variant and size classes", () => {
@@ -16,9 +17,9 @@ describe("Button", () => {
   })
 
   it("applies a custom className", () => {
-    render(<Button className="my-custom-class">Custom</Button>)
+    render(<Button className="mt-2">Custom</Button>)
     const button = screen.getByRole("button", { name: "Custom" })
-    expect(button.className).toContain("my-custom-class")
+    expect(button.className).toContain("mt-2")
   })
 
   it("calls onClick when clicked", async () => {
@@ -50,18 +51,18 @@ describe("Button", () => {
   it("renders the destructive variant with its class", () => {
     render(<Button variant="destructive">Eliminar</Button>)
     const button = screen.getByRole("button", { name: "Eliminar" })
-    expect(button.className).toContain("bg-destructive/10")
+    expect(button.className).toContain("bg-critical-action")
   })
 
   it("renders the small size with its class", () => {
     render(<Button size="sm">Pequeño</Button>)
     const button = screen.getByRole("button", { name: "Pequeño" })
-    expect(button.className).toContain("h-7")
+    expect(button.className).toContain("h-8")
   })
 
   it("buttonVariants returns a string with the given options", () => {
     const classes = buttonVariants({ variant: "ghost", size: "lg" })
     expect(typeof classes).toBe("string")
-    expect(classes).toContain("h-9")
+    expect(classes).toContain("h-11")
   })
 })

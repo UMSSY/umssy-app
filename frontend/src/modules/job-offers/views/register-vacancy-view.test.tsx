@@ -1,7 +1,17 @@
+import { Button as TestButton } from "@/components/ui/button";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { toast } from "sonner";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_CONDITIONS, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
 import { RegisterVacancyView } from "./register-vacancy-view";
+
+const { push, publishOptions } = vi.hoisted(() => ({
+  push: vi.fn(),
+  publishOptions: { current: undefined as { onSuccess?: () => void } | undefined },
+}));
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const { form, publication, leaveGuard } = vi.hoisted(() => ({
   form: {
@@ -38,7 +48,12 @@ const useLeaveGuard = vi.fn((isActive: boolean) => {
 });
 
 vi.mock("../hooks/use-job-offer-form", () => ({ useJobOfferForm: () => form }));
-vi.mock("../hooks/use-publish-job-offer", () => ({ usePublishJobOffer: () => publication }));
+vi.mock("../hooks/use-publish-job-offer", () => ({
+  usePublishJobOffer: (_jobOfferId?: string, options?: { onSuccess?: () => void }) => {
+    publishOptions.current = options;
+    return publication;
+  },
+}));
 vi.mock("../hooks/use-leave-guard", () => ({ useLeaveGuard: (isActive: boolean) => useLeaveGuard(isActive) }));
 vi.mock("../components/vacancy-stepper", () => ({
   VacancyStepper: ({ currentStep }: { currentStep: number }) => <div data-testid="stepper">Paso {currentStep}</div>,
@@ -46,16 +61,16 @@ vi.mock("../components/vacancy-stepper", () => ({
 vi.mock("../components/information-step", () => ({
   InformationStep: ({ onCancel, onContinue }: { onCancel: () => void; onContinue: () => void }) => (
     <div data-testid="information-step">
-      <button onClick={onCancel}>Cancelar</button>
-      <button onClick={onContinue}>Continuar</button>
+      <TestButton onClick={onCancel}>Cancelar</TestButton>
+      <TestButton onClick={onContinue}>Continuar</TestButton>
     </div>
   ),
 }));
 vi.mock("../components/requirements-step", () => ({
   RequirementsStep: ({ onPrevious, onContinue }: { onPrevious: () => void; onContinue: () => void }) => (
     <div data-testid="requirements-step">
-      <button onClick={onPrevious}>Anterior</button>
-      <button onClick={onContinue}>Continuar</button>
+      <TestButton onClick={onPrevious}>Anterior</TestButton>
+      <TestButton onClick={onContinue}>Continuar</TestButton>
     </div>
   ),
 }));
@@ -63,18 +78,14 @@ vi.mock("../components/preview-step", () => ({
   PreviewStep: (props: {
     onPrevious: () => void;
     onConfirm: () => void;
-    onFinish: () => void;
     isSubmitting: boolean;
-    isPublished: boolean;
     company: { name: string };
   }) => (
     <div data-testid="preview-step">
       <span>{props.isSubmitting ? "enviando" : "libre"}</span>
-      <span>{props.isPublished ? "publicada" : "pendiente"}</span>
       <span>{props.company.name}</span>
-      <button onClick={props.onPrevious}>Anterior</button>
-      <button onClick={props.onConfirm}>Confirmar</button>
-      <button onClick={props.onFinish}>Aceptar</button>
+      <TestButton onClick={props.onPrevious}>Anterior</TestButton>
+      <TestButton onClick={props.onConfirm}>Confirmar</TestButton>
     </div>
   ),
 }));
@@ -195,8 +206,9 @@ describe("RegisterVacancyView", () => {
     publication.isSuccess = true;
     render(<RegisterVacancyView />);
 
-    expect(screen.getByText("publicada")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
+    expect(screen.getByRole("heading", { name: "Vacante publicada" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Volver a mi empresa" })).toHaveAttribute("href", "/recruiters");
+    fireEvent.click(screen.getByRole("button", { name: "Publicar otra vacante" }));
 
     expect(publication.reset).toHaveBeenCalledOnce();
     expect(form.reset).toHaveBeenCalledOnce();
@@ -209,5 +221,47 @@ describe("RegisterVacancyView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Anterior" }));
 
     expect(form.goBack).toHaveBeenCalledOnce();
+  });
+  it("al publicar una vacante nueva no redirige ni notifica desde la vista", () => {
+    setStep(3, VALID_CONDITIONS, true);
+    render(<RegisterVacancyView />);
+
+    expect(publishOptions.current?.onSuccess).toBeUndefined();
+  });
+
+  it("al guardar una edición avisa con una notificación y vuelve al listado", () => {
+    setStep(3, VALID_CONDITIONS, true);
+    render(<RegisterVacancyView jobOfferId="offer-1" />);
+
+    publishOptions.current?.onSuccess?.();
+
+    expect(toast.success).toHaveBeenCalledWith("Vacante actualizada correctamente", {
+      position: "top-center",
+      duration: 5000,
+    });
+    expect(push).toHaveBeenCalledWith("/recruiters");
+  });
+
+  it("en la edición los diálogos hablan de cambios no guardados", () => {
+    setStep(1, VALID_CONDITIONS, true);
+    leaveGuard.isLeaveDialogOpen = true;
+    render(<RegisterVacancyView jobOfferId="offer-1" />);
+
+    expect(screen.getByText("¿Salir sin guardar?")).toBeInTheDocument();
+    expect(screen.getByText("Los cambios no guardados se perderán si abandonas la pantalla.")).toBeInTheDocument();
+  });
+
+  it("al descartar una edición vuelve al listado", () => {
+    setStep(1, VALID_CONDITIONS, true);
+    render(<RegisterVacancyView jobOfferId="offer-1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(
+      screen.getByText("Los cambios no guardados se perderán y la vacante conservará sus datos originales."),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Descartar" }));
+
+    expect(form.reset).toHaveBeenCalledOnce();
+    expect(push).toHaveBeenCalledWith("/recruiters");
   });
 });

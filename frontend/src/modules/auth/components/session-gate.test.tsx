@@ -1,3 +1,4 @@
+import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
@@ -31,7 +32,7 @@ describe("SessionGate", () => {
   });
 
   it("con token muestra el contenido, no redirige y mantiene la cookie", () => {
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    saveAccessToken("token-de-prueba");
     renderGate();
 
     expect(screen.getByText("contenido privado")).toBeInTheDocument();
@@ -59,12 +60,12 @@ describe("SessionGate", () => {
   });
 
   it("un 401 del backend cierra la sesión y lleva al login", async () => {
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    saveAccessToken("token-de-prueba");
     renderGate();
 
     await expect(
       apiClient.get("/algo", {
-        adapter: () => Promise.reject(Object.assign(new Error("no autorizado"), { isAxiosError: true, response: { status: 401 } })),
+        adapter: (config) => Promise.reject(Object.assign(new Error("no autorizado"), { isAxiosError: true, config, response: { status: 401 } })),
       }),
     ).rejects.toThrow("no autorizado");
 
@@ -74,12 +75,12 @@ describe("SessionGate", () => {
   });
 
   it("otros errores no cierran la sesión", async () => {
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    saveAccessToken("token-de-prueba");
     renderGate();
 
     await expect(
       apiClient.get("/algo", {
-        adapter: () => Promise.reject(Object.assign(new Error("fallo"), { isAxiosError: true, response: { status: 500 } })),
+        adapter: (config) => Promise.reject(Object.assign(new Error("fallo"), { isAxiosError: true, config, response: { status: 500 } })),
       }),
     ).rejects.toThrow("fallo");
 
@@ -87,17 +88,17 @@ describe("SessionGate", () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
-  it("al desmontar quita el interceptor de 401", async () => {
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+  it("el interceptor central sigue invalidando la sesión después de desmontar el guard", async () => {
+    saveAccessToken("token-de-prueba");
     const { unmount } = renderGate();
     unmount();
 
     await expect(
       apiClient.get("/algo", {
-        adapter: () => Promise.reject(Object.assign(new Error("no autorizado"), { isAxiosError: true, response: { status: 401 } })),
+        adapter: (config) => Promise.reject(Object.assign(new Error("no autorizado"), { isAxiosError: true, config, response: { status: 401 } })),
       }),
     ).rejects.toThrow();
 
-    expect(sessionStorage.getItem("accessToken")).toBe("token-de-prueba");
+    expect(sessionStorage.getItem("accessToken")).toBeNull();
   });
 });

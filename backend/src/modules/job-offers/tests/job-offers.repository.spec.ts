@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { Prisma } from '../../../prisma/client.js';
 import { JOB_OFFER_CREATED_SELECT, JOB_OFFER_SELECT } from '../constants/job-offer.constants.js';
+import { JobOfferNotFoundException } from '../exceptions/index.js';
 import { JobOffersRepository } from '../repositories/job-offers.repository.js';
+import { JobOfferContractType, JobOfferModality, JobOfferStatus } from '../types/job-offer.enum.js';
 
 function createPrisma() {
   return {
@@ -9,7 +12,7 @@ function createPrisma() {
     jobOfferModality: { findUnique: vi.fn() },
     jobOfferContractType: { findUnique: vi.fn() },
     jobOfferStatus: { findUnique: vi.fn() },
-    jobOffer: { create: vi.fn(), findMany: vi.fn() },
+    jobOffer: { create: vi.fn(), findMany: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
   };
 }
 
@@ -47,6 +50,52 @@ describe('JobOffersRepository', () => {
     });
   });
 
+  it('al reabrir cambia el estado y renueva la fecha de publicación', async () => {
+    const publishedAt = new Date('2026-10-28T14:00:00.000Z');
+    prisma.jobOffer.update.mockResolvedValue({ id: 'offer-1' });
+
+    await repository.reopen('offer-1', 'status-published', publishedAt);
+
+    expect(prisma.jobOffer.update).toHaveBeenCalledWith({
+      where: { id: 'offer-1' },
+      data: { statusId: 'status-published', publishedAt },
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('responde vacante no encontrada si se borró antes de escribir', async () => {
+    const recordNotFound = new Prisma.PrismaClientKnownRequestError('Record not found', {
+      code: 'P2025',
+      clientVersion: 'test',
+    });
+    prisma.jobOffer.update.mockRejectedValue(recordNotFound);
+
+    await expect(repository.updateStatus('offer-1', 'status-deleted')).rejects.toBeInstanceOf(
+      JobOfferNotFoundException,
+    );
+    await expect(
+      repository.reopen('offer-1', 'status-published', new Date()),
+    ).rejects.toBeInstanceOf(JobOfferNotFoundException);
+  });
+
+  it('no oculta otros errores de la base de datos al escribir', async () => {
+    const failure = new Error('connection lost');
+    prisma.jobOffer.update.mockRejectedValue(failure);
+
+    await expect(repository.updateStatus('offer-1', 'status-deleted')).rejects.toBe(failure);
+  });
+
+  it('busca el id de un estado por su título', async () => {
+    prisma.jobOfferStatus.findUnique.mockResolvedValueOnce({ id: 'status-1' }).mockResolvedValueOnce(null);
+
+    expect(await repository.findStatusId(JobOfferStatus.DELETED)).toBe('status-1');
+    expect(await repository.findStatusId(JobOfferStatus.CLOSED)).toBeNull();
+    expect(prisma.jobOfferStatus.findUnique).toHaveBeenCalledWith({
+      where: { title: 'Eliminada' },
+      select: { id: true },
+    });
+  });
+
   it('devuelve todos los ids en null si los catálogos no están sembrados', async () => {
     prisma.jobOfferModality.findUnique.mockResolvedValue(null);
     prisma.jobOfferContractType.findUnique.mockResolvedValue({ id: 'contract-1' });
@@ -74,6 +123,9 @@ describe('JobOffersRepository', () => {
       salaryRange: 'Bs 5.000',
       languages: 'Español',
       locationUrl: 'https://goo.gl/maps/a',
+      requiredCareers: [],
+      minExperienceYears: null,
+      otherRequirements: [],
       skillIds: ['skill-1', 'skill-2'],
     });
 
@@ -99,20 +151,112 @@ describe('JobOffersRepository', () => {
         status: { title: 'Publicada' },
         OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { publishedAt: 'desc' },
       select: JOB_OFFER_SELECT,
     });
   });
-
-  it('lista las vacantes de una empresa', async () => {
+    it('lista las vacantes de una empresa sin filtros, de la más reciente a la más antigua', async () => {
     prisma.jobOffer.findMany.mockResolvedValue([]);
 
-    await repository.findByCompany('company-1');
+    await repository.findByCompany('company-1', { sortBy: 'publishedAt', order: 'desc' });
 
     expect(prisma.jobOffer.findMany).toHaveBeenCalledWith({
-      where: { companyId: 'company-1' },
-      orderBy: { createdAt: 'desc' },
+      where: { companyId: 'company-1'  },
+      orderBy: [{ publishedAt: 'desc' }, { id: 'desc' }],
       select: JOB_OFFER_SELECT,
     });
   });
+
+  it('aplica los filtros al listar las vacantes de una empresa', async () => {
+    prisma.jobOffer.findMany.mockResolvedValue([]);
+
+    await repository.findByCompany('company-1', {
+      modality: JobOfferModality.REMOTE,
+      contractType: JobOfferContractType.PART_TIME,
+      dateFrom: '2026-10-01',
+      dateTo: '2026-10-31',
+      search: 'react',
+      sortBy: 'publishedAt',
+      order: 'asc',
+    });
+
+    expect(prisma.jobOffer.findMany).toHaveBeenCalledWith({
+      where: {
+        companyId: 'company-1',
+        modality: { title: 'Remoto' },
+        contractType: { title: 'Medio tiempo' },
+        publishedAt: {
+          gte: new Date('2026-10-01T04:00:00.000Z'),
+          lt: new Date('2026-11-01T04:00:00.000Z'),
+        },
+        title: { contains: 'react', mode: 'insensitive' },
+      },
+      orderBy: [{ publishedAt: 'asc' }, { id: 'asc' }],
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('consulta una vacante por empresa e id con sus relaciones detalladas', async () => {
+    const record = { id: 'offer-1' };
+    prisma.jobOffer.findFirst.mockResolvedValue(record);
+
+    await expect(repository.findByCompanyAndId('company-1', 'offer-1')).resolves.toBe(record);
+
+    expect(prisma.jobOffer.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'offer-1',
+        companyId: 'company-1',
+        status: { title: { not: JobOfferStatus.DELETED } },
+      },
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('actualiza la vacante reemplazando sus habilidades en una sola operación', async () => {
+    prisma.jobOffer.update.mockResolvedValue({ id: 'offer-1' });
+
+    await repository.update('offer-1', {
+      modalityId: 'modality-1',
+      contractTypeId: 'contract-1',
+      title: 'DevOps',
+      description: 'Descripción',
+      category: 'Tecnología',
+      positionsAvailable: 2,
+      salaryRange: 'Bs 6.500',
+      languages: 'Español',
+      locationUrl: 'https://maps.google.com/?q=x',
+      skillIds: ['skill-1', 'skill-2'],
+    });
+
+    expect(prisma.jobOffer.update).toHaveBeenCalledWith({
+      where: { id: 'offer-1' },
+      data: expect.objectContaining({
+        title: 'DevOps',
+        modalityId: 'modality-1',
+        skills: {
+          deleteMany: {},
+          create: [{ skillId: 'skill-1' }, { skillId: 'skill-2' }],
+        },
+      }),
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
+  it('permite consultar los detalles de una vacante eliminada en el historial', async () => {
+    const record = { id: 'offer-1' };
+    prisma.jobOffer.findFirst.mockResolvedValue(record);
+
+    await expect(
+      repository.findHistoryByCompanyAndId('company-1', 'offer-1'),
+    ).resolves.toBe(record);
+
+    expect(prisma.jobOffer.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'offer-1',
+        companyId: 'company-1',
+      },
+      select: JOB_OFFER_SELECT,
+    });
+  });
+
 });

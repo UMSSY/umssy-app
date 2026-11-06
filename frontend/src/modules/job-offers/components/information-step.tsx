@@ -1,45 +1,34 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { cn } from "@/lib/utils";
 import {
   CONTRACT_TYPES,
   EDITING_KEYS,
+  FIELD_FOCUS_CLASS,
+  INTERNSHIP_CONTRACT_TYPE,
+  MAX_CATEGORY_CHARS,
   MAX_LANGUAGES_CHARS,
+  MAX_MAPS_LINK_CHARS,
   MAX_TITLE_CHARS,
   MAX_VACANCIES,
+  MAX_VACANCY_DIGITS,
   MODALITIES,
+  SALARY_TO_BE_AGREED,
   TITLE_ALLOWED_REGEX,
   TITLE_DISALLOWED_CHARS_REGEX,
-} from "../constants/vacancies.constants";
-import type {
-  Modality,
-  UpdateVacancyField,
-  VacancyConditions,
-  VacancyErrors,
-} from "../types/vacancy-conditions.types";
+  VACANCY_MESSAGES,
+} from "../constants/job-offers.constants";
+import { countDigits, findCaretAfterDigits, formatSalaryInput } from "../utils/format-salary-input";
+import type { Modality } from "../types/modality.types";
+import { getMapsLinkError } from "../utils/validate-vacancy";
 import { FieldError } from "./field-error";
 import { StepActions } from "./step-actions";
-
-interface InformationStepProps {
-  conditions: VacancyConditions;
-  errors: VacancyErrors;
-  updateField: UpdateVacancyField;
-  selectModality: (modality: Modality) => void;
-  validateField: (field: keyof VacancyConditions) => void;
-  onCancel: () => void;
-  onContinue: () => void;
-}
-
-const THOUSANDS_SEPARATOR_REGEX = /\B(?=(\d{3})+(?!\d))/g;
-
-function formatThousands(digits: string): string {
-  if (!digits) return "";
-  const amount = Number.parseInt(digits, 10);
-  return Number.isNaN(amount) ? "" : amount.toString().replace(THOUSANDS_SEPARATOR_REGEX, ".");
-}
+import type { InformationStepProps } from "../types/information-step-props.types";
 
 export function InformationStep({
   conditions,
@@ -50,6 +39,18 @@ export function InformationStep({
   onCancel,
   onContinue,
 }: InformationStepProps) {
+  const salaryInputRef = useRef<HTMLInputElement>(null);
+  const pendingSalaryDigits = useRef<number | null>(null);
+  const isInternship = conditions.contractType === INTERNSHIP_CONTRACT_TYPE;
+
+  useLayoutEffect(() => {
+    const input = salaryInputRef.current;
+    if (!input || pendingSalaryDigits.current === null) return;
+    const caret = findCaretAfterDigits(conditions.salary, pendingSalaryDigits.current);
+    pendingSalaryDigits.current = null;
+    input.setSelectionRange(caret, caret);
+  }, [conditions.salary]);
+
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sanitized = e.target.value.replace(TITLE_DISALLOWED_CHARS_REGEX, "").slice(0, MAX_TITLE_CHARS);
     updateField("title", sanitized);
@@ -72,50 +73,49 @@ export function InformationStep({
   };
 
   const handleVacancyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const digits = e.target.value.replace(/\D/g, "");
-    if (digits === "") {
-      updateField("vacancyCount", "");
-      return;
-    }
-    const count = Number.parseInt(digits, 10);
-    updateField("vacancyCount", Math.min(count, MAX_VACANCIES).toString());
+    updateField("vacancyCount", e.target.value.replace(/\D/g, "").slice(0, MAX_VACANCY_DIGITS));
   };
 
   const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value.replace(/[^\d-]/g, "");
-    if (!rawValue) {
-      updateField("salary", "");
-      return;
-    }
-    const [min, max] = rawValue.split("-");
-    const formatted = rawValue.includes("-")
-      ? `Bs ${formatThousands(min)} - ${formatThousands(max ?? "")}`
-      : `Bs ${formatThousands(min)}`;
-    updateField("salary", formatted);
+    const { value, selectionStart } = e.target;
+    const isCaretAtEnd = selectionStart === null || selectionStart === value.length;
+    pendingSalaryDigits.current = isCaretAtEnd ? null : countDigits(value.slice(0, selectionStart));
+    updateField("salary", formatSalaryInput(value, conditions.salary));
+  };
+
+  const handleContractTypeChange = (value: string | null) => {
+    updateField("contractType", value ?? "");
+    if (value === INTERNSHIP_CONTRACT_TYPE) updateField("salary", "");
   };
 
   const handleSalaryBlur = () => validateField("salary");
 
+  const vacancyCountMessage =
+    errors.vacancyCount ??
+    (Number(conditions.vacancyCount) > MAX_VACANCIES ? VACANCY_MESSAGES.maxVacancies : undefined);
+  const mapsLinkMessage =
+    errors.mapsLink ?? (conditions.mapsLink.trim() ? getMapsLinkError(conditions.mapsLink) : undefined);
+
   return (
-    <div className="mt-6 rounded-xl border border-border bg-surface">
+    <div className="rounded-lg border border-border bg-surface">
       <div className="border-b border-border px-6 py-4">
-        <h2 className="text-[22px] font-bold text-ink">
-          Informacion y condiciones de la oferta
+        <h2 className="text-lg font-bold text-ink">
+          Información y condiciones de la oferta
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 px-6 py-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-8 gap-y-5 p-6 md:grid-cols-2">
         <div className="md:col-span-2">
           <div className="flex justify-between">
-            <Label htmlFor="title" className="text-[12.5px] font-semibold">
-              Titulo del puesto <span className="text-danger">*</span>
+            <Label htmlFor="title" className="text-xs font-semibold">
+              Título del puesto <span className="text-ink-soft">*</span>
             </Label>
-            <span className="text-[11px] text-slate-400">{conditions.title.length}/{MAX_TITLE_CHARS}</span>
+            <span className="text-xs text-text-secondary">{conditions.title.length}/{MAX_TITLE_CHARS}</span>
           </div>
           <Input 
             id="title" 
             placeholder="Desarrollador Backend" 
-            className="mt-1.5" 
+            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
             value={conditions.title} 
             onChange={handleTitleChange}
             onKeyDown={handleTitleKeyDown}
@@ -127,8 +127,8 @@ export function InformationStep({
         </div>
 
         <div>
-          <Label className="text-[12.5px] font-semibold">
-            Modalidad  <span className="text-danger">*</span>
+          <Label className="text-xs font-semibold">
+            Modalidad  <span className="text-ink-soft">*</span>
           </Label>
           <ToggleGroup
             id="modality"
@@ -145,7 +145,7 @@ export function InformationStep({
                 key={modality}
                 value={modality}
                 variant="outline"
-                className="h-auto w-full rounded-md px-3 py-2 text-sm font-semibold text-ink data-[pressed]:border-ink data-[pressed]:bg-ink data-[pressed]:text-white"
+                className="h-auto w-full rounded-md px-3 py-2 text-sm font-semibold text-ink data-[pressed]:border-primary data-[pressed]:bg-primary data-[pressed]:text-primary-foreground"
               >
                 {modality}
               </ToggleGroupItem>
@@ -155,29 +155,30 @@ export function InformationStep({
         </div>
 
         <div>
-          <Label htmlFor="mapsLink" className="text-[12.5px] font-semibold">
-            Enlace de Google Maps <span className="text-danger">*</span>
+          <Label htmlFor="mapsLink" className="text-xs font-semibold">
+            Enlace de Google Maps <span className="text-ink-soft">*</span>
           </Label>
           <Input
             id="mapsLink"
-            placeholder="https://maps.google.com/?q=..."
-            className="mt-1.5"
+            placeholder="https://maps.app.goo.gl/..."
+            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
             value={conditions.mapsLink} 
-            onChange={(event) => updateField("mapsLink" , event.target.value)}
-            onBlur={() => validateField("mapsLink")}
-            aria-invalid={Boolean(errors.mapsLink)}
-            aria-describedby={errors.mapsLink ? "mapsLink-error" : undefined}
+            onChange={(event) => updateField("mapsLink", event.target.value.slice(0, MAX_MAPS_LINK_CHARS))}
+            maxLength={MAX_MAPS_LINK_CHARS}
+            aria-invalid={Boolean(mapsLinkMessage)}
+            aria-describedby={mapsLinkMessage ? "mapsLink-error" : undefined}
           />
-          <FieldError fieldId="mapsLink" message={errors.mapsLink} />
+          <FieldError fieldId="mapsLink" message={mapsLinkMessage} />
         </div>
 
+        <h3 className="mt-3 border-t border-border pt-6 text-sm font-semibold text-ink md:col-span-2">Condiciones del puesto</h3>
         <div>
-          <Label htmlFor="contractType" className="text-[12.5px] font-semibold">
-            Tipo de contrato <span className="text-danger">*</span>
+          <Label htmlFor="contractType" className="text-xs font-semibold">
+            Tipo de contrato <span className="text-ink-soft">*</span>
           </Label>
-          <Select value={conditions.contractType} onValueChange={(value) => updateField("contractType", value ?? "")}>
-            <SelectTrigger id="contractType" className="mt-1.5 w-full">
-              <SelectValue  placeholder="Selecciona una opcion" />
+          <Select value={conditions.contractType} onValueChange={handleContractTypeChange}>
+            <SelectTrigger id="contractType" className={cn("mt-1.5 w-full", FIELD_FOCUS_CLASS)}>
+              <SelectValue  placeholder="Selecciona una opción" />
             </SelectTrigger>
             <SelectContent>
               {CONTRACT_TYPES.map((type) => (
@@ -191,15 +192,16 @@ export function InformationStep({
         </div>
 
         <div>
-          <Label htmlFor="category" className="text-[12.5px] font-semibold">
-            Categoria <span className="text-danger">*</span>
+          <Label htmlFor="category" className="text-xs font-semibold">
+            Categoría <span className="text-ink-soft">*</span>
           </Label>
           <Input 
             id="category" 
-            placeholder="Tecnologia" 
-            className="mt-1.5" 
+            placeholder="Tecnología" 
+            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
             value={conditions.category} 
-            onChange={(event) => updateField("category", event.target.value)} 
+            onChange={(event) => updateField("category", event.target.value.slice(0, MAX_CATEGORY_CHARS))}
+            maxLength={MAX_CATEGORY_CHARS}
             aria-invalid={Boolean(errors.category)}
             aria-describedby={errors.category ? "category-error" : undefined}
           />
@@ -207,32 +209,35 @@ export function InformationStep({
         </div>
 
         <div>
-          <Label htmlFor="vacancyCount" className="text-[12.5px] font-semibold">
-            Numero de vacantes <span className="text-danger">*</span>
+          <Label htmlFor="vacancyCount" className="text-xs font-semibold">
+            Número de vacantes <span className="text-ink-soft">*</span>
           </Label>
           <Input 
             id="vacancyCount" 
             placeholder="1" 
-            className="mt-1.5" 
+            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
             value={conditions.vacancyCount} 
             onChange={handleVacancyChange}
             onKeyDown={handleNumberKeyDown}
             inputMode="numeric"
-            aria-invalid={Boolean(errors.vacancyCount)}
-            aria-describedby={errors.vacancyCount ? "vacancyCount-error" : undefined}
+            maxLength={MAX_VACANCY_DIGITS}
+            aria-invalid={Boolean(vacancyCountMessage)}
+            aria-describedby={vacancyCountMessage ? "vacancyCount-error" : undefined}
           />
-          <FieldError fieldId="vacancyCount" message={errors.vacancyCount} />
+          <FieldError fieldId="vacancyCount" message={vacancyCountMessage} />
         </div>
 
         <div>
-          <Label htmlFor="salary" className="text-[12.5px] font-semibold">
-            Salario <span className="text-danger">*</span>
+          <Label htmlFor="salary" className="text-xs font-semibold">
+            Salario {!isInternship && <span className="text-ink-soft">*</span>}
           </Label>
           <Input 
             id="salary" 
-            placeholder="Bs 6.500 - 8.000" 
-            className="mt-1.5" 
+            ref={salaryInputRef}
+            placeholder={isInternship ? SALARY_TO_BE_AGREED : "Bs 6.500 - 8.000"} 
+            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
             value={conditions.salary} 
+            disabled={isInternship}
             onChange={handleSalaryChange}
             onBlur={handleSalaryBlur}
             aria-invalid={Boolean(errors.salary)}
@@ -242,13 +247,13 @@ export function InformationStep({
         </div>
 
         <div>
-          <Label htmlFor="languages" className="text-[12.5px] font-semibold">
-            Idiomas <span className="text-danger">*</span>
+          <Label htmlFor="languages" className="text-xs font-semibold">
+            Idiomas <span className="text-ink-soft">*</span>
           </Label>
           <Input 
             id="languages" 
-            placeholder="Español, ingles intermedio" 
-            className="mt-1.5"
+            placeholder="Español, inglés intermedio" 
+            className={cn("mt-1.5", FIELD_FOCUS_CLASS)}
             value={conditions.languages} 
             onChange={(event) => updateField("languages", event.target.value)} 
             maxLength={MAX_LANGUAGES_CHARS}

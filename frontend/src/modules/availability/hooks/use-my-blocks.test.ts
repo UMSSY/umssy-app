@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { renderHook, waitFor } from "@testing-library/react"
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper"
 import { useMyBlocks } from "./use-my-blocks"
-import { availabilityApi } from "../services/availability.api"
+import { availabilityApi } from "../services/availability.service"
 import type { AvailabilityBlock } from "../types/availability-block.types"
 
 const WEEK_OF_OCT_5 = "2026-10-05T04:00:00.000Z"

@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { ProfileSummary } from "../types/profile-summary.types";
 import { ContactInfoCard } from "./contact-info-card";
@@ -65,7 +66,7 @@ describe("profile components with missing data", () => {
       </>,
     );
 
-    expect(screen.getByText("Formación registrada")).toBeInTheDocument();
+    expect(screen.getByText("Formación académica")).toBeInTheDocument();
     expect(screen.getByText("Aún no registraste experiencia laboral.")).toBeInTheDocument();
   });
 });

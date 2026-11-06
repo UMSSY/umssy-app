@@ -1,0 +1,251 @@
+import { cleanup, screen, waitFor } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { toast } from "sonner"
+import { renderWithQuery } from "@/shared/testing/render-with-query"
+import * as downloadModule from "@/shared/utils/download-file"
+import { APPOINTMENT_DETAIL_TEXT, APPOINTMENTS_TEXT } from "../constants/appointments.constants"
+import { appointmentsApi } from "../services/appointments.service"
+import type { Appointment } from "../types/appointment.types"
+import { AppointmentDetailDialog } from "./appointment-detail-dialog"
+
+vi.mock("sonner", () => ({ toast: { error: vi.fn() } }))
+
+function makeAppointment(overrides: Partial<Appointment> = {}): Appointment {
+  return {
+    id: "a1",
+    blockId: "b1",
+    startAt: "2026-10-13T13:00:00.000Z",
+    endAt: "2026-10-13T14:00:00.000Z",
+    counterpart: { id: "mentor-1", fullName: "Ana Rojas", role: "mentor" },
+    orientationType: { id: "t1", name: "Revisión de CV" },
+    status: "CONFIRMED",
+    message: "Quiero que revises mi CV antes de enviarlo.",
+    requestedAt: "2026-10-08T22:42:00.000Z",
+    document: {
+      fileName: "Tesis_capitulo_2.pdf",
+      mimeType: "application/pdf",
+      sizeBytes: 2.4 * 1024 * 1024,
+      uploadedAt: "2026-10-08T22:43:00.000Z",
+    },
+    ...overrides,
+  }
+}
+
+function renderDialog(appointmentId: string | null = "a1") {
+  const onClose = vi.fn()
+  renderWithQuery(<AppointmentDetailDialog appointmentId={appointmentId} onClose={onClose} />)
+  return { onClose, user: userEvent.setup() }
+}
+
+describe("AppointmentDetailDialog", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(makeAppointment())
+    vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null)
+  })
+
+  afterEach(() => {
+    cleanup()
+  })
+
+  it("no se abre sin una cita elegida", () => {
+    renderDialog(null)
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    expect(appointmentsApi.getById).not.toHaveBeenCalled()
+  })
+
+  it("muestra un estado de carga mientras pide la cita", () => {
+    vi.mocked(appointmentsApi.getById).mockReturnValue(new Promise(() => undefined))
+
+    renderDialog()
+
+    expect(screen.getByRole("status", { name: APPOINTMENT_DETAIL_TEXT.loading })).toBeInTheDocument()
+  })
+
+  it("muestra un mensaje si falla la petición", async () => {
+    vi.mocked(appointmentsApi.getById).mockRejectedValue(new Error("network"))
+
+    renderDialog()
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(APPOINTMENT_DETAIL_TEXT.loadError)
+  })
+
+  it("muestra la persona, el estado y todos los datos de la cita", async () => {
+    renderDialog()
+
+    expect(await screen.findByRole("heading", { name: "Cita con Ana Rojas" })).toBeInTheDocument()
+    expect(screen.getByText("Mentor · Revisión de CV")).toBeInTheDocument()
+    expect(screen.getByText("Confirmada")).toBeInTheDocument()
+    expect(screen.getByText("Martes 13 de octubre de 2026")).toBeInTheDocument()
+    expect(screen.getByText("09:00 - 10:00 · Hora de Bolivia (GMT-4)")).toBeInTheDocument()
+    expect(screen.getByText("Revisión de CV")).toBeInTheDocument()
+    expect(screen.getByText("8 de octubre de 2026, 18:42")).toBeInTheDocument()
+  })
+
+  it("muestra las iniciales cuando la otra persona no tiene foto", async () => {
+    renderDialog()
+
+    expect(await screen.findByText("AR")).toBeInTheDocument()
+    expect(appointmentsApi.getCounterpartPhoto).toHaveBeenCalledWith("a1")
+  })
+
+  it("muestra el mensaje del titulado", async () => {
+    renderDialog()
+
+    expect(await screen.findByText(APPOINTMENT_DETAIL_TEXT.messageTitle)).toBeInTheDocument()
+    expect(screen.getByText("Quiero que revises mi CV antes de enviarlo.")).toBeInTheDocument()
+  })
+
+  it("muestra «Sin mensaje» en citas reservadas sin mensaje", async () => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(makeAppointment({ message: null }))
+
+    renderDialog()
+
+    expect(await screen.findByText(APPOINTMENT_DETAIL_TEXT.noMessage)).toBeInTheDocument()
+  })
+
+  it("muestra el documento y lo descarga con su nombre original", async () => {
+    const file = new Blob(["%PDF"])
+    vi.spyOn(appointmentsApi, "downloadDocument").mockResolvedValue(file)
+    const download = vi.spyOn(downloadModule, "downloadFile").mockImplementation(() => undefined)
+    const { user } = renderDialog()
+
+    expect(await screen.findByText(APPOINTMENT_DETAIL_TEXT.documentTitle)).toBeInTheDocument()
+    expect(screen.getByText("PDF")).toBeInTheDocument()
+    expect(screen.getByText("Tesis_capitulo_2.pdf")).toBeInTheDocument()
+    expect(screen.getByText("2.4 MB")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: APPOINTMENT_DETAIL_TEXT.download }))
+
+    expect(appointmentsApi.downloadDocument).toHaveBeenCalledWith("a1")
+    expect(download).toHaveBeenCalledWith(file, "Tesis_capitulo_2.pdf")
+  })
+
+  it("sin documento no muestra la sección", async () => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(makeAppointment({ document: null }))
+
+    renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Ana Rojas" })
+    expect(screen.queryByText(APPOINTMENT_DETAIL_TEXT.documentTitle)).not.toBeInTheDocument()
+  })
+
+  it("el titulado ve el enlace al perfil del mentor", async () => {
+    renderDialog()
+
+    expect(
+      await screen.findByRole("link", { name: APPOINTMENT_DETAIL_TEXT.mentorProfile }),
+    ).toHaveAttribute("href", "/mentors/mentor-1")
+  })
+
+  it("el mentor no ve el enlace al perfil", async () => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(
+      makeAppointment({
+        counterpart: { id: "student-1", fullName: "Luis Flores", role: "student" },
+      }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByText("Titulado · Revisión de CV")).toBeInTheDocument()
+    expect(
+      screen.queryByRole("link", { name: APPOINTMENT_DETAIL_TEXT.mentorProfile }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("se cierra con «Cerrar»", async () => {
+    const { onClose, user } = renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Ana Rojas" })
+    await user.click(screen.getByRole("button", { name: APPOINTMENT_DETAIL_TEXT.close }))
+
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+})
+
+describe("AppointmentDetailDialog: foto, tema y descarga", () => {
+  class LoadedImage {
+    complete = true
+    naturalWidth = 1
+    src = ""
+    onload: (() => void) | null = null
+    onerror: (() => void) | null = null
+  }
+
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    vi.mocked(toast.error).mockClear()
+    vi.spyOn(appointmentsApi, "getById").mockResolvedValue(makeAppointment())
+    vi.spyOn(appointmentsApi, "getCounterpartPhoto").mockResolvedValue(null)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    cleanup()
+  })
+
+  it("muestra la foto de perfil de la otra persona cuando tiene una", async () => {
+    vi.stubGlobal("Image", LoadedImage)
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:foto-ana")
+    vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined)
+    vi.mocked(appointmentsApi.getCounterpartPhoto).mockResolvedValue(
+      new Blob(["png"], { type: "image/png" }),
+    )
+
+    renderDialog()
+
+    expect(await screen.findByRole("img", { name: "Foto de perfil de Ana Rojas" })).toHaveAttribute(
+      "src",
+      "blob:foto-ana",
+    )
+  })
+
+  it("no pide la foto hasta tener los datos de la cita", () => {
+    vi.mocked(appointmentsApi.getById).mockReturnValue(new Promise(() => undefined))
+
+    renderDialog()
+
+    expect(appointmentsApi.getCounterpartPhoto).not.toHaveBeenCalled()
+  })
+
+  it("muestra una alternativa cuando la cita no tiene tema", async () => {
+    vi.mocked(appointmentsApi.getById).mockResolvedValue(makeAppointment({ orientationType: null }))
+
+    renderDialog()
+
+    expect(await screen.findByText(`Mentor · ${APPOINTMENTS_TEXT.noTopic}`)).toBeInTheDocument()
+    expect(screen.getAllByText(APPOINTMENTS_TEXT.noTopic)).toHaveLength(1)
+  })
+
+  it("deshabilita «Descargar» mientras baja el documento", async () => {
+    vi.spyOn(appointmentsApi, "downloadDocument").mockReturnValue(new Promise(() => undefined))
+    const { user } = renderDialog()
+
+    await user.click(await screen.findByRole("button", { name: APPOINTMENT_DETAIL_TEXT.download }))
+
+    expect(screen.getByRole("button", { name: APPOINTMENT_DETAIL_TEXT.downloading })).toBeDisabled()
+  })
+
+  it("avisa si la descarga falla y deja volver a intentarlo", async () => {
+    vi.spyOn(appointmentsApi, "downloadDocument").mockRejectedValue(new Error("network"))
+    const { user } = renderDialog()
+
+    await user.click(await screen.findByRole("button", { name: APPOINTMENT_DETAIL_TEXT.download }))
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(APPOINTMENT_DETAIL_TEXT.downloadError),
+    )
+    expect(screen.getByRole("button", { name: APPOINTMENT_DETAIL_TEXT.download })).toBeEnabled()
+  })
+
+  it("se cierra con la tecla Escape", async () => {
+    const { onClose, user } = renderDialog()
+
+    await screen.findByRole("heading", { name: "Cita con Ana Rojas" })
+    await user.keyboard("{Escape}")
+
+    expect(onClose).toHaveBeenCalledOnce()
+  })
+})

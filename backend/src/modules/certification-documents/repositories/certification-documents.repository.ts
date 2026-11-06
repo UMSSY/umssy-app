@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { mapRecordNotFound } from '../../../common/utils/map-record-not-found.js';
 import { CertificationNotFoundException } from '../../certifications/exceptions/certification-not-found.exception.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 
 const documentSelect = { documentUrl: true } as const;
 
@@ -11,9 +12,14 @@ const idSelect = { id: true } as const;
 export class CertificationDocumentsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async save(id: string, content: Buffer): Promise<void> {
+  async save(
+    id: string,
+    content: Buffer,
+    context?: TransactionContext,
+  ): Promise<void> {
+    const client = context?.client ?? this.prisma;
     await mapRecordNotFound(
-      this.prisma.certification.update({
+      client.certification.update({
         where: { id },
         data: { documentUrl: new Uint8Array(content) },
         select: idSelect,
@@ -31,9 +37,10 @@ export class CertificationDocumentsRepository {
     return record?.documentUrl ? Buffer.from(record.documentUrl) : null;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, context?: TransactionContext): Promise<void> {
+    const client = context?.client ?? this.prisma;
     await mapRecordNotFound(
-      this.prisma.certification.update({
+      client.certification.update({
         where: { id },
         data: { documentUrl: null },
         select: idSelect,

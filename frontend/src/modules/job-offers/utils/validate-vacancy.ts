@@ -1,5 +1,6 @@
 import {
   GOOGLE_MAPS_LINK_REGEX,
+  INTERNSHIP_CONTRACT_TYPE,
   MAX_DESCRIPTION_CHARS,
   MAX_LANGUAGES_CHARS,
   MAX_SKILLS,
@@ -7,8 +8,9 @@ import {
   MAX_VACANCIES,
   TITLE_ALLOWED_REGEX,
   VACANCY_MESSAGES,
-} from "../constants/vacancies.constants";
-import type { VacancyConditions, VacancyErrors } from "../types/vacancy-conditions.types";
+} from "../constants/job-offers.constants";
+import type { VacancyConditions } from "../types/vacancy-conditions.types";
+import type { VacancyErrors } from "../types/vacancy-errors.types";
 import { parseSalary } from "./parse-salary";
 
 export const INFORMATION_FIELDS_ORDER: (keyof VacancyConditions)[] = [
@@ -26,6 +28,10 @@ export function isFieldEmpty(field: keyof VacancyConditions, conditions: Vacancy
   if (field === "modality") return conditions.modality === null;
   if (field === "skills") return conditions.skills.length === 0;
   return (conditions[field] as string).trim() === "";
+}
+
+export function getMapsLinkError(value: string): string | undefined {
+  return GOOGLE_MAPS_LINK_REGEX.test(value.trim()) ? undefined : VACANCY_MESSAGES.invalidMapsLink;
 }
 
 function validateSalary(value: string): string | undefined {
@@ -46,7 +52,10 @@ function validateVacancyCount(value: string): string | undefined {
 export function validateInformation(conditions: VacancyConditions): VacancyErrors {
   const errors: VacancyErrors = {};
 
+  const isInternship = conditions.contractType === INTERNSHIP_CONTRACT_TYPE;
+
   for (const field of INFORMATION_FIELDS_ORDER) {
+    if (field === "salary" && isInternship) continue;
     if (isFieldEmpty(field, conditions)) {
       errors[field] = VACANCY_MESSAGES.required;
     }
@@ -59,8 +68,9 @@ export function validateInformation(conditions: VacancyConditions): VacancyError
     errors.title = "Solo se permiten caracteres alfanuméricos y espacios";
   }
 
-  if (!errors.mapsLink && !GOOGLE_MAPS_LINK_REGEX.test(conditions.mapsLink.trim())) {
-    errors.mapsLink = VACANCY_MESSAGES.invalidMapsLink;
+  if (!errors.mapsLink) {
+    const message = getMapsLinkError(conditions.mapsLink);
+    if (message) errors.mapsLink = message;
   }
 
   if (!errors.vacancyCount) {
@@ -68,7 +78,7 @@ export function validateInformation(conditions: VacancyConditions): VacancyError
     if (message) errors.vacancyCount = message;
   }
 
-  if (!errors.salary) {
+  if (!errors.salary && !isInternship) {
     const message = validateSalary(conditions.salary);
     if (message) errors.salary = message;
   }

@@ -36,9 +36,11 @@ export const reportsService = {
     page,
     limit,
     reportType,
+    search,
+    snapshotAt,
   }: ReportHistoryParams): Promise<ApiResponse<PaginatedData<GeneratedReport>>> => {
     const { data } = await apiClient.get<ApiResponse<PaginatedData<GeneratedReport>>>("/reports/history", {
-      params: { page, limit, reportType },
+      params: { page, limit, reportType, search: search || undefined, snapshotAt },
     });
 
     return data;
@@ -50,9 +52,10 @@ export const reportsService = {
     userType,
     period,
     search,
+    snapshotAt,
   }: RegisteredUsersParams): Promise<ApiResponse<PaginatedData<RegisteredUser>>> => {
     const { data } = await apiClient.get<ApiResponse<PaginatedData<RegisteredUser>>>("/reports/registered-users", {
-      params: { page, limit, userType, period, search },
+      params: { page, limit, userType, period, search, snapshotAt },
     });
 
     return data;
@@ -62,11 +65,11 @@ export const reportsService = {
     downloadCsv("/reports/registered-users/export", { userType, period, search }, REGISTERED_USERS_CSV_FALLBACK_NAME),
 
   getRejectedUsers: async (
-    { page, limit, search }: RejectedUsersParams,
+    { page, limit, userType, period, search, snapshotAt }: RejectedUsersParams,
     signal?: AbortSignal,
   ): Promise<ApiResponse<PaginatedData<RejectedUser>>> => {
     const { data } = await apiClient.get<ApiResponse<PaginatedData<RejectedUser>>>("/reports/rejected-users", {
-      params: { page, limit, search: search || undefined },
+      params: { page, limit, userType, period, search: search || undefined, snapshotAt },
       signal,
       timeout: SLOW_REQUEST_THRESHOLD_MS,
     });
@@ -74,6 +77,10 @@ export const reportsService = {
     return data;
   },
 
-  exportRejectedUsersCsv: ({ search }: RejectedUsersExportParams): Promise<ExportedFile> =>
-    downloadCsv("/reports/rejected-users/export", { search: search || undefined }, REJECTED_USERS_CSV_FALLBACK_NAME),
+  exportRejectedUsersCsv: ({ userType, period, search }: RejectedUsersExportParams): Promise<ExportedFile> =>
+    downloadCsv(
+      "/reports/rejected-users/export",
+      { userType, period, search: search || undefined },
+      REJECTED_USERS_CSV_FALLBACK_NAME,
+    ),
 };

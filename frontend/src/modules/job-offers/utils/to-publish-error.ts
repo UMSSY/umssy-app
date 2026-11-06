@@ -1,11 +1,8 @@
-import { isAxiosError } from "axios";
-import { PUBLISH_MESSAGES } from "../constants/vacancies.constants";
-import type { PublishError } from "../types/job-offer.types";
-
-interface ErrorBody {
-  data?: unknown;
-  detail?: unknown;
-}
+import { isApiError as isAxiosError } from "@/shared/services/api-client";
+import { EDIT_MESSAGES, PUBLISH_MESSAGES } from "../constants/job-offers.constants";
+import type { PublishError } from "../types/publish-error.types";
+import type { PublishErrorBody } from "../types/publish-error-body.types";
+import type { PublishMode } from "../types/publish-mode.types";
 
 function readValidationMessages(data: unknown): string[] {
   if (!Array.isArray(data)) return [];
@@ -14,23 +11,26 @@ function readValidationMessages(data: unknown): string[] {
     .filter((message): message is string => typeof message === "string" && message.length > 0);
 }
 
-function readDetails(body: ErrorBody | undefined): string[] {
+function readDetails(body: PublishErrorBody | undefined): string[] {
   const messages = readValidationMessages(body?.data);
   if (messages.length > 0) return messages;
   return typeof body?.detail === "string" && body.detail.length > 0 ? [body.detail] : [];
 }
 
-export function toPublishError(error: unknown): PublishError {
+export function toPublishError(error: unknown, mode: PublishMode = "publish"): PublishError {
+  const isEdit = mode === "edit";
+  const serverMessage = isEdit ? EDIT_MESSAGES.error : PUBLISH_MESSAGES.server;
+  const networkMessage = isEdit ? EDIT_MESSAGES.error : PUBLISH_MESSAGES.network;
   if (!isAxiosError(error)) {
-    return { kind: "server", message: PUBLISH_MESSAGES.server, details: [] };
+    return { kind: "server", message: serverMessage, details: [] };
   }
   if (!error.response) {
-    return { kind: "network", message: PUBLISH_MESSAGES.network, details: [] };
+    return { kind: "network", message: networkMessage, details: [] };
   }
 
   const { status, data } = error.response;
   if (status === 400 || status === 422) {
-    return { kind: "validation", message: PUBLISH_MESSAGES.validation, details: readDetails(data as ErrorBody) };
+    return { kind: "validation", message: PUBLISH_MESSAGES.validation, details: readDetails(data as PublishErrorBody) };
   }
   if (status === 404) {
     return { kind: "company", message: PUBLISH_MESSAGES.company, details: [] };
@@ -38,5 +38,5 @@ export function toPublishError(error: unknown): PublishError {
   if (status === 401 || status === 403) {
     return { kind: "session", message: PUBLISH_MESSAGES.session, details: [] };
   }
-  return { kind: "server", message: PUBLISH_MESSAGES.server, details: [] };
+  return { kind: "server", message: serverMessage, details: [] };
 }
