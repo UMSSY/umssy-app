@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ProfileSkillInvalidationService } from '../../nlp/services/profile-skill-invalidation.service.js';
 import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
 import { CertificationMapper } from '../mappers/certification.mapper.js';
 import { CertificationDocumentsRepository } from '../../certification-documents/repositories/certification-documents.repository.js';
@@ -14,6 +15,7 @@ export class CertificationsService {
     private readonly certificationsRepository: CertificationsRepository,
     private readonly documentsRepository: CertificationDocumentsRepository,
     private readonly certificationMapper: CertificationMapper,
+    private readonly skillInvalidation: ProfileSkillInvalidationService,
   ) {}
 
   async create(
@@ -46,6 +48,7 @@ export class CertificationsService {
   async remove(userId: string, id: string): Promise<void> {
     await this.getOwnedOrFail(userId, id);
     await this.certificationsRepository.delete(id);
+    await this.skillInvalidation.markChanged(userId);
   }
 
   private async getOwnedOrFail(

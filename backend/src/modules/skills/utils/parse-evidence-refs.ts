@@ -1,7 +1,7 @@
 import type { SkillEvidenceRefPayload } from '../types/skill-evidence-ref-payload.type.js';
 import { sortEvidenceRefs } from './sort-evidence-refs.js';
 
-const SOURCE_TYPES: ReadonlySet<SkillEvidenceRefPayload['type']> = new Set(['work-experience', 'education']);
+const SOURCE_TYPES: ReadonlySet<SkillEvidenceRefPayload['type']> = new Set(['work-experience', 'education', 'cv', 'certification']);
 
 function isEvidenceRef(value: unknown): value is SkillEvidenceRefPayload {
   if (typeof value !== 'object' || value === null) return false;

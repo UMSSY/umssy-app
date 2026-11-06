@@ -5,6 +5,7 @@ import { CV_FILE_QUERY_KEY, CV_QUERY_KEY, CV_RECENT_LIMIT } from "../constants/c
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
 import { documentsService } from "../services/documents.service";
 import { getCvErrorMessage } from "../utils/get-cv-error-message";
+import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile/hooks/use-profile-skills-radar";
 
 export function useCvDocument() {
   const queryClient = useQueryClient();
@@ -16,7 +17,10 @@ export function useCvDocument() {
     },
   });
   const cancelLoads = () => queryClient.cancelQueries({ queryKey: CV_QUERY_KEY });
-  const reloadCvs = () => queryClient.invalidateQueries({ queryKey: CV_QUERY_KEY });
+  const reloadCvs = async () => {
+    await queryClient.invalidateQueries({ queryKey: CV_QUERY_KEY });
+    await queryClient.invalidateQueries({ queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY });
+  };
   const uploadMutation = useMutation({
     mutationFn: (file: File) => documentsService.uploadCv(file),
     onMutate: cancelLoads,

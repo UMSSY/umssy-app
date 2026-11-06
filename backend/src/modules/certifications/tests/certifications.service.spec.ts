@@ -4,6 +4,7 @@ import { CertificationMapper } from '../mappers/certification.mapper.js';
 import { CertificationDocumentsRepository } from '../../certification-documents/repositories/certification-documents.repository.js';
 import { CertificationsRepository } from '../repositories/certifications.repository.js';
 import { CertificationsService } from '../services/certifications.service.js';
+import type { ProfileSkillInvalidationService } from '../../nlp/services/profile-skill-invalidation.service.js';
 import type { CertificationRecord } from '../types/certification-record.type.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
@@ -53,6 +54,7 @@ describe('CertificationsService', () => {
       repository as unknown as CertificationsRepository,
       documentsRepository as unknown as CertificationDocumentsRepository,
       new CertificationMapper(),
+      { markChanged: vi.fn() } as unknown as ProfileSkillInvalidationService,
     );
   });
 

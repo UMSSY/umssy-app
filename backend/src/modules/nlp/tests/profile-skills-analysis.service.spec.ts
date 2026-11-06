@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import { NLP_DICTIONARY_VERSION } from '../constants/nlp-dictionary.constants.js';
 import { ProfileSkillsRadarMapper } from '../mappers/profile-skills-radar.mapper.js';
+import { NlpDocumentReadException } from '../exceptions/nlp-document-read.exception.js';
 import type { ProfileSkillResultsRepository } from '../repositories/profile-skill-results.repository.js';
 import type { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
@@ -171,6 +172,32 @@ describe('ProfileSkillsAnalysisService', () => {
     await service.refreshAfterChange(userId);
 
     expect(await service.getRadarSnapshot(userId)).toMatchObject({ status: 'ready', version: 1, skills: [] });
+  });
+
+  it('merges document evidence without duplicate skills or automatic approval', async () => {
+    textSources = [
+      { id: 'cv1', type: 'cv', text: 'Python Docker' },
+      { id: 'cert1', type: 'certification', text: 'Python React' },
+    ];
+    const snapshot = await service.analyzeNow(userId);
+    expect(snapshot.skills).toHaveLength(3);
+    expect(snapshot.skills.find((skill) => skill.name === 'Python')).toMatchObject({
+      verificationStatus: 'pending',
+      evidenceRefs: expect.arrayContaining([{ id: 'cv1', type: 'cv' }, { id: 'cert1', type: 'certification' }]),
+    });
+    textSources = [{ id: 'cv2', type: 'cv', text: 'Docker' }];
+    expect((await service.analyzeNow(userId)).skills.map((skill) => skill.name)).toEqual(['Docker']);
+  });
+
+  it('retains stored results on document failure, reports the source and can recover', async () => {
+    await service.analyzeNow(userId);
+    const stored = structuredClone(results.rows);
+    sources.findTextSources.mockRejectedValueOnce(new NlpDocumentReadException('cert1', 'certification'));
+    const response = await service.analyzeNow(userId);
+    expect(response.status).toBe('error');
+    expect(response.analysis.rejectedSources).toEqual([expect.objectContaining({ id: 'cert1', type: 'certification', reason: 'document-unreadable' })]);
+    expect(results.rows).toEqual(stored);
+    expect((await service.analyzeNow(userId)).status).toBe('ready');
   });
 
   it('only keeps the manual skills when the profile has no texts', async () => {

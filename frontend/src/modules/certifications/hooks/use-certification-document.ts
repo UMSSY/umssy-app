@@ -17,6 +17,7 @@ import { isCorruptedFileError } from "../utils/is-corrupted-file-error";
 import { getFileFormat } from "../utils/get-file-format";
 import { formatIssueDate } from "../utils/format-issue-date";
 import { getTodayIsoDate } from "../utils/validate-certification";
+import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile/hooks/use-profile-skills-radar";
 
 const STORAGE_KEY = "certification-documents";
 
@@ -90,6 +91,7 @@ export function useCertificationDocument() {
           return next;
         });
       }
+      await queryClient.invalidateQueries({ queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY });
       setFeedback({
         type: "success",
         message: isReplacing

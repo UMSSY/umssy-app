@@ -6,6 +6,7 @@ import { skillsService } from "../services/skills.service";
 import { SkillsProfileSection } from "./skills-profile-section";
 
 vi.mock("../services/skills.service", () => ({ skillsService: { getCatalog: vi.fn(), getMySkills: vi.fn(), createCustomSkill: vi.fn(), saveMySkills: vi.fn() } }));
+vi.mock("@/modules/profile/services/profile-skills-radar.service", () => ({ profileSkillsRadarService: { getSkills: vi.fn().mockResolvedValue({ status: "pending", skills: [] }) } }));
 const PYTHON = { id: "python", name: "Python" };
 const SQL = { id: "sql", name: "SQL" };
 beforeEach(() => { vi.mocked(skillsService.getCatalog).mockResolvedValue([PYTHON, SQL]); vi.mocked(skillsService.getMySkills).mockResolvedValue([PYTHON]); });

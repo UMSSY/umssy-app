@@ -12,6 +12,7 @@ import { CertificationDocumentNotFoundException } from '../exceptions/certificat
 import { CertificationDocumentMapper } from '../mappers/certification-document.mapper.js';
 import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
 import { CertificationDocumentsService } from '../services/certification-documents.service.js';
+import type { ProfileSkillInvalidationService } from '../../nlp/services/profile-skill-invalidation.service.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const otherUserId = '22222222-2222-4222-8222-222222222222';
@@ -46,6 +47,7 @@ const buildFile = (
 });
 
 describe('CertificationDocumentsService', () => {
+  const invalidation = { markChanged: vi.fn() };
   let service: CertificationDocumentsService;
   let certificationsRepository: { findById: ReturnType<typeof vi.fn> };
   let documentsRepository: {
@@ -56,6 +58,7 @@ describe('CertificationDocumentsService', () => {
   };
 
   beforeEach(() => {
+    invalidation.markChanged.mockReset();
     certificationsRepository = { findById: vi.fn() };
     documentsRepository = {
       save: vi.fn(),
@@ -69,6 +72,7 @@ describe('CertificationDocumentsService', () => {
       new FileValidationService(),
       new CertificationMapper(),
       new CertificationDocumentMapper(),
+      invalidation as unknown as ProfileSkillInvalidationService,
     );
   });
 
@@ -92,6 +96,7 @@ describe('CertificationDocumentsService', () => {
         Buffer.from(bytes),
       );
       expect(result).toMatchObject({ id: certificationId, hasDocument: true });
+      expect(invalidation.markChanged).toHaveBeenCalledWith(userId);
       expect(result).not.toHaveProperty('userId');
     });
 

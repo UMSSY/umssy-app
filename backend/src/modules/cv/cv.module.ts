@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ProfileSkillStateModule } from '../nlp/profile-skill-state.module.js';
 import { JwtAuthModule } from '../../common/guards/jwt-auth.module.js';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { FileValidationService } from '../../common/services/file-validation.service.js';
@@ -11,7 +12,7 @@ import { CvService } from './services/cv.service.js';
 import { CvFileStorage } from './types/cv-file-storage.type.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule],
+  imports: [PrismaModule, JwtAuthModule, ProfileSkillStateModule],
   controllers: [CvHistoryController, CvFileController],
   providers: [
     CvService,

@@ -9,6 +9,7 @@ export const NLP_SKILL_NAME_LETTER = /\p{L}/u;
 export const NLP_SKILL_NAME_REPEATED_CHARACTER = /(.)\1{3,}/iu;
 
 export const NLP_VALIDATION_MESSAGES: Readonly<Record<NlpDiscardReason, string>> = {
+  'document-unreadable': 'No se pudo leer el documento. Comprueba que sea legible, tenga como máximo 10 páginas y vuelve a intentarlo.',
   'not-in-catalog': 'La habilidad detectada no pertenece al catálogo de habilidades.',
   'empty-name': 'La habilidad no tiene nombre.',
   'name-too-long': 'El nombre de la habilidad supera los 50 caracteres.',

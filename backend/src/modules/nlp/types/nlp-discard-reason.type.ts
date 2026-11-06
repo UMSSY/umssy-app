@@ -5,4 +5,5 @@ export type NlpDiscardReason =
   | 'invalid-characters'
   | 'missing-letter'
   | 'repeated-characters'
-  | 'source-too-long';
+  | 'source-too-long'
+  | 'document-unreadable';

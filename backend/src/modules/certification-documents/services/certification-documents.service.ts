@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ProfileSkillInvalidationService } from '../../nlp/services/profile-skill-invalidation.service.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { CertificationNotFoundException } from '../../certifications/exceptions/certification-not-found.exception.js';
@@ -20,7 +21,12 @@ export class CertificationDocumentsService {
     private readonly fileValidationService: FileValidationService,
     private readonly certificationMapper: CertificationMapper,
     private readonly documentMapper: CertificationDocumentMapper,
+    private readonly skillInvalidation: ProfileSkillInvalidationService,
   ) {}
+
+  findDocumentIds(userId: string): Promise<Set<string>> {
+    return this.documentsRepository.findIdsWithDocument(userId);
+  }
 
   async upload(
     userId: string,
@@ -35,6 +41,7 @@ export class CertificationDocumentsService {
     );
 
     await this.documentsRepository.save(id, validatedFile.buffer);
+    await this.skillInvalidation.markChanged(userId);
 
     const updated = await this.getOwnedOrFail(userId, id);
     return this.certificationMapper.toResponse(updated, true);
@@ -66,6 +73,7 @@ export class CertificationDocumentsService {
     }
 
     await this.documentsRepository.remove(id);
+    await this.skillInvalidation.markChanged(userId);
   }
 
   private async getOwnedOrFail(

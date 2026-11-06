@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ProfileSkillInvalidationService } from '../../nlp/services/profile-skill-invalidation.service.js';
 import { CV_VALIDATION_RULES } from '../constants/cv.constants.js';
 import { CvNotFoundException } from '../exceptions/cv-not-found.exception.js';
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
@@ -20,6 +21,7 @@ export class CvService {
     private readonly cvFileStorage: CvFileStorage,
     private readonly fileValidationService: FileValidationService,
     private readonly cvMapper: CvMapper,
+    private readonly skillInvalidation: ProfileSkillInvalidationService,
   ) {}
 
   async list(userId: string, request: ListCvsRequest): Promise<PaginatedResult<CvResponse>> {
@@ -64,6 +66,7 @@ export class CvService {
     );
 
     const record = await this.cvMetadataRepository.findByIdForUser(userId, cvId);
+    await this.skillInvalidation.markChanged(userId);
     return record ? this.cvMapper.toResponse(record) : null;
   }
 
@@ -73,6 +76,7 @@ export class CvService {
     if (!isRemoved) {
       throw new CvNotFoundException();
     }
+    await this.skillInvalidation.markChanged(userId);
   }
 
   private async readDownload(

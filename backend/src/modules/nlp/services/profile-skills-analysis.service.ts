@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { NlpDocumentReadException } from '../exceptions/nlp-document-read.exception.js';
 import { Injectable, Logger } from '@nestjs/common';
 import { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
 import { NLP_DICTIONARY_VERSION } from '../constants/nlp-dictionary.constants.js';
@@ -37,7 +38,7 @@ export class ProfileSkillsAnalysisService {
 
   async analyzeNow(userId: string): Promise<ProfileSkillsAnalysisResponse> {
     await this.sources.ensureProfileExists(userId);
-    const state = await this.results.ensureState(userId, new Date());
+    const state = await this.results.registerSourceChange(userId, new Date());
     const outcome = await this.process(userId, state.inputRevision);
     return this.mapper.toAnalysisResponse(await this.readSnapshot(userId), outcome);
   }
@@ -86,6 +87,7 @@ export class ProfileSkillsAnalysisService {
         changed: published?.changed ?? false,
       });
     } catch (error) {
+      if (error instanceof NlpDocumentReadException) outcome.rejectedSources.push(error.source);
       await this.markError(userId, revision);
       this.write('error', NLP_LOG_EVENTS.failed, {
         correlationId,

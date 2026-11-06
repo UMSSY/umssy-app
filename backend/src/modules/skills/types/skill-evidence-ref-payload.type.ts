@@ -1,4 +1,4 @@
 export interface SkillEvidenceRefPayload {
-  type: 'work-experience' | 'education';
+  type: 'work-experience' | 'education' | 'cv' | 'certification';
   id: string;
 }

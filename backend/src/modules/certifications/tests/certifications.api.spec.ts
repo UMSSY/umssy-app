@@ -6,6 +6,7 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { ProfileSkillInvalidationService } from '../../nlp/services/profile-skill-invalidation.service.js';
 import { CertificationsModule } from '../certifications.module.js';
 import { CertificationDocumentsRepository } from '../../certification-documents/repositories/certification-documents.repository.js';
 import { CertificationsRepository } from '../repositories/certifications.repository.js';
@@ -61,6 +62,8 @@ describe('Certifications API', () => {
       imports: [CertificationsModule],
       providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
     })
+      .overrideProvider(ProfileSkillInvalidationService)
+      .useValue({ markChanged: vi.fn() })
       .overrideProvider(PrismaService)
       .useValue({ user: {
           findFirst: ({ where }: { where: { id: string } }) => Promise.resolve({

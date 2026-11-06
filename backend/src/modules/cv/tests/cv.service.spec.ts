@@ -9,6 +9,7 @@ import type { MulterFile } from '../../../common/types/multer-file.type.js';
 import { CvMapper } from '../mappers/cv.mapper.js';
 import type { CvMetadataRepository } from '../repositories/cv-metadata.repository.js';
 import { CvService } from '../services/cv.service.js';
+import type { ProfileSkillInvalidationService } from '../../nlp/services/profile-skill-invalidation.service.js';
 import type { CvFileStorage } from '../types/cv-file-storage.type.js';
 import type { CvMetadataRecord } from '../types/cv-metadata-record.type.js';
 
@@ -43,6 +44,7 @@ const buildMulterFile = (
 });
 
 describe('CvService', () => {
+  const invalidation = { markChanged: vi.fn() };
   let service: CvService;
   let repository: {
     findByIdForUser: ReturnType<typeof vi.fn>;
@@ -56,6 +58,7 @@ describe('CvService', () => {
   };
 
   beforeEach(() => {
+    invalidation.markChanged.mockReset();
     repository = {
       findByIdForUser: vi.fn(),
       countByUserId: vi.fn(),
@@ -67,6 +70,7 @@ describe('CvService', () => {
       storage as unknown as CvFileStorage,
       new FileValidationService(),
       new CvMapper(),
+      invalidation as unknown as ProfileSkillInvalidationService,
     );
   });
 
@@ -172,6 +176,7 @@ describe('CvService', () => {
       const result = await service.upload(userId, buildMulterFile(pdfContent));
 
       expect(storage.create).toHaveBeenCalledWith(userId, pdfContent, 'resume.pdf');
+      expect(invalidation.markChanged).toHaveBeenCalledWith(userId);
       expect(repository.findByIdForUser).toHaveBeenCalledWith(userId, cvId);
       expect(result).toMatchObject({ id: cvId, isCurrent: true, fileName: 'resume.pdf' });
     });
@@ -228,6 +233,7 @@ describe('CvService', () => {
 
       await expect(service.removeById(userId, olderCvId)).resolves.toBeUndefined();
       expect(storage.removeById).toHaveBeenCalledWith(userId, olderCvId);
+      expect(invalidation.markChanged).toHaveBeenCalledWith(userId);
     });
 
     it('throws cv not found when the cv does not exist or belongs to another user', async () => {

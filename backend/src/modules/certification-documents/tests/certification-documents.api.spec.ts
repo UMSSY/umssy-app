@@ -9,6 +9,7 @@ import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { CertificationDocumentsModule } from '../certification-documents.module.js';
 import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
 import { CertificationsRepository } from '../../certifications/repositories/certifications.repository.js';
+import { ProfileSkillInvalidationService } from '../../nlp/services/profile-skill-invalidation.service.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const otherUserId = '22222222-2222-4222-8222-222222222222';
@@ -50,6 +51,8 @@ describe('Certification documents API', () => {
       imports: [CertificationDocumentsModule],
       providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
     })
+      .overrideProvider(ProfileSkillInvalidationService)
+      .useValue({ markChanged: vi.fn() })
       .overrideProvider(PrismaService)
       .useValue({ user: {
           findFirst: ({ where }: { where: { id: string } }) => Promise.resolve({

@@ -62,7 +62,7 @@ describe("useSaveWorkExperience", () => {
       ANALYSIS,
     );
     vi.mocked(profileSkillsRadarService.analyzeSkills).mockResolvedValue(
-      undefined,
+      { userId: "user-1", status: "ready", version: 1, updatedAt: null, dictionaryVersion: null, skills: [], analysis: { rejectedSources: [] } },
     );
   });
 
