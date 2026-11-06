@@ -94,7 +94,7 @@ describe('MessageInputBar - File Attachment & Validation Toasts (HU-11 Task 3)',
     fireEvent.change(fileInput, { target: { files: [largeImage] } });
 
     expect(toast.error).toHaveBeenCalledWith(
-      'La imagen supera el tamaño maximo permitido de 5 MB.'
+      'La imagen supera el tamaño máximo permitido de 5 MB.'
     );
     expect(screen.queryByTestId('attachment-preview')).not.toBeInTheDocument();
     const sendButton = screen.getByTestId('send-button') as HTMLButtonElement;
@@ -136,7 +136,7 @@ describe('MessageInputBar - File Attachment & Validation Toasts (HU-11 Task 3)',
     fireEvent.change(fileInput, { target: { files: [largePdf] } });
 
     expect(toast.error).toHaveBeenCalledWith(
-      'El documento supera el tamaño maximo permitido 10 MB.'
+      'El documento supera el tamaño máximo permitido 10 MB.'
     );
     expect(screen.queryByTestId('attachment-preview')).not.toBeInTheDocument();
   });
@@ -156,7 +156,7 @@ describe('MessageInputBar - File Attachment & Validation Toasts (HU-11 Task 3)',
     fireEvent.change(fileInput, { target: { files: [exeFile] } });
 
     expect(toast.error).toHaveBeenCalledWith(
-      'Formato no permitido, Solo puedes adjuntar imágenes (JPG, PNG) o documentos PDF.'
+      'Formato no permitido, Solo puedes adjuntar imágenes JPG, PNG o documentos PDF'
     );
     expect(screen.queryByTestId('attachment-preview')).not.toBeInTheDocument();
   });
