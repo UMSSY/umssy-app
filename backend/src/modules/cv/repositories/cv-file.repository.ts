@@ -40,4 +40,18 @@ export class CvFileRepository implements CvFileStorage {
 
     return count > 0;
   }
+  currentCv(userId: string) {
+    return this.prisma.userCvFile.findFirst({
+      where: { userId },
+      orderBy: { cvUploadedAt: 'desc' },
+      select: { id: true, cvPdfData: true },
+    });
+  }
+
+  cvById(cvId: string) {
+    return this.prisma.userCvFile.findUnique({
+      where: { id: cvId },
+      select: { id: true, userId: true, cvPdfData: true, cvFileName: true },
+    });
+  }
 }
