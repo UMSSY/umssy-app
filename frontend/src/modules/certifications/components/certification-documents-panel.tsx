@@ -2,6 +2,7 @@
 
 import type { CertificationDocumentsPanelProps } from "../types/certification-documents-panel-props.types";
 import { CertificationDocumentItem } from "./certification-document-item";
+import { getCertificationDocumentInfo } from '../utils/get-certification-document-info';
 import { SectionCard } from "@/modules/profile";
 
 export function CertificationDocumentsPanel({
@@ -32,7 +33,7 @@ export function CertificationDocumentsPanel({
                 <li key={certification.id}>
                   <CertificationDocumentItem
                     certification={certification}
-                    info={uploadedInfo[certification.id]}
+                    info={getCertificationDocumentInfo(certification) ?? uploadedInfo[certification.id]}
                     isBusy={isBusy}
                     onView={onView}
                   />

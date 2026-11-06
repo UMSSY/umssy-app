@@ -4,7 +4,7 @@ import { EventRegistrationsService } from '../../event-registrations/services/ev
 import { ConversationRepository } from '../repositories/conversation.repository.js';
 import { NotRegisteredForEventException } from '../exceptions/not-registered-for-event.exception.js';
 import { EventRoomService } from '../services/event-room.service.js';
-import { ConversationMapper } from '../mappers/conversation.mapper.js'; 
+import { ConversationMapper } from '../mappers/conversation.mapper.js';
 describe('EventRoomService', () => {
   let service: EventRoomService;
   let registrationsService: { getPassById: ReturnType<typeof vi.fn> };
@@ -21,7 +21,7 @@ describe('EventRoomService', () => {
       findById: vi.fn(),
       findParticipantsByConversationId: vi.fn(),
     };
-    
+
     const conversationMapper = new ConversationMapper();
 
     service = new EventRoomService(
@@ -69,7 +69,7 @@ describe('EventRoomService', () => {
         createdAt: '2026-11-01T10:00:00.000Z',
         participants: [{ id: 'user-1', fullName: 'Maria Fernandez' }],
       });
-      
+
       expect(registrationsService.getPassById).toHaveBeenCalledWith(
         'registration-1',
         'user-1',

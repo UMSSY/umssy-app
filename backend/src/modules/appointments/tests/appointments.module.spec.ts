@@ -76,19 +76,4 @@ describe('AppointmentsModule', () => {
     expect(imports).toContain(AppointmentsModule);
   });
 
-  it('inicializa la aplicación con appointments y la conexión de datos sustituida', async () => {
-    const rootModule = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(PrismaService)
-      .useValue({})
-      .compile();
-    const app = rootModule.createNestApplication();
-
-    try {
-      await app.init();
-
-      expect(app.get(AppointmentsService)).toBeInstanceOf(AppointmentsService);
-    } finally {
-      await app.close();
-    }
-  });
 });

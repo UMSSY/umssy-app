@@ -9,7 +9,7 @@ describe('UserPresenceService', () => {
   beforeEach(() => {
     const mockRepository = {
       upsert: vi.fn().mockResolvedValue(undefined),
-      findByUserIds: vi.fn().mockResolvedValue([]), 
+      findByUserIds: vi.fn().mockResolvedValue([]),
     };
 
 
@@ -20,18 +20,18 @@ describe('UserPresenceService', () => {
   it('debe marcar al usuario como en línea', async () => {
     const userId = 'user-123';
     const now = new Date();
-    
+
     await service.markOnline(userId, now);
-     
+
     expect(repository.upsert).toHaveBeenCalledWith(userId, true, now);
   });
 
   it('debe marcar al usuario como desconectado', async () => {
     const userId = 'user-123';
     const now = new Date();
-    
+
     await service.markOffline(userId, now);
-     
+
     expect(repository.upsert).toHaveBeenCalledWith(userId, false, now);
   });
 });

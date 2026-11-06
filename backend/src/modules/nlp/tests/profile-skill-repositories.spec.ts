@@ -37,6 +37,18 @@ describe('ProfileSkillResultsRepository', () => {
     repository = new ProfileSkillResultsRepository(prisma as unknown as PrismaService);
   });
 
+  it('locks the revision through the supplied transaction instead of the global client', async () => {
+    const row = { input_revision: 4, processed_revision: 4, status: 'ready' };
+    const query = vi.fn().mockResolvedValue([row]);
+    const context = { client: { $queryRaw: query } } as unknown as TransactionContext;
+    expect(await repository.readLockedRevision(userId, context)).toBe(row);
+    expect(query.mock.calls[0][0].join('')).toContain('FOR SHARE');
+    expect(query.mock.calls[0][1]).toBe(userId);
+    expect(prisma.profileSkillProcessingState.findUnique).not.toHaveBeenCalled();
+    query.mockResolvedValueOnce([]);
+    expect(await repository.readLockedRevision(userId, context)).toBeUndefined();
+  });
+
   it('reads only its processing state', async () => {
     await expect(repository.findState(userId)).resolves.toBe(state);
     expect(prisma.profileSkillProcessingState.findUnique).toHaveBeenCalledWith({ where: { userId }, select: processingStateSelect });
