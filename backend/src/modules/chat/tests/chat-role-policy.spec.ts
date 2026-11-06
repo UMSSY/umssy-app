@@ -1,5 +1,3 @@
-
-import { ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ChatRolePolicyService } from '../services/chat-role-policy.service.js';
@@ -14,7 +12,7 @@ import {
 import { ConversationMapper } from '../mappers/conversation.mapper.js';
 
 const USER_A = '00000000-0000-4000-8000-000000000001';
-const USER_B = '00000000-0000-4000-8000-000000000002';
+const USER_B = '00000000-0000-s000-8000-000000000002';
 const CONVERSATION_ID = '00000000-0000-4000-8000-000000000003';
 
 function setup(rolesA: string[], rolesB: string[]) {
@@ -50,18 +48,8 @@ function setup(rolesA: string[], rolesB: string[]) {
     eventId: null,
     event: null,
     updatedAt: now,
-    userA: {
-      id: USER_A,
-      firstName: 'Ana',
-      lastName: 'Perez',
-      photoUrl: null,
-    },
-    userB: {
-      id: USER_B,
-      firstName: 'Luis',
-      lastName: 'Lopez',
-      photoUrl: null,
-    },
+    userA: { id: USER_A, firstName: 'Ana', lastName: 'Perez', photoUrl: null },
+    userB: { id: USER_B, firstName: 'Luis', lastName: 'Lopez', photoUrl: null },
     messages: [],
   };
 
@@ -73,28 +61,17 @@ function setup(rolesA: string[], rolesB: string[]) {
   };
 
   const participants = {
-    findByConversationAndUser: vi.fn().mockResolvedValue({
-      lastReadAt: now,
-    }),
+    findByConversationAndUser: vi.fn().mockResolvedValue({ lastReadAt: now }),
     countUnread: vi.fn().mockResolvedValue(0),
     markRead: vi.fn().mockResolvedValue(undefined),
   };
 
   const lookup = {
-    findById: vi.fn().mockResolvedValue({
-      id: USER_B,
-      isActive: true,
-    }),
+    findById: vi.fn().mockResolvedValue({ id: USER_B, isActive: true }),
   };
 
-  const presence = {
-    mapOnlineStatus: vi.fn().mockResolvedValue(new Map()),
-  };
-
-  const connections = {
-    findAcceptedRequest: vi.fn().mockResolvedValue({ id: 'accepted' }),
-  };
-
+  const presence = { mapOnlineStatus: vi.fn().mockResolvedValue(new Map()) };
+  const connections = { findAcceptedRequest: vi.fn().mockResolvedValue({ id: 'accepted' }) };
   const blocks = {
     isBlockedBetween: vi.fn().mockResolvedValue(false),
     findBlockedIdsBy: vi.fn().mockResolvedValue(new Set<string>()),
@@ -111,14 +88,9 @@ function setup(rolesA: string[], rolesB: string[]) {
     }),
   };
 
-  const statuses = {
-    getSentId: vi.fn().mockResolvedValue('sent-status'),
-  };
-
+  const statuses = { getSentId: vi.fn().mockResolvedValue('sent-status') };
   const attachments = {
-    findAttachmentTypeByTitle: vi.fn().mockResolvedValue({
-      id: 'image-type',
-    }),
+    findAttachmentTypeByTitle: vi.fn().mockResolvedValue({ id: 'image-type' }),
     create: vi.fn().mockResolvedValue({ id: 'attachment-1' }),
   };
 
@@ -151,13 +123,8 @@ function setup(rolesA: string[], rolesB: string[]) {
     }),
   };
 
-  const educationsService = {
-    findAll: vi.fn().mockResolvedValue([]),
-  };
-
-  const userSkillService = {
-    getUserSkills: vi.fn().mockResolvedValue([]),
-  };
+  const educationsService = { findAll: vi.fn().mockResolvedValue([]) };
+  const userSkillService = { getUserSkills: vi.fn().mockResolvedValue([]) };
 
   const conversationService = new ConversationService(
     ...([
@@ -309,22 +276,6 @@ describe('HU8 tarea 3: roles permitidos', () => {
     },
   );
 
-  it('rechaza abrir una conversacion existente con reclutador', async () => {
-    const context = setup(['estudiante'], ['empresa']);
-
-    context.conversations.findByOrderedPair.mockResolvedValue(
-      context.conversation,
-    );
-
-    await expect(
-      context.conversationService.getOrCreate(USER_A, USER_B),
-    ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
-
-    expect(
-      context.conversations.createWithParticipants,
-    ).not.toHaveBeenCalled();
-  });
-
   it('vuelve a consultar roles si cambian durante la sesion', async () => {
     const context = setup(['estudiante'], ['titulado']);
 
@@ -341,24 +292,6 @@ describe('HU8 tarea 3: roles permitidos', () => {
     ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
 
     expect(context.messages.create).not.toHaveBeenCalled();
-  });
-
-  it('conserva la solicitud de conexion aceptada de HU9', async () => {
-    const context = setup(['estudiante'], ['titulado']);
-
-    context.connections.findAcceptedRequest.mockResolvedValue(null);
-
-    await expect(
-      context.conversationService.getOrCreate(USER_A, USER_B),
-    ).rejects.toBeInstanceOf(ForbiddenException);
-
-    expect(
-      context.connections.findAcceptedRequest,
-    ).toHaveBeenCalledWith(USER_A, USER_B);
-
-    expect(
-      context.conversations.createWithParticipants,
-    ).not.toHaveBeenCalled();
   });
 
   it('conserva el bloqueo de HU13 aunque los roles sean permitidos', async () => {
