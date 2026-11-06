@@ -4,10 +4,13 @@ import { CertificationNotFoundException } from '../exceptions/certification-not-
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { CertificationsRepository } from '../repositories/certifications.repository.js';
 
-const recordNotFoundError = new Prisma.PrismaClientKnownRequestError('Record not found', {
-  code: 'P2025',
-  clientVersion: 'test',
-});
+const recordNotFoundError = new Prisma.PrismaClientKnownRequestError(
+  'Record not found',
+  {
+    code: 'P2025',
+    clientVersion: 'test',
+  },
+);
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const certificationId = '33333333-3333-4333-8333-333333333333';
@@ -39,7 +42,7 @@ describe('CertificationsRepository', () => {
     const records = [{ id: 'a' }];
     certification.findMany.mockResolvedValue(records);
 
-    await expect(repository.findManyByUserId(userId)).resolves.toBe(records);
+    await expect(repository.findManyByUserId(userId)).resolves.toEqual(records);
     expect(certification.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { userId },
@@ -52,7 +55,7 @@ describe('CertificationsRepository', () => {
     const record = { id: certificationId };
     certification.findUnique.mockResolvedValue(record);
 
-    await expect(repository.findById(certificationId)).resolves.toBe(record);
+    await expect(repository.findById(certificationId)).resolves.toEqual(record);
     expect(certification.findUnique).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: certificationId } }),
     );
@@ -85,7 +88,7 @@ describe('CertificationsRepository', () => {
 
     await expect(
       repository.update(certificationId, { name: 'Updated' }),
-    ).resolves.toBe(record);
+    ).resolves.toEqual(record);
     expect(certification.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: certificationId },
@@ -97,9 +100,7 @@ describe('CertificationsRepository', () => {
   it('deletes a certification by id', async () => {
     certification.delete.mockResolvedValue({ id: certificationId });
 
-    await expect(
-      repository.delete(certificationId),
-    ).resolves.toBeUndefined();
+    await expect(repository.delete(certificationId)).resolves.toBeUndefined();
     expect(certification.delete).toHaveBeenCalledWith({
       where: { id: certificationId },
     });
