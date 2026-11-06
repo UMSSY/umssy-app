@@ -1,5 +1,6 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UsersService } from '../../users/services/users.service.js';
+import { ChatRoleNotAllowedException } from '../exceptions/chat.exceptions.js';
 
 const STUDENT_ROLES = new Set(['estudiante', 'titulado']);
 
@@ -45,12 +46,10 @@ export class ChatRolePolicyService {
       return;
     }
 
-     return this.deny();
+    return this.deny();
   }
 
   private deny(): never {
-    throw new ForbiddenException(
-      'El chat libre solo está disponible entre estudiantes y titulados. Para contactar a un reclutador, debes postularte a una de sus vacantes.',
-    );
+    throw new ChatRoleNotAllowedException();
   }
 }

@@ -1,4 +1,3 @@
-import { ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ChatRolePolicyService } from '../services/chat-role-policy.service.js';
@@ -13,7 +12,7 @@ import {
 import { ConversationMapper } from '../mappers/conversation.mapper.js';
 
 const USER_A = '00000000-0000-4000-8000-000000000001';
-const USER_B = '00000000-0000-4000-8000-000000000002';
+const USER_B = '00000000-0000-s000-8000-000000000002';
 const CONVERSATION_ID = '00000000-0000-4000-8000-000000000003';
 
 function setup(rolesA: string[], rolesB: string[]) {
@@ -251,7 +250,7 @@ describe('HU8 tarea 3: roles permitidos', () => {
 
       await expect(
         context.conversationService.getOrCreate(USER_A, USER_B),
-      ).rejects.toBeInstanceOf(ForbiddenException);
+      ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
 
       expect(
         context.conversations.createWithParticipants,
@@ -263,13 +262,13 @@ describe('HU8 tarea 3: roles permitidos', () => {
           senderId: USER_A,
           content: 'Hola',
         }),
-      ).rejects.toBeInstanceOf(ForbiddenException);
+      ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
 
       await expect(
         context.attachmentService.uploadAndSend(USER_A, context.file, {
           conversationId: CONVERSATION_ID,
         }),
-      ).rejects.toBeInstanceOf(ForbiddenException);
+      ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
 
       expect(context.messages.create).not.toHaveBeenCalled();
       expect(context.attachments.create).not.toHaveBeenCalled();
@@ -290,7 +289,7 @@ describe('HU8 tarea 3: roles permitidos', () => {
         senderId: USER_A,
         content: 'Hola',
       }),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    ).rejects.toBeInstanceOf(ChatRoleNotAllowedException);
 
     expect(context.messages.create).not.toHaveBeenCalled();
   });
