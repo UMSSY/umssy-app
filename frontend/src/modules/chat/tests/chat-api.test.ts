@@ -148,13 +148,13 @@ describe('chat-api — searchUsers (HU-2, backend integration)', () => {
 
   });
 
-  it('debe mapear la respuesta del backend al tipo User del frontend', async () => {
+    it('debe mapear la respuesta del backend al tipo User del frontend', async () => {
     apiClientMock.get.mockResolvedValue({
       data: [
         {
           id: 'user-1',
           fullName: 'Maria Peredo',
-          avatarUrl: 'https\://example.com/a.jpg',
+          avatarUrl: 'https://example.com/a.jpg',
           headline: 'Senior IT Recruiter',
           role: 'RECRUITER',
           isOnline: true,
@@ -168,15 +168,44 @@ describe('chat-api — searchUsers (HU-2, backend integration)', () => {
       {
         id: 'user-1',
         fullName: 'Maria Peredo',
-        avatarUrl: 'https\://example.com/a.jpg',
+        avatarUrl: 'https://example.com/a.jpg',
         headline: 'Senior IT Recruiter',
         role: 'RECRUITER',
         isActive: true,
+        canChatByApplication: false,
       },
     ]);
-
   });
 
+    it('debe conservar el permiso de chat por postulación', async () => {
+    apiClientMock.get.mockResolvedValue({
+      data: [
+        {
+          id: 'user-1',
+          fullName: 'Carlos Rojas',
+          avatarUrl: null,
+          headline: null,
+          role: 'RECRUITER',
+          isOnline: true,
+          canChatByApplication: true,
+        },
+      ],
+    });
+
+    const result = await searchUsers('carlos');
+
+    expect(result).toEqual([
+      {
+        id: 'user-1',
+        fullName: 'Carlos Rojas',
+        avatarUrl: null,
+        headline: null,
+        role: 'RECRUITER',
+        isActive: true,
+        canChatByApplication: true,
+      },
+    ]);
+  });
   it('debe propagar el error del backend cuando la peticion falla', async () => {
     apiClientMock.get.mockRejectedValueOnce(new Error('Network Error'));
 

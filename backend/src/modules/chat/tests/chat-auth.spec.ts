@@ -16,6 +16,7 @@ import { ConversationController } from '../controllers/conversation.controller.j
 import { MessageController } from '../controllers/message.controller.js';
 import { UserSearchController } from '../controllers/user-search.controller.js';
 import { ConversationService } from '../services/conversation.service.js';
+import { ChatGateway } from '../gateways/chat.gateway.js';
 
 describe('Chat access', () => {
   let app: INestApplication;
@@ -31,6 +32,7 @@ describe('Chat access', () => {
       controllers: [ConversationController],
       providers: [
         { provide: ConversationService, useValue: { findAllForUser } },
+        { provide: ChatGateway, useValue: {} }, // 👈 Added mock provider
         { provide: APP_FILTER, useClass: DomainExceptionFilter },
       ],
     })
