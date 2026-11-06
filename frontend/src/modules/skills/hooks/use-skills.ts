@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { PROFILE_SKILLS_RADAR_QUERY_KEY } from "@/modules/profile/constants/profile-skills-query.constants";
 import {
   PENDING_SKILL_ID_PREFIX,
   SKILLS_ERROR_MESSAGES,
@@ -101,6 +102,8 @@ export function useSkills(): UseSkillsResult {
       }));
       setSelectedSkills(null);
       setFeedback({ type: "success", message: SKILLS_SUCCESS_MESSAGES.saved });
+      // The PUT already runs the analysis; refresh its stored result in the background.
+      void queryClient.invalidateQueries({ queryKey: PROFILE_SKILLS_RADAR_QUERY_KEY });
       return true;
     } catch (error) {
       setFeedback({

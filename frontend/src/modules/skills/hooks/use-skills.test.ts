@@ -1,4 +1,5 @@
 import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+import { useQuery } from "@tanstack/react-query";
 import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { skillsService } from "../services/skills.service";
@@ -196,5 +197,107 @@ describe("useSkills", () => {
 
     expect(result.current.isSaving).toBe(false);
     expect(result.current.selectedSkills).toEqual([PYTHON]);
+  });
+
+  describe("automatic consolidated skills refresh", () => {
+    const consolidatedQueryKey = ["profile", "skills-radar"] as const;
+
+    async function renderConsolidatedSkills() {
+      const readConsolidated = vi.fn().mockResolvedValue([PYTHON]);
+      const hook = renderHook(() => ({
+        skills: useSkills(),
+        consolidated: useQuery({
+          queryKey: consolidatedQueryKey,
+          queryFn: readConsolidated,
+          staleTime: Infinity,
+        }),
+      }));
+      await waitFor(() => {
+        expect(hook.result.current.skills.isLoading).toBe(false);
+        expect(hook.result.current.consolidated.data).toEqual([PYTHON]);
+      });
+      return { ...hook, readConsolidated };
+    }
+
+    it.each([
+      { action: "adding a skill", selection: [PYTHON, SQL] },
+      { action: "replacing a skill", selection: [SQL] },
+      { action: "removing every manual skill", selection: [] },
+    ])("refreshes the consolidated list after $action", async ({ selection }) => {
+      const { result, readConsolidated } = await renderConsolidatedSkills();
+      vi.mocked(skillsService.saveMySkills).mockImplementation(async () => {
+        readConsolidated.mockResolvedValue(selection);
+        return selection;
+      });
+
+      await act(async () => {
+        expect(await result.current.skills.saveSkills(selection)).toBe(true);
+      });
+
+      await waitFor(() => expect(result.current.consolidated.data).toEqual(selection));
+      expect(readConsolidated).toHaveBeenCalledTimes(2);
+      expect(result.current.skills.selectedSkills).toEqual(selection);
+    });
+
+    it("keeps the previous consolidated list while the save is pending", async () => {
+      const { result, readConsolidated } = await renderConsolidatedSkills();
+      let resolveSave!: (value: typeof PYTHON[]) => void;
+      vi.mocked(skillsService.saveMySkills).mockReturnValue(new Promise((resolve) => {
+        resolveSave = resolve;
+      }));
+      let saved!: Promise<boolean>;
+
+      act(() => { saved = result.current.skills.saveSkills([PYTHON, SQL]); });
+
+      expect(readConsolidated).toHaveBeenCalledTimes(1);
+      expect(result.current.consolidated.data).toEqual([PYTHON]);
+
+      await act(async () => {
+        readConsolidated.mockResolvedValue([PYTHON, SQL]);
+        resolveSave([PYTHON, SQL]);
+        await saved;
+      });
+      await waitFor(() => expect(result.current.consolidated.data).toEqual([PYTHON, SQL]));
+    });
+
+    it("preserves the consolidated cache when saving fails", async () => {
+      const { result, client, readConsolidated } = await renderConsolidatedSkills();
+      vi.mocked(skillsService.saveMySkills).mockRejectedValue(new Error("Save failed"));
+
+      await act(async () => {
+        expect(await result.current.skills.saveSkills([PYTHON, SQL])).toBe(false);
+      });
+
+      expect(result.current.consolidated.data).toEqual([PYTHON]);
+      expect(readConsolidated).toHaveBeenCalledTimes(1);
+      expect(client.getQueryState(consolidatedQueryKey)?.isInvalidated).toBe(false);
+    });
+
+    it("marks an inactive consolidated list as stale for the next visit", async () => {
+      const { result, client } = await renderLoadedHook();
+      client.setQueryData(consolidatedQueryKey, [PYTHON]);
+      vi.mocked(skillsService.saveMySkills).mockResolvedValue([PYTHON, SQL]);
+
+      await act(async () => {
+        expect(await result.current.saveSkills([PYTHON, SQL])).toBe(true);
+      });
+
+      expect(client.getQueryState(consolidatedQueryKey)?.isInvalidated).toBe(true);
+    });
+
+    it("keeps a successful save when refreshing the consolidated list fails", async () => {
+      const { result, client, readConsolidated } = await renderConsolidatedSkills();
+      vi.mocked(skillsService.saveMySkills).mockResolvedValue([PYTHON, SQL]);
+      readConsolidated.mockRejectedValue(new Error("Refresh failed"));
+
+      await act(async () => {
+        expect(await result.current.skills.saveSkills([PYTHON, SQL])).toBe(true);
+      });
+
+      await waitFor(() => expect(client.getQueryState(consolidatedQueryKey)?.status).toBe("error"));
+      expect(result.current.skills.selectedSkills).toEqual([PYTHON, SQL]);
+      expect(result.current.skills.feedback?.type).toBe("success");
+      expect(result.current.consolidated.data).toEqual([PYTHON]);
+    });
   });
 });
