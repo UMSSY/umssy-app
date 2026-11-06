@@ -1,4 +1,3 @@
-
 import {
   BadRequestException,
   ConflictException,
@@ -35,6 +34,10 @@ describe('ConnectionRequestService', () => {
     findActiveById: vi.fn(),
   };
 
+  const chatGateway = {
+    notifyUser: vi.fn(),
+  };
+
   let service: ConnectionRequestService;
 
   beforeEach(() => {
@@ -44,6 +47,7 @@ describe('ConnectionRequestService', () => {
       repository as any,
       blockRepository as any,
       userRepository as any,
+      chatGateway as any, // 👈 Passed the mock here
     );
 
     userRepository.findActiveById.mockResolvedValue({
@@ -93,6 +97,11 @@ describe('ConnectionRequestService', () => {
       senderId,
       receiverId,
       'pending-status-id',
+    );
+    expect(chatGateway.notifyUser).toHaveBeenCalledWith(
+      receiverId,
+      'connection_request:new',
+      expect.any(Object),
     );
   });
 
@@ -187,6 +196,11 @@ describe('ConnectionRequestService', () => {
     );
 
     expect(result).toBeDefined();
+    expect(chatGateway.notifyUser).toHaveBeenCalledWith(
+      senderId,
+      'connection_request:updated',
+      expect.any(Object),
+    );
   });
 
   it('permite al destinatario rechazar una solicitud pendiente', async () => {
@@ -202,6 +216,11 @@ describe('ConnectionRequestService', () => {
     );
 
     expect(result).toBeDefined();
+    expect(chatGateway.notifyUser).toHaveBeenCalledWith(
+      senderId,
+      'connection_request:updated',
+      expect.any(Object),
+    );
   });
 
   it('impide al remitente aceptar su propia solicitud enviada', async () => {

@@ -63,6 +63,23 @@ afterEach(() => {
 });
 
 describe("recuperación con el socket de la epic", () => {
+  it("mantiene el aviso al recuperar internet hasta sincronizar la lista sin sala abierta", async () => {
+    const { result } = renderHook(() => useChatConnection(null), { wrapper });
+    await waitFor(() => expect(result.current.status).toBe("connected"));
+    act(() => network(false));
+    expect(result.current.status).toBe("offline");
+    let finish!: () => void;
+    vi.spyOn(client, "invalidateQueries").mockImplementationOnce(
+      () => new Promise<void>((resolve) => { finish = resolve; }),
+    );
+    act(() => network(true));
+    expect(result.current.status).toBe("reconnecting");
+    await act(async () => finish());
+    expect(result.current.status).toBe("connected");
+    expect(socket.emit).not.toHaveBeenCalled();
+    expect(synchronizeMessages).not.toHaveBeenCalled();
+  });
+
   it("espera conexión, confirmación de sala y sincronización antes de recuperarse", async () => {
     socket.connected = false;
     deferJoin = true;

@@ -91,3 +91,51 @@ export function formatMessageDateSeparator(isoString?: string | null): string {
     .format(date)
     .toUpperCase();
 }
+
+export const BOLIVIA_TIME_ZONE = 'America/La_Paz';
+
+/**
+ * Formatea la fecha de creación de la sala de evento como dd/mm/aa
+ * en hora de Bolivia (America/La_Paz).
+ */
+export function formatEventRoomCreatedAt(
+  isoDateString?: string | null,
+): string {
+  if (!isoDateString) {
+    return '';
+  }
+
+  const date = new Date(isoDateString);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat('es-BO', {
+    timeZone: BOLIVIA_TIME_ZONE,
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+  }).format(date);
+}
+
+/**
+ * Formatea la hora de un mensaje en hora de Bolivia (America/La_Paz),
+ * reutilizando el criterio de zona horaria del chat (es-BO).
+ */
+export function formatEventRoomTime(isoDateString?: string | null): string {
+  if (!isoDateString) {
+    return '';
+  }
+
+  const date = new Date(isoDateString);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat('es-BO', {
+    timeZone: BOLIVIA_TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h12',
+  }).format(date);
+}

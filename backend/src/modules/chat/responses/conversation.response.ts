@@ -34,6 +34,11 @@ export interface EventConversationResponse extends Omit<
 > {
   eventId: string;
   eventTitle: string;
+  createdAt: string;
+  participants: Array<{
+    id: string;
+    fullName: string;
+  }>;
   contact?: never;
 }
 

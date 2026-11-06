@@ -42,7 +42,7 @@ describe("avisos de conexión en la sala", () => {
       />
     );
     const { rerender } = render(room("offline"));
-    expect(screen.getByText("Sin conexión a internet")).toBeInTheDocument();
+    expect(screen.getByText("Sin conexión")).toBeInTheDocument();
     expect(screen.getByText("Mensaje existente")).toBeInTheDocument();
     fireEvent.change(screen.getByTestId("message-textarea"), {
       target: { value: "Mi borrador" },
@@ -54,7 +54,7 @@ describe("avisos de conexión en la sala", () => {
       screen.getByRole("button", { name: "Cerrar aviso de conexión" }),
     );
     expect(
-      screen.queryByText("Sin conexión a internet"),
+      screen.queryByText("Sin conexión"),
     ).not.toBeInTheDocument();
     rerender(room("reconnecting"));
     expect(
@@ -67,10 +67,10 @@ describe("avisos de conexión en la sala", () => {
       screen.queryByText("Reconectando y sincronizando mensajes..."),
     ).not.toBeInTheDocument();
     rerender(room("offline"));
-    expect(screen.getByText("Sin conexión a internet")).toBeInTheDocument();
+    expect(screen.getByText("Sin conexión")).toBeInTheDocument();
     rerender(room("connected"));
     expect(
-      screen.queryByText("Sin conexión a internet"),
+      screen.queryByText("Sin conexión"),
     ).not.toBeInTheDocument();
     expect(screen.getByTestId("message-textarea")).toHaveValue("Mi borrador");
     expect(screen.getByTestId("send-button")).toBeEnabled();
