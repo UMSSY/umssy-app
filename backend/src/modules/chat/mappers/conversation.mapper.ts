@@ -1,6 +1,8 @@
 
-import { UserNotFoundException } from '../exceptions/index.js';
 import { Injectable } from '@nestjs/common';
+
+import { UserNotFoundException } from '../exceptions/index.js';
+
 import type {
   ConversationResponse,
   EventConversationResponse,
@@ -9,6 +11,7 @@ import type {
 import type { RawConversationMessage } from '../types/raw-conversation-message.types.js';
 import type { RawConversationUser } from '../types/raw-conversation-user.types.js';
 import type { RawConversationRecord } from '../types/raw-conversation-record.types.js';
+import type { RawConversationParticipant } from '../types/raw-conversation-participant.types.js';
 import type { EventRoomJoinedPayload } from '../types/event-room-joined-payload.types.js';
 
 @Injectable()
@@ -17,8 +20,10 @@ export class ConversationMapper {
     message?: RawConversationMessage,
   ): ConversationResponse['lastMessage'] {
     if (!message) return null;
+
     const content = message.content ?? '';
     const isAttachment = content.startsWith('[Archivo] ');
+
     return {
       id: message.id,
       senderId: message.senderId,
@@ -29,24 +34,39 @@ export class ConversationMapper {
     };
   }
 
+  private toEventParticipants(
+    participants: RawConversationParticipant[],
+  ): EventRoomJoinedPayload['participants'] {
+    return participants.map((participant) => ({
+      id: participant.userId,
+      fullName:
+        `${participant.user.firstName} ${participant.user.lastName}`.trim(),
+    }));
+  }
+
   toAvatarUrl(photo?: Uint8Array | null): string | null {
     if (!photo || photo.length === 0) return null;
+
     return `data:image/jpeg;base64,${Buffer.from(photo).toString('base64')}`;
   }
 
   toEventConversationResponse(
     conversation: RawConversationRecord,
   ): EventConversationResponse {
-    if (!conversation.event) throw new UserNotFoundException();
+    if (!conversation.event) {
+      throw new UserNotFoundException();
+    }
+
     return {
       id: conversation.id,
       eventId: conversation.event.id,
       eventTitle: conversation.event.title,
-      createdAt: (conversation.createdAt ?? conversation.updatedAt).toISOString(),
-      participants: (conversation.participants ?? []).map((participant) => ({
-        id: participant.userId,
-        fullName: `${participant.user.firstName} ${participant.user.lastName}`.trim(),
-      })),
+      createdAt: (
+        conversation.createdAt ?? conversation.updatedAt
+      ).toISOString(),
+      participants: this.toEventParticipants(
+        conversation.participants ?? [],
+      ),
       lastMessage: this.toLastMessage(conversation.messages[0]),
       unreadCount: 0,
       isBlockedByMe: false,
@@ -95,25 +115,20 @@ export class ConversationMapper {
       updatedAt: conversation.updatedAt.toISOString(),
     };
   }
-toEventRoomJoinedPayload(params: {
+
+  toEventRoomJoinedPayload(params: {
     conversationId: string;
     eventId: string;
     eventTitle: string;
     createdAt: Date;
-    participants: Array<{
-      userId: string;
-      user: { firstName: string; lastName: string };
-    }>;
+    participants: RawConversationParticipant[];
   }): EventRoomJoinedPayload {
     return {
       conversationId: params.conversationId,
       eventId: params.eventId,
       name: params.eventTitle,
       createdAt: params.createdAt.toISOString(),
-      participants: params.participants.map((p) => ({
-        id: p.userId,
-        fullName: `${p.user.firstName} ${p.user.lastName}`.trim(),
-      })),
+      participants: this.toEventParticipants(params.participants),
     };
   }
 }

@@ -1,12 +1,17 @@
+
 import { Injectable } from '@nestjs/common';
+
 import { UsersService } from '../../users/services/users.service.js';
+
 import { ChatRoleNotAllowedException } from '../exceptions/chat.exceptions.js';
 
 const STUDENT_ROLES = new Set(['estudiante', 'titulado']);
 
 @Injectable()
 export class ChatRolePolicyService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+  ) {}
 
   async assertCanCommunicate(
     userId: string,
@@ -21,7 +26,8 @@ export class ChatRolePolicyService {
       return this.deny();
     }
 
-    const users = await this.usersService.findManyWithActiveRoles(ids);
+    const users =
+      await this.usersService.findManyWithActiveRoles(ids);
 
     if (
       users.length !== 2 ||
