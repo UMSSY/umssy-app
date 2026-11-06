@@ -95,6 +95,7 @@ export function SkillsProfileSection() {
         {!isAdding ? (
           <FeedbackMessage feedback={skills.feedback} />
         ) : null}
+        <DetectedSkillsPanel />
       </SectionCard>
 
       {isAdding ? (

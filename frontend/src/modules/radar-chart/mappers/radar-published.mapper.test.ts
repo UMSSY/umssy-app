@@ -25,4 +25,22 @@ describe('Radar publicado por backend', () => {
     expect(mapped.areas.every(area => area.score===0)).toBe(true);
     expect(mapped.average).toBe(0);
   });
+  it('handles null, undefined or empty snapshot gracefully without throwing', () => {
+    const mappedNull = mapPublishedRadar(null);
+    expect(mappedNull.areas).toHaveLength(6);
+    expect(mappedNull.areas.every(area => area.score === 0)).toBe(true);
+    expect(mappedNull.approved).toEqual([]);
+    expect(mappedNull.average).toBe(0);
+    expect(mappedNull.keywordCount).toBe(0);
+
+    const mappedUndefined = mapPublishedRadar(undefined);
+    expect(mappedUndefined.areas).toHaveLength(6);
+    expect(mappedUndefined.approved).toEqual([]);
+    expect(mappedUndefined.average).toBe(0);
+
+    const mappedEmpty = mapPublishedRadar({} as IntegrationRadar);
+    expect(mappedEmpty.areas).toHaveLength(6);
+    expect(mappedEmpty.approved).toEqual([]);
+    expect(mappedEmpty.keywordCount).toBe(0);
+  });
 });
