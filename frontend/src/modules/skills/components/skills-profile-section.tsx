@@ -114,7 +114,6 @@ export function SkillsProfileSection() {
           }
         />
       ) : null}
-       <DetectedSkillsPanel />
     </section>
   );
 }

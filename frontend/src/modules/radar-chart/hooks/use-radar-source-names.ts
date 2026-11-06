@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { documentsService } from "@/modules/documents";
-import { certificationsService } from "@/modules/certifications";
+import { useCertifications } from "@/modules/certifications";
 import type { Epic2Skill } from "../types/epic2-skill.types";
 
 export function useRadarSourceNames(userId: string, skills: Epic2Skill[]) {
@@ -27,25 +27,24 @@ export function useRadarSourceNames(userId: string, skills: Epic2Skill[]) {
       return names;
     },
   });
-  const certificates = useQuery({
-    queryKey: ["radar-source-names", userId, "certification", certificationIds],
+  const certifications = useCertifications({
     enabled: certificationIds.length > 0,
-    retry: false,
-    queryFn: async () => {
-      const items = await certificationsService.getCertifications();
-      return Object.fromEntries(items.filter(item => certificationIds.includes(item.id)).map(item => [item.id, item.document?.fileName?.trim() || item.name]));
-    },
   });
 
   const getName = (ref: Epic2Skill["evidenceRefs"][number]): string => {
     if (ref.type === "cv") return cvs.data?.[ref.id] ?? (cvs.isFetching ? "Cargando nombre del CV…" : "CV de origen no disponible");
-    if (ref.type === "certification") return certificates.data?.[ref.id] ?? (certificates.isFetching ? "Cargando certificación…" : "Certificación de origen no disponible");
+    if (ref.type === "certification") {
+      const item = certifications.certifications.find(item => item.id === ref.id);
+      return item
+        ? (item.document?.fileName?.trim() || item.name)
+        : (certifications.isLoading ? "Cargando certificación…" : "Certificación de origen no disponible");
+    }
     if (ref.type === "education") return "Formación académica del perfil";
     if (ref.type === "work-experience") return "Experiencia laboral del perfil";
     return "Fuente de origen no disponible";
   };
-  return { getName, hasError: cvs.isError || certificates.isError, retry: () => {
+  return { getName, hasError: cvs.isError || Boolean(certifications.error), retry: () => {
     if (cvIds.length) void cvs.refetch();
-    if (certificationIds.length) void certificates.refetch();
+    if (certificationIds.length) void certifications.reload();
   } };
 }

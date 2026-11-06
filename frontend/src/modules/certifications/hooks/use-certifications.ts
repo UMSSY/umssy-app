@@ -6,7 +6,7 @@ import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedbac
 import { certificationsService } from "../services/certifications.service";
 import { sortCertifications } from "../utils/sort-certifications";
 
-export function useCertifications() {
+export function useCertifications(options: { enabled?: boolean } = {}) {
   const queryClient = useQueryClient();
   const mountedRef = useRef(false);
   useEffect(() => {
@@ -16,6 +16,7 @@ export function useCertifications() {
   const queryKey = ["certifications", "certifications"];
   const query = useQuery({
     queryKey,
+    enabled: options.enabled ?? true,
     queryFn: async ({ signal }) => {
       signal.throwIfAborted();
       const items = await certificationsService.getCertifications();
