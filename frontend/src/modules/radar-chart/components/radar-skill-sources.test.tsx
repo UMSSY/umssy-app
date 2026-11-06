@@ -2,11 +2,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { documentsService } from "@/modules/documents";
-import { certificationsService } from "@/modules/certifications";
+import { certificationsService, useCertifications } from "@/modules/certifications";
 import { RadarSkillSources } from "./radar-skill-sources";
 import type { Epic2Skill } from "../types/epic2-skill.types";
 vi.mock("@/modules/documents", () => ({ documentsService: { getCvs: vi.fn() } }));
-vi.mock("@/modules/certifications", () => ({ certificationsService: { getCertifications: vi.fn() } }));
+vi.mock("@/modules/certifications/services/certifications.service", () => ({ certificationsService: { getCertifications: vi.fn() } }));
 function show(refs: Epic2Skill["evidenceRefs"]) {
   const skill: Epic2Skill = { id: "skill-secret", name: "Python", text: "Python", source: "nlp", areaId: "data-ai", verificationStatus: "approved", isHighRelevance: false, evidenceRefs: refs };
   return render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><RadarSkillSources userId="owner" skills={[skill]} /></QueryClientProvider>);
@@ -36,6 +36,33 @@ describe("Nombres de documentos del radar", () => {
     show([{ type: "certification", id: "cert-id" }]);
     expect(await screen.findByText("Diploma Python.pdf")).toBeInTheDocument();
     expect(documentsService.getCvs).not.toHaveBeenCalled();
+  });
+  it("reutiliza la misma consulta de certificaciones entre componentes", async () => {
+    const certification = {
+      id: "cert-shared", name: "Curso compartido", issuingOrganization: "UMSS",
+      issueDate: "2026-01-01", createdAt: "", updatedAt: "",
+      document: { fileName: "Diploma compartido.pdf", mimeType: "application/pdf", sizeBytes: 1, uploadedAt: "" },
+    };
+    vi.mocked(certificationsService.getCertifications).mockResolvedValue([certification]);
+    const skill: Epic2Skill = {
+      id: "skill-shared", name: "Python", text: "Python", source: "nlp",
+      areaId: "data-ai", verificationStatus: "approved", isHighRelevance: false,
+      evidenceRefs: [{ type: "certification", id: "cert-shared" }],
+    };
+    function OtherConsumer() {
+      const { certifications } = useCertifications();
+      return <p>Certificaciones compartidas: {certifications.length}</p>;
+    }
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <OtherConsumer />
+        <RadarSkillSources userId="owner" skills={[skill]} />
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText("Diploma compartido.pdf")).toBeInTheDocument();
+    expect(screen.getByText("Certificaciones compartidas: 1")).toBeInTheDocument();
+    expect(certificationsService.getCertifications).toHaveBeenCalledTimes(1);
   });
   it("no inventa nombres para documentos eliminados", async () => {
     vi.mocked(documentsService.getCvs).mockResolvedValue(page([]));
