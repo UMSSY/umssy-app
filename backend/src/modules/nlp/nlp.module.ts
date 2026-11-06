@@ -1,3 +1,6 @@
+import { CertificationSourcesModule } from '../certifications/certification-sources.module.js';
+import { RadarEvidenceSourcesModule } from '../radar-integration/radar-evidence-sources.module.js';
+import { ProfileSkillsEventsModule } from '../../common/profile-skills/profile-skills-events.module.js';
 import { Module } from '@nestjs/common';
 import { EducationSourcesModule } from '../educations/education-sources.module.js';
 import { WorkExperienceSourcesModule } from '../work-experience/work-experience-sources.module.js';
@@ -14,7 +17,7 @@ import { SkillDetectionService } from './services/skill-detection.service.js';
 import { SkillValidationService } from './services/skill-validation.service.js';
 
 @Module({
-  imports: [PrismaModule, JwtAuthModule, EducationSourcesModule, WorkExperienceSourcesModule, SkillAnalysisModule, ProfileModule],
+  imports: [PrismaModule, JwtAuthModule, EducationSourcesModule, WorkExperienceSourcesModule, SkillAnalysisModule, ProfileModule, ProfileSkillsEventsModule, CertificationSourcesModule, RadarEvidenceSourcesModule,],
   controllers: [ProfileSkillsAnalysisController],
   providers: [
     ProfileSkillsAnalysisService,
