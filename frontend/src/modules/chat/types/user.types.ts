@@ -10,10 +10,10 @@ export interface User {
   fullName: string;
   role: UserRole;
   avatarUrl: string | null;
-  headline: string | null;   
-  isActive: boolean;         
+  headline: string | null;
+  isActive: boolean;
+  canChatByApplication?: boolean;
 }
-
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   STUDENT: 'Estudiante',

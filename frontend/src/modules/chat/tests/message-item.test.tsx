@@ -30,6 +30,40 @@ describe("MessageItem Component (HU-11 Task 4)", () => {
     const messageWrapper = screen.getByTestId("message-item-msg-test-1");
     expect(messageWrapper.className).toContain("justify-start");
     expect(screen.getByText("Mensaje simple de texto")).toBeDefined();
+    expect(screen.queryByTestId("message-sender-name")).not.toBeInTheDocument();
+  });
+
+  it("muestra el nombre y las iniciales del remitente en un mensaje ajeno del grupo", () => {
+    render(
+      <MessageItem
+        message={baseMessage}
+        isOwn={false}
+        senderName="Carlos Rojas"
+      />
+    );
+
+    expect(screen.getByTestId("message-sender-name")).toHaveTextContent(
+      "Carlos Rojas"
+    );
+    expect(screen.getByTestId("message-sender-avatar")).toHaveTextContent("CR");
+  });
+
+  it("no muestra el remitente en un mensaje propio aunque se reciba senderName", () => {
+    const ownMessage: Message = {
+      ...baseMessage,
+      id: "msg-own-sender",
+      senderId: "current-user",
+    };
+
+    render(
+      <MessageItem
+        message={ownMessage}
+        isOwn={true}
+        senderName="Carlos Rojas"
+      />
+    );
+
+    expect(screen.queryByTestId("message-sender-name")).not.toBeInTheDocument();
   });
 
   it("renderiza un mensaje propio alineado a la derecha con indicador de estado si aplica", () => {
