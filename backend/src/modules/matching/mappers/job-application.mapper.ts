@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ApplicationStatus } from '../../applications/types/applications.types.js';
+import { JOB_APPLICATION_STATUS } from '../constants/job-application.constants.js';
 import type {
   CompanyJobApplicantsResponse,
   CompanyJobOfferRecord,
@@ -28,10 +28,15 @@ export class JobApplicationMapper {
   toMyApplicationResponse(
     record: JobApplicationRecord | null,
   ): MyJobApplicationResponse {
-    const active = record !== null && record.status.title !== ApplicationStatus.WITHDRAWN;
+    if (!record || record.status.title === JOB_APPLICATION_STATUS.WITHDRAWN) {
+      return {
+        hasApplied: false,
+        application: null,
+      };
+    }
     return {
-      hasApplied: active,
-      application: active ? this.toResponse(record) : null,
+      hasApplied: true,
+      application: this.toResponse(record),
     };
   }
 

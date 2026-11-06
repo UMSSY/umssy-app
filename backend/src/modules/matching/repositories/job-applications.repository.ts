@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { JobOfferStatus } from '../../job-offers/types/job-offer.enum.js';
-import { ApplicationStatus } from '../../applications/types/applications.types.js';
-import { ACTIVE_JOB_APPLICATION_WHERE } from '../constants/job-application.constants.js';
+import {
+  ACTIVE_JOB_APPLICATION_WHERE,
+  JOB_APPLICATION_STATUS,
+} from '../constants/job-application.constants.js';
 import type { JobApplicantRecord } from '../types/company-job-applicants.types.js';
 import type { JobApplicationRecord } from '../types/job-application.types.js';
 
@@ -87,7 +89,7 @@ export class JobApplicationsRepository {
       where: {
         userId,
         jobOfferId,
-        status: { title: ApplicationStatus.WITHDRAWN },
+        status: { title: JOB_APPLICATION_STATUS.WITHDRAWN },
       },
       data: { statusId, appliedAt: new Date() },
     });
