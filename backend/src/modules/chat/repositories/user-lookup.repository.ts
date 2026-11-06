@@ -1,9 +1,7 @@
-
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { hasOnlyChatAllowedRoles } from '../constants/chat-role-policy.constants.js';
 
-type SearchUserRow = {
+export type SearchUserRow = {
   id: string;
   first_name: string;
   last_name: string;
@@ -13,17 +11,16 @@ type SearchUserRow = {
   role_name: string | null;
 };
 
-type SearchUserWithRolesRow = SearchUserRow & {
-  role_names: string[];
-};
-
 @Injectable()
 export class UserLookupRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findActiveById(userId: string) {
     return this.prisma.user.findFirst({
-      where: { id: userId, isActive: true },
+      where: {
+        id: userId,
+        isActive: true,
+      },
       select: {
         id: true,
         firstName: true,
@@ -35,7 +32,9 @@ export class UserLookupRepository {
 
   async findById(userId: string) {
     return this.prisma.user.findUnique({
-      where: { id: userId },
+      where: {
+        id: userId,
+      },
       select: {
         id: true,
         firstName: true,
@@ -55,7 +54,8 @@ export class UserLookupRepository {
     const escaped = normalizedQuery.replace(/[%_\\]/g, '\\$&');
     const pattern = `%${escaped}%`;
 
-    const rows = await this.prisma.$queryRaw<SearchUserWithRolesRow[]>`
+    
+    return this.prisma.$queryRaw<SearchUserRow[]>`
       SELECT
         u.id,
         u.first_name,
@@ -64,36 +64,28 @@ export class UserLookupRepository {
         u.photo_url,
         up.is_online,
         (
-          SELECT r.name
+          SELECT CASE lower(trim(r.name))
+            WHEN 'estudiante' THEN 'STUDENT'
+            WHEN 'titulado' THEN 'GRADUATE'
+            WHEN 'empresa' THEN 'RECRUITER'
+            WHEN 'mentor' THEN 'MENTOR'
+          END
           FROM user_roles ur
           JOIN roles r ON r.id = ur.role_id
           WHERE ur.user_id = u.id
             AND ur.deleted_at IS NULL
           ORDER BY ur.created_at ASC, r.name ASC
           LIMIT 1
-        ) AS role_name,
-        ARRAY(
-          SELECT r.name
-          FROM user_roles ur
-          JOIN roles r ON r.id = ur.role_id
-          WHERE ur.user_id = u.id
-            AND ur.deleted_at IS NULL
-        ) AS role_names
+        ) AS role_name
       FROM users u
       LEFT JOIN user_presences up ON up.user_id = u.id
       WHERE u.id <> ${excludeUserId}::uuid
         AND u.is_active = true
-        AND lower(u.first_name || ' ' || u.last_name)
-            LIKE lower(${pattern}) ESCAPE '\'
-      ORDER BY u.first_name ASC, u.last_name ASC, u.id ASC;
+        AND lower(
+          u.first_name || ' ' || u.last_name || ' ' || u.email
+        ) LIKE lower(${pattern}) ESCAPE '\\'
+      ORDER BY u.first_name ASC, u.last_name ASC, u.id ASC
+      LIMIT ${limit};
     `;
-
-    return rows
-      .filter((row) => hasOnlyChatAllowedRoles(row.role_names))
-      .slice(0, limit)
-      .map(({ role_names, ...row }) => {
-        void role_names;
-        return row;
-      });
   }
 }

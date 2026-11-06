@@ -33,6 +33,7 @@ describe("ConversationItem · estado bloqueado", () => {
     expect(screen.queryByTestId("conversation-blocked-label")).not.toBeInTheDocument();
     expect(screen.getByText("Hola, buenas tardes")).toBeInTheDocument();
     expect(screen.getByTitle("En línea")).toBeInTheDocument();
+    expect(screen.queryByTestId("conversation-group-icon")).not.toBeInTheDocument();
   });
   it('renderiza una conversación de evento sin contacto', () => {
     const event: Conversation = {
@@ -41,6 +42,8 @@ describe("ConversationItem · estado bloqueado", () => {
     };
     render(<ConversationItem conversation={event} isSelected={false} onSelect={vi.fn()} />);
     expect(screen.getByText('Taller de Prisma')).toBeInTheDocument();
+    expect(screen.getByText('TP')).toBeInTheDocument();
+    expect(screen.getByTestId('conversation-group-icon')).toBeInTheDocument();
     expect(screen.queryByTitle('En línea')).not.toBeInTheDocument();
   });
 

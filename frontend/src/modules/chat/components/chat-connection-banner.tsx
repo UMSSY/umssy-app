@@ -39,7 +39,7 @@ export function ChatConnectionBanner({
       <div className="min-w-0 flex-1">
         <p className="font-semibold">
           {offline
-            ? "Sin conexión a internet"
+            ? "Sin conexión"
             : "Reconectando y sincronizando mensajes..."}
         </p>
 
