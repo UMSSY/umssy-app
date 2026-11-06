@@ -59,7 +59,7 @@ export function ConnectionRequestItem({
           </p>
 
           <span
-            className="min-w-4 shrink-0 rounded-full bg-accent px-1.5 py-0.5 text-center text-[10px] font-bold text-surface"
+            className="min-w-4 shrink-0 rounded-full bg-accent px-1.5 py-0.5 text-center text-[10px] font-bold text-accent-foreground"
             aria-label="Solicitud pendiente"
           >
             1

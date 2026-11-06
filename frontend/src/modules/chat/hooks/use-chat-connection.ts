@@ -28,8 +28,6 @@ export function useChatConnection(conversationId: string | null) {
   });
 
   useEffect(() => {
-    if (!conversationId) return;
-
     let disposed = false;
     let socket: ReturnType<typeof getChatSocket> | undefined;
     let attempt: AbortController | undefined;
@@ -72,11 +70,18 @@ export function useChatConnection(conversationId: string | null) {
         do {
           dirty = false;
 
-          await synchronizeMessages(
-            client,
-            conversationId,
-            current.signal,
-          );
+          if (conversationId) {
+            await synchronizeMessages(
+              client,
+              conversationId,
+              current.signal,
+            );
+          } else {
+            await client.invalidateQueries(
+              { queryKey: ["chat", "conversations"] },
+              { throwOnError: true },
+            );
+          }
 
           current.signal.throwIfAborted();
 
@@ -88,9 +93,11 @@ export function useChatConnection(conversationId: string | null) {
         failures = 0;
         update("connected");
 
-        void client.invalidateQueries({
-          queryKey: ["chat", "conversations"],
-        });
+        if (conversationId) {
+          void client.invalidateQueries({
+            queryKey: ["chat", "conversations"],
+          });
+        }
       } catch {
         if (disposed || current.signal.aborted) return;
 
@@ -122,11 +129,13 @@ export function useChatConnection(conversationId: string | null) {
       update("reconnecting");
 
       try {
-        await joinChatConversation(
-          socket!,
-          conversationId,
-          current.signal,
-        );
+        if (conversationId) {
+          await joinChatConversation(
+            socket!,
+            conversationId,
+            current.signal,
+          );
+        }
 
         current.signal.throwIfAborted();
 
