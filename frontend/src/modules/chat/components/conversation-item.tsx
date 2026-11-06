@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock } from "lucide-react";
+import { Lock, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import type { Conversation } from "../types/conversation.types";
@@ -89,6 +89,16 @@ export function ConversationItem({
           </div>
         )}
 
+        {conversation.eventId && (
+          <span
+            data-testid="conversation-group-icon"
+            aria-hidden="true"
+            className="absolute -right-1 -bottom-1 flex size-5 items-center justify-center rounded-full border-2 border-surface bg-accent text-accent-foreground"
+          >
+            <Users className="size-2.5" />
+          </span>
+        )}
+
         {contact.isOnline && !conversation.isBlockedByMe && (
           <span
             className="absolute right-0 bottom-0 size-3.5 rounded-full border-2 border-surface bg-ink-soft shadow-xs"
@@ -134,7 +144,7 @@ export function ConversationItem({
           </p>
 
           {hasUnread && (
-            <span className="min-w-4 shrink-0 rounded-full bg-accent px-1.5 py-0.5 text-center text-[10px] font-bold text-surface shadow-xs">
+            <span className="min-w-4 shrink-0 rounded-full bg-accent px-1.5 py-0.5 text-center text-[10px] font-bold text-accent-foreground shadow-xs">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}
