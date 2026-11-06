@@ -242,6 +242,7 @@ export const UserScalarFieldEnum = {
   isAvailableForMentoring: 'isAvailableForMentoring',
   photoUrl: 'photoUrl',
   cityId: 'cityId',
+  companyId: 'companyId',
   phone: 'phone',
   personalEmail: 'personalEmail',
   headline: 'headline',
