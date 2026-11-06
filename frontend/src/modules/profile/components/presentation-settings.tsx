@@ -1,7 +1,7 @@
 "use client";
 
-import { FeedbackMessage } from "../components/feedback-message";
-import { PresentationForm } from "../components/presentation-form";
+import { FeedbackMessage } from "./feedback-message";
+import { PresentationForm } from "./presentation-form";
 import { PROFILE_FEEDBACK_MESSAGES } from "../constants/profile-feedback.constants";
 import { useProfile } from "../hooks/use-profile";
 import { useSaveProfile } from "../hooks/use-save-profile";

@@ -1,3 +1,5 @@
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClient } from "@/shared/services/query-client";
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -5,11 +7,19 @@ import AppLayout from "@/app/(app)/layout";
 import { ReviewQueueView } from "@/modules/radar-chart";
 
 const { route } = vi.hoisted(() => ({ route: { pathname: "/profile" } }));
-
 const replace = vi.fn();
+
 vi.mock("next/navigation", () => ({
   usePathname: () => route.pathname,
   useRouter: () => ({ replace }),
+}));
+
+vi.mock("@/modules/radar-chart/services/radar-integration.service", () => ({
+  radarIntegrationApi: {
+    reviews: vi.fn().mockResolvedValue([]),
+    decision: vi.fn(),
+    adminReprocessCv: vi.fn(),
+  },
 }));
 
 vi.mock("./app-shell", () => ({
@@ -80,11 +90,16 @@ describe("AppRouteLayout", () => {
 
   it("renders the review queue inside exactly one shell", () => {
     route.pathname = "/affinity-radar/review-queue";
-    render(<AppLayout><ReviewQueueView /></AppLayout>);
+    render(<QueryClientProvider client={createQueryClient()}>
+      <AppLayout>
+        <ReviewQueueView />
+       </AppLayout>
+      </QueryClientProvider>,
+    );
 
     expect(screen.getAllByTestId("app-shell")).toHaveLength(1);
     expect(screen.getByTestId("app-shell")).toContainElement(
-      screen.getByRole("heading", { name: "Revisión de radares" }),
+      screen.getByRole("heading", { name: "Revisión documental y de radares" }),
     );
   });
 

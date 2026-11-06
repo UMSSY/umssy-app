@@ -28,13 +28,17 @@ describe('CertificationDocumentsRepository', () => {
       findMany: vi.fn(),
       update: vi.fn(),
     };
-    repository = new CertificationDocumentsRepository({
+    const db = {
       certification,
-    } as unknown as PrismaService);
+      $transaction: vi.fn(async (operation) => operation(db)),
+    };
+    repository = new CertificationDocumentsRepository(
+      db as unknown as PrismaService,
+    );
   });
 
   it('saves the content in the document column of the certification', async () => {
-    certification.update.mockResolvedValue({ id: certificationId });
+    certification.update.mockResolvedValue({ id: certificationId, userId });
 
     await expect(
       repository.save(certificationId, Buffer.from([1, 2, 3])),
@@ -73,7 +77,7 @@ describe('CertificationDocumentsRepository', () => {
   });
 
   it('clears the document column when removing the document', async () => {
-    certification.update.mockResolvedValue({ id: certificationId });
+    certification.update.mockResolvedValue({ id: certificationId, userId });
 
     await expect(repository.remove(certificationId)).resolves.toBeUndefined();
     expect(certification.update).toHaveBeenCalledWith({

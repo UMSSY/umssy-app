@@ -22,6 +22,19 @@ export const processingStateSelect = {
 export class ProfileSkillResultsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async readLockedRevision(userId: string, context: TransactionContext) {
+    const states = await context.client.$queryRaw<
+      {
+        input_revision: number;
+        processed_revision: number | null;
+        status: string;
+      }[]
+    >`
+      SELECT input_revision,processed_revision,status FROM profile_skill_processing_states
+      WHERE user_id=${userId}::uuid FOR SHARE`;
+    return states[0];
+  }
+
   findState(userId: string): Promise<ProfileSkillProcessingState | null> {
     return this.prisma.profileSkillProcessingState.findUnique({
       where: { userId },
