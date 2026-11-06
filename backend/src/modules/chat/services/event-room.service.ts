@@ -11,7 +11,7 @@ export class EventRoomService {
   constructor(
     private readonly registrationsService: EventRegistrationsService,
     private readonly conversationRepository: ConversationRepository,
-    private readonly conversationMapper: ConversationMapper, // <-- INYECTAMOS EL MAPPER
+    private readonly conversationMapper: ConversationMapper, 
   ) {}
 
   async joinEventRoom(userId: string, registrationId: string): Promise<EventRoomJoinedPayload> {
