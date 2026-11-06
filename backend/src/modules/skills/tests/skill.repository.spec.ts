@@ -78,4 +78,15 @@ describe('SkillRepository', () => {
       select,
     });
   });
+
+  it('lists skills for NLP catalog', async () => {
+    const records = [{ id: skillId, name: 'Docker', areaId: 'cloud' }];
+    skill.findMany.mockResolvedValue(records);
+
+    await expect(repository.findNlpCatalog()).resolves.toBe(records);
+    expect(skill.findMany).toHaveBeenCalledWith({
+      where: { isCustom: false },
+      select: { id: true, name: true, areaId: true },
+    });
+  });
 });

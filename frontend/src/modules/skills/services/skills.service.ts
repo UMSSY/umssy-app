@@ -1,3 +1,6 @@
+import type { DetectedSkillsSummary } from "../types/detected-skills-summary.types";
+import { profileSkillsRadarService } from "@/modules/profile";
+import { toDetectedSkillsSummary } from "../utils/to-detected-skills-summary";
 import { apiClient } from "@/shared/services/api-client";
 import {
   CUSTOM_SKILL_ENDPOINT,
@@ -12,16 +15,22 @@ import { toSkillItem } from "../utils/to-skill-item";
 
 export const skillsService = {
   getCatalog: async (): Promise<SkillItem[]> => {
-    const response = await apiClient.get<ApiResponse<SkillResponse[]>>(SKILLS_CATALOG_ENDPOINT, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiClient.get<ApiResponse<SkillResponse[]>>(
+      SKILLS_CATALOG_ENDPOINT,
+      {
+        headers: getAuthHeaders(),
+      },
+    );
     return (response.data.data ?? []).map(toSkillItem);
   },
 
   getMySkills: async (): Promise<SkillItem[]> => {
-    const response = await apiClient.get<ApiResponse<SkillResponse[]>>(MY_SKILLS_ENDPOINT, {
-      headers: getAuthHeaders(),
-    });
+    const response = await apiClient.get<ApiResponse<SkillResponse[]>>(
+      MY_SKILLS_ENDPOINT,
+      {
+        headers: getAuthHeaders(),
+      },
+    );
     return (response.data.data ?? []).map(toSkillItem);
   },
 
@@ -41,5 +50,14 @@ export const skillsService = {
       { headers: getAuthHeaders() },
     );
     return (response.data.data ?? []).map(toSkillItem);
+  },
+  getDetectedSkills: async (): Promise<DetectedSkillsSummary> => {
+    return toDetectedSkillsSummary(await profileSkillsRadarService.getSkills());
+  },
+
+  analyzeSkills: async (): Promise<DetectedSkillsSummary> => {
+    return toDetectedSkillsSummary(
+      await profileSkillsRadarService.analyzeAndGetSkills(),
+    );
   },
 };
