@@ -1,12 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { RadarReviewRepository } from '../repositories/radar-review.repository.js';
-
-import type { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
-
-type ReviewQueueRows = [
-  Awaited<ReturnType<RadarReviewRepository['listReviewQueue']>>,
-  Awaited<ReturnType<SkillAnalysisService['listReviewQueue']>>,
-];
+import type { ReviewQueueRows } from '../types/review-queue-rows.type.js';
 
 @Injectable()
 export class RadarReviewMapper {

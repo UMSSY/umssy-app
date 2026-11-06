@@ -1,3 +1,4 @@
+import type { CvSourcesService } from '../cv/services/cv-sources.service.js';
 import type { SkillAnalysisService } from '../skills/services/skill-analysis.service.js';
 import type { TransactionService } from '../../common/prisma/transaction.service.js';
 import type { TransactionContext } from '../../common/types/transaction-context.types.js';
@@ -19,10 +20,9 @@ const cvId = '22222222-2222-4222-8222-222222222222';
 const admin = '33333333-3333-4333-8333-333333333333';
 
 function setupCv() {
+  const cvs = { currentCv: vi.fn(), cvById: vi.fn() };
   const repository = {
     upsertEvidence: vi.fn().mockResolvedValue([{ review_status: 'approved' }]),
-    currentCv: vi.fn(),
-    cvById: vi.fn(),
   };
   const access = {
     hasRole: vi.fn().mockResolvedValue(true),
@@ -47,18 +47,19 @@ function setupCv() {
     nlp as unknown as ProfileSkillsAnalysisService,
     publication as unknown as RadarPublicationService,
     extractor as unknown as RadarPdfExtractionService,
+    cvs as unknown as CvSourcesService,
   );
-  return { repository, access, nlp, publication, extractor, service };
+  return { cvs, repository, access, nlp, publication, extractor, service };
 }
 
 function setupReview() {
+  const cvs = { cvById: vi.fn() };
   const repository = {
     listReviewQueue: vi.fn().mockResolvedValue([[], []]),
     changeCvDecision: vi.fn(),
     cvOwner: vi.fn(),
     skillForDecision: vi.fn(),
     changeSkillDecision: vi.fn(),
-    cvForAdmin: vi.fn(),
   };
   const access = {
     hasRole: vi.fn().mockResolvedValue(true),
@@ -80,11 +81,45 @@ function setupReview() {
       run: (operation: (context: TransactionContext) => Promise<unknown>) =>
         operation({ client: {} } as TransactionContext),
     } as TransactionService,
+    cvs as unknown as CvSourcesService,
   );
-  return { repository, access, nlp, publication, service };
+  return { cvs, repository, access, nlp, publication, service };
 }
 
-describe('Separación de CV y revisión HU1-HU3', () => {
+describe('Separación de CV y revisión', () => {
+  it('rescans the current CV returned by its owner service', async () => {
+    const { service, cvs } = setupCv();
+    cvs.currentCv.mockResolvedValue({ id: cvId, cvPdfData: Buffer.from('pdf').toString('base64') });
+    const ingest = vi.spyOn(service, 'ingestCv').mockResolvedValue({} as never);
+    await service.rescanCurrentCv(owner);
+    expect(cvs.currentCv).toHaveBeenCalledWith(owner);
+    expect(ingest).toHaveBeenCalledWith(owner, cvId, Buffer.from('pdf'), true);
+  });
+
+  it('uses the stored owner when an administrator reprocesses a CV', async () => {
+    const { service, cvs, access } = setupCv();
+    cvs.cvById.mockResolvedValue({ id: cvId, userId: owner, cvPdfData: Buffer.from('pdf').toString('base64') });
+    const ingest = vi.spyOn(service, 'ingestCv').mockResolvedValue({ extractionStatus: 'ready' } as never);
+    await service.reprocessCv(admin, cvId);
+    expect(cvs.cvById).toHaveBeenCalledWith(cvId);
+    expect(ingest).toHaveBeenCalledWith(owner, cvId, Buffer.from('pdf'), true);
+    expect(access.recordAudit).toHaveBeenCalledWith(owner, admin, 'cv.admin_reprocessed', cvId, { extractionStatus: 'ready' });
+  });
+
+  it('does not ingest a missing current CV', async () => {
+    const { service, cvs, extractor } = setupCv();
+    cvs.currentCv.mockResolvedValue(null);
+    await expect(service.rescanCurrentCv(owner)).rejects.toThrow('No hay CV vigente');
+    expect(extractor.extract).not.toHaveBeenCalled();
+  });
+
+  it('does not record a view for a missing administrative download', async () => {
+    const { service, cvs, access } = setupReview();
+    cvs.cvById.mockResolvedValue(null);
+    await expect(service.downloadForAdmin(admin, cvId)).rejects.toThrow('Archivo no encontrado');
+    expect(access.recordAudit).not.toHaveBeenCalled();
+  });
+
   it('reprocesa un CV conservando la decisión administrativa almacenada', async () => {
     const { service, repository, access, nlp, publication } = setupCv();
     const result = await service.ingestCv(
@@ -166,8 +201,8 @@ describe('Separación de CV y revisión HU1-HU3', () => {
     expect(publication.recalculate).toHaveBeenCalledWith(owner, admin);
   });
   it('audita las visualizaciones administrativas de un CV', async () => {
-    const { service, repository, access } = setupReview();
-    repository.cvForAdmin.mockResolvedValue({
+    const { service, cvs, access } = setupReview();
+    cvs.cvById.mockResolvedValue({
       userId: owner,
       cvPdfData: Buffer.from('contenido').toString('base64'),
       cvFileName: 'cv.pdf',

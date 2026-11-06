@@ -12,21 +12,12 @@ import type {
 export class RadarPublicationTransaction {
   constructor(private readonly tx: PrismaTypes.TransactionClient) {}
 
-  async lockAndReadRevision(userId: string) {
+  async lockPublication(userId: string) {
     const lock = await this.tx.$queryRaw<
       { locked: number; started_at: Date }[]
     >`
       SELECT 1 AS locked,clock_timestamp() AS started_at FROM pg_advisory_xact_lock(hashtext(${userId}))`;
-    const states = await this.tx.$queryRaw<
-      {
-        input_revision: number;
-        processed_revision: number | null;
-        status: string;
-      }[]
-    >`
-      SELECT input_revision,processed_revision,status FROM profile_skill_processing_states
-      WHERE user_id=${userId}::uuid FOR SHARE`;
-    return { startedAt: lock[0]?.started_at ?? new Date(), state: states[0] };
+    return lock[0]?.started_at ?? new Date();
   }
 
   snapshots(userId: string, limit: number) {
@@ -107,21 +98,12 @@ export class RadarPublicationRepository {
   }
 
   async radarState(userId: string) {
-    const [snapshots, pendingDocs, state, attempts] = await Promise.all([
+    const [snapshots, pendingDocs, attempts] = await Promise.all([
       this.snapshots(userId, 2),
       this.prisma.$queryRaw<{ count: bigint }[]>`
         SELECT COUNT(*)::bigint AS count FROM radar_cv_evidence e
         JOIN radar_cv_review_statuses review ON review.id=e.review_status_id
         WHERE e.user_id=${userId}::uuid AND review.title='pending'`,
-      this.prisma.profileSkillProcessingState.findUnique({
-        where: { userId },
-        select: {
-          status: true,
-          inputRevision: true,
-          processedRevision: true,
-          dictionaryVersion: true,
-        },
-      }),
       this.prisma.$queryRaw<
         { source_revision: number | null; status: string }[]
       >`
@@ -131,7 +113,7 @@ export class RadarPublicationRepository {
           AND event_type IN ('radar.published','radar.synchronized','radar.recalculation_failed')
         ORDER BY occurred_at DESC,id DESC LIMIT 1`,
     ]);
-    return { snapshots, pendingDocs, state, attempts };
+    return { snapshots, pendingDocs, attempts };
   }
 
   async recordFailure(

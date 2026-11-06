@@ -1,3 +1,4 @@
+import { CvSourcesService } from '../cv/services/cv-sources.service.js';
 import { Injectable } from '@nestjs/common';
 import { RadarReviewInvalidDecisionException } from './exceptions/radar-review-invalid-decision.exception.js';
 import { RadarReviewInvalidEvidenceException } from './exceptions/radar-review-invalid-evidence.exception.js';
@@ -21,6 +22,7 @@ export class RadarReviewService {
     private readonly mapper: RadarReviewMapper,
     private readonly skills: SkillAnalysisService,
     private readonly transactions: TransactionService,
+    private readonly cvs: CvSourcesService,
   ) {}
   private async audit(
     userId: string,
@@ -95,12 +97,11 @@ export class RadarReviewService {
     try {
       await this.publication.recalculate(userId, actorId);
     } catch {
-      // La decisión ya se guardó; informar el estado recuperable sin indicar que se revirtió.
     }
     return this.publication.myRadar(userId);
   }
   async downloadForAdmin(adminId: string, cvId: string) {
-    const rows = await this.repository.cvForAdmin(cvId);
+    const rows = await this.cvs.cvById(cvId);
     if (!rows?.cvPdfData)
       throw new RadarReviewNotFoundException('Archivo no encontrado');
     await this.audit(rows.userId, adminId, 'cv.viewed', cvId);
