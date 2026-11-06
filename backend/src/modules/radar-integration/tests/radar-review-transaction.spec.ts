@@ -1,3 +1,4 @@
+import type { CvSourcesService } from '../../cv/services/cv-sources.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import { RadarReviewService } from '../radar-review.service.js';
 import { RadarReviewMapper } from '../mappers/radar-review.mapper.js';
@@ -42,6 +43,7 @@ function setup() {
     new RadarReviewMapper(),
     skills as unknown as SkillAnalysisService,
     new TransactionService(prisma as unknown as PrismaService),
+    {} as CvSourcesService,
   );
   return { service, repository, skills, access, nlp, publication, client };
 }

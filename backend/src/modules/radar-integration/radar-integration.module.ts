@@ -1,3 +1,4 @@
+import { CvSourcesModule } from '../cv/cv-sources.module.js';
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../common/prisma/prisma.module.js';
 import { ProfileSkillsEventsModule } from '../../common/profile-skills/profile-skills-events.module.js';
@@ -24,7 +25,7 @@ import { RadarIntegrationService } from './radar-integration.service.js';
 
 @Module({
   imports: [
-    PrismaModule, JwtAuthModule, NlpModule, ProfileSkillsEventsModule,
+    CvSourcesModule, PrismaModule, JwtAuthModule, NlpModule, ProfileSkillsEventsModule,
     SkillAnalysisModule, WorkExperienceSourcesModule, EducationSourcesModule,
     CertificationSourcesModule, RadarEvidenceSourcesModule,
   ],

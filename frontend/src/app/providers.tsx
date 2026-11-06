@@ -25,7 +25,7 @@ const getServerToken = () => null;
 
 export function Providers({ children }: { children: ReactNode }) {
   const token = useSyncExternalStore(subscribeAccessToken, getAccessToken, getServerToken);
-  // Changing identity remounts private views and their cache together. A late
-  // request from the old session can only populate the discarded query client.
+  // El cambio de identidad reinicia las vistas privadas y su caché. Las respuestas
+  // tardías de la sesión anterior solo afectan al cliente de consultas descartado.
   return <SessionProviders key={token ?? 'anonymous'}>{children}</SessionProviders>;
 }

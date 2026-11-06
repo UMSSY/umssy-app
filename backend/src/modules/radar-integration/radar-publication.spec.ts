@@ -50,7 +50,11 @@ function setup() {
     throw new Error('Unexpected database operation');
   });
   db.$transaction.mockImplementation(async operation => operation(db));
-  const nlp = { analyzeNow: vi.fn().mockResolvedValue({ status: 'ready' }) };
+  const nlp = {
+    analyzeNow: vi.fn().mockResolvedValue({ status: 'ready' }),
+    getProcessingState: vi.fn(() => db.profileSkillProcessingState.findUnique()),
+    readLockedRevision: vi.fn(async () => ({ input_revision: state.inputRevision, processed_revision: state.processedRevision, status: state.status })),
+  };
   const events = new ProfileSkillsEvents();
   const evidence = {
     countPendingPublicationSkills: () => db.userSkill.count(),
@@ -63,12 +67,28 @@ function setup() {
   const publication = new RadarPublicationService(
     new RadarPublicationRepository(db as unknown as PrismaService),
     new RadarPublicationMapper(), evidence as unknown as RadarPublicationEvidenceService,
+    nlp as unknown as ProfileSkillsAnalysisService,
   );
   const service = new RadarIntegrationService(nlp as unknown as ProfileSkillsAnalysisService, events, publication, {} as RadarCvService, {} as RadarReviewService);
   return { service, db, state, rows, insertions, nlp, events };
 }
 
 describe('Radar publication consistency', () => {
+  it('reads NLP under the publication lock with the same transaction', async () => {
+    const { service, db, nlp } = setup();
+    await service.recalculate(userId, null);
+    expect(nlp.readLockedRevision).toHaveBeenCalledWith(userId, { client: db });
+    expect(db.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(nlp.readLockedRevision.mock.invocationCallOrder[0]);
+  });
+
+  it('aborts publication when the owner service cannot read the revision', async () => {
+    const { service, db, nlp, insertions } = setup();
+    nlp.readLockedRevision.mockRejectedValueOnce(new Error('NLP unavailable'));
+    await expect(service.recalculate(userId, null)).rejects.toThrow('NLP unavailable');
+    expect(insertions).toEqual([]);
+    expect(db.userSkill.findMany).not.toHaveBeenCalled();
+  });
+
   it('publishes only current owned evidence, excluding pending CVs and orphaned approvals', async () => {
     const { service, db, insertions } = setup();
     db.userSkill.findMany.mockResolvedValue([

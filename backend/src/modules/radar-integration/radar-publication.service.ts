@@ -1,3 +1,4 @@
+import { ProfileSkillsAnalysisService } from '../nlp/services/profile-skills-analysis.service.js';
 import { Injectable } from '@nestjs/common';
 import { RadarPublicationPendingAnalysisException } from './exceptions/radar-publication-pending-analysis.exception.js';
 import type { ProfileSkillsPublished } from '../../common/profile-skills/profile-skills-events.service.js';
@@ -13,6 +14,7 @@ export class RadarPublicationService {
     private readonly repository: RadarPublicationRepository,
     private readonly mapper: RadarPublicationMapper,
     private readonly sources: RadarPublicationEvidenceService,
+    private readonly nlp: ProfileSkillsAnalysisService,
   ) {}
 
   // Inmutable e idempotente por titular; no se publica un snapshot parcial.
@@ -21,8 +23,8 @@ export class RadarPublicationService {
     let attemptStartedAt = new Date();
     try {
       return await this.repository.withTransaction(async (store, context) => {
-        const { state, startedAt } = await store.lockAndReadRevision(userId);
-        attemptStartedAt = startedAt;
+        attemptStartedAt = await store.lockPublication(userId);
+        const state = await this.nlp.readLockedRevision(userId, context);
         revision = state?.input_revision ?? 0;
         if (state && (state.status !== 'ready' || state.processed_revision !== revision)) {
           throw new RadarPublicationPendingAnalysisException();
@@ -72,10 +74,11 @@ export class RadarPublicationService {
   }
 
   async myRadar(userId: string) {
-    const [state, pendingSkills] = await Promise.all([
+    const [radarState, pendingSkills, state] = await Promise.all([
       this.repository.radarState(userId),
       this.sources.countPendingPublicationSkills(userId),
+      this.nlp.getProcessingState(userId),
     ]);
-    return this.mapper.myRadar(userId, { ...state, pendingSkills });
+    return this.mapper.myRadar(userId, { ...radarState, state, pendingSkills });
   }
 }

@@ -2,15 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 
-export type CvReview = {
-  cv_id: string;
-  user_id: string;
-  extraction_status: string;
-  review_status: string;
-  submitted_at: Date;
-  cv_file_name: string | null;
-  extracted_chars: number;
-};
+import type { CvReview } from '../types/cv-review.type.js';
 
 @Injectable()
 export class RadarReviewRepository {
@@ -50,10 +42,4 @@ export class RadarReviewRepository {
       SELECT user_id FROM radar_cv_evidence WHERE cv_id=${cvId}::uuid`;
   }
 
-  cvForAdmin(cvId: string) {
-    return this.prisma.userCvFile.findFirst({
-      where: { id: cvId },
-      select: { userId: true, cvPdfData: true, cvFileName: true },
-    });
-  }
 }

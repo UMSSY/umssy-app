@@ -1,4 +1,5 @@
 import { ProfileSkillsEvents } from '../../../common/profile-skills/profile-skills-events.service.js';
+import type { TransactionContext } from '../../../common/types/transaction-context.types.js';
 import { randomUUID } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
 import { SkillAnalysisService } from '../../skills/services/skill-analysis.service.js';
@@ -27,6 +28,14 @@ export class ProfileSkillsAnalysisService {
     private readonly skills: SkillAnalysisService,
     private readonly events: ProfileSkillsEvents,
   ) {}
+
+  getProcessingState(userId: string) {
+    return this.results.findState(userId);
+  }
+
+  readLockedRevision(userId: string, context: TransactionContext) {
+    return this.results.readLockedRevision(userId, context);
+  }
 
   async refreshAfterChange(userId: string): Promise<void> {
     try {

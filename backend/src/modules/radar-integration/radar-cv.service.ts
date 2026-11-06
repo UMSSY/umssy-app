@@ -1,3 +1,4 @@
+import { CvSourcesService } from '../cv/services/cv-sources.service.js';
 import { Injectable } from '@nestjs/common';
 import { RadarCvOwnershipException } from './exceptions/radar-cv-ownership.exception.js';
 import { RadarCvNotFoundException } from './exceptions/radar-cv-not-found.exception.js';
@@ -15,6 +16,7 @@ export class RadarCvService {
     private readonly nlp:ProfileSkillsAnalysisService,
     private readonly publication:RadarPublicationService,
     private readonly extractor:RadarPdfExtractionService,
+    private readonly cvs: CvSourcesService,
   ){}
   private async audit(userId:string,actorId:string|null,event:string,targetId:string|null,details:object={}){
     await this.access.recordAudit(userId, actorId, event, targetId, details);
@@ -30,12 +32,12 @@ export class RadarCvService {
     return {cvId,extractionStatus,extractedCharacters:extractedText.length,reviewStatus:rows[0].review_status,nlpStatus:nlp.status};
   }
   async rescanCurrentCv(userId:string){
-    const cv=await this.repository.currentCv(userId);
+    const cv=await this.cvs.currentCv(userId);
     if(!cv?.cvPdfData)throw new RadarCvNotFoundException('No hay CV vigente para analizar');
     return this.ingestCv(userId,cv.id,Buffer.from(cv.cvPdfData,'base64'),true);
   }
   async reprocessCv(adminId:string,cvId:string){
-    const cv=await this.repository.cvById(cvId);
+    const cv=await this.cvs.cvById(cvId);
     if(!cv?.cvPdfData)throw new RadarCvNotFoundException();
     const result=await this.ingestCv(cv.userId,cvId,Buffer.from(cv.cvPdfData,'base64'),true);
     await this.audit(cv.userId,adminId,'cv.admin_reprocessed',cvId,{extractionStatus:result.extractionStatus});

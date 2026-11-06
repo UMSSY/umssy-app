@@ -18,8 +18,8 @@ export class ProfileSkillsEvents {
     return () => this.listeners.delete(listener);
   }
 
-  // Await consumers inside the request. No detached work is left to a serverless runtime.
-  // A failed consumer must not turn an already committed NLP result into an NLP error.
+  // Se espera a los consumidores dentro de la petición para evitar tareas sueltas en serverless.
+  // Un fallo del consumidor no debe invalidar un resultado de NLP ya confirmado.
   async published(publication: ProfileSkillsPublished): Promise<void> {
     const results = await Promise.allSettled([...this.listeners].map(listener => Promise.resolve().then(() => listener(publication))));
     for (const result of results) {
