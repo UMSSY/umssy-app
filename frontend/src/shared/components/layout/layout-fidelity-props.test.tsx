@@ -27,7 +27,7 @@ describe("props opcionales del layout compartido", () => {
     expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cerrar barra lateral" })).toBeInTheDocument();
     expect(screen.getByText("Ana Pérez")).toBeInTheDocument();
-    expect(screen.getByText("Contenido").parentElement).toHaveClass("px-12", "py-10");
+    expect(screen.getByText("Contenido").parentElement).toHaveClass("px-4", "py-6", "lg:px-12", "lg:py-10");
     expect(screen.queryByLabelText(/pendientes/)).toBeNull();
   });
 
