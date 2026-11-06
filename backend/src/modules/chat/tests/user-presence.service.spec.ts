@@ -1,5 +1,3 @@
-
-import { Test, TestingModule } from '@nestjs/testing';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { UserPresenceService } from '../services/user-presence.service.js';
 import { UserPresenceRepository } from '../repositories/user-presence.repository.js';
@@ -8,23 +6,15 @@ describe('UserPresenceService', () => {
   let service: UserPresenceService;
   let repository: UserPresenceRepository;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     const mockRepository = {
       upsert: vi.fn().mockResolvedValue(undefined),
+      findByUserIds: vi.fn().mockResolvedValue([]), 
     };
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UserPresenceService,
-        {
-          provide: UserPresenceRepository,
-          useValue: mockRepository, 
-        },
-      ],
-    }).compile();
 
-    service = module.get<UserPresenceService>(UserPresenceService);
-    repository = module.get<UserPresenceRepository>(UserPresenceRepository);
+    repository = mockRepository as unknown as UserPresenceRepository;
+    service = new UserPresenceService(repository);
   });
 
   it('debe marcar al usuario como en línea', async () => {

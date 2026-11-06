@@ -1,12 +1,17 @@
 
 import { Injectable } from '@nestjs/common';
+
 import { UsersService } from '../../users/services/users.service.js';
-import { hasOnlyChatAllowedRoles } from '../constants/chat-role-policy.constants.js';
-import { ChatRoleNotAllowedException } from '../exceptions/index.js';
+
+import { ChatRoleNotAllowedException } from '../exceptions/chat.exceptions.js';
+
+const STUDENT_ROLES = new Set(['estudiante', 'titulado']);
 
 @Injectable()
 export class ChatRolePolicyService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+  ) {}
 
   async assertCanCommunicate(
     userId: string,
@@ -17,23 +22,40 @@ export class ChatRolePolicyService {
       contactId.trim().toLowerCase(),
     ];
 
-    const users = await this.usersService.findManyWithActiveRoles(ids);
-
-    const allowed =
-      users.length === 2 &&
-      ids.every((id) =>
-        users.some(
-          (user) =>
-            user.id.toLowerCase() === id &&
-            user.isActive &&
-            hasOnlyChatAllowedRoles(
-              user.roles.map(({ role }) => role.name),
-            ),
-        ),
-      );
-
-    if (!allowed) {
-      throw new ChatRoleNotAllowedException();
+    if (ids[0] === ids[1]) {
+      return this.deny();
     }
+
+    const users =
+      await this.usersService.findManyWithActiveRoles(ids);
+
+    if (
+      users.length !== 2 ||
+      users.some((user) => !user.isActive)
+    ) {
+      return this.deny();
+    }
+
+    const roles = users.map((user) =>
+      user.roles.map(({ role }) =>
+        role.name.trim().toLowerCase(),
+      ),
+    );
+
+    const areStudents = roles.map(
+      (names) =>
+        names.length > 0 &&
+        names.every((name) => STUDENT_ROLES.has(name)),
+    );
+
+    if (areStudents[0] && areStudents[1]) {
+      return;
+    }
+
+    return this.deny();
+  }
+
+  private deny(): never {
+    throw new ChatRoleNotAllowedException();
   }
 }

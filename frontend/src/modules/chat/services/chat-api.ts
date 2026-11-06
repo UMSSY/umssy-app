@@ -95,22 +95,28 @@ export async function searchUsers(rawQuery: string): Promise<User[]> {
 
   const response = await apiClient.get<
     ChatUserResponse[] | StandardApiResponse<ChatUserResponse[]>
-  >('/chat/users/search', { params: { q: query } });
+  >('/chat/users/search', {
+    params: { q: query },
+  });
 
   const body = response.data;
+
   const items: ChatUserResponse[] = Array.isArray(body)
     ? body
-    : Array.isArray((body as { data?: ChatUserResponse[] })?.data)
+    : Array.isArray(
+          (body as { data?: ChatUserResponse[] })?.data,
+        )
       ? (body as { data: ChatUserResponse[] }).data
       : [];
 
-  return items.map((u) => ({
-    id: u.id,
-    fullName: u.fullName,
-    avatarUrl: u.avatarUrl,
-    headline: u.headline,
-    role: u.role as UserRole,
+  return items.map((user) => ({
+    id: user.id,
+    fullName: user.fullName,
+    avatarUrl: user.avatarUrl,
+    headline: user.headline,
+    role: user.role as UserRole,
     isActive: true,
+    canChatByApplication: user.canChatByApplication === true,
   }));
 }
 
