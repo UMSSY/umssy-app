@@ -1,7 +1,5 @@
-import { MyPassesView } from "@/modules/events";
+import { MyPassesRouteView } from "@/modules/events";
 
 export default function MyPassesPage() {
-  return (
-    <MyPassesView />
-  );
+  return <MyPassesRouteView />;
 }

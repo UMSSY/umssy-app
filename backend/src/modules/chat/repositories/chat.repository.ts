@@ -17,7 +17,6 @@ export class ChatRepository {
           { userAId: userId },
           { userBId: userId },
         ],
-        // Validar particiapción en participants (válido para 1:1 y grupales)
         participants: {
           some: {
             conversationId,

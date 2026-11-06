@@ -17,6 +17,7 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator.j
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import { MessageService } from '../services/message.service.js';
+import { ChatGateway } from '../gateways/chat.gateway.js';
 import {
   sendMessageSchema,
   type SendMessageDto,
@@ -31,18 +32,25 @@ import {
 @Roles('titulado', 'estudiante', 'mentor', 'empresa')
 @UseInterceptors(ResponseInterceptor)
 export class MessageController {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly chatGateway: ChatGateway,
+  ) {}
 
   @Post()
-  send(
+  async send(
     @Body(new ZodValidationPipe(sendMessageSchema)) body: SendMessageDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.messageService.send({
+    const message = await this.messageService.send({
       conversationId: body.conversationId,
       senderId: user.id,
       content: body.content,
     });
+
+    this.chatGateway.broadcastMessage(message);
+
+    return message;
   }
 
   @Get()
