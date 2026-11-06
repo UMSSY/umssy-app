@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../../prisma/client.js';
-import { ApplicationStatus } from '../../applications/types/applications.types.js';
 import {
   JOB_APPLICATION_STATUS,
   UNIQUE_VIOLATION_CODE,
@@ -38,7 +37,7 @@ export class JobApplicationsService {
     }
 
     const existing = await this.repository.findByUserAndOffer(userId, jobOfferId);
-    if (existing && existing.status.title !== ApplicationStatus.WITHDRAWN) {
+    if (existing && existing.status.title !== JOB_APPLICATION_STATUS.WITHDRAWN) {
       throw new DuplicateJobApplicationException();
     }
 
