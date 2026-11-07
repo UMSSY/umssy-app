@@ -1,14 +1,24 @@
 
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { skillsAnalysisService } from "@/modules/matching";
 import { WORK_EXPERIENCE_VALIDATION_MESSAGES } from "../constants/work-experience-validation.constants";
 import { WorkExperienceForm } from "./work-experience-form";
+
+vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
+  skillsAnalysisService: {
+    analyzeExperience: vi.fn(),
+    previewExperience: vi.fn(),
+  },
+}));
 
 describe("WorkExperienceForm", () => {
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   it("sends the typed values", async () => {
@@ -228,5 +238,209 @@ describe("WorkExperienceForm", () => {
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(screen.getByText(WORK_EXPERIENCE_VALIDATION_MESSAGES.positionTooLong)).toBeInTheDocument();
+  });
+
+  it("shows the previously detected skills when editing", () => {
+    render(
+      <WorkExperienceForm
+        experienceId="experience-123"
+        initialDetectedSkills={[
+          { id: "skill-1", name: "Python" },
+          { id: "skill-2", name: "Docker" },
+        ]}
+        initialValues={{
+          companyName: "Synapse Labs",
+          position: "Backend Developer",
+          startDate: "2024-01-01",
+          endDate: "",
+          isCurrent: true,
+          description: "Desarrollo de aplicaciones",
+        }}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Python")).toBeInTheDocument();
+    expect(screen.getByText("Docker")).toBeInTheDocument();
+  });
+
+  it("analyzes the edited description after the 500ms debounce", async () => {
+    vi.useFakeTimers();
+
+    vi.mocked(skillsAnalysisService.previewExperience).mockResolvedValue({
+      experienceId: "experience-123",
+      skills: [{ id: "skill-3", name: "React" }],
+      processingTimeMs: 1250,
+    });
+
+    render(
+      <WorkExperienceForm
+        experienceId="experience-123"
+        initialValues={{
+          companyName: "Synapse Labs",
+          position: "Frontend Developer",
+          startDate: "2024-01-01",
+          endDate: "",
+          isCurrent: true,
+          description: "Desarrollo inicial",
+        }}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/Descripción de funciones/), {
+      target: {
+        value: "  Desarrollo de interfaces con React  ",
+      },
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(499);
+    });
+
+    expect(
+      skillsAnalysisService.previewExperience,
+    ).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+
+    expect(
+      skillsAnalysisService.previewExperience,
+    ).toHaveBeenCalledWith(
+      "experience-123",
+      "Desarrollo de interfaces con React",
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+
+    expect(screen.getByText("React")).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Análisis completado en 1.25 s"),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the chips and the analysis time when an experience is opened for editing (AC-01.8)", async () => {
+    vi.useFakeTimers();
+
+    vi.mocked(skillsAnalysisService.previewExperience).mockResolvedValue({
+      experienceId: "experience-123",
+      skills: [
+        { id: "skill-1", name: "Python" },
+        { id: "skill-2", name: "Scrum" },
+      ],
+      processingTimeMs: 320,
+    });
+
+    render(
+      <WorkExperienceForm
+        experienceId="experience-123"
+        initialDetectedSkills={[{ id: "skill-1", name: "Python" }]}
+        initialValues={{
+          companyName: "Synapse Labs",
+          position: "Backend Developer",
+          startDate: "2024-01-01",
+          endDate: "",
+          isCurrent: true,
+          description: "Desarrollo con Python y Scrum",
+        }}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByText("Habilidades detectadas automáticamente"),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("Python")).toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+
+    expect(
+      skillsAnalysisService.previewExperience,
+    ).toHaveBeenCalledWith("experience-123", "Desarrollo con Python y Scrum");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+
+    expect(screen.getByText("Scrum")).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Análisis completado en 0.32 s"),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps previously detected skills when the preview analysis fails", async () => {
+    vi.useFakeTimers();
+
+    vi.mocked(skillsAnalysisService.previewExperience).mockRejectedValue(
+      new Error("NLP unavailable"),
+    );
+
+    render(
+      <WorkExperienceForm
+        experienceId="experience-123"
+        initialDetectedSkills={[
+          { id: "skill-1", name: "Python" },
+        ]}
+        initialValues={{
+          companyName: "Synapse Labs",
+          position: "Backend Developer",
+          startDate: "2024-01-01",
+          endDate: "",
+          isCurrent: true,
+          description: "Desarrollo backend",
+        }}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Python")).toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+
+    expect(screen.getByText("Python")).toBeInTheDocument();
+  });
+
+  it("does not request a preview when the description is empty", () => {
+    vi.useFakeTimers();
+
+    render(
+      <WorkExperienceForm
+        experienceId="experience-123"
+        initialDetectedSkills={[
+          { id: "skill-1", name: "Python" },
+        ]}
+        initialValues={{
+          companyName: "Synapse Labs",
+          position: "Backend Developer",
+          startDate: "2024-01-01",
+          endDate: "",
+          isCurrent: true,
+          description: "   ",
+        }}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText("Python")).not.toBeInTheDocument();
+
+    expect(
+      skillsAnalysisService.previewExperience,
+    ).not.toHaveBeenCalled();
   });
 });

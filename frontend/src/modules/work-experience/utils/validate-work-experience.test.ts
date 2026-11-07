@@ -91,4 +91,13 @@ describe("validateWorkExperience", () => {
       description: WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong,
     });
   });
+
+  it("accepts a description of exactly 5000 characters (AC-01.1)", () => {
+    expect(
+      validateWorkExperience({
+        ...VALID_VALUES,
+        description: "b".repeat(5000),
+      }),
+    ).toEqual({});
+  });
 });

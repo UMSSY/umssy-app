@@ -1,5 +1,9 @@
+
 import { describe, expect, it } from 'vitest';
-import { NLP_DICTIONARY_VERSION, NLP_SKILL_DICTIONARY } from '../constants/nlp-dictionary.constants.js';
+import {
+  NLP_DICTIONARY_VERSION,
+  NLP_SKILL_DICTIONARY,
+} from '../constants/nlp-dictionary.constants.js';
 import { SkillDetectionService } from '../services/skill-detection.service.js';
 import { buildAliasIndex } from '../utils/build-alias-index.js';
 import { detectSkillMentions } from '../utils/detect-skill-mentions.js';
@@ -15,6 +19,7 @@ describe('skill dictionary', () => {
 
   it('never assigns the same alias to two skills', () => {
     const owners = new Map<string, string>();
+
     for (const entry of NLP_SKILL_DICTIONARY) {
       for (const alias of [...entry.aliases, ...(entry.ambiguousAliases ?? [])]) {
         const key = toContentWords(alias).join(' ');
@@ -90,7 +95,10 @@ describe('detectSkillMentions', () => {
   });
 
   it('does not read "no solo" or "sin embargo" as negations', () => {
-    expect(detect('No solo usé Java sino también Spring Boot.')).toEqual(['Java', 'Spring Boot']);
+    expect(detect('No solo usé Java sino también Spring Boot.')).toEqual([
+      'Java',
+      'Spring Boot',
+    ]);
     expect(detect('Sin embargo, desarrollé APIs con FastAPI')).toEqual(['FastAPI']);
   });
 
@@ -102,7 +110,9 @@ describe('detectSkillMentions', () => {
 
   it('ignores the wish to learn a technology', () => {
     expect(detect('Quiero aprender Kubernetes el próximo año.')).toEqual([]);
-    expect(detect('Me gustaría aprender más sobre Terraform; uso Ansible')).toEqual(['Ansible']);
+    expect(detect('Me gustaría aprender más sobre Terraform; uso Ansible')).toEqual([
+      'Ansible',
+    ]);
     expect(detect('Aprendí Python en la universidad')).toEqual(['Python']);
   });
 
@@ -141,7 +151,10 @@ describe('SkillDetectionService', () => {
     });
 
     expect(candidates).toEqual([
-      { name: 'Node.js', evidenceRefs: [{ type: 'work-experience', id: 'experience-1' }] },
+      {
+        name: 'Node.js',
+        evidenceRefs: [{ type: 'work-experience', id: 'experience-1' }],
+      },
       {
         name: 'Docker',
         evidenceRefs: [
@@ -149,11 +162,43 @@ describe('SkillDetectionService', () => {
           { type: 'education', id: 'education-1' },
         ],
       },
-      { name: 'Python', evidenceRefs: [{ type: 'education', id: 'education-1' }] },
+      {
+        name: 'Python',
+        evidenceRefs: [{ type: 'education', id: 'education-1' }],
+      },
     ]);
   });
 
   it('returns no candidates without sources', () => {
     expect(service.detect({ userId: 'user-1', sources: [] })).toEqual([]);
+  });
+
+  it('detects official catalog skills that are not in the static dictionary', () => {
+    const candidates = service.detect(
+      {
+        userId: 'user-1',
+        sources: [
+          {
+            id: 'experience-1',
+            type: 'work-experience',
+            text: 'Automaticé procesos con Power Automate',
+          },
+        ],
+      },
+      [
+        {
+          id: 'skill-power-automate',
+          name: 'Power Automate',
+          areaId: 'automation',
+        },
+      ],
+    );
+
+    expect(candidates).toEqual([
+      {
+        name: 'Power Automate',
+        evidenceRefs: [{ type: 'work-experience', id: 'experience-1' }],
+      },
+    ]);
   });
 });

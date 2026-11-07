@@ -10,6 +10,8 @@ vi.mock("@/modules/applications/services/application.service", () => ({
   applicationService: { getMine: vi.fn(), withdraw: vi.fn() },
 }));
 
+vi.mock("@/hooks/use-mobile", () => ({ useIsMobile: () => false }));
+
 afterEach(cleanup);
 
 describe("Mis postulaciones route", () => {
