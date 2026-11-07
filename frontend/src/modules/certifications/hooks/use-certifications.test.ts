@@ -40,6 +40,13 @@ describe("useCertifications", () => {
     vi.clearAllMocks();
   });
 
+  it("no consulta certificaciones cuando está deshabilitado", () => {
+    const { result } = renderHook(() => useCertifications({ enabled: false }));
+    expect(result.current.certifications).toEqual([]);
+    expect(result.current.isLoading).toBe(false);
+    expect(certificationsService.getCertifications).not.toHaveBeenCalled();
+  });
+
   it("loads the certifications sorted from the newest to the oldest", async () => {
     vi.mocked(certificationsService.getCertifications).mockResolvedValue([OLDEST, NEWEST, MIDDLE]);
     const { result } = renderHook(() => useCertifications());
