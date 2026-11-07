@@ -1,7 +1,7 @@
 "use client";
 
 import { Label } from "@/components/ui/label";
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,9 +25,7 @@ import { validateWorkExperience } from "../utils/validate-work-experience";
 import { FeedbackMessage } from "@/modules/profile";
 import { DetectedSkillsChips, FormField } from "@/modules/profile";
 import { FormFieldset } from "@/shared/components/layout/form-fieldset";
-import { skillsAnalysisService, type DetectedSkill } from "@/modules/matching";
-
-const ANALYSIS_DEBOUNCE_MS = 500;
+import { useWorkExperienceSkillsPreview } from "../hooks/use-work-experience-skills-preview";
 
 export function WorkExperienceForm({
   initialValues,
@@ -43,71 +41,17 @@ export function WorkExperienceForm({
     initialValues ?? EMPTY_WORK_EXPERIENCE_FORM_VALUES,
   );
   const [errors, setErrors] = useState<WorkExperienceErrors>({});
-  const [detectedSkills, setDetectedSkills] = useState<DetectedSkill[]>(
-    (initialValues?.description ?? EMPTY_WORK_EXPERIENCE_FORM_VALUES.description).trim()
-      ? initialDetectedSkills
-      : [],
-  );
-  const [processingTimeMs, setProcessingTimeMs] = useState<number | undefined>();
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const analysisRequestId = useRef(0);
+  const { detectedSkills, processingTimeMs, isAnalyzing } = useWorkExperienceSkillsPreview({
+    experienceId,
+    description: values.description,
+    initialSkills: initialDetectedSkills,
+  });
   const isEditing = Boolean(initialValues);
   const title = isEditing ? "Editar experiencia" : "Agregar experiencia";
   const today = getTodayIsoDate();
 
-  useEffect(() => {
-    if (!experienceId) {
-      return;
-    }
-
-    const description = values.description.trim();
-
-    if (!description) {
-      return;
-    }
-
-    const requestId = ++analysisRequestId.current;
-    let cancelled = false;
-
-    const timeoutId = window.setTimeout(() => {
-      setIsAnalyzing(true);
-
-      void skillsAnalysisService
-        .previewExperience(experienceId, description)
-        .then((result) => {
-          if (cancelled || requestId !== analysisRequestId.current) {
-            return;
-          }
-
-          setDetectedSkills(result.skills);
-          setProcessingTimeMs(result.processingTimeMs);
-        })
-        .catch(() => undefined)
-        .finally(() => {
-          if (!cancelled && requestId === analysisRequestId.current) {
-            setIsAnalyzing(false);
-          }
-        });
-    }, ANALYSIS_DEBOUNCE_MS);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timeoutId);
-    };
-  }, [experienceId, values.description]);
-
   const handleValueChange = (name: keyof WorkExperienceFormValues, value: string) => {
     onValuesChange?.();
-
-    if (name === "description") {
-      setIsAnalyzing(false);
-
-      if (!value.trim()) {
-        analysisRequestId.current += 1;
-        setDetectedSkills([]);
-        setProcessingTimeMs(undefined);
-      }
-    }
 
     setValues((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({ ...current, [name]: undefined }));

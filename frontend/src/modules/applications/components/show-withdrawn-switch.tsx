@@ -4,7 +4,7 @@ import { useId } from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { APPLICATION_MESSAGES } from "../constants/application.constants";
-import type { ShowWithdrawnSwitchProps } from "../types/applications-table-props.types";
+import type { ShowWithdrawnSwitchProps } from "../types/show-withdrawn-switch-props.types";
 
 export function ShowWithdrawnSwitch({ checked, onCheckedChange, count }: ShowWithdrawnSwitchProps) {
   const labelId = useId();

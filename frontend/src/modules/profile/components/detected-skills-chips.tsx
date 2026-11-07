@@ -3,6 +3,7 @@
 
 import { Clock, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import type { DetectedSkillsChipsProps } from "../types/detected-skills-chips-props.types";
 
 export function DetectedSkillsChips({
@@ -24,7 +25,7 @@ export function DetectedSkillsChips({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-ink">
           <Sparkles
-            className={`size-3.5 text-accent ${isLoading ? "animate-pulse" : ""}`}
+            className={cn("size-3.5 text-accent", isLoading && "animate-pulse")}
           />
           <span>Habilidades detectadas automáticamente</span>
         </div>

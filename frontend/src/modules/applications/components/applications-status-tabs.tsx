@@ -2,8 +2,8 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { APPLICATION_MESSAGES } from "../constants/application.constants";
-import type { ApplicationStatusFilter } from "../types/application-list.types";
-import type { ApplicationsStatusTabsProps } from "../types/applications-table-props.types";
+import type { ApplicationStatusFilter } from "../types/application-status-filter.types";
+import type { ApplicationsStatusTabsProps } from "../types/applications-status-tabs-props.types";
 import { getStatusTabs } from "../utils/get-status-tabs";
 
 export function ApplicationsStatusTabs({ value, onValueChange, showWithdrawn = true }: ApplicationsStatusTabsProps) {

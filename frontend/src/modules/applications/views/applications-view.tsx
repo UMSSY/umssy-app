@@ -15,7 +15,8 @@ import { APPLICATION_MESSAGES, VACANCIES_ROUTE, WITHDRAWN_STATUS } from "../cons
 import { useMyApplications } from "../hooks/use-my-applications";
 import { useWithdrawApplication } from "../hooks/use-withdraw-application";
 import type { Application } from "../types/application.types";
-import type { ApplicationSort, ApplicationStatusFilter } from "../types/application-list.types";
+import type { ApplicationSort } from "../types/application-sort.types";
+import type { ApplicationStatusFilter } from "../types/application-status-filter.types";
 import { excludeWithdrawnApplications } from "../utils/exclude-withdrawn-applications";
 import { filterApplicationsByStatus } from "../utils/filter-applications-by-status";
 import { nextApplicationSort, sortApplications } from "../utils/sort-applications";

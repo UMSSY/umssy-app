@@ -1,5 +1,6 @@
 import type { ApplicationStatus } from "../types/application.types";
-import type { ApplicationSortKey, ApplicationStatusFilter } from "../types/application-list.types";
+import type { ApplicationSortKey } from "../types/application-sort-key.types";
+import type { ApplicationStatusFilter } from "../types/application-status-filter.types";
 
 export const APPLICATIONS_ENDPOINT = "/applications/me";
 

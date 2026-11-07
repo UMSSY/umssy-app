@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { APPLICATION_MESSAGES } from "../constants/application.constants";
-import type { WithdrawApplicationDialogProps } from "../types/applications-table-props.types";
+import type { WithdrawApplicationDialogProps } from "../types/withdraw-application-dialog-props.types";
 
 export function WithdrawApplicationDialog({ application, onCancel, onConfirm }: WithdrawApplicationDialogProps) {
   return (

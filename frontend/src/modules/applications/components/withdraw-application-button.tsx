@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { APPLICATION_MESSAGES, WITHDRAWABLE_STATUSES } from "../constants/application.constants";
-import type { WithdrawApplicationButtonProps } from "../types/applications-table-props.types";
+import type { WithdrawApplicationButtonProps } from "../types/withdraw-application-button-props.types";
 
 export function WithdrawApplicationButton({
   application,
