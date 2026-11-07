@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { APPLICATION_MESSAGES, WITHDRAWABLE_STATUSES } from "../constants/application.constants";
+import { APPLICATION_MESSAGES } from "../constants/application.constants";
 import type { ApplicationsMobileListProps } from "../types/applications-table-props.types";
+import { WithdrawApplicationButton } from "./withdraw-application-button";
 
 export function ApplicationsMobileList({ applications, withdrawingId, onWithdraw }: ApplicationsMobileListProps) {
   return (
@@ -16,19 +16,12 @@ export function ApplicationsMobileList({ applications, withdrawingId, onWithdraw
             </span>
             <Badge variant="outline">{application.status}</Badge>
           </div>
-          {WITHDRAWABLE_STATUSES.includes(application.status) ? (
-            <Button
-              variant="destructive"
-              size="sm"
-              className="self-start"
-              disabled={withdrawingId === application.id}
-              onClick={() => onWithdraw(application.id)}
-            >
-              {withdrawingId === application.id ? APPLICATION_MESSAGES.withdrawing : APPLICATION_MESSAGES.withdraw}
-            </Button>
-          ) : (
-            <span className="text-xs text-text-secondary">{APPLICATION_MESSAGES.notAvailable}</span>
-          )}
+          <WithdrawApplicationButton
+            application={application}
+            withdrawingId={withdrawingId}
+            onWithdraw={onWithdraw}
+            className="self-start"
+          />
         </li>
       ))}
     </ul>
