@@ -58,7 +58,7 @@ describe('WorkExperienceService', () => {
     expect(repository.findManyByUserId).toHaveBeenCalledWith(userId);
   });
 
-  it('creates a record and fills the optional fields with null', async () => {
+  it('creates a record and fills the missing end date with null', async () => {
     repository.create.mockResolvedValue(record);
 
     await expect(
@@ -67,6 +67,7 @@ describe('WorkExperienceService', () => {
         position: 'Junior web developer',
         startDate: record.startDate,
         isCurrent: true,
+        description: 'Built user interfaces',
       }),
     ).resolves.toEqual(mapper.toResponse(record));
     expect(repository.create).toHaveBeenCalledWith(userId, {
@@ -75,7 +76,7 @@ describe('WorkExperienceService', () => {
       startDate: record.startDate,
       endDate: null,
       isCurrent: true,
-      description: null,
+      description: 'Built user interfaces',
     });
     expect(skillsAnalysis.refreshAfterChange).toHaveBeenCalledWith(userId);
   });
@@ -89,6 +90,7 @@ describe('WorkExperienceService', () => {
       startDate: record.startDate,
       endDate: new Date('2025-06-30T00:00:00.000Z'),
       isCurrent: true,
+      description: 'Built user interfaces',
     });
 
     expect(repository.create).toHaveBeenCalledWith(
@@ -104,6 +106,7 @@ describe('WorkExperienceService', () => {
         position: 'Junior web developer',
         startDate: record.startDate,
         isCurrent: false,
+        description: 'Built user interfaces',
       }),
     ).rejects.toBeInstanceOf(WorkExperienceEndDateRequiredException);
     expect(repository.create).not.toHaveBeenCalled();
@@ -118,6 +121,7 @@ describe('WorkExperienceService', () => {
         startDate: new Date('2024-07-01T00:00:00.000Z'),
         endDate: new Date('2024-06-30T00:00:00.000Z'),
         isCurrent: false,
+        description: 'Built user interfaces',
       }),
     ).rejects.toBeInstanceOf(InvalidWorkExperienceDateRangeException);
     expect(repository.create).not.toHaveBeenCalled();

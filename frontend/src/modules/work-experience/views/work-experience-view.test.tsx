@@ -89,6 +89,7 @@ describe("WorkExperienceView", () => {
     await user.type(screen.getByLabelText(/Cargo/), "Desarrolladora web junior");
     fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2025-03-01" } });
     await user.click(screen.getByRole("checkbox", { name: "Trabajo actualmente aquí" }));
+    await user.type(screen.getByLabelText(/Descripción de funciones/), "Interfaces con React");
     await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
     expect(workExperienceService.createWorkExperience).toHaveBeenCalledWith(

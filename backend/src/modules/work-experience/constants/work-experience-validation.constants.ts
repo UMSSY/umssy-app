@@ -11,6 +11,7 @@ export const WORK_EXPERIENCE_BUSINESS_TIMEZONE = 'America/La_Paz';
 export const WORK_EXPERIENCE_VALIDATION_MESSAGES = {
   companyNameTooLong: `Usa como máximo ${WORK_EXPERIENCE_COMPANY_NAME_MAX_LENGTH} caracteres.`,
   positionTooLong: `Usa como máximo ${WORK_EXPERIENCE_POSITION_MAX_LENGTH} caracteres.`,
+  descriptionRequired: 'Este campo es obligatorio.',
   descriptionTooLong: `Usa como máximo ${WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH} caracteres.`,
   dateBeforeMinimum: 'La fecha no puede ser anterior al 1 de enero de 1950.',
   futureDate: 'La fecha no puede ser posterior a hoy.',
