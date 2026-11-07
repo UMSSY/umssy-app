@@ -68,6 +68,7 @@ async function addExperience(
     position: string;
     startDate: string;
     endDate?: string;
+    description: string;
   },
 ) {
   await user.click(screen.getByRole("button", { name: "Añadir experiencia" }));
@@ -89,11 +90,13 @@ async function addExperience(
       }),
     );
   }
-
+  await user.type(
+    screen.getByLabelText(/Descripción de funciones/),
+    values.description,
+  );
   await user.click(
     screen.getByRole("button", { name: "Guardar experiencia" }),
   );
-
   await screen.findByText(values.position);
 }
 
@@ -121,12 +124,14 @@ describe("WorkExperienceView flow", () => {
       position: "Asistente de laboratorio",
       startDate: "2023-03-01",
       endDate: "2024-12-31",
+      description: "Soporte en prácticas de redes",
     });
 
     await addExperience(user, {
       companyName: "Synapse Labs",
       position: "Desarrolladora web junior",
       startDate: "2025-03-01",
+      description: "Desarrollo con Python y Scrum",
     });
 
     const list = screen
@@ -236,6 +241,7 @@ describe("WorkExperienceView flow", () => {
       position: "Asistente de laboratorio",
       startDate: "2023-03-01",
       endDate: "2024-12-31",
+      description: "Soporte en prácticas de redes",
     });
 
     await user.click(
@@ -244,7 +250,6 @@ describe("WorkExperienceView flow", () => {
 
     await user.type(screen.getByLabelText(/Empresa/), "UMSS");
     await user.type(screen.getByLabelText(/Cargo/), "Practicante");
-
     fireEvent.change(screen.getByLabelText(/Desde/), {
       target: { value: "2024-07-01" },
     });
@@ -252,6 +257,11 @@ describe("WorkExperienceView flow", () => {
     fireEvent.change(screen.getByLabelText("Hasta"), {
       target: { value: "2024-06-30" },
     });
+
+    await user.type(
+      screen.getByLabelText(/Descripción de funciones/),
+      "Soporte técnico",
+    );
 
     await user.click(
       screen.getByRole("button", { name: "Guardar experiencia" }),
@@ -296,12 +306,16 @@ describe("WorkExperienceView flow", () => {
       companyName: "Synapse Labs",
       position: "Desarrolladora web junior",
       startDate: "2025-03-01",
+      description: "Desarrollo con Python y Scrum",
     });
 
     await waitFor(() => {
       expect(
         skillsAnalysisService.analyzeExperience,
-      ).toHaveBeenCalledWith("experience-1", null);
+      ).toHaveBeenCalledWith(
+        "experience-1",
+        "Desarrollo con Python y Scrum",
+      );
     });
 
     expect(
@@ -326,6 +340,7 @@ describe("WorkExperienceView flow", () => {
       companyName: "Synapse Labs",
       position: "Desarrolladora web junior",
       startDate: "2025-03-01",
+      description: "Desarrollo con Python y Scrum",
     });
 
     await waitFor(() =>

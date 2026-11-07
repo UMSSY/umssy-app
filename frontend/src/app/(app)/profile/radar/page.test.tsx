@@ -1,6 +1,7 @@
 import { mapPublishedRadar } from "@/modules/radar-chart/mappers/radar-published.mapper";
 import { cloneElement, type ReactElement } from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
+import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import RadarProfilePage from "./page";
@@ -38,7 +39,7 @@ describe("RadarProfilePage", () => {
   });
 
   it("renders the affinity radar view of the profile", () => {
-    render(<RadarProfilePage />);
+    renderWithQuery(<RadarProfilePage />);
 
     expect(screen.getByRole("heading", { level: 2, name: "Mi perfil profesional" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Desglose vectorial de afinidad" })).toBeDefined();
