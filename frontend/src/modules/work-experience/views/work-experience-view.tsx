@@ -1,4 +1,3 @@
-
 "use client";
 
 import { ProfilePageLayout } from "@/modules/profile";

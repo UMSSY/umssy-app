@@ -23,11 +23,14 @@ import { getFieldErrorProps } from "@/modules/profile";
 import { getTodayIsoDate } from "../utils/get-today-iso-date";
 import { validateWorkExperience } from "../utils/validate-work-experience";
 import { FeedbackMessage } from "@/modules/profile";
-import { FormField } from "@/modules/profile";
+import { DetectedSkillsChips, FormField } from "@/modules/profile";
 import { FormFieldset } from "@/shared/components/layout/form-fieldset";
+import { useWorkExperienceSkillsPreview } from "../hooks/use-work-experience-skills-preview";
 
 export function WorkExperienceForm({
   initialValues,
+  experienceId,
+  initialDetectedSkills = [],
   isPending = false,
   feedback = null,
   onSubmit,
@@ -38,12 +41,18 @@ export function WorkExperienceForm({
     initialValues ?? EMPTY_WORK_EXPERIENCE_FORM_VALUES,
   );
   const [errors, setErrors] = useState<WorkExperienceErrors>({});
+  const { detectedSkills, processingTimeMs, isAnalyzing } = useWorkExperienceSkillsPreview({
+    experienceId,
+    description: values.description,
+    initialSkills: initialDetectedSkills,
+  });
   const isEditing = Boolean(initialValues);
   const title = isEditing ? "Editar experiencia" : "Agregar experiencia";
   const today = getTodayIsoDate();
 
   const handleValueChange = (name: keyof WorkExperienceFormValues, value: string) => {
     onValuesChange?.();
+
     setValues((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({ ...current, [name]: undefined }));
   };
@@ -150,7 +159,8 @@ export function WorkExperienceForm({
         <FormField
           id="work-experience-description"
           error={errors.description}
-          label="Descripción de funciones (opcional)"
+          label="Descripción de funciones"
+          isRequired
         >
           <Textarea
             id="work-experience-description"
@@ -167,6 +177,13 @@ export function WorkExperienceForm({
           <p className="mt-1 text-right text-xs text-text-secondary">
             {values.description.length}/{WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH}
           </p>
+          {experienceId ? (
+            <DetectedSkillsChips
+              skills={detectedSkills}
+              processingTimeMs={processingTimeMs}
+              isLoading={isAnalyzing}
+            />
+          ) : null}
         </FormField>
 
         </FormFieldset>

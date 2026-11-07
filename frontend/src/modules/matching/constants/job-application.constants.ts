@@ -7,6 +7,7 @@ export function getMyJobApplicationEndpoint(jobOfferId: string): string {
 }
 
 export const JOB_APPLICATION_QUERY_KEYS = {
+  minePrefix: ["job-matching", "application"] as const,
   mine: (jobOfferId: string) => ["job-matching", "application", jobOfferId] as const,
 };
 
