@@ -2,9 +2,10 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { APPLICATION_MESSAGES, APPLICATION_SORT_COLUMNS, WITHDRAWABLE_STATUSES } from "../constants/application.constants";
+import { APPLICATION_MESSAGES, APPLICATION_SORT_COLUMNS } from "../constants/application.constants";
 import type { ApplicationSort, ApplicationSortKey } from "../types/application-list.types";
 import type { ApplicationsTableProps } from "../types/applications-table-props.types";
+import { WithdrawApplicationButton } from "./withdraw-application-button";
 
 function ariaSortFor(sort: ApplicationSort | null | undefined, key: ApplicationSortKey) {
   if (sort?.key !== key) return "none" as const;
@@ -57,20 +58,11 @@ export function ApplicationsTable({ applications, withdrawingId, onWithdraw, sor
                 <Badge variant="outline">{application.status}</Badge>
               </TableCell>
               <TableCell>
-                {WITHDRAWABLE_STATUSES.includes(application.status) ? (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    disabled={withdrawingId === application.id}
-                    onClick={() => onWithdraw(application.id)}
-                  >
-                    {withdrawingId === application.id
-                      ? APPLICATION_MESSAGES.withdrawing
-                      : APPLICATION_MESSAGES.withdraw}
-                  </Button>
-                ) : (
-                  <span className="text-xs text-text-secondary">{APPLICATION_MESSAGES.notAvailable}</span>
-                )}
+                <WithdrawApplicationButton
+                  application={application}
+                  withdrawingId={withdrawingId}
+                  onWithdraw={onWithdraw}
+                />
               </TableCell>
             </TableRow>
           ))}
