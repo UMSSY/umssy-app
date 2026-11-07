@@ -9,6 +9,7 @@ const seedTechnicalAreas = vi.fn();
 const seedOrientationTypes = vi.fn();
 const seedJobOffers = vi.fn();
 const seedChat = vi.fn();
+const seedRadar = vi.fn();
 
 vi.mock('../../modules/users/seeds/users.seed.js', () => ({
   hashSeedPassword: vi.fn().mockResolvedValue('hash'),
@@ -44,6 +45,9 @@ vi.mock('../../modules/job-offers/seeds/job-offers.seed.js', () => ({
 }));
 vi.mock('../../modules/chat/seeds/chat.seed.js', () => ({
   seedChat: (...args: unknown[]) => seedChat(...args),
+}));
+vi.mock('../../modules/radar-integration/seeds/radar.seed.js', () => ({
+  seedRadar: (...args: unknown[]) => seedRadar(...args),
 }));
 
 const { runSeed } = await import('../database/seeds.js');
@@ -100,7 +104,7 @@ describe('runSeed', () => {
 
     const summary = await runSeed(client as never);
 
-    expect(client.$transaction).toHaveBeenCalledTimes(9);
+    expect(client.$transaction).toHaveBeenCalledTimes(10);
     expect(seedTechnicalAreas).toHaveBeenCalledWith(tx);
     expect(seedOrientationTypes).toHaveBeenCalledWith(tx);
     expect(seedJobOffers).toHaveBeenCalledWith(tx);
@@ -127,5 +131,11 @@ describe('runSeed', () => {
       accessRequests: { statuses: 5, documentTypes: 2, careers: 2 },
     });
     expect(client.$disconnect).not.toHaveBeenCalled();
+    expect(seedRadar).toHaveBeenCalledWith(
+      tx,
+      expect.objectContaining({
+        graduate: { id: 'g1' },
+      }),
+    );
   });
 });
