@@ -34,6 +34,7 @@ export type UserMinAggregateOutputType = {
   isAvailableForMentoring: boolean | null
   photoUrl: runtime.Bytes | null
   cityId: string | null
+  companyId: string | null
   phone: string | null
   personalEmail: string | null
   headline: string | null
@@ -52,6 +53,7 @@ export type UserMaxAggregateOutputType = {
   isAvailableForMentoring: boolean | null
   photoUrl: runtime.Bytes | null
   cityId: string | null
+  companyId: string | null
   phone: string | null
   personalEmail: string | null
   headline: string | null
@@ -70,6 +72,7 @@ export type UserCountAggregateOutputType = {
   isAvailableForMentoring: number
   photoUrl: number
   cityId: number
+  companyId: number
   phone: number
   personalEmail: number
   headline: number
@@ -90,6 +93,7 @@ export type UserMinAggregateInputType = {
   isAvailableForMentoring?: true
   photoUrl?: true
   cityId?: true
+  companyId?: true
   phone?: true
   personalEmail?: true
   headline?: true
@@ -108,6 +112,7 @@ export type UserMaxAggregateInputType = {
   isAvailableForMentoring?: true
   photoUrl?: true
   cityId?: true
+  companyId?: true
   phone?: true
   personalEmail?: true
   headline?: true
@@ -126,6 +131,7 @@ export type UserCountAggregateInputType = {
   isAvailableForMentoring?: true
   photoUrl?: true
   cityId?: true
+  companyId?: true
   phone?: true
   personalEmail?: true
   headline?: true
@@ -217,6 +223,7 @@ export type UserGroupByOutputType = {
   isAvailableForMentoring: boolean
   photoUrl: runtime.Bytes | null
   cityId: string | null
+  companyId: string | null
   phone: string | null
   personalEmail: string | null
   headline: string | null
@@ -256,6 +263,7 @@ export type UserWhereInput = {
   isAvailableForMentoring?: Prisma.BoolFilter<"User"> | boolean
   photoUrl?: Prisma.BytesNullableFilter<"User"> | runtime.Bytes | null
   cityId?: Prisma.UuidNullableFilter<"User"> | string | null
+  companyId?: Prisma.UuidNullableFilter<"User"> | string | null
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   personalEmail?: Prisma.StringNullableFilter<"User"> | string | null
   headline?: Prisma.StringNullableFilter<"User"> | string | null
@@ -264,6 +272,7 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptListRelationFilter
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionListRelationFilter
+  company?: Prisma.XOR<Prisma.CompanyNullableScalarRelationFilter, Prisma.CompanyWhereInput> | null
   city?: Prisma.XOR<Prisma.CityNullableScalarRelationFilter, Prisma.CityWhereInput> | null
   roles?: Prisma.UserRoleListRelationFilter
   educations?: Prisma.EducationListRelationFilter
@@ -306,6 +315,11 @@ export type UserWhereInput = {
   auditEvents?: Prisma.AuditEventListRelationFilter
   revertedValidations?: Prisma.DocumentValidationListRelationFilter
   jobApplications?: Prisma.JobApplicationListRelationFilter
+  radarCvOwned?: Prisma.RadarCvEvidenceListRelationFilter
+  radarCvReviewed?: Prisma.RadarCvEvidenceListRelationFilter
+  radarSnapshots?: Prisma.RadarScoreSnapshotListRelationFilter
+  radarAuditSubjects?: Prisma.RadarAuditEventListRelationFilter
+  radarAuditActors?: Prisma.RadarAuditEventListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -318,6 +332,7 @@ export type UserOrderByWithRelationInput = {
   isAvailableForMentoring?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   cityId?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyId?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   personalEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   headline?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -326,6 +341,7 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptOrderByRelationAggregateInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionOrderByRelationAggregateInput
+  company?: Prisma.CompanyOrderByWithRelationInput
   city?: Prisma.CityOrderByWithRelationInput
   roles?: Prisma.UserRoleOrderByRelationAggregateInput
   educations?: Prisma.EducationOrderByRelationAggregateInput
@@ -368,6 +384,11 @@ export type UserOrderByWithRelationInput = {
   auditEvents?: Prisma.AuditEventOrderByRelationAggregateInput
   revertedValidations?: Prisma.DocumentValidationOrderByRelationAggregateInput
   jobApplications?: Prisma.JobApplicationOrderByRelationAggregateInput
+  radarCvOwned?: Prisma.RadarCvEvidenceOrderByRelationAggregateInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceOrderByRelationAggregateInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotOrderByRelationAggregateInput
+  radarAuditSubjects?: Prisma.RadarAuditEventOrderByRelationAggregateInput
+  radarAuditActors?: Prisma.RadarAuditEventOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -383,6 +404,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   isAvailableForMentoring?: Prisma.BoolFilter<"User"> | boolean
   photoUrl?: Prisma.BytesNullableFilter<"User"> | runtime.Bytes | null
   cityId?: Prisma.UuidNullableFilter<"User"> | string | null
+  companyId?: Prisma.UuidNullableFilter<"User"> | string | null
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   personalEmail?: Prisma.StringNullableFilter<"User"> | string | null
   headline?: Prisma.StringNullableFilter<"User"> | string | null
@@ -391,6 +413,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptListRelationFilter
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionListRelationFilter
+  company?: Prisma.XOR<Prisma.CompanyNullableScalarRelationFilter, Prisma.CompanyWhereInput> | null
   city?: Prisma.XOR<Prisma.CityNullableScalarRelationFilter, Prisma.CityWhereInput> | null
   roles?: Prisma.UserRoleListRelationFilter
   educations?: Prisma.EducationListRelationFilter
@@ -433,6 +456,11 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   auditEvents?: Prisma.AuditEventListRelationFilter
   revertedValidations?: Prisma.DocumentValidationListRelationFilter
   jobApplications?: Prisma.JobApplicationListRelationFilter
+  radarCvOwned?: Prisma.RadarCvEvidenceListRelationFilter
+  radarCvReviewed?: Prisma.RadarCvEvidenceListRelationFilter
+  radarSnapshots?: Prisma.RadarScoreSnapshotListRelationFilter
+  radarAuditSubjects?: Prisma.RadarAuditEventListRelationFilter
+  radarAuditActors?: Prisma.RadarAuditEventListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -445,6 +473,7 @@ export type UserOrderByWithAggregationInput = {
   isAvailableForMentoring?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   cityId?: Prisma.SortOrderInput | Prisma.SortOrder
+  companyId?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   personalEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   headline?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -469,6 +498,7 @@ export type UserScalarWhereWithAggregatesInput = {
   isAvailableForMentoring?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   photoUrl?: Prisma.BytesNullableWithAggregatesFilter<"User"> | runtime.Bytes | null
   cityId?: Prisma.UuidNullableWithAggregatesFilter<"User"> | string | null
+  companyId?: Prisma.UuidNullableWithAggregatesFilter<"User"> | string | null
   phone?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   personalEmail?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   headline?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
@@ -494,6 +524,7 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -536,6 +567,11 @@ export type UserCreateInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -548,6 +584,7 @@ export type UserUncheckedCreateInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -597,6 +634,11 @@ export type UserUncheckedCreateInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserUpdateInput = {
@@ -616,6 +658,7 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -658,6 +701,11 @@ export type UserUpdateInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -670,6 +718,7 @@ export type UserUncheckedUpdateInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -719,6 +768,11 @@ export type UserUncheckedUpdateInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -731,6 +785,7 @@ export type UserCreateManyInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -766,6 +821,7 @@ export type UserUncheckedUpdateManyInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -794,6 +850,7 @@ export type UserCountOrderByAggregateInput = {
   isAvailableForMentoring?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrder
   cityId?: Prisma.SortOrder
+  companyId?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   personalEmail?: Prisma.SortOrder
   headline?: Prisma.SortOrder
@@ -812,6 +869,7 @@ export type UserMaxOrderByAggregateInput = {
   isAvailableForMentoring?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrder
   cityId?: Prisma.SortOrder
+  companyId?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   personalEmail?: Prisma.SortOrder
   headline?: Prisma.SortOrder
@@ -830,6 +888,7 @@ export type UserMinOrderByAggregateInput = {
   isAvailableForMentoring?: Prisma.SortOrder
   photoUrl?: Prisma.SortOrder
   cityId?: Prisma.SortOrder
+  companyId?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   personalEmail?: Prisma.SortOrder
   headline?: Prisma.SortOrder
@@ -887,6 +946,48 @@ export type UserUncheckedUpdateManyWithoutCityNestedInput = {
   connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
   update?: Prisma.UserUpdateWithWhereUniqueWithoutCityInput | Prisma.UserUpdateWithWhereUniqueWithoutCityInput[]
   updateMany?: Prisma.UserUpdateManyWithWhereWithoutCityInput | Prisma.UserUpdateManyWithWhereWithoutCityInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type UserCreateNestedManyWithoutCompanyInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyInput, Prisma.UserUncheckedCreateWithoutCompanyInput> | Prisma.UserCreateWithoutCompanyInput[] | Prisma.UserUncheckedCreateWithoutCompanyInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyInput | Prisma.UserCreateOrConnectWithoutCompanyInput[]
+  createMany?: Prisma.UserCreateManyCompanyInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUncheckedCreateNestedManyWithoutCompanyInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyInput, Prisma.UserUncheckedCreateWithoutCompanyInput> | Prisma.UserCreateWithoutCompanyInput[] | Prisma.UserUncheckedCreateWithoutCompanyInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyInput | Prisma.UserCreateOrConnectWithoutCompanyInput[]
+  createMany?: Prisma.UserCreateManyCompanyInputEnvelope
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+}
+
+export type UserUpdateManyWithoutCompanyNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyInput, Prisma.UserUncheckedCreateWithoutCompanyInput> | Prisma.UserCreateWithoutCompanyInput[] | Prisma.UserUncheckedCreateWithoutCompanyInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyInput | Prisma.UserCreateOrConnectWithoutCompanyInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutCompanyInput | Prisma.UserUpsertWithWhereUniqueWithoutCompanyInput[]
+  createMany?: Prisma.UserCreateManyCompanyInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutCompanyInput | Prisma.UserUpdateWithWhereUniqueWithoutCompanyInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutCompanyInput | Prisma.UserUpdateManyWithWhereWithoutCompanyInput[]
+  deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
+}
+
+export type UserUncheckedUpdateManyWithoutCompanyNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCompanyInput, Prisma.UserUncheckedCreateWithoutCompanyInput> | Prisma.UserCreateWithoutCompanyInput[] | Prisma.UserUncheckedCreateWithoutCompanyInput[]
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCompanyInput | Prisma.UserCreateOrConnectWithoutCompanyInput[]
+  upsert?: Prisma.UserUpsertWithWhereUniqueWithoutCompanyInput | Prisma.UserUpsertWithWhereUniqueWithoutCompanyInput[]
+  createMany?: Prisma.UserCreateManyCompanyInputEnvelope
+  set?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  disconnect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  delete?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  connect?: Prisma.UserWhereUniqueInput | Prisma.UserWhereUniqueInput[]
+  update?: Prisma.UserUpdateWithWhereUniqueWithoutCompanyInput | Prisma.UserUpdateWithWhereUniqueWithoutCompanyInput[]
+  updateMany?: Prisma.UserUpdateManyWithWhereWithoutCompanyInput | Prisma.UserUpdateManyWithWhereWithoutCompanyInput[]
   deleteMany?: Prisma.UserScalarWhereInput | Prisma.UserScalarWhereInput[]
 }
 
@@ -1522,6 +1623,80 @@ export type UserUpdateOneRequiredWithoutMentorParticipationSanctionsNestedInput 
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMentorParticipationSanctionsInput, Prisma.UserUpdateWithoutMentorParticipationSanctionsInput>, Prisma.UserUncheckedUpdateWithoutMentorParticipationSanctionsInput>
 }
 
+export type UserCreateNestedOneWithoutRadarCvOwnedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRadarCvOwnedInput, Prisma.UserUncheckedCreateWithoutRadarCvOwnedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRadarCvOwnedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutRadarCvReviewedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRadarCvReviewedInput, Prisma.UserUncheckedCreateWithoutRadarCvReviewedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRadarCvReviewedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutRadarCvOwnedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRadarCvOwnedInput, Prisma.UserUncheckedCreateWithoutRadarCvOwnedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRadarCvOwnedInput
+  upsert?: Prisma.UserUpsertWithoutRadarCvOwnedInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRadarCvOwnedInput, Prisma.UserUpdateWithoutRadarCvOwnedInput>, Prisma.UserUncheckedUpdateWithoutRadarCvOwnedInput>
+}
+
+export type UserUpdateOneWithoutRadarCvReviewedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRadarCvReviewedInput, Prisma.UserUncheckedCreateWithoutRadarCvReviewedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRadarCvReviewedInput
+  upsert?: Prisma.UserUpsertWithoutRadarCvReviewedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRadarCvReviewedInput, Prisma.UserUpdateWithoutRadarCvReviewedInput>, Prisma.UserUncheckedUpdateWithoutRadarCvReviewedInput>
+}
+
+export type UserCreateNestedOneWithoutRadarSnapshotsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRadarSnapshotsInput, Prisma.UserUncheckedCreateWithoutRadarSnapshotsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRadarSnapshotsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutRadarSnapshotsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRadarSnapshotsInput, Prisma.UserUncheckedCreateWithoutRadarSnapshotsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRadarSnapshotsInput
+  upsert?: Prisma.UserUpsertWithoutRadarSnapshotsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRadarSnapshotsInput, Prisma.UserUpdateWithoutRadarSnapshotsInput>, Prisma.UserUncheckedUpdateWithoutRadarSnapshotsInput>
+}
+
+export type UserCreateNestedOneWithoutRadarAuditSubjectsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRadarAuditSubjectsInput, Prisma.UserUncheckedCreateWithoutRadarAuditSubjectsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRadarAuditSubjectsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutRadarAuditActorsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRadarAuditActorsInput, Prisma.UserUncheckedCreateWithoutRadarAuditActorsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRadarAuditActorsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutRadarAuditSubjectsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRadarAuditSubjectsInput, Prisma.UserUncheckedCreateWithoutRadarAuditSubjectsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRadarAuditSubjectsInput
+  upsert?: Prisma.UserUpsertWithoutRadarAuditSubjectsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRadarAuditSubjectsInput, Prisma.UserUpdateWithoutRadarAuditSubjectsInput>, Prisma.UserUncheckedUpdateWithoutRadarAuditSubjectsInput>
+}
+
+export type UserUpdateOneWithoutRadarAuditActorsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRadarAuditActorsInput, Prisma.UserUncheckedCreateWithoutRadarAuditActorsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRadarAuditActorsInput
+  upsert?: Prisma.UserUpsertWithoutRadarAuditActorsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRadarAuditActorsInput, Prisma.UserUpdateWithoutRadarAuditActorsInput>, Prisma.UserUncheckedUpdateWithoutRadarAuditActorsInput>
+}
+
 export type UserCreateWithoutCityInput = {
   id?: string
   firstName: string
@@ -1539,6 +1714,7 @@ export type UserCreateWithoutCityInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
@@ -1580,6 +1756,11 @@ export type UserCreateWithoutCityInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutCityInput = {
@@ -1591,6 +1772,7 @@ export type UserUncheckedCreateWithoutCityInput = {
   isActive?: boolean
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -1640,6 +1822,11 @@ export type UserUncheckedCreateWithoutCityInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutCityInput = {
@@ -1681,12 +1868,171 @@ export type UserScalarWhereInput = {
   isAvailableForMentoring?: Prisma.BoolFilter<"User"> | boolean
   photoUrl?: Prisma.BytesNullableFilter<"User"> | runtime.Bytes | null
   cityId?: Prisma.UuidNullableFilter<"User"> | string | null
+  companyId?: Prisma.UuidNullableFilter<"User"> | string | null
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   personalEmail?: Prisma.StringNullableFilter<"User"> | string | null
   headline?: Prisma.StringNullableFilter<"User"> | string | null
   aboutMe?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+}
+
+export type UserCreateWithoutCompanyInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutCompanyInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutCompanyInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCompanyInput, Prisma.UserUncheckedCreateWithoutCompanyInput>
+}
+
+export type UserCreateManyCompanyInputEnvelope = {
+  data: Prisma.UserCreateManyCompanyInput | Prisma.UserCreateManyCompanyInput[]
+  skipDuplicates?: boolean
+}
+
+export type UserUpsertWithWhereUniqueWithoutCompanyInput = {
+  where: Prisma.UserWhereUniqueInput
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCompanyInput, Prisma.UserUncheckedUpdateWithoutCompanyInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCompanyInput, Prisma.UserUncheckedCreateWithoutCompanyInput>
+}
+
+export type UserUpdateWithWhereUniqueWithoutCompanyInput = {
+  where: Prisma.UserWhereUniqueInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCompanyInput, Prisma.UserUncheckedUpdateWithoutCompanyInput>
+}
+
+export type UserUpdateManyWithWhereWithoutCompanyInput = {
+  where: Prisma.UserScalarWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateManyMutationInput, Prisma.UserUncheckedUpdateManyWithoutCompanyInput>
 }
 
 export type UserCreateWithoutRolesInput = {
@@ -1706,6 +2052,7 @@ export type UserCreateWithoutRolesInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
@@ -1747,6 +2094,11 @@ export type UserCreateWithoutRolesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutRolesInput = {
@@ -1759,6 +2111,7 @@ export type UserUncheckedCreateWithoutRolesInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -1807,6 +2160,11 @@ export type UserUncheckedCreateWithoutRolesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutRolesInput = {
@@ -1842,6 +2200,7 @@ export type UserUpdateWithoutRolesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
@@ -1883,6 +2242,11 @@ export type UserUpdateWithoutRolesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRolesInput = {
@@ -1895,6 +2259,7 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1943,6 +2308,11 @@ export type UserUncheckedUpdateWithoutRolesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutEducationsInput = {
@@ -1962,6 +2332,7 @@ export type UserCreateWithoutEducationsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
@@ -2003,6 +2374,11 @@ export type UserCreateWithoutEducationsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutEducationsInput = {
@@ -2015,6 +2391,7 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -2063,6 +2440,11 @@ export type UserUncheckedCreateWithoutEducationsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutEducationsInput = {
@@ -2098,6 +2480,7 @@ export type UserUpdateWithoutEducationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
@@ -2139,6 +2522,11 @@ export type UserUpdateWithoutEducationsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEducationsInput = {
@@ -2151,6 +2539,7 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2199,6 +2588,11 @@ export type UserUncheckedUpdateWithoutEducationsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutWorkExperiencesInput = {
@@ -2218,6 +2612,7 @@ export type UserCreateWithoutWorkExperiencesInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -2259,6 +2654,11 @@ export type UserCreateWithoutWorkExperiencesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutWorkExperiencesInput = {
@@ -2271,6 +2671,7 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -2319,6 +2720,11 @@ export type UserUncheckedCreateWithoutWorkExperiencesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutWorkExperiencesInput = {
@@ -2354,6 +2760,7 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -2395,6 +2802,11 @@ export type UserUpdateWithoutWorkExperiencesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
@@ -2407,6 +2819,7 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2455,6 +2868,11 @@ export type UserUncheckedUpdateWithoutWorkExperiencesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutUserSkillsInput = {
@@ -2474,6 +2892,7 @@ export type UserCreateWithoutUserSkillsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -2515,6 +2934,11 @@ export type UserCreateWithoutUserSkillsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutUserSkillsInput = {
@@ -2527,6 +2951,7 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -2575,6 +3000,11 @@ export type UserUncheckedCreateWithoutUserSkillsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutUserSkillsInput = {
@@ -2610,6 +3040,7 @@ export type UserUpdateWithoutUserSkillsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -2651,6 +3082,11 @@ export type UserUpdateWithoutUserSkillsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserSkillsInput = {
@@ -2663,6 +3099,7 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2711,6 +3148,11 @@ export type UserUncheckedUpdateWithoutUserSkillsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutCertificationsInput = {
@@ -2730,6 +3172,7 @@ export type UserCreateWithoutCertificationsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -2771,6 +3214,11 @@ export type UserCreateWithoutCertificationsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutCertificationsInput = {
@@ -2783,6 +3231,7 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -2831,6 +3280,11 @@ export type UserUncheckedCreateWithoutCertificationsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutCertificationsInput = {
@@ -2866,6 +3320,7 @@ export type UserUpdateWithoutCertificationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -2907,6 +3362,11 @@ export type UserUpdateWithoutCertificationsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCertificationsInput = {
@@ -2919,6 +3379,7 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2967,6 +3428,11 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutCvFilesInput = {
@@ -2986,6 +3452,7 @@ export type UserCreateWithoutCvFilesInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -3027,6 +3494,11 @@ export type UserCreateWithoutCvFilesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutCvFilesInput = {
@@ -3039,6 +3511,7 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -3087,6 +3560,11 @@ export type UserUncheckedCreateWithoutCvFilesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutCvFilesInput = {
@@ -3122,6 +3600,7 @@ export type UserUpdateWithoutCvFilesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -3163,6 +3642,11 @@ export type UserUpdateWithoutCvFilesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCvFilesInput = {
@@ -3175,6 +3659,7 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3223,6 +3708,11 @@ export type UserUncheckedUpdateWithoutCvFilesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutSkillProcessingStateInput = {
@@ -3242,6 +3732,7 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -3283,6 +3774,11 @@ export type UserCreateWithoutSkillProcessingStateInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
@@ -3295,6 +3791,7 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -3343,6 +3840,11 @@ export type UserUncheckedCreateWithoutSkillProcessingStateInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutSkillProcessingStateInput = {
@@ -3378,6 +3880,7 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -3419,6 +3922,11 @@ export type UserUpdateWithoutSkillProcessingStateInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
@@ -3431,6 +3939,7 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3479,6 +3988,11 @@ export type UserUncheckedUpdateWithoutSkillProcessingStateInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutMentorTechnicalAreasInput = {
@@ -3498,6 +4012,7 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -3539,6 +4054,11 @@ export type UserCreateWithoutMentorTechnicalAreasInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
@@ -3551,6 +4071,7 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -3599,6 +4120,11 @@ export type UserUncheckedCreateWithoutMentorTechnicalAreasInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutMentorTechnicalAreasInput = {
@@ -3634,6 +4160,7 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -3675,6 +4202,11 @@ export type UserUpdateWithoutMentorTechnicalAreasInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
@@ -3687,6 +4219,7 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3735,6 +4268,11 @@ export type UserUncheckedUpdateWithoutMentorTechnicalAreasInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutMentorOrientationTypesInput = {
@@ -3754,6 +4292,7 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -3795,6 +4334,11 @@ export type UserCreateWithoutMentorOrientationTypesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
@@ -3807,6 +4351,7 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -3855,6 +4400,11 @@ export type UserUncheckedCreateWithoutMentorOrientationTypesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutMentorOrientationTypesInput = {
@@ -3890,6 +4440,7 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -3931,6 +4482,11 @@ export type UserUpdateWithoutMentorOrientationTypesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
@@ -3943,6 +4499,7 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3991,6 +4548,11 @@ export type UserUncheckedUpdateWithoutMentorOrientationTypesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutAvailabilityBlocksInput = {
@@ -4010,6 +4572,7 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -4051,6 +4614,11 @@ export type UserCreateWithoutAvailabilityBlocksInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
@@ -4063,6 +4631,7 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -4111,6 +4680,11 @@ export type UserUncheckedCreateWithoutAvailabilityBlocksInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutAvailabilityBlocksInput = {
@@ -4146,6 +4720,7 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -4187,6 +4762,11 @@ export type UserUpdateWithoutAvailabilityBlocksInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
@@ -4199,6 +4779,7 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4247,6 +4828,11 @@ export type UserUncheckedUpdateWithoutAvailabilityBlocksInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutBlockedDatesInput = {
@@ -4266,6 +4852,7 @@ export type UserCreateWithoutBlockedDatesInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -4307,6 +4894,11 @@ export type UserCreateWithoutBlockedDatesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutBlockedDatesInput = {
@@ -4319,6 +4911,7 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -4367,6 +4960,11 @@ export type UserUncheckedCreateWithoutBlockedDatesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutBlockedDatesInput = {
@@ -4402,6 +5000,7 @@ export type UserUpdateWithoutBlockedDatesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -4443,6 +5042,11 @@ export type UserUpdateWithoutBlockedDatesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBlockedDatesInput = {
@@ -4455,6 +5059,7 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4503,6 +5108,11 @@ export type UserUncheckedUpdateWithoutBlockedDatesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutMentorAppointmentsInput = {
@@ -4522,6 +5132,7 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -4563,6 +5174,11 @@ export type UserCreateWithoutMentorAppointmentsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
@@ -4575,6 +5191,7 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -4623,6 +5240,11 @@ export type UserUncheckedCreateWithoutMentorAppointmentsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutMentorAppointmentsInput = {
@@ -4647,6 +5269,7 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -4688,6 +5311,11 @@ export type UserCreateWithoutStudentAppointmentsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
@@ -4700,6 +5328,7 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -4748,6 +5377,11 @@ export type UserUncheckedCreateWithoutStudentAppointmentsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutStudentAppointmentsInput = {
@@ -4772,6 +5406,7 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -4813,6 +5448,11 @@ export type UserCreateWithoutCancelledAppointmentsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
@@ -4825,6 +5465,7 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -4873,6 +5514,11 @@ export type UserUncheckedCreateWithoutCancelledAppointmentsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutCancelledAppointmentsInput = {
@@ -4908,6 +5554,7 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -4949,6 +5596,11 @@ export type UserUpdateWithoutMentorAppointmentsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
@@ -4961,6 +5613,7 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5009,6 +5662,11 @@ export type UserUncheckedUpdateWithoutMentorAppointmentsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutStudentAppointmentsInput = {
@@ -5039,6 +5697,7 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -5080,6 +5739,11 @@ export type UserUpdateWithoutStudentAppointmentsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
@@ -5092,6 +5756,7 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5140,6 +5805,11 @@ export type UserUncheckedUpdateWithoutStudentAppointmentsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutCancelledAppointmentsInput = {
@@ -5170,6 +5840,7 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -5211,6 +5882,11 @@ export type UserUpdateWithoutCancelledAppointmentsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
@@ -5223,6 +5899,7 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5271,6 +5948,11 @@ export type UserUncheckedUpdateWithoutCancelledAppointmentsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutAppointmentChangesInput = {
@@ -5290,6 +5972,7 @@ export type UserCreateWithoutAppointmentChangesInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -5331,6 +6014,11 @@ export type UserCreateWithoutAppointmentChangesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutAppointmentChangesInput = {
@@ -5343,6 +6031,7 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -5391,6 +6080,11 @@ export type UserUncheckedCreateWithoutAppointmentChangesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutAppointmentChangesInput = {
@@ -5426,6 +6120,7 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -5467,6 +6162,11 @@ export type UserUpdateWithoutAppointmentChangesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
@@ -5479,6 +6179,7 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5527,6 +6228,11 @@ export type UserUncheckedUpdateWithoutAppointmentChangesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutCreatedEventsInput = {
@@ -5546,6 +6252,7 @@ export type UserCreateWithoutCreatedEventsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -5587,6 +6294,11 @@ export type UserCreateWithoutCreatedEventsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutCreatedEventsInput = {
@@ -5599,6 +6311,7 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -5647,6 +6360,11 @@ export type UserUncheckedCreateWithoutCreatedEventsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutCreatedEventsInput = {
@@ -5671,6 +6389,7 @@ export type UserCreateWithoutModeratedEventsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -5712,6 +6431,11 @@ export type UserCreateWithoutModeratedEventsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutModeratedEventsInput = {
@@ -5724,6 +6448,7 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -5772,6 +6497,11 @@ export type UserUncheckedCreateWithoutModeratedEventsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutModeratedEventsInput = {
@@ -5807,6 +6537,7 @@ export type UserUpdateWithoutCreatedEventsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -5848,6 +6579,11 @@ export type UserUpdateWithoutCreatedEventsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedEventsInput = {
@@ -5860,6 +6596,7 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5908,6 +6645,11 @@ export type UserUncheckedUpdateWithoutCreatedEventsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutModeratedEventsInput = {
@@ -5938,6 +6680,7 @@ export type UserUpdateWithoutModeratedEventsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -5979,6 +6722,11 @@ export type UserUpdateWithoutModeratedEventsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutModeratedEventsInput = {
@@ -5991,6 +6739,7 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6039,6 +6788,11 @@ export type UserUncheckedUpdateWithoutModeratedEventsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutEventRegistrationsInput = {
@@ -6058,6 +6812,7 @@ export type UserCreateWithoutEventRegistrationsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -6099,6 +6854,11 @@ export type UserCreateWithoutEventRegistrationsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutEventRegistrationsInput = {
@@ -6111,6 +6871,7 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -6159,6 +6920,11 @@ export type UserUncheckedCreateWithoutEventRegistrationsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutEventRegistrationsInput = {
@@ -6194,6 +6960,7 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -6235,6 +7002,11 @@ export type UserUpdateWithoutEventRegistrationsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
@@ -6247,6 +7019,7 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6295,6 +7068,11 @@ export type UserUncheckedUpdateWithoutEventRegistrationsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutCheckedInAttendancesInput = {
@@ -6314,6 +7092,7 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -6355,6 +7134,11 @@ export type UserCreateWithoutCheckedInAttendancesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
@@ -6367,6 +7151,7 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -6415,6 +7200,11 @@ export type UserUncheckedCreateWithoutCheckedInAttendancesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutCheckedInAttendancesInput = {
@@ -6450,6 +7240,7 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -6491,6 +7282,11 @@ export type UserUpdateWithoutCheckedInAttendancesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
@@ -6503,6 +7299,7 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6551,6 +7348,11 @@ export type UserUncheckedUpdateWithoutCheckedInAttendancesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutExportHistoriesInput = {
@@ -6570,6 +7372,7 @@ export type UserCreateWithoutExportHistoriesInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -6611,6 +7414,11 @@ export type UserCreateWithoutExportHistoriesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutExportHistoriesInput = {
@@ -6623,6 +7431,7 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -6671,6 +7480,11 @@ export type UserUncheckedCreateWithoutExportHistoriesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutExportHistoriesInput = {
@@ -6706,6 +7520,7 @@ export type UserUpdateWithoutExportHistoriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -6747,6 +7562,11 @@ export type UserUpdateWithoutExportHistoriesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExportHistoriesInput = {
@@ -6759,6 +7579,7 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6807,6 +7628,11 @@ export type UserUncheckedUpdateWithoutExportHistoriesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutOpenedAccessRequestsInput = {
@@ -6826,6 +7652,7 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -6867,6 +7694,11 @@ export type UserCreateWithoutOpenedAccessRequestsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
@@ -6879,6 +7711,7 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -6927,6 +7760,11 @@ export type UserUncheckedCreateWithoutOpenedAccessRequestsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutOpenedAccessRequestsInput = {
@@ -6951,6 +7789,7 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -6992,6 +7831,11 @@ export type UserCreateWithoutReviewedAccessRequestsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
@@ -7004,6 +7848,7 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -7052,6 +7897,11 @@ export type UserUncheckedCreateWithoutReviewedAccessRequestsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutReviewedAccessRequestsInput = {
@@ -7076,6 +7926,7 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -7117,6 +7968,11 @@ export type UserCreateWithoutApprovedAccessRequestInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
@@ -7129,6 +7985,7 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -7177,6 +8034,11 @@ export type UserUncheckedCreateWithoutApprovedAccessRequestInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutApprovedAccessRequestInput = {
@@ -7212,6 +8074,7 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -7253,6 +8116,11 @@ export type UserUpdateWithoutOpenedAccessRequestsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
@@ -7265,6 +8133,7 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7313,6 +8182,11 @@ export type UserUncheckedUpdateWithoutOpenedAccessRequestsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutReviewedAccessRequestsInput = {
@@ -7343,6 +8217,7 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -7384,6 +8259,11 @@ export type UserUpdateWithoutReviewedAccessRequestsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
@@ -7396,6 +8276,7 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7444,6 +8325,11 @@ export type UserUncheckedUpdateWithoutReviewedAccessRequestsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutApprovedAccessRequestInput = {
@@ -7474,6 +8360,7 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -7515,6 +8402,11 @@ export type UserUpdateWithoutApprovedAccessRequestInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
@@ -7527,6 +8419,7 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7575,6 +8468,11 @@ export type UserUncheckedUpdateWithoutApprovedAccessRequestInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationRequestsInput = {
@@ -7594,6 +8492,7 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -7635,6 +8534,11 @@ export type UserCreateWithoutMentorParticipationRequestsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
@@ -7647,6 +8551,7 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -7695,6 +8600,11 @@ export type UserUncheckedCreateWithoutMentorParticipationRequestsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationRequestsInput = {
@@ -7730,6 +8640,7 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -7771,6 +8682,11 @@ export type UserUpdateWithoutMentorParticipationRequestsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
@@ -7783,6 +8699,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7831,6 +8748,11 @@ export type UserUncheckedUpdateWithoutMentorParticipationRequestsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutMentorSlotOffersInput = {
@@ -7850,6 +8772,7 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -7891,6 +8814,11 @@ export type UserCreateWithoutMentorSlotOffersInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
@@ -7903,6 +8831,7 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -7951,6 +8880,11 @@ export type UserUncheckedCreateWithoutMentorSlotOffersInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutMentorSlotOffersInput = {
@@ -7986,6 +8920,7 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -8027,6 +8962,11 @@ export type UserUpdateWithoutMentorSlotOffersInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
@@ -8039,6 +8979,7 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8087,6 +9028,11 @@ export type UserUncheckedUpdateWithoutMentorSlotOffersInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutConversationsAsUserAInput = {
@@ -8106,6 +9052,7 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -8147,6 +9094,11 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
@@ -8159,6 +9111,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -8207,6 +9160,11 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsUserAInput = {
@@ -8231,6 +9189,7 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -8272,6 +9231,11 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
@@ -8284,6 +9248,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -8332,6 +9297,11 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutConversationsAsUserBInput = {
@@ -8367,6 +9337,7 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -8408,6 +9379,11 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
@@ -8420,6 +9396,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8468,6 +9445,11 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutConversationsAsUserBInput = {
@@ -8498,6 +9480,7 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -8539,6 +9522,11 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
@@ -8551,6 +9539,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8599,6 +9588,11 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutChatParticipantsInput = {
@@ -8618,6 +9612,7 @@ export type UserCreateWithoutChatParticipantsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -8659,6 +9654,11 @@ export type UserCreateWithoutChatParticipantsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutChatParticipantsInput = {
@@ -8671,6 +9671,7 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -8719,6 +9720,11 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutChatParticipantsInput = {
@@ -8754,6 +9760,7 @@ export type UserUpdateWithoutChatParticipantsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -8795,6 +9802,11 @@ export type UserUpdateWithoutChatParticipantsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatParticipantsInput = {
@@ -8807,6 +9819,7 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8855,6 +9868,11 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutChatMessagesInput = {
@@ -8874,6 +9892,7 @@ export type UserCreateWithoutChatMessagesInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -8915,6 +9934,11 @@ export type UserCreateWithoutChatMessagesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutChatMessagesInput = {
@@ -8927,6 +9951,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -8975,6 +10000,11 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutChatMessagesInput = {
@@ -9010,6 +10040,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -9051,6 +10082,11 @@ export type UserUpdateWithoutChatMessagesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatMessagesInput = {
@@ -9063,6 +10099,7 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9111,6 +10148,11 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutChatBlocksMadeInput = {
@@ -9130,6 +10172,7 @@ export type UserCreateWithoutChatBlocksMadeInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -9171,6 +10214,11 @@ export type UserCreateWithoutChatBlocksMadeInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
@@ -9183,6 +10231,7 @@ export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -9231,6 +10280,11 @@ export type UserUncheckedCreateWithoutChatBlocksMadeInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutChatBlocksMadeInput = {
@@ -9255,6 +10309,7 @@ export type UserCreateWithoutChatBlocksReceivedInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -9296,6 +10351,11 @@ export type UserCreateWithoutChatBlocksReceivedInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
@@ -9308,6 +10368,7 @@ export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -9356,6 +10417,11 @@ export type UserUncheckedCreateWithoutChatBlocksReceivedInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutChatBlocksReceivedInput = {
@@ -9391,6 +10457,7 @@ export type UserUpdateWithoutChatBlocksMadeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -9432,6 +10499,11 @@ export type UserUpdateWithoutChatBlocksMadeInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
@@ -9444,6 +10516,7 @@ export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9492,6 +10565,11 @@ export type UserUncheckedUpdateWithoutChatBlocksMadeInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutChatBlocksReceivedInput = {
@@ -9522,6 +10600,7 @@ export type UserUpdateWithoutChatBlocksReceivedInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -9563,6 +10642,11 @@ export type UserUpdateWithoutChatBlocksReceivedInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
@@ -9575,6 +10659,7 @@ export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9623,6 +10708,11 @@ export type UserUncheckedUpdateWithoutChatBlocksReceivedInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutSentRequestsInput = {
@@ -9642,6 +10732,7 @@ export type UserCreateWithoutSentRequestsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -9683,6 +10774,11 @@ export type UserCreateWithoutSentRequestsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutSentRequestsInput = {
@@ -9695,6 +10791,7 @@ export type UserUncheckedCreateWithoutSentRequestsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -9743,6 +10840,11 @@ export type UserUncheckedCreateWithoutSentRequestsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutSentRequestsInput = {
@@ -9767,6 +10869,7 @@ export type UserCreateWithoutReceivedRequestsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -9808,6 +10911,11 @@ export type UserCreateWithoutReceivedRequestsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutReceivedRequestsInput = {
@@ -9820,6 +10928,7 @@ export type UserUncheckedCreateWithoutReceivedRequestsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -9868,6 +10977,11 @@ export type UserUncheckedCreateWithoutReceivedRequestsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutReceivedRequestsInput = {
@@ -9903,6 +11017,7 @@ export type UserUpdateWithoutSentRequestsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -9944,6 +11059,11 @@ export type UserUpdateWithoutSentRequestsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentRequestsInput = {
@@ -9956,6 +11076,7 @@ export type UserUncheckedUpdateWithoutSentRequestsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10004,6 +11125,11 @@ export type UserUncheckedUpdateWithoutSentRequestsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUpsertWithoutReceivedRequestsInput = {
@@ -10034,6 +11160,7 @@ export type UserUpdateWithoutReceivedRequestsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -10075,6 +11202,11 @@ export type UserUpdateWithoutReceivedRequestsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
@@ -10087,6 +11219,7 @@ export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10135,6 +11268,11 @@ export type UserUncheckedUpdateWithoutReceivedRequestsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutPresenceInput = {
@@ -10154,6 +11292,7 @@ export type UserCreateWithoutPresenceInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -10195,6 +11334,11 @@ export type UserCreateWithoutPresenceInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutPresenceInput = {
@@ -10207,6 +11351,7 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -10255,6 +11400,11 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutPresenceInput = {
@@ -10290,6 +11440,7 @@ export type UserUpdateWithoutPresenceInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -10331,6 +11482,11 @@ export type UserUpdateWithoutPresenceInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPresenceInput = {
@@ -10343,6 +11499,7 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10391,6 +11548,11 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutPasswordResetOtpsInput = {
@@ -10410,6 +11572,7 @@ export type UserCreateWithoutPasswordResetOtpsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -10451,6 +11614,11 @@ export type UserCreateWithoutPasswordResetOtpsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
@@ -10463,6 +11631,7 @@ export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -10511,6 +11680,11 @@ export type UserUncheckedCreateWithoutPasswordResetOtpsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetOtpsInput = {
@@ -10546,6 +11720,7 @@ export type UserUpdateWithoutPasswordResetOtpsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -10587,6 +11762,11 @@ export type UserUpdateWithoutPasswordResetOtpsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
@@ -10599,6 +11779,7 @@ export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10647,6 +11828,11 @@ export type UserUncheckedUpdateWithoutPasswordResetOtpsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
@@ -10666,6 +11852,7 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -10707,6 +11894,11 @@ export type UserCreateWithoutMentorParticipationAttemptLimitInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
@@ -10719,6 +11911,7 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -10767,6 +11960,11 @@ export type UserUncheckedCreateWithoutMentorParticipationAttemptLimitInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationAttemptLimitInput = {
@@ -10802,6 +12000,7 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -10843,6 +12042,11 @@ export type UserUpdateWithoutMentorParticipationAttemptLimitInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
@@ -10855,6 +12059,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10903,6 +12108,11 @@ export type UserUncheckedUpdateWithoutMentorParticipationAttemptLimitInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutJobApplicationsInput = {
@@ -10922,6 +12132,7 @@ export type UserCreateWithoutJobApplicationsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -10963,6 +12174,11 @@ export type UserCreateWithoutJobApplicationsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutJobApplicationsInput = {
@@ -10975,6 +12191,7 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -11023,6 +12240,11 @@ export type UserUncheckedCreateWithoutJobApplicationsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutJobApplicationsInput = {
@@ -11058,6 +12280,7 @@ export type UserUpdateWithoutJobApplicationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -11099,6 +12322,11 @@ export type UserUpdateWithoutJobApplicationsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutJobApplicationsInput = {
@@ -11111,6 +12339,7 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11159,6 +12388,11 @@ export type UserUncheckedUpdateWithoutJobApplicationsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutCreatedSurveysInput = {
@@ -11178,6 +12412,7 @@ export type UserCreateWithoutCreatedSurveysInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -11219,6 +12454,11 @@ export type UserCreateWithoutCreatedSurveysInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutCreatedSurveysInput = {
@@ -11231,6 +12471,7 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -11279,6 +12520,11 @@ export type UserUncheckedCreateWithoutCreatedSurveysInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutCreatedSurveysInput = {
@@ -11314,6 +12560,7 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -11355,6 +12602,11 @@ export type UserUpdateWithoutCreatedSurveysInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
@@ -11367,6 +12619,7 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11415,6 +12668,11 @@ export type UserUncheckedUpdateWithoutCreatedSurveysInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutSurveyResponsesInput = {
@@ -11434,6 +12692,7 @@ export type UserCreateWithoutSurveyResponsesInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -11475,6 +12734,11 @@ export type UserCreateWithoutSurveyResponsesInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutSurveyResponsesInput = {
@@ -11487,6 +12751,7 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -11535,6 +12800,11 @@ export type UserUncheckedCreateWithoutSurveyResponsesInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutSurveyResponsesInput = {
@@ -11570,6 +12840,7 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -11611,6 +12882,11 @@ export type UserUpdateWithoutSurveyResponsesInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
@@ -11623,6 +12899,7 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11671,6 +12948,11 @@ export type UserUncheckedUpdateWithoutSurveyResponsesInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutAuditEventsInput = {
@@ -11690,6 +12972,7 @@ export type UserCreateWithoutAuditEventsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -11731,6 +13014,11 @@ export type UserCreateWithoutAuditEventsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutAuditEventsInput = {
@@ -11743,6 +13031,7 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -11791,6 +13080,11 @@ export type UserUncheckedCreateWithoutAuditEventsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutAuditEventsInput = {
@@ -11826,6 +13120,7 @@ export type UserUpdateWithoutAuditEventsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -11867,6 +13162,11 @@ export type UserUpdateWithoutAuditEventsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditEventsInput = {
@@ -11879,6 +13179,7 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11927,6 +13228,11 @@ export type UserUncheckedUpdateWithoutAuditEventsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutRevertedValidationsInput = {
@@ -11946,6 +13252,7 @@ export type UserCreateWithoutRevertedValidationsInput = {
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -11987,6 +13294,11 @@ export type UserCreateWithoutRevertedValidationsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutRevertedValidationsInput = {
@@ -11999,6 +13311,7 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -12047,6 +13360,11 @@ export type UserUncheckedCreateWithoutRevertedValidationsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutRevertedValidationsInput = {
@@ -12082,6 +13400,7 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -12123,6 +13442,11 @@ export type UserUpdateWithoutRevertedValidationsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
@@ -12135,6 +13459,7 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12183,6 +13508,11 @@ export type UserUncheckedUpdateWithoutRevertedValidationsInput = {
   passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutMentorIntakeAttemptsInput = {
@@ -12201,6 +13531,7 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -12243,6 +13574,11 @@ export type UserCreateWithoutMentorIntakeAttemptsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
@@ -12255,6 +13591,7 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -12303,6 +13640,11 @@ export type UserUncheckedCreateWithoutMentorIntakeAttemptsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutMentorIntakeAttemptsInput = {
@@ -12337,6 +13679,7 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -12379,6 +13722,11 @@ export type UserUpdateWithoutMentorIntakeAttemptsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
@@ -12391,6 +13739,7 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12439,6 +13788,11 @@ export type UserUncheckedUpdateWithoutMentorIntakeAttemptsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutMentorParticipationSanctionsInput = {
@@ -12457,6 +13811,7 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
   roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
   educations?: Prisma.EducationCreateNestedManyWithoutUserInput
@@ -12499,6 +13854,11 @@ export type UserCreateWithoutMentorParticipationSanctionsInput = {
   auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
 export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
@@ -12511,6 +13871,7 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   isAvailableForMentoring?: boolean
   photoUrl?: runtime.Bytes | null
   cityId?: string | null
+  companyId?: string | null
   phone?: string | null
   personalEmail?: string | null
   headline?: string | null
@@ -12559,6 +13920,11 @@ export type UserUncheckedCreateWithoutMentorParticipationSanctionsInput = {
   auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
   revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
   jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
 }
 
 export type UserCreateOrConnectWithoutMentorParticipationSanctionsInput = {
@@ -12593,6 +13959,7 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
@@ -12635,6 +14002,11 @@ export type UserUpdateWithoutMentorParticipationSanctionsInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
@@ -12647,6 +14019,7 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
   cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12695,9 +14068,14 @@ export type UserUncheckedUpdateWithoutMentorParticipationSanctionsInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
-export type UserCreateManyCityInput = {
+export type UserCreateWithoutRadarCvOwnedInput = {
   id?: string
   firstName: string
   lastName: string
@@ -12712,9 +14090,277 @@ export type UserCreateManyCityInput = {
   aboutMe?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
 }
 
-export type UserUpdateWithoutCityInput = {
+export type UserUncheckedCreateWithoutRadarCvOwnedInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutRadarCvOwnedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutRadarCvOwnedInput, Prisma.UserUncheckedCreateWithoutRadarCvOwnedInput>
+}
+
+export type UserCreateWithoutRadarCvReviewedInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutRadarCvReviewedInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutRadarCvReviewedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutRadarCvReviewedInput, Prisma.UserUncheckedCreateWithoutRadarCvReviewedInput>
+}
+
+export type UserUpsertWithoutRadarCvOwnedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutRadarCvOwnedInput, Prisma.UserUncheckedUpdateWithoutRadarCvOwnedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRadarCvOwnedInput, Prisma.UserUncheckedCreateWithoutRadarCvOwnedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutRadarCvOwnedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutRadarCvOwnedInput, Prisma.UserUncheckedUpdateWithoutRadarCvOwnedInput>
+}
+
+export type UserUpdateWithoutRadarCvOwnedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -12731,6 +14377,8 @@ export type UserUpdateWithoutCityInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
   mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
   roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
   educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
@@ -12772,9 +14420,13 @@ export type UserUpdateWithoutCityInput = {
   auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
 }
 
-export type UserUncheckedUpdateWithoutCityInput = {
+export type UserUncheckedUpdateWithoutRadarCvOwnedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   firstName?: Prisma.StringFieldUpdateOperationsInput | string
   lastName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -12783,6 +14435,8 @@ export type UserUncheckedUpdateWithoutCityInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12832,6 +14486,1143 @@ export type UserUncheckedUpdateWithoutCityInput = {
   auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
   revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
   jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserUpsertWithoutRadarCvReviewedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutRadarCvReviewedInput, Prisma.UserUncheckedUpdateWithoutRadarCvReviewedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRadarCvReviewedInput, Prisma.UserUncheckedCreateWithoutRadarCvReviewedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutRadarCvReviewedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutRadarCvReviewedInput, Prisma.UserUncheckedUpdateWithoutRadarCvReviewedInput>
+}
+
+export type UserUpdateWithoutRadarCvReviewedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutRadarCvReviewedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserCreateWithoutRadarSnapshotsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutRadarSnapshotsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutRadarSnapshotsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutRadarSnapshotsInput, Prisma.UserUncheckedCreateWithoutRadarSnapshotsInput>
+}
+
+export type UserUpsertWithoutRadarSnapshotsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutRadarSnapshotsInput, Prisma.UserUncheckedUpdateWithoutRadarSnapshotsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRadarSnapshotsInput, Prisma.UserUncheckedCreateWithoutRadarSnapshotsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutRadarSnapshotsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutRadarSnapshotsInput, Prisma.UserUncheckedUpdateWithoutRadarSnapshotsInput>
+}
+
+export type UserUpdateWithoutRadarSnapshotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutRadarSnapshotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserCreateWithoutRadarAuditSubjectsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditActors?: Prisma.RadarAuditEventCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutRadarAuditSubjectsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutRadarAuditSubjectsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutRadarAuditSubjectsInput, Prisma.UserUncheckedCreateWithoutRadarAuditSubjectsInput>
+}
+
+export type UserCreateWithoutRadarAuditActorsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionCreateNestedManyWithoutUserInput
+  company?: Prisma.CompanyCreateNestedOneWithoutRecruitersInput
+  city?: Prisma.CityCreateNestedOneWithoutUsersInput
+  roles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventCreateNestedManyWithoutSubjectInput
+}
+
+export type UserUncheckedCreateWithoutRadarAuditActorsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedCreateNestedManyWithoutUserInput
+  roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  educations?: Prisma.EducationUncheckedCreateNestedManyWithoutUserInput
+  workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
+  userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
+  certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
+  cvFiles?: Prisma.UserCvFileUncheckedCreateNestedManyWithoutUserInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedCreateNestedOneWithoutUserInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
+  blockedDates?: Prisma.BlockedDateUncheckedCreateNestedManyWithoutMentorInput
+  mentorAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutMentorInput
+  studentAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutStudentInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedCreateNestedManyWithoutCancelledByInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  createdEvents?: Prisma.EventUncheckedCreateNestedManyWithoutCreatedByInput
+  moderatedEvents?: Prisma.EventUncheckedCreateNestedManyWithoutModeratedByInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedCreateNestedManyWithoutUserInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedCreateNestedManyWithoutCheckedInByInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedCreateNestedManyWithoutUserInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutOpenedByInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedCreateNestedManyWithoutReviewedByInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedCreateNestedOneWithoutApprovedUserInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedCreateNestedManyWithoutUserInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedCreateNestedOneWithoutUserInput
+  createdSurveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutCreatedByInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutRespondentInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserAInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserBInput
+  chatMessages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  presence?: Prisma.UserPresenceUncheckedCreateNestedOneWithoutUserInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockerInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedCreateNestedManyWithoutBlockedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutSenderInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedCreateNestedManyWithoutReceiverInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedCreateNestedManyWithoutUserInput
+  auditEvents?: Prisma.AuditEventUncheckedCreateNestedManyWithoutActorInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedCreateNestedManyWithoutRevertedByInput
+  jobApplications?: Prisma.JobApplicationUncheckedCreateNestedManyWithoutUserInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutOwnerInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedCreateNestedManyWithoutReviewerInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedCreateNestedManyWithoutUserInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedCreateNestedManyWithoutSubjectInput
+}
+
+export type UserCreateOrConnectWithoutRadarAuditActorsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutRadarAuditActorsInput, Prisma.UserUncheckedCreateWithoutRadarAuditActorsInput>
+}
+
+export type UserUpsertWithoutRadarAuditSubjectsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutRadarAuditSubjectsInput, Prisma.UserUncheckedUpdateWithoutRadarAuditSubjectsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRadarAuditSubjectsInput, Prisma.UserUncheckedCreateWithoutRadarAuditSubjectsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutRadarAuditSubjectsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutRadarAuditSubjectsInput, Prisma.UserUncheckedUpdateWithoutRadarAuditSubjectsInput>
+}
+
+export type UserUpdateWithoutRadarAuditSubjectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutRadarAuditSubjectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserUpsertWithoutRadarAuditActorsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutRadarAuditActorsInput, Prisma.UserUncheckedUpdateWithoutRadarAuditActorsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRadarAuditActorsInput, Prisma.UserUncheckedCreateWithoutRadarAuditActorsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutRadarAuditActorsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutRadarAuditActorsInput, Prisma.UserUncheckedUpdateWithoutRadarAuditActorsInput>
+}
+
+export type UserUpdateWithoutRadarAuditActorsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+}
+
+export type UserUncheckedUpdateWithoutRadarAuditActorsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+}
+
+export type UserCreateManyCityInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  companyId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UserUpdateWithoutCityInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  company?: Prisma.CompanyUpdateOneWithoutRecruitersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCityInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutCityInput = {
@@ -12843,6 +15634,175 @@ export type UserUncheckedUpdateManyWithoutCityInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
   photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  companyId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UserCreateManyCompanyInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  email: string
+  password?: string | null
+  isActive?: boolean
+  isAvailableForMentoring?: boolean
+  photoUrl?: runtime.Bytes | null
+  cityId?: string | null
+  phone?: string | null
+  personalEmail?: string | null
+  headline?: string | null
+  aboutMe?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UserUpdateWithoutCompanyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUpdateManyWithoutUserNestedInput
+  city?: Prisma.CityUpdateOneWithoutUsersNestedInput
+  roles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCompanyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mentorIntakeAttempts?: Prisma.MentorIntakeAttemptUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationSanctions?: Prisma.MentorParticipationSanctionUncheckedUpdateManyWithoutUserNestedInput
+  roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  educations?: Prisma.EducationUncheckedUpdateManyWithoutUserNestedInput
+  workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
+  userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
+  certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
+  cvFiles?: Prisma.UserCvFileUncheckedUpdateManyWithoutUserNestedInput
+  skillProcessingState?: Prisma.ProfileSkillProcessingStateUncheckedUpdateOneWithoutUserNestedInput
+  mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
+  mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
+  availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
+  blockedDates?: Prisma.BlockedDateUncheckedUpdateManyWithoutMentorNestedInput
+  mentorAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutMentorNestedInput
+  studentAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutStudentNestedInput
+  cancelledAppointments?: Prisma.AppointmentUncheckedUpdateManyWithoutCancelledByNestedInput
+  appointmentChanges?: Prisma.AppointmentHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  createdEvents?: Prisma.EventUncheckedUpdateManyWithoutCreatedByNestedInput
+  moderatedEvents?: Prisma.EventUncheckedUpdateManyWithoutModeratedByNestedInput
+  eventRegistrations?: Prisma.EventRegistrationUncheckedUpdateManyWithoutUserNestedInput
+  checkedInAttendances?: Prisma.EventAttendanceUncheckedUpdateManyWithoutCheckedInByNestedInput
+  exportHistories?: Prisma.AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput
+  openedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutOpenedByNestedInput
+  reviewedAccessRequests?: Prisma.AccessRequestUncheckedUpdateManyWithoutReviewedByNestedInput
+  approvedAccessRequest?: Prisma.AccessRequestUncheckedUpdateOneWithoutApprovedUserNestedInput
+  mentorSlotOffers?: Prisma.MentorSlotOfferUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationRequests?: Prisma.MentorParticipationRequestUncheckedUpdateManyWithoutUserNestedInput
+  mentorParticipationAttemptLimit?: Prisma.MentorParticipationAttemptLimitUncheckedUpdateOneWithoutUserNestedInput
+  createdSurveys?: Prisma.SurveyUncheckedUpdateManyWithoutCreatedByNestedInput
+  surveyResponses?: Prisma.SurveyResponseUncheckedUpdateManyWithoutRespondentNestedInput
+  conversationsAsUserA?: Prisma.ConversationUncheckedUpdateManyWithoutUserANestedInput
+  conversationsAsUserB?: Prisma.ConversationUncheckedUpdateManyWithoutUserBNestedInput
+  chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
+  chatBlocksMade?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockerNestedInput
+  chatBlocksReceived?: Prisma.ChatUserBlockUncheckedUpdateManyWithoutBlockedNestedInput
+  sentRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutSenderNestedInput
+  receivedRequests?: Prisma.ConnectionRequestUncheckedUpdateManyWithoutReceiverNestedInput
+  passwordResetOtps?: Prisma.PasswordResetOtpUncheckedUpdateManyWithoutUserNestedInput
+  auditEvents?: Prisma.AuditEventUncheckedUpdateManyWithoutActorNestedInput
+  revertedValidations?: Prisma.DocumentValidationUncheckedUpdateManyWithoutRevertedByNestedInput
+  jobApplications?: Prisma.JobApplicationUncheckedUpdateManyWithoutUserNestedInput
+  radarCvOwned?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutOwnerNestedInput
+  radarCvReviewed?: Prisma.RadarCvEvidenceUncheckedUpdateManyWithoutReviewerNestedInput
+  radarSnapshots?: Prisma.RadarScoreSnapshotUncheckedUpdateManyWithoutUserNestedInput
+  radarAuditSubjects?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutSubjectNestedInput
+  radarAuditActors?: Prisma.RadarAuditEventUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateManyWithoutCompanyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isAvailableForMentoring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  photoUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
+  cityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12896,6 +15856,11 @@ export type UserCountOutputType = {
   auditEvents: number
   revertedValidations: number
   jobApplications: number
+  radarCvOwned: number
+  radarCvReviewed: number
+  radarSnapshots: number
+  radarAuditSubjects: number
+  radarAuditActors: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -12938,6 +15903,11 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   auditEvents?: boolean | UserCountOutputTypeCountAuditEventsArgs
   revertedValidations?: boolean | UserCountOutputTypeCountRevertedValidationsArgs
   jobApplications?: boolean | UserCountOutputTypeCountJobApplicationsArgs
+  radarCvOwned?: boolean | UserCountOutputTypeCountRadarCvOwnedArgs
+  radarCvReviewed?: boolean | UserCountOutputTypeCountRadarCvReviewedArgs
+  radarSnapshots?: boolean | UserCountOutputTypeCountRadarSnapshotsArgs
+  radarAuditSubjects?: boolean | UserCountOutputTypeCountRadarAuditSubjectsArgs
+  radarAuditActors?: boolean | UserCountOutputTypeCountRadarAuditActorsArgs
 }
 
 /**
@@ -13223,6 +16193,41 @@ export type UserCountOutputTypeCountJobApplicationsArgs<ExtArgs extends runtime.
   where?: Prisma.JobApplicationWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountRadarCvOwnedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RadarCvEvidenceWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountRadarCvReviewedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RadarCvEvidenceWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountRadarSnapshotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RadarScoreSnapshotWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountRadarAuditSubjectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RadarAuditEventWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountRadarAuditActorsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RadarAuditEventWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -13234,6 +16239,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   isAvailableForMentoring?: boolean
   photoUrl?: boolean
   cityId?: boolean
+  companyId?: boolean
   phone?: boolean
   personalEmail?: boolean
   headline?: boolean
@@ -13242,6 +16248,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   mentorIntakeAttempts?: boolean | Prisma.User$mentorIntakeAttemptsArgs<ExtArgs>
   mentorParticipationSanctions?: boolean | Prisma.User$mentorParticipationSanctionsArgs<ExtArgs>
+  company?: boolean | Prisma.User$companyArgs<ExtArgs>
   city?: boolean | Prisma.User$cityArgs<ExtArgs>
   roles?: boolean | Prisma.User$rolesArgs<ExtArgs>
   educations?: boolean | Prisma.User$educationsArgs<ExtArgs>
@@ -13284,6 +16291,11 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   revertedValidations?: boolean | Prisma.User$revertedValidationsArgs<ExtArgs>
   jobApplications?: boolean | Prisma.User$jobApplicationsArgs<ExtArgs>
+  radarCvOwned?: boolean | Prisma.User$radarCvOwnedArgs<ExtArgs>
+  radarCvReviewed?: boolean | Prisma.User$radarCvReviewedArgs<ExtArgs>
+  radarSnapshots?: boolean | Prisma.User$radarSnapshotsArgs<ExtArgs>
+  radarAuditSubjects?: boolean | Prisma.User$radarAuditSubjectsArgs<ExtArgs>
+  radarAuditActors?: boolean | Prisma.User$radarAuditActorsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -13297,12 +16309,14 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   isAvailableForMentoring?: boolean
   photoUrl?: boolean
   cityId?: boolean
+  companyId?: boolean
   phone?: boolean
   personalEmail?: boolean
   headline?: boolean
   aboutMe?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  company?: boolean | Prisma.User$companyArgs<ExtArgs>
   city?: boolean | Prisma.User$cityArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -13316,12 +16330,14 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   isAvailableForMentoring?: boolean
   photoUrl?: boolean
   cityId?: boolean
+  companyId?: boolean
   phone?: boolean
   personalEmail?: boolean
   headline?: boolean
   aboutMe?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  company?: boolean | Prisma.User$companyArgs<ExtArgs>
   city?: boolean | Prisma.User$cityArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -13335,6 +16351,7 @@ export type UserSelectScalar = {
   isAvailableForMentoring?: boolean
   photoUrl?: boolean
   cityId?: boolean
+  companyId?: boolean
   phone?: boolean
   personalEmail?: boolean
   headline?: boolean
@@ -13343,10 +16360,11 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "email" | "password" | "isActive" | "isAvailableForMentoring" | "photoUrl" | "cityId" | "phone" | "personalEmail" | "headline" | "aboutMe" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "email" | "password" | "isActive" | "isAvailableForMentoring" | "photoUrl" | "cityId" | "companyId" | "phone" | "personalEmail" | "headline" | "aboutMe" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   mentorIntakeAttempts?: boolean | Prisma.User$mentorIntakeAttemptsArgs<ExtArgs>
   mentorParticipationSanctions?: boolean | Prisma.User$mentorParticipationSanctionsArgs<ExtArgs>
+  company?: boolean | Prisma.User$companyArgs<ExtArgs>
   city?: boolean | Prisma.User$cityArgs<ExtArgs>
   roles?: boolean | Prisma.User$rolesArgs<ExtArgs>
   educations?: boolean | Prisma.User$educationsArgs<ExtArgs>
@@ -13389,12 +16407,19 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   auditEvents?: boolean | Prisma.User$auditEventsArgs<ExtArgs>
   revertedValidations?: boolean | Prisma.User$revertedValidationsArgs<ExtArgs>
   jobApplications?: boolean | Prisma.User$jobApplicationsArgs<ExtArgs>
+  radarCvOwned?: boolean | Prisma.User$radarCvOwnedArgs<ExtArgs>
+  radarCvReviewed?: boolean | Prisma.User$radarCvReviewedArgs<ExtArgs>
+  radarSnapshots?: boolean | Prisma.User$radarSnapshotsArgs<ExtArgs>
+  radarAuditSubjects?: boolean | Prisma.User$radarAuditSubjectsArgs<ExtArgs>
+  radarAuditActors?: boolean | Prisma.User$radarAuditActorsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  company?: boolean | Prisma.User$companyArgs<ExtArgs>
   city?: boolean | Prisma.User$cityArgs<ExtArgs>
 }
 export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  company?: boolean | Prisma.User$companyArgs<ExtArgs>
   city?: boolean | Prisma.User$cityArgs<ExtArgs>
 }
 
@@ -13403,6 +16428,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     mentorIntakeAttempts: Prisma.$MentorIntakeAttemptPayload<ExtArgs>[]
     mentorParticipationSanctions: Prisma.$MentorParticipationSanctionPayload<ExtArgs>[]
+    company: Prisma.$CompanyPayload<ExtArgs> | null
     city: Prisma.$CityPayload<ExtArgs> | null
     roles: Prisma.$UserRolePayload<ExtArgs>[]
     educations: Prisma.$EducationPayload<ExtArgs>[]
@@ -13445,6 +16471,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     auditEvents: Prisma.$AuditEventPayload<ExtArgs>[]
     revertedValidations: Prisma.$DocumentValidationPayload<ExtArgs>[]
     jobApplications: Prisma.$JobApplicationPayload<ExtArgs>[]
+    radarCvOwned: Prisma.$RadarCvEvidencePayload<ExtArgs>[]
+    radarCvReviewed: Prisma.$RadarCvEvidencePayload<ExtArgs>[]
+    radarSnapshots: Prisma.$RadarScoreSnapshotPayload<ExtArgs>[]
+    radarAuditSubjects: Prisma.$RadarAuditEventPayload<ExtArgs>[]
+    radarAuditActors: Prisma.$RadarAuditEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -13456,6 +16487,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     isAvailableForMentoring: boolean
     photoUrl: runtime.Bytes | null
     cityId: string | null
+    companyId: string | null
     phone: string | null
     personalEmail: string | null
     headline: string | null
@@ -13858,6 +16890,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   mentorIntakeAttempts<T extends Prisma.User$mentorIntakeAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorIntakeAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorIntakeAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mentorParticipationSanctions<T extends Prisma.User$mentorParticipationSanctionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mentorParticipationSanctionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MentorParticipationSanctionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  company<T extends Prisma.User$companyArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$companyArgs<ExtArgs>>): Prisma.Prisma__CompanyClient<runtime.Types.Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   city<T extends Prisma.User$cityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$cityArgs<ExtArgs>>): Prisma.Prisma__CityClient<runtime.Types.Result.GetResult<Prisma.$CityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   roles<T extends Prisma.User$rolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$rolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   educations<T extends Prisma.User$educationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$educationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EducationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -13900,6 +16933,11 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   auditEvents<T extends Prisma.User$auditEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   revertedValidations<T extends Prisma.User$revertedValidationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$revertedValidationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentValidationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   jobApplications<T extends Prisma.User$jobApplicationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$jobApplicationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  radarCvOwned<T extends Prisma.User$radarCvOwnedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$radarCvOwnedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarCvEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  radarCvReviewed<T extends Prisma.User$radarCvReviewedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$radarCvReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarCvEvidencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  radarSnapshots<T extends Prisma.User$radarSnapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$radarSnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarScoreSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  radarAuditSubjects<T extends Prisma.User$radarAuditSubjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$radarAuditSubjectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarAuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  radarAuditActors<T extends Prisma.User$radarAuditActorsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$radarAuditActorsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RadarAuditEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13938,6 +16976,7 @@ export interface UserFieldRefs {
   readonly isAvailableForMentoring: Prisma.FieldRef<"User", 'Boolean'>
   readonly photoUrl: Prisma.FieldRef<"User", 'Bytes'>
   readonly cityId: Prisma.FieldRef<"User", 'String'>
+  readonly companyId: Prisma.FieldRef<"User", 'String'>
   readonly phone: Prisma.FieldRef<"User", 'String'>
   readonly personalEmail: Prisma.FieldRef<"User", 'String'>
   readonly headline: Prisma.FieldRef<"User", 'String'>
@@ -14390,6 +17429,25 @@ export type User$mentorParticipationSanctionsArgs<ExtArgs extends runtime.Types.
   take?: number
   skip?: number
   distinct?: Prisma.MentorParticipationSanctionScalarFieldEnum | Prisma.MentorParticipationSanctionScalarFieldEnum[]
+}
+
+/**
+ * User.company
+ */
+export type User$companyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Company
+   */
+  select?: Prisma.CompanySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Company
+   */
+  omit?: Prisma.CompanyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyInclude<ExtArgs> | null
+  where?: Prisma.CompanyWhereInput
 }
 
 /**
@@ -15373,6 +18431,126 @@ export type User$jobApplicationsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.JobApplicationScalarFieldEnum | Prisma.JobApplicationScalarFieldEnum[]
+}
+
+/**
+ * User.radarCvOwned
+ */
+export type User$radarCvOwnedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RadarCvEvidence
+   */
+  select?: Prisma.RadarCvEvidenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RadarCvEvidence
+   */
+  omit?: Prisma.RadarCvEvidenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RadarCvEvidenceInclude<ExtArgs> | null
+  where?: Prisma.RadarCvEvidenceWhereInput
+  orderBy?: Prisma.RadarCvEvidenceOrderByWithRelationInput | Prisma.RadarCvEvidenceOrderByWithRelationInput[]
+  cursor?: Prisma.RadarCvEvidenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RadarCvEvidenceScalarFieldEnum | Prisma.RadarCvEvidenceScalarFieldEnum[]
+}
+
+/**
+ * User.radarCvReviewed
+ */
+export type User$radarCvReviewedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RadarCvEvidence
+   */
+  select?: Prisma.RadarCvEvidenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RadarCvEvidence
+   */
+  omit?: Prisma.RadarCvEvidenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RadarCvEvidenceInclude<ExtArgs> | null
+  where?: Prisma.RadarCvEvidenceWhereInput
+  orderBy?: Prisma.RadarCvEvidenceOrderByWithRelationInput | Prisma.RadarCvEvidenceOrderByWithRelationInput[]
+  cursor?: Prisma.RadarCvEvidenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RadarCvEvidenceScalarFieldEnum | Prisma.RadarCvEvidenceScalarFieldEnum[]
+}
+
+/**
+ * User.radarSnapshots
+ */
+export type User$radarSnapshotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RadarScoreSnapshot
+   */
+  select?: Prisma.RadarScoreSnapshotSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RadarScoreSnapshot
+   */
+  omit?: Prisma.RadarScoreSnapshotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RadarScoreSnapshotInclude<ExtArgs> | null
+  where?: Prisma.RadarScoreSnapshotWhereInput
+  orderBy?: Prisma.RadarScoreSnapshotOrderByWithRelationInput | Prisma.RadarScoreSnapshotOrderByWithRelationInput[]
+  cursor?: Prisma.RadarScoreSnapshotWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RadarScoreSnapshotScalarFieldEnum | Prisma.RadarScoreSnapshotScalarFieldEnum[]
+}
+
+/**
+ * User.radarAuditSubjects
+ */
+export type User$radarAuditSubjectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RadarAuditEvent
+   */
+  select?: Prisma.RadarAuditEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RadarAuditEvent
+   */
+  omit?: Prisma.RadarAuditEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RadarAuditEventInclude<ExtArgs> | null
+  where?: Prisma.RadarAuditEventWhereInput
+  orderBy?: Prisma.RadarAuditEventOrderByWithRelationInput | Prisma.RadarAuditEventOrderByWithRelationInput[]
+  cursor?: Prisma.RadarAuditEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RadarAuditEventScalarFieldEnum | Prisma.RadarAuditEventScalarFieldEnum[]
+}
+
+/**
+ * User.radarAuditActors
+ */
+export type User$radarAuditActorsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RadarAuditEvent
+   */
+  select?: Prisma.RadarAuditEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RadarAuditEvent
+   */
+  omit?: Prisma.RadarAuditEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RadarAuditEventInclude<ExtArgs> | null
+  where?: Prisma.RadarAuditEventWhereInput
+  orderBy?: Prisma.RadarAuditEventOrderByWithRelationInput | Prisma.RadarAuditEventOrderByWithRelationInput[]
+  cursor?: Prisma.RadarAuditEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RadarAuditEventScalarFieldEnum | Prisma.RadarAuditEventScalarFieldEnum[]
 }
 
 /**

@@ -46,7 +46,7 @@ describe("AffinityRadarChart", () => {
     render(<AffinityRadarChart areas={RADAR_AREA_SCORES} average={GLOBAL_AVERAGE} />);
 
     expect(screen.getByRole("heading", { name: "Desglose vectorial de afinidad" })).toBeDefined();
-    expect(screen.getByText("6 áreas · Tokenización NLP")).toBeDefined();
+    expect(screen.getByText("6 áreas de competencias verificadas")).toBeDefined();
     expect(screen.getByText("Puntaje de afinidad del perfil")).toBeDefined();
     expect(screen.getByText("6,25")).toBeDefined();
     expect(screen.getByText("Promedio")).toBeDefined();

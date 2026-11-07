@@ -1,8 +1,8 @@
 "use client";
 
-import { FeedbackMessage } from "../components/feedback-message";
-import { PersonalInfoForm } from "../components/personal-info-form";
-import { ProfilePhotoFeedback } from "../components/profile-photo-feedback";
+import { FeedbackMessage } from "./feedback-message";
+import { PersonalInfoForm } from "./personal-info-form";
+import { ProfilePhotoFeedback } from "./profile-photo-feedback";
 import { PROFILE_FEEDBACK_MESSAGES } from "../constants/profile-feedback.constants";
 import { useCities } from "../hooks/use-cities";
 import { useProfile } from "../hooks/use-profile";

@@ -8,8 +8,8 @@ import {
 } from "@/modules/profile";
 import type { DetectedSkill } from "@/modules/matching";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
-import { WorkExperienceForm } from "../components/work-experience-form";
-import { WorkExperienceListCard } from "../components/work-experience-list-card";
+import { WorkExperienceForm } from "./work-experience-form";
+import { WorkExperienceListCard } from "./work-experience-list-card";
 import { useDeleteWorkExperience } from "../hooks/use-delete-work-experience";
 import { useSaveWorkExperience } from "../hooks/use-save-work-experience";
 import { useWorkExperiences } from "../hooks/use-work-experiences";

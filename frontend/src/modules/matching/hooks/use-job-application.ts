@@ -36,7 +36,6 @@ export function useJobApplication(jobOfferId: string) {
   });
 
   const apply = () => {
-    // Bloquea clics repetidos antes del siguiente render de React.
     if (submissionPending.current || query.isPending || mutation.isPending || query.data?.hasApplied) return;
     submissionPending.current = true;
     mutation.mutate();

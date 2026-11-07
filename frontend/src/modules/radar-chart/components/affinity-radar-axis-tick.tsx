@@ -18,7 +18,9 @@ export function AffinityRadarAxisTick({
       y={y}
       textAnchor={textAnchor}
       verticalAnchor={verticalAnchor}
-      className="fill-ink-soft text-sm font-semibold"
+      width={84}
+      fontSize={11}
+      className="fill-ink-soft text-[11px] font-semibold sm:text-sm"
     >
       {area.name}
     </Text>

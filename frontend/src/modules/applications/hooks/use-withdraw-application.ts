@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { JOB_APPLICATION_QUERY_KEYS } from "@/modules/matching/constants/job-application.constants";
+import { JOB_APPLICATION_QUERY_KEYS } from "@/modules/matching";
 import { APPLICATION_QUERY_KEYS } from "../constants/application.constants";
 import { applicationService } from "../services/application.service";
 
