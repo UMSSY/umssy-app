@@ -323,6 +323,11 @@ export type JobApplicationStatus = Prisma.JobApplicationStatusModel
  */
 export type JobApplication = Prisma.JobApplicationModel
 /**
+ * Model RadarApplicationConsent
+ * 
+ */
+export type RadarApplicationConsent = Prisma.RadarApplicationConsentModel
+/**
  * Model SurveyStatus
  * 
  */

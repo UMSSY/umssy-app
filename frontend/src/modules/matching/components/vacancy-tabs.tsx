@@ -2,10 +2,9 @@
 
 import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import type { Vacancy } from "../types/matching-types";
 
 interface VacancyTabsProps {
-  vacancies: Vacancy[];
+  vacancies: { id: string; title: string }[];
   activeVacancyId: string;
   onChange: (vacancyId: string) => void;
 }
