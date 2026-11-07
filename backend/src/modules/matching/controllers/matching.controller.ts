@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiNotFoundResponse,
@@ -31,6 +39,20 @@ export class MatchingController {
     @Body() body: AnalyzeExperienceBodyDto,
   ): Promise<AnalyzeExperienceResponse> {
     return this.matchingService.analyzeExperience(userId, {
+      experienceId: params.id,
+      text: body.text,
+    });
+  }
+
+  @Post(':id/skills/preview')
+  @HttpCode(HttpStatus.OK)
+  @ApiNotFoundResponse({ description: 'Work experience not found' })
+  previewExperience(
+    @CurrentUserId() userId: string,
+    @Param() params: AnalyzeExperienceParamsDto,
+    @Body() body: AnalyzeExperienceBodyDto,
+  ): Promise<AnalyzeExperienceResponse> {
+    return this.matchingService.previewExperience(userId, {
       experienceId: params.id,
       text: body.text,
     });
