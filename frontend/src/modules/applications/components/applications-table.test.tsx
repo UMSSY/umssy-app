@@ -37,17 +37,23 @@ describe("ApplicationsTable", () => {
     expect(onWithdraw).toHaveBeenCalledWith("application-7");
   });
 
-  it("does not offer to withdraw an application that already has a decision", () => {
+  it("disables the withdraw button of an application that already has a decision", () => {
     render(
       <ApplicationsTable
-        applications={[buildApplication({ status: "Aceptada" })]}
+        applications={[
+          buildApplication({ id: "application-1", status: "Aceptada" }),
+          buildApplication({ id: "application-2", status: "No seleccionado" }),
+        ]}
         withdrawingId={null}
         onWithdraw={vi.fn()}
       />,
     );
 
-    expect(screen.queryByRole("button", { name: "Retirar" })).not.toBeInTheDocument();
-    expect(screen.getByText("No disponible")).toBeInTheDocument();
+    const buttons = screen.getAllByRole("button", { name: "Retirar" });
+
+    expect(buttons).toHaveLength(2);
+    buttons.forEach((button) => expect(button).toBeDisabled());
+    expect(screen.queryByText("No disponible")).not.toBeInTheDocument();
   });
 
   it("disables the button of the application that is being withdrawn", () => {
