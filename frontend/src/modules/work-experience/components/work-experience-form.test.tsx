@@ -42,9 +42,34 @@ describe("WorkExperienceForm", () => {
     await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(screen.getAllByText(WORK_EXPERIENCE_VALIDATION_MESSAGES.required)).toHaveLength(3);
+    expect(screen.getAllByText(WORK_EXPERIENCE_VALIDATION_MESSAGES.required)).toHaveLength(4);
     expect(screen.getByText(WORK_EXPERIENCE_VALIDATION_MESSAGES.endDateRequired)).toBeInTheDocument();
     expect(screen.getByLabelText(/Empresa/)).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("marks the description as required", () => {
+    render(<WorkExperienceForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+
+    const label = screen.getByText("Descripción de funciones");
+    expect(label).toHaveTextContent("Descripción de funciones *");
+    expect(screen.queryByText(/\(opcional\)/)).not.toBeInTheDocument();
+  });
+
+  it("does not submit without a description and shows the required message", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<WorkExperienceForm onSubmit={onSubmit} onCancel={vi.fn()} />);
+
+    await user.type(screen.getByLabelText(/Empresa/), "Synapse Labs");
+    await user.type(screen.getByLabelText(/Cargo/), "Desarrolladora web");
+    fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2024-07-01" } });
+    fireEvent.change(screen.getByLabelText("Hasta"), { target: { value: "2024-12-31" } });
+    await user.type(screen.getByLabelText(/Descripción de funciones/), "   ");
+    await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByText(WORK_EXPERIENCE_VALIDATION_MESSAGES.required)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Descripción de funciones/)).toHaveAttribute("aria-invalid", "true");
   });
 
   it("rejects an end date earlier than the start date", async () => {
@@ -56,6 +81,7 @@ describe("WorkExperienceForm", () => {
     await user.type(screen.getByLabelText(/Cargo/), "Desarrolladora web");
     fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2024-07-01" } });
     fireEvent.change(screen.getByLabelText("Hasta"), { target: { value: "2024-06-30" } });
+    await user.type(screen.getByLabelText(/Descripción de funciones/), "Interfaces con React");
     await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
     expect(onSubmit).not.toHaveBeenCalled();
@@ -158,6 +184,7 @@ describe("WorkExperienceForm", () => {
     await user.type(screen.getByLabelText(/Cargo/), "Analista de Calidad QA");
     fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "0012-02-10" } });
     fireEvent.change(screen.getByLabelText("Hasta"), { target: { value: "2010-09-10" } });
+    await user.type(screen.getByLabelText(/Descripción de funciones/), "Pruebas de software");
     await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
     expect(onSubmit).not.toHaveBeenCalled();
@@ -190,7 +217,7 @@ describe("WorkExperienceForm", () => {
           startDate: "2020-02-10",
           endDate: "2023-07-01",
           isCurrent: false,
-          description: "",
+          description: "Pruebas de software",
         }}
         onSubmit={onSubmit}
         onCancel={vi.fn()}

@@ -55,6 +55,8 @@ describe("Radar personal integrado con Épica 2", () => {
   it("muestra seis ejes en cero sin inventar datos ni mezclar perfiles", () => {
     renderWithQuery(<RadarProfileView />);
     expect(screen.getByText("Mi perfil profesional")).toBeInTheDocument();
+    expect(screen.queryByText(/Rúbrica|Versión del radar|Identificador/)).not.toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent("servidor-v1");
     expect(screen.getByText(/Todavía no tienes habilidades aprobadas/)).toBeInTheDocument();
     expect(screen.getByTestId("radar-dot-qa")).toBeInTheDocument();
     expect(screen.getByTestId("radar-dot-data-ai")).toBeInTheDocument();
