@@ -1,5 +1,6 @@
 import type { Application } from "../types/application.types";
-import type { ApplicationSort, ApplicationSortKey } from "../types/application-list.types";
+import type { ApplicationSort } from "../types/application-sort.types";
+import type { ApplicationSortKey } from "../types/application-sort-key.types";
 
 const SORT_VALUE: Record<ApplicationSortKey, (application: Application) => string | number> = {
   vacancy: (application) => application.vacancyTitle,

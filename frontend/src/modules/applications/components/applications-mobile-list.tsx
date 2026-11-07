@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { APPLICATION_MESSAGES } from "../constants/application.constants";
-import type { ApplicationsMobileListProps } from "../types/applications-table-props.types";
+import type { ApplicationsMobileListProps } from "../types/applications-mobile-list-props.types";
 import { WithdrawApplicationButton } from "./withdraw-application-button";
 
 export function ApplicationsMobileList({ applications, withdrawingId, onWithdraw }: ApplicationsMobileListProps) {

@@ -1,5 +1,5 @@
 import type { Application } from "../types/application.types";
-import type { ApplicationStatusFilter } from "../types/application-list.types";
+import type { ApplicationStatusFilter } from "../types/application-status-filter.types";
 
 export function filterApplicationsByStatus(
   applications: readonly Application[],

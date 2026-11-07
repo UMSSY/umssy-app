@@ -315,6 +315,10 @@ describe("WorkExperienceForm", () => {
       "Desarrollo de interfaces con React",
     );
 
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+
     expect(screen.getByText("React")).toBeInTheDocument();
 
     expect(
@@ -364,6 +368,10 @@ describe("WorkExperienceForm", () => {
     expect(
       skillsAnalysisService.previewExperience,
     ).toHaveBeenCalledWith("experience-123", "Desarrollo con Python y Scrum");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
 
     expect(screen.getByText("Scrum")).toBeInTheDocument();
 

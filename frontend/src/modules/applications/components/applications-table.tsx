@@ -3,7 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { APPLICATION_MESSAGES, APPLICATION_SORT_COLUMNS } from "../constants/application.constants";
-import type { ApplicationSort, ApplicationSortKey } from "../types/application-list.types";
+import type { ApplicationSort } from "../types/application-sort.types";
+import type { ApplicationSortKey } from "../types/application-sort-key.types";
 import type { ApplicationsTableProps } from "../types/applications-table-props.types";
 import { WithdrawApplicationButton } from "./withdraw-application-button";
 

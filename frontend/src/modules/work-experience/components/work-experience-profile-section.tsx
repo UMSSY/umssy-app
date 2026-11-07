@@ -51,34 +51,6 @@ export function WorkExperienceProfileSection() {
     void reload();
   });
 
-  const skillsByExperience = useMemo(() => {
-    const result: Record<string, string[]> = {};
-
-    for (const skill of radar?.skills ?? []) {
-      if (!Array.isArray(skill.evidenceRefs)) {
-        continue;
-      }
-
-      for (const ref of skill.evidenceRefs) {
-        if (ref.type !== "work-experience" || !ref.id) {
-          continue;
-        }
-
-        const current = result[ref.id] ?? [];
-
-        if (
-          !current.some(
-            (name) => name.toLowerCase() === skill.name.toLowerCase(),
-          )
-        ) {
-          result[ref.id] = [...current, skill.name];
-        }
-      }
-    }
-
-    return result;
-  }, [radar]);
-
   const detectedSkillsByExperience = useMemo(() => {
     const result: Record<string, DetectedSkill[]> = {};
 
@@ -94,7 +66,9 @@ export function WorkExperienceProfileSection() {
 
         const current = result[ref.id] ?? [];
 
-        if (!current.some((item) => item.id === skill.id)) {
+        if (!current.some((item) =>
+          item.id === skill.id || item.name.toLowerCase() === skill.name.toLowerCase(),
+        )) {
           result[ref.id] = [
             ...current,
             {
@@ -108,6 +82,15 @@ export function WorkExperienceProfileSection() {
 
     return result;
   }, [radar]);
+
+  const skillsByExperience = useMemo(() =>
+    Object.fromEntries(
+      Object.entries(detectedSkillsByExperience).map(([id, skills]) => [
+        id,
+        skills.map((skill) => skill.name),
+      ]),
+    ),
+  [detectedSkillsByExperience]);
 
   const isBusy = saveMutation.isSaving || deleteMutation.isDeleting;
 
