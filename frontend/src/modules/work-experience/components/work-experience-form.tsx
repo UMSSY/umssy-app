@@ -150,7 +150,8 @@ export function WorkExperienceForm({
         <FormField
           id="work-experience-description"
           error={errors.description}
-          label="Descripción de funciones (opcional)"
+          label="Descripción de funciones"
+          isRequired
         >
           <Textarea
             id="work-experience-description"

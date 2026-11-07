@@ -8,6 +8,7 @@ import { AffinityRadarChart } from "../components/affinity-radar-chart";
 import { AreaBreakdownPanel } from "../components/area-breakdown-panel";
 import type { AreaId } from "../types/area-detail.types";
 import { RadarEvidencePanel } from "../components/radar-evidence-panel";
+import { RadarSkillSources } from "../components/radar-skill-sources";
 import { useLiveRadar } from "../hooks/use-live-radar";
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short" };
@@ -41,10 +42,10 @@ export function RadarProfileView() {
               </div>
               <div className="text-right text-xs text-text-secondary">
                 <p role="status" className="font-semibold text-ink">{data.status === "ready" ? (data.approved.length ? "Publicado" : "Sin evidencias aprobadas") : data.status === "pending" ? (data.processingStatus === "pending" ? "Actualización en curso" : "Pendiente de revisión") : "Análisis con error"}</p>
-                <p>Versión del radar {data.version} · Rúbrica {data.rubric}</p>
                 <p>Última actualización: {data.updatedAt ? new Date(data.updatedAt).toLocaleString("es-BO", DATE_FORMAT) : "Sin actualización"}</p>
               </div>
             </div>
+            <RadarSkillSources userId={data.userId} skills={data.approved} />
           </div>
           <div aria-label="Resumen del perfil" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-lg border border-border bg-surface p-5"><b className="text-2xl">{data.average.toLocaleString("es-BO", { maximumFractionDigits: 2 })} / 10</b><p className="text-xs">Afinidad global</p><p className="text-xs text-text-secondary">{variation === null ? "Variación anterior no disponible" : `${variation >= 0 ? "+" : ""}${variation.toFixed(2)} vs. anterior`}</p></div>
@@ -62,7 +63,7 @@ export function RadarProfileView() {
           {selectedArea ? (
             <RadarEvidencePanel key={`${data.userId}:${selectedArea}`} selected={selectedArea} radar={data} onClose={() => setSelectedArea(null)} />
           ) : null}
-          <p className="text-xs text-text-secondary">Las puntuaciones y comparaciones del radar se calculan y publican en el servidor conforme a la rúbrica vigente.</p>
+          <p className="text-xs text-text-secondary">Las puntuaciones reflejan las habilidades aprobadas y sus evidencias.</p>
         </>
       ) : (!loading && !error ? <p className="text-text-secondary">Sin respuesta del servicio de afinidad.</p> : null)}
     </main>
