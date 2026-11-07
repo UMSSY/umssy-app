@@ -15,6 +15,8 @@ export const VACANCIES_ROUTE = "/vacancies";
 
 export const WITHDRAWABLE_STATUSES: readonly ApplicationStatus[] = ["En revisión", "Entrevista"];
 
+export const WITHDRAWN_STATUS: ApplicationStatus = "Retirada";
+
 export const APPLICATION_MESSAGES = {
   pageTitle: "Mis postulaciones",
   emptyTitle: "Todavía no te postulaste a ninguna vacante",
@@ -24,7 +26,6 @@ export const APPLICATION_MESSAGES = {
   withdraw: "Retirar",
   withdrawing: "Retirando…",
   withdrawError: "No pudimos retirar la postulación. Intenta nuevamente.",
-  notAvailable: "No disponible",
   vacancy: "Vacante",
   company: "Empresa",
   affinity: "Afinidad",
@@ -33,6 +34,8 @@ export const APPLICATION_MESSAGES = {
   statusTabsLabel: "Filtrar postulaciones por estado",
   allStatuses: "Todas",
   noApplicationsInStatus: "No tienes postulaciones en este estado.",
+  noActiveApplications: "No tienes postulaciones activas.",
+  showWithdrawn: "Mostrar postulaciones retiradas",
   confirmWithdrawTitle: "¿Retirar tu postulación?",
   confirmWithdrawDescription:
     "Dejarás de participar en el proceso de esta vacante. Esta acción no se puede deshacer desde Mis postulaciones.",
