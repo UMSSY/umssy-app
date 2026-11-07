@@ -49,6 +49,26 @@ export class MatchingService {
     return { experienceId: input.experienceId, skills, processingTimeMs };
   }
 
+  async previewExperience(
+    userId: string,
+    input: AnalyzeExperienceInput,
+  ): Promise<AnalyzeExperienceResponse> {
+    if (
+      !(await this.experienceSkillsRepository.belongsToUser(
+        input.experienceId,
+        userId,
+      ))
+    ) {
+      throw new WorkExperienceNotFoundException();
+    }
+
+    const startedAt = performance.now();
+    const skills = await this.detectSkills(input.text ?? '');
+    const processingTimeMs = Math.round(performance.now() - startedAt);
+
+    return { experienceId: input.experienceId, skills, processingTimeMs };
+  }
+
   private async detectSkills(text: string): Promise<DetectedSkillResponse[]> {
     if (text.trim().length === 0) return [];
 
@@ -56,6 +76,7 @@ export class MatchingService {
       ...this.skillDictionaryService.extract(text).skills,
       ...this.nlpService.extractRequirementTerms(text),
     ];
+
     return candidates.length > 0 ? this.detectCatalogSkills(candidates) : [];
   }
 
@@ -65,6 +86,7 @@ export class MatchingService {
     const catalog = (await this.skillCatalogService.listCatalog({})).map(
       ({ id, name }) => ({ id, name }),
     );
+
     return this.skillsClassifierService.classify(candidates, catalog);
   }
 

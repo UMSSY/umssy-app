@@ -19,6 +19,7 @@ vi.mock("../services/work-experience.service", () => ({
 vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
   skillsAnalysisService: {
     analyzeExperience: vi.fn().mockResolvedValue({ experienceId: "experience-1", skills: [], processingTimeMs: 0 }),
+    previewExperience: vi.fn().mockResolvedValue({ experienceId: "experience-1", skills: [], processingTimeMs: 0 }),
   },
 }));
 

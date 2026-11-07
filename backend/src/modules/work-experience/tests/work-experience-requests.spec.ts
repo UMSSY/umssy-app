@@ -76,7 +76,7 @@ describe('createWorkExperienceSchema', () => {
     { ...validBody, startDate: '1949-12-31' },
     { ...validBody, endDate: '2999-01-01' },
     { ...validBody, position: 'a'.repeat(151) },
-    { ...validBody, description: 'b'.repeat(2001) },
+    { ...validBody, description: 'b'.repeat(5001) },
   ])('rejects invalid data', (body) => {
     expect(createWorkExperienceSchema.safeParse(body).success).toBe(false);
   });
@@ -87,7 +87,7 @@ describe('createWorkExperienceSchema', () => {
         ...validBody,
         startDate: '1950-01-01',
         position: 'a'.repeat(150),
-        description: 'b'.repeat(2000),
+        description: 'b'.repeat(5000),
       }).success,
     ).toBe(true);
   });
