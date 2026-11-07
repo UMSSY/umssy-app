@@ -61,9 +61,9 @@ export function VacanciesView({ initialVacancyId, onInitialClose }: VacanciesVie
       ) : isLoading ? null : filteredVacancies.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-surface px-6 py-14 text-center">
           <SearchX aria-hidden="true" className="size-8 text-ink-soft" strokeWidth={1.5} />
-          <h2 className="text-lg font-semibold text-ink">No se encontraron vacantes</h2>
+          <h2 className="text-lg font-semibold text-ink">{search ? "No se encontraron vacantes" : "Todavía no hay vacantes publicadas"}</h2>
           <p className="max-w-md text-sm text-text-secondary">
-            {search ? "Prueba con otro cargo, empresa o requisito para ampliar tu búsqueda." : "Todavía no hay vacantes publicadas. Vuelve pronto."}
+            {search ? "Prueba con otro cargo, empresa o requisito para ampliar tu búsqueda." : "Vuelve pronto para ver nuevas oportunidades."}
           </p>
           {search ? (
             <Button variant="outline" onClick={() => setSearch("")} className="mt-2">
