@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
 import { isApiError } from "@/shared/services/api-client";
 import { JOB_APPLICATION_QUERY_KEYS } from "../constants/job-application.constants";
 import { jobApplicationService } from "../services/job-application.service";
@@ -10,6 +11,7 @@ const CONFLICT_STATUS = 409;
 
 export function useJobApplication(jobOfferId: string) {
   const queryClient = useQueryClient();
+  const submissionPending = useRef(false);
   const queryKey = JOB_APPLICATION_QUERY_KEYS.mine(jobOfferId);
 
   const query = useQuery({
@@ -28,12 +30,21 @@ export function useJobApplication(jobOfferId: string) {
         return queryClient.invalidateQueries({ queryKey });
       }
     },
+    onSettled: () => {
+      submissionPending.current = false;
+    },
   });
+
+  const apply = () => {
+    if (submissionPending.current || query.isPending || mutation.isPending || query.data?.hasApplied) return;
+    submissionPending.current = true;
+    mutation.mutate();
+  };
 
   return {
     myApplication: query.data,
     isLoading: query.isPending,
-    apply: mutation.mutate,
+    apply,
     isApplying: mutation.isPending,
     applyError: mutation.isError && !(isApiError(mutation.error) && mutation.error.response?.status === CONFLICT_STATUS),
     submittedApplication: mutation.data ?? null,

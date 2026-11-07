@@ -70,7 +70,10 @@ export class ProfileSkillsAnalysisService {
         this.sources.findCatalog(),
       ]);
       const sources = this.validation.validateSources(textSources);
-      const candidates = await this.detection.detect({ userId, sources: sources.accepted });
+      const candidates = this.detection.detect(
+        { userId, sources: sources.accepted },
+        catalog,
+      );
       const detection = this.validation.validateDetected(candidates, catalog);
       outcome.rejectedSources = sources.rejected;
       outcome.discarded = detection.discarded;

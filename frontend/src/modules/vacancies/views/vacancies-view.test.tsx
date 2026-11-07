@@ -80,7 +80,9 @@ describe("VacanciesView", () => {
     listPublished.mockResolvedValue([]);
     renderWithQuery(<VacanciesView />);
 
-    expect(await screen.findByText("Todavía no hay vacantes publicadas. Vuelve pronto.")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Todavía no hay vacantes publicadas" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "No se encontraron vacantes" })).toBeNull();
+    expect(screen.getByText("Vuelve pronto para ver nuevas oportunidades.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Limpiar búsqueda" })).toBeNull();
   });
 
