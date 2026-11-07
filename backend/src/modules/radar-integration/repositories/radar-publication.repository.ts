@@ -74,7 +74,7 @@ function querySnapshots(
     FROM radar_score_snapshots s
     LEFT JOIN LATERAL (SELECT details FROM radar_audit_events WHERE user_id=s.user_id
       AND event_type IN ('radar.published','radar.synchronized') AND details->>'version'=s.version::text
-      AND details ? 'skills' ORDER BY occurred_at DESC,id DESC LIMIT 1) a ON TRUE
+      ORDER BY occurred_at DESC,id DESC LIMIT 1) a ON TRUE
     WHERE s.user_id=${userId}::uuid ORDER BY s.version DESC LIMIT ${limit}`;
 }
 
