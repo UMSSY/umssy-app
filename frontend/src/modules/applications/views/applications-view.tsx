@@ -1,17 +1,53 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ApplicationsMobileList } from "../components/applications-mobile-list";
+import { ApplicationsStatusTabs } from "../components/applications-status-tabs";
 import { ApplicationsTable } from "../components/applications-table";
-import { APPLICATION_MESSAGES, VACANCIES_ROUTE } from "../constants/application.constants";
+import { ShowWithdrawnSwitch } from "../components/show-withdrawn-switch";
+import { WithdrawApplicationDialog } from "../components/withdraw-application-dialog";
+import { APPLICATION_MESSAGES, VACANCIES_ROUTE, WITHDRAWN_STATUS } from "../constants/application.constants";
 import { useMyApplications } from "../hooks/use-my-applications";
 import { useWithdrawApplication } from "../hooks/use-withdraw-application";
+import type { Application } from "../types/application.types";
+import type { ApplicationSort } from "../types/application-sort.types";
+import type { ApplicationStatusFilter } from "../types/application-status-filter.types";
+import { excludeWithdrawnApplications } from "../utils/exclude-withdrawn-applications";
+import { filterApplicationsByStatus } from "../utils/filter-applications-by-status";
+import { nextApplicationSort, sortApplications } from "../utils/sort-applications";
 
 export function ApplicationsView() {
   const { data, isPending, isError, refetch } = useMyApplications();
   const { withdraw, withdrawingId, hasWithdrawError } = useWithdrawApplication();
+  const isMobile = useIsMobile();
+  const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>("all");
+  const [sort, setSort] = useState<ApplicationSort | null>(null);
+  const [pendingWithdrawal, setPendingWithdrawal] = useState<Application | null>(null);
+  const [showWithdrawn, setShowWithdrawn] = useState(false);
+
+  const withdrawnCount = useMemo(
+    () => (data ?? []).filter((application) => application.status === WITHDRAWN_STATUS).length,
+    [data],
+  );
+
+  const visibleApplications = useMemo(() => {
+    const listed = showWithdrawn ? (data ?? []) : excludeWithdrawnApplications(data ?? []);
+    return sortApplications(filterApplicationsByStatus(listed, statusFilter), sort);
+  }, [data, showWithdrawn, statusFilter, sort]);
+
+  const handleShowWithdrawnChange = (checked: boolean) => {
+    setShowWithdrawn(checked);
+    if (!checked && statusFilter === WITHDRAWN_STATUS) setStatusFilter("all");
+  };
+
+  const requestWithdraw = (applicationId: string) => {
+    setPendingWithdrawal(data?.find((application) => application.id === applicationId) ?? null);
+  };
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -49,8 +85,53 @@ export function ApplicationsView() {
       )}
 
       {data && data.length > 0 && (
-        <ApplicationsTable applications={data} withdrawingId={withdrawingId} onWithdraw={withdraw} />
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <ApplicationsStatusTabs value={statusFilter} onValueChange={setStatusFilter} showWithdrawn={showWithdrawn} />
+            {withdrawnCount > 0 && (
+              <ShowWithdrawnSwitch
+                checked={showWithdrawn}
+                onCheckedChange={handleShowWithdrawnChange}
+                count={withdrawnCount}
+              />
+            )}
+          </div>
+
+          {visibleApplications.length === 0 && (
+            <p className="text-sm text-text-secondary">
+              {statusFilter === "all"
+                ? APPLICATION_MESSAGES.noActiveApplications
+                : APPLICATION_MESSAGES.noApplicationsInStatus}
+            </p>
+          )}
+
+          {visibleApplications.length > 0 &&
+            (isMobile ? (
+              <ApplicationsMobileList
+                applications={visibleApplications}
+                withdrawingId={withdrawingId}
+                onWithdraw={requestWithdraw}
+              />
+            ) : (
+              <ApplicationsTable
+                applications={visibleApplications}
+                withdrawingId={withdrawingId}
+                onWithdraw={requestWithdraw}
+                sort={sort}
+                onSortChange={(key) => setSort((current) => nextApplicationSort(current, key))}
+              />
+            ))}
+        </>
       )}
+
+      <WithdrawApplicationDialog
+        application={pendingWithdrawal}
+        onCancel={() => setPendingWithdrawal(null)}
+        onConfirm={(applicationId) => {
+          setPendingWithdrawal(null);
+          withdraw(applicationId);
+        }}
+      />
     </section>
   );
 }

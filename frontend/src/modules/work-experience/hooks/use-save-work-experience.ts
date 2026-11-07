@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -95,7 +94,6 @@ export function useSaveWorkExperience(onSaved: () => void) {
 
       onSaved();
 
-      // El análisis se ejecuta en segundo plano sin invalidar el guardado.
       void analyze(saved, payload);
     } catch {
       setFeedback({

@@ -36,7 +36,8 @@ export class JobApplicationsService {
       throw new JobOfferUnavailableException();
     }
 
-    if (await this.repository.findByUserAndOffer(userId, jobOfferId)) {
+    const existing = await this.repository.findByUserAndOffer(userId, jobOfferId);
+    if (existing && existing.status.title !== JOB_APPLICATION_STATUS.WITHDRAWN) {
       throw new DuplicateJobApplicationException();
     }
 
@@ -48,6 +49,11 @@ export class JobApplicationsService {
     }
 
     try {
+      if (existing) {
+        const reactivated = await this.repository.reactivate(userId, jobOfferId, status.id);
+        if (!reactivated) throw new DuplicateJobApplicationException();
+        return this.mapper.toResponse(reactivated);
+      }
       return this.mapper.toResponse(
         await this.repository.create(userId, jobOfferId, status.id),
       );
