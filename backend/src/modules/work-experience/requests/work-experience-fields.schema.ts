@@ -44,11 +44,10 @@ export const workExperienceDateSchema = z.iso
   .transform((value) => new Date(value));
 export const isCurrentSchema = z.boolean();
 export const workExperienceDescriptionSchema = z
-  .string()
+  .string(WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionRequired)
   .trim()
+  .min(1, WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionRequired)
   .max(
     WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH,
     WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong,
-  )
-  .nullable()
-  .optional();
+  );
