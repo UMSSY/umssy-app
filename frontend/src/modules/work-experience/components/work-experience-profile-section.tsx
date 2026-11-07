@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import {
   ConfirmDeleteDialog,
   FeedbackMessage,
+  useProfileSkillsRadar,
 } from "@/modules/profile";
-import { useProfileSkillsRadar } from "@/modules/profile";
+import type { DetectedSkill } from "@/modules/matching";
 import { RecordEditorDialog } from "@/shared/components/layout/record-editor-dialog";
 import { WorkExperienceForm } from "./work-experience-form";
 import { WorkExperienceListCard } from "./work-experience-list-card";
@@ -46,6 +47,7 @@ export function WorkExperienceProfileSection() {
     if (editingExperience?.id === deleted.id) {
       resetForm();
     }
+
     void reload();
   });
 
@@ -70,6 +72,36 @@ export function WorkExperienceProfileSection() {
           )
         ) {
           result[ref.id] = [...current, skill.name];
+        }
+      }
+    }
+
+    return result;
+  }, [radar]);
+
+  const detectedSkillsByExperience = useMemo(() => {
+    const result: Record<string, DetectedSkill[]> = {};
+
+    for (const skill of radar?.skills ?? []) {
+      if (!Array.isArray(skill.evidenceRefs)) {
+        continue;
+      }
+
+      for (const ref of skill.evidenceRefs) {
+        if (ref.type !== "work-experience" || !ref.id) {
+          continue;
+        }
+
+        const current = result[ref.id] ?? [];
+
+        if (!current.some((item) => item.id === skill.id)) {
+          result[ref.id] = [
+            ...current,
+            {
+              id: skill.id,
+              name: skill.name,
+            },
+          ];
         }
       }
     }
@@ -180,6 +212,12 @@ export function WorkExperienceProfileSection() {
                 editingExperience
                   ? toWorkExperienceFormValues(editingExperience)
                   : undefined
+              }
+              experienceId={editingExperience?.id}
+              initialDetectedSkills={
+                editingExperience
+                  ? detectedSkillsByExperience[editingExperience.id] ?? []
+                  : []
               }
               isPending={saveMutation.isSaving}
               feedback={saveMutation.feedback}

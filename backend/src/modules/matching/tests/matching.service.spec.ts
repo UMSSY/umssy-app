@@ -106,6 +106,50 @@ describe('MatchingService', () => {
     ]);
   });
 
+    it('genera una vista previa de habilidades sin persistir asociaciones', async () => {
+    const result = await service.previewExperience(USER_ID, {
+      experienceId: EXPERIENCE_ID,
+      text: 'Desarrolle aplicaciones con Python y Docker',
+    });
+
+    expect(result.experienceId).toBe(EXPERIENCE_ID);
+    expect(result.skills.map((skill) => skill.name)).toEqual([
+      'Python',
+      'Docker',
+    ]);
+    expect(Number.isInteger(result.processingTimeMs)).toBe(true);
+
+    expect(repository.belongsToUser).toHaveBeenCalledWith(
+      EXPERIENCE_ID,
+      USER_ID,
+    );
+    expect(repository.replaceDetected).not.toHaveBeenCalled();
+  });
+
+  it('rechaza la vista previa cuando la experiencia no pertenece al usuario', async () => {
+    repository.belongsToUser.mockResolvedValue(false);
+
+    await expect(
+      service.previewExperience(USER_ID, {
+        experienceId: EXPERIENCE_ID,
+        text: 'Python',
+      }),
+    ).rejects.toBeInstanceOf(WorkExperienceNotFoundException);
+
+    expect(skillCatalog.listCatalog).not.toHaveBeenCalled();
+    expect(repository.replaceDetected).not.toHaveBeenCalled();
+  });
+
+  it('devuelve una vista previa vacía para una descripción sin texto', async () => {
+    const result = await service.previewExperience(USER_ID, {
+      experienceId: EXPERIENCE_ID,
+      text: '   ',
+    });
+
+    expect(result.skills).toEqual([]);
+    expect(repository.replaceDetected).not.toHaveBeenCalled();
+    expect(skillCatalog.listCatalog).not.toHaveBeenCalled();
+  });
   it('detecta habilidades del catalogo que no estan en el diccionario (AC-01.2)', async () => {
     const result = await analyze('Desplegue contenedores con Docker y Python');
 

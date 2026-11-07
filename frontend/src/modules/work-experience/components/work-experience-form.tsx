@@ -1,7 +1,7 @@
 "use client";
 
 import { Label } from "@/components/ui/label";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,11 +23,16 @@ import { getFieldErrorProps } from "@/modules/profile";
 import { getTodayIsoDate } from "../utils/get-today-iso-date";
 import { validateWorkExperience } from "../utils/validate-work-experience";
 import { FeedbackMessage } from "@/modules/profile";
-import { FormField } from "@/modules/profile";
+import { DetectedSkillsChips, FormField } from "@/modules/profile";
 import { FormFieldset } from "@/shared/components/layout/form-fieldset";
+import { skillsAnalysisService, type DetectedSkill } from "@/modules/matching";
+
+const ANALYSIS_DEBOUNCE_MS = 500;
 
 export function WorkExperienceForm({
   initialValues,
+  experienceId,
+  initialDetectedSkills = [],
   isPending = false,
   feedback = null,
   onSubmit,
@@ -38,12 +43,72 @@ export function WorkExperienceForm({
     initialValues ?? EMPTY_WORK_EXPERIENCE_FORM_VALUES,
   );
   const [errors, setErrors] = useState<WorkExperienceErrors>({});
+  const [detectedSkills, setDetectedSkills] = useState<DetectedSkill[]>(
+    (initialValues?.description ?? EMPTY_WORK_EXPERIENCE_FORM_VALUES.description).trim()
+      ? initialDetectedSkills
+      : [],
+  );
+  const [processingTimeMs, setProcessingTimeMs] = useState<number | undefined>();
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const analysisRequestId = useRef(0);
   const isEditing = Boolean(initialValues);
   const title = isEditing ? "Editar experiencia" : "Agregar experiencia";
   const today = getTodayIsoDate();
 
+  useEffect(() => {
+    if (!experienceId) {
+      return;
+    }
+
+    const description = values.description.trim();
+
+    if (!description) {
+      return;
+    }
+
+    const requestId = ++analysisRequestId.current;
+    let cancelled = false;
+
+    const timeoutId = window.setTimeout(() => {
+      setIsAnalyzing(true);
+
+      void skillsAnalysisService
+        .previewExperience(experienceId, description)
+        .then((result) => {
+          if (cancelled || requestId !== analysisRequestId.current) {
+            return;
+          }
+
+          setDetectedSkills(result.skills);
+          setProcessingTimeMs(result.processingTimeMs);
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          if (!cancelled && requestId === analysisRequestId.current) {
+            setIsAnalyzing(false);
+          }
+        });
+    }, ANALYSIS_DEBOUNCE_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [experienceId, values.description]);
+
   const handleValueChange = (name: keyof WorkExperienceFormValues, value: string) => {
     onValuesChange?.();
+
+    if (name === "description") {
+      setIsAnalyzing(false);
+
+      if (!value.trim()) {
+        analysisRequestId.current += 1;
+        setDetectedSkills([]);
+        setProcessingTimeMs(undefined);
+      }
+    }
+
     setValues((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({ ...current, [name]: undefined }));
   };
@@ -150,7 +215,8 @@ export function WorkExperienceForm({
         <FormField
           id="work-experience-description"
           error={errors.description}
-          label="Descripción de funciones (opcional)"
+          label="Descripción de funciones"
+          isRequired
         >
           <Textarea
             id="work-experience-description"
@@ -167,6 +233,13 @@ export function WorkExperienceForm({
           <p className="mt-1 text-right text-xs text-text-secondary">
             {values.description.length}/{WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH}
           </p>
+          {experienceId ? (
+            <DetectedSkillsChips
+              skills={detectedSkills}
+              processingTimeMs={processingTimeMs}
+              isLoading={isAnalyzing}
+            />
+          ) : null}
         </FormField>
 
         </FormFieldset>
