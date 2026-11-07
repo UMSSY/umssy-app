@@ -60,7 +60,7 @@ export class ProfileSkillsRadarMapper {
     const isNlp = row.source === USER_SKILL_SOURCES.nlp;
     const nameCheck = validateSkillName(row.skill.name);
 
-        if (!nameCheck.isValid) return [];
+    if (!nameCheck.isValid) return [];
     const evidenceRefs = parseEvidenceRefs(row.evidenceRefs);
     if (isNlp && evidenceRefs.length === 0) return [];
 

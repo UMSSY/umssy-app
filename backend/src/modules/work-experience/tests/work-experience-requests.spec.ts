@@ -26,9 +26,8 @@ describe('createWorkExperienceSchema', () => {
     });
   });
 
-  it('accepts a current job without end date or description', () => {
-    const { endDate: _endDate, description: _description, ...body } =
-      validBody;
+  it('accepts a current job without end date', () => {
+    const { endDate: _endDate, ...body } = validBody;
 
     expect(
       createWorkExperienceSchema.safeParse({ ...body, isCurrent: true })
@@ -39,6 +38,31 @@ describe('createWorkExperienceSchema', () => {
         .success,
     ).toBe(true);
   });
+
+  it('rejects a missing description', () => {
+    const { description: _description, ...body } = validBody;
+    const result = createWorkExperienceSchema.safeParse(body);
+
+    expect(result.error?.issues[0]).toMatchObject({
+      path: ['description'],
+      message: 'Este campo es obligatorio.',
+    });
+  });
+
+  it.each([null, '', '   '])(
+    'rejects the description %j as required',
+    (description) => {
+      const result = createWorkExperienceSchema.safeParse({
+        ...validBody,
+        description,
+      });
+
+      expect(result.error?.issues[0]).toMatchObject({
+        path: ['description'],
+        message: 'Este campo es obligatorio.',
+      });
+    },
+  );
 
   it.each([
     { ...validBody, companyName: ' ' },
@@ -95,6 +119,27 @@ describe('updateWorkExperienceSchema', () => {
   it('rejects an empty update', () => {
     expect(updateWorkExperienceSchema.safeParse({}).success).toBe(false);
   });
+
+  it('accepts an update without description', () => {
+    expect(
+      updateWorkExperienceSchema.safeParse({ position: 'Lead' }).success,
+    ).toBe(true);
+  });
+
+  it('trims a sent description', () => {
+    expect(
+      updateWorkExperienceSchema.parse({ description: ' APIs con Node.js ' }),
+    ).toEqual({ description: 'APIs con Node.js' });
+  });
+
+  it.each([null, '', '   '])(
+    'rejects the description %j when it is sent',
+    (description) => {
+      expect(
+        updateWorkExperienceSchema.safeParse({ description }).success,
+      ).toBe(false);
+    },
+  );
 });
 
 describe('workExperienceIdSchema', () => {

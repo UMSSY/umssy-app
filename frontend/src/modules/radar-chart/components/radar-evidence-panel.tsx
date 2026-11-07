@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useWorkExperiences } from "@/modules/work-experience";
 import { useEducations } from "@/modules/education";
 import { useCertifications } from "@/modules/certifications";
+import { useRadarSourceNames } from "../hooks/use-radar-source-names";
 import { useRadarEvidenceFiles } from "../hooks/use-radar-evidence-files";
 import { RADAR_AXIS_NAMES } from "../constants/radar-axis-names.constants";
 import { RadarAreaDetailsDialog } from "./radar-area-details-dialog";
@@ -54,6 +55,7 @@ export function RadarEvidencePanel({
     () => radar.approved.filter((skill) => skill.areaId === selected),
     [radar.approved, selected],
   );
+  const sources = useRadarSourceNames(radar.userId, relevant);
   const refs = useMemo(
     () =>
       new Set(
@@ -161,7 +163,7 @@ export function RadarEvidencePanel({
               size="sm"
               onClick={() => void openDocument(id, "cv")}
             >
-              Abrir CV relacionado
+              Abrir {sources.getName({ type: "cv", id })}
             </Button>
           ))}
           {attachments.map((cert) => (
@@ -171,7 +173,7 @@ export function RadarEvidencePanel({
               size="sm"
               onClick={() => void openDocument(cert.id, "certification")}
             >
-              Abrir respaldo de {cert.name}
+              Abrir {cert.document?.fileName || cert.name}
             </Button>
           ))}
         </div>
