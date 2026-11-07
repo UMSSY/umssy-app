@@ -99,6 +99,42 @@ describe("HU-02B T2.10 - JobApplicationAction", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
+  it("allows applying when the backend reports no active application", async () => {
+    mockedService.getMine.mockResolvedValue({ hasApplied: false, application: null });
+    renderWithQuery(<JobApplicationAction jobOfferId="offer-1" />);
+
+    expect(await findEnabledApplyButton()).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "Ya te postulaste" })).not.toBeInTheDocument();
+  });
+
+  it("AC-02.13: sends only one request when the apply button is clicked twice quickly", async () => {
+    let finishRequest!: (application: JobApplication) => void;
+    mockedService.apply.mockImplementation(
+      () => new Promise<JobApplication>((resolve) => { finishRequest = resolve; }),
+    );
+    renderWithQuery(<JobApplicationAction jobOfferId="offer-1" />);
+
+    const button = await findEnabledApplyButton();
+    fireEvent.click(button);
+    fireEvent.click(button);
+
+    await waitFor(() => {
+  expect(mockedService.apply).toHaveBeenCalledTimes(1);
+});
+    finishRequest(APPLICATION);
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+  });
+
+  it("AC-02.14: shows the apply button again when the prior application was withdrawn", async () => {
+    mockedService.getMine.mockResolvedValue({ hasApplied: false, application: null });
+    mockedService.apply.mockResolvedValue(APPLICATION);
+    renderWithQuery(<JobApplicationAction jobOfferId="offer-1" />);
+
+    fireEvent.click(await findEnabledApplyButton());
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(mockedService.apply).toHaveBeenCalledTimes(1);
+  });
+
   it("shows an error message when the application fails", async () => {
     mockedService.apply.mockRejectedValue(new Error("network"));
     renderWithQuery(<JobApplicationAction jobOfferId="offer-1" />);

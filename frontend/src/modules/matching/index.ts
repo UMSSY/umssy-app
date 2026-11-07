@@ -14,6 +14,7 @@ export * from "./types/match-score.types";
 export { RecommendedJobsView } from "./views/recommended-jobs-view";
 export { JobMatchDetailView } from "./views/job-match-detail-view";
 export { JobApplicationAction } from "./components/job-application-action";
+export { JOB_APPLICATION_QUERY_KEYS } from "./constants/job-application.constants";
 export type {
   JobMatch,
   JobRequirement,
