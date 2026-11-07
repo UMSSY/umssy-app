@@ -1,17 +1,39 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button-variants";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ApplicationsMobileList } from "../components/applications-mobile-list";
+import { ApplicationsStatusTabs } from "../components/applications-status-tabs";
 import { ApplicationsTable } from "../components/applications-table";
+import { WithdrawApplicationDialog } from "../components/withdraw-application-dialog";
 import { APPLICATION_MESSAGES, VACANCIES_ROUTE } from "../constants/application.constants";
 import { useMyApplications } from "../hooks/use-my-applications";
 import { useWithdrawApplication } from "../hooks/use-withdraw-application";
+import type { Application } from "../types/application.types";
+import type { ApplicationSort, ApplicationStatusFilter } from "../types/application-list.types";
+import { filterApplicationsByStatus } from "../utils/filter-applications-by-status";
+import { nextApplicationSort, sortApplications } from "../utils/sort-applications";
 
 export function ApplicationsView() {
   const { data, isPending, isError, refetch } = useMyApplications();
   const { withdraw, withdrawingId, hasWithdrawError } = useWithdrawApplication();
+  const isMobile = useIsMobile();
+  const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>("all");
+  const [sort, setSort] = useState<ApplicationSort | null>(null);
+  const [pendingWithdrawal, setPendingWithdrawal] = useState<Application | null>(null);
+
+  const visibleApplications = useMemo(
+    () => sortApplications(filterApplicationsByStatus(data ?? [], statusFilter), sort),
+    [data, statusFilter, sort],
+  );
+
+  const requestWithdraw = (applicationId: string) => {
+    setPendingWithdrawal(data?.find((application) => application.id === applicationId) ?? null);
+  };
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -49,8 +71,40 @@ export function ApplicationsView() {
       )}
 
       {data && data.length > 0 && (
-        <ApplicationsTable applications={data} withdrawingId={withdrawingId} onWithdraw={withdraw} />
+        <>
+          <ApplicationsStatusTabs value={statusFilter} onValueChange={setStatusFilter} />
+
+          {visibleApplications.length === 0 && (
+            <p className="text-sm text-text-secondary">{APPLICATION_MESSAGES.noApplicationsInStatus}</p>
+          )}
+
+          {visibleApplications.length > 0 &&
+            (isMobile ? (
+              <ApplicationsMobileList
+                applications={visibleApplications}
+                withdrawingId={withdrawingId}
+                onWithdraw={requestWithdraw}
+              />
+            ) : (
+              <ApplicationsTable
+                applications={visibleApplications}
+                withdrawingId={withdrawingId}
+                onWithdraw={requestWithdraw}
+                sort={sort}
+                onSortChange={(key) => setSort((current) => nextApplicationSort(current, key))}
+              />
+            ))}
+        </>
       )}
+
+      <WithdrawApplicationDialog
+        application={pendingWithdrawal}
+        onCancel={() => setPendingWithdrawal(null)}
+        onConfirm={(applicationId) => {
+          setPendingWithdrawal(null);
+          withdraw(applicationId);
+        }}
+      />
     </section>
   );
 }
