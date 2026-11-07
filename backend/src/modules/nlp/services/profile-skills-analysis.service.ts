@@ -60,9 +60,9 @@ export class ProfileSkillsAnalysisService {
       ]);
       const sources = this.validation.validateSources(textSources);
       const candidates = this.detection.detect(
-  { userId, sources: sources.accepted },
-  catalog,
-);
+        { userId, sources: sources.accepted },
+        catalog,
+      );
       const detection = this.validation.validateDetected(candidates, catalog);
       outcome.rejectedSources = sources.rejected;
       outcome.discarded = detection.discarded;

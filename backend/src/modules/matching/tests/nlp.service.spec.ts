@@ -94,6 +94,44 @@ describe('NlpService', () => {
     it('conserva tildes y la ñ', () => {
       expect(nlpService.tokenizeAndFilter('Gestión de diseño')).toEqual(['gestión', 'diseño']);
     });
+
+    it('no descarta palabras de contenido como proyectos o desarrollo', () => {
+      expect(
+        nlpService.tokenizeAndFilter('Gestión de proyectos y desarrollo web'),
+      ).toEqual(['gestión', 'proyectos', 'desarrollo', 'web']);
+    });
+
+    it('unifica los nombres institucionales en un solo token aunque contengan stopwords (AC-01.4)', () => {
+      expect(
+        nlpService.tokenizeAndFilter(
+          'Estudié en la Universidad Mayor de San Simón, Cochabamba',
+        ),
+      ).toEqual(['estudié', 'universidad_mayor_de_san_simón', 'cochabamba']);
+
+      expect(
+        nlpService.tokenizeAndFilter('Facultad de Ciencias y Tecnología (FCyT) UMSS'),
+      ).toEqual(['facultad_de_ciencias_y_tecnología', 'fcyt', 'umss']);
+    });
+
+    it('reconoce los nombres institucionales sin tildes y con espacios repetidos (AC-01.4)', () => {
+      expect(nlpService.tokenizeAndFilter('SAN   SIMON')).toEqual(['san_simon']);
+    });
+
+    it('unifica "San Simón" como un solo token clave (AC-01.5)', () => {
+      expect(nlpService.tokenizeAndFilter('San Simón')).toEqual(['san_simón']);
+    });
+
+    it('unifica las variantes de escritura de tecnologías (AC-01.4)', () => {
+      expect(
+        nlpService.tokenizeAndFilter(
+          'Java Script, Next JS, ReactJS, nodejs, dotnet, C #, Vue js',
+        ),
+      ).toEqual(['javascript', 'next.js', 'react', 'node.js', '.net', 'c#', 'vue.js']);
+    });
+
+    it('no confunde un sufijo js con la tecnología JavaScript', () => {
+      expect(nlpService.tokenizeAndFilter('React.js')).toEqual(['react.js']);
+    });
   });
 
   describe('generateNGrams', () => {
@@ -118,6 +156,16 @@ describe('NlpService', () => {
     it('devuelve vacío con texto vacío', () => {
       expect(nlpService.extractRequirementTerms('')).toEqual([]);
     });
+
+    it('agrupa los términos compuestos como un solo token clave (AC-01.5)', () => {
+      const terms = nlpService.extractRequirementTerms(
+        'Desarrollador Web con Machine Learning y gestión de proyectos',
+      );
+
+      expect(terms).toContain('desarrollador_web');
+      expect(terms).toContain('machine_learning');
+      expect(terms).toContain('gestión_proyectos');
+    });
   });
 
   describe('rendimiento', () => {
@@ -135,6 +183,17 @@ describe('NlpService', () => {
       expect(result).toBe(result.toLowerCase());
       expect(result).not.toMatch(/[^\p{L}\p{N}\s]/u);
       expect(result).not.toMatch(/\s{2,}/);
+    });
+
+    it('extrae los términos de 5000 caracteres en menos de 2 segundos (AC-01.1, AC-01.6)', () => {
+      const text = longText.slice(0, 5000);
+
+      const start = performance.now();
+      const terms = nlpService.extractRequirementTerms(text);
+      const duration = performance.now() - start;
+
+      expect(duration).toBeLessThan(MAX_PROCESSING_MS);
+      expect(terms).toContain('nestjs');
     });
 
     it('mantiene el tiempo estable con 100 ejecuciones consecutivas', () => {

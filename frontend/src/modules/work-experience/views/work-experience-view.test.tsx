@@ -18,11 +18,8 @@ vi.mock("../services/work-experience.service", () => ({
 
 vi.mock("@/modules/matching/services/skills-analysis.service", () => ({
   skillsAnalysisService: {
-    analyzeExperience: vi.fn().mockResolvedValue({
-      experienceId: "experience-1",
-      skills: [],
-      processingTimeMs: 0,
-    }),
+    analyzeExperience: vi.fn().mockResolvedValue({ experienceId: "experience-1", skills: [], processingTimeMs: 0 }),
+    previewExperience: vi.fn().mockResolvedValue({ experienceId: "experience-1", skills: [], processingTimeMs: 0 }),
   },
 }));
 
@@ -48,10 +45,7 @@ const PAST_JOB: WorkExperienceItem = {
 
 describe("WorkExperienceView", () => {
   beforeEach(() => {
-    vi.mocked(workExperienceService.getWorkExperiences).mockResolvedValue([
-      PAST_JOB,
-      CURRENT_JOB,
-    ]);
+    vi.mocked(workExperienceService.getWorkExperiences).mockResolvedValue([PAST_JOB, CURRENT_JOB]);
   });
 
   afterEach(() => {
@@ -62,40 +56,22 @@ describe("WorkExperienceView", () => {
   it("shows the saved experiences with their period", async () => {
     render(<WorkExperienceView />);
 
-    expect(
-      screen.getByRole("heading", {
-        level: 1,
-        name: "Experiencia laboral",
-      }),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByText("Cargando experiencia laboral..."),
-    ).toBeInTheDocument();
-
-    expect(
-      await screen.findByText("Desarrolladora web junior"),
-    ).toBeInTheDocument();
-
+    expect(screen.getByRole("heading", { level: 1, name: "Experiencia laboral" })).toBeInTheDocument();
+    expect(screen.getByText("Cargando experiencia laboral...")).toBeInTheDocument();
+    expect(await screen.findByText("Desarrolladora web junior")).toBeInTheDocument();
     expect(screen.getByText(/Mar 2025 – Actualidad/)).toBeInTheDocument();
     expect(screen.getByText(/Mar 2023 – Dic 2024/)).toBeInTheDocument();
   });
 
   it("shows the empty message when there are no experiences", async () => {
     vi.mocked(workExperienceService.getWorkExperiences).mockResolvedValue([]);
-
     render(<WorkExperienceView />);
 
-    expect(
-      await screen.findByText("Aún no registraste experiencia laboral."),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Aún no registraste experiencia laboral.")).toBeInTheDocument();
   });
 
   it("shows an error when the experiences cannot be loaded", async () => {
-    vi.mocked(workExperienceService.getWorkExperiences).mockRejectedValue(
-      new Error("fail"),
-    );
-
+    vi.mocked(workExperienceService.getWorkExperiences).mockRejectedValue(new Error("fail"));
     render(<WorkExperienceView />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -105,107 +81,52 @@ describe("WorkExperienceView", () => {
 
   it("creates an experience and reloads the list", async () => {
     const user = userEvent.setup();
-
-    vi.mocked(workExperienceService.createWorkExperience).mockResolvedValue(
-      CURRENT_JOB,
-    );
-
+    vi.mocked(workExperienceService.createWorkExperience).mockResolvedValue(CURRENT_JOB);
     render(<WorkExperienceView />);
-
     await screen.findByText("Desarrolladora web junior");
 
-    await user.click(
-      screen.getByRole("button", { name: "Añadir experiencia" }),
-    );
-
+    await user.click(screen.getByRole("button", { name: "Añadir experiencia" }));
     await user.type(screen.getByLabelText(/Empresa/), "Synapse Labs");
-    await user.type(
-      screen.getByLabelText(/Cargo/),
-      "Desarrolladora web junior",
-    );
+    await user.type(screen.getByLabelText(/Cargo/), "Desarrolladora web junior");
+    fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "2025-03-01" } });
+    await user.click(screen.getByRole("checkbox", { name: "Trabajo actualmente aquí" }));
+    await user.type(screen.getByLabelText(/Descripción de funciones/), "Interfaces con React");
+    await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
-    await user.type(
-      screen.getByLabelText(/Descripción de funciones/),
-      "Desarrollo de actividades relacionadas con el cargo.",
-    );
-
-    fireEvent.change(screen.getByLabelText(/Desde/), {
-      target: { value: "2025-03-01" },
-    });
-
-    await user.click(
-      screen.getByRole("checkbox", {
-        name: "Trabajo actualmente aquí",
+    expect(workExperienceService.createWorkExperience).toHaveBeenCalledWith(
+      expect.objectContaining({
+        companyName: "Synapse Labs",
+        position: "Desarrolladora web junior",
+        endDate: null,
+        isCurrent: true,
       }),
     );
-
-    await user.click(
-      screen.getByRole("button", { name: "Guardar experiencia" }),
-    );
-
-    await waitFor(() => {
-      expect(
-        workExperienceService.createWorkExperience,
-      ).toHaveBeenCalledWith(
-        expect.objectContaining({
-          companyName: "Synapse Labs",
-          position: "Desarrolladora web junior",
-          endDate: null,
-          isCurrent: true,
-        }),
-      );
-    });
-
     expect(await screen.findByRole("status")).toHaveTextContent(
       WORK_EXPERIENCE_FEEDBACK_MESSAGES.createSuccess,
     );
-
     await waitFor(() =>
-      expect(
-        workExperienceService.getWorkExperiences,
-      ).toHaveBeenCalledTimes(2),
+      expect(workExperienceService.getWorkExperiences).toHaveBeenCalledTimes(2),
     );
-
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("edits an experience from the list", async () => {
     const user = userEvent.setup();
-
-    vi.mocked(workExperienceService.updateWorkExperience).mockResolvedValue(
-      PAST_JOB,
-    );
-
+    vi.mocked(workExperienceService.updateWorkExperience).mockResolvedValue(PAST_JOB);
     render(<WorkExperienceView />);
-
     await screen.findByText("Asistente de laboratorio");
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "Editar Asistente de laboratorio",
-      }),
-    );
+    await user.click(screen.getByRole("button", { name: "Editar Asistente de laboratorio" }));
 
-    expect(
-      screen.getByRole("form", { name: "Editar experiencia" }),
-    ).toBeInTheDocument();
-
+    expect(screen.getByRole("form", { name: "Editar experiencia" })).toBeInTheDocument();
     expect(screen.getByLabelText(/Empresa/)).toHaveValue("Tecnored");
 
-    await user.click(
-      screen.getByRole("button", { name: "Guardar experiencia" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
-    expect(
-      workExperienceService.updateWorkExperience,
-    ).toHaveBeenCalledWith(
+    expect(workExperienceService.updateWorkExperience).toHaveBeenCalledWith(
       "experience-2",
-      expect.objectContaining({
-        companyName: "Tecnored",
-        endDate: "2024-12-01",
-      }),
+      expect.objectContaining({ companyName: "Tecnored", endDate: "2024-12-01" }),
     );
-
     expect(await screen.findByRole("status")).toHaveTextContent(
       WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateSuccess,
     );
@@ -213,24 +134,12 @@ describe("WorkExperienceView", () => {
 
   it("shows an error when an experience cannot be saved", async () => {
     const user = userEvent.setup();
-
-    vi.mocked(workExperienceService.updateWorkExperience).mockRejectedValue(
-      new Error("fail"),
-    );
-
+    vi.mocked(workExperienceService.updateWorkExperience).mockRejectedValue(new Error("fail"));
     render(<WorkExperienceView />);
-
     await screen.findByText("Asistente de laboratorio");
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "Editar Asistente de laboratorio",
-      }),
-    );
-
-    await user.click(
-      screen.getByRole("button", { name: "Guardar experiencia" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Editar Asistente de laboratorio" }));
+    await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       WORK_EXPERIENCE_FEEDBACK_MESSAGES.updateError,
@@ -239,215 +148,112 @@ describe("WorkExperienceView", () => {
 
   it("asks for confirmation and keeps the experience when the deletion is cancelled", async () => {
     const user = userEvent.setup();
-
     render(<WorkExperienceView />);
-
     await screen.findByText("Asistente de laboratorio");
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "Eliminar Asistente de laboratorio",
-      }),
-    );
+    await user.click(screen.getByRole("button", { name: "Eliminar Asistente de laboratorio" }));
 
     const dialog = await screen.findByRole("alertdialog");
+    expect(dialog).toHaveTextContent('Se eliminará "Asistente de laboratorio" de tu perfil.');
 
-    expect(dialog).toHaveTextContent(
-      'Se eliminará "Asistente de laboratorio" de tu perfil.',
-    );
+    await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
 
-    await user.click(
-      within(dialog).getByRole("button", { name: "Cancelar" }),
-    );
-
-    await waitFor(() =>
-      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument(),
-    );
-
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(workExperienceService.deleteWorkExperience).not.toHaveBeenCalled();
-
-    expect(
-      screen.getByText("Asistente de laboratorio"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Asistente de laboratorio")).toBeInTheDocument();
   });
 
   it("deletes the experience after confirming and reloads the list", async () => {
     const user = userEvent.setup();
-
     vi.mocked(workExperienceService.deleteWorkExperience).mockResolvedValue();
-
     render(<WorkExperienceView />);
-
     await screen.findByText("Asistente de laboratorio");
 
+    await user.click(screen.getByRole("button", { name: "Eliminar Asistente de laboratorio" }));
     await user.click(
-      screen.getByRole("button", {
-        name: "Eliminar Asistente de laboratorio",
-      }),
+      within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Eliminar" }),
     );
 
-    await user.click(
-      within(await screen.findByRole("alertdialog")).getByRole("button", {
-        name: "Eliminar",
-      }),
-    );
-
-    expect(workExperienceService.deleteWorkExperience).toHaveBeenCalledWith(
-      "experience-2",
-    );
-
+    expect(workExperienceService.deleteWorkExperience).toHaveBeenCalledWith("experience-2");
     expect(await screen.findByRole("status")).toHaveTextContent(
       WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess,
     );
-
     await waitFor(() =>
-      expect(
-        workExperienceService.getWorkExperiences,
-      ).toHaveBeenCalledTimes(2),
+      expect(workExperienceService.getWorkExperiences).toHaveBeenCalledTimes(2),
     );
   });
 
   it("returns to the summary before deleting a previously edited experience", async () => {
     const user = userEvent.setup();
-
     vi.mocked(workExperienceService.deleteWorkExperience).mockResolvedValue();
-
     render(<WorkExperienceView />);
-
     await screen.findByText("Asistente de laboratorio");
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "Editar Asistente de laboratorio",
-      }),
-    );
-
-    expect(
-      screen.getByRole("form", { name: "Editar experiencia" }),
-    ).toBeInTheDocument();
-
+    await user.click(screen.getByRole("button", { name: "Editar Asistente de laboratorio" }));
+    expect(screen.getByRole("form", { name: "Editar experiencia" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
 
+    await user.click(screen.getByRole("button", { name: "Eliminar Asistente de laboratorio" }));
     await user.click(
-      screen.getByRole("button", {
-        name: "Eliminar Asistente de laboratorio",
-      }),
+      within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Eliminar" }),
     );
 
-    await user.click(
-      within(await screen.findByRole("alertdialog")).getByRole("button", {
-        name: "Eliminar",
-      }),
-    );
-
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess,
-    );
-
+    expect(await screen.findByRole("status")).toHaveTextContent(WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("shows an error when the experience cannot be deleted", async () => {
     const user = userEvent.setup();
-
-    vi.mocked(workExperienceService.deleteWorkExperience).mockRejectedValue(
-      new Error("fail"),
-    );
-
+    vi.mocked(workExperienceService.deleteWorkExperience).mockRejectedValue(new Error("fail"));
     render(<WorkExperienceView />);
-
     await screen.findByText("Asistente de laboratorio");
 
+    await user.click(screen.getByRole("button", { name: "Eliminar Asistente de laboratorio" }));
     await user.click(
-      screen.getByRole("button", {
-        name: "Eliminar Asistente de laboratorio",
-      }),
-    );
-
-    await user.click(
-      within(await screen.findByRole("alertdialog")).getByRole("button", {
-        name: "Eliminar",
-      }),
+      within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Eliminar" }),
     );
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteError,
     );
-
-    expect(
-      screen.getByText("Asistente de laboratorio"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Asistente de laboratorio")).toBeInTheDocument();
   });
 
   it("blocks editing and deleting other experiences while one is being saved", async () => {
     const user = userEvent.setup();
-
     let finishSave: (value: WorkExperienceItem) => void = () => undefined;
-
     vi.mocked(workExperienceService.updateWorkExperience).mockReturnValue(
       new Promise((resolve) => {
         finishSave = resolve;
       }),
     );
-
     render(<WorkExperienceView />);
-
     await screen.findByText("Asistente de laboratorio");
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "Editar Asistente de laboratorio",
-      }),
-    );
+    await user.click(screen.getByRole("button", { name: "Editar Asistente de laboratorio" }));
+    await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
 
-    await user.click(
-      screen.getByRole("button", { name: "Guardar experiencia" }),
-    );
-
-    expect(
-      screen.getByRole("button", {
-        name: "Editar Desarrolladora web junior",
-        hidden: true,
-      }),
-    ).toBeDisabled();
-
-    expect(
-      screen.getByRole("button", {
-        name: "Eliminar Desarrolladora web junior",
-        hidden: true,
-      }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Editar Desarrolladora web junior", hidden: true })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Eliminar Desarrolladora web junior", hidden: true })).toBeDisabled();
 
     finishSave(PAST_JOB);
 
     await waitFor(() =>
       expect(
-        screen.getByRole("button", {
-          name: "Editar Desarrolladora web junior",
-        }),
+        screen.getByRole("button", { name: "Editar Desarrolladora web junior" }),
       ).toBeEnabled(),
     );
   });
 
   it("returns to the summary when editing is cancelled", async () => {
     const user = userEvent.setup();
-
     render(<WorkExperienceView />);
-
     await screen.findByText("Asistente de laboratorio");
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "Editar Asistente de laboratorio",
-      }),
-    );
-
+    await user.click(screen.getByRole("button", { name: "Editar Asistente de laboratorio" }));
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-
-    expect(
-      screen.getByRole("button", { name: "Añadir experiencia" }),
-    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Añadir experiencia" })).toBeEnabled();
   });
 });

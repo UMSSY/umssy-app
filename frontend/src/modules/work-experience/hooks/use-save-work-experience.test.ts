@@ -38,12 +38,9 @@ const PAYLOAD: WorkExperiencePayload = {
   description: "Desarrollo con Python y Scrum",
 };
 
-const NORMALIZED_DESCRIPTION = "desarrollo con python y scrum";
-
 const SAVED: WorkExperienceItem = {
   id: "experience-1",
   ...PAYLOAD,
-  description: NORMALIZED_DESCRIPTION,
 };
 
 const ANALYSIS = {
@@ -79,16 +76,15 @@ describe("useSaveWorkExperience", () => {
     vi.resetAllMocks();
   });
 
-  it("creates the experience with a normalized description and analyzes it after saving (AC-01.1)", async () => {
+  it("creates the experience keeping the description as typed and analyzes it after saving (AC-01.1)", async () => {
     const onSaved = vi.fn();
     const { result } = renderHook(() => useSaveWorkExperience(onSaved));
 
     await act(() => result.current.save(PAYLOAD));
 
-    expect(workExperienceService.createWorkExperience).toHaveBeenCalledWith({
-      ...PAYLOAD,
-      description: NORMALIZED_DESCRIPTION,
-    });
+    expect(workExperienceService.createWorkExperience).toHaveBeenCalledWith(
+      PAYLOAD,
+    );
 
     expect(onSaved).toHaveBeenCalledTimes(1);
 
@@ -102,15 +98,35 @@ describe("useSaveWorkExperience", () => {
     });
 
     expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledWith(
-  "experience-1",
-  PAYLOAD.description,
-);
+      "experience-1",
+      PAYLOAD.description,
+    );
+
     await waitFor(() => {
       expect(profileSkillsRadarService.analyzeSkills).toHaveBeenCalledTimes(1);
     });
 
     await waitFor(() => {
       expect(result.current.isAnalyzing).toBe(false);
+    });
+  });
+
+  it("does not alter the capitalization, accents or punctuation of the saved description", async () => {
+    const description = "Lideré APIs en Node.js, C++ y C#. ¡Gestión de proyectos!";
+    const { result } = renderHook(() => useSaveWorkExperience(vi.fn()));
+
+    await act(() => result.current.save({ ...PAYLOAD, description }));
+
+    expect(workExperienceService.createWorkExperience).toHaveBeenCalledWith({
+      ...PAYLOAD,
+      description,
+    });
+
+    await waitFor(() => {
+      expect(skillsAnalysisService.analyzeExperience).toHaveBeenCalledWith(
+        "experience-1",
+        description,
+      );
     });
   });
 
@@ -181,10 +197,9 @@ describe("useSaveWorkExperience", () => {
       expect(result.current.isAnalyzing).toBe(false);
     });
 
-    expect(workExperienceService.createWorkExperience).toHaveBeenCalledWith({
-      ...PAYLOAD,
-      description: NORMALIZED_DESCRIPTION,
-    });
+    expect(workExperienceService.createWorkExperience).toHaveBeenCalledWith(
+      PAYLOAD,
+    );
 
     expect(onSaved).toHaveBeenCalledTimes(1);
     expect(result.current.analysis).toBeNull();
@@ -216,10 +231,9 @@ describe("useSaveWorkExperience", () => {
 
     expect(onSaved).toHaveBeenCalledTimes(1);
     expect(result.current.feedback?.type).toBe("success");
-    expect(workExperienceService.createWorkExperience).toHaveBeenCalledWith({
-      ...PAYLOAD,
-      description: NORMALIZED_DESCRIPTION,
-    });
+    expect(workExperienceService.createWorkExperience).toHaveBeenCalledWith(
+      PAYLOAD,
+    );
   });
 
   it("does not analyze when the experience could not be saved", async () => {

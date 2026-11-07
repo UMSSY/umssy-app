@@ -10,10 +10,10 @@ import { normalizeTerm } from '../utils/normalize-term.js';
 
 @Injectable()
 export class SkillDetectionService {
- detect(
-  input: NlpInput,
-  catalog: readonly NlpCatalogSkill[] = [],
-): NlpSkillCandidate[] {
+  detect(
+    input: NlpInput,
+    catalog: readonly NlpCatalogSkill[] = [],
+  ): NlpSkillCandidate[] {
     const dictionaryNames = new Set(
       NLP_SKILL_DICTIONARY.map((entry) => normalizeTerm(entry.name)),
     );

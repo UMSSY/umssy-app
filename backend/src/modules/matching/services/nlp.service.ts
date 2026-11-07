@@ -1,14 +1,44 @@
 import { Injectable } from '@nestjs/common';
 
+const INSTITUTIONAL_EXCEPTIONS = new Map<string, string>([
+  ['umss', 'UMSS'],
+  ['san simon', 'San Simón'],
+  ['universidad mayor de san simon', 'Universidad Mayor de San Simón'],
+  ['cochabamba', 'Cochabamba'],
+  ['facultad de ciencias y tecnologia', 'Facultad de Ciencias y Tecnología'],
+  ['fcyt', 'FCyT'],
+]);
+
+const ACCENT_CLASSES: Readonly<Record<string, string>> = {
+  a: '[aá]',
+  e: '[eé]',
+  i: '[ií]',
+  o: '[oó]',
+  u: '[uúü]',
+};
+
+const INSTITUTIONAL_PATTERNS: readonly RegExp[] = [
+  ...INSTITUTIONAL_EXCEPTIONS.keys(),
+]
+  .sort((a, b) => b.length - a.length)
+  .map((phrase) => {
+    const words = phrase
+      .split(' ')
+      .map((word) => word.replace(/[aeiou]/g, (vowel) => ACCENT_CLASSES[vowel]));
+
+    return new RegExp(
+      `(?<![\\p{L}\\p{N}_])${words.join('\\s+')}(?![\\p{L}\\p{N}_])`,
+      'giu',
+    );
+  });
+
 @Injectable()
 export class NlpService {
   private static readonly STOPWORDS = new Set([
     'a', 'al', 'con', 'de', 'del', 'el', 'en', 'la', 'las', 'los',
     'para', 'por', 'un', 'una', 'y', 'e', 'o', 'u', 'lo', 'le',
     'les', 'se', 'su', 'sus', 'que', 'sin', 'sobre', 'como', 'muy',
-    'unas', 'unos', 'es', 'son', 'ser', 'ha', 'han', 'lidero',
-    'proyectos', 'desarrollo', 'usamos', 'metodolia', 'uso',
-    'magistral', 'campos',
+    'unas', 'unos', 'es', 'son', 'ser', 'ha', 'han',
     'the', 'and', 'or', 'of', 'in', 'on', 'to', 'for', 'with',
     'an', 'is', 'are',
   ]);
@@ -27,15 +57,6 @@ export class NlpService {
     ['c #', 'c#'],
     ['js', 'javascript'],
   ] as const;
-
-  private static readonly INSTITUTIONAL_EXCEPTIONS = new Map<string, string>([
-    ['umss', 'UMSS'],
-    ['san simon', 'San Simón'],
-    ['universidad mayor de san simon', 'Universidad Mayor de San Simón'],
-    ['cochabamba', 'Cochabamba'],
-    ['facultad de ciencias y tecnologia', 'Facultad de Ciencias y Tecnología'],
-    ['fcyt', 'FCyT'],
-  ]);
 
   private static readonly MULTIPLE_SPACES_REGEX = /\s+/g;
 
@@ -67,11 +88,19 @@ export class NlpService {
     }, text);
   }
 
+  private protectInstitutionalTerms(text: string): string {
+    return INSTITUTIONAL_PATTERNS.reduce(
+      (result, pattern) =>
+        result.replace(pattern, (match) => match.replace(/\s+/g, '_')),
+      text,
+    );
+  }
+
   tokenizeAndFilter(text: string): string[] {
     if (!text) return [];
 
-    const normalized = this.normalizeTechnicalAliases(
-      text.normalize('NFC').toLowerCase(),
+    const normalized = this.protectInstitutionalTerms(
+      this.normalizeTechnicalAliases(text.normalize('NFC').toLowerCase()),
     );
 
     const matches = normalized.match(
@@ -117,9 +146,5 @@ export class NlpService {
     const ngrams = this.generateNGrams(tokens);
 
     return [...new Set([...tokens, ...ngrams])];
-  }
-
-  getInstitutionalExceptions(): Map<string, string> {
-    return NlpService.INSTITUTIONAL_EXCEPTIONS;
   }
 }
