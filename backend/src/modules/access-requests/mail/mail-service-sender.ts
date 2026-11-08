@@ -1,6 +1,6 @@
+import { MINUTE_MS } from '../../../common/constants/date-time.constants.js';
 import { Injectable } from '@nestjs/common';
 import { MailService } from '../../mail/services/mail.service.js';
-import { MS_PER_MINUTE } from '../constants/otp.constants.js';
 import { buildFrontendUrl } from './helpers/frontend-url.js';
 import { RejectionMailLinkService } from '../services/rejection-mail-link.service.js';
 import type { MailSender } from './mail-sender.js';
@@ -15,7 +15,7 @@ export class MailServiceSender implements MailSender {
   ) {}
 
   async sendActivationCode(to: string, code: string, expiresAt: Date): Promise<void> {
-    const minutes = Math.max(1, Math.round((expiresAt.getTime() - Date.now()) / MS_PER_MINUTE));
+    const minutes = Math.max(1, Math.round((expiresAt.getTime() - Date.now()) / MINUTE_MS));
     const activationUrl = buildFrontendUrl('/request-access/activation', { email: to });
     await this.mailService.send({
       to,

@@ -1,16 +1,9 @@
+import { MINUTE_MS } from '../../../common/constants/date-time.constants.js';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from '../../auth/services/auth.service.js';
-import { PASSWORD_BCRYPT_ROUNDS } from '../constants/activation.constants.js';
-import {
-  MS_PER_HOUR,
-  MS_PER_MINUTE,
-  MS_PER_SECOND,
-  OTP_MAX_ATTEMPTS,
-  OTP_MAX_RESENDS_PER_HOUR,
-  OTP_RESEND_COOLDOWN_SECONDS,
-  OTP_TTL_MINUTES,
-} from '../constants/otp.constants.js';
+
+import { OTP_MAX_ATTEMPTS, OTP_TTL_MINUTES } from '../constants/otp.constants.js';
 import {
   AccountAlreadyActivatedException,
   ActivationAttemptsExceededException,
@@ -54,13 +47,13 @@ export class AccountActivationService {
     if (activated) {
       return { state: 'activated' as ActivationState, serverTime: now.toISOString(), expiresAt: null, resendAvailableAt: null, resendsRemaining: 0, remainingAttempts: 0 };
     }
-    const resends = await this.otpRepository.countResendsSince(request.id, new Date(now.getTime() - MS_PER_HOUR));
+    const resends = await this.otpRepository.countResendsSince(request.id, new Date(now.getTime() - 3_600_000));
     return {
       state: this.resolveState(otp, now),
       serverTime: now.toISOString(),
       expiresAt: otp ? otp.expiresAt.toISOString() : null,
-      resendAvailableAt: (otp ? new Date(otp.createdAt.getTime() + OTP_RESEND_COOLDOWN_SECONDS * MS_PER_SECOND) : now).toISOString(),
-      resendsRemaining: Math.max(0, OTP_MAX_RESENDS_PER_HOUR - resends),
+      resendAvailableAt: (otp ? new Date(otp.createdAt.getTime() + 60 * 1_000) : now).toISOString(),
+      resendsRemaining: Math.max(0, 3 - resends),
       remainingAttempts: otp ? Math.max(0, OTP_MAX_ATTEMPTS - otp.attempts) : 0,
     };
   }
@@ -74,7 +67,7 @@ export class AccountActivationService {
   async activate(email: string, code: string, password: string, now: Date = new Date()) {
     const context = await this.loadContext(email);
     const otp = await this.checkCode(context, code, now);
-    const passwordHash = await bcrypt.hash(password, PASSWORD_BCRYPT_ROUNDS);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const result = await this.activationRepository.createUserAndConsumeOtp(
       otp.id,
@@ -98,12 +91,12 @@ export class AccountActivationService {
     const { request, otp, activated } = await this.loadContext(email);
     if (activated) throw new AccountAlreadyActivatedException();
 
-    const resends = await this.otpRepository.countResendsSince(request.id, new Date(now.getTime() - MS_PER_HOUR));
-    if (resends >= OTP_MAX_RESENDS_PER_HOUR) throw new ResendLimitExceededException();
+    const resends = await this.otpRepository.countResendsSince(request.id, new Date(now.getTime() - 3_600_000));
+    if (resends >= 3) throw new ResendLimitExceededException();
 
     if (otp) {
-      const waitMs = OTP_RESEND_COOLDOWN_SECONDS * MS_PER_SECOND - (now.getTime() - otp.createdAt.getTime());
-      if (waitMs > 0) throw new ResendTooSoonException(Math.ceil(waitMs / MS_PER_SECOND));
+      const waitMs = 60 * 1_000 - (now.getTime() - otp.createdAt.getTime());
+      if (waitMs > 0) throw new ResendTooSoonException(Math.ceil(waitMs / 1_000));
     }
 
     const sent = await this.otpService.issueFor(request.id, request.email, now);
@@ -111,9 +104,9 @@ export class AccountActivationService {
 
     return {
       serverTime: now.toISOString(),
-      expiresAt: new Date(now.getTime() + OTP_TTL_MINUTES * MS_PER_MINUTE).toISOString(),
-      resendAvailableAt: new Date(now.getTime() + OTP_RESEND_COOLDOWN_SECONDS * MS_PER_SECOND).toISOString(),
-      resendsRemaining: Math.max(0, OTP_MAX_RESENDS_PER_HOUR - resends - 1),
+      expiresAt: new Date(now.getTime() + OTP_TTL_MINUTES * MINUTE_MS).toISOString(),
+      resendAvailableAt: new Date(now.getTime() + 60 * 1_000).toISOString(),
+      resendsRemaining: Math.max(0, 3 - resends - 1),
     };
   }
 

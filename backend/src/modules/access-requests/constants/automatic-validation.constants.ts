@@ -1,9 +1,3 @@
-export const AUTO_APPROVAL_THRESHOLD = 90;
-
-export const AUTO_REJECTION_THRESHOLD = 20;
-
-export const LOW_LEGIBILITY_CONFIDENCE = 0.6;
-
 export const FIELD_WEIGHTS = {
   fullName: 0.6,
   career: 0.25,

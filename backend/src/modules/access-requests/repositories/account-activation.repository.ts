@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
-import { ACTIVATION_ROLE } from '../constants/activation.constants.js';
+
 import { ACCESS_REQUEST_STATUS } from '../types/access-request.enum.js';
 
 export interface NewActivatedUser {
@@ -49,7 +49,7 @@ export class AccountActivationRepository {
             phone: user.phone,
             password: user.passwordHash,
             isActive: true,
-            roles: { create: { role: { connect: { name: ACTIVATION_ROLE } } } },
+            roles: { create: { role: { connect: { name: 'titulado' } } } },
           },
           select: { id: true },
         });

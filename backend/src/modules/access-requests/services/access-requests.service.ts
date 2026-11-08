@@ -41,12 +41,7 @@ import { ACCESS_REQUEST_DOCUMENT_TYPE, ACCESS_REQUEST_STATUS } from '../types/ac
 import type { AttachDocumentInput } from '../types/uploaded-file.types.js';
 import { DUPLICATE_LABELS } from '../constants/duplicate-labels.constants.js';
 import { INBOX_PERIOD_DAYS } from '../constants/inbox-filters.constants.js';
-import {
-  HOUR_MS,
-  PENDING_ALERT_HOURS,
-  REVIEW_TIME_GOAL_HOURS,
-  REVIEW_TIME_WINDOW_DAYS,
-} from '../constants/inbox-summary.constants.js';
+import { HOUR_MS } from '../../../common/constants/date-time.constants.js';
 import { DAY_MS } from '../../../common/constants/date-time.constants.js';
 import { toBoliviaTime, toUtcIso } from '../../../common/utils/date-time.js';
 
@@ -296,8 +291,8 @@ export class AccessRequestsService {
     const { date: boliviaToday } = toBoliviaTime(now);
     const todayStart = new Date(toUtcIso(boliviaToday, '00:00'));
     const monthStart = new Date(toUtcIso(`${boliviaToday.slice(0, 8)}01`, '00:00'));
-    const windowStart = new Date(now.getTime() - REVIEW_TIME_WINDOW_DAYS * DAY_MS);
-    const alertCutoff = new Date(now.getTime() - PENDING_ALERT_HOURS * HOUR_MS);
+    const windowStart = new Date(now.getTime() - 30 * DAY_MS);
+    const alertCutoff = new Date(now.getTime() - 24 * HOUR_MS);
     const { PENDING, APPROVED, REJECTED } = ACCESS_REQUEST_STATUS;
 
     const [pendingCount, pendingOver24hCount, approvedTodayCount, rejectedTodayCount, rejectedThisMonthCount, reviewTimes] =
@@ -322,7 +317,7 @@ export class AccessRequestsService {
       approvedTodayCount,
       rejectedTodayCount,
       averageReviewHours,
-      reviewTimeGoalHours: REVIEW_TIME_GOAL_HOURS,
+      reviewTimeGoalHours: 48,
       rejectedThisMonthCount,
       topRejectionReason: null,
     };

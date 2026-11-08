@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { CAREER } from '../types/career.enum.js';
 import { ID_CARD_ISSUED_IN } from '../types/id-card-issued-in.enum.js';
-import { ID_CARD_MAX_LENGTH, ID_CARD_MIN_LENGTH, MIN_AGE, SIS_CODE_LENGTH } from '../constants/access-request-fields.constants.js';
 
 function isRealIsoDate(value: string): boolean {
   const date = new Date(`${value}T00:00:00.000Z`);
@@ -9,12 +8,12 @@ function isRealIsoDate(value: string): boolean {
 }
 
 export function isAdult(birthDate: Date, now = new Date()): boolean {
-  const cutoff = Date.UTC(now.getUTCFullYear() - MIN_AGE, now.getUTCMonth(), now.getUTCDate());
+  const cutoff = Date.UTC(now.getUTCFullYear() - 18, now.getUTCMonth(), now.getUTCDate());
   return birthDate.getTime() <= cutoff;
 }
 
 export function isGraduationYearCoherent(graduationYear: number, birthDate: Date): boolean {
-  return graduationYear >= birthDate.getUTCFullYear() + MIN_AGE;
+  return graduationYear >= birthDate.getUTCFullYear() + 18;
 }
 
 export function hasGraduationYearConflict(data: { graduationYear?: unknown; birthDate?: unknown }): boolean {
@@ -41,12 +40,12 @@ const digitsField = (label: string) =>
     .regex(/^\d+$/, `${label} solo puede contener dígitos`);
 
 const idCardField = digitsField('El carnet de identidad')
-  .min(ID_CARD_MIN_LENGTH, `El carnet de identidad debe tener entre ${ID_CARD_MIN_LENGTH} y ${ID_CARD_MAX_LENGTH} dígitos`)
-  .max(ID_CARD_MAX_LENGTH, `El carnet de identidad debe tener entre ${ID_CARD_MIN_LENGTH} y ${ID_CARD_MAX_LENGTH} dígitos`);
+  .min(6, `El carnet de identidad debe tener entre 6 y 10 dígitos`)
+  .max(10, `El carnet de identidad debe tener entre 6 y 10 dígitos`);
 
 const sisCodeField = digitsField('El código SIS').length(
-  SIS_CODE_LENGTH,
-  `El código SIS debe tener exactamente ${SIS_CODE_LENGTH} dígitos`,
+  9,
+  `El código SIS debe tener exactamente 9 dígitos`,
 );
 
 export const accessRequestFields = {
@@ -71,7 +70,7 @@ export const accessRequestFields = {
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha de nacimiento debe tener el formato AAAA-MM-DD')
     .refine(isRealIsoDate, 'La fecha de nacimiento no es válida')
     .transform((value) => new Date(`${value}T00:00:00.000Z`))
-    .refine((value) => Number.isNaN(value.getTime()) || isAdult(value), `Debes ser mayor de ${MIN_AGE} años`),
+    .refine((value) => Number.isNaN(value.getTime()) || isAdult(value), `Debes ser mayor de 18 años`),
   career: z.enum(CAREER, { error: 'La carrera no es válida' }),
   graduationYear: z
     .number({ error: 'El año de titulación es obligatorio' })

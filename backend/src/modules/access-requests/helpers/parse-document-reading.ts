@@ -1,4 +1,4 @@
-import { DIPLOMA_KEYWORDS, MIN_GRADUATION_YEAR, UNIVERSITY_KEYWORDS } from '../constants/document-reading.constants.js';
+import { DIPLOMA_KEYWORDS, UNIVERSITY_KEYWORDS } from '../constants/document-reading.constants.js';
 import type { DocumentReading } from '../types/document-reading.types.js';
 import type { DocumentText } from '../types/document-text.types.js';
 import type { DeclaredData } from '../types/document-validation.types.js';
@@ -13,7 +13,7 @@ function readYear(text: string, currentYear: number): number | null {
   const lines = toLines(text)
     .map((line) => foldAccents(line))
     .filter((line) => !/\b(?:resolucion|decreto|ley)\b/.test(line));
-  const valid = (year: number) => year >= MIN_GRADUATION_YEAR && year <= currentYear;
+  const valid = (year: number) => year >= 1950 && year <= currentYear;
   const dates = new Set<number>();
 
   for (const line of lines) {

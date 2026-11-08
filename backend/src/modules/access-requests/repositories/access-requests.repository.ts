@@ -10,12 +10,12 @@ import {
 import type { CreateAccessRequestDto } from '../requests/create-access-request.schema.js';
 import type { UpdateAccessRequestDto } from '../requests/update-access-request.schema.js';
 import { nextRequestCode, randomRetryDelayMs, requestCodePrefix, sleep } from '../helpers/request-code.js';
-import { MAX_REQUEST_CODE_ATTEMPTS } from '../constants/request-code.constants.js';
+
 import { isSubmittedDuplicate } from '../helpers/unique-violation.js';
 import { ACCESS_REQUEST_STATUS } from '../types/access-request.enum.js';
 import { ACCESS_REQUEST_SELECT } from '../constants/access-request-selects.constants.js';
 import { ACTIVE_STATUSES, LISTED_STATUSES } from '../constants/access-request-status-groups.constants.js';
-import { MAX_SEARCH_TERMS } from '../constants/inbox-filters.constants.js';
+
 import { DECIDED_STATUSES } from '../constants/inbox-summary.constants.js';
 import { escapeLikePattern } from '../helpers/escape-like-pattern.js';
 import { foldAccents } from '../helpers/fold-accents.js';
@@ -75,7 +75,7 @@ export class AccessRequestsRepository {
     page: number;
     limit: number;
   }) {
-    const terms = params.search?.split(/\s+/).filter(Boolean).slice(0, MAX_SEARCH_TERMS) ?? [];
+    const terms = params.search?.split(/\s+/).filter(Boolean).slice(0, 5) ?? [];
     const matchingIds = terms.length > 0 ? await this.findIdsBySearch(terms) : undefined;
     const where: Prisma.AccessRequestWhereInput = {
       status: { title: params.status ?? { in: LISTED_STATUSES } },
@@ -330,7 +330,7 @@ export class AccessRequestsRepository {
   }
 
   async submitWithGeneratedCode(id: string, onSubmitted?: AccessRequestAuditHook) {
-    for (let attempt = 1; attempt <= MAX_REQUEST_CODE_ATTEMPTS; attempt++) {
+    for (let attempt = 1; attempt <= 8; attempt++) {
       const requestCode = await this.generateRequestCode();
       try {
         return await this.submit(id, requestCode, onSubmitted);
@@ -339,7 +339,7 @@ export class AccessRequestsRepository {
         if (!isCollision) throw error;
         if (isSubmittedDuplicate(error.meta)) throw new ActiveAccessRequestExistsException();
       }
-      if (attempt < MAX_REQUEST_CODE_ATTEMPTS) await this.retryPause(randomRetryDelayMs());
+      if (attempt < 8) await this.retryPause(randomRetryDelayMs());
     }
     throw new RequestCodeGenerationException();
   }

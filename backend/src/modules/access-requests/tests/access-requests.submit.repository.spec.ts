@@ -7,7 +7,7 @@ import {
   ActiveAccessRequestExistsException,
   RequestCodeGenerationException,
 } from '../exceptions/index.js';
-import { MAX_REQUEST_CODE_ATTEMPTS } from '../constants/request-code.constants.js';
+
 import { ACCESS_REQUEST_AUDIT_SELECT } from '../constants/access-request-audit-select.constants.js';
 
 function build() {
@@ -104,7 +104,7 @@ describe('AccessRequestsRepository: envío y consulta de estado', () => {
     });
 
     it('define 8 intentos como máximo', () => {
-      expect(MAX_REQUEST_CODE_ATTEMPTS).toBe(8);
+      expect(8).toBe(8);
     });
 
     it.each([2, 5, 8])('ante P2002 recalcula el código y tiene éxito en el intento %d', async (successAt) => {

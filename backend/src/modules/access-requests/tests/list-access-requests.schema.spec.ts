@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { listAccessRequestsQuerySchema } from '../requests/list-access-requests.schema.js';
-import { MAX_PAGE_SIZE } from '../constants/list-access-requests.constants.js';
 
 const messagesOf = (input: unknown) => {
   const result = listAccessRequestsQuerySchema.safeParse(input);
@@ -27,9 +26,9 @@ describe('listAccessRequestsQuerySchema', () => {
 
   it('acota el límite entre 1 y el máximo', () => {
     expect(messagesOf({ limit: '0' })).toContain('limit: El límite debe ser mayor o igual a 1');
-    expect(messagesOf({ limit: String(MAX_PAGE_SIZE + 1) })).toContain(`limit: El límite no puede superar ${MAX_PAGE_SIZE}`);
+    expect(messagesOf({ limit: String(50 + 1) })).toContain(`limit: El límite no puede superar 50`);
     expect(messagesOf({ limit: 'x' }).some((m) => m.startsWith('limit:'))).toBe(true);
     expect(messagesOf({ limit: '2.5' }).some((m) => m.startsWith('limit:'))).toBe(true);
-    expect(messagesOf({ limit: String(MAX_PAGE_SIZE) })).toEqual([]);
+    expect(messagesOf({ limit: String(50) })).toEqual([]);
   });
 });

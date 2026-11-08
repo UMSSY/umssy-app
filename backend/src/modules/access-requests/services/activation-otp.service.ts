@@ -1,7 +1,8 @@
+import { MINUTE_MS } from '../../../common/constants/date-time.constants.js';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { randomInt } from 'node:crypto';
-import { MS_PER_MINUTE, OTP_BCRYPT_ROUNDS, OTP_DIGITS, OTP_TTL_MINUTES } from '../constants/otp.constants.js';
+import { OTP_DIGITS, OTP_TTL_MINUTES } from '../constants/otp.constants.js';
 import { MAIL_SENDER, type MailSender } from '../mail/mail-sender.js';
 import { ActivationOtpRepository } from '../repositories/activation-otp.repository.js';
 
@@ -22,8 +23,8 @@ export class ActivationOtpService {
     let createdId: string | null = null;
     try {
       const code = generateOtpCode();
-      const expiresAt = new Date(now.getTime() + OTP_TTL_MINUTES * MS_PER_MINUTE);
-      const codeHash = await bcrypt.hash(code, OTP_BCRYPT_ROUNDS);
+      const expiresAt = new Date(now.getTime() + OTP_TTL_MINUTES * MINUTE_MS);
+      const codeHash = await bcrypt.hash(code, 10);
       const created = await this.otpRepository.create({ accessRequestId, codeHash, expiresAt });
       createdId = created.id;
       await this.mailSender.sendActivationCode(email, code, expiresAt);

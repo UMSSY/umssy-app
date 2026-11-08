@@ -3,7 +3,6 @@ import * as mupdf from 'mupdf';
 import { PSM, type Worker } from 'tesseract.js';
 import { createTesseractWorker } from '../../../common/ocr/tesseract-ocr.js';
 import type { FileContent } from '../../files/types/file.types.js';
-import { OCR_LANGUAGE, OCR_TESSERACT_MODEL, PDF_MIME_TYPE, PDF_RENDER_SCALE } from '../constants/document-reading.constants.js';
 import type { DocumentText, DocumentTextRegion } from '../types/document-text.types.js';
 
 const TESSERACT_CONFIDENCE_MAX = 100;
@@ -23,7 +22,7 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
     const job = this.queue.then(async () => {
       const worker = await this.getTesseractWorker();
       try {
-        return file.mimeType === PDF_MIME_TYPE
+        return file.mimeType === 'application/pdf'
           ? await this.recognizePdf(worker, file.content)
           : await this.recognizeImage(worker, file.content);
       } catch (error) {
@@ -55,7 +54,7 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
   }
 
   private async createWorker(): Promise<Worker> {
-    const worker = await createTesseractWorker(OCR_TESSERACT_MODEL, [OCR_LANGUAGE]);
+    const worker = await createTesseractWorker('4.0.0_best', ['spa']);
     try {
       await worker.setParameters({ tessedit_pageseg_mode: PAGE_SEGMENTATION_KEEPING_HEADINGS });
     } catch (error) {
@@ -85,14 +84,14 @@ export class DocumentTextExtractorService implements OnModuleDestroy {
   }
 
   private async recognizePdf(worker: Worker, content: Buffer): Promise<DocumentText> {
-    const document = mupdf.Document.openDocument(content, PDF_MIME_TYPE);
+    const document = mupdf.Document.openDocument(content, 'application/pdf');
     const pages: DocumentText[] = [];
     try {
       for (let index = 0; index < document.countPages(); index += 1) {
         const page = document.loadPage(index);
         try {
           const pixmap = page.toPixmap(
-            mupdf.Matrix.scale(PDF_RENDER_SCALE, PDF_RENDER_SCALE),
+            mupdf.Matrix.scale(2, 2),
             mupdf.ColorSpace.DeviceRGB, false, true,
           );
           try {

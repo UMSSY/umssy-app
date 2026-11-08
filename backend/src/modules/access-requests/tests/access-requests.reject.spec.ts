@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AccessRequestsController } from '../controllers/access-requests.controller.js';
 import { AccessRequestNotFoundException, RequestNotInReviewException } from '../exceptions/index.js';
 import { rejectAccessRequestSchema } from '../requests/reject-access-request.schema.js';
-import { MAX_REJECTION_REASON_LENGTH } from '../constants/reject-access-request.constants.js';
+
 import { AccessRequestsService } from '../services/access-requests.service.js';
 import { RejectionNotificationService } from '../services/rejection-notification.service.js';
 import { RejectionMailContextService } from '../mail/rejection-mail-context.service.js';
@@ -23,8 +23,8 @@ describe('rejectAccessRequestSchema', () => {
   });
 
   it('acepta 500 caracteres y rechaza 501', () => {
-    expect(messagesOf({ reason: 'a'.repeat(MAX_REJECTION_REASON_LENGTH) })).toEqual([]);
-    expect(messagesOf({ reason: 'a'.repeat(MAX_REJECTION_REASON_LENGTH + 1) })).toContain('reason: El motivo y la indicación no pueden superar los 500 caracteres en total');
+    expect(messagesOf({ reason: 'a'.repeat(500) })).toEqual([]);
+    expect(messagesOf({ reason: 'a'.repeat(500 + 1) })).toContain('reason: El motivo y la indicación no pueden superar los 500 caracteres en total');
   });
 });
 
