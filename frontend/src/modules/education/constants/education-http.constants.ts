@@ -1,1 +1,0 @@
-export const EDUCATION_CONFLICT_STATUS = 409;

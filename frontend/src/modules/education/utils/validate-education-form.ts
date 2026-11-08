@@ -1,9 +1,5 @@
-import {
-  EDUCATION_DATE_PATTERN,
-  EDUCATION_MIN_DATE,
-  EDUCATION_DESCRIPTION_MAX_LENGTH,
-  EDUCATION_VALIDATION_MESSAGES,
-} from "../constants/education-validation.constants";
+import { DATE_PATTERN } from "@/shared/constants/date-time.constants";
+import { EDUCATION_MIN_DATE, EDUCATION_DESCRIPTION_MAX_LENGTH, EDUCATION_VALIDATION_MESSAGES } from "../constants/education-validation.constants";
 import type { EducationFormErrors } from "../types/education-form-errors.types";
 import type { EducationFormValues } from "../types/education-form-values.types";
 import type { EducationInstitution } from "../types/education-institution.types";
@@ -11,7 +7,7 @@ import { resolveEducationInstitution } from "./resolve-education-institution";
 import { getEducationDegrees, resolveEducationDegree } from "./resolve-education-degree";
 
 function isValidDate(value: string): boolean {
-  if (!EDUCATION_DATE_PATTERN.test(value)) return false;
+  if (!DATE_PATTERN.test(value)) return false;
   const date = new Date(`${value}T00:00:00.000Z`);
   return (
     !Number.isNaN(date.getTime()) && date.toISOString().startsWith(`${value}T`)
