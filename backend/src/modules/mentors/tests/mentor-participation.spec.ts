@@ -251,11 +251,13 @@ describe('HU7-2: solicitudes de participacion FIFO', () => {
   });
 
   it('consulta la solicitud del usuario autenticado', async () => {
-    const { service, findFirst } = fixture({
+    const { service, findFirst, tx } = fixture({
       pending: true,
     });
 
     await service.findMyRequest('user-1');
+    expect(tx.$executeRaw).not.toHaveBeenCalled();
+    expect(tx.$queryRaw).not.toHaveBeenCalled();
 
     expect(findFirst).toHaveBeenCalledWith({
       where: {

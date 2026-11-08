@@ -103,8 +103,7 @@ export class MentorParticipationRepository extends MentorIntakeRepository {
   }
 
   findMyRequest(userId: string) {
-    return withMentorCapacityLock(this.prisma, async (tx) => {
-      await reconcileMentorOffers(tx);
+    return this.prisma.$transaction(async (tx) => {
       const request = await tx.mentorParticipationRequest.findFirst({
         where: { userId },
         orderBy: [{ queuedAt: 'desc' }, { id: 'desc' }],
