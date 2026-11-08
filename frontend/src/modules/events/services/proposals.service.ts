@@ -1,5 +1,5 @@
 import { apiClient } from '@/shared/services/api-client';
-import { PROPOSAL_ENDPOINT } from '../constants/proposal.constants';
+
 import type { CreatedProposal, ProposalValues } from '../types/proposal.types';
 import { readCount, readRecord, readString } from '../utils/response-validation';
 
@@ -8,7 +8,7 @@ export const proposalsService = {
     const payload = new FormData();
     Object.entries(values).forEach(([key, value]) => payload.append(key, value.trim()));
     payload.append('cover', cover);
-    const response = await apiClient.post<unknown>(PROPOSAL_ENDPOINT, payload, {
+    const response = await apiClient.post<unknown>('/event-proposals', payload, {
       headers: { 'Idempotency-Key': requestId, ...(accessToken !== undefined && { Authorization: accessToken ? `Bearer ${accessToken}` : '' }) },
       timeout: 60000,
     });

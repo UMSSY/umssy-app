@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ImagePlus, Upload, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PROPOSAL_COVER_ACCEPT } from '../constants/proposal.constants';
+
 import { readProposalCover } from '../utils/read-proposal-cover';
 import { ProposalField } from './proposal-field';
 
@@ -94,7 +94,7 @@ export function ProposalCoverField({ value, onChange, error, disabled, onBusyCha
             <span className="text-xs text-text-secondary">o arrastra y suelta una imagen aquí</span>
           </div>
           
-          <Input ref={input} id="proposal-cover" type="file" accept={PROPOSAL_COVER_ACCEPT} className="sr-only" disabled={disabled || busy}
+          <Input ref={input} id="proposal-cover" type="file" accept={'image/jpeg,image/png'} className="sr-only" disabled={disabled || busy}
             onChange={(event) => { const files = Array.from(event.target.files ?? []); event.target.value = ''; if (files.length) void selectFiles(files); }} />
         </div>
       </div>
