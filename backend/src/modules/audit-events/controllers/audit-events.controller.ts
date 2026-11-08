@@ -5,7 +5,7 @@ import { RequestValidationException } from '../../../common/exceptions/request-v
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
-import { AUDIT_ROLE } from '../constants/audit-events.constants.js';
+
 import { auditEventsFiltersSchema, type AuditEventsFiltersQuery } from '../requests/audit-events-filters.schema.js';
 import { listAuditEventsQuerySchema, type ListAuditEventsQuery } from '../requests/list-audit-events.schema.js';
 import { AuditEventsExportService } from '../services/audit-events-export.service.js';
@@ -24,7 +24,7 @@ const uuidPipe = new ParseUUIDPipe({
 @ApiTags('Registro de auditoría')
 @Controller('audit-events')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(AUDIT_ROLE)
+@Roles('administrativo')
 export class AuditEventsController {
   constructor(
     private readonly auditEventsService: AuditEventsService,

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { StreamableFile } from '@nestjs/common';
-import { AUDIT_EXPORT_BATCH_SIZE } from '../constants/audit-events-export.constants.js';
+
 import { AuditEventsController } from '../controllers/audit-events.controller.js';
 import { formatBoliviaDateTime, toAuditEventCsvRow } from '../mappers/audit-event-csv.mapper.js';
 import { AuditEventsExportService } from '../services/audit-events-export.service.js';
@@ -42,16 +42,16 @@ describe('toAuditEventCsvRow', () => {
 
 describe('AuditEventsExportService', () => {
   it('recorre todos los lotes con los mismos filtros hasta agotar el conjunto', async () => {
-    const full = Array.from({ length: AUDIT_EXPORT_BATCH_SIZE }, (_, index) => row(index + 1));
+    const full = Array.from({ length: 500 }, (_, index) => row(index + 1));
     const repository = { findBatch: vi.fn().mockResolvedValueOnce(full).mockResolvedValueOnce([row(999)]) };
 
     const file = await new AuditEventsExportService(repository as any).exportCsv({ action: 'activation_code_sent' }, new Date('2026-10-22T12:00:00Z'));
 
-    expect(repository.findBatch).toHaveBeenNthCalledWith(1, { filters: { action: 'activation_code_sent' }, skip: 0, take: AUDIT_EXPORT_BATCH_SIZE });
-    expect(repository.findBatch).toHaveBeenNthCalledWith(2, { filters: { action: 'activation_code_sent' }, skip: AUDIT_EXPORT_BATCH_SIZE, take: AUDIT_EXPORT_BATCH_SIZE });
+    expect(repository.findBatch).toHaveBeenNthCalledWith(1, { filters: { action: 'activation_code_sent' }, skip: 0, take: 500 });
+    expect(repository.findBatch).toHaveBeenNthCalledWith(2, { filters: { action: 'activation_code_sent' }, skip: 500, take: 500 });
     expect(file.fileName).toBe('registro-auditoria-2026-10-22.csv');
     const lines = file.content.split('\r\n').filter((line) => line !== '');
-    expect(lines).toHaveLength(AUDIT_EXPORT_BATCH_SIZE + 2);
+    expect(lines).toHaveLength(500 + 2);
     expect(lines[0]).toBe('﻿Fecha y hora,Solicitud,Acción,Responsable,Detalle,Evidencia');
     expect(lines[1]).toBe('22/09/2026 11:41,SOL-2026-0141,Código de activación enviado,Sistema (Proceso automático),Código de activación enviado a an•••@gmail.com.,Sin documento');
   });

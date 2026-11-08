@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { toUtcIso } from '../../../common/utils/date-time.js';
-import { MAX_AUDIT_SEARCH_LENGTH, MIN_AUDIT_SEARCH_LENGTH, SYSTEM_RESPONSIBLE_ID } from '../constants/audit-events.constants.js';
+import { SYSTEM_RESPONSIBLE_ID } from '../constants/audit-events.constants.js';
 import { AUDIT_ACTION } from '../types/audit-action.enum.js';
 
 const RESPONSIBLE_ERROR = 'El responsable no es válido';
@@ -32,8 +32,8 @@ export const auditEventsFiltersShape = {
     z
       .string({ error: 'La búsqueda debe ser un texto' })
       .trim()
-      .min(MIN_AUDIT_SEARCH_LENGTH, `La búsqueda debe tener al menos ${MIN_AUDIT_SEARCH_LENGTH} caracteres`)
-      .max(MAX_AUDIT_SEARCH_LENGTH, `La búsqueda no puede superar ${MAX_AUDIT_SEARCH_LENGTH} caracteres`)
+      .min(2, `La búsqueda debe tener al menos 2 caracteres`)
+      .max(100, `La búsqueda no puede superar 100 caracteres`)
       .optional(),
   ),
   action: z.preprocess(emptyToUndefined, z.enum(Object.values(AUDIT_ACTION), { error: 'La acción no es válida' }).optional()),
