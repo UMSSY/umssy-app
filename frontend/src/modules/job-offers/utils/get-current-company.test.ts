@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
-import { DEFAULT_COMPANY_ID } from "../constants/job-offers.constants";
+
 import { buildSessionToken } from "../testing/vacancy-fixtures";
 import { getCurrentCompany } from "./get-current-company";
 
@@ -15,7 +15,7 @@ describe("getCurrentCompany", () => {
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_NAME", "");
     saveAccessToken(buildSessionToken("empresa"));
 
-    expect(getCurrentCompany()).toEqual({ id: DEFAULT_COMPANY_ID, name: "TechBolivia S.R.L.", initials: "TB" });
+    expect(getCurrentCompany()).toEqual({ id: "a0000000-0000-4000-8000-000000000001", name: "TechBolivia S.R.L.", initials: "TB" });
   });
 
   it("permite sobrescribir la empresa por entorno", () => {

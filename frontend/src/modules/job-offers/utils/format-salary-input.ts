@@ -1,10 +1,8 @@
-import { MAX_SALARY_DIGITS } from "../constants/job-offers.constants";
-
 const CURRENCY_PREFIX = "Bs ";
 const RANGE_SEPARATOR = " - ";
 
 function formatAmount(digits: string): string {
-  const amount = digits.replace(/^0+(?=\d)/, "").slice(0, MAX_SALARY_DIGITS);
+  const amount = digits.replace(/^0+(?=\d)/, "").slice(0, 9);
   return amount.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
